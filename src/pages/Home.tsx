@@ -179,7 +179,7 @@ const Home = () => {
             <div className="space-y-8">
               <div className="space-y-4">
                 <h2 className="font-poppins font-bold text-3xl lg:text-4xl text-foreground">
-                  Por que escolher a Lovable Beauty Pro?
+                  Por que escolher a Beauty Pro?
                 </h2>
                 <p className="text-xl text-muted-foreground">
                   Mais de 1.000 maquiadoras já transformaram seus negócios com nossa plataforma.

@@ -13,7 +13,7 @@ const Footer = () => {
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-poppins font-bold text-xl">
-                Lovable Beauty Pro
+                Beauty Pro
               </span>
             </div>
             <p className="text-primary-foreground/80 text-sm leading-relaxed">
@@ -112,7 +112,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-light/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 Lovable Beauty Pro. Todos os direitos reservados.
+            © 2024 Beauty Pro. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link 

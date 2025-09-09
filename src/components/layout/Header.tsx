@@ -23,7 +23,7 @@ const Header = () => {
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="font-poppins font-bold text-xl text-foreground">
-              Lovable Beauty Pro
+              Beauty Pro
             </span>
           </Link>
 
