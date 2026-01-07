@@ -12,10 +12,8 @@ import {
   Settings, 
   LogOut,
   Shield,
-  Palette,
-  ClipboardList,
-  MessageSquare,
-  Camera
+  FolderOpen,
+  Plus
 } from 'lucide-react';
 
 export default function Dashboard() {
@@ -43,62 +41,27 @@ export default function Dashboard() {
 
   if (!user) return null;
 
-  const features = [
+  const quickActions = [
     {
-      title: "Clientes (CRM)",
-      description: "Gerencie suas clientes e histórico",
+      title: "Clientes",
+      description: "Gerencie suas clientes",
       icon: Users,
-      status: "em breve",
+      href: "/clientes",
       color: "bg-blue-500"
     },
     {
-      title: "Agenda",
-      description: "Calendário de eventos e compromissos",
-      icon: Calendar,
-      status: "em breve",
-      color: "bg-green-500"
-    },
-    {
-      title: "Financeiro",
-      description: "Faturas e pagamentos",
-      icon: DollarSign,
-      status: "em breve",
-      color: "bg-yellow-500"
-    },
-    {
-      title: "Contratos",
-      description: "Templates e assinaturas digitais",
-      icon: FileText,
-      status: "em breve",
+      title: "Projetos",
+      description: "Eventos e trabalhos",
+      icon: FolderOpen,
+      href: "/projetos",
       color: "bg-purple-500"
     },
     {
-      title: "Moodboard",
-      description: "Galeria de referências com clientes",
-      icon: Palette,
-      status: "em breve",
-      color: "bg-pink-500"
-    },
-    {
-      title: "Briefing",
-      description: "Questionários de anamnese",
-      icon: ClipboardList,
-      status: "em breve",
-      color: "bg-indigo-500"
-    },
-    {
-      title: "Mensagens",
-      description: "Comunicação com clientes",
-      icon: MessageSquare,
-      status: "em breve",
-      color: "bg-teal-500"
-    },
-    {
-      title: "Portfólio",
-      description: "Galeria de trabalhos",
-      icon: Camera,
-      status: "em breve",
-      color: "bg-orange-500"
+      title: "Configurações",
+      description: "Perfil e serviços",
+      icon: Settings,
+      href: "/configuracoes",
+      color: "bg-gray-500"
     }
   ];
 
@@ -108,14 +71,14 @@ export default function Dashboard() {
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <Link to="/" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
                 <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="font-poppins font-bold text-xl text-foreground">
                 Beauty Pro
               </span>
-            </div>
+            </Link>
             
             <div className="flex items-center space-x-4">
               {isAdmin && (
@@ -151,8 +114,28 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          {quickActions.map((action) => (
+            <Link key={action.title} to={action.href}>
+              <Card className="hover:shadow-md transition-all hover:scale-[1.02] cursor-pointer h-full">
+                <CardHeader className="pb-2">
+                  <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mb-2`}>
+                    <action.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <CardTitle className="text-lg">{action.title}</CardTitle>
+                  <CardDescription>{action.description}</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <h2 className="font-poppins font-semibold text-xl text-foreground mb-4">
+          Resumo
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -168,10 +151,10 @@ export default function Dashboard() {
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Eventos este mês</p>
+                  <p className="text-sm text-muted-foreground">Projetos</p>
                   <p className="text-2xl font-bold">0</p>
                 </div>
-                <Calendar className="h-8 w-8 text-primary/50" />
+                <FolderOpen className="h-8 w-8 text-primary/50" />
               </div>
             </CardContent>
           </Card>
@@ -199,30 +182,32 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Features Grid */}
-        <h2 className="font-poppins font-semibold text-xl text-foreground mb-4">
-          Funcionalidades
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {features.map((feature) => (
-            <Card key={feature.title} className="hover:shadow-md transition-shadow cursor-pointer opacity-60">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className={`w-10 h-10 ${feature.color} rounded-lg flex items-center justify-center`}>
-                    <feature.icon className="h-5 w-5 text-white" />
-                  </div>
-                  <span className="text-xs bg-muted px-2 py-1 rounded-full text-muted-foreground">
-                    {feature.status}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardTitle className="text-base mb-1">{feature.title}</CardTitle>
-                <CardDescription className="text-sm">{feature.description}</CardDescription>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {/* Empty State / Getting Started */}
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardContent className="py-12 text-center">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="h-8 w-8 text-primary" />
+            </div>
+            <h3 className="font-semibold text-xl mb-2">Comece agora!</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              Adicione sua primeira cliente e crie um projeto para começar a usar todas as funcionalidades.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/clientes">
+                <Button className="gap-2">
+                  <Users className="h-4 w-4" />
+                  Adicionar Cliente
+                </Button>
+              </Link>
+              <Link to="/configuracoes">
+                <Button variant="outline" className="gap-2">
+                  <Settings className="h-4 w-4" />
+                  Configurar Perfil
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );

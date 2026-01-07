@@ -10,6 +10,12 @@ import Planos from "./pages/Planos";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Clientes from "./pages/Clientes";
+import ClienteDetalhes from "./pages/ClienteDetalhes";
+import Projetos from "./pages/Projetos";
+import ProjetoDetalhes from "./pages/ProjetoDetalhes";
+import Configuracoes from "./pages/Configuracoes";
+import PortalCliente from "./pages/PortalCliente";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,13 +28,28 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Public Marketing Pages */}
             <Route path="/" element={<Home />} />
             <Route path="/recursos" element={<Recursos />} />
             <Route path="/planos" element={<Planos />} />
+            
+            {/* Auth */}
             <Route path="/auth" element={<Auth />} />
+            
+            {/* Protected App Pages */}
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<Admin />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/clientes/:id" element={<ClienteDetalhes />} />
+            <Route path="/projetos" element={<Projetos />} />
+            <Route path="/projetos/novo" element={<Projetos />} />
+            <Route path="/projetos/:id" element={<ProjetoDetalhes />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
+            
+            {/* Public Client Portal */}
+            <Route path="/portal/:token" element={<PortalCliente />} />
+            
+            {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
