@@ -1,26 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
 import { 
   ArrowLeft,
-  Plus,
   Calendar as CalendarIcon,
-  Clock,
-  MapPin,
-  Users,
-  ChevronLeft,
-  ChevronRight
+  Menu
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import EventDialog from '@/components/agenda/EventDialog';
-import EventCard from '@/components/agenda/EventCard';
+import { CalendarHeader, ViewMode } from '@/components/agenda/CalendarHeader';
+import { CalendarSidebar } from '@/components/agenda/CalendarSidebar';
+import { MonthView } from '@/components/agenda/views/MonthView';
+import { WeekView } from '@/components/agenda/views/WeekView';
+import { DayView } from '@/components/agenda/views/DayView';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Event {
   id: string;
@@ -57,14 +55,18 @@ export default function Agenda() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+  
   const [events, setEvents] = useState<Event[]>([]);
   const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [viewMode, setViewMode] = useState<'month' | 'day'>('month');
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [prefilledTime, setPrefilledTime] = useState<string | undefined>();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -77,12 +79,39 @@ export default function Agenda() {
       fetchEvents();
       fetchAssistants();
     }
-  }, [user, currentMonth]);
+  }, [user, currentDate, viewMode]);
+
+  const getDateRange = () => {
+    switch (viewMode) {
+      case 'month':
+        return {
+          start: startOfMonth(currentDate),
+          end: endOfMonth(currentDate)
+        };
+      case 'week':
+        return {
+          start: startOfWeek(currentDate, { locale: ptBR }),
+          end: endOfWeek(currentDate, { locale: ptBR })
+        };
+      case 'day':
+        return {
+          start: currentDate,
+          end: currentDate
+        };
+    }
+  };
 
   const fetchEvents = async () => {
     setLoadingEvents(true);
-    const start = startOfMonth(currentMonth);
-    const end = endOfMonth(currentMonth);
+    const { start, end } = getDateRange();
+    
+    // For week view, also fetch surrounding days for navigation
+    const fetchStart = viewMode === 'month' 
+      ? startOfWeek(startOfMonth(currentDate), { locale: ptBR })
+      : start;
+    const fetchEnd = viewMode === 'month'
+      ? endOfWeek(endOfMonth(currentDate), { locale: ptBR })
+      : end;
 
     const { data, error } = await supabase
       .from('events')
@@ -91,8 +120,8 @@ export default function Agenda() {
         client:clients(name),
         project:projects(name)
       `)
-      .gte('event_date', format(start, 'yyyy-MM-dd'))
-      .lte('event_date', format(end, 'yyyy-MM-dd'))
+      .gte('event_date', format(fetchStart, 'yyyy-MM-dd'))
+      .lte('event_date', format(fetchEnd, 'yyyy-MM-dd'))
       .order('event_date', { ascending: true });
 
     if (error) {
@@ -133,24 +162,53 @@ export default function Agenda() {
     }
   };
 
-  const handlePreviousMonth = () => {
-    setCurrentMonth(subMonths(currentMonth, 1));
+  const handleNavigate = (date: Date) => {
+    setCurrentDate(date);
   };
 
-  const handleNextMonth = () => {
-    setCurrentMonth(addMonths(currentMonth, 1));
+  const handleToday = () => {
+    setCurrentDate(new Date());
+    setSelectedDate(new Date());
   };
 
-  const handleDateSelect = (date: Date | undefined) => {
-    setSelectedDate(date);
-    if (date) {
-      setViewMode('day');
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
+    // When switching to day view, use selected date or today
+    if (mode === 'day' && selectedDate) {
+      setCurrentDate(selectedDate);
     }
   };
 
-  const handleCreateEvent = () => {
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    // When selecting a date, switch to day view and navigate
+    if (viewMode !== 'day') {
+      setViewMode('day');
+    }
+    setCurrentDate(date);
+    setSidebarOpen(false);
+  };
+
+  const handleMonthChange = (date: Date) => {
+    setCurrentDate(date);
+  };
+
+  const handleCreateEvent = (date?: Date, time?: string) => {
     setEditingEvent(null);
+    if (date) {
+      setSelectedDate(date);
+    }
+    setPrefilledTime(time);
     setDialogOpen(true);
+  };
+
+  const handleEventClick = (event: Event) => {
+    // For now, just edit on single click
+    handleEditEvent(event);
+  };
+
+  const handleEventDoubleClick = (event: Event) => {
+    handleEditEvent(event);
   };
 
   const handleEditEvent = (event: Event) => {
@@ -179,11 +237,16 @@ export default function Agenda() {
     }
   };
 
-  const eventsForSelectedDate = selectedDate
-    ? events.filter(e => isSameDay(new Date(e.event_date), selectedDate))
-    : [];
-
-  const daysWithEvents = events.map(e => new Date(e.event_date));
+  const sidebarContent = (
+    <CalendarSidebar
+      currentDate={currentDate}
+      selectedDate={selectedDate}
+      onDateSelect={handleDateSelect}
+      onMonthChange={handleMonthChange}
+      assistants={assistants}
+      events={events}
+    />
+  );
 
   if (loading) {
     return (
@@ -194,169 +257,123 @@ export default function Agenda() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-border bg-card shrink-0">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
-                  <CalendarIcon className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-poppins font-bold text-xl text-foreground">
-                  Agenda
-                </span>
+          <div className="flex items-center gap-4">
+            <Link to="/dashboard">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            
+            {/* Mobile sidebar trigger */}
+            {isMobile && (
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 p-4">
+                  {sidebarContent}
+                </SheetContent>
+              </Sheet>
+            )}
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center">
+                <CalendarIcon className="h-5 w-5 text-primary-foreground" />
               </div>
+              <span className="font-bold text-xl text-foreground hidden sm:inline">
+                Agenda
+              </span>
             </div>
-            <Button onClick={handleCreateEvent} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Novo Evento
-            </Button>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Calendar Sidebar */}
-          <Card className="lg:col-span-1">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <Button variant="ghost" size="icon" onClick={handlePreviousMonth}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <CardTitle className="text-lg">
-                  {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-                </CardTitle>
-                <Button variant="ghost" size="icon" onClick={handleNextMonth}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={handleDateSelect}
-                month={currentMonth}
-                onMonthChange={setCurrentMonth}
-                locale={ptBR}
-                modifiers={{
-                  hasEvent: daysWithEvents
-                }}
-                modifiersClassNames={{
-                  hasEvent: 'bg-primary/20 font-bold'
-                }}
-                className="rounded-md"
-              />
-              
-              {/* Assistants Quick List */}
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-sm flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Assistentes
-                  </h3>
-                  <Link to="/assistentes">
-                    <Button variant="ghost" size="sm">
-                      Gerenciar
-                    </Button>
-                  </Link>
-                </div>
-                <div className="space-y-2">
-                  {assistants.slice(0, 5).map(assistant => (
-                    <div key={assistant.id} className="flex items-center gap-2 text-sm">
-                      <div className="w-2 h-2 rounded-full bg-primary"></div>
-                      <span>{assistant.name}</span>
-                    </div>
-                  ))}
-                  {assistants.length === 0 && (
-                    <p className="text-sm text-muted-foreground">
-                      Nenhuma assistente cadastrada
-                    </p>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col min-h-0">
+        {/* Calendar Header */}
+        <CalendarHeader
+          currentDate={currentDate}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          onNavigate={handleNavigate}
+          onToday={handleToday}
+          onCreateEvent={() => handleCreateEvent()}
+        />
 
-          {/* Events List */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  {viewMode === 'day' && selectedDate ? (
-                    <>
-                      <CalendarIcon className="h-5 w-5" />
-                      {format(selectedDate, "dd 'de' MMMM, EEEE", { locale: ptBR })}
-                    </>
-                  ) : (
-                    <>
-                      <CalendarIcon className="h-5 w-5" />
-                      Eventos do Mês
-                    </>
-                  )}
-                </CardTitle>
-                {viewMode === 'day' && (
-                  <Button variant="ghost" size="sm" onClick={() => setViewMode('month')}>
-                    Ver todos
-                  </Button>
-                )}
+        {/* Main Content */}
+        <div className="flex-1 flex gap-6 mt-6 min-h-0">
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <div className="w-72 shrink-0">
+              {sidebarContent}
+            </div>
+          )}
+
+          {/* Calendar View */}
+          <div className="flex-1 border rounded-lg bg-card overflow-hidden min-h-[500px]">
+            {loadingEvents ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
-            </CardHeader>
-            <CardContent>
-              {loadingEvents ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {(viewMode === 'day' ? eventsForSelectedDate : events).length === 0 ? (
-                    <div className="text-center py-12">
-                      <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                      <p className="text-muted-foreground">
-                        {viewMode === 'day' 
-                          ? 'Nenhum evento para esta data'
-                          : 'Nenhum evento este mês'}
-                      </p>
-                      <Button onClick={handleCreateEvent} variant="outline" className="mt-4">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Criar Evento
-                      </Button>
-                    </div>
-                  ) : (
-                    (viewMode === 'day' ? eventsForSelectedDate : events).map(event => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onEdit={() => handleEditEvent(event)}
-                        onDelete={() => handleDeleteEvent(event.id)}
-                        showDate={viewMode === 'month'}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+            ) : (
+              <>
+                {viewMode === 'month' && (
+                  <MonthView
+                    currentDate={currentDate}
+                    events={events}
+                    selectedDate={selectedDate}
+                    onDateSelect={handleDateSelect}
+                    onEventClick={handleEventClick}
+                    onEventDoubleClick={handleEventDoubleClick}
+                    onCreateEvent={(date) => handleCreateEvent(date)}
+                  />
+                )}
+                {viewMode === 'week' && (
+                  <WeekView
+                    currentDate={currentDate}
+                    events={events}
+                    selectedDate={selectedDate}
+                    onDateSelect={handleDateSelect}
+                    onEventClick={handleEventClick}
+                    onEventDoubleClick={handleEventDoubleClick}
+                    onCreateEvent={(date, time) => handleCreateEvent(date, time)}
+                  />
+                )}
+                {viewMode === 'day' && (
+                  <DayView
+                    currentDate={currentDate}
+                    events={events}
+                    onEventClick={handleEventClick}
+                    onEventDoubleClick={handleEventDoubleClick}
+                    onCreateEvent={(date, time) => handleCreateEvent(date, time)}
+                  />
+                )}
+              </>
+            )}
+          </div>
         </div>
       </main>
 
       <EventDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) {
+            setPrefilledTime(undefined);
+          }
+        }}
         event={editingEvent}
         assistants={assistants}
-        selectedDate={selectedDate}
+        selectedDate={selectedDate || undefined}
         onSuccess={() => {
           fetchEvents();
           setDialogOpen(false);
+          setPrefilledTime(undefined);
         }}
       />
     </div>
