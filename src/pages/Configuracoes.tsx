@@ -24,8 +24,10 @@ import {
   Wallet,
   Building2,
   QrCode,
-  Smartphone
+  Smartphone,
+  Link2
 } from 'lucide-react';
+import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import { useToast } from '@/hooks/use-toast';
 
 interface ProfessionalSettings {
@@ -364,6 +366,10 @@ export default function Configuracoes() {
             <TabsTrigger value="financeiro" className="gap-2">
               <Wallet className="h-4 w-4" />
               Recebimentos
+            </TabsTrigger>
+            <TabsTrigger value="integracoes" className="gap-2">
+              <Link2 className="h-4 w-4" />
+              Integrações
             </TabsTrigger>
             <TabsTrigger value="plano" className="gap-2">
               <CreditCard className="h-4 w-4" />
@@ -813,6 +819,11 @@ export default function Configuracoes() {
                 {savingPayment ? 'Salvando...' : 'Salvar Dados Bancários'}
               </Button>
             </div>
+          </TabsContent>
+
+          {/* INTEGRAÇÕES */}
+          <TabsContent value="integracoes">
+            <IntegrationsTab />
           </TabsContent>
 
           {/* PLANO */}
