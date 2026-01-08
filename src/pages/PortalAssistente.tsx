@@ -1,245 +1,202 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Sparkles, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  MapPin, 
-  LogOut,
-  User,
-  CheckCircle2,
-  Circle,
-  ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
-import { format, startOfMonth, endOfMonth, addMonths, subMonths, isSameDay, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { startOfMonth, endOfMonth, format } from "date-fns";
+import AssistantHeader from "@/components/assistant-portal/AssistantHeader";
+import AssistantSidebar from "@/components/assistant-portal/AssistantSidebar";
+import AssistantDashboard from "@/components/assistant-portal/AssistantDashboard";
+import AssistantAgenda from "@/components/assistant-portal/AssistantAgenda";
+import AssistantTasks from "@/components/assistant-portal/AssistantTasks";
+import PremiumFeatureModal from "@/components/assistant-portal/PremiumFeatureModal";
+import UpgradeBanner from "@/components/assistant-portal/UpgradeBanner";
+import { Loader2, Menu, User, Sparkles, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-interface Event {
-  id: string;
-  title: string;
-  event_date: string;
-  event_type: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  arrival_time: string | null;
-  making_of_time: string | null;
-  ceremony_time: string | null;
-  address: string | null;
-  location: string | null;
-  notes: string | null;
-  color: string | null;
-  client?: { name: string } | null;
-  project?: { name: string } | null;
-}
+type TabType = "dashboard" | "agenda" | "tarefas" | "clientes" | "financeiro" | "relatorios";
 
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  due_date: string | null;
-  is_completed: boolean;
-  project: { name: string } | null;
-}
-
-export default function PortalAssistente() {
+const PortalAssistente = () => {
+  const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { user, signOut, loading } = useAuth();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [assistantInfo, setAssistantInfo] = useState<{ name: string; id: string } | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [loadingData, setLoadingData] = useState(true);
+  const [events, setEvents] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [assistant, setAssistant] = useState<any>(null);
+  const [professional, setProfessional] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
+    if (!authLoading && !user) {
+      navigate("/auth");
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (user) {
-      fetchAssistantInfo();
+      fetchAssistantData();
     }
   }, [user]);
 
   useEffect(() => {
-    if (assistantInfo) {
+    if (assistant) {
       fetchEvents();
-      fetchTasks();
     }
-  }, [assistantInfo, currentMonth]);
+  }, [assistant, currentMonth]);
 
-  const fetchAssistantInfo = async () => {
+  const fetchAssistantData = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('assistants')
-      .select('id, name')
-      .eq('assistant_user_id', user.id)
-      .maybeSingle();
+    try {
+      const { data: assistantData } = await supabase
+        .from("assistants")
+        .select("*, user_id")
+        .eq("assistant_user_id", user.id)
+        .maybeSingle();
 
-    if (!error && data) {
-      setAssistantInfo(data);
-    } else {
-      // User is not registered as an assistant
-      setLoadingData(false);
+      if (!assistantData) {
+        setLoading(false);
+        return;
+      }
+
+      setAssistant(assistantData);
+
+      // Get professional info
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", assistantData.user_id)
+        .single();
+
+      const { data: settingsData } = await supabase
+        .from("professional_settings")
+        .select("phone")
+        .eq("user_id", assistantData.user_id)
+        .single();
+
+      setProfessional({
+        name: profileData?.full_name || "Profissional",
+        phone: settingsData?.phone
+      });
+
+      // Fetch tasks - get projects from assigned events first
+      const { data: assignedEvents } = await supabase
+        .from("event_assistants")
+        .select("event_id")
+        .eq("assistant_id", assistantData.id);
+
+      if (assignedEvents && assignedEvents.length > 0) {
+        const eventIds = assignedEvents.map(e => e.event_id);
+        
+        const { data: eventsWithProjects } = await supabase
+          .from("events")
+          .select("project_id")
+          .in("id", eventIds)
+          .not("project_id", "is", null);
+
+        if (eventsWithProjects && eventsWithProjects.length > 0) {
+          const projectIds = [...new Set(eventsWithProjects.map(e => e.project_id).filter(Boolean))];
+          
+          const { data: tasksData } = await supabase
+            .from("tasks")
+            .select("*, projects(name)")
+            .in("project_id", projectIds)
+            .in("visibility", ["assistant", "client"])
+            .order("due_date", { ascending: true, nullsFirst: false });
+
+          setTasks(tasksData || []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching assistant data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const fetchEvents = async () => {
-    if (!assistantInfo) return;
-    setLoadingData(true);
+    if (!assistant) return;
 
-    const startDate = format(startOfMonth(currentMonth), 'yyyy-MM-dd');
-    const endDate = format(endOfMonth(currentMonth), 'yyyy-MM-dd');
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
 
-    // First get event IDs assigned to this assistant
-    const { data: assignedEvents, error: assignError } = await supabase
-      .from('event_assistants')
-      .select('event_id')
-      .eq('assistant_id', assistantInfo.id);
+    const { data: eventAssignments } = await supabase
+      .from("event_assistants")
+      .select("event_id")
+      .eq("assistant_id", assistant.id);
 
-    if (assignError) {
-      console.error('Error fetching assigned events:', assignError);
-      setLoadingData(false);
-      return;
-    }
-
-    if (!assignedEvents || assignedEvents.length === 0) {
+    if (!eventAssignments?.length) {
       setEvents([]);
-      setLoadingData(false);
       return;
     }
 
-    const eventIds = assignedEvents.map(e => e.event_id);
+    const eventIds = eventAssignments.map((ea) => ea.event_id);
 
-    // Then fetch the event details
-    const { data, error } = await supabase
-      .from('events')
-      .select(`
-        *,
-        client:clients(name),
-        project:projects(name)
-      `)
-      .in('id', eventIds)
-      .gte('event_date', startDate)
-      .lte('event_date', endDate)
-      .order('event_date', { ascending: true });
+    const { data: eventsData } = await supabase
+      .from("events")
+      .select("*, clients(name), projects(name)")
+      .in("id", eventIds)
+      .gte("event_date", format(start, "yyyy-MM-dd"))
+      .lte("event_date", format(end, "yyyy-MM-dd"))
+      .order("event_date", { ascending: true });
 
-    if (!error && data) {
-      setEvents(data);
-    }
-    setLoadingData(false);
+    setEvents(eventsData || []);
   };
 
-  const fetchTasks = async () => {
-    if (!assistantInfo) return;
-
-    // Get projects from assigned events
-    const { data: assignedEvents } = await supabase
-      .from('event_assistants')
-      .select('event_id')
-      .eq('assistant_id', assistantInfo.id);
-
-    if (!assignedEvents || assignedEvents.length === 0) {
-      setTasks([]);
-      return;
-    }
-
-    const eventIds = assignedEvents.map(e => e.event_id);
-
-    // Get project IDs from these events
-    const { data: eventsWithProjects } = await supabase
-      .from('events')
-      .select('project_id')
-      .in('id', eventIds)
-      .not('project_id', 'is', null);
-
-    if (!eventsWithProjects || eventsWithProjects.length === 0) {
-      setTasks([]);
-      return;
-    }
-
-    const projectIds = [...new Set(eventsWithProjects.map(e => e.project_id).filter(Boolean))];
-
-    // Get tasks for these projects that are visible to assistants
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('*, project:projects(name)')
-      .in('project_id', projectIds)
-      .in('visibility', ['assistant', 'client']) // Tasks visible to assistants
-      .order('due_date', { ascending: true, nullsFirst: false });
-
-    if (!error && data) {
-      setTasks(data);
-    }
-  };
-
-  const handleSignOut = async () => {
+  const handleLogout = async () => {
     await signOut();
-    navigate('/');
+    navigate("/");
   };
 
-  const handlePreviousMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
-  const handleNextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
-
-  const eventsOnDate = selectedDate
-    ? events.filter(event => isSameDay(parseISO(event.event_date), selectedDate))
-    : [];
-
-  const eventDates = events.map(e => parseISO(e.event_date));
-
-  const formatTime = (time: string | null) => {
-    if (!time) return null;
-    return time.slice(0, 5);
+  const handleLockedClick = (feature: string) => {
+    setSelectedFeature(feature);
+    setPremiumModalOpen(true);
   };
 
-  const getEventTypeLabel = (type: string | null) => {
-    const types: Record<string, string> = {
-      noivas: 'Noiva',
-      madrinhas: 'Madrinha',
-      debutantes: 'Debutante',
-      formandas: 'Formanda',
-      ensaio: 'Ensaio',
-      outro: 'Outro'
-    };
-    return types[type || ''] || type || 'Evento';
+  const handleContactProfessional = () => {
+    if (professional?.phone) {
+      const phone = professional.phone.replace(/\D/g, "");
+      window.open(`https://wa.me/55${phone}`, "_blank");
+    }
   };
 
-  if (loading) {
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    setMobileMenuOpen(false);
+  };
+
+  const pendingTasksCount = tasks.filter((t) => !t.is_completed).length;
+
+  if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!user) return null;
 
-  if (!assistantInfo && !loadingData) {
+  // Not registered as assistant
+  if (!assistant) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card">
           <div className="container mx-auto px-4 py-4">
             <div className="flex items-center justify-between">
               <Link to="/" className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
-                  <Sparkles className="h-5 w-5 text-white" />
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
+                  <Sparkles className="h-5 w-5 text-primary-foreground" />
                 </div>
-                <span className="font-poppins font-bold text-xl text-foreground">
-                  Beauty Pro
-                </span>
+                <span className="font-bold text-xl">Beauty Pro</span>
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <Button variant="ghost" size="icon" onClick={handleLogout}>
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -254,7 +211,7 @@ export default function PortalAssistente() {
               <p className="text-muted-foreground mb-6">
                 Você não está registrada como assistente. Entre em contato com a profissional que te convidou.
               </p>
-              <Button variant="outline" onClick={handleSignOut}>
+              <Button variant="outline" onClick={handleLogout}>
                 Sair
               </Button>
             </CardContent>
@@ -266,246 +223,87 @@ export default function PortalAssistente() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <span className="font-poppins font-bold text-xl text-foreground">
-                  Beauty Pro
-                </span>
-                <Badge variant="secondary" className="ml-2">Assistente</Badge>
-              </div>
-            </Link>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-muted-foreground hidden sm:block">
-                {assistantInfo?.name}
-              </span>
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
-                <LogOut className="h-5 w-5" />
-              </Button>
+      <AssistantHeader
+        assistantName={assistant?.name || "Assistente"}
+        professionalName={professional?.name || "Profissional"}
+        onLogout={handleLogout}
+      />
+
+      <div className="flex">
+        {/* Mobile Menu Button */}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="fixed bottom-20 left-4 z-50 md:hidden h-12 w-12 rounded-full shadow-lg bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-72 p-0">
+            <div className="pt-12">
+              <AssistantSidebar
+                activeTab={activeTab}
+                onTabChange={handleTabChange}
+                pendingTasksCount={pendingTasksCount}
+                onLockedClick={(feature) => {
+                  handleLockedClick(feature);
+                  setMobileMenuOpen(false);
+                }}
+              />
             </div>
-          </div>
-        </div>
-      </header>
+          </SheetContent>
+        </Sheet>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="font-poppins font-bold text-3xl text-foreground mb-2">
-            Olá, {assistantInfo?.name}! 👋
-          </h1>
-          <p className="text-muted-foreground">
-            Veja seus eventos e tarefas atribuídas.
-          </p>
-        </div>
+        {/* Desktop Sidebar */}
+        <AssistantSidebar
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          pendingTasksCount={pendingTasksCount}
+          onLockedClick={handleLockedClick}
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Calendar Column */}
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <Button variant="ghost" size="icon" onClick={handlePreviousMonth}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <span className="font-semibold capitalize">
-                    {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
-                  </span>
-                  <Button variant="ghost" size="icon" onClick={handleNextMonth}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={setSelectedDate}
-                  month={currentMonth}
-                  onMonthChange={setCurrentMonth}
-                  locale={ptBR}
-                  modifiers={{
-                    hasEvent: eventDates
-                  }}
-                  modifiersStyles={{
-                    hasEvent: {
-                      backgroundColor: 'hsl(var(--primary) / 0.2)',
-                      borderRadius: '50%'
-                    }
-                  }}
-                  className="pointer-events-auto"
-                />
-              </CardContent>
-            </Card>
-          </div>
+        <main className="flex-1 p-4 md:p-6 pb-28">
+          {activeTab === "dashboard" && (
+            <AssistantDashboard
+              events={events}
+              tasks={tasks}
+              onLockedClick={handleLockedClick}
+            />
+          )}
 
-          {/* Events & Tasks Column */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Events for Selected Date */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CalendarIcon className="h-5 w-5 text-primary" />
-                  Eventos do Dia
-                </CardTitle>
-                <CardDescription>
-                  {selectedDate
-                    ? format(selectedDate, "d 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    : 'Selecione uma data'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingData ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                  </div>
-                ) : eventsOnDate.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    Nenhum evento nesta data.
-                  </p>
-                ) : (
-                  <div className="space-y-4">
-                    {eventsOnDate.map(event => (
-                      <div
-                        key={event.id}
-                        className="p-4 rounded-lg border bg-card hover:shadow-sm transition-shadow"
-                        style={{ borderLeftColor: event.color || 'hsl(var(--primary))', borderLeftWidth: '4px' }}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h3 className="font-semibold">{event.title}</h3>
-                            <Badge variant="outline" className="mt-1">
-                              {getEventTypeLabel(event.event_type)}
-                            </Badge>
-                          </div>
-                        </div>
+          {activeTab === "agenda" && (
+            <AssistantAgenda
+              events={events}
+              currentMonth={currentMonth}
+              onMonthChange={setCurrentMonth}
+            />
+          )}
 
-                        <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                          {event.client && (
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              <span>Cliente: {event.client.name}</span>
-                            </div>
-                          )}
-                          
-                          {event.arrival_time && (
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              <span>Chegada: {formatTime(event.arrival_time)}</span>
-                            </div>
-                          )}
-                          
-                          {event.making_of_time && (
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              <span>Making of: {formatTime(event.making_of_time)}</span>
-                            </div>
-                          )}
+          {activeTab === "tarefas" && (
+            <AssistantTasks
+              tasks={tasks}
+              onTaskUpdate={fetchAssistantData}
+            />
+          )}
+        </main>
+      </div>
 
-                          {event.ceremony_time && (
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              <span>Cerimônia: {formatTime(event.ceremony_time)}</span>
-                            </div>
-                          )}
+      <UpgradeBanner
+        professionalName={professional?.name || "Profissional"}
+        onContactClick={handleContactProfessional}
+      />
 
-                          {(event.start_time || event.end_time) && (
-                            <div className="flex items-center gap-2">
-                              <Clock className="h-4 w-4" />
-                              <span>
-                                {formatTime(event.start_time)}
-                                {event.end_time && ` - ${formatTime(event.end_time)}`}
-                              </span>
-                            </div>
-                          )}
-
-                          {(event.address || event.location) && (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4" />
-                              <span>{event.address || event.location}</span>
-                            </div>
-                          )}
-
-                          {event.notes && (
-                            <div className="mt-2 p-2 bg-muted rounded text-sm">
-                              {event.notes}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Tasks */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  Tarefas
-                </CardTitle>
-                <CardDescription>
-                  Tarefas dos seus projetos
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {tasks.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    Nenhuma tarefa atribuída.
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {tasks.map(task => (
-                      <div
-                        key={task.id}
-                        className={`flex items-start gap-3 p-3 rounded-lg border ${
-                          task.is_completed ? 'bg-muted/50' : 'bg-card'
-                        }`}
-                      >
-                        {task.is_completed ? (
-                          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-                        ) : (
-                          <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          <p className={`font-medium ${task.is_completed ? 'line-through text-muted-foreground' : ''}`}>
-                            {task.title}
-                          </p>
-                          {task.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {task.description}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            {task.project && (
-                              <Badge variant="secondary" className="text-xs">
-                                {task.project.name}
-                              </Badge>
-                            )}
-                            {task.due_date && (
-                              <span>
-                                Prazo: {format(parseISO(task.due_date), 'dd/MM/yyyy')}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </main>
+      <PremiumFeatureModal
+        open={premiumModalOpen}
+        onOpenChange={setPremiumModalOpen}
+        featureName={selectedFeature}
+        professionalName={professional?.name || "Profissional"}
+        professionalPhone={professional?.phone}
+      />
     </div>
   );
-}
+};
+
+export default PortalAssistente;
