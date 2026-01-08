@@ -272,6 +272,7 @@ export type Database = {
           description: string | null
           end_time: string | null
           event_date: string
+          event_type: string | null
           id: string
           location: string | null
           making_of_time: string | null
@@ -294,6 +295,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date: string
+          event_type?: string | null
           id?: string
           location?: string | null
           making_of_time?: string | null
@@ -316,6 +318,7 @@ export type Database = {
           description?: string | null
           end_time?: string | null
           event_date?: string
+          event_type?: string | null
           id?: string
           location?: string | null
           making_of_time?: string | null

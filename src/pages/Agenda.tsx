@@ -27,6 +27,7 @@ interface Event {
   title: string;
   description: string | null;
   event_date: string;
+  event_type: string | null;
   start_time: string | null;
   end_time: string | null;
   arrival_time: string | null;

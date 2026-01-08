@@ -15,7 +15,8 @@ import {
   HeartHandshake,
   Navigation,
   Calendar as CalendarIcon,
-  Download
+  Download,
+  Tag
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -32,6 +33,7 @@ interface Event {
   title: string;
   description: string | null;
   event_date: string;
+  event_type?: string | null;
   start_time: string | null;
   end_time: string | null;
   arrival_time?: string | null;
@@ -53,13 +55,21 @@ interface EventCardProps {
   showDate?: boolean;
 }
 
+const EVENT_TYPE_LABELS: Record<string, string> = {
+  'noivas': 'Noivas',
+  'pre_wedding': 'Pré Wedding',
+  'producoes_sociais': 'Produções Sociais'
+};
+
 export default function EventCard({ event, onEdit, onDelete, showDate = false }: EventCardProps) {
   const formatTime = (time: string | null | undefined) => {
     if (!time) return null;
     return time.substring(0, 5);
   };
 
-  const hasAnyTime = event.arrival_time || event.making_of_time || event.ceremony_time || event.advisory_time || event.start_time;
+  const isNoivas = event.event_type === 'noivas' || !event.event_type;
+  const hasNoivasTimes = event.arrival_time || event.making_of_time || event.ceremony_time || event.advisory_time;
+  const hasRegularTimes = event.start_time || event.end_time;
   const displayAddress = event.address || event.location;
 
   const handleOpenMaps = () => {
@@ -110,9 +120,16 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <h3 className="font-semibold text-foreground">{event.title}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-semibold text-foreground">{event.title}</h3>
+                  {event.event_type && (
+                    <Badge variant="outline" className="text-xs">
+                      {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
+                    </Badge>
+                  )}
+                </div>
                 {event.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2">
                     {event.description}
                   </p>
                 )}
@@ -171,13 +188,13 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
               )}
             </div>
 
-            {/* Specific times */}
-            {hasAnyTime && (
+            {/* Noivas - Specific times */}
+            {isNoivas && hasNoivasTimes && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs">
-                {(event.arrival_time || event.start_time) && (
+                {event.arrival_time && (
                   <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
                     <Car className="h-3 w-3" />
-                    <span>Chegada: {formatTime(event.arrival_time || event.start_time)}</span>
+                    <span>Chegada: {formatTime(event.arrival_time)}</span>
                   </div>
                 )}
                 {event.making_of_time && (
@@ -198,6 +215,17 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                     <span>Assessoria: {formatTime(event.advisory_time)}</span>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Pre Wedding / Produções Sociais - Start and End times */}
+            {!isNoivas && hasRegularTimes && (
+              <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3.5 w-3.5" />
+                  {formatTime(event.start_time)}
+                  {event.end_time && ` - ${formatTime(event.end_time)}`}
+                </span>
               </div>
             )}
 

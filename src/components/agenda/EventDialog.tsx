@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { 
@@ -32,7 +33,9 @@ import {
   Car,
   Camera,
   Church,
-  HeartHandshake
+  HeartHandshake,
+  Tag,
+  X
 } from 'lucide-react';
 import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
@@ -42,6 +45,7 @@ interface Event {
   title: string;
   description: string | null;
   event_date: string;
+  event_type: string | null;
   start_time: string | null;
   end_time: string | null;
   arrival_time: string | null;
@@ -85,6 +89,12 @@ interface EventDialogProps {
   onSuccess: () => void;
 }
 
+const EVENT_TYPES = [
+  { value: 'noivas', label: 'Noivas' },
+  { value: 'pre_wedding', label: 'Pré Wedding' },
+  { value: 'producoes_sociais', label: 'Produções Sociais' },
+];
+
 const COLORS = [
   '#5A7D7C', // Primary
   '#E57373', // Red
@@ -126,10 +136,18 @@ export default function EventDialog({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [eventDate, setEventDate] = useState('');
+  const [eventType, setEventType] = useState('noivas');
+  
+  // Times for Noivas
   const [arrivalTime, setArrivalTime] = useState('');
   const [makingOfTime, setMakingOfTime] = useState('');
   const [ceremonyTime, setCeremonyTime] = useState('');
   const [advisoryTime, setAdvisoryTime] = useState('');
+  
+  // Times for Pre Wedding / Produções Sociais
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  
   const [address, setAddress] = useState('');
   const [location, setLocation] = useState('');
   const [notes, setNotes] = useState('');
@@ -151,11 +169,15 @@ export default function EventDialog({
       setTitle(event.title);
       setDescription(event.description || '');
       setEventDate(event.event_date);
-      // Support legacy start_time or new specific times
+      setEventType(event.event_type || 'noivas');
+      // Noivas times
       setArrivalTime(event.arrival_time || '');
       setMakingOfTime(event.making_of_time || '');
-      setCeremonyTime(event.ceremony_time || event.start_time || '');
+      setCeremonyTime(event.ceremony_time || '');
       setAdvisoryTime(event.advisory_time || '');
+      // Regular times
+      setStartTime(event.start_time || '');
+      setEndTime(event.end_time || '');
       setAddress(event.address || '');
       setLocation(event.location || '');
       setNotes(event.notes || '');
@@ -176,10 +198,13 @@ export default function EventDialog({
     setTitle('');
     setDescription('');
     setEventDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
+    setEventType('noivas');
     setArrivalTime('');
     setMakingOfTime('');
     setCeremonyTime('');
     setAdvisoryTime('');
+    setStartTime('');
+    setEndTime('');
     setAddress('');
     setLocation('');
     setNotes('');
@@ -235,24 +260,31 @@ export default function EventDialog({
     }
   };
 
+  const getSelectedAssistantNames = () => {
+    return assistants.filter(a => selectedAssistants.includes(a.id));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
 
+    const isNoivas = eventType === 'noivas';
+
     const eventData = {
       user_id: user.id,
       title,
       description: description || null,
       event_date: eventDate,
-      arrival_time: arrivalTime || null,
-      making_of_time: makingOfTime || null,
-      ceremony_time: ceremonyTime || null,
-      advisory_time: advisoryTime || null,
-      // Keep legacy fields for backwards compatibility
-      start_time: ceremonyTime || null,
-      end_time: null,
+      event_type: eventType,
+      // Conditional times based on event type
+      arrival_time: isNoivas ? (arrivalTime || null) : null,
+      making_of_time: isNoivas ? (makingOfTime || null) : null,
+      ceremony_time: isNoivas ? (ceremonyTime || null) : null,
+      advisory_time: isNoivas ? (advisoryTime || null) : null,
+      start_time: !isNoivas ? (startTime || null) : (ceremonyTime || null),
+      end_time: !isNoivas ? (endTime || null) : null,
       address: address || null,
       location: location || null,
       notes: notes || null,
@@ -266,7 +298,6 @@ export default function EventDialog({
       let eventId: string;
 
       if (event) {
-        // Update existing event
         const { error } = await supabase
           .from('events')
           .update(eventData)
@@ -275,13 +306,11 @@ export default function EventDialog({
         if (error) throw error;
         eventId = event.id;
 
-        // Delete existing assistant assignments
         await supabase
           .from('event_assistants')
           .delete()
           .eq('event_id', event.id);
       } else {
-        // Create new event
         const { data, error } = await supabase
           .from('events')
           .insert(eventData)
@@ -292,7 +321,6 @@ export default function EventDialog({
         eventId = data.id;
       }
 
-      // Add assistant assignments
       if (selectedAssistants.length > 0) {
         const assignments = selectedAssistants.map(assistantId => ({
           event_id: eventId,
@@ -324,6 +352,8 @@ export default function EventDialog({
     ? projects.filter(p => p.client_id === clientId)
     : projects;
 
+  const isNoivas = eventType === 'noivas';
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -335,6 +365,28 @@ export default function EventDialog({
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Event Type */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Tag className="h-4 w-4" />
+                Tipo de Evento *
+              </Label>
+              <div className="flex gap-2">
+                {EVENT_TYPES.map(type => (
+                  <Button
+                    key={type.value}
+                    type="button"
+                    variant={eventType === type.value ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setEventType(type.value)}
+                    className="flex-1"
+                  >
+                    {type.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title">Título *</Label>
@@ -342,7 +394,7 @@ export default function EventDialog({
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ex: Casamento Ana Silva"
+                placeholder={isNoivas ? "Ex: Casamento Ana Silva" : "Ex: Ensaio Pré Wedding João & Maria"}
                 required
               />
             </div>
@@ -374,63 +426,98 @@ export default function EventDialog({
               />
             </div>
 
-            {/* Times - 4 specific times */}
-            <div className="space-y-4">
-              <Label className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Horários
-              </Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="arrivalTime" className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Car className="h-3.5 w-3.5" />
-                    Chegada ao Local
-                  </Label>
-                  <Input
-                    id="arrivalTime"
-                    type="time"
-                    value={arrivalTime}
-                    onChange={(e) => setArrivalTime(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="makingOfTime" className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Camera className="h-3.5 w-3.5" />
-                    Making Of
-                  </Label>
-                  <Input
-                    id="makingOfTime"
-                    type="time"
-                    value={makingOfTime}
-                    onChange={(e) => setMakingOfTime(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="ceremonyTime" className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Church className="h-3.5 w-3.5" />
-                    Cerimônia
-                  </Label>
-                  <Input
-                    id="ceremonyTime"
-                    type="time"
-                    value={ceremonyTime}
-                    onChange={(e) => setCeremonyTime(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="advisoryTime" className="text-sm text-muted-foreground flex items-center gap-2">
-                    <HeartHandshake className="h-3.5 w-3.5" />
-                    Assessoria
-                  </Label>
-                  <Input
-                    id="advisoryTime"
-                    type="time"
-                    value={advisoryTime}
-                    onChange={(e) => setAdvisoryTime(e.target.value)}
-                  />
+            {/* Conditional Times based on Event Type */}
+            {isNoivas ? (
+              /* Noivas - 4 specific times */
+              <div className="space-y-4">
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Horários
+                </Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="arrivalTime" className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Car className="h-3.5 w-3.5" />
+                      Chegada ao Local
+                    </Label>
+                    <Input
+                      id="arrivalTime"
+                      type="time"
+                      value={arrivalTime}
+                      onChange={(e) => setArrivalTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="makingOfTime" className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Camera className="h-3.5 w-3.5" />
+                      Making Of
+                    </Label>
+                    <Input
+                      id="makingOfTime"
+                      type="time"
+                      value={makingOfTime}
+                      onChange={(e) => setMakingOfTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ceremonyTime" className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Church className="h-3.5 w-3.5" />
+                      Cerimônia
+                    </Label>
+                    <Input
+                      id="ceremonyTime"
+                      type="time"
+                      value={ceremonyTime}
+                      onChange={(e) => setCeremonyTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="advisoryTime" className="text-sm text-muted-foreground flex items-center gap-2">
+                      <HeartHandshake className="h-3.5 w-3.5" />
+                      Assessoria
+                    </Label>
+                    <Input
+                      id="advisoryTime"
+                      type="time"
+                      value={advisoryTime}
+                      onChange={(e) => setAdvisoryTime(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              /* Pre Wedding / Produções Sociais - Start and End time */
+              <div className="space-y-4">
+                <Label className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Horários
+                </Label>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="startTime" className="text-sm text-muted-foreground">
+                      Início
+                    </Label>
+                    <Input
+                      id="startTime"
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="endTime" className="text-sm text-muted-foreground">
+                      Término
+                    </Label>
+                    <Input
+                      id="endTime"
+                      type="time"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Address with GPS integration hint */}
             <div className="space-y-2">
@@ -521,6 +608,61 @@ export default function EventDialog({
               </div>
             </div>
 
+            {/* Assistants as Tags */}
+            {assistants.length > 0 && (
+              <div className="space-y-3">
+                <Label className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Assistentes
+                </Label>
+                
+                {/* Selected assistants as tags */}
+                {selectedAssistants.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {getSelectedAssistantNames().map(assistant => (
+                      <Badge
+                        key={assistant.id}
+                        variant="secondary"
+                        className="gap-1 pr-1"
+                      >
+                        {assistant.name}
+                        <button
+                          type="button"
+                          onClick={() => toggleAssistant(assistant.id)}
+                          className="ml-1 rounded-full hover:bg-muted-foreground/20 p-0.5"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Available assistants to select */}
+                <div className="flex flex-wrap gap-2">
+                  {assistants
+                    .filter(a => !selectedAssistants.includes(a.id))
+                    .map(assistant => (
+                      <Button
+                        key={assistant.id}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => toggleAssistant(assistant.id)}
+                        className="h-7 text-xs gap-1"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {assistant.name}
+                      </Button>
+                    ))}
+                </div>
+                
+                {assistants.length > 0 && assistants.every(a => selectedAssistants.includes(a.id)) && (
+                  <p className="text-xs text-muted-foreground">Todas as assistentes foram selecionadas</p>
+                )}
+              </div>
+            )}
+
             {/* Color */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
@@ -541,36 +683,6 @@ export default function EventDialog({
                 ))}
               </div>
             </div>
-
-            {/* Assistants */}
-            {assistants.length > 0 && (
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Assistentes
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {assistants.map(assistant => (
-                    <div
-                      key={assistant.id}
-                      className="flex items-center space-x-2"
-                    >
-                      <Checkbox
-                        id={`assistant-${assistant.id}`}
-                        checked={selectedAssistants.includes(assistant.id)}
-                        onCheckedChange={() => toggleAssistant(assistant.id)}
-                      />
-                      <label
-                        htmlFor={`assistant-${assistant.id}`}
-                        className="text-sm cursor-pointer"
-                      >
-                        {assistant.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Reminders */}
             <div className="space-y-2">
