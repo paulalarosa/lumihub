@@ -119,9 +119,16 @@ export function getGoogleCalendarUrl(event: EventData): string {
 }
 
 /**
- * Open Google Maps with the address
+ * Open Google Maps with the address or coordinates
  */
-export function openInMaps(address: string): void {
+export function openInMaps(address: string, latitude?: number | null, longitude?: number | null): void {
+  // If we have coordinates, use them for better precision
+  if (latitude && longitude) {
+    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
+  }
+  
   const encodedAddress = encodeURIComponent(address);
   
   // Try to detect platform

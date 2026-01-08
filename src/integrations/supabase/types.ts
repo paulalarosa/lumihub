@@ -14,41 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      assistant_notifications: {
+        Row: {
+          assistant_id: string
+          created_at: string | null
+          event_id: string
+          id: string
+          is_read: boolean | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          assistant_id: string
+          created_at?: string | null
+          event_id: string
+          id?: string
+          is_read?: boolean | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          assistant_id?: string
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          is_read?: boolean | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_notifications_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "assistants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistant_notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       assistants: {
         Row: {
           assistant_user_id: string | null
           created_at: string
           email: string | null
+          has_pro_access: boolean | null
           id: string
           invite_token: string | null
           is_registered: boolean | null
           name: string
           phone: string | null
           updated_at: string
+          upgraded_at: string | null
           user_id: string
         }
         Insert: {
           assistant_user_id?: string | null
           created_at?: string
           email?: string | null
+          has_pro_access?: boolean | null
           id?: string
           invite_token?: string | null
           is_registered?: boolean | null
           name: string
           phone?: string | null
           updated_at?: string
+          upgraded_at?: string | null
           user_id: string
         }
         Update: {
           assistant_user_id?: string | null
           created_at?: string
           email?: string | null
+          has_pro_access?: boolean | null
           id?: string
           invite_token?: string | null
           is_registered?: boolean | null
           name?: string
           phone?: string | null
           updated_at?: string
+          upgraded_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -275,7 +326,9 @@ export type Database = {
           event_type: string | null
           google_calendar_event_id: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           making_of_time: string | null
           notes: string | null
           project_id: string | null
@@ -299,7 +352,9 @@ export type Database = {
           event_type?: string | null
           google_calendar_event_id?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           making_of_time?: string | null
           notes?: string | null
           project_id?: string | null
@@ -323,7 +378,9 @@ export type Database = {
           event_type?: string | null
           google_calendar_event_id?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           making_of_time?: string | null
           notes?: string | null
           project_id?: string | null

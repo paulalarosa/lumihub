@@ -25,7 +25,6 @@ import { format } from 'date-fns';
 import { 
   Calendar, 
   Clock, 
-  MapPin, 
   Users, 
   Palette, 
   Bell,
@@ -39,6 +38,7 @@ import {
 } from 'lucide-react';
 import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
+import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
 
 interface Event {
   id: string;
@@ -54,6 +54,8 @@ interface Event {
   advisory_time: string | null;
   location: string | null;
   address: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   notes: string | null;
   color: string;
   client_id: string | null;
@@ -149,7 +151,8 @@ export default function EventDialog({
   const [endTime, setEndTime] = useState('');
   
   const [address, setAddress] = useState('');
-  const [location, setLocation] = useState('');
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
   const [color, setColor] = useState(COLORS[0]);
   const [clientId, setClientId] = useState<string>('');
@@ -179,7 +182,8 @@ export default function EventDialog({
       setStartTime(event.start_time || '');
       setEndTime(event.end_time || '');
       setAddress(event.address || '');
-      setLocation(event.location || '');
+      setLatitude(event.latitude ?? null);
+      setLongitude(event.longitude ?? null);
       setNotes(event.notes || '');
       setColor(event.color || COLORS[0]);
       setClientId(event.client_id || '');
@@ -206,7 +210,8 @@ export default function EventDialog({
     setStartTime('');
     setEndTime('');
     setAddress('');
-    setLocation('');
+    setLatitude(null);
+    setLongitude(null);
     setNotes('');
     setColor(COLORS[0]);
     setClientId('');
@@ -286,7 +291,8 @@ export default function EventDialog({
       start_time: !isNoivas ? (startTime || null) : (ceremonyTime || null),
       end_time: !isNoivas ? (endTime || null) : null,
       address: address || null,
-      location: location || null,
+      latitude,
+      longitude,
       notes: notes || null,
       color,
       client_id: clientId || null,
@@ -328,6 +334,16 @@ export default function EventDialog({
         }));
 
         await supabase.from('event_assistants').insert(assignments);
+        
+        // Create notifications for assigned assistants
+        const notifications = selectedAssistants.map(assistantId => ({
+          assistant_id: assistantId,
+          event_id: eventId,
+          type: 'event_assigned',
+          user_id: user.id
+        }));
+        
+        await supabase.from('assistant_notifications').insert(notifications);
       }
 
       toast({
@@ -519,32 +535,23 @@ export default function EventDialog({
               </div>
             )}
 
-            {/* Address with GPS integration hint */}
+            {/* Address with Google Maps Autocomplete */}
             <div className="space-y-2">
-              <Label htmlFor="address" className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
+              <Label className="flex items-center gap-2">
                 Endereço
               </Label>
-              <Input
-                id="address"
+              <AddressAutocomplete
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Rua, número, bairro, cidade - CEP"
+                onChange={setAddress}
+                onCoordinatesChange={(lat, lng) => {
+                  setLatitude(lat);
+                  setLongitude(lng);
+                }}
+                placeholder="Digite o endereço completo..."
               />
               <p className="text-xs text-muted-foreground">
-                O endereço será integrado com Google Maps / Apple Maps
+                Clique no endereço salvo para abrir no app de GPS
               </p>
-            </div>
-
-            {/* Location (venue name) */}
-            <div className="space-y-2">
-              <Label htmlFor="location">Nome do Local</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="Ex: Espaço Villa Real"
-              />
             </div>
 
             {/* Client and Project with quick create */}

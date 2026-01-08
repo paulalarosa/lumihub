@@ -42,6 +42,8 @@ interface Event {
   advisory_time?: string | null;
   location: string | null;
   address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
   color: string;
   client?: { name: string } | null;
   project?: { name: string } | null;
@@ -74,7 +76,7 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
 
   const handleOpenMaps = () => {
     if (displayAddress) {
-      openInMaps(displayAddress);
+      openInMaps(displayAddress, event.latitude, event.longitude);
     }
   };
 
