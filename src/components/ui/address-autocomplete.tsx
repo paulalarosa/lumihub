@@ -54,12 +54,17 @@ export function AddressAutocomplete({
   const [isApiLoaded, setIsApiLoaded] = useState(false);
 
   useEffect(() => {
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    console.log('Maps API Key exists:', !!apiKey);
+    
     loadGoogleMaps()
       .then(() => {
+        console.log('Maps Loaded: true');
         setIsApiLoaded(true);
         setIsLoading(false);
       })
       .catch((err) => {
+        console.log('Maps Loaded: false');
         console.warn("Google Maps não disponível:", err.message);
         setIsLoading(false);
       });
