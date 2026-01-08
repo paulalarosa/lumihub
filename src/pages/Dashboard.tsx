@@ -15,6 +15,7 @@ import {
   FolderOpen,
   Plus
 } from 'lucide-react';
+import { AssistantsPanelCard } from '@/components/dashboard/AssistantsPanelCard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -193,7 +194,10 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Empty State / Getting Started */}
+        {/* Assistants Panel */}
+        <div className="mb-8">
+          <AssistantsPanelCard />
+        </div>
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
           <CardContent className="py-12 text-center">
             <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
