@@ -1,9 +1,10 @@
-import { format, isSameDay } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar } from "@/components/ui/calendar";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Phone, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { User, Phone, Mail, Plus, Minus } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Assistant {
   id: string;
@@ -18,13 +19,18 @@ interface Event {
   color: string | null;
 }
 
+export type CalendarSize = 'small' | 'medium' | 'large';
+
 interface CalendarSidebarProps {
   currentDate: Date;
   selectedDate: Date | null;
   onDateSelect: (date: Date) => void;
   onMonthChange: (date: Date) => void;
+  onClearDateFilter?: () => void;
   assistants: Assistant[];
   events: Event[];
+  calendarSize?: CalendarSize;
+  onCalendarSizeChange?: (size: CalendarSize) => void;
 }
 
 export function CalendarSidebar({
@@ -32,8 +38,11 @@ export function CalendarSidebar({
   selectedDate,
   onDateSelect,
   onMonthChange,
+  onClearDateFilter,
   assistants,
   events,
+  calendarSize = 'small',
+  onCalendarSizeChange,
 }: CalendarSidebarProps) {
   // Create a map of dates with events for highlighting
   const eventDates = events.reduce((acc, event) => {
@@ -45,10 +54,61 @@ export function CalendarSidebar({
     return acc;
   }, {} as Record<string, string[]>);
 
+  const handleIncreaseSize = () => {
+    if (onCalendarSizeChange) {
+      if (calendarSize === 'small') onCalendarSizeChange('medium');
+      else if (calendarSize === 'medium') onCalendarSizeChange('large');
+    }
+  };
+
+  const handleDecreaseSize = () => {
+    if (onCalendarSizeChange) {
+      if (calendarSize === 'large') onCalendarSizeChange('medium');
+      else if (calendarSize === 'medium') onCalendarSizeChange('small');
+    }
+  };
+
+  const calendarClassName = cn(
+    "w-full transition-all duration-200",
+    calendarSize === 'medium' && "[&_.rdp-cell]:p-1 [&_.rdp-day]:h-10 [&_.rdp-day]:w-10",
+    calendarSize === 'large' && "[&_.rdp-cell]:p-1.5 [&_.rdp-day]:h-12 [&_.rdp-day]:w-12 [&_.rdp-head_cell]:text-sm"
+  );
+
   return (
     <div className="flex flex-col h-full">
       {/* Mini Calendar */}
       <div className="border rounded-lg p-3 bg-card">
+        {/* Size controls */}
+        {onCalendarSizeChange && (
+          <div className="flex items-center justify-between mb-2">
+            <button
+              onClick={onClearDateFilter}
+              className="text-sm font-medium text-primary hover:underline cursor-pointer"
+            >
+              {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
+            </button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleDecreaseSize}
+                disabled={calendarSize === 'small'}
+              >
+                <Minus className="h-3 w-3" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleIncreaseSize}
+                disabled={calendarSize === 'large'}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
         <Calendar
           mode="single"
           selected={selectedDate || undefined}
@@ -56,7 +116,7 @@ export function CalendarSidebar({
           month={currentDate}
           onMonthChange={onMonthChange}
           locale={ptBR}
-          className="w-full"
+          className={calendarClassName}
           modifiers={{
             hasEvent: (date) => {
               const dateStr = format(date, 'yyyy-MM-dd');
