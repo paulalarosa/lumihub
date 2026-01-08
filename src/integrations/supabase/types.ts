@@ -273,6 +273,7 @@ export type Database = {
           end_time: string | null
           event_date: string
           event_type: string | null
+          google_calendar_event_id: string | null
           id: string
           location: string | null
           making_of_time: string | null
@@ -296,6 +297,7 @@ export type Database = {
           end_time?: string | null
           event_date: string
           event_type?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           location?: string | null
           making_of_time?: string | null
@@ -319,6 +321,7 @@ export type Database = {
           end_time?: string | null
           event_date?: string
           event_type?: string | null
+          google_calendar_event_id?: string | null
           id?: string
           location?: string | null
           making_of_time?: string | null
@@ -845,6 +848,9 @@ export type Database = {
           access_token: string | null
           calendar_id: string | null
           created_at: string
+          google_channel_expiration: string | null
+          google_channel_id: string | null
+          google_resource_id: string | null
           id: string
           is_active: boolean
           last_sync_at: string | null
@@ -859,6 +865,9 @@ export type Database = {
           access_token?: string | null
           calendar_id?: string | null
           created_at?: string
+          google_channel_expiration?: string | null
+          google_channel_id?: string | null
+          google_resource_id?: string | null
           id?: string
           is_active?: boolean
           last_sync_at?: string | null
@@ -873,6 +882,9 @@ export type Database = {
           access_token?: string | null
           calendar_id?: string | null
           created_at?: string
+          google_channel_expiration?: string | null
+          google_channel_id?: string | null
+          google_resource_id?: string | null
           id?: string
           is_active?: boolean
           last_sync_at?: string | null
