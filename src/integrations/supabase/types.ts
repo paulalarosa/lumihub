@@ -435,6 +435,86 @@ export type Database = {
           },
         ]
       }
+      notification_logs: {
+        Row: {
+          event_id: string | null
+          id: string
+          notification_type: string
+          recipient_email: string
+          sent_at: string
+          status: string
+          subject: string
+          user_id: string
+        }
+        Insert: {
+          event_id?: string | null
+          id?: string
+          notification_type: string
+          recipient_email: string
+          sent_at?: string
+          status?: string
+          subject: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string | null
+          id?: string
+          notification_type?: string
+          recipient_email?: string
+          sent_at?: string
+          status?: string
+          subject?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          created_at: string
+          email_enabled: boolean
+          id: string
+          notify_assistant_assigned: boolean
+          notify_event_cancel: boolean
+          notify_event_update: boolean
+          notify_new_event: boolean
+          reminder_days: number[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          notify_assistant_assigned?: boolean
+          notify_event_cancel?: boolean
+          notify_event_update?: boolean
+          notify_new_event?: boolean
+          reminder_days?: number[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean
+          id?: string
+          notify_assistant_assigned?: boolean
+          notify_event_cancel?: boolean
+          notify_event_update?: boolean
+          notify_new_event?: boolean
+          reminder_days?: number[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_accounts: {
         Row: {
           account_holder_document: string | null
@@ -759,6 +839,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_integrations: {
+        Row: {
+          access_token: string | null
+          calendar_id: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          last_sync_at: string | null
+          provider: string
+          refresh_token: string | null
+          sync_enabled: boolean
+          token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token?: string | null
+          calendar_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider: string
+          refresh_token?: string | null
+          sync_enabled?: boolean
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string | null
+          calendar_id?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_sync_at?: string | null
+          provider?: string
+          refresh_token?: string | null
+          sync_enabled?: boolean
+          token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
