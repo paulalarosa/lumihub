@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   roles: AppRole[];
   isAdmin: boolean;
+  isAssistant: boolean;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -22,6 +23,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [roles, setRoles] = useState<AppRole[]>([]);
+  const [isAssistant, setIsAssistant] = useState(false);
+
+  const checkIfAssistant = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('assistants')
+      .select('id')
+      .eq('assistant_user_id', userId)
+      .maybeSingle();
+
+    setIsAssistant(!error && !!data);
+  };
 
   const fetchRoles = async (userId: string) => {
     const { data, error } = await supabase
@@ -45,9 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (session?.user) {
           setTimeout(() => {
             fetchRoles(session.user.id);
+            checkIfAssistant(session.user.id);
           }, 0);
         } else {
           setRoles([]);
+          setIsAssistant(false);
         }
       }
     );
@@ -58,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchRoles(session.user.id);
+        checkIfAssistant(session.user.id);
       }
       setLoading(false);
     });
@@ -94,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut();
     setRoles([]);
+    setIsAssistant(false);
   };
 
   const isAdmin = roles.includes('admin');
@@ -105,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading,
       roles,
       isAdmin,
+      isAssistant,
       signUp,
       signIn,
       signOut
