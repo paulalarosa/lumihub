@@ -582,6 +582,7 @@ export type Database = {
           created_at: string
           id: string
           instagram: string | null
+          is_public: boolean
           logo_url: string | null
           phone: string | null
           primary_color: string | null
@@ -595,6 +596,7 @@ export type Database = {
           created_at?: string
           id?: string
           instagram?: string | null
+          is_public?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -608,6 +610,7 @@ export type Database = {
           created_at?: string
           id?: string
           instagram?: string | null
+          is_public?: boolean
           logo_url?: string | null
           phone?: string | null
           primary_color?: string | null
@@ -920,6 +923,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_project_access: { Args: { _project_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -929,6 +933,10 @@ export type Database = {
       }
       is_assistant_assigned_to_event: {
         Args: { _assistant_user_id: string; _event_id: string }
+        Returns: boolean
+      }
+      is_assistant_for_project: {
+        Args: { _assistant_user_id: string; _project_id: string }
         Returns: boolean
       }
       user_owns_event: {
