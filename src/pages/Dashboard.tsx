@@ -18,13 +18,17 @@ import {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, isAssistant, signOut, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
-  }, [user, loading, navigate]);
+    // Redirect assistants to their portal
+    if (!loading && user && isAssistant && !isAdmin) {
+      navigate('/assistente');
+    }
+  }, [user, loading, isAssistant, isAdmin, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
