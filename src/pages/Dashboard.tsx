@@ -57,6 +57,13 @@ export default function Dashboard() {
       color: "bg-purple-500"
     },
     {
+      title: "Agenda",
+      description: "Calendário e eventos",
+      icon: Calendar,
+      href: "/agenda",
+      color: "bg-green-500"
+    },
+    {
       title: "Configurações",
       description: "Perfil e serviços",
       icon: Settings,

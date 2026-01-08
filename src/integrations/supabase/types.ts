@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      assistants: {
+        Row: {
+          assistant_user_id: string | null
+          created_at: string
+          email: string | null
+          id: string
+          invite_token: string | null
+          is_registered: boolean | null
+          name: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assistant_user_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          invite_token?: string | null
+          is_registered?: boolean | null
+          name: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assistant_user_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          invite_token?: string | null
+          is_registered?: boolean | null
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       briefings: {
         Row: {
           answers: Json
@@ -175,6 +214,114 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "contracts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_assistants: {
+        Row: {
+          assistant_id: string
+          created_at: string
+          event_id: string
+          id: string
+          notified_at: string | null
+        }
+        Insert: {
+          assistant_id: string
+          created_at?: string
+          event_id: string
+          id?: string
+          notified_at?: string | null
+        }
+        Update: {
+          assistant_id?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          notified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_assistants_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "assistants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          client_id: string | null
+          color: string | null
+          created_at: string
+          description: string | null
+          end_time: string | null
+          event_date: string
+          id: string
+          location: string | null
+          notes: string | null
+          project_id: string | null
+          reminder_days: number[] | null
+          start_time: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          event_date: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          project_id?: string | null
+          reminder_days?: number[] | null
+          start_time?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          event_date?: string
+          id?: string
+          location?: string | null
+          notes?: string | null
+          project_id?: string | null
+          reminder_days?: number[] | null
+          start_time?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
