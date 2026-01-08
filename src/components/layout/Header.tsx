@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,16 +14,16 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50">
+    <header className="bg-background/80 backdrop-blur-xl border-b border-border/50 sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-18 py-4">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-r from-primary to-primary-light rounded-lg flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
+          <Link to="/" className="flex items-center space-x-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-glow transition-all duration-300 group-hover:scale-105">
+              <span className="text-xl font-serif font-bold text-white">L</span>
             </div>
-            <span className="font-poppins font-bold text-xl text-foreground">
-              Beauty Pro
+            <span className="font-serif font-semibold text-2xl text-foreground tracking-tight">
+              Lumi
             </span>
           </Link>
 
@@ -33,7 +33,7 @@ const Header = () => {
               <Link
                 key={item.name}
                 to={item.href}
-                className="text-foreground hover:text-primary transition-colors duration-200 font-medium"
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-medium text-sm tracking-wide"
               >
                 {item.name}
               </Link>
@@ -43,17 +43,21 @@ const Header = () => {
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/auth">
-              <Button variant="ghost">Entrar</Button>
+              <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
+                Entrar
+              </Button>
             </Link>
             <Link to="/auth">
-              <Button variant="accent">Começar Grátis</Button>
+              <Button className="glow-hover bg-gradient-to-r from-primary to-accent hover:from-primary-hover hover:to-accent-hover text-white border-0">
+                Começar Grátis
+              </Button>
             </Link>
           </div>
 
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors"
+            className="md:hidden p-2 rounded-xl hover:bg-muted transition-colors"
           >
             {isMenuOpen ? (
               <X className="h-6 w-6" />
@@ -65,7 +69,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="md:hidden py-4 border-t border-border/50 animate-fade-in">
             <nav className="flex flex-col space-y-4">
               {navigation.map((item) => (
                 <Link
@@ -77,14 +81,14 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="flex flex-col space-y-3 pt-4 border-t border-border">
+              <div className="flex flex-col space-y-3 pt-4 border-t border-border/50">
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     Entrar
                   </Button>
                 </Link>
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button variant="accent" className="w-full">
+                  <Button className="w-full bg-gradient-to-r from-primary to-accent text-white border-0">
                     Começar Grátis
                   </Button>
                 </Link>
