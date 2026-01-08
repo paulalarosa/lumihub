@@ -1,1 +1,7 @@
 project_id = "rhvmczcwtfjodrocesaa"
+
+[functions.create-payment]
+verify_jwt = false
+
+[functions.mercadopago-webhook]
+verify_jwt = false
