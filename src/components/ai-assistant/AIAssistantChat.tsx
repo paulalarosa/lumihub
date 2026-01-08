@@ -42,9 +42,19 @@ export default function AIAssistantChat() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading || !user) return;
+    const trimmedInput = input.trim();
+    
+    // Client-side validation
+    if (!trimmedInput || isLoading || !user) return;
+    if (trimmedInput.length > 2000) {
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: 'Mensagem muito longa. Por favor, limite sua mensagem a 2000 caracteres.' 
+      }]);
+      return;
+    }
 
-    const userMessage: Message = { role: 'user', content: input.trim() };
+    const userMessage: Message = { role: 'user', content: trimmedInput };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);

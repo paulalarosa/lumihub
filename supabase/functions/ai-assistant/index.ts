@@ -452,7 +452,39 @@ serve(async (req) => {
       });
     }
 
-    const { messages } = await req.json() as { messages: Message[] };
+const body = await req.json();
+    const messages = body?.messages as Message[] | undefined;
+
+    // Validate input
+    if (!messages || !Array.isArray(messages)) {
+      return new Response(JSON.stringify({ error: "Formato de mensagem inválido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Limit messages array size (max 50 messages)
+    if (messages.length > 50) {
+      return new Response(JSON.stringify({ error: "Limite de mensagens excedido" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Validate and sanitize each message
+    const sanitizedMessages = messages.slice(-50).map(msg => {
+      // Ensure proper role
+      const role = msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system' 
+        ? msg.role 
+        : 'user';
+      
+      // Limit content length (max 2000 chars per message)
+      const content = typeof msg.content === 'string' 
+        ? msg.content.slice(0, 2000) 
+        : '';
+      
+      return { role, content };
+    });
 
     // First API call with tools
     let response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -465,7 +497,7 @@ serve(async (req) => {
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
-          ...messages,
+          ...sanitizedMessages,
         ],
         tools,
         tool_choice: "auto",
@@ -522,7 +554,7 @@ serve(async (req) => {
           model: "google/gemini-2.5-flash",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
-            ...messages,
+            ...sanitizedMessages,
             assistantMessage,
             ...toolResults.map(tr => ({ role: "user" as const, content: `Resultado da ferramenta: ${tr.content}` }))
           ],

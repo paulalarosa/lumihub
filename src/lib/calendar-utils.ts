@@ -120,41 +120,18 @@ export function getGoogleCalendarUrl(event: EventData): string {
 
 /**
  * Open Google Maps with the address or coordinates
+ * Uses the universal Google Maps search URL that works on all platforms
+ * and triggers the GPS app on mobile devices
  */
 export function openInMaps(address: string, latitude?: number | null, longitude?: number | null): void {
-  // If we have coordinates, use them for better precision
+  // Use Google Maps universal URL - works on web, iOS, and Android
+  // This URL will open the Google Maps app if installed, or web otherwise
   if (latitude && longitude) {
-    const url = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-    return;
-  }
-  
-  const encodedAddress = encodeURIComponent(address);
-  
-  // Try to detect platform
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid = /Android/.test(navigator.userAgent);
-  
-  let url: string;
-  
-  if (isIOS) {
-    // Apple Maps
-    url = `maps://maps.apple.com/?q=${encodedAddress}`;
-    // Fallback to Google Maps if Apple Maps doesn't open
-    setTimeout(() => {
-      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
-    }, 500);
-    window.location.href = url;
-  } else if (isAndroid) {
-    // Google Maps on Android
-    url = `geo:0,0?q=${encodedAddress}`;
-    window.location.href = url;
-    // Fallback
-    setTimeout(() => {
-      window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
-    }, 500);
+    // Use coordinates for precise location
+    window.open(`https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`, '_blank', 'noopener,noreferrer');
   } else {
-    // Desktop - open Google Maps in new tab
-    window.open(`https://maps.google.com/?q=${encodedAddress}`, '_blank');
+    // Fallback to address search
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank', 'noopener,noreferrer');
   }
 }
