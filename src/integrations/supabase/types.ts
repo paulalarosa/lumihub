@@ -790,6 +790,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_assistant_assigned_to_event: {
+        Args: { _assistant_user_id: string; _event_id: string }
+        Returns: boolean
+      }
+      user_owns_event: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
