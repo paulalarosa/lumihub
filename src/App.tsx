@@ -20,6 +20,7 @@ import PortalAssistente from "./pages/PortalAssistente";
 import Agenda from "./pages/Agenda";
 import Assistentes from "./pages/Assistentes";
 import NotFound from "./pages/NotFound";
+import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +61,7 @@ const App = () => (
             {/* Catch-all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <AIAssistantChat />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
