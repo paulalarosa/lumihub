@@ -8,10 +8,24 @@ import {
   Edit2, 
   Trash2,
   User,
-  Briefcase
+  Briefcase,
+  Car,
+  Camera,
+  Church,
+  HeartHandshake,
+  Navigation,
+  Calendar as CalendarIcon,
+  Download
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { downloadICSFile, getGoogleCalendarUrl, openInMaps } from '@/lib/calendar-utils';
 
 interface Event {
   id: string;
@@ -20,7 +34,12 @@ interface Event {
   event_date: string;
   start_time: string | null;
   end_time: string | null;
+  arrival_time?: string | null;
+  making_of_time?: string | null;
+  ceremony_time?: string | null;
+  advisory_time?: string | null;
   location: string | null;
+  address?: string | null;
   color: string;
   client?: { name: string } | null;
   project?: { name: string } | null;
@@ -35,9 +54,47 @@ interface EventCardProps {
 }
 
 export default function EventCard({ event, onEdit, onDelete, showDate = false }: EventCardProps) {
-  const formatTime = (time: string | null) => {
+  const formatTime = (time: string | null | undefined) => {
     if (!time) return null;
     return time.substring(0, 5);
+  };
+
+  const hasAnyTime = event.arrival_time || event.making_of_time || event.ceremony_time || event.advisory_time || event.start_time;
+  const displayAddress = event.address || event.location;
+
+  const handleOpenMaps = () => {
+    if (displayAddress) {
+      openInMaps(displayAddress);
+    }
+  };
+
+  const handleExportICS = () => {
+    downloadICSFile({
+      title: event.title,
+      description: event.description,
+      event_date: event.event_date,
+      arrival_time: event.arrival_time,
+      making_of_time: event.making_of_time,
+      ceremony_time: event.ceremony_time,
+      advisory_time: event.advisory_time,
+      address: event.address,
+      location: event.location
+    });
+  };
+
+  const handleAddToGoogle = () => {
+    const url = getGoogleCalendarUrl({
+      title: event.title,
+      description: event.description,
+      event_date: event.event_date,
+      arrival_time: event.arrival_time,
+      making_of_time: event.making_of_time,
+      ceremony_time: event.ceremony_time,
+      advisory_time: event.advisory_time,
+      address: event.address,
+      location: event.location
+    });
+    window.open(url, '_blank');
   };
 
   return (
@@ -62,6 +119,25 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
               </div>
               
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Calendar export dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <CalendarIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleAddToGoogle}>
+                      <CalendarIcon className="h-4 w-4 mr-2" />
+                      Adicionar ao Google Calendar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportICS}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar .ICS (Apple Calendar)
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button variant="ghost" size="icon" onClick={onEdit}>
                   <Edit2 className="h-4 w-4" />
                 </Button>
@@ -71,26 +147,12 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
               </div>
             </div>
 
+            {/* Date and basic info */}
             <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
               {showDate && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
                   {format(new Date(event.event_date), "dd/MM", { locale: ptBR })}
-                </span>
-              )}
-              
-              {(event.start_time || event.end_time) && (
-                <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
-                  {formatTime(event.start_time)}
-                  {event.end_time && ` - ${formatTime(event.end_time)}`}
-                </span>
-              )}
-
-              {event.location && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {event.location}
                 </span>
               )}
 
@@ -108,6 +170,47 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                 </span>
               )}
             </div>
+
+            {/* Specific times */}
+            {hasAnyTime && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs">
+                {(event.arrival_time || event.start_time) && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    <Car className="h-3 w-3" />
+                    <span>Chegada: {formatTime(event.arrival_time || event.start_time)}</span>
+                  </div>
+                )}
+                {event.making_of_time && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    <Camera className="h-3 w-3" />
+                    <span>Making of: {formatTime(event.making_of_time)}</span>
+                  </div>
+                )}
+                {event.ceremony_time && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    <Church className="h-3 w-3" />
+                    <span>Cerimônia: {formatTime(event.ceremony_time)}</span>
+                  </div>
+                )}
+                {event.advisory_time && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                    <HeartHandshake className="h-3 w-3" />
+                    <span>Assessoria: {formatTime(event.advisory_time)}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Address with GPS link */}
+            {displayAddress && (
+              <button
+                onClick={handleOpenMaps}
+                className="flex items-center gap-1.5 mt-3 text-sm text-primary hover:underline"
+              >
+                <Navigation className="h-3.5 w-3.5" />
+                <span className="truncate">{displayAddress}</span>
+              </button>
+            )}
 
             {event.assistants && event.assistants.length > 0 && (
               <div className="flex items-center gap-2 mt-3">

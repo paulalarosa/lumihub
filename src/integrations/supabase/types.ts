@@ -262,6 +262,10 @@ export type Database = {
       }
       events: {
         Row: {
+          address: string | null
+          advisory_time: string | null
+          arrival_time: string | null
+          ceremony_time: string | null
           client_id: string | null
           color: string | null
           created_at: string
@@ -270,6 +274,7 @@ export type Database = {
           event_date: string
           id: string
           location: string | null
+          making_of_time: string | null
           notes: string | null
           project_id: string | null
           reminder_days: number[] | null
@@ -279,6 +284,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: string | null
+          advisory_time?: string | null
+          arrival_time?: string | null
+          ceremony_time?: string | null
           client_id?: string | null
           color?: string | null
           created_at?: string
@@ -287,6 +296,7 @@ export type Database = {
           event_date: string
           id?: string
           location?: string | null
+          making_of_time?: string | null
           notes?: string | null
           project_id?: string | null
           reminder_days?: number[] | null
@@ -296,6 +306,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: string | null
+          advisory_time?: string | null
+          arrival_time?: string | null
+          ceremony_time?: string | null
           client_id?: string | null
           color?: string | null
           created_at?: string
@@ -304,6 +318,7 @@ export type Database = {
           event_date?: string
           id?: string
           location?: string | null
+          making_of_time?: string | null
           notes?: string | null
           project_id?: string | null
           reminder_days?: number[] | null
