@@ -18,7 +18,9 @@ import {
   FileText,
   DollarSign,
   Send,
-  Check
+  Check,
+  Loader2,
+  CreditCard
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -91,6 +93,7 @@ export default function PortalCliente() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   
   const [briefingAnswers, setBriefingAnswers] = useState<Record<string, string>>({});
+  const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -206,6 +209,51 @@ export default function PortalCliente() {
     } else {
       toast({ title: "Respostas enviadas com sucesso!" });
       setBriefing({ ...briefing, is_submitted: true, answers: briefingAnswers });
+    }
+  };
+
+  const handlePayment = async (invoice: Invoice) => {
+    setPayingInvoiceId(invoice.id);
+    
+    try {
+      const response = await supabase.functions.invoke('create-payment', {
+        body: {
+          invoice_id: invoice.id,
+          invoice_amount: invoice.amount,
+          invoice_description: invoice.description,
+          project_name: project?.name,
+        }
+      });
+
+      if (response.error) {
+        console.error('Payment error:', response.error);
+        toast({ 
+          title: "Erro ao iniciar pagamento", 
+          description: response.error.message,
+          variant: "destructive" 
+        });
+        return;
+      }
+
+      const { init_point } = response.data;
+      
+      if (init_point) {
+        // Redirect to Mercado Pago checkout
+        window.location.href = init_point;
+      } else {
+        toast({ 
+          title: "Erro ao gerar link de pagamento", 
+          variant: "destructive" 
+        });
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast({ 
+        title: "Erro ao processar pagamento", 
+        variant: "destructive" 
+      });
+    } finally {
+      setPayingInvoiceId(null);
     }
   };
 
@@ -523,9 +571,24 @@ export default function PortalCliente() {
                             {invoice.status === 'paid' ? 'Pago' : 
                              invoice.status === 'overdue' ? 'Vencido' : 'Pendente'}
                           </Badge>
-                          {invoice.status === 'pending' && (
-                            <Button size="sm" className="mt-2">
-                              Pagar Agora
+                          {(invoice.status === 'pending' || invoice.status === 'overdue') && (
+                            <Button 
+                              size="sm" 
+                              className="mt-2"
+                              onClick={() => handlePayment(invoice)}
+                              disabled={payingInvoiceId === invoice.id}
+                            >
+                              {payingInvoiceId === invoice.id ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Processando...
+                                </>
+                              ) : (
+                                <>
+                                  <CreditCard className="h-4 w-4 mr-2" />
+                                  Pagar com Mercado Pago
+                                </>
+                              )}
                             </Button>
                           )}
                         </div>
