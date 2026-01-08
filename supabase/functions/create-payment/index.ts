@@ -13,9 +13,94 @@ serve(async (req) => {
   }
 
   try {
-    const { invoice_id, invoice_amount, invoice_description, project_name, payer_email } = await req.json();
+    const { invoice_id, payer_email } = await req.json();
+
+    // Validate invoice_id format (UUID)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!invoice_id || !uuidRegex.test(invoice_id)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid invoice ID' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     console.log('Creating Mercado Pago payment for invoice:', invoice_id);
+
+    // Create Supabase client with service role to fetch invoice details
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
+
+    // Fetch invoice with related project data to verify it exists and get amount
+    const { data: invoice, error: invoiceError } = await supabaseAdmin
+      .from('invoices')
+      .select(`
+        id,
+        amount,
+        description,
+        status,
+        user_id,
+        project_id,
+        projects:project_id (
+          name,
+          public_token
+        )
+      `)
+      .eq('id', invoice_id)
+      .single();
+
+    if (invoiceError || !invoice) {
+      console.error('Invoice not found:', invoiceError);
+      return new Response(
+        JSON.stringify({ error: 'Invoice not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if invoice is already paid
+    if (invoice.status === 'paid') {
+      return new Response(
+        JSON.stringify({ error: 'Invoice already paid' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Authorization check: Either authenticated user owns the invoice OR project has public token
+    const authHeader = req.headers.get('Authorization');
+    const project = invoice.projects as { name: string; public_token: string | null } | null;
+    
+    let isAuthorized = false;
+
+    if (authHeader) {
+      // Check if authenticated user owns the invoice
+      const supabaseAuth = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const { data: { user } } = await supabaseAuth.auth.getUser();
+      
+      if (user && user.id === invoice.user_id) {
+        isAuthorized = true;
+        console.log('Authorized: Invoice owner');
+      }
+    }
+
+    // Allow public access if project has a public_token (client portal)
+    if (!isAuthorized && project?.public_token) {
+      isAuthorized = true;
+      console.log('Authorized: Public project token');
+    }
+
+    if (!isAuthorized) {
+      console.error('Unauthorized access attempt for invoice:', invoice_id);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     const accessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
     if (!accessToken) {
@@ -26,18 +111,18 @@ serve(async (req) => {
       );
     }
 
-    // Create Mercado Pago preference
+    // Create Mercado Pago preference with validated data from database
     const preferenceData = {
       items: [
         {
-          title: invoice_description || `Pagamento - ${project_name}`,
+          title: invoice.description || `Pagamento - ${project?.name || 'Projeto'}`,
           quantity: 1,
-          unit_price: Number(invoice_amount),
+          unit_price: Number(invoice.amount),
           currency_id: 'BRL',
         }
       ],
       payer: payer_email ? { email: payer_email } : undefined,
-      external_reference: invoice_id,
+      external_reference: invoice.id,
       back_urls: {
         success: `${req.headers.get('origin') || 'https://lovable.dev'}/pagamento/sucesso`,
         failure: `${req.headers.get('origin') || 'https://lovable.dev'}/pagamento/erro`,
@@ -63,7 +148,7 @@ serve(async (req) => {
     if (!response.ok) {
       console.error('Mercado Pago API error:', data);
       return new Response(
-        JSON.stringify({ error: 'Erro ao criar pagamento', details: data }),
+        JSON.stringify({ error: 'Erro ao criar pagamento' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -82,7 +167,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in create-payment function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
