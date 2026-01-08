@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,14 +9,12 @@ import {
   Menu
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, isSameDay, addMonths, subMonths, addWeeks, subWeeks, addDays, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import EventDialog from '@/components/agenda/EventDialog';
-import { CalendarHeader, ViewMode } from '@/components/agenda/CalendarHeader';
-import { CalendarSidebar } from '@/components/agenda/CalendarSidebar';
-import { MonthView } from '@/components/agenda/views/MonthView';
-import { WeekView } from '@/components/agenda/views/WeekView';
-import { DayView } from '@/components/agenda/views/DayView';
+import { CalendarHeader } from '@/components/agenda/CalendarHeader';
+import { CalendarSidebar, CalendarSize } from '@/components/agenda/CalendarSidebar';
+import { EventListView } from '@/components/agenda/views/EventListView';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -61,12 +59,11 @@ export default function Agenda() {
   const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [prefilledTime, setPrefilledTime] = useState<string | undefined>();
+  const [calendarSize, setCalendarSize] = useState<CalendarSize>('small');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -79,39 +76,14 @@ export default function Agenda() {
       fetchEvents();
       fetchAssistants();
     }
-  }, [user, currentDate, viewMode]);
-
-  const getDateRange = () => {
-    switch (viewMode) {
-      case 'month':
-        return {
-          start: startOfMonth(currentDate),
-          end: endOfMonth(currentDate)
-        };
-      case 'week':
-        return {
-          start: startOfWeek(currentDate, { locale: ptBR }),
-          end: endOfWeek(currentDate, { locale: ptBR })
-        };
-      case 'day':
-        return {
-          start: currentDate,
-          end: currentDate
-        };
-    }
-  };
+  }, [user, currentDate]);
 
   const fetchEvents = async () => {
     setLoadingEvents(true);
-    const { start, end } = getDateRange();
     
-    // For week view, also fetch surrounding days for navigation
-    const fetchStart = viewMode === 'month' 
-      ? startOfWeek(startOfMonth(currentDate), { locale: ptBR })
-      : start;
-    const fetchEnd = viewMode === 'month'
-      ? endOfWeek(endOfMonth(currentDate), { locale: ptBR })
-      : end;
+    // Always fetch full month plus surrounding days for calendar display
+    const fetchStart = startOfWeek(startOfMonth(currentDate), { locale: ptBR });
+    const fetchEnd = endOfWeek(endOfMonth(currentDate), { locale: ptBR });
 
     const { data, error } = await supabase
       .from('events')
@@ -164,51 +136,31 @@ export default function Agenda() {
 
   const handleNavigate = (date: Date) => {
     setCurrentDate(date);
+    setSelectedDate(null);
   };
 
   const handleToday = () => {
     setCurrentDate(new Date());
-    setSelectedDate(new Date());
-  };
-
-  const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
-    // When switching to day view, use selected date or today
-    if (mode === 'day' && selectedDate) {
-      setCurrentDate(selectedDate);
-    }
+    setSelectedDate(null);
   };
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    // When selecting a date, switch to day view and navigate
-    if (viewMode !== 'day') {
-      setViewMode('day');
-    }
-    setCurrentDate(date);
     setSidebarOpen(false);
+  };
+
+  const handleClearDateFilter = () => {
+    setSelectedDate(null);
   };
 
   const handleMonthChange = (date: Date) => {
     setCurrentDate(date);
+    setSelectedDate(null);
   };
 
-  const handleCreateEvent = (date?: Date, time?: string) => {
+  const handleCreateEvent = () => {
     setEditingEvent(null);
-    if (date) {
-      setSelectedDate(date);
-    }
-    setPrefilledTime(time);
     setDialogOpen(true);
-  };
-
-  const handleEventClick = (event: Event) => {
-    // For now, just edit on single click
-    handleEditEvent(event);
-  };
-
-  const handleEventDoubleClick = (event: Event) => {
-    handleEditEvent(event);
   };
 
   const handleEditEvent = (event: Event) => {
@@ -243,8 +195,11 @@ export default function Agenda() {
       selectedDate={selectedDate}
       onDateSelect={handleDateSelect}
       onMonthChange={handleMonthChange}
+      onClearDateFilter={handleClearDateFilter}
       assistants={assistants}
       events={events}
+      calendarSize={calendarSize}
+      onCalendarSizeChange={setCalendarSize}
     />
   );
 
@@ -298,11 +253,9 @@ export default function Agenda() {
         {/* Calendar Header */}
         <CalendarHeader
           currentDate={currentDate}
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
           onNavigate={handleNavigate}
           onToday={handleToday}
-          onCreateEvent={() => handleCreateEvent()}
+          onCreateEvent={handleCreateEvent}
         />
 
         {/* Main Content */}
@@ -314,46 +267,20 @@ export default function Agenda() {
             </div>
           )}
 
-          {/* Calendar View */}
+          {/* Event List View */}
           <div className="flex-1 border rounded-lg bg-card overflow-hidden min-h-[500px]">
             {loadingEvents ? (
               <div className="flex items-center justify-center h-full">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : (
-              <>
-                {viewMode === 'month' && (
-                  <MonthView
-                    currentDate={currentDate}
-                    events={events}
-                    selectedDate={selectedDate}
-                    onDateSelect={handleDateSelect}
-                    onEventClick={handleEventClick}
-                    onEventDoubleClick={handleEventDoubleClick}
-                    onCreateEvent={(date) => handleCreateEvent(date)}
-                  />
-                )}
-                {viewMode === 'week' && (
-                  <WeekView
-                    currentDate={currentDate}
-                    events={events}
-                    selectedDate={selectedDate}
-                    onDateSelect={handleDateSelect}
-                    onEventClick={handleEventClick}
-                    onEventDoubleClick={handleEventDoubleClick}
-                    onCreateEvent={(date, time) => handleCreateEvent(date, time)}
-                  />
-                )}
-                {viewMode === 'day' && (
-                  <DayView
-                    currentDate={currentDate}
-                    events={events}
-                    onEventClick={handleEventClick}
-                    onEventDoubleClick={handleEventDoubleClick}
-                    onCreateEvent={(date, time) => handleCreateEvent(date, time)}
-                  />
-                )}
-              </>
+              <EventListView
+                events={events}
+                selectedDate={selectedDate}
+                currentDate={currentDate}
+                onEditEvent={handleEditEvent}
+                onDeleteEvent={handleDeleteEvent}
+              />
             )}
           </div>
         </div>
@@ -361,19 +288,13 @@ export default function Agenda() {
 
       <EventDialog
         open={dialogOpen}
-        onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) {
-            setPrefilledTime(undefined);
-          }
-        }}
+        onOpenChange={setDialogOpen}
         event={editingEvent}
         assistants={assistants}
         selectedDate={selectedDate || undefined}
         onSuccess={() => {
           fetchEvents();
           setDialogOpen(false);
-          setPrefilledTime(undefined);
         }}
       />
     </div>
