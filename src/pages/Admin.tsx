@@ -155,48 +155,59 @@ export default function Admin() {
     {
       category: "CRM - Clientes",
       items: [
-        { name: "Cadastro de clientes", status: "pending" },
-        { name: "Histórico de interações", status: "pending" },
-        { name: "Anotações privadas", status: "pending" },
-        { name: "Tags e segmentação", status: "pending" }
+        { name: "Cadastro de clientes", status: "done" },
+        { name: "Histórico de interações", status: "done" },
+        { name: "Anotações privadas", status: "done" },
+        { name: "Tags e segmentação", status: "done" }
       ]
     },
     {
       category: "Projetos & Eventos",
       items: [
-        { name: "Criar projetos por cliente", status: "pending" },
-        { name: "Checklist de tarefas", status: "pending" },
-        { name: "Moodboard interativo", status: "pending" },
-        { name: "Questionário de briefing", status: "pending" },
-        { name: "Geração de contratos", status: "pending" }
+        { name: "Criar projetos por cliente", status: "done" },
+        { name: "Checklist de tarefas", status: "done" },
+        { name: "Moodboard interativo", status: "done" },
+        { name: "Questionário de briefing", status: "done" },
+        { name: "Geração de contratos", status: "done" }
       ]
     },
     {
       category: "Financeiro",
       items: [
-        { name: "Geração de faturas", status: "pending" },
-        { name: "Integração Mercado Pago", status: "pending" },
+        { name: "Geração de faturas", status: "done" },
+        { name: "Integração Mercado Pago", status: "done" },
         { name: "Split de pagamentos", status: "pending" },
-        { name: "Relatórios financeiros", status: "pending" }
+        { name: "Relatórios financeiros", status: "pending" },
+        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "pending" },
+        { name: "Recebimento de pagamentos na plataforma", status: "pending" },
+        { name: "Dashboard financeiro do usuário", status: "pending" }
       ]
     },
     {
       category: "Portal da Cliente",
       items: [
-        { name: "Link exclusivo por projeto", status: "pending" },
-        { name: "Visualização de moodboard", status: "pending" },
-        { name: "Preenchimento de briefing", status: "pending" },
-        { name: "Visualização de contrato", status: "pending" },
-        { name: "Pagamento online", status: "pending" }
+        { name: "Link exclusivo por projeto", status: "done" },
+        { name: "Visualização de moodboard", status: "done" },
+        { name: "Preenchimento de briefing", status: "done" },
+        { name: "Visualização de contrato", status: "done" },
+        { name: "Pagamento online", status: "done" }
       ]
     },
     {
       category: "Configurações",
       items: [
-        { name: "Perfil da maquiadora", status: "pending" },
-        { name: "Personalização de marca", status: "pending" },
-        { name: "Cardápio de serviços", status: "pending" },
+        { name: "Perfil da maquiadora", status: "done" },
+        { name: "Personalização de marca", status: "done" },
+        { name: "Cardápio de serviços", status: "done" },
         { name: "Planos e assinatura", status: "pending" }
+      ]
+    },
+    {
+      category: "Upload de Imagens",
+      items: [
+        { name: "Moodboard com upload real", status: "pending" },
+        { name: "Foto de perfil/avatar", status: "pending" },
+        { name: "Logo personalizado", status: "pending" }
       ]
     }
   ];
