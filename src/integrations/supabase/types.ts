@@ -270,6 +270,63 @@ export type Database = {
           },
         ]
       }
+      payment_accounts: {
+        Row: {
+          account_holder_document: string | null
+          account_holder_name: string | null
+          account_number: string | null
+          account_type: string | null
+          agency: string | null
+          bank_code: string | null
+          bank_name: string | null
+          created_at: string
+          digital_wallet_account: string | null
+          digital_wallet_type: string | null
+          id: string
+          pix_key: string | null
+          pix_key_type: string | null
+          preferred_method: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_holder_document?: string | null
+          account_holder_name?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          agency?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          created_at?: string
+          digital_wallet_account?: string | null
+          digital_wallet_type?: string | null
+          id?: string
+          pix_key?: string | null
+          pix_key_type?: string | null
+          preferred_method?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_holder_document?: string | null
+          account_holder_name?: string | null
+          account_number?: string | null
+          account_type?: string | null
+          agency?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          created_at?: string
+          digital_wallet_account?: string | null
+          digital_wallet_type?: string | null
+          id?: string
+          pix_key?: string | null
+          pix_key_type?: string | null
+          preferred_method?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       professional_settings: {
         Row: {
           bio: string | null

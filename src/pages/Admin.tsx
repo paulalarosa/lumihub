@@ -178,7 +178,7 @@ export default function Admin() {
         { name: "Integração Mercado Pago", status: "done" },
         { name: "Split de pagamentos", status: "pending" },
         { name: "Relatórios financeiros", status: "pending" },
-        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "pending" },
+        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "done" },
         { name: "Recebimento de pagamentos na plataforma", status: "pending" },
         { name: "Dashboard financeiro do usuário", status: "pending" }
       ]
