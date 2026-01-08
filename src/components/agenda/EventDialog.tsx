@@ -548,10 +548,10 @@ export default function EventDialog({
                   setLongitude(lng);
                 }}
                 placeholder="Digite o endereço completo..."
+                showMiniMap={true}
+                latitude={latitude}
+                longitude={longitude}
               />
-              <p className="text-xs text-muted-foreground">
-                Clique no endereço salvo para abrir no app de GPS
-              </p>
             </div>
 
             {/* Client and Project with quick create */}
