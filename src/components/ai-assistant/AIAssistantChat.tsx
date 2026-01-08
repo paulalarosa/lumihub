@@ -14,6 +14,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { z } from 'zod';
+
+// Input validation schema
+const messageSchema = z.object({
+  content: z.string()
+    .trim()
+    .min(1, { message: "Mensagem não pode estar vazia" })
+    .max(2000, { message: "Mensagem muito longa (máximo 2000 caracteres)" })
+    // Sanitize potentially dangerous patterns
+    .transform(val => val.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ''))
+    .transform(val => val.replace(/javascript:/gi, ''))
+    .transform(val => val.replace(/on\w+\s*=/gi, ''))
+});
 
 interface Message {
   role: 'user' | 'assistant';
@@ -42,19 +55,22 @@ export default function AIAssistantChat() {
   }, [messages]);
 
   const sendMessage = async () => {
-    const trimmedInput = input.trim();
+    // Validate and sanitize input
+    const validationResult = messageSchema.safeParse({ content: input });
     
-    // Client-side validation
-    if (!trimmedInput || isLoading || !user) return;
-    if (trimmedInput.length > 2000) {
+    if (!validationResult.success) {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: 'Mensagem muito longa. Por favor, limite sua mensagem a 2000 caracteres.' 
+        content: validationResult.error.errors[0].message 
       }]);
       return;
     }
 
-    const userMessage: Message = { role: 'user', content: trimmedInput };
+    if (isLoading || !user) return;
+
+    const sanitizedContent = validationResult.data.content;
+    
+    const userMessage: Message = { role: 'user', content: sanitizedContent };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
@@ -125,7 +141,7 @@ export default function AIAssistantChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full shadow-strong bg-gradient-to-br from-primary to-primary-light hover:scale-105 transition-transform"
+              className="h-14 w-14 rounded-full shadow-glow bg-gradient-to-br from-primary to-accent hover:scale-105 transition-transform"
             >
               <Sparkles className="h-6 w-6" />
             </Button>
@@ -141,14 +157,14 @@ export default function AIAssistantChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] bg-card rounded-2xl shadow-strong border border-border flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] glass-card rounded-2xl shadow-strong border-0 flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary to-primary-light text-primary-foreground">
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary to-accent text-white">
               <div className="flex items-center gap-2">
                 <Bot className="h-5 w-5" />
                 <div>
-                  <h3 className="font-semibold text-sm">Assistente IA</h3>
+                  <h3 className="font-semibold text-sm">Assistente Lumi</h3>
                   <p className="text-xs opacity-90">Gerenciamento por voz natural</p>
                 </div>
               </div>
@@ -156,7 +172,7 @@ export default function AIAssistantChat() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 text-primary-foreground hover:bg-white/20"
+                className="h-8 w-8 text-white hover:bg-white/20"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -166,10 +182,10 @@ export default function AIAssistantChat() {
             <ScrollArea className="flex-1 p-4" ref={scrollRef}>
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/20 flex items-center justify-center mb-4">
                     <MessageCircle className="h-8 w-8 text-primary" />
                   </div>
-                  <h4 className="font-semibold text-foreground mb-2">
+                  <h4 className="font-serif font-semibold text-foreground mb-2">
                     Olá! Como posso ajudar?
                   </h4>
                   <p className="text-sm text-muted-foreground mb-4">
@@ -208,7 +224,7 @@ export default function AIAssistantChat() {
                         className={cn(
                           "max-w-[85%] rounded-2xl px-4 py-2 text-sm",
                           message.role === 'user'
-                            ? 'bg-primary text-primary-foreground rounded-br-md'
+                            ? 'bg-gradient-to-r from-primary to-accent text-white rounded-br-md'
                             : 'bg-muted text-foreground rounded-bl-md'
                         )}
                       >
@@ -228,7 +244,7 @@ export default function AIAssistantChat() {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border/50">
               <div className="flex gap-2">
                 <Input
                   ref={inputRef}
@@ -237,13 +253,14 @@ export default function AIAssistantChat() {
                   onKeyDown={handleKeyDown}
                   placeholder="Digite sua mensagem..."
                   disabled={isLoading}
+                  maxLength={2000}
                   className="flex-1"
                 />
                 <Button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
                   size="icon"
-                  className="shrink-0"
+                  className="shrink-0 bg-gradient-to-r from-primary to-accent text-white"
                 >
                   <Send className="h-4 w-4" />
                 </Button>
