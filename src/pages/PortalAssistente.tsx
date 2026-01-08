@@ -10,6 +10,7 @@ import AssistantAgenda from "@/components/assistant-portal/AssistantAgenda";
 import AssistantTasks from "@/components/assistant-portal/AssistantTasks";
 import PremiumFeatureModal from "@/components/assistant-portal/PremiumFeatureModal";
 import UpgradeBanner from "@/components/assistant-portal/UpgradeBanner";
+import ConfirmationNotification from "@/components/assistant-portal/ConfirmationNotification";
 import { Loader2, Menu, User, Sparkles, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,6 +32,8 @@ const PortalAssistente = () => {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -49,6 +52,36 @@ const PortalAssistente = () => {
       fetchEvents();
     }
   }, [assistant, currentMonth]);
+
+  // Smart Tagging: Listen for real-time notifications
+  useEffect(() => {
+    if (!assistant) return;
+
+    const channel = supabase
+      .channel('assistant_notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'assistant_notifications',
+          filter: `assistant_id=eq.${assistant.id}`,
+        },
+        (payload) => {
+          if (payload.new.type === 'event_assigned') {
+            setConfirmationMessage('Você foi tagged em um novo evento! 🎉');
+            setShowConfirmation(true);
+            // Refresh events to show the new assignment
+            fetchEvents();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [assistant]);
 
   const fetchAssistantData = async () => {
     if (!user) return;
@@ -147,6 +180,11 @@ const PortalAssistente = () => {
       .order("event_date", { ascending: true });
 
     setEvents(eventsData || []);
+  };
+
+  const handleConfirmationComplete = () => {
+    setShowConfirmation(false);
+    setConfirmationMessage('');
   };
 
   const handleLogout = async () => {
@@ -301,6 +339,12 @@ const PortalAssistente = () => {
         featureName={selectedFeature}
         professionalName={professional?.name || "Profissional"}
         professionalPhone={professional?.phone}
+      />
+
+      <ConfirmationNotification
+        message={confirmationMessage}
+        isVisible={showConfirmation}
+        onComplete={handleConfirmationComplete}
       />
     </div>
   );

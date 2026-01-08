@@ -134,18 +134,18 @@ export function AssistantsPanelCard() {
                 </div>
                 <div className="flex items-center gap-2">
                   {assistant.is_registered ? (
-                    <Badge variant="secondary" className="bg-green-500/10 text-green-600">
-                      Registrada
-                    </Badge>
+                    <span className="lumi-badge-active">
+                      Ativa
+                    </span>
                   ) : (
                     <>
-                      <Badge variant="outline" className="text-amber-600 border-amber-300">
+                      <span className="lumi-badge-pending">
                         Pendente
-                      </Badge>
+                      </span>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
                         onClick={() => copyInviteLink(assistant)}
                       >
                         {copiedId === assistant.id ? (

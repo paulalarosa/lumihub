@@ -19,9 +19,13 @@ import {
   Zap,
   Sparkles
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform } from "framer-motion";
 
 const Home = () => {
+  // Parallax effect for hero image
+  const scrollY = useMotionValue(0);
+  const imageY = useTransform(scrollY, [0, 300], [0, 100]);
+  
   const features = [
     {
       icon: Users,
@@ -78,45 +82,50 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background page-transition">
+    <div className="min-h-screen bg-background page-transition" onScroll={(e) => scrollY.set((e.target as any).scrollTop)}>
       <Header />
       
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-24 lg:py-36">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
+      {/* Hero Section - Elite Lunar Design */}
+      <section className="relative overflow-hidden py-32 lg:py-48">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
+        <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+        
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="space-y-10"
+              className="space-y-12"
             >
-              <div className="space-y-6">
-                <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary font-medium text-sm">
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Ilumine sua carreira
+              <div className="space-y-8">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] font-medium text-xs tracking-widest uppercase">
+                  <Sparkles className="h-3 w-3 mr-2" />
+                  Elevação Visual
                 </div>
-                <h1 className="font-serif font-semibold text-5xl lg:text-7xl text-foreground leading-[1.1] tracking-tight">
-                  A plataforma que 
-                  <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent"> ilumina</span> sua carreira
+                <h1 className="hero-title text-6xl lg:text-8xl text-foreground leading-[0.95] mb-6">
+                  Lumi—
+                  <br />
+                  <span className="text-[hsl(var(--primary))]">Excelência</span>
+                  <br />
+                  em Arte
                 </h1>
-                <p className="text-xl text-muted-foreground leading-relaxed max-w-xl">
-                  Transforme a gestão do seu negócio de beleza em uma experiência 
-                  simples, elegante e automatizada. Brilhe como você merece.
+                <p className="hero-subtitle text-lg lg:text-xl text-[hsl(var(--muted-foreground))] leading-relaxed max-w-xl font-light">
+                  Uma plataforma minimalista e sofisticada para profissionais de beleza que entendem o valor da elegância. Transforme sua gestão em arte.
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-5 pt-4">
                 <Link to="/cadastro">
-                  <Button size="lg" className="w-full sm:w-auto glow-hover bg-gradient-to-r from-primary to-accent hover:from-primary-hover hover:to-accent-hover text-white border-0 text-lg px-8 py-6">
-                    Começar Grátis
-                    <ArrowRight className="h-5 w-5 ml-2" />
+                  <Button size="lg" className="w-full sm:w-auto button-glow bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-0 text-base px-8 py-6 rounded-[1rem] font-medium hover:bg-[hsl(var(--accent))]">
+                    Começar Agora
+                    <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </Link>
                 <Link to="/demo">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto text-lg px-8 py-6">
-                    Ver Demonstração
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto lumi-button-ghost text-base px-8 py-6">
+                    Ver Demo
                   </Button>
                 </Link>
               </div>
@@ -138,6 +147,7 @@ const Home = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
               className="relative"
+              style={{ y: imageY }}
             >
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-2xl" />
@@ -155,14 +165,20 @@ const Home = () => {
       {/* Features Section - Bento Grid */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-center mb-16 space-y-4"
+          >
             <h2 className="font-serif font-semibold text-4xl lg:text-5xl text-foreground">
               Tudo que você precisa
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Uma plataforma completa para transformar seu negócio de beleza.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
@@ -170,14 +186,19 @@ const Home = () => {
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.15 }}
+                viewport={{ once: true, margin: "-50px" }}
+                whileHover={{ y: -10, transition: { duration: 0.3 } }}
               >
                 <Card className="glass-card border-0 glow-hover h-full">
                   <CardContent className="p-8 space-y-4">
-                    <div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center">
+                    <motion.div 
+                      className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center"
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ type: "spring", stiffness: 400 }}
+                    >
                       <feature.icon className="h-7 w-7 text-primary" />
-                    </div>
+                    </motion.div>
                     <h3 className="font-serif font-semibold text-xl text-foreground">
                       {feature.title}
                     </h3>

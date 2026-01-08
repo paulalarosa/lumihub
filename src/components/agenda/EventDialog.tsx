@@ -22,11 +22,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  Palette, 
+import {
+  Calendar,
+  Clock,
+  Users,
+  Palette,
   Bell,
   Plus,
   Car,
@@ -39,6 +39,7 @@ import {
 import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
+import ConfirmationNotification from '@/components/assistant-portal/ConfirmationNotification';
 
 interface Event {
   id: string;
@@ -133,6 +134,7 @@ export default function EventDialog({
   // Quick create dialogs
   const [showQuickClient, setShowQuickClient] = useState(false);
   const [showQuickProject, setShowQuickProject] = useState(false);
+  const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
 
   // Form state
   const [title, setTitle] = useState('');
@@ -159,6 +161,8 @@ export default function EventDialog({
   const [projectId, setProjectId] = useState<string>('');
   const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
   const [reminderDays, setReminderDays] = useState<number[]>([1, 7]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [confirmationMessage, setConfirmationMessage] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -265,6 +269,11 @@ export default function EventDialog({
     }
   };
 
+  const handleConfirmationComplete = () => {
+    setShowConfirmation(false);
+    setConfirmationMessage('');
+  };
+
   const getSelectedAssistantNames = () => {
     return assistants.filter(a => selectedAssistants.includes(a.id));
   };
@@ -334,16 +343,49 @@ export default function EventDialog({
         }));
 
         await supabase.from('event_assistants').insert(assignments);
-        
-        // Create notifications for assigned assistants
+
+        // Smart Tagging: Create notifications and sync calendars
         const notifications = selectedAssistants.map(assistantId => ({
           assistant_id: assistantId,
           event_id: eventId,
           type: 'event_assigned',
           user_id: user.id
         }));
-        
+
         await supabase.from('assistant_notifications').insert(notifications);
+
+        // Sync to Google Calendar for each assistant (server-side)
+        try {
+          const eventData = {
+            title,
+            description,
+            event_date,
+            start_time,
+            end_time,
+            location: address,
+            assistants: selectedAssistants
+          };
+
+          // Call server function to sync calendars
+          await supabase.functions.invoke('google-calendar-sync', {
+            body: {
+              action: 'sync_event_to_assistants',
+              eventId,
+              eventData,
+              assistantIds: selectedAssistants
+            }
+          });
+        } catch (calendarError) {
+          console.warn('Calendar sync failed:', calendarError);
+          // Don't fail the whole operation if calendar sync fails
+        }
+
+        // Show confirmation notification for each tagged assistant
+        const taggedAssistants = assistants.filter(a => selectedAssistants.includes(a.id));
+        if (taggedAssistants.length > 0) {
+          setConfirmationMessage(`${taggedAssistants.length} assistente${taggedAssistants.length > 1 ? 's' : ''} ${taggedAssistants.length > 1 ? 'foram' : 'foi'} tagged${taggedAssistants.length > 1 ? 's' : ''} com sucesso!`);
+          setShowConfirmation(true);
+        }
       }
 
       toast({
@@ -372,7 +414,7 @@ export default function EventDialog({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(open) => { if (!open && isAutocompleteOpen) return; onOpenChange(open); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -537,21 +579,24 @@ export default function EventDialog({
 
             {/* Address with Google Maps Autocomplete */}
             <div className="space-y-2">
-              <Label className="flex items-center gap-2">
-                Endereço
+              <Label className="flex items-center gap-2 luxury-body">
+                📍 Localização
               </Label>
-              <AddressAutocomplete
-                value={address}
-                onChange={setAddress}
-                onCoordinatesChange={(lat, lng) => {
-                  setLatitude(lat);
-                  setLongitude(lng);
-                }}
-                placeholder="Digite o endereço completo..."
-                showMiniMap={true}
-                latitude={latitude}
-                longitude={longitude}
-              />
+              <div onClick={(e) => e.stopPropagation()}>
+                <AddressAutocomplete
+                  value={address}
+                  onChange={setAddress}
+                  onCoordinatesChange={(lat, lng) => {
+                    setLatitude(lat);
+                    setLongitude(lng);
+                  }}
+                  onFocus={() => setIsAutocompleteOpen(true)}
+                  onBlur={() => setIsAutocompleteOpen(false)}
+                  placeholder="Digite o endereço completo..."
+                  latitude={latitude}
+                  longitude={longitude}
+                />
+              </div>
             </div>
 
             {/* Client and Project with quick create */}
@@ -761,6 +806,12 @@ export default function EventDialog({
         onSuccess={handleProjectCreated}
         preselectedClientId={clientId}
         clients={clients}
+      />
+
+      <ConfirmationNotification
+        message={confirmationMessage}
+        isVisible={showConfirmation}
+        onComplete={handleConfirmationComplete}
       />
     </>
   );

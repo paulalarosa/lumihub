@@ -20,7 +20,7 @@ export default {
   	extend: {
   		fontFamily: {
   			serif: [
-  				'Merriweather',
+  				'Cormorant Garamond',
   				'ui-serif',
   				'Georgia',
   				'Cambria',
@@ -34,7 +34,7 @@ export default {
   				'sans-serif'
   			],
   			sans: [
-  				'Montserrat',
+  				'Inter',
   				'ui-sans-serif',
   				'system-ui',
   				'sans-serif',
@@ -111,6 +111,10 @@ export default {
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
   			}
+  		},
+  		lineHeight: {
+  			'relaxed': '1.75',
+  			'loose': '2',
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
