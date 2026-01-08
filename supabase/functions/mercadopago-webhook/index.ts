@@ -6,6 +6,65 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// HMAC-SHA256 signature validation for Mercado Pago webhooks
+async function validateSignature(
+  xSignature: string | null,
+  xRequestId: string | null,
+  dataId: string,
+  secret: string
+): Promise<boolean> {
+  if (!xSignature || !xRequestId) {
+    console.log('Missing signature headers');
+    return false;
+  }
+
+  try {
+    // Parse the x-signature header (format: "ts=...,v1=...")
+    const signatureParts: Record<string, string> = {};
+    xSignature.split(',').forEach(part => {
+      const [key, value] = part.split('=');
+      if (key && value) {
+        signatureParts[key.trim()] = value.trim();
+      }
+    });
+
+    const ts = signatureParts['ts'];
+    const v1 = signatureParts['v1'];
+
+    if (!ts || !v1) {
+      console.log('Invalid signature format');
+      return false;
+    }
+
+    // Build the manifest string as per Mercado Pago docs
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+    // Generate HMAC-SHA256
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+
+    const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(manifest));
+    const computedHash = Array.from(new Uint8Array(signature))
+      .map(b => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    const isValid = computedHash === v1;
+    if (!isValid) {
+      console.log('Signature mismatch');
+    }
+    return isValid;
+  } catch (error) {
+    console.error('Error validating signature:', error);
+    return false;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -15,6 +74,30 @@ serve(async (req) => {
   try {
     const body = await req.json();
     console.log('Mercado Pago webhook received:', JSON.stringify(body));
+
+    // Get signature headers
+    const xSignature = req.headers.get('x-signature');
+    const xRequestId = req.headers.get('x-request-id');
+
+    // Get the webhook secret for signature validation
+    const webhookSecret = Deno.env.get('MERCADO_PAGO_WEBHOOK_SECRET');
+    
+    // Validate signature if webhook secret is configured
+    if (webhookSecret) {
+      const dataId = body.data?.id?.toString() || '';
+      const isValid = await validateSignature(xSignature, xRequestId, dataId, webhookSecret);
+      
+      if (!isValid) {
+        console.error('Invalid webhook signature - rejecting request');
+        return new Response(JSON.stringify({ error: 'Invalid signature' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+      console.log('Webhook signature validated successfully');
+    } else {
+      console.warn('MERCADO_PAGO_WEBHOOK_SECRET not configured - skipping signature validation');
+    }
 
     // Mercado Pago sends notifications with different types
     if (body.type === 'payment') {
@@ -56,6 +139,16 @@ serve(async (req) => {
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
         );
 
+        // Validate the external_reference is a valid UUID format
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (!uuidRegex.test(paymentData.external_reference)) {
+          console.error('Invalid external_reference format:', paymentData.external_reference);
+          return new Response(JSON.stringify({ error: 'Invalid reference' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
         const { error } = await supabase
           .from('invoices')
           .update({ 
@@ -79,7 +172,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in mercadopago-webhook:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
