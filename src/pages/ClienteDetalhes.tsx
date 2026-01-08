@@ -18,7 +18,10 @@ import {
   Calendar,
   FileText,
   Plus,
-  Send
+  Send,
+  Trash2,
+  Tag,
+  StickyNote
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -130,6 +133,22 @@ export default function ClienteDetalhes() {
     } else {
       toast({ title: "Nota adicionada!" });
       setNewNote('');
+      fetchData();
+    }
+  };
+
+  const deleteInteraction = async (interactionId: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta nota?')) return;
+    
+    const { error } = await supabase
+      .from('client_interactions')
+      .delete()
+      .eq('id', interactionId);
+
+    if (error) {
+      toast({ title: "Erro ao excluir nota", variant: "destructive" });
+    } else {
+      toast({ title: "Nota excluída!" });
       fetchData();
     }
   };
@@ -313,17 +332,25 @@ export default function ClienteDetalhes() {
                         {interactions.map((interaction) => (
                           <div 
                             key={interaction.id}
-                            className="flex gap-3 p-4 border rounded-lg"
+                            className="flex gap-3 p-4 border rounded-lg group"
                           >
                             <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                              <MessageSquare className="h-4 w-4 text-primary" />
+                              <StickyNote className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex-1">
-                              <p className="text-sm">{interaction.content}</p>
+                              <p className="text-sm whitespace-pre-wrap">{interaction.content}</p>
                               <p className="text-xs text-muted-foreground mt-1">
                                 {format(new Date(interaction.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                               </p>
                             </div>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                              onClick={() => deleteInteraction(interaction.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         ))}
                       </div>

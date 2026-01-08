@@ -50,6 +50,7 @@ export default function Clientes() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loadingClients, setLoadingClients] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   
@@ -60,6 +61,9 @@ export default function Clientes() {
   const [instagram, setInstagram] = useState('');
   const [notes, setNotes] = useState('');
   const [tags, setTags] = useState('');
+
+  // Get all unique tags from clients
+  const allTags = [...new Set(clients.flatMap(c => c.tags || []))];
 
   useEffect(() => {
     if (!loading && !user) {
@@ -170,11 +174,17 @@ export default function Clientes() {
     }
   };
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone?.includes(searchTerm)
-  );
+  const filteredClients = clients.filter(client => {
+    const matchesSearch = 
+      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.phone?.includes(searchTerm) ||
+      client.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    
+    const matchesTag = !selectedTag || client.tags?.includes(selectedTag);
+    
+    return matchesSearch && matchesTag;
+  });
 
   if (loading) {
     return (
@@ -284,17 +294,40 @@ export default function Clientes() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Search */}
-        <div className="mb-6">
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Buscar clientes..."
+              placeholder="Buscar clientes por nome, email, telefone ou tag..."
               className="pl-10"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          
+          {/* Tag Filters */}
+          {allTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <Badge 
+                variant={selectedTag === null ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setSelectedTag(null)}
+              >
+                Todas
+              </Badge>
+              {allTags.map(tag => (
+                <Badge 
+                  key={tag}
+                  variant={selectedTag === tag ? "default" : "outline"}
+                  className="cursor-pointer"
+                  onClick={() => setSelectedTag(selectedTag === tag ? null : tag)}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Stats */}
