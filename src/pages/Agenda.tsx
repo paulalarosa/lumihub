@@ -29,7 +29,12 @@ interface Event {
   event_date: string;
   start_time: string | null;
   end_time: string | null;
+  arrival_time: string | null;
+  making_of_time: string | null;
+  ceremony_time: string | null;
+  advisory_time: string | null;
   location: string | null;
+  address: string | null;
   notes: string | null;
   color: string;
   client_id: string | null;
