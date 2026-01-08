@@ -20,7 +20,11 @@ import {
   Plus,
   Trash2,
   Edit,
-  GripVertical
+  GripVertical,
+  Wallet,
+  Building2,
+  QrCode,
+  Smartphone
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -45,6 +49,22 @@ interface Service {
   sort_order: number;
 }
 
+interface PaymentAccount {
+  id: string;
+  pix_key_type: string | null;
+  pix_key: string | null;
+  bank_name: string | null;
+  bank_code: string | null;
+  account_type: string | null;
+  agency: string | null;
+  account_number: string | null;
+  account_holder_name: string | null;
+  account_holder_document: string | null;
+  digital_wallet_type: string | null;
+  digital_wallet_account: string | null;
+  preferred_method: string;
+}
+
 export default function Configuracoes() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -52,8 +72,10 @@ export default function Configuracoes() {
   
   const [settings, setSettings] = useState<ProfessionalSettings | null>(null);
   const [services, setServices] = useState<Service[]>([]);
+  const [paymentAccount, setPaymentAccount] = useState<PaymentAccount | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingPayment, setSavingPayment] = useState(false);
   
   // Form state
   const [businessName, setBusinessName] = useState('');
@@ -70,6 +92,20 @@ export default function Configuracoes() {
   const [serviceDescription, setServiceDescription] = useState('');
   const [servicePrice, setServicePrice] = useState('');
   const [serviceDuration, setServiceDuration] = useState('');
+  
+  // Payment account form
+  const [pixKeyType, setPixKeyType] = useState('');
+  const [pixKey, setPixKey] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankCode, setBankCode] = useState('');
+  const [accountType, setAccountType] = useState('');
+  const [agency, setAgency] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountHolderName, setAccountHolderName] = useState('');
+  const [accountHolderDocument, setAccountHolderDocument] = useState('');
+  const [digitalWalletType, setDigitalWalletType] = useState('');
+  const [digitalWalletAccount, setDigitalWalletAccount] = useState('');
+  const [preferredMethod, setPreferredMethod] = useState('pix');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -111,6 +147,30 @@ export default function Configuracoes() {
       .order('sort_order');
     
     setServices(servicesData || []);
+    
+    // Fetch payment account
+    const { data: paymentData } = await supabase
+      .from('payment_accounts')
+      .select('*')
+      .eq('user_id', user!.id)
+      .maybeSingle();
+    
+    if (paymentData) {
+      setPaymentAccount(paymentData);
+      setPixKeyType(paymentData.pix_key_type || '');
+      setPixKey(paymentData.pix_key || '');
+      setBankName(paymentData.bank_name || '');
+      setBankCode(paymentData.bank_code || '');
+      setAccountType(paymentData.account_type || '');
+      setAgency(paymentData.agency || '');
+      setAccountNumber(paymentData.account_number || '');
+      setAccountHolderName(paymentData.account_holder_name || '');
+      setAccountHolderDocument(paymentData.account_holder_document || '');
+      setDigitalWalletType(paymentData.digital_wallet_type || '');
+      setDigitalWalletAccount(paymentData.digital_wallet_account || '');
+      setPreferredMethod(paymentData.preferred_method || 'pix');
+    }
+    
     setLoadingData(false);
   };
 
@@ -223,6 +283,38 @@ export default function Configuracoes() {
     }
   };
 
+  const savePaymentAccount = async () => {
+    setSavingPayment(true);
+    
+    const paymentData = {
+      user_id: user!.id,
+      pix_key_type: pixKeyType || null,
+      pix_key: pixKey.trim() || null,
+      bank_name: bankName.trim() || null,
+      bank_code: bankCode.trim() || null,
+      account_type: accountType || null,
+      agency: agency.trim() || null,
+      account_number: accountNumber.trim() || null,
+      account_holder_name: accountHolderName.trim() || null,
+      account_holder_document: accountHolderDocument.trim() || null,
+      digital_wallet_type: digitalWalletType || null,
+      digital_wallet_account: digitalWalletAccount.trim() || null,
+      preferred_method: preferredMethod
+    };
+
+    const { error } = await supabase
+      .from('payment_accounts')
+      .upsert(paymentData, { onConflict: 'user_id' });
+
+    if (error) {
+      console.error('Error saving payment account:', error);
+      toast({ title: "Erro ao salvar dados bancários", variant: "destructive" });
+    } else {
+      toast({ title: "Dados bancários salvos!" });
+    }
+    setSavingPayment(false);
+  };
+
   if (loading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -268,6 +360,10 @@ export default function Configuracoes() {
             <TabsTrigger value="servicos" className="gap-2">
               <Package className="h-4 w-4" />
               Serviços
+            </TabsTrigger>
+            <TabsTrigger value="financeiro" className="gap-2">
+              <Wallet className="h-4 w-4" />
+              Recebimentos
             </TabsTrigger>
             <TabsTrigger value="plano" className="gap-2">
               <CreditCard className="h-4 w-4" />
@@ -506,6 +602,217 @@ export default function Configuracoes() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* FINANCEIRO / RECEBIMENTOS */}
+          <TabsContent value="financeiro">
+            <div className="space-y-6">
+              {/* PIX */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <QrCode className="h-5 w-5" />
+                    Chave PIX
+                  </CardTitle>
+                  <CardDescription>
+                    Configure sua chave PIX para receber pagamentos instantâneos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tipo de Chave</Label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={pixKeyType}
+                        onChange={(e) => setPixKeyType(e.target.value)}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="cpf">CPF</option>
+                        <option value="cnpj">CNPJ</option>
+                        <option value="email">E-mail</option>
+                        <option value="phone">Telefone</option>
+                        <option value="random">Chave Aleatória</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Chave PIX</Label>
+                      <Input 
+                        value={pixKey}
+                        onChange={(e) => setPixKey(e.target.value)}
+                        placeholder={
+                          pixKeyType === 'cpf' ? '000.000.000-00' :
+                          pixKeyType === 'cnpj' ? '00.000.000/0000-00' :
+                          pixKeyType === 'email' ? 'email@exemplo.com' :
+                          pixKeyType === 'phone' ? '+55 11 99999-9999' :
+                          'Cole sua chave aleatória'
+                        }
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Conta Bancária */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Conta Bancária
+                  </CardTitle>
+                  <CardDescription>
+                    Dados para transferência bancária (TED/DOC)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nome do Banco</Label>
+                      <Input 
+                        value={bankName}
+                        onChange={(e) => setBankName(e.target.value)}
+                        placeholder="Ex: Banco do Brasil, Itaú, Nubank..."
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Código do Banco</Label>
+                      <Input 
+                        value={bankCode}
+                        onChange={(e) => setBankCode(e.target.value)}
+                        placeholder="Ex: 001, 341, 260..."
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label>Tipo de Conta</Label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={accountType}
+                        onChange={(e) => setAccountType(e.target.value)}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="checking">Conta Corrente</option>
+                        <option value="savings">Conta Poupança</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Agência</Label>
+                      <Input 
+                        value={agency}
+                        onChange={(e) => setAgency(e.target.value)}
+                        placeholder="0000"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Conta (com dígito)</Label>
+                      <Input 
+                        value={accountNumber}
+                        onChange={(e) => setAccountNumber(e.target.value)}
+                        placeholder="00000-0"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Nome do Titular</Label>
+                      <Input 
+                        value={accountHolderName}
+                        onChange={(e) => setAccountHolderName(e.target.value)}
+                        placeholder="Nome completo conforme conta"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>CPF/CNPJ do Titular</Label>
+                      <Input 
+                        value={accountHolderDocument}
+                        onChange={(e) => setAccountHolderDocument(e.target.value)}
+                        placeholder="000.000.000-00"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Conta Digital */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Smartphone className="h-5 w-5" />
+                    Conta Digital
+                  </CardTitle>
+                  <CardDescription>
+                    Configure sua conta digital para recebimentos (integração futura)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Plataforma</Label>
+                      <select
+                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        value={digitalWalletType}
+                        onChange={(e) => setDigitalWalletType(e.target.value)}
+                      >
+                        <option value="">Selecione...</option>
+                        <option value="mercado_pago">Mercado Pago</option>
+                        <option value="pagbank">PagBank</option>
+                        <option value="picpay">PicPay</option>
+                        <option value="nubank">Nubank</option>
+                        <option value="inter">Banco Inter</option>
+                        <option value="c6">C6 Bank</option>
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>E-mail ou ID da Conta</Label>
+                      <Input 
+                        value={digitalWalletAccount}
+                        onChange={(e) => setDigitalWalletAccount(e.target.value)}
+                        placeholder="email@exemplo.com"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Preferência de Recebimento */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Método Preferido de Recebimento</CardTitle>
+                  <CardDescription>
+                    Escolha como você prefere receber os pagamentos
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      { value: 'pix', label: 'PIX', icon: QrCode },
+                      { value: 'bank', label: 'Conta Bancária', icon: Building2 },
+                      { value: 'digital_wallet', label: 'Conta Digital', icon: Smartphone }
+                    ].map((method) => (
+                      <button
+                        key={method.value}
+                        type="button"
+                        onClick={() => setPreferredMethod(method.value)}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
+                          preferredMethod === method.value 
+                            ? 'border-primary bg-primary/10 text-primary' 
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <method.icon className="h-5 w-5" />
+                        {method.label}
+                      </button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Button onClick={savePaymentAccount} disabled={savingPayment} className="w-full">
+                <Save className="h-4 w-4 mr-2" />
+                {savingPayment ? 'Salvando...' : 'Salvar Dados Bancários'}
+              </Button>
+            </div>
           </TabsContent>
 
           {/* PLANO */}
