@@ -17,6 +17,7 @@ import ProjetoDetalhes from "./pages/ProjetoDetalhes";
 import Configuracoes from "./pages/Configuracoes";
 import PortalCliente from "./pages/PortalCliente";
 import PortalAssistente from "./pages/PortalAssistente";
+import AssistantInvite from "./pages/AssistantInvite";
 import Agenda from "./pages/Agenda";
 import Assistentes from "./pages/Assistentes";
 import NotFound from "./pages/NotFound";
@@ -54,6 +55,7 @@ const App = () => (
             
             {/* Assistant Portal */}
             <Route path="/assistente" element={<PortalAssistente />} />
+            <Route path="/assistente/convite/:token" element={<AssistantInvite />} />
             
             {/* Public Client Portal */}
             <Route path="/portal/:token" element={<PortalCliente />} />
