@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { MapPin, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -13,29 +14,52 @@ interface AddressAutocompleteProps {
 
 // Singleton para carregar o script uma única vez
 let googleMapsPromise: Promise<void> | null = null;
+let cachedApiKey: string | null = null;
+
+async function fetchApiKey(): Promise<string> {
+  if (cachedApiKey) return cachedApiKey;
+  
+  // Primeiro tenta a variável de ambiente
+  const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+  if (envKey) {
+    cachedApiKey = envKey;
+    return envKey;
+  }
+  
+  // Se não existir, busca da edge function
+  const { data, error } = await supabase.functions.invoke('get-maps-key');
+  
+  if (error || !data?.apiKey) {
+    throw new Error("Google Maps API Key não configurada");
+  }
+  
+  cachedApiKey = data.apiKey;
+  return data.apiKey;
+}
 
 function loadGoogleMaps(): Promise<void> {
   if (googleMapsPromise) return googleMapsPromise;
-  
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) {
-    return Promise.reject(new Error("Google Maps API Key não configurada"));
-  }
 
-  googleMapsPromise = new Promise((resolve, reject) => {
-    // Check if already loaded
-    if (window.google?.maps?.places) {
-      resolve();
-      return;
+  googleMapsPromise = new Promise(async (resolve, reject) => {
+    try {
+      // Check if already loaded
+      if (window.google?.maps?.places) {
+        resolve();
+        return;
+      }
+
+      const apiKey = await fetchApiKey();
+      
+      const script = document.createElement("script");
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error("Falha ao carregar Google Maps"));
+      document.head.appendChild(script);
+    } catch (error) {
+      reject(error);
     }
-
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Falha ao carregar Google Maps"));
-    document.head.appendChild(script);
   });
 
   return googleMapsPromise;
@@ -54,17 +78,13 @@ export function AddressAutocomplete({
   const [isApiLoaded, setIsApiLoaded] = useState(false);
 
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-    console.log('Maps API Key exists:', !!apiKey);
-    
     loadGoogleMaps()
       .then(() => {
-        console.log('Maps Loaded: true');
+        console.log('Google Maps carregado com sucesso');
         setIsApiLoaded(true);
         setIsLoading(false);
       })
       .catch((err) => {
-        console.log('Maps Loaded: false');
         console.warn("Google Maps não disponível:", err.message);
         setIsLoading(false);
       });
