@@ -234,10 +234,13 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
             {/* Address with GPS link */}
             {displayAddress && (
               <button
-                onClick={handleOpenMaps}
-                className="flex items-center gap-1.5 mt-3 text-sm text-primary hover:underline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenMaps();
+                }}
+                className="flex items-center gap-1.5 mt-3 text-sm text-primary hover:underline text-left"
               >
-                <Navigation className="h-3.5 w-3.5" />
+                <Navigation className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="truncate">{displayAddress}</span>
               </button>
             )}
