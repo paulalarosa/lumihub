@@ -194,6 +194,18 @@ export default function Admin() {
       ]
     },
     {
+      category: "Agenda & Calendário",
+      items: [
+        { name: "Visualização de agenda (mês/dia/ano)", status: "pending" },
+        { name: "Eventos com detalhes (local, nome, data, hora)", status: "pending" },
+        { name: "Tags para assistentes nos eventos", status: "pending" },
+        { name: "Sincronização automática de agenda", status: "pending" },
+        { name: "Notificações recorrentes", status: "pending" },
+        { name: "Conta de assistente (acesso limitado)", status: "pending" },
+        { name: "Acesso completo para assistentes (pago)", status: "pending" }
+      ]
+    },
+    {
       category: "Configurações",
       items: [
         { name: "Perfil da maquiadora", status: "done" },
