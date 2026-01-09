@@ -5,84 +5,50 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
 import heroFallback from "@/assets/hero-beauty.jpg";
-import { 
-  Users, 
-  Calendar, 
-  CreditCard, 
-  Palette, 
-  FileText, 
-  BarChart3,
-  CheckCircle,
-  ArrowRight,
-  Star,
-  Shield,
-  Zap,
-  Sparkles
-} from "lucide-react";
+import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle, ArrowRight, Star, Shield, Zap, Sparkles } from "lucide-react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
-
 const Home = () => {
   // Parallax effect for hero image
   const scrollY = useMotionValue(0);
   const imageY = useTransform(scrollY, [0, 300], [0, 100]);
-  
-  const features = [
-    {
-      icon: Users,
-      title: "CRM Completo",
-      description: "Gerencie clientes, histórico e anotações em um só lugar"
-    },
-    {
-      icon: Calendar,
-      title: "Gestão de Projetos",
-      description: "Organize cada evento com checklists e cronogramas"
-    },
-    {
-      icon: Palette,
-      title: "Moodboard Interativo",
-      description: "Colabore com clientes em referências visuais"
-    },
-    {
-      icon: FileText,
-      title: "Contratos Automáticos",
-      description: "Gere contratos profissionais em minutos"
-    },
-    {
-      icon: CreditCard,
-      title: "Pagamentos Integrados",
-      description: "Receba via Pix e cartão com split automático"
-    },
-    {
-      icon: BarChart3,
-      title: "Relatórios Financeiros",
-      description: "Acompanhe sua receita e crescimento"
-    }
-  ];
-
-  const benefits = [
-    "Economize 10+ horas por semana em tarefas administrativas",
-    "Aumente sua receita com processos profissionais",
-    "Ofereça experiência premium para suas clientes",
-    "Organize completamente seu negócio"
-  ];
-
-  const testimonials = [
-    {
-      name: "Maria Silva",
-      role: "Maquiadora Especialista em Noivas",
-      content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!",
-      rating: 5
-    },
-    {
-      name: "Ana Costa",
-      role: "Maquiadora & Beauty Artist",
-      content: "O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicação.",
-      rating: 5
-    }
-  ];
-
-  return (
-    <div className="min-h-screen bg-background page-transition" onScroll={(e) => scrollY.set((e.target as any).scrollTop)}>
+  const features = [{
+    icon: Users,
+    title: "CRM Completo",
+    description: "Gerencie clientes, histórico e anotações em um só lugar"
+  }, {
+    icon: Calendar,
+    title: "Gestão de Projetos",
+    description: "Organize cada evento com checklists e cronogramas"
+  }, {
+    icon: Palette,
+    title: "Moodboard Interativo",
+    description: "Colabore com clientes em referências visuais"
+  }, {
+    icon: FileText,
+    title: "Contratos Automáticos",
+    description: "Gere contratos profissionais em minutos"
+  }, {
+    icon: CreditCard,
+    title: "Pagamentos Integrados",
+    description: "Receba via Pix e cartão com split automático"
+  }, {
+    icon: BarChart3,
+    title: "Relatórios Financeiros",
+    description: "Acompanhe sua receita e crescimento"
+  }];
+  const benefits = ["Economize 10+ horas por semana em tarefas administrativas", "Aumente sua receita com processos profissionais", "Ofereça experiência premium para suas clientes", "Organize completamente seu negócio"];
+  const testimonials = [{
+    name: "Maria Silva",
+    role: "Maquiadora Especialista em Noivas",
+    content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!",
+    rating: 5
+  }, {
+    name: "Ana Costa",
+    role: "Maquiadora & Beauty Artist",
+    content: "O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicação.",
+    rating: 5
+  }];
+  return <div className="min-h-screen bg-background page-transition" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
       <Header />
       
       {/* Hero Section - Elite Lunar Design */}
@@ -93,12 +59,15 @@ const Home = () => {
         
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-12"
-            >
+            <motion.div initial={{
+            opacity: 0,
+            y: 40
+          }} animate={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.8
+          }} className="space-y-12">
               <div className="space-y-8">
                 <div className="inline-flex items-center px-4 py-2 rounded-full bg-[hsl(var(--muted))] text-[hsl(var(--muted-foreground))] font-medium text-xs tracking-widest uppercase">
                   <Sparkles className="h-3 w-3 mr-2" />
@@ -142,23 +111,23 @@ const Home = () => {
               </div>
             </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-              style={{ y: imageY }}
-            >
+            <motion.div initial={{
+            opacity: 0,
+            scale: 0.95
+          }} animate={{
+            opacity: 1,
+            scale: 1
+          }} transition={{
+            duration: 0.8,
+            delay: 0.2
+          }} className="relative" style={{
+            y: imageY
+          }}>
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-2xl" />
-                <img 
-                  src={'/assets/image_7.png'} 
-                  alt="Imagem hero: maquiagem clean girl com produtos prateados sobre vidro" 
-                  loading="eager"
-                  decoding="async"
-                  className="relative rounded-3xl shadow-strong w-full h-auto object-cover"
-                  onError={(e) => { (e.target as HTMLImageElement).src = heroFallback; }}
-                />
+                <img alt="Imagem hero: maquiagem clean girl com produtos prateados sobre vidro" loading="eager" decoding="async" className="relative rounded-3xl shadow-strong w-full h-auto object-cover" onError={e => {
+                (e.target as HTMLImageElement).src = heroFallback;
+              }} src="/lovable-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png" />
               </div>
             </motion.div>
           </div>
@@ -168,13 +137,17 @@ const Home = () => {
       {/* Features Section - Bento Grid */}
       <section className="py-24 bg-muted/30">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-16 space-y-4"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 40
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} viewport={{
+          once: true
+        }} transition={{
+          duration: 0.8
+        }} className="text-center mb-16 space-y-4">
             <h2 className="font-serif font-semibold text-4xl lg:text-5xl text-foreground">
               Tudo que você precisa
             </h2>
@@ -184,22 +157,33 @@ const Home = () => {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -10, transition: { duration: 0.3 } }}
-              >
+            {features.map((feature, index) => <motion.div key={index} initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.5,
+            delay: index * 0.15
+          }} viewport={{
+            once: true,
+            margin: "-50px"
+          }} whileHover={{
+            y: -10,
+            transition: {
+              duration: 0.3
+            }
+          }}>
                 <Card className="glass-card border-0 glow-hover h-full">
                   <CardContent className="p-8 space-y-4">
-                    <motion.div 
-                      className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center"
-                      whileHover={{ scale: 1.1, rotate: 5 }}
-                      transition={{ type: "spring", stiffness: 400 }}
-                    >
+                    <motion.div className="w-14 h-14 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center" whileHover={{
+                  scale: 1.1,
+                  rotate: 5
+                }} transition={{
+                  type: "spring",
+                  stiffness: 400
+                }}>
                       <feature.icon className="h-7 w-7 text-primary" />
                     </motion.div>
                     <h3 className="font-serif font-semibold text-xl text-foreground">
@@ -210,8 +194,7 @@ const Home = () => {
                     </p>
                   </CardContent>
                 </Card>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </div>
         </div>
       </section>
@@ -231,21 +214,23 @@ const Home = () => {
               </div>
 
               <div className="space-y-5">
-                {benefits.map((benefit, index) => (
-                  <motion.div 
-                    key={index} 
-                    className="flex items-start space-x-4"
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                  >
+                {benefits.map((benefit, index) => <motion.div key={index} className="flex items-start space-x-4" initial={{
+                opacity: 0,
+                x: -20
+              }} whileInView={{
+                opacity: 1,
+                x: 0
+              }} transition={{
+                duration: 0.5,
+                delay: index * 0.1
+              }} viewport={{
+                once: true
+              }}>
                     <div className="w-6 h-6 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <CheckCircle className="h-4 w-4 text-success" />
                     </div>
                     <span className="text-foreground font-medium text-lg">{benefit}</span>
-                  </motion.div>
-                ))}
+                  </motion.div>)}
               </div>
 
               <Link to="/recursos">
@@ -258,31 +243,27 @@ const Home = () => {
 
             {/* Stats Bento Grid */}
             <div className="grid grid-cols-2 gap-4">
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="glass-card rounded-2xl p-8 text-center"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="glass-card rounded-2xl p-8 text-center">
                 <div className="text-4xl font-serif font-bold text-primary mb-2">10+</div>
                 <div className="text-sm text-muted-foreground">Horas economizadas por semana</div>
               </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="glass-card rounded-2xl p-8 text-center"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="glass-card rounded-2xl p-8 text-center">
                 <div className="text-4xl font-serif font-bold text-accent mb-2">40%</div>
                 <div className="text-sm text-muted-foreground">Aumento médio na receita</div>
               </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="glass-card rounded-2xl p-8 text-center"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="glass-card rounded-2xl p-8 text-center">
                 <div className="text-4xl font-serif font-bold text-success mb-2">98%</div>
                 <div className="text-sm text-muted-foreground">Satisfação das clientes</div>
               </motion.div>
-              <motion.div 
-                whileHover={{ scale: 1.02 }}
-                className="glass-card rounded-2xl p-8 text-center"
-              >
+              <motion.div whileHover={{
+              scale: 1.02
+            }} className="glass-card rounded-2xl p-8 text-center">
                 <div className="text-4xl font-serif font-bold text-primary mb-2">24/7</div>
                 <div className="text-sm text-muted-foreground">Suporte disponível</div>
               </motion.div>
@@ -304,20 +285,22 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
+            {testimonials.map((testimonial, index) => <motion.div key={index} initial={{
+            opacity: 0,
+            y: 20
+          }} whileInView={{
+            opacity: 1,
+            y: 0
+          }} transition={{
+            duration: 0.5,
+            delay: index * 0.1
+          }} viewport={{
+            once: true
+          }}>
                 <Card className="glass-card border-0 p-8">
                   <div className="space-y-6">
                     <div className="flex items-center space-x-1">
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <Star key={i} className="h-5 w-5 fill-accent text-accent" />
-                      ))}
+                      {[...Array(testimonial.rating)].map((_, i) => <Star key={i} className="h-5 w-5 fill-accent text-accent" />)}
                     </div>
                     <blockquote className="text-lg text-foreground italic leading-relaxed">
                       "{testimonial.content}"
@@ -328,8 +311,7 @@ const Home = () => {
                     </div>
                   </div>
                 </Card>
-              </motion.div>
-            ))}
+              </motion.div>)}
           </div>
         </div>
       </section>
@@ -353,13 +335,17 @@ const Home = () => {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent opacity-95" />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto space-y-10"
-          >
+          <motion.div initial={{
+          opacity: 0,
+          y: 20
+        }} whileInView={{
+          opacity: 1,
+          y: 0
+        }} transition={{
+          duration: 0.6
+        }} viewport={{
+          once: true
+        }} className="max-w-3xl mx-auto space-y-10">
             <div className="space-y-6">
               <h2 className="font-serif font-semibold text-4xl lg:text-5xl text-white">
                 Pronta para brilhar?
@@ -392,8 +378,6 @@ const Home = () => {
       </section>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Home;
