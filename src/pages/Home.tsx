@@ -4,6 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
+import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { FloatingGlassShapes } from "@/components/animations/FloatingGlassShapes";
+import { CountUp } from "@/components/animations/CountUp";
+import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerAnimation";
+import { MagneticButton } from "@/components/animations/MagneticButton";
+import { useScroll, useParallax } from "@/hooks/useScroll";
 import heroFallback from "@/assets/hero-beauty.jpg";
 import { 
   Users, 
@@ -19,12 +26,22 @@ import {
   Zap,
   Sparkles
 } from "lucide-react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
+import { useEffect } from "react";
 
 const Home = () => {
-  // Parallax effect for hero image
-  const scrollY = useMotionValue(0);
-  const imageY = useTransform(scrollY, [0, 300], [0, 100]);
+  // Scroll animations
+  const { scrollY } = useScroll();
+  const imageY = useParallax(scrollY, [0, 500], [0, 150]);
+  
+  // Update scroll when window scrolls
+  useEffect(() => {
+    const handleScroll = () => {
+      // The hook handles this automatically
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
   
   const features = [
     {
@@ -87,6 +104,7 @@ const Home = () => {
       
       {/* Hero Section - Elite Lunar Design */}
       <section className="relative overflow-hidden py-32 lg:py-48">
+        <FloatingGlassShapes />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/3 via-transparent to-accent/3" />
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
@@ -117,17 +135,17 @@ const Home = () => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-5 pt-4">
-                <Link to="/cadastro">
+                <MagneticButton href="/cadastro" strength={0.35}>
                   <Button size="lg" className="w-full sm:w-auto button-glow bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] border-0 text-base px-8 py-6 rounded-[1rem] font-medium hover:bg-[hsl(var(--accent))]">
                     Começar Agora
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
-                </Link>
-                <Link to="/demo">
+                </MagneticButton>
+                <MagneticButton href="/demo" strength={0.35}>
                   <Button variant="outline" size="lg" className="w-full sm:w-auto lumi-button-ghost text-base px-8 py-6">
                     Ver Demo
                   </Button>
-                </Link>
+                </MagneticButton>
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-muted-foreground">
@@ -183,16 +201,9 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <StaggerContainer staggerChildren={0.1} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.15 }}
-                viewport={{ once: true, margin: "-50px" }}
-                whileHover={{ y: -10, transition: { duration: 0.3 } }}
-              >
+              <StaggerItem key={index}>
                 <Card className="glass-card border-0 glow-hover h-full">
                   <CardContent className="p-8 space-y-4">
                     <motion.div 
@@ -210,25 +221,26 @@ const Home = () => {
                     </p>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* Benefits Section */}
-      <section className="py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-10">
-              <div className="space-y-4">
-                <h2 className="font-serif font-semibold text-4xl lg:text-5xl text-foreground">
-                  Por que escolher a Lumi?
-                </h2>
-                <p className="text-xl text-muted-foreground">
-                  Mais de 1.000 profissionais já transformaram seus negócios.
-                </p>
-              </div>
+      <ErrorBoundary sectionName="Benefits Section - Why Choose Lumi">
+        <section className="py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-10">
+                <div className="space-y-4">
+                  <h2 className="font-serif font-semibold text-4xl lg:text-5xl text-foreground">
+                    Por que escolher a Lumi?
+                  </h2>
+                  <p className="text-xl text-muted-foreground">
+                    Mais de 1.000 profissionais já transformaram seus negócios.
+                  </p>
+                </div>
 
               <div className="space-y-5">
                 {benefits.map((benefit, index) => (
@@ -262,21 +274,27 @@ const Home = () => {
                 whileHover={{ scale: 1.02 }}
                 className="glass-card rounded-2xl p-8 text-center"
               >
-                <div className="text-4xl font-serif font-bold text-primary mb-2">10+</div>
+                <div className="text-4xl font-serif font-bold text-primary mb-2">
+                  <CountUp to={10} suffix="+" duration={2.5} />
+                </div>
                 <div className="text-sm text-muted-foreground">Horas economizadas por semana</div>
               </motion.div>
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 className="glass-card rounded-2xl p-8 text-center"
               >
-                <div className="text-4xl font-serif font-bold text-accent mb-2">40%</div>
+                <div className="text-4xl font-serif font-bold text-accent mb-2">
+                  <CountUp to={40} suffix="%" duration={2.5} />
+                </div>
                 <div className="text-sm text-muted-foreground">Aumento médio na receita</div>
               </motion.div>
               <motion.div 
                 whileHover={{ scale: 1.02 }}
                 className="glass-card rounded-2xl p-8 text-center"
               >
-                <div className="text-4xl font-serif font-bold text-success mb-2">98%</div>
+                <div className="text-4xl font-serif font-bold text-success mb-2">
+                  <CountUp to={98} suffix="%" duration={2.5} />
+                </div>
                 <div className="text-sm text-muted-foreground">Satisfação das clientes</div>
               </motion.div>
               <motion.div 
@@ -290,6 +308,7 @@ const Home = () => {
           </div>
         </div>
       </section>
+      </ErrorBoundary>
 
       {/* Testimonials */}
       <section className="py-24 bg-muted/30">
@@ -392,6 +411,7 @@ const Home = () => {
       </section>
 
       <Footer />
+      <AIAssistantFAB />
     </div>
   );
 };

@@ -55,7 +55,7 @@ export default function Dashboard() {
         
         // Get clients count
         const { count: clientCount, error: clientError } = await supabase
-          .from('clientes')
+          .from('clients')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', user.id);
         
@@ -69,14 +69,15 @@ export default function Dashboard() {
         
         if (!projectError && projectCount !== null) setProjectsCount(projectCount);
         
-        // Get total revenue from payments
-        const { data: payments, error: revenueError } = await supabase
-          .from('payments')
+        // Get total revenue from invoices
+        const { data: invoices, error: revenueError } = await supabase
+          .from('invoices')
           .select('amount')
-          .eq('user_id', user.id)
-          .eq('status', 'completed');
+          .eq('user_id', user.id);
         
-        if (!revenueError && payments) {
+        const payments = invoices || [];
+        
+        if (!revenueError && payments && Array.isArray(payments)) {
           const total = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
           setTotalRevenue(total);
         }
@@ -176,7 +177,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div data-theme="light" className="min-h-screen bg-background overflow-hidden">
+    <div data-theme="light" className="dashboard-root min-h-screen bg-background overflow-hidden">
       {/* Header Ultra Luxury */}
       <motion.header
         initial={{ y: -100, opacity: 0 }}

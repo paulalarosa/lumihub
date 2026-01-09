@@ -7,6 +7,8 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Home from "./pages/Home";
 import Recursos from "./pages/Recursos";
 import Planos from "./pages/Planos";
+import Blog from "./pages/Blog";
+import BlogArticle from "./pages/BlogArticle";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
@@ -19,6 +21,7 @@ import PortalCliente from "./pages/PortalCliente";
 import PortalAssistente from "./pages/PortalAssistente";
 import AssistantInvite from "./pages/AssistantInvite";
 import Agenda from "./pages/Agenda";
+import Contact from "./pages/Contact";
 import Assistentes from "./pages/Assistentes";
 import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
@@ -37,6 +40,8 @@ const App = () => (
             <Route path="/" element={<Home />} />
             <Route path="/recursos" element={<Recursos />} />
             <Route path="/planos" element={<Planos />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogArticle />} />
             
             {/* Auth */}
             <Route path="/auth" element={<Auth />} />
@@ -51,6 +56,7 @@ const App = () => (
             <Route path="/projetos/:id" element={<ProjetoDetalhes />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/agenda" element={<Agenda />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/assistentes" element={<Assistentes />} />
             
             {/* Assistant Portal */}
