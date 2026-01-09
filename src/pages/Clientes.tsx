@@ -202,7 +202,7 @@ export default function Clientes() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div data-theme="light" className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">

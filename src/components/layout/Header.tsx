@@ -1,10 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sun, Moon } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    // default to light
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('lumi_theme') : null;
+    if (stored === 'dark') {
+      setTheme('dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      setTheme('light');
+      document.documentElement.removeAttribute('data-theme');
+      localStorage.setItem('lumi_theme', 'light');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    if (next === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+    localStorage.setItem('lumi_theme', next);
+  };
 
   const navigation = [
     { name: "Recursos", href: "/recursos" },
@@ -42,6 +67,15 @@ const Header = () => {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-4">
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              aria-label="Alternar tema claro/escuro"
+              className="p-2 rounded-lg hover:bg-muted transition-colors"
+              title="Alternar tema"
+            >
+              {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />} 
+            </button>
             <Link to="/auth">
               <Button variant="ghost" className="text-muted-foreground hover:text-foreground">
                 Entrar
@@ -82,6 +116,15 @@ const Header = () => {
                 </Link>
               ))}
               <div className="flex flex-col space-y-3 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-center py-2">
+                  <button
+                    onClick={() => { toggleTheme(); setIsMenuOpen(false); }}
+                    aria-label="Alternar tema"
+                    className="p-2 rounded-lg hover:bg-muted transition-colors"
+                  >
+                    {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                  </button>
+                </div>
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                   <Button variant="outline" className="w-full">
                     Entrar

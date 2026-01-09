@@ -212,7 +212,7 @@ export default function Agenda() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div data-theme="light" className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="border-b border-border bg-card shrink-0">
         <div className="container mx-auto px-4 py-4">

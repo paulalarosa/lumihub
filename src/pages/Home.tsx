@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
-import heroImage from "@/assets/hero-beauty.jpg";
+import heroFallback from "@/assets/hero-beauty.jpg";
 import { 
   Users, 
   Calendar, 
@@ -152,9 +152,12 @@ const Home = () => {
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-3xl blur-2xl" />
                 <img 
-                  src={heroImage} 
-                  alt="Ferramentas profissionais de maquiagem organizadas elegantemente" 
-                  className="relative rounded-3xl shadow-strong w-full h-auto"
+                  src={'/assets/image_7.png'} 
+                  alt="Imagem hero: maquiagem clean girl com produtos prateados sobre vidro" 
+                  loading="eager"
+                  decoding="async"
+                  className="relative rounded-3xl shadow-strong w-full h-auto object-cover"
+                  onError={(e) => { (e.target as HTMLImageElement).src = heroFallback; }}
                 />
               </div>
             </motion.div>

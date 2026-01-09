@@ -1,106 +1,135 @@
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap");
-@import url('https://cdn.jsdelivr.net/npm/@geist-ui/icons@1.0.3/package.json');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Lumi Design System - Paleta Lunar Neutra 2026 */
+/* Lumi Design System - Light (default) + Dark theme toggle via [data-theme="dark"] */
 
 @layer base {
   :root {
-    /* Lunar Neutral Palette */
-    --background: 0 0% 7%; /* Cinza Profundo #121214 */
-    --foreground: 0 0% 95%; /* Branco Titânio #F2F2F7 */
+    /* Light Mode - Default (High-ticket, minimal, metallic/silver accents) */
+    --background: 0 0% 100%; /* White */
+    --surface: 0 0% 100%; /* Cards / Sidebar */
+    --surface-border: 0 0% 90%; /* #E5E7EB */
+    --foreground: 217 8% 11%; /* #111827 charcoal text */
 
-    --card: 0 0% 12%; /* Cinza Grafite #1E1E22 */
-    --card-foreground: 0 0% 95%;
+    --muted: 220 12% 58%; /* ~#6B7280 */
+    --muted-foreground: 210 8% 64%; /* ~#9CA3AF */
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 95%;
+    --primary: 210 4% 84%; /* metallic-silver base (used subtly) */
+    --primary-foreground: 217 8% 11%;
 
-    --primary: 0 0% 62%; /* Prata Acetinada #9D9DA2 */
-    --primary-foreground: 0 0% 7%;
+    --accent: 210 6% 76%;
+    --accent-foreground: 217 8% 11%;
 
-    --secondary: 0 0% 18%; /* Cinza Médio #2D2D32 */
-    --secondary-foreground: 0 0% 95%;
+    --glass-bg: rgba(255,255,255,0.6);
+    --glass-border: rgba(156,163,175,0.18); /* subtle silver */
+    --glass-shadow: 0 8px 24px rgba(16,24,40,0.06);
 
-    --muted: 0 0% 25%; /* Cinza Suave #404045 */
-    --muted-foreground: 0 0% 75%; /* Cinza Prateado #C0C0C5 */
+    /* metallic highlight */
+    --metallic: 210 4% 78%; /* silver-ish */
 
-    --accent: 0 0% 68%; /* Prata Brilho #ACACB0 */
-    --accent-foreground: 0 0% 7%;
+    --border: 0 0% 90%;
+    --input: 0 0% 98%;
+    --ring: 210 8% 85%;
 
-    --destructive: 0 72% 50%;
-    --destructive-foreground: 0 0% 95%;
+    --radius: 1rem;
+    --radius-button: 0.75rem;
 
-    --success: 120 50% 55%;
-    --success-foreground: 0 0% 7%;
-
-    --warning: 38 80% 50%;
-    --warning-foreground: 0 0% 7%;
-
-    --border: 0 0% 20%; /* Borda Sutil */
-    --input: 0 0% 15%;
-    --ring: 0 0% 62%;
-
-    --radius: 2rem; /* 32px */
-    --radius-button: 1rem; /* 16px */
-
-    --sidebar: 0 0% 10%;
     --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
-    --font-serif: 'Cormorant Garamond', ui-serif, Georgia, Cambria, Times New Roman, Times, serif;
-    --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+    --font-serif: 'Cormorant Garamond', ui-serif, Georgia, serif;
+    --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+  }
 
-    /* Glassmorphism */
-    --glass-bg: rgba(30, 30, 34, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.05);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  /* Dark theme variables applied when html[data-theme="dark"] */
+  html[data-theme="dark"] {
+    --background: 0 0% 7%; /* #121212 */
+    --surface: 230 6% 12%; /* #1E1E24 */
+    --surface-border: 0 0% 15%;
+    --foreground: 0 0% 95%; /* #F3F4F6 */
 
-    /* Shadows */
-    --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.15);
-    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.3);
+    --muted: 0 0% 25%;
+    --muted-foreground: 0 0% 70%;
+
+    --primary: 0 0% 62%;
+    --primary-foreground: 0 0% 95%;
+
+    --glass-bg: rgba(30,30,34,0.45);
+    --glass-border: rgba(255,255,255,0.04);
+    --glass-shadow: 0 8px 32px rgba(0,0,0,0.4);
   }
 }
 
 @layer components {
   /* Base Card Styling */
   .lumi-card {
-    @apply bg-[hsl(var(--card))] border border-[rgba(255,255,255,0.05)] rounded-[2rem] shadow-sm;
+    background: hsl(var(--surface));
+    border: 1px solid hsl(var(--surface-border));
+    border-radius: var(--radius);
+    box-shadow: var(--glass-shadow);
   }
 
   /* Typography */
   .lumi-title {
-    @apply font-serif font-light tracking-[-0.02em] text-[hsl(var(--foreground))];
+    font-family: var(--font-serif);
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: hsl(var(--foreground));
   }
 
   .lumi-text {
-    @apply font-sans font-light text-[hsl(var(--foreground))];
+    font-family: var(--font-sans);
+    font-weight: 300;
+    color: hsl(var(--foreground));
   }
 
   .lumi-label {
-    @apply font-sans font-medium text-xs tracking-wide text-[hsl(var(--muted-foreground))];
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: hsl(var(--muted-foreground));
   }
 
   /* Buttons */
   .lumi-button {
-    @apply px-6 py-2 rounded-[1rem] font-sans font-medium bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] hover:bg-[hsl(var(--accent))] transition-all duration-300 shadow-sm;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-button);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    transition: all 200ms ease;
+    box-shadow: 0 6px 18px rgba(16,24,40,0.04);
   }
 
   .lumi-button-ghost {
-    @apply px-4 py-2 rounded-[1rem] font-sans font-medium text-[hsl(var(--foreground))] border border-[rgba(255,255,255,0.1)] hover:bg-[hsl(var(--muted))] transition-all duration-300;
+    padding: 0.45rem 1rem;
+    border-radius: var(--radius-button);
+    font-weight: 600;
+    color: hsl(var(--foreground));
+    border: 1px solid rgba(0,0,0,0.04);
   }
 
-  /* Glass Effect */
   .glass-panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     border: 1px solid var(--glass-border);
-    box-shadow: var(--glass-shadow);
   }
+
+  /* subtle metallic divider used on headers and card accents */
+  .metallic-divider {
+    border-top: 1px solid hsl(var(--metallic) / 0.22);
+  }
+
+  /* ensure internal cards read as pure white in light mode */
+  html:not([data-theme="dark"]) .lumi-card {
+    background: hsl(var(--surface));
+    color: hsl(var(--foreground));
+  }
+  
 
   /* Badge */
   .lumi-badge {

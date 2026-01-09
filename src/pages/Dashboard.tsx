@@ -176,7 +176,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div data-theme="light" className="min-h-screen bg-background overflow-hidden">
       {/* Header Ultra Luxury */}
       <motion.header
         initial={{ y: -100, opacity: 0 }}
