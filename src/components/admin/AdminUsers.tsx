@@ -4,17 +4,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, LogIn } from 'lucide-react';
+import { UserRoleRecord } from '@/types/database';
 
-interface User {
-  id: string;
-  email: string;
-  created_at: string;
-  user_metadata?: any;
+interface AdminUser extends UserRoleRecord {
+  email?: string;
 }
 
 export default function AdminUsers() {
   const { user: adminUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [impersonating, setImpersonating] = useState<string | null>(null);
 
@@ -25,14 +23,14 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      // Fetch users from auth.users via a secure query
+      // Fetch users from user_roles table
       const { data, error } = await supabase
-        .from('auth.users')
-        .select('id, email, created_at, user_metadata')
+        .from('user_roles')
+        .select('*')
         .limit(50);
 
       if (!error && data) {
-        setUsers(data as User[]);
+        setUsers(data as AdminUser[]);
       }
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -81,7 +79,8 @@ export default function AdminUsers() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-700">
-                  <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">Email</th>
+                  <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">ID do Usuário</th>
+                  <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">Função</th>
                   <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">Data de Criação</th>
                   <th className="text-right py-3 px-4 text-slate-300 font-medium text-sm">Ações</th>
                 </tr>
@@ -89,14 +88,15 @@ export default function AdminUsers() {
               <tbody>
                 {users.map((u) => (
                   <tr key={u.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition">
-                    <td className="py-4 px-4 text-white text-sm">{u.email}</td>
+                    <td className="py-4 px-4 text-white text-sm font-mono">{u.user_id.substring(0, 8)}...</td>
+                    <td className="py-4 px-4 text-slate-300 text-sm capitalize">{u.role}</td>
                     <td className="py-4 px-4 text-slate-400 text-sm">
                       {new Date(u.created_at).toLocaleDateString('pt-BR')}
                     </td>
                     <td className="py-4 px-4 text-right space-x-2">
                       <Button
                         onClick={() => {
-                          navigator.clipboard.writeText(u.id);
+                          navigator.clipboard.writeText(u.user_id);
                           alert('ID copiado!');
                         }}
                         size="sm"
@@ -106,13 +106,13 @@ export default function AdminUsers() {
                         <Copy className="h-4 w-4" />
                       </Button>
                       <Button
-                        onClick={() => handleImpersonate(u.id)}
-                        disabled={impersonating === u.id}
+                        onClick={() => handleImpersonate(u.user_id)}
+                        disabled={impersonating === u.user_id}
                         size="sm"
                         className="bg-red-600 hover:bg-red-700 text-white"
                       >
                         <LogIn className="h-4 w-4 mr-1" />
-                        {impersonating === u.id ? 'Processando...' : 'Acessar Conta'}
+                        {impersonating === u.user_id ? 'Processando...' : 'Acessar Conta'}
                       </Button>
                     </td>
                   </tr>

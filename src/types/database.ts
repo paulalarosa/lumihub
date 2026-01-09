@@ -101,15 +101,18 @@ export interface UserRoleRecord {
 
 export type ConfigValueType = 'string' | 'number' | 'boolean' | 'json';
 
-export interface SystemConfig {
+export interface ConfigItem {
   id: string;
   key: string;
-  value: string;
+  value: string | null;
   type: ConfigValueType;
   description?: string;
   updated_at: string;
   updated_by?: string;
 }
+
+// Alias for consistency
+export type SystemConfig = ConfigItem;
 
 // ============================================
 // Wallets Table (Financial)
@@ -118,8 +121,10 @@ export interface SystemConfig {
 export interface Wallet {
   id: string;
   user_id: string;
-  balance: number;
-  currency: string;
+  available_balance: number;
+  pending_balance: number;
+  bank_details?: Record<string, any>;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
@@ -128,22 +133,22 @@ export interface Wallet {
 // Transactions Table (Financial)
 // ============================================
 
-export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded';
-export type TransactionType = 'credit' | 'debit';
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded';
+export type TransactionType = 'charge' | 'refund' | 'payout' | 'adjustment';
 
 export interface Transaction {
   id: string;
-  wallet_id: string;
-  project_id?: string;
-  amount: number;
+  id_stripe?: string;
+  user_id: string;
+  appointment_id?: string;
+  gross_amount: number;
+  platform_fee: number;
+  net_amount: number;
+  currency: string;
   type: TransactionType;
   status: TransactionStatus;
-  description?: string;
+  metadata?: Record<string, any>;
   created_at: string;
-  updated_at: string;
-  // Relationships
-  wallets?: Wallet;
-  projects?: Project;
 }
 
 // ============================================
@@ -152,33 +157,47 @@ export interface Transaction {
 
 export interface SplitRule {
   id: string;
-  project_id: string;
+  service: string;
   recipient_user_id: string;
   percentage: number;
-  fixed_amount?: number;
+  active: boolean;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
-  // Relationships
-  projects?: Project;
 }
 
 // ============================================
 // Payouts Table (Financial)
 // ============================================
 
-export type PayoutStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type PayoutStatus = 'requested' | 'processing' | 'completed' | 'failed' | 'canceled';
 
 export interface Payout {
   id: string;
-  wallet_id: string;
+  user_id: string;
   amount: number;
+  fee: number;
+  net_amount: number;
+  bank_details?: Record<string, any>;
+  external_payout_id?: string;
   status: PayoutStatus;
-  bank_account?: string;
-  payout_date?: string;
-  created_at: string;
-  updated_at: string;
-  // Relationships
-  wallets?: Wallet;
+  requested_at: string;
+  processed_at?: string;
+  metadata?: Record<string, any>;
+}
+
+// ============================================
+// Financial Overview (View)
+// ============================================
+
+export interface FinancialOverview {
+  user_id: string;
+  period_start: string;
+  period_type: 'monthly' | 'annual';
+  gross_revenue: number;
+  platform_fees: number;
+  net_revenue: number;
+  transactions_count: number;
 }
 
 // ============================================

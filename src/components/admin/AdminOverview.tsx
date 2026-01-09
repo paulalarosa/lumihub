@@ -18,22 +18,22 @@ export default function AdminOverview() {
 
   const fetchStats = async () => {
     try {
-      // Get total users
+      // Get total users from user_roles table (authenticated users)
       const { count: userCount } = await supabase
-        .from('auth.users')
+        .from('user_roles')
         .select('*', { count: 'exact' });
 
-      // Get total revenue
+      // Get total revenue from transactions
       const { data: transactionData } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .select('net_amount')
         .eq('status', 'completed');
 
-      const totalRev = transactionData?.reduce((sum, t) => sum + t.net_amount, 0) || 0;
+      const totalRev = (transactionData as any)?.reduce((sum: number, t: any) => sum + (t.net_amount || 0), 0) || 0;
 
       // Get pending payouts
       const { count: pendingCount } = await supabase
-        .from('payouts')
+        .from('payouts' as any)
         .select('*', { count: 'exact' })
         .eq('status', 'requested');
 

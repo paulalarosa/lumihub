@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart3, Users, Settings, AlertCircle, LogOut, Menu, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { UserRole } from '@/types/database';
 
 import AdminOverview from '@/components/admin/AdminOverview';
 import AdminUsers from '@/components/admin/AdminUsers';
@@ -43,7 +44,7 @@ export default function AdminDashboard() {
         .eq('user_id', user?.id)
         .single();
 
-      const userRole = profileData?.role;
+      const userRole = profileData?.role as UserRole | undefined;
       const isAdminUser = userRole === 'admin' || userRole === 'super_admin';
 
       if (!isAdminUser) {

@@ -86,7 +86,7 @@ export default function ProjectContract() {
 
         if (error) throw error;
 
-        setProject(data);
+        setProject(data as any);
 
         // Load contract content into editor
         const savedContent = localStorage.getItem(`contract_${projectId}`);

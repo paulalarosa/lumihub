@@ -17,24 +17,7 @@ import {
 } from 'recharts';
 import { ArrowUpRight, Download } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface Wallet {
-  id: string;
-  available_balance: number;
-  pending_balance: number;
-  updated_at: string;
-}
-
-interface Transaction {
-  id: string;
-  gross_amount: number;
-  platform_fee: number;
-  net_amount: number;
-  type: string;
-  status: string;
-  created_at: string;
-  appointment_id?: string;
-}
+import { Wallet, Transaction, FinancialOverview } from '@/types/database';
 
 interface MonthlyData {
   month: string;
@@ -72,18 +55,18 @@ export default function FinancialDashboard() {
 
       // Fetch wallet data
       const { data: walletData } = await supabase
-        .from('wallets')
+        .from('wallets' as any)
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (walletData) {
-        setWallet(walletData);
+        setWallet(walletData as any as Wallet);
       }
 
       // Fetch recent transactions (limit 15)
       const { data: txData } = await supabase
-        .from('transactions')
+        .from('transactions' as any)
         .select('*')
         .eq('user_id', user.id)
         .eq('status', 'completed')
@@ -91,20 +74,20 @@ export default function FinancialDashboard() {
         .limit(15);
 
       if (txData) {
-        setTransactions(txData);
+        setTransactions(txData as any as Transaction[]);
       }
 
       // Fetch monthly revenue overview (last 6 months)
       const { data: overviewData } = await supabase
-        .from('financial_overview')
+        .from('financial_overview' as any)
         .select('*')
         .eq('user_id', user.id)
         .eq('period_type', 'monthly')
         .order('period_start', { ascending: true });
 
       if (overviewData) {
-        const last6Months = overviewData.slice(-6);
-        const chartData: MonthlyData[] = last6Months.map(item => ({
+        const last6Months = (overviewData as any as FinancialOverview[]).slice(-6);
+        const chartData: MonthlyData[] = last6Months.map((item: any) => ({
           month: new Date(item.period_start).toLocaleDateString('pt-BR', {
             month: 'short',
             year: '2-digit',
@@ -133,7 +116,7 @@ export default function FinancialDashboard() {
     try {
       setIsWithdrawing(true);
 
-      const { error } = await supabase.from('payouts').insert({
+      const { error } = await supabase.from('payouts' as any).insert({
         user_id: user.id,
         amount: amount,
         fee: amount * 0.01,

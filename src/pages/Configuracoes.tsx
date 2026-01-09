@@ -1,34 +1,34 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import IntegrationsTab from '@/components/settings/IntegrationsTab';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { 
-  ArrowLeft, 
-  User,
-  Palette,
-  Package,
+import {
+  ArrowLeft,
+  Building2,
   CreditCard,
-  Save,
-  Plus,
-  Trash2,
   Edit,
   GripVertical,
-  Wallet,
-  Building2,
+  Link2,
+  Package,
+  Palette,
+  Plus,
   QrCode,
+  Save,
   Smartphone,
-  Link2
+  Trash2,
+  User,
+  Wallet
 } from 'lucide-react';
-import IntegrationsTab from '@/components/settings/IntegrationsTab';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface ProfessionalSettings {
   id: string;

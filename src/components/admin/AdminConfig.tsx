@@ -1,15 +1,9 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, RotateCcw } from 'lucide-react';
-
-interface ConfigItem {
-  key: string;
-  value: string;
-  type: 'string' | 'number' | 'boolean' | 'json';
-  description: string;
-}
+import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { RotateCcw, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ConfigItem } from '@/types/database';
 
 export default function AdminConfig() {
   const [configs, setConfigs] = useState<ConfigItem[]>([]);
@@ -25,14 +19,14 @@ export default function AdminConfig() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('system_config')
+        .from('system_config' as any)
         .select('*')
         .order('key');
 
       if (!error && data) {
-        setConfigs(data as ConfigItem[]);
+        setConfigs(data as any as ConfigItem[]);
         const edited: Record<string, string> = {};
-        data.forEach((item) => {
+        (data as any).forEach((item: any) => {
           edited[item.key] = item.value || '';
         });
         setEditedConfigs(edited);
@@ -59,8 +53,8 @@ export default function AdminConfig() {
         const newValue = editedConfigs[config.key];
         if (newValue !== config.value) {
           const { error } = await supabase
-            .from('system_config')
-            .update({ value: newValue })
+            .from('system_config' as any)
+            .update({ value: newValue } as any)
             .eq('key', config.key);
 
           if (error) {
