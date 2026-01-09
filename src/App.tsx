@@ -11,11 +11,14 @@ import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
+import AdminDashboard from "./pages/AdminDashboard";
 import Clientes from "./pages/Clientes";
 import ClienteDetalhes from "./pages/ClienteDetalhes";
 import Projetos from "./pages/Projetos";
 import ProjetoDetalhes from "./pages/ProjetoDetalhes";
+import ProjectDetails from "./pages/ProjectDetails";
 import Configuracoes from "./pages/Configuracoes";
 import PortalCliente from "./pages/PortalCliente";
 import PortalAssistente from "./pages/PortalAssistente";
@@ -23,6 +26,7 @@ import AssistantInvite from "./pages/AssistantInvite";
 import Agenda from "./pages/Agenda";
 import Contact from "./pages/Contact";
 import Assistentes from "./pages/Assistentes";
+import ProjectContract from "./pages/ProjectContract";
 import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
 
@@ -48,12 +52,16 @@ const App = () => (
             
             {/* Protected App Pages */}
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/financial" element={<FinancialDashboard />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/clientes/:id" element={<ClienteDetalhes />} />
             <Route path="/projetos" element={<Projetos />} />
             <Route path="/projetos/novo" element={<Projetos />} />
             <Route path="/projetos/:id" element={<ProjetoDetalhes />} />
+            <Route path="/projects/:id" element={<ProjectDetails />} />
+            <Route path="/projects/:projectId/contract" element={<ProjectContract />} />
             <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/contact" element={<Contact />} />
