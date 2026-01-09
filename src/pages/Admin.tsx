@@ -166,7 +166,7 @@ export default function Admin() {
       items: [
         { name: "Criar projetos por cliente", status: "done" },
         { name: "Checklist de tarefas", status: "done" },
-        { name: "Moodboard interativo", status: "done" },
+        { name: "Moodboard interativo (URLs externas)", status: "done" },
         { name: "Questionário de briefing", status: "done" },
         { name: "Geração de contratos", status: "done" }
       ]
@@ -176,9 +176,9 @@ export default function Admin() {
       items: [
         { name: "Geração de faturas", status: "done" },
         { name: "Integração Mercado Pago", status: "done" },
+        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "done" },
         { name: "Split de pagamentos", status: "pending" },
         { name: "Relatórios financeiros", status: "pending" },
-        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "done" },
         { name: "Recebimento de pagamentos na plataforma", status: "pending" },
         { name: "Dashboard financeiro do usuário", status: "pending" }
       ]
@@ -196,13 +196,13 @@ export default function Admin() {
     {
       category: "Agenda & Calendário",
       items: [
-        { name: "Visualização de agenda (mês/dia/ano)", status: "pending" },
-        { name: "Eventos com detalhes (local, nome, data, hora)", status: "pending" },
-        { name: "Tags para assistentes nos eventos", status: "pending" },
-        { name: "Sincronização automática de agenda", status: "pending" },
-        { name: "Notificações recorrentes", status: "pending" },
-        { name: "Conta de assistente (acesso limitado)", status: "pending" },
-        { name: "Acesso completo para assistentes (pago)", status: "pending" }
+        { name: "Visualização de agenda (mês/semana/dia/lista)", status: "done" },
+        { name: "Eventos com detalhes completos", status: "done" },
+        { name: "Atribuição de assistentes nos eventos", status: "done" },
+        { name: "Sincronização com Google Calendar", status: "done" },
+        { name: "Portal do assistente (acesso limitado)", status: "done" },
+        { name: "Acesso Pro para assistentes (pago)", status: "done" },
+        { name: "Envio automático de lembretes por email", status: "pending" }
       ]
     },
     {
@@ -211,13 +211,13 @@ export default function Admin() {
         { name: "Perfil da maquiadora", status: "done" },
         { name: "Personalização de marca", status: "done" },
         { name: "Cardápio de serviços", status: "done" },
-        { name: "Planos e assinatura", status: "pending" }
+        { name: "Planos e assinatura (integração de pagamento)", status: "pending" }
       ]
     },
     {
       category: "Upload de Imagens",
       items: [
-        { name: "Moodboard com upload real", status: "pending" },
+        { name: "Moodboard com upload real de arquivos", status: "pending" },
         { name: "Foto de perfil/avatar", status: "pending" },
         { name: "Logo personalizado", status: "pending" }
       ]
