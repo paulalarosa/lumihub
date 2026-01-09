@@ -29,6 +29,7 @@ import Assistentes from "./pages/Assistentes";
 import ProjectContract from "./pages/ProjectContract";
 import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
+import DebugConnection from "./pages/DebugConnection";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
             <Route path="/planos" element={<Planos />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogArticle />} />
+            <Route path="/debug" element={<DebugConnection />} />
             
             {/* Auth */}
             <Route path="/auth" element={<Auth />} />

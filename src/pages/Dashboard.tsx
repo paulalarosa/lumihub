@@ -40,10 +40,7 @@ export default function Dashboard() {
     if (!loading && !user) {
       navigate('/auth');
     }
-    if (!loading && user && isAssistant && !isAdmin) {
-      navigate('/assistente');
-    }
-  }, [user, loading, isAssistant, isAdmin, navigate]);
+  }, [user, loading, navigate]);
 
   // Fetch real data from Supabase
   useEffect(() => {

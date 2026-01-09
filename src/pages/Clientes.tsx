@@ -30,7 +30,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { contractPrivacy } from '@/lib/privacy-utils';
 
 interface Client {
   id: string;
@@ -147,20 +146,15 @@ export default function Clientes() {
         fetchClients();
       }
     } else {
-      // Generate encrypted UUID for new client
-      const encryptedId = await contractPrivacy.generateContractId();
-      
+      // Let Supabase generate the UUID automatically
       const { error } = await supabase
         .from('clients')
-        .insert({
-          ...clientData,
-          id: encryptedId
-        });
+        .insert([clientData]);
 
       if (error) {
         toast({ title: "Erro ao criar cliente", variant: "destructive" });
       } else {
-        toast({ title: "Cliente adicionado com segurança!" });
+        toast({ title: "Cliente adicionado!" });
         setIsDialogOpen(false);
         resetForm();
         fetchClients();
