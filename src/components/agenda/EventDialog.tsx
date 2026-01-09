@@ -356,12 +356,12 @@ export default function EventDialog({
 
         // Sync to Google Calendar for each assistant (server-side)
         try {
-          const eventData = {
+          const syncEventData = {
             title,
             description,
-            event_date,
-            start_time,
-            end_time,
+            event_date: eventDate,
+            start_time: startTime,
+            end_time: endTime,
             location: address,
             assistants: selectedAssistants
           };
@@ -371,7 +371,7 @@ export default function EventDialog({
             body: {
               action: 'sync_event_to_assistants',
               eventId,
-              eventData,
+              eventData: syncEventData,
               assistantIds: selectedAssistants
             }
           });
