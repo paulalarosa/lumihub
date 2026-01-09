@@ -9,31 +9,53 @@
 
 @layer base {
   :root {
-    /* Light Mode - Default (High-ticket, minimal, metallic/silver accents) */
+    /* Light Mode - Default (High-ticket, minimal, with strong contrast) */
     --background: 0 0% 100%; /* White */
     --surface: 0 0% 100%; /* Cards / Sidebar */
-    --surface-border: 0 0% 90%; /* #E5E7EB */
-    --foreground: 217 8% 11%; /* #111827 charcoal text */
+    --surface-border: 0 0% 88%; /* #E1E1E1 */
+    --foreground: 217 10% 15%; /* #1F2937 deep charcoal text */
 
-    --muted: 220 12% 58%; /* ~#6B7280 */
-    --muted-foreground: 210 8% 64%; /* ~#9CA3AF */
+    --muted: 220 10% 94%; /* Light gray bg for muted sections */
+    --muted-foreground: 217 10% 45%; /* #6B7280 readable gray text */
 
-    --primary: 210 4% 84%; /* metallic-silver base (used subtly) */
-    --primary-foreground: 217 8% 11%;
+    --primary: 220 12% 28%; /* Deep charcoal-slate - high contrast */
+    --primary-foreground: 0 0% 100%; /* White text on primary */
+    --primary-hover: 220 12% 22%; /* Darker on hover */
+    --primary-light: 220 12% 95%; /* Light bg variant */
 
-    --accent: 210 6% 76%;
-    --accent-foreground: 217 8% 11%;
+    --accent: 35 45% 52%; /* Warm bronze/gold accent */
+    --accent-foreground: 0 0% 100%; /* White text on accent */
+    --accent-hover: 35 45% 42%; /* Darker on hover */
+    --accent-light: 35 45% 94%; /* Light bg variant */
 
-    --glass-bg: rgba(255,255,255,0.6);
-    --glass-border: rgba(156,163,175,0.18); /* subtle silver */
-    --glass-shadow: 0 8px 24px rgba(16,24,40,0.06);
+    --success: 142 60% 40%; /* Green with good contrast */
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%; /* Orange warning */
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%; /* Red destructive */
+    --destructive-foreground: 0 0% 100%;
+
+    --glass-bg: rgba(255,255,255,0.85);
+    --glass-border: rgba(31,41,55,0.08); /* subtle charcoal */
+    --glass-shadow: 0 8px 32px rgba(16,24,40,0.08);
 
     /* metallic highlight */
-    --metallic: 210 4% 78%; /* silver-ish */
+    --metallic: 220 8% 50%; /* Darker silver for visibility */
 
-    --border: 0 0% 90%;
+    --border: 220 10% 88%;
     --input: 0 0% 98%;
-    --ring: 210 8% 85%;
+    --ring: 220 12% 28%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 217 10% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 10% 15%;
+
+    --secondary: 220 10% 94%;
+    --secondary-foreground: 217 10% 25%;
 
     --radius: 1rem;
     --radius-button: 0.75rem;

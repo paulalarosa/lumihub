@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useMotionValue, useTransform } from 'framer-motion';
+import { useMotionValue, useTransform, MotionValue } from 'framer-motion';
 
 export const useScroll = () => {
   const scrollY = useMotionValue(0);
@@ -27,6 +27,6 @@ export const useScroll = () => {
  * @param range - [start, end] scroll range
  * @param offset - [start, end] transform range (e.g., [0, 100])
  */
-export const useParallax = (scrollY: ReturnType<typeof useMotionValue>, range: [number, number], offset: [number, number]) => {
+export const useParallax = (scrollY: MotionValue<number>, range: [number, number], offset: [number, number]) => {
   return useTransform(scrollY, range, offset);
 };
