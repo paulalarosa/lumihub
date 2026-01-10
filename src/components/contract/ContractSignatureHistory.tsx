@@ -3,25 +3,56 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Download, FileText } from 'lucide-react';
-import { ContractSignature } from '@/types/database';
+
+interface ContractSignatureData {
+  id: string;
+  project_id: string;
+  signed_by: string;
+  signed_at: string;
+  ip_address?: string | null;
+  signature_url?: string | null;
+  created_at: string;
+}
 
 export function ContractSignatureHistory({ projectId }: { projectId: string }) {
-  const [signatures, setSignatures] = useState<ContractSignature[]>([]);
+  const [signatures, setSignatures] = useState<ContractSignatureData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSignatures = async () => {
       try {
+        // Note: This table may not exist yet - will need to be created via migration
+        // For now, we'll handle the error gracefully
         const { data, error } = await supabase
-          .from('contract_signatures')
-          .select('*')
+          .from('contracts')
+          .select('id, project_id, status, signed_at, signature_data, created_at')
           .eq('project_id', projectId)
+          .eq('status', 'signed')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-        setSignatures(data || []);
+        if (error) {
+          console.error('Erro ao buscar assinaturas:', error);
+          setSignatures([]);
+          return;
+        }
+
+        // Transform contracts data to signature format
+        const signatureData: ContractSignatureData[] = (data || [])
+          .filter(c => c.signed_at)
+          .map(contract => ({
+            id: contract.id,
+            project_id: contract.project_id,
+            signed_by: 'Cliente',
+            signed_at: contract.signed_at!,
+            ip_address: null,
+            signature_url: null,
+            created_at: contract.created_at,
+          }));
+
+        setSignatures(signatureData);
       } catch (error) {
         console.error('Erro ao buscar assinaturas:', error);
+        setSignatures([]);
       } finally {
         setLoading(false);
       }
