@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
+import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -225,7 +225,7 @@ const tools = [
 async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
-  supabaseClient: ReturnType<typeof createClient>,
+  supabaseClient: SupabaseClient,
   userId: string
 ): Promise<string> {
   console.log(`Executing tool: ${toolName}`, args);
@@ -238,13 +238,13 @@ async function executeTool(
           .select("id, title, event_date, start_time, end_time, location, event_type, description, client:clients(name), project:projects(name)")
           .eq("user_id", userId)
           .order("event_date", { ascending: true })
-          .limit(args.limit as number || 10);
+          .limit((args.limit as number) || 10);
 
         if (args.start_date) {
-          query = query.gte("event_date", args.start_date);
+          query = query.gte("event_date", args.start_date as string);
         }
         if (args.end_date) {
-          query = query.lte("event_date", args.end_date);
+          query = query.lte("event_date", args.end_date as string);
         }
 
         const { data, error } = await query;
@@ -256,20 +256,20 @@ async function executeTool(
         const eventData = {
           title: args.title as string,
           event_date: args.event_date as string,
-          description: args.description as string || null,
-          start_time: args.start_time as string || null,
-          end_time: args.end_time as string || null,
-          location: args.location as string || null,
-          address: args.address as string || null,
-          event_type: args.event_type as string || "outro",
-          client_id: args.client_id as string || null,
-          project_id: args.project_id as string || null,
+          description: (args.description as string) || null,
+          start_time: (args.start_time as string) || null,
+          end_time: (args.end_time as string) || null,
+          location: (args.location as string) || null,
+          address: (args.address as string) || null,
+          event_type: (args.event_type as string) || "outro",
+          client_id: (args.client_id as string) || null,
+          project_id: (args.project_id as string) || null,
           user_id: userId
         };
 
         const { data, error } = await supabaseClient
           .from("events")
-          .insert(eventData)
+          .insert(eventData as Record<string, unknown>)
           .select()
           .single();
 
@@ -279,14 +279,17 @@ async function executeTool(
 
       case "update_event": {
         const { event_id, ...updateData } = args;
-        const filteredData = Object.fromEntries(
-          Object.entries(updateData).filter(([_, v]) => v !== undefined)
-        );
+        const filteredData: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(updateData)) {
+          if (value !== undefined) {
+            filteredData[key] = value;
+          }
+        }
 
         const { data, error } = await supabaseClient
           .from("events")
           .update(filteredData)
-          .eq("id", event_id)
+          .eq("id", event_id as string)
           .eq("user_id", userId)
           .select()
           .single();
@@ -299,7 +302,7 @@ async function executeTool(
         const { error } = await supabaseClient
           .from("events")
           .delete()
-          .eq("id", args.event_id)
+          .eq("id", args.event_id as string)
           .eq("user_id", userId);
 
         if (error) throw error;
@@ -312,10 +315,10 @@ async function executeTool(
           .select("id, name, status, event_date, event_type, event_location, client:clients(name)")
           .eq("user_id", userId)
           .order("created_at", { ascending: false })
-          .limit(args.limit as number || 10);
+          .limit((args.limit as number) || 10);
 
         if (args.status) {
-          query = query.eq("status", args.status);
+          query = query.eq("status", args.status as string);
         }
 
         const { data, error } = await query;
@@ -327,17 +330,17 @@ async function executeTool(
         const projectData = {
           name: args.name as string,
           client_id: args.client_id as string,
-          event_date: args.event_date as string || null,
-          event_type: args.event_type as string || null,
-          event_location: args.event_location as string || null,
-          notes: args.notes as string || null,
+          event_date: (args.event_date as string) || null,
+          event_type: (args.event_type as string) || null,
+          event_location: (args.event_location as string) || null,
+          notes: (args.notes as string) || null,
           user_id: userId,
           status: "active"
         };
 
         const { data, error } = await supabaseClient
           .from("projects")
-          .insert(projectData)
+          .insert(projectData as Record<string, unknown>)
           .select()
           .single();
 
@@ -347,14 +350,17 @@ async function executeTool(
 
       case "update_project": {
         const { project_id, ...updateData } = args;
-        const filteredData = Object.fromEntries(
-          Object.entries(updateData).filter(([_, v]) => v !== undefined)
-        );
+        const filteredData: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(updateData)) {
+          if (value !== undefined) {
+            filteredData[key] = value;
+          }
+        }
 
         const { data, error } = await supabaseClient
           .from("projects")
           .update(filteredData)
-          .eq("id", project_id)
+          .eq("id", project_id as string)
           .eq("user_id", userId)
           .select()
           .single();
@@ -367,7 +373,7 @@ async function executeTool(
         const { error } = await supabaseClient
           .from("projects")
           .delete()
-          .eq("id", args.project_id)
+          .eq("id", args.project_id as string)
           .eq("user_id", userId);
 
         if (error) throw error;
@@ -380,7 +386,7 @@ async function executeTool(
           .select("id, name, email, phone, instagram")
           .eq("user_id", userId)
           .order("name")
-          .limit(args.limit as number || 10);
+          .limit((args.limit as number) || 10);
 
         if (args.search) {
           query = query.ilike("name", `%${args.search}%`);
@@ -395,12 +401,12 @@ async function executeTool(
         let query = supabaseClient
           .from("tasks")
           .select("id, title, description, due_date, is_completed")
-          .eq("project_id", args.project_id)
+          .eq("project_id", args.project_id as string)
           .eq("user_id", userId)
           .order("sort_order");
 
-        if (args.completed !== undefined) {
-          query = query.eq("is_completed", args.completed);
+        if (args.completed !== undefined && args.completed !== null) {
+          query = query.eq("is_completed", args.completed as boolean);
         }
 
         const { data, error } = await query;
@@ -452,7 +458,7 @@ serve(async (req) => {
       });
     }
 
-const body = await req.json();
+    const body = await req.json();
     const messages = body?.messages as Message[] | undefined;
 
     // Validate input
@@ -505,45 +511,37 @@ const body = await req.json();
     });
 
     if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Taxa de requisições excedida. Tente novamente em alguns segundos." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione mais créditos ao seu workspace." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      const errorText = await response.text();
-      console.error("AI gateway error:", response.status, errorText);
-      throw new Error("AI gateway error");
+      const errorData = await response.json();
+      console.error("API Error:", errorData);
+      throw new Error(errorData.error?.message || "Erro na API de IA");
     }
 
     let data = await response.json();
-    let assistantMessage = data.choices[0].message;
+    let assistantMessage = data.choices?.[0]?.message;
 
-    // Process tool calls if any
-    while (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
-      const toolResults: Message[] = [];
+    // Check if the model wants to use tools
+    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
+      console.log("Tool calls requested:", assistantMessage.tool_calls.length);
+      
+      const toolResults: { role: string; tool_call_id: string; content: string }[] = [];
 
       for (const toolCall of assistantMessage.tool_calls as ToolCall[]) {
-        const args = JSON.parse(toolCall.function.arguments);
+        let args: Record<string, unknown>;
+        try {
+          args = JSON.parse(toolCall.function.arguments);
+        } catch {
+          args = {};
+        }
+
         const result = await executeTool(toolCall.function.name, args, supabaseClient, user.id);
-        
         toolResults.push({
-          role: "assistant",
-          content: JSON.stringify({
-            tool_call_id: toolCall.id,
-            name: toolCall.function.name,
-            result
-          })
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: result,
         });
       }
 
-      // Continue conversation with tool results
+      // Second API call with tool results
       response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -556,35 +554,37 @@ const body = await req.json();
             { role: "system", content: SYSTEM_PROMPT },
             ...sanitizedMessages,
             assistantMessage,
-            ...toolResults.map(tr => ({ role: "user" as const, content: `Resultado da ferramenta: ${tr.content}` }))
+            ...toolResults,
           ],
-          tools,
-          tool_choice: "auto",
         }),
       });
 
       if (!response.ok) {
-        throw new Error("AI gateway error on tool result processing");
+        const errorData = await response.json();
+        console.error("API Error (second call):", errorData);
+        throw new Error(errorData.error?.message || "Erro na API de IA");
       }
 
       data = await response.json();
-      assistantMessage = data.choices[0].message;
+      assistantMessage = data.choices?.[0]?.message;
     }
 
-    return new Response(JSON.stringify({ 
-      content: assistantMessage.content,
-      role: "assistant"
-    }), {
+    const reply = assistantMessage?.content || "Desculpe, não consegui processar sua solicitação.";
+
+    return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
 
   } catch (error) {
-    console.error("AI assistant error:", error);
-    return new Response(JSON.stringify({ 
-      error: error instanceof Error ? error.message : "Erro interno do servidor" 
-    }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    console.error("Error in AI assistant:", error);
+    return new Response(
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : "Erro interno do servidor" 
+      }),
+      { 
+        status: 500, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
   }
 });

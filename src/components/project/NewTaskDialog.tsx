@@ -10,11 +10,26 @@ import {
 import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Task, TaskPriority } from '@/types/database';
+
+interface TaskData {
+  id: string;
+  project_id: string;
+  title: string;
+  description?: string | null;
+  is_completed: boolean;
+  due_date?: string | null;
+  sort_order: number;
+  visibility: string;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
+
+type TaskPriority = 'low' | 'medium' | 'high';
 
 interface NewTaskDialogProps {
   projectId: string;
-  onTaskCreated: (task: Task) => void;
+  onTaskCreated: (task: TaskData) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -43,14 +58,20 @@ export function NewTaskDialog({
     setIsLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .insert({
           project_id: projectId,
           title: title.trim(),
-          status: 'todo',
-          priority,
           description: '',
+          is_completed: false,
+          user_id: user.id,
         })
         .select()
         .single();
@@ -62,7 +83,7 @@ export function NewTaskDialog({
         description: 'Tarefa criada com sucesso.',
       });
 
-      onTaskCreated(data as Task);
+      onTaskCreated(data as TaskData);
       setTitle('');
       setPriority('medium');
       onOpenChange(false);
@@ -128,7 +149,7 @@ export function NewTaskDialog({
             <select
               id="priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value as any)}
+              onChange={(e) => setPriority(e.target.value as TaskPriority)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="low">Baixa</option>
