@@ -10,26 +10,13 @@ import {
 import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-interface TaskData {
-  id: string;
-  project_id: string;
-  title: string;
-  description?: string | null;
-  is_completed: boolean;
-  due_date?: string | null;
-  sort_order: number;
-  visibility: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
+import type { Tables } from '@/integrations/supabase/types';
 
 type TaskPriority = 'low' | 'medium' | 'high';
 
 interface NewTaskDialogProps {
   projectId: string;
-  onTaskCreated: (task: TaskData) => void;
+  onTaskCreated: (task: Tables<'tasks'>) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -83,7 +70,7 @@ export function NewTaskDialog({
         description: 'Tarefa criada com sucesso.',
       });
 
-      onTaskCreated(data as TaskData);
+      onTaskCreated(data);
       setTitle('');
       setPriority('medium');
       onOpenChange(false);
