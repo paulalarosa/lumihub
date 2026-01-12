@@ -99,6 +99,15 @@ export default function AIAssistantChat() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        
+        // Handle specific error codes
+        if (response.status === 429) {
+          throw new Error('Limite de requisições atingido. Aguarde alguns segundos e tente novamente.');
+        }
+        if (response.status === 402) {
+          throw new Error('Créditos de IA insuficientes. Entre em contato com o suporte.');
+        }
+        
         throw new Error(errorData.error || 'Erro ao processar sua mensagem');
       }
 
@@ -106,7 +115,7 @@ export default function AIAssistantChat() {
       
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: data.content 
+        content: data.reply // Fixed: edge function returns 'reply', not 'content'
       }]);
     } catch (error) {
       console.error('AI Chat error:', error);
