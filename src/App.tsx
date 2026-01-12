@@ -10,6 +10,7 @@ import Planos from "./pages/Planos";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
 import Auth from "./pages/Auth";
+import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
@@ -30,6 +31,7 @@ import ProjectContract from "./pages/ProjectContract";
 import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
 import DebugConnection from "./pages/DebugConnection";
+import AuthCallbackHandler from "./components/auth/AuthCallbackHandler";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ const App = () => (
             
             {/* Auth */}
             <Route path="/auth" element={<Auth />} />
+            <Route path="/auth/callback" element={<AuthCallbackHandler />} />
+            <Route path="/onboarding" element={<Onboarding />} />
             
             {/* Protected App Pages */}
             <Route path="/dashboard" element={<Dashboard />} />
