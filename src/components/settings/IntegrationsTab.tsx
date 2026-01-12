@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import GoogleCalendarConnect from '@/components/integrations/GoogleCalendarConnect';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -56,6 +55,7 @@ export default function IntegrationsTab() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const [syncing, setSyncing] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,6 +72,7 @@ export default function IntegrationsTab() {
       const state = urlParams.get('state');
 
       if (code && state) {
+        setConnecting(true);
         try {
           const { data: { session } } = await supabase.auth.getSession();
           
@@ -105,12 +106,14 @@ export default function IntegrationsTab() {
             description: error.message || "Não foi possível conectar ao Google Calendar",
             variant: "destructive"
           });
+        } finally {
+          setConnecting(false);
         }
       }
     };
 
     handleCallback();
-  }, [toast]);
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -143,6 +146,38 @@ export default function IntegrationsTab() {
     }
     
     setLoading(false);
+  };
+
+  const connectGoogleCalendar = async () => {
+    setConnecting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const response = await supabase.functions.invoke('google-calendar-auth', {
+        body: { 
+          redirect_uri: `${window.location.origin}/configuracoes` 
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      if (response.data?.url) {
+        window.location.href = response.data.url;
+      }
+    } catch (error: any) {
+      console.error('Error connecting Google Calendar:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível iniciar a conexão",
+        variant: "destructive"
+      });
+      setConnecting(false);
+    }
   };
 
   const disconnectCalendar = async (integrationId: string, provider: string) => {
@@ -322,11 +357,14 @@ export default function IntegrationsTab() {
                   Desconectar
                 </Button>
               ) : (
-                <GoogleCalendarConnect 
-                  size="sm"
-                  redirectUri={`${window.location.origin}/configuracoes`}
-                  onSuccess={fetchData}
-                />
+                <Button onClick={connectGoogleCalendar} disabled={connecting}>
+                  {connecting ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : (
+                    <ExternalLink className="h-4 w-4 mr-1" />
+                  )}
+                  Conectar
+                </Button>
               )}
             </div>
 
