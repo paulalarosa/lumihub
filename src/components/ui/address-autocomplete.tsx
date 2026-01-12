@@ -129,6 +129,27 @@ export function AddressAutocomplete({
   );
   const [isSelected, setIsSelected] = useState(!!latitude && !!longitude);
 
+  // Função auxiliar para fechar o PAC dropdown
+  const closePacDropdown = useCallback(() => {
+    // Método 1: Pressionar Escape
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      code: 'Escape',
+      keyCode: 27,
+      which: 27,
+      bubbles: true,
+    });
+    document.dispatchEvent(escapeEvent);
+    
+    // Método 2: Remover display do PAC container
+    const pacContainer = document.querySelector('.pac-container');
+    if (pacContainer) {
+      (pacContainer as HTMLElement).style.display = 'none';
+    }
+    
+    console.log('✅ PAC dropdown fechado via múltiplos métodos');
+  }, []);
+
   useEffect(() => {
     if (latitude && longitude) {
       setCoords({ lat: latitude, lng: longitude });
@@ -152,29 +173,57 @@ export function AddressAutocomplete({
   }, []);
 
   const handlePlaceChanged = useCallback(() => {
-    if (!autocompleteRef.current) return;
-
-    const place = autocompleteRef.current.getPlace();
-
-    if (place.formatted_address) {
-      onChange(place.formatted_address);
+    console.log('🔍 handlePlaceChanged chamado - iniciando processamento da seleção');
+    
+    if (!autocompleteRef.current) {
+      console.warn('⚠️ Autocomplete reference não disponível');
+      return;
     }
 
+    const place = autocompleteRef.current.getPlace();
+    console.log('📍 Place object recebido:', {
+      formatted_address: place.formatted_address,
+      has_geometry: !!place.geometry?.location,
+      has_lat_lng: !!(place.geometry?.location?.lat && place.geometry?.location?.lng)
+    });
+
+    // STEP 1: Extrair endereço formatado
+    const addressText = place.formatted_address || '';
+    
+    if (addressText) {
+      console.log('✅ Atualizando address com:', addressText);
+      // Force immediate state update
+      onChange(addressText);
+    } else {
+      console.warn('⚠️ Nenhum endereço disponível');
+    }
+
+    // STEP 2: Extrair coordenadas
     if (place.geometry?.location) {
       const lat = place.geometry.location.lat();
       const lng = place.geometry.location.lng();
+      console.log('✅ Coordenadas extraídas:', { lat, lng });
+      
       setCoords({ lat, lng });
-      setIsSelected(true); // Mark as selected after successful place selection
+      setIsSelected(true);
       onCoordinatesChange?.(lat, lng);
+    } else {
+      console.warn('⚠️ Geometria ou localização não disponível');
     }
 
-    // CRITICAL FIX: Prevent dialog from closing after selection
+    // STEP 3: Fechar o dropdown do autocomplete com força
+    console.log('🔄 Fechando dropdown do autocomplete...');
     setTimeout(() => {
+      // Remover foco do input para fechar o PAC
       if (inputRef.current) {
         inputRef.current.blur();
+        console.log('✅ Input blur disparado');
       }
-    }, 100);
-  }, [onChange, onCoordinatesChange]);
+      
+      // Fechar PAC via métodos robustos
+      closePacDropdown();
+    }, 50);
+  }, [onChange, onCoordinatesChange, closePacDropdown]);
 
   useEffect(() => {
     if (!isApiLoaded || !inputRef.current || autocompleteRef.current) return;
@@ -195,30 +244,33 @@ export function AddressAutocomplete({
     };
   }, [isApiLoaded, handlePlaceChanged]);
 
-  // CRITICAL: Prevent clicks on the autocomplete dropdown from propagating
+  // CRITICAL: Prevent blur event when clicking on PAC suggestions
+  // Use onMouseDown to intercept BEFORE the blur event fires
   useEffect(() => {
-    const handlePacInteraction = (e: Event) => {
+    const handlePacMouseDown = (e: Event) => {
+      const mouseEvent = e as MouseEvent;
       const target = e.target as HTMLElement;
-      if (target.closest('.pac-container') || target.classList.contains('pac-item') || target.closest('.pac-item')) {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        e.preventDefault();
+      const isPacContainer = target.closest('.pac-container') || 
+                             target.classList.contains('pac-item') || 
+                             target.closest('.pac-item') ||
+                             target.closest('.pac-item-query') ||
+                             target.closest('.pac-matched');
+      
+      if (isPacContainer) {
+        console.log('🖱️ PAC item mousedown interceptado - prevenindo blur');
+        // CRÍTICO: preventDefault impede que o input perca o foco
+        mouseEvent.preventDefault();
+        mouseEvent.stopPropagation();
+        mouseEvent.stopImmediatePropagation();
       }
     };
     
-    // Capture phase to intercept before any other handlers
-    document.addEventListener('click', handlePacInteraction, true);
-    document.addEventListener('mousedown', handlePacInteraction, true);
-    document.addEventListener('mouseup', handlePacInteraction, true);
-    document.addEventListener('touchstart', handlePacInteraction, true);
-    document.addEventListener('touchend', handlePacInteraction, true);
+    // IMPORTANT: Use capture phase on mousedown to intercept BEFORE blur
+    // This must happen before the browser triggers the default blur behavior
+    document.addEventListener('mousedown', handlePacMouseDown, true);
     
     return () => {
-      document.removeEventListener('click', handlePacInteraction, true);
-      document.removeEventListener('mousedown', handlePacInteraction, true);
-      document.removeEventListener('mouseup', handlePacInteraction, true);
-      document.removeEventListener('touchstart', handlePacInteraction, true);
-      document.removeEventListener('touchend', handlePacInteraction, true);
+      document.removeEventListener('mousedown', handlePacMouseDown, true);
     };
   }, []);
 
@@ -243,7 +295,13 @@ export function AddressAutocomplete({
 
   const handleInputClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    console.log('🖱️ Input clicado, focando...');
   };
+
+  // DEBUG: Log para monitorar mudanças no value prop
+  useEffect(() => {
+    console.log('📝 Address value prop alterado:', value);
+  }, [value]);
 
   return (
     <div className={cn("space-y-4", className)} onClick={(e) => e.stopPropagation()}>
@@ -253,7 +311,11 @@ export function AddressAutocomplete({
           ref={inputRef}
           type="text"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            console.log('✍️ Input onChange disparado:', newValue);
+            onChange(newValue);
+          }}
           onClick={handleInputClick}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}

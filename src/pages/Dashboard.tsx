@@ -258,7 +258,7 @@ export default function Dashboard() {
             { icon: Users, label: "Clientes", to: "/clientes", color: "from-blue-400/20 to-cyan-400/20" },
             { icon: FolderOpen, label: "Projetos", to: "/projetos", color: "from-purple-400/20 to-pink-400/20" },
             { icon: Calendar, label: "Agenda", to: "/agenda", color: "from-emerald-400/20 to-teal-400/20" },
-            { icon: Settings, label: "Configurações", to: "/configuracoes", color: "from-orange-400/20 to-red-400/20" }
+            { icon: Settings, label: "Meu Negócio", to: "/configuracoes", color: "from-orange-400/20 to-red-400/20" }
           ].map((item, idx) => (
             <motion.div
               key={idx}
