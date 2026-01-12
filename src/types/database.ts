@@ -1,102 +1,124 @@
 /**
- * Database Types - Typed interfaces for all Supabase tables
- * Auto-generated from database schema
+ * Database Types - Re-exports and helpers based on Supabase auto-generated types
+ * The source of truth is src/integrations/supabase/types.ts
  */
 
-// ============================================
-// Clients Table
-// ============================================
-
-export interface Client {
-  id: string;
-  name: string;
-  email: string;
-  phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  zip_code?: string;
-  created_at: string;
-  updated_at: string;
-}
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 // ============================================
-// Projects Table
+// Type Aliases from Supabase Tables
 // ============================================
 
-export type ProjectStatus = 'planning' | 'in_progress' | 'on_hold' | 'completed' | 'cancelled';
+export type Client = Tables<'clients'>;
+export type ClientInsert = TablesInsert<'clients'>;
+export type ClientUpdate = TablesUpdate<'clients'>;
 
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  client_id: string;
-  status: ProjectStatus;
-  deadline: string;
-  budget: number;
-  paid_amount: number;
-  briefing?: Record<string, any>;
-  contract_content?: string;
-  contract_url?: string;
-  created_at: string;
-  updated_at: string;
-  // Relationships (via joins)
-  clients?: Client;
-}
+export type Project = Tables<'projects'>;
+export type ProjectInsert = TablesInsert<'projects'>;
+export type ProjectUpdate = TablesUpdate<'projects'>;
+
+export type Task = Tables<'tasks'>;
+export type TaskInsert = TablesInsert<'tasks'>;
+export type TaskUpdate = TablesUpdate<'tasks'>;
+
+export type Contract = Tables<'contracts'>;
+export type ContractInsert = TablesInsert<'contracts'>;
+export type ContractUpdate = TablesUpdate<'contracts'>;
+
+export type Event = Tables<'events'>;
+export type EventInsert = TablesInsert<'events'>;
+export type EventUpdate = TablesUpdate<'events'>;
+
+export type Assistant = Tables<'assistants'>;
+export type AssistantInsert = TablesInsert<'assistants'>;
+export type AssistantUpdate = TablesUpdate<'assistants'>;
+
+export type Invoice = Tables<'invoices'>;
+export type InvoiceInsert = TablesInsert<'invoices'>;
+export type InvoiceUpdate = TablesUpdate<'invoices'>;
+
+export type Service = Tables<'services'>;
+export type ServiceInsert = TablesInsert<'services'>;
+export type ServiceUpdate = TablesUpdate<'services'>;
+
+export type Profile = Tables<'profiles'>;
+export type ProfileInsert = TablesInsert<'profiles'>;
+export type ProfileUpdate = TablesUpdate<'profiles'>;
 
 // ============================================
-// Tasks Table
+// Project Status Type (based on actual DB values)
+// ============================================
+
+export type ProjectStatus = 'active' | 'completed' | 'cancelled' | 'planning' | 'in_progress' | 'on_hold';
+
+// ============================================
+// Task Types for Kanban (UI-only, not in DB)
 // ============================================
 
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done';
 export type TaskPriority = 'low' | 'medium' | 'high';
 
-export interface Task {
-  id: string;
-  project_id: string;
-  title: string;
-  description?: string;
+// Extended task type for Kanban UI (adds virtual fields)
+export interface KanbanTask extends Task {
   status: TaskStatus;
   priority: TaskPriority;
-  assignee_id?: string;
-  created_at: string;
-  updated_at: string;
-  // Relationships (via joins)
-  projects?: Project;
 }
 
 // ============================================
-// Contract Signatures Table
+// User Roles (from DB enum)
 // ============================================
 
-export interface ContractSignature {
-  id: string;
-  project_id: string;
-  signed_by: string;
-  signed_at: string;
-  ip_address?: string;
-  signature_url?: string;
-  created_at: string;
-  // Relationships
-  projects?: Project;
-}
-
-// ============================================
-// User Roles Table
-// ============================================
-
-export type UserRole = 'user' | 'admin' | 'super_admin' | 'assistant';
+export type UserRole = 'admin' | 'user';
 
 export interface UserRoleRecord {
   id: string;
   user_id: string;
   role: UserRole;
+}
+
+// ============================================
+// Financial Types (manual tables)
+// ============================================
+
+export interface Wallet {
+  id: string;
+  user_id: string;
+  available_balance: number;
+  pending_balance: number;
+  bank_details?: Record<string, any>;
+  metadata?: Record<string, any>;
   created_at: string;
   updated_at: string;
 }
 
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded';
+export type TransactionType = 'charge' | 'refund' | 'payout' | 'adjustment';
+
+export interface Transaction {
+  id: string;
+  user_id: string;
+  gross_amount: number;
+  platform_fee: number;
+  net_amount: number;
+  currency: string;
+  type: TransactionType;
+  status: TransactionStatus;
+  metadata?: Record<string, any>;
+  created_at: string;
+}
+
+export interface FinancialOverview {
+  user_id: string;
+  period_start: string;
+  period_type: 'monthly' | 'annual';
+  gross_revenue: number;
+  platform_fees: number;
+  net_revenue: number;
+  transactions_count: number;
+}
+
 // ============================================
-// System Config Table (CMS)
+// Config Types
 // ============================================
 
 export type ConfigValueType = 'string' | 'number' | 'boolean' | 'json';
@@ -111,94 +133,46 @@ export interface ConfigItem {
   updated_by?: string;
 }
 
-// Alias for consistency
-export type SystemConfig = ConfigItem;
-
 // ============================================
-// Wallets Table (Financial)
+// UI Display Labels & Colors
 // ============================================
 
-export interface Wallet {
-  id: string;
-  user_id: string;
-  available_balance: number;
-  pending_balance: number;
-  bank_details?: Record<string, any>;
-  metadata?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
+export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
+  active: 'Ativo',
+  planning: 'Planejamento',
+  in_progress: 'Em Progresso',
+  on_hold: 'Pausado',
+  completed: 'Concluído',
+  cancelled: 'Cancelado',
+};
 
-// ============================================
-// Transactions Table (Financial)
-// ============================================
+export const PROJECT_STATUS_COLORS: Record<ProjectStatus, string> = {
+  active: 'bg-blue-100 text-blue-700 border-blue-200',
+  planning: 'bg-purple-100 text-purple-700 border-purple-200',
+  in_progress: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+  on_hold: 'bg-orange-100 text-orange-700 border-orange-200',
+  completed: 'bg-green-100 text-green-700 border-green-200',
+  cancelled: 'bg-red-100 text-red-700 border-red-200',
+};
 
-export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'canceled' | 'refunded';
-export type TransactionType = 'charge' | 'refund' | 'payout' | 'adjustment';
+export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
+  todo: 'A Fazer',
+  in_progress: 'Em Progresso',
+  review: 'Revisão',
+  done: 'Concluído',
+};
 
-export interface Transaction {
-  id: string;
-  id_stripe?: string;
-  user_id: string;
-  appointment_id?: string;
-  gross_amount: number;
-  platform_fee: number;
-  net_amount: number;
-  currency: string;
-  type: TransactionType;
-  status: TransactionStatus;
-  metadata?: Record<string, any>;
-  created_at: string;
-}
+export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
+  low: 'Baixa',
+  medium: 'Média',
+  high: 'Alta',
+};
 
-// ============================================
-// Split Rules Table (Financial)
-// ============================================
-
-export interface SplitRule {
-  id: string;
-  service: string;
-  recipient_user_id: string;
-  percentage: number;
-  active: boolean;
-  metadata?: Record<string, any>;
-  created_at: string;
-  updated_at: string;
-}
-
-// ============================================
-// Payouts Table (Financial)
-// ============================================
-
-export type PayoutStatus = 'requested' | 'processing' | 'completed' | 'failed' | 'canceled';
-
-export interface Payout {
-  id: string;
-  user_id: string;
-  amount: number;
-  fee: number;
-  net_amount: number;
-  bank_details?: Record<string, any>;
-  external_payout_id?: string;
-  status: PayoutStatus;
-  requested_at: string;
-  processed_at?: string;
-  metadata?: Record<string, any>;
-}
-
-// ============================================
-// Financial Overview (View)
-// ============================================
-
-export interface FinancialOverview {
-  user_id: string;
-  period_start: string;
-  period_type: 'monthly' | 'annual';
-  gross_revenue: number;
-  platform_fees: number;
-  net_revenue: number;
-  transactions_count: number;
-}
+export const TASK_PRIORITY_COLORS: Record<TaskPriority, string> = {
+  low: 'bg-blue-100 text-blue-700',
+  medium: 'bg-yellow-100 text-yellow-700',
+  high: 'bg-red-100 text-red-700',
+};
 
 // ============================================
 // Common Query Response Types
@@ -222,40 +196,9 @@ export interface QueryManyResponse<T> {
 }
 
 // ============================================
-// Enums for UI Display
+// Project with Client (for joins)
 // ============================================
 
-export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
-  planning: 'Planejamento',
-  in_progress: 'Em Progresso',
-  on_hold: 'Pausado',
-  completed: 'Concluído',
-  cancelled: 'Cancelado',
-};
-
-export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  todo: 'A Fazer',
-  in_progress: 'Em Progresso',
-  review: 'Revisão',
-  done: 'Concluído',
-};
-
-export const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
-  low: 'Baixa',
-  medium: 'Média',
-  high: 'Alta',
-};
-
-export const PROJECT_STATUS_COLORS: Record<ProjectStatus, string> = {
-  planning: 'bg-blue-100 text-blue-700 border-blue-200',
-  in_progress: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  on_hold: 'bg-orange-100 text-orange-700 border-orange-200',
-  completed: 'bg-green-100 text-green-700 border-green-200',
-  cancelled: 'bg-red-100 text-red-700 border-red-200',
-};
-
-export const TASK_PRIORITY_COLORS: Record<TaskPriority, string> = {
-  low: 'bg-blue-100 text-blue-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  high: 'bg-red-100 text-red-700',
-};
+export interface ProjectWithClient extends Project {
+  clients?: Client | null;
+}

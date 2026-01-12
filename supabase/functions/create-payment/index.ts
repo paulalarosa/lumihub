@@ -6,6 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+interface ProjectData {
+  name: string;
+  public_token: string | null;
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -66,12 +71,19 @@ serve(async (req) => {
       );
     }
 
-    // Authorization check: Either authenticated user owns the invoice OR project has public token
-    const authHeader = req.headers.get('Authorization');
-    const project = invoice.projects as { name: string; public_token: string | null } | null;
+    // Extract project data - handle both array and object formats
+    const projectsData = invoice.projects;
+    let project: ProjectData | null = null;
+    
+    if (Array.isArray(projectsData) && projectsData.length > 0) {
+      project = projectsData[0] as ProjectData;
+    } else if (projectsData && typeof projectsData === 'object') {
+      project = projectsData as ProjectData;
+    }
     
     let isAuthorized = false;
 
+    const authHeader = req.headers.get('Authorization');
     if (authHeader) {
       // Check if authenticated user owns the invoice
       const supabaseAuth = createClient(

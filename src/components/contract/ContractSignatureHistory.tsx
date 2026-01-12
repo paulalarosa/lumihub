@@ -3,25 +3,38 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Download, FileText } from 'lucide-react';
-import { ContractSignature } from '@/types/database';
+
+interface ContractSignatureData {
+  id: string;
+  project_id: string;
+  signed_by?: string | null;
+  signed_at: string | null;
+  signature_data: string | null;
+  status: string;
+  created_at: string;
+}
 
 export function ContractSignatureHistory({ projectId }: { projectId: string }) {
-  const [signatures, setSignatures] = useState<ContractSignature[]>([]);
+  const [signatures, setSignatures] = useState<ContractSignatureData[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSignatures = async () => {
       try {
+        // Note: This table may not exist yet - will need to be created via migration
+        // For now, we'll handle the error gracefully
         const { data, error } = await supabase
-          .from('contract_signatures' as any)
-          .select('*')
+          .from('contracts')
+          .select('id, project_id, status, signed_at, signature_data, created_at')
           .eq('project_id', projectId)
+          .eq('status', 'signed')
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setSignatures((data as any) || []);
+        setSignatures(data || []);
       } catch (error) {
         console.error('Erro ao buscar assinaturas:', error);
+        setSignatures([]);
       } finally {
         setLoading(false);
       }
@@ -54,26 +67,22 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{signature.signed_by}</p>
-                <p className="text-sm text-gray-500">
-                  {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
-                    locale: ptBR,
-                  })}
+                <p className="font-medium text-gray-900">
+                  {signature.signed_by || 'Contrato Assinado'}
                 </p>
-                {signature.ip_address && (
-                  <p className="text-xs text-gray-400">IP: {signature.ip_address}</p>
+                {signature.signed_at && (
+                  <p className="text-sm text-gray-500">
+                    {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
+                      locale: ptBR,
+                    })}
+                  </p>
                 )}
               </div>
-              {signature.signature_url && (
-                <a
-                  href={signature.signature_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
-                >
+              {signature.signature_data && (
+                <div className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded">
                   <Download className="w-4 h-4" />
-                  PDF
-                </a>
+                  Assinado
+                </div>
               )}
             </div>
           </div>

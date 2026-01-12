@@ -4,13 +4,13 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
-import { TaskCard } from './TaskCard.tsx';
-import { Task } from '@/types/database';
+import { TaskCard } from './TaskCard';
+import type { KanbanTask } from '@/types/database';
 
 interface KanbanColumnProps {
   status: string;
   statusLabel: string;
-  tasks: Task[];
+  tasks: KanbanTask[];
   priorityColors: Record<string, string>;
   priorityLabels: Record<string, string>;
   isFirstColumn: boolean;
