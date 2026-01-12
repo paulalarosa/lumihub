@@ -81,7 +81,6 @@ export default function AdminUsers() {
                 <tr className="border-b border-slate-700">
                   <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">ID do Usuário</th>
                   <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">Função</th>
-                  <th className="text-left py-3 px-4 text-slate-300 font-medium text-sm">Data de Criação</th>
                   <th className="text-right py-3 px-4 text-slate-300 font-medium text-sm">Ações</th>
                 </tr>
               </thead>
@@ -90,9 +89,6 @@ export default function AdminUsers() {
                   <tr key={u.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition">
                     <td className="py-4 px-4 text-white text-sm font-mono">{u.user_id.substring(0, 8)}...</td>
                     <td className="py-4 px-4 text-slate-300 text-sm capitalize">{u.role}</td>
-                    <td className="py-4 px-4 text-slate-400 text-sm">
-                      {new Date(u.created_at).toLocaleDateString('pt-BR')}
-                    </td>
                     <td className="py-4 px-4 text-right space-x-2">
                       <Button
                         onClick={() => {
