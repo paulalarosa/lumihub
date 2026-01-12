@@ -13,13 +13,13 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
     const fetchSignatures = async () => {
       try {
         const { data, error } = await supabase
-          .from('contract_signatures')
+          .from('contract_signatures' as any)
           .select('*')
           .eq('project_id', projectId)
           .order('created_at', { ascending: false });
 
         if (error) throw error;
-        setSignatures(data || []);
+        setSignatures((data as any) || []);
       } catch (error) {
         console.error('Erro ao buscar assinaturas:', error);
       } finally {

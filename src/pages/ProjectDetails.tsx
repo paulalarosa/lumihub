@@ -40,7 +40,7 @@ export default function ProjectDetails() {
 
         if (error) throw error;
 
-        setProject(data);
+        setProject(data as any);
       } catch (error) {
         console.error('Erro ao buscar projeto:', error);
         toast({

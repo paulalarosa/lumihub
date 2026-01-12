@@ -4,7 +4,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { Plus } from 'lucide-react';
-import { TaskCard } from './TaskCard';
+import { TaskCard } from './TaskCard.tsx';
 import { Task } from '@/types/database';
 
 interface KanbanColumnProps {

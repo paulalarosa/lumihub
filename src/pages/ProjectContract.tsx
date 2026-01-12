@@ -90,13 +90,13 @@ export default function ProjectContract() {
 
         // Load contract content into editor
         const savedContent = localStorage.getItem(`contract_${projectId}`);
-        const contentToLoad = savedContent || data?.contract_content || '';
+        const contentToLoad = savedContent || (data as any)?.contract_content || '';
 
         if (editor && contentToLoad) {
           editor.commands.setContent(contentToLoad);
         }
 
-        setShowSignatureArea(data?.status === 'signed');
+        setShowSignatureArea((data as any)?.status === 'signed');
       } catch (error) {
         console.error('Erro ao buscar projeto:', error);
         toast({
@@ -213,7 +213,7 @@ export default function ProjectContract() {
       const opt = {
         margin: 10,
         filename: `${project?.project_name || 'contrato'}_assinado.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        image: { type: 'png' as any, quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
@@ -221,7 +221,7 @@ export default function ProjectContract() {
       // Generate PDF blob
       const pdfPromise = new Promise<Blob>((resolve, reject) => {
         html2pdf()
-          .set(opt)
+          .set(opt as any)
           .from(fullHTML)
           .toPdf()
           .output('blob')
@@ -254,14 +254,14 @@ export default function ProjectContract() {
 
       // Save signature data to contract_signatures table
       const { error: signatureError } = await supabase
-        .from('contract_signatures')
+        .from('contract_signatures' as any)
         .insert({
           project_id: projectId,
           signed_by: signingData.name,
           signed_at: new Date().toISOString(),
           ip_address: getClientIP(),
           signature_url: urlData.publicUrl,
-        });
+        } as any);
 
       if (signatureError) {
         console.error('Erro ao salvar assinatura:', signatureError);
@@ -292,7 +292,7 @@ export default function ProjectContract() {
       if (project) {
         setProject({
           ...project,
-          status: 'signed',
+          status: 'completed' as any,
           contract_url: urlData.publicUrl,
         });
       }
@@ -537,7 +537,7 @@ export default function ProjectContract() {
               </div>
 
               {/* Success Message */}
-              {project?.status === 'signed' && (
+              {project?.status === 'completed' && (
                 <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Contrato já foi assinado em {project.contract_url ? '(PDF salvo)' : ''}

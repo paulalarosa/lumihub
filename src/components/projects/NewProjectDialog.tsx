@@ -76,7 +76,7 @@ export function NewProjectDialog({
 
       if (error) throw error;
 
-      setClients(data || []);
+      setClients((data as any) || []);
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
       toast({

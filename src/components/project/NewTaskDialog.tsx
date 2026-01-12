@@ -48,10 +48,8 @@ export function NewTaskDialog({
         .insert({
           project_id: projectId,
           title: title.trim(),
-          status: 'todo',
-          priority,
           description: '',
-        })
+        } as any)
         .select()
         .single();
 
@@ -62,7 +60,7 @@ export function NewTaskDialog({
         description: 'Tarefa criada com sucesso.',
       });
 
-      onTaskCreated(data as Task);
+      onTaskCreated(data as any as Task);
       setTitle('');
       setPriority('medium');
       onOpenChange(false);

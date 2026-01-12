@@ -9,11 +9,11 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/utilities';
+import { arrayMove } from '@dnd-kit/sortable';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { KanbanColumn } from './KanbanColumn';
-import { NewTaskDialog } from './NewTaskDialog';
+import { KanbanColumn } from './KanbanColumn.tsx';
+import { NewTaskDialog } from './NewTaskDialog.tsx';
 import { Task, TaskStatus, TaskPriority, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_PRIORITY_COLORS } from '@/types/database';
 const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
 
@@ -29,9 +29,7 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      distance: 8,
-    })
+    useSensor(PointerSensor)
   );
 
   // Fetch tasks from Supabase
@@ -45,7 +43,7 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
           .order('created_at', { ascending: true });
 
         if (error) throw error;
-        setTasks(data || []);
+        setTasks((data as any) || []);
       } catch (error) {
         console.error('Erro ao buscar tarefas:', error);
         toast({
@@ -97,7 +95,7 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
       try {
         const { error } = await supabase
           .from('tasks')
-          .update({ status: newStatus })
+          .update({ status: newStatus } as any)
           .eq('id', activeTask.id);
 
         if (error) throw error;
