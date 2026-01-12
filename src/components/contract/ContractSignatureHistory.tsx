@@ -7,10 +7,10 @@ import { Download, FileText } from 'lucide-react';
 interface ContractSignatureData {
   id: string;
   project_id: string;
-  signed_by: string;
-  signed_at: string;
-  ip_address?: string | null;
-  signature_url?: string | null;
+  signed_by?: string | null;
+  signed_at: string | null;
+  signature_data: string | null;
+  status: string;
   created_at: string;
 }
 
@@ -67,26 +67,22 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="font-medium text-gray-900">{signature.signed_by}</p>
-                <p className="text-sm text-gray-500">
-                  {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
-                    locale: ptBR,
-                  })}
+                <p className="font-medium text-gray-900">
+                  {signature.signed_by || 'Contrato Assinado'}
                 </p>
-                {signature.ip_address && (
-                  <p className="text-xs text-gray-400">IP: {signature.ip_address}</p>
+                {signature.signed_at && (
+                  <p className="text-sm text-gray-500">
+                    {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
+                      locale: ptBR,
+                    })}
+                  </p>
                 )}
               </div>
-              {signature.signature_url && (
-                <a
-                  href={signature.signature_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition"
-                >
+              {signature.signature_data && (
+                <div className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded">
                   <Download className="w-4 h-4" />
-                  PDF
-                </a>
+                  Assinado
+                </div>
               )}
             </div>
           </div>
