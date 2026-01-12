@@ -11,6 +11,17 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
+interface EventData {
+  title: string;
+  description?: string;
+  event_date: string;
+  start_time?: string;
+  end_time?: string;
+  location?: string;
+  address?: string;
+  color?: string;
+}
+
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -32,7 +43,7 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
   return data.access_token;
 }
 
-function formatEventForGoogle(event: any) {
+function formatEventForGoogle(event: EventData) {
   const startDateTime = event.start_time 
     ? `${event.event_date}T${event.start_time}` 
     : event.event_date;
@@ -55,7 +66,7 @@ function formatEventForGoogle(event: any) {
     end: isAllDay
       ? { date: event.event_date }
       : { dateTime: endDateTime, timeZone: 'America/Sao_Paulo' },
-    colorId: getGoogleColorId(event.color),
+    colorId: getGoogleColorId(event.color || ''),
   };
 }
 
@@ -147,7 +158,7 @@ serve(async (req) => {
 
     // CREATE event in Google Calendar
     if (action === 'create') {
-      const googleEvent = formatEventForGoogle(event_data);
+      const googleEvent = formatEventForGoogle(event_data as EventData);
       console.log('Creating Google Calendar event:', googleEvent);
 
       const response = await fetch(baseUrl, {
@@ -194,7 +205,7 @@ serve(async (req) => {
 
       if (!localEvent?.google_calendar_event_id) {
         // Event doesn't exist in Google, create it instead
-        const googleEvent = formatEventForGoogle(event_data);
+        const googleEvent = formatEventForGoogle(event_data as EventData);
         const response = await fetch(baseUrl, {
           method: 'POST',
           headers: {
@@ -217,7 +228,7 @@ serve(async (req) => {
         });
       }
 
-      const googleEvent = formatEventForGoogle(event_data);
+      const googleEvent = formatEventForGoogle(event_data as EventData);
       console.log('Updating Google Calendar event:', localEvent.google_calendar_event_id);
 
       const response = await fetch(`${baseUrl}/${localEvent.google_calendar_event_id}`, {
@@ -368,7 +379,7 @@ serve(async (req) => {
       let synced = 0;
 
       for (const event of localEvents || []) {
-        const googleEvent = formatEventForGoogle(event);
+        const googleEvent = formatEventForGoogle(event as EventData);
         
         const response = await fetch(baseUrl, {
           method: 'POST',
@@ -410,7 +421,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in google-calendar-sync:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

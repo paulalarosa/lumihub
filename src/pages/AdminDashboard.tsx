@@ -45,7 +45,7 @@ export default function AdminDashboard() {
         .single();
 
       const userRole = profileData?.role as UserRole | undefined;
-      const isAdminUser = userRole === 'admin' || userRole === 'super_admin';
+      const isAdminUser = userRole === 'admin';
 
       if (!isAdminUser) {
         navigate('/');
