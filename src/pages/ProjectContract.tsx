@@ -17,17 +17,14 @@ import {
   Copy,
   Download,
   FileText,
+  X,
 } from 'lucide-react';
-import type { Tables } from '@/integrations/supabase/types';
+import { Project } from '@/types/database';
 
-interface ProjectData {
-  id: string;
-  name: string;
-  status: string;
-  notes?: string | null;
+interface ProjectContract extends Omit<Project, 'client_id' | 'deadline' | 'budget' | 'paid_amount' | 'briefing' | 'created_at' | 'updated_at'> {
+  project_name: string;
+  client_email?: string;
 }
-
-interface ContractData extends Tables<'contracts'> {}
 
 export default function ProjectContract() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -35,8 +32,7 @@ export default function ProjectContract() {
   const { toast } = useToast();
 
   // State
-  const [project, setProject] = useState<ProjectData | null>(null);
-  const [contract, setContract] = useState<ContractData | null>(null);
+  const [project, setProject] = useState<ProjectContract | null>(null);
   const [loading, setLoading] = useState(true);
   const [isClientView, setIsClientView] = useState(false);
   const [signingData, setSigningData] = useState({
@@ -44,6 +40,7 @@ export default function ProjectContract() {
     agreed: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSignatureArea, setShowSignatureArea] = useState(false);
 
   const editorRef = useRef<HTMLDivElement>(null);
   const signatureAreaRef = useRef<HTMLDivElement>(null);
@@ -55,6 +52,7 @@ export default function ProjectContract() {
     editable: true,
     onUpdate: ({ editor }) => {
       if (projectId && !isClientView) {
+        // Auto-save to localStorage during editing
         localStorage.setItem(`contract_${projectId}`, editor.getHTML());
       }
     },
@@ -73,45 +71,32 @@ export default function ProjectContract() {
 
   // Fetch project and contract content
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProject = async () => {
       if (!projectId) {
         setLoading(false);
         return;
       }
 
       try {
-        // Fetch project
-        const { data: projectData, error: projectError } = await supabase
+        const { data, error } = await supabase
           .from('projects')
-          .select('id, name, status, notes')
+          .select('id, project_name, contract_content, contract_url, status, client_email')
           .eq('id', projectId)
           .single();
 
-        if (projectError) throw projectError;
-        setProject(projectData);
+        if (error) throw error;
 
-        // Fetch contract from contracts table
-        const { data: contractData, error: contractError } = await supabase
-          .from('contracts')
-          .select('*')
-          .eq('project_id', projectId)
-          .maybeSingle();
-
-        if (contractError && contractError.code !== 'PGRST116') {
-          console.error('Error fetching contract:', contractError);
-        }
-
-        if (contractData) {
-          setContract(contractData);
-        }
+        setProject(data as any);
 
         // Load contract content into editor
         const savedContent = localStorage.getItem(`contract_${projectId}`);
-        const contentToLoad = savedContent || contractData?.content || '';
+        const contentToLoad = savedContent || (data as any)?.contract_content || '';
 
         if (editor && contentToLoad) {
           editor.commands.setContent(contentToLoad);
         }
+
+        setShowSignatureArea((data as any)?.status === 'signed');
       } catch (error) {
         console.error('Erro ao buscar projeto:', error);
         toast({
@@ -124,7 +109,7 @@ export default function ProjectContract() {
       }
     };
 
-    fetchData();
+    fetchProject();
   }, [projectId, editor, toast]);
 
   // Generate signature link
@@ -149,9 +134,9 @@ export default function ProjectContract() {
     }
   };
 
-  // Get client IP (simulated)
+  // Get client IP (simulated - in production, fetch from backend)
   const getClientIP = () => {
-    return '127.0.0.1';
+    return '127.0.0.1'; // Placeholder - should be fetched from server
   };
 
   // Handle contract signature
@@ -177,7 +162,10 @@ export default function ProjectContract() {
     setIsSubmitting(true);
 
     try {
+      // Get current HTML content
       const contractHTML = editor?.getHTML() || '';
+
+      // Add signature block to the document
       const signedAt = format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR });
       const signatureBlock = `
         <div style="margin-top: 60px; border-top: 1px solid #000; padding-top: 20px; font-family: 'Times New Roman', serif; text-align: center;">
@@ -218,97 +206,95 @@ export default function ProjectContract() {
         </html>
       `;
 
+      // Generate PDF using html2pdf
+      const element = document.createElement('div');
+      element.innerHTML = fullHTML;
+
       const opt = {
         margin: 10,
-        filename: `${project?.name || 'contrato'}_assinado.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
+        filename: `${project?.project_name || 'contrato'}_assinado.pdf`,
+        image: { type: 'png' as any, quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
 
       // Generate PDF blob
-      const pdfBlob = await new Promise<Blob>((resolve, reject) => {
+      const pdfPromise = new Promise<Blob>((resolve, reject) => {
         html2pdf()
           .set(opt as any)
           .from(fullHTML)
           .toPdf()
           .output('blob')
-          .then((blob: Blob) => resolve(blob))
-          .catch((err: Error) => reject(err));
+          .then((blob: Blob) => {
+            resolve(blob);
+          })
+          .catch((err: Error) => {
+            reject(err);
+          });
       });
+
+      const pdfBlob = await pdfPromise;
 
       // Upload PDF to Supabase Storage
       const fileName = `contracts/${projectId}/${Date.now()}_${signingData.name.replace(/\s+/g, '_')}.pdf`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('briefing-files')
         .upload(fileName, pdfBlob, {
           cacheControl: '3600',
           upsert: false,
         });
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        // Continue even if upload fails
-      }
+      if (uploadError) throw uploadError;
 
+      // Get public URL
       const { data: urlData } = supabase.storage
         .from('briefing-files')
         .getPublicUrl(fileName);
 
-      // Update or create contract in contracts table
-      if (contract) {
-        const { error: updateError } = await supabase
-          .from('contracts')
-          .update({
-            content: contractHTML,
-            status: 'signed',
-            signature_data: JSON.stringify({
-              signed_by: signingData.name,
-              signed_at: new Date().toISOString(),
-              ip_address: getClientIP(),
-              pdf_url: urlData.publicUrl,
-            }),
-            signed_at: new Date().toISOString(),
-          })
-          .eq('id', contract.id);
+      // Save signature data to contract_signatures table
+      const { error: signatureError } = await supabase
+        .from('contract_signatures' as any)
+        .insert({
+          project_id: projectId,
+          signed_by: signingData.name,
+          signed_at: new Date().toISOString(),
+          ip_address: getClientIP(),
+          signature_url: urlData.publicUrl,
+        } as any);
 
-        if (updateError) throw updateError;
-      } else {
-        // Get current user for contract creation
-        const { data: { user } } = await supabase.auth.getUser();
-        
-        if (user) {
-          const { error: insertError } = await supabase
-            .from('contracts')
-            .insert({
-              project_id: projectId!,
-              user_id: user.id,
-              title: `Contrato - ${project?.name}`,
-              content: contractHTML,
-              status: 'signed',
-              signature_data: JSON.stringify({
-                signed_by: signingData.name,
-                signed_at: new Date().toISOString(),
-                ip_address: getClientIP(),
-                pdf_url: urlData.publicUrl,
-              }),
-              signed_at: new Date().toISOString(),
-            });
-
-          if (insertError) throw insertError;
-        }
+      if (signatureError) {
+        console.error('Erro ao salvar assinatura:', signatureError);
+        // Don't fail the whole operation if signature save fails
       }
+
+      // Update project with contract URL and signature data
+      const { error: updateError } = await supabase
+        .from('projects')
+        .update({
+          contract_url: urlData.publicUrl,
+          status: 'signed',
+          contract_content: contractHTML,
+        })
+        .eq('id', projectId);
+
+      if (updateError) throw updateError;
 
       toast({
         title: 'Sucesso!',
         description: 'Contrato assinado e PDF gerado com sucesso.',
       });
 
+      // Reset form
       setSigningData({ name: '', agreed: false });
 
+      // Update project state to show signed status
       if (project) {
-        setProject({ ...project, status: 'signed' });
+        setProject({
+          ...project,
+          status: 'completed' as any,
+          contract_url: urlData.publicUrl,
+        });
       }
     } catch (error) {
       console.error('Erro ao assinar contrato:', error);
@@ -330,10 +316,10 @@ export default function ProjectContract() {
       const html = editor.getHTML();
       const opt = {
         margin: 10,
-        filename: `${project?.name || 'contrato'}.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
+        filename: `${project?.project_name || 'contrato'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
       };
 
       html2pdf().set(opt).from(html).save();
@@ -373,20 +359,19 @@ export default function ProjectContract() {
     );
   }
 
-  const isSigned = contract?.status === 'signed' || project.status === 'signed';
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.project_name}</h1>
           <p className="text-gray-600">Contrato do Projeto</p>
         </div>
 
         {/* Toolbar */}
         {!isClientView && editor && (
           <div className="bg-white rounded-t-lg border border-b-0 border-gray-200 p-4 flex flex-wrap gap-2 items-center shadow-sm">
+            {/* Bold */}
             <button
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`p-2 rounded hover:bg-gray-100 transition ${
@@ -397,6 +382,7 @@ export default function ProjectContract() {
               <Bold className="w-5 h-5" />
             </button>
 
+            {/* Italic */}
             <button
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={`p-2 rounded hover:bg-gray-100 transition ${
@@ -407,6 +393,7 @@ export default function ProjectContract() {
               <Italic className="w-5 h-5" />
             </button>
 
+            {/* Underline */}
             <button
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               className={`p-2 rounded hover:bg-gray-100 transition ${
@@ -419,6 +406,7 @@ export default function ProjectContract() {
 
             <div className="h-6 border-l border-gray-300"></div>
 
+            {/* Heading */}
             <button
               onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
               className={`p-2 rounded hover:bg-gray-100 transition ${
@@ -429,6 +417,7 @@ export default function ProjectContract() {
               <Heading2 className="w-5 h-5" />
             </button>
 
+            {/* List */}
             <button
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               className={`p-2 rounded hover:bg-gray-100 transition ${
@@ -441,6 +430,7 @@ export default function ProjectContract() {
 
             <div className="h-6 border-l border-gray-300 ml-auto mr-2"></div>
 
+            {/* Generate Signature Link */}
             <button
               onClick={handleGenerateSignatureLink}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
@@ -450,6 +440,7 @@ export default function ProjectContract() {
               Gerar Link
             </button>
 
+            {/* Download PDF */}
             <button
               onClick={handleDownloadPDF}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
@@ -494,6 +485,7 @@ export default function ProjectContract() {
               <h3 className="text-lg font-bold text-gray-900 mb-4">Assinar Contrato</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                {/* Checkbox Agreement */}
                 <div className="flex items-center gap-3">
                   <input
                     type="checkbox"
@@ -512,6 +504,7 @@ export default function ProjectContract() {
                   </label>
                 </div>
 
+                {/* Full Name Input */}
                 <input
                   type="text"
                   placeholder="Nome completo para assinatura"
@@ -523,6 +516,7 @@ export default function ProjectContract() {
                   className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                 />
 
+                {/* Sign Button */}
                 <button
                   onClick={handleSignContract}
                   disabled={isSubmitting || !signingData.agreed}
@@ -542,16 +536,18 @@ export default function ProjectContract() {
                 </button>
               </div>
 
-              {isSigned && (
+              {/* Success Message */}
+              {project?.status === 'completed' && (
                 <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2">
                   <FileText className="w-4 h-4" />
-                  Contrato já foi assinado
+                  Contrato já foi assinado em {project.contract_url ? '(PDF salvo)' : ''}
                 </div>
               )}
             </div>
           </div>
         )}
 
+        {/* Bottom padding for sticky footer in client view */}
         {isClientView && <div className="h-32"></div>}
       </div>
     </div>

@@ -10,13 +10,11 @@ import {
 import { Plus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import type { Tables } from '@/integrations/supabase/types';
-
-type TaskPriority = 'low' | 'medium' | 'high';
+import { Task, TaskPriority } from '@/types/database';
 
 interface NewTaskDialogProps {
   projectId: string;
-  onTaskCreated: (task: Tables<'tasks'>) => void;
+  onTaskCreated: (task: Task) => void;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -45,21 +43,13 @@ export function NewTaskDialog({
     setIsLoading(true);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        throw new Error('Usuário não autenticado');
-      }
-
       const { data, error } = await supabase
         .from('tasks')
         .insert({
           project_id: projectId,
           title: title.trim(),
           description: '',
-          is_completed: false,
-          user_id: user.id,
-        })
+        } as any)
         .select()
         .single();
 
@@ -70,7 +60,7 @@ export function NewTaskDialog({
         description: 'Tarefa criada com sucesso.',
       });
 
-      onTaskCreated(data);
+      onTaskCreated(data as any as Task);
       setTitle('');
       setPriority('medium');
       onOpenChange(false);
@@ -136,7 +126,7 @@ export function NewTaskDialog({
             <select
               id="priority"
               value={priority}
-              onChange={(e) => setPriority(e.target.value as TaskPriority)}
+              onChange={(e) => setPriority(e.target.value as any)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="low">Baixa</option>

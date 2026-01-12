@@ -9,30 +9,13 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { KanbanColumn } from './KanbanColumn';
-import { NewTaskDialog } from './NewTaskDialog';
-import type { Tables } from '@/integrations/supabase/types';
-import {
-  TaskStatus,
-  TaskPriority,
-  KanbanTask,
-  TASK_STATUS_LABELS,
-  TASK_PRIORITY_LABELS,
-  TASK_PRIORITY_COLORS,
-} from '@/types/database';
-
+import { KanbanColumn } from './KanbanColumn.tsx';
+import { NewTaskDialog } from './NewTaskDialog.tsx';
+import { Task, TaskStatus, TaskPriority, TASK_STATUS_LABELS, TASK_PRIORITY_LABELS, TASK_PRIORITY_COLORS } from '@/types/database';
 const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done'];
-
-// Map is_completed to status
-function mapTaskToKanban(task: Tables<'tasks'>): KanbanTask {
-  return {
-    ...task,
-    status: task.is_completed ? 'done' : 'todo',
-    priority: 'medium' as TaskPriority,
-  };
-}
 
 interface ProjectKanbanProps {
   projectId: string;
@@ -40,17 +23,13 @@ interface ProjectKanbanProps {
 
 export function ProjectKanban({ projectId }: ProjectKanbanProps) {
   const { toast } = useToast();
-  const [tasks, setTasks] = useState<KanbanTask[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
+    useSensor(PointerSensor)
   );
 
   // Fetch tasks from Supabase
@@ -64,7 +43,7 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
           .order('created_at', { ascending: true });
 
         if (error) throw error;
-        setTasks((data || []).map(mapTaskToKanban));
+        setTasks((data as any) || []);
       } catch (error) {
         console.error('Erro ao buscar tarefas:', error);
         toast({
@@ -91,11 +70,12 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     const activeTask = tasks.find((t) => t.id === active.id);
     const overStatus = over.id as string;
 
-    if (activeTask && STATUSES.includes(overStatus as TaskStatus)) {
+    if (activeTask && STATUSES.includes(overStatus as any)) {
+      // Update local state for optimistic UI
       setTasks((tasks) =>
         tasks.map((task) =>
           task.id === activeTask.id
-            ? { ...task, status: overStatus as TaskStatus }
+            ? { ...task, status: overStatus as Task['status'] }
             : task
         )
       );
@@ -111,14 +91,11 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     const activeTask = tasks.find((t) => t.id === active.id);
     const newStatus = over.id as string;
 
-    if (activeTask && STATUSES.includes(newStatus as TaskStatus)) {
+    if (activeTask && STATUSES.includes(newStatus as any)) {
       try {
-        // Map status to is_completed for DB
-        const isCompleted = newStatus === 'done';
-
         const { error } = await supabase
           .from('tasks')
-          .update({ is_completed: isCompleted })
+          .update({ status: newStatus } as any)
           .eq('id', activeTask.id);
 
         if (error) throw error;
@@ -146,8 +123,8 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     }
   };
 
-  const handleTaskCreated = (newTask: Tables<'tasks'>) => {
-    setTasks((prev) => [mapTaskToKanban(newTask), ...prev]);
+  const handleTaskCreated = (newTask: Task) => {
+    setTasks((prev) => [newTask, ...prev]);
     setIsDialogOpen(false);
   };
 

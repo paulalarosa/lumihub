@@ -20,13 +20,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Client } from '@/types/database';
 import { Plus } from 'lucide-react';
-
-// Minimal client type for the dropdown
-interface ClientOption {
-  id: string;
-  name: string;
-}
 
 interface NewProjectDialogProps {
   onSuccess: () => void;
@@ -42,16 +37,15 @@ export function NewProjectDialog({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingClients, setLoadingClients] = useState(false);
-  const [clients, setClients] = useState<ClientOption[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
     client_id: '',
-    event_date: '',
-    event_location: '',
-    event_type: '',
-    notes: '',
-    status: 'active',
+    deadline: '',
+    budget: '',
+    description: '',
+    status: 'planning',
   });
 
   // Carregar clientes ao abrir o modal
@@ -100,6 +94,14 @@ export function NewProjectDialog({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+
+    // Validação de budget (apenas números positivos)
+    if (name === 'budget') {
+      if (value && !/^\d+(\.\d{0,2})?$/.test(value)) {
+        return; // Ignora valores inválidos
+      }
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -114,6 +116,7 @@ export function NewProjectDialog({
   };
 
   const validateForm = (): boolean => {
+    // Nome obrigatório
     if (!formData.name.trim()) {
       toast({
         title: 'Erro de Validação',
@@ -123,10 +126,37 @@ export function NewProjectDialog({
       return false;
     }
 
+    // Cliente obrigatório
     if (!formData.client_id) {
       toast({
         title: 'Erro de Validação',
         description: 'Selecione um cliente.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    // Validação de deadline (não pode ser no passado)
+    if (formData.deadline) {
+      const selectedDate = new Date(formData.deadline);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        toast({
+          title: 'Erro de Validação',
+          description: 'A data limite não pode ser no passado.',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    }
+
+    // Validação de budget (deve ser positivo)
+    if (formData.budget && parseFloat(formData.budget) <= 0) {
+      toast({
+        title: 'Erro de Validação',
+        description: 'O orçamento deve ser maior que zero.',
         variant: 'destructive',
       });
       return false;
@@ -155,18 +185,18 @@ export function NewProjectDialog({
         return;
       }
 
-      // Preparar dados para insert (matching actual DB columns)
+      // Preparar dados para insert
       const newProject = {
         name: formData.name.trim(),
         client_id: formData.client_id,
         user_id: user.id,
-        event_date: formData.event_date || null,
-        event_location: formData.event_location.trim() || null,
-        event_type: formData.event_type.trim() || null,
-        notes: formData.notes.trim() || null,
+        deadline: formData.deadline || null,
+        budget: formData.budget ? parseFloat(formData.budget) : null,
+        description: formData.description.trim() || null,
         status: formData.status,
       };
 
+      // Insert no Supabase
       const { error } = await supabase
         .from('projects')
         .insert([newProject]);
@@ -175,6 +205,7 @@ export function NewProjectDialog({
         throw error;
       }
 
+      // Sucesso
       const clientName = clients.find((c) => c.id === formData.client_id)?.name;
       toast({
         title: 'Projeto Criado',
@@ -185,14 +216,16 @@ export function NewProjectDialog({
       setFormData({
         name: '',
         client_id: '',
-        event_date: '',
-        event_location: '',
-        event_type: '',
-        notes: '',
-        status: 'active',
+        deadline: '',
+        budget: '',
+        description: '',
+        status: 'planning',
       });
 
+      // Fechar dialog
       setOpen(false);
+
+      // Chamar callback
       onSuccess();
     } catch (error) {
       console.error('Erro ao criar projeto:', error);
@@ -254,7 +287,7 @@ export function NewProjectDialog({
               <Input
                 id="name"
                 name="name"
-                placeholder="Casamento Maria & João"
+                placeholder="Website Redesign"
                 value={formData.name}
                 onChange={handleInputChange}
                 disabled={loading}
@@ -285,62 +318,64 @@ export function NewProjectDialog({
               </Select>
             </div>
 
-            {/* Tipo de Evento */}
+            {/* Descrição */}
             <div className="space-y-2">
-              <Label htmlFor="event_type">Tipo de Evento</Label>
-              <Input
-                id="event_type"
-                name="event_type"
-                placeholder="Casamento, Formatura, etc."
-                value={formData.event_type}
-                onChange={handleInputChange}
-                disabled={loading}
-              />
-            </div>
-
-            {/* Grid de 2 colunas para Data e Local */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Data do Evento */}
-              <div className="space-y-2">
-                <Label htmlFor="event_date">Data do Evento</Label>
-                <Input
-                  id="event_date"
-                  name="event_date"
-                  type="date"
-                  value={formData.event_date}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                />
-              </div>
-
-              {/* Local */}
-              <div className="space-y-2">
-                <Label htmlFor="event_location">Local</Label>
-                <Input
-                  id="event_location"
-                  name="event_location"
-                  placeholder="Local do evento"
-                  value={formData.event_location}
-                  onChange={handleInputChange}
-                  disabled={loading}
-                />
-              </div>
-            </div>
-
-            {/* Notas */}
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notas</Label>
+              <Label htmlFor="description">Descrição</Label>
               <textarea
-                id="notes"
-                name="notes"
-                placeholder="Observações sobre o projeto..."
-                value={formData.notes}
+                id="description"
+                name="description"
+                placeholder="Descrição do projeto..."
+                value={formData.description}
                 onChange={handleInputChange}
                 disabled={loading}
                 rows={3}
                 className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            {/* Grid de 2 colunas para Deadline e Budget */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* Deadline */}
+              <div className="space-y-2">
+                <Label htmlFor="deadline">Data Limite</Label>
+                <Input
+                  id="deadline"
+                  name="deadline"
+                  type="date"
+                  value={formData.deadline}
+                  onChange={handleInputChange}
+                  disabled={loading}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              {/* Budget */}
+              <div className="space-y-2">
+                <Label htmlFor="budget">Orçamento</Label>
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5 text-slate-500">
+                    R$
+                  </span>
+                  <Input
+                    id="budget"
+                    name="budget"
+                    type="text"
+                    placeholder="0.00"
+                    value={formData.budget}
+                    onChange={handleInputChange}
+                    disabled={loading}
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Status (hidden, sempre 'planning') */}
+            <input
+              type="hidden"
+              name="status"
+              value={formData.status}
+            />
 
             {/* Buttons */}
             <div className="flex justify-end gap-2 pt-4">

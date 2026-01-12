@@ -6,19 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface Assistant {
-  id: string;
-  google_calendar_token: string | null;
-  google_refresh_token: string | null;
-}
-
-interface SyncResult {
-  assistantId: string;
-  success: boolean;
-  eventId?: string;
-  error?: string;
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -50,7 +37,7 @@ serve(async (req) => {
       }
 
       // Sync event to each assistant's calendar
-      const syncPromises = (assistants as Assistant[] || []).map(async (assistant): Promise<SyncResult> => {
+      const syncPromises = assistants.map(async (assistant) => {
         try {
           // Refresh token if needed
           let accessToken = assistant.google_calendar_token
@@ -135,8 +122,7 @@ serve(async (req) => {
 
         } catch (error) {
           console.error(`Failed to sync calendar for assistant ${assistant.id}:`, error)
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-          return { assistantId: assistant.id, success: false, error: errorMessage }
+          return { assistantId: assistant.id, success: false, error: error.message }
         }
       })
 
@@ -165,9 +151,8 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Edge function error:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: error.message }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
