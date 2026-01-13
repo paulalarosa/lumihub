@@ -6,15 +6,15 @@ import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requireCalendar?: boolean;
+  requireOnboarding?: boolean;
 }
 
-const ProtectedRoute = ({ children, requireCalendar = false }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [checkingCalendar, setCheckingCalendar] = useState(requireCalendar);
-  const [hasCalendar, setHasCalendar] = useState<boolean | null>(null);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -24,47 +24,61 @@ const ProtectedRoute = ({ children, requireCalendar = false }: ProtectedRoutePro
       return;
     }
 
-    if (requireCalendar && user) {
-      checkCalendarConnection();
+    if (requireOnboarding) {
+      checkOnboardingStatus();
+    } else {
+      setCheckingOnboarding(false);
     }
-  }, [user, authLoading, requireCalendar]);
+  }, [user, authLoading, requireOnboarding]);
 
-  const checkCalendarConnection = async () => {
+  const checkOnboardingStatus = async () => {
+    if (!user) return;
+
     try {
       const { data, error } = await supabase
-        .from('user_integrations')
-        .select('id, is_active')
-        .eq('user_id', user!.id)
-        .eq('provider', 'google')
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
-        console.error('Error checking calendar:', error);
-        setHasCalendar(false);
+        console.error('Error checking onboarding status:', error);
+        setOnboardingCompleted(true); // Assume completed on error to prevent blocking
       } else {
-        setHasCalendar(data?.is_active ?? false);
+        setOnboardingCompleted(data?.onboarding_completed ?? false);
       }
     } catch (err) {
-      console.error('Calendar check error:', err);
-      setHasCalendar(false);
+      console.error('Onboarding check error:', err);
+      setOnboardingCompleted(true);
     } finally {
-      setCheckingCalendar(false);
+      setCheckingOnboarding(false);
     }
   };
 
+  // Handle redirects based on onboarding status
   useEffect(() => {
-    if (!checkingCalendar && requireCalendar && hasCalendar === false) {
-      // User is logged in but doesn't have calendar connected
-      if (location.pathname !== '/onboarding') {
-        navigate('/onboarding');
-      }
-    }
-  }, [checkingCalendar, hasCalendar, requireCalendar, location.pathname]);
+    if (checkingOnboarding || onboardingCompleted === null) return;
+    if (!user) return;
 
-  if (authLoading || (requireCalendar && checkingCalendar)) {
+    const isOnboardingPage = location.pathname === '/onboarding';
+
+    // User hasn't completed onboarding and is not on onboarding page
+    if (!onboardingCompleted && !isOnboardingPage && requireOnboarding) {
+      navigate('/onboarding', { replace: true });
+      return;
+    }
+
+    // User has completed onboarding but is trying to access onboarding page
+    if (onboardingCompleted && isOnboardingPage) {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+  }, [checkingOnboarding, onboardingCompleted, location.pathname, user, requireOnboarding]);
+
+  if (authLoading || (requireOnboarding && checkingOnboarding)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+        <Loader2 className="h-8 w-8 animate-spin text-white/60" />
       </div>
     );
   }
@@ -73,11 +87,30 @@ const ProtectedRoute = ({ children, requireCalendar = false }: ProtectedRoutePro
     return null;
   }
 
-  if (requireCalendar && hasCalendar === false && location.pathname !== '/onboarding') {
-    return null;
+  // Allow rendering if:
+  // 1. On onboarding page and onboarding not completed
+  // 2. Not on onboarding page and onboarding completed
+  // 3. requireOnboarding is false
+  const isOnboardingPage = location.pathname === '/onboarding';
+  
+  if (!requireOnboarding) {
+    return <>{children}</>;
   }
 
-  return <>{children}</>;
+  if (isOnboardingPage && !onboardingCompleted) {
+    return <>{children}</>;
+  }
+
+  if (!isOnboardingPage && onboardingCompleted) {
+    return <>{children}</>;
+  }
+
+  // Waiting for redirect
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+      <Loader2 className="h-8 w-8 animate-spin text-white/60" />
+    </div>
+  );
 };
 
 export default ProtectedRoute;
