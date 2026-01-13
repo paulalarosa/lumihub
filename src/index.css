@@ -85,12 +85,38 @@
 }
 
 @layer components {
-  /* Base Card Styling */
+  /* Base Card Styling - Dark Glass */
   .lumi-card {
-    background: hsl(var(--surface));
-    border: 1px solid hsl(var(--surface-border));
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(192, 192, 192, 0.1);
     border-radius: var(--radius);
-    box-shadow: var(--glass-shadow);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Glass Card - Beauty Tech Style */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(192, 192, 192, 0.1);
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .glass-card:hover {
+    border-color: rgba(192, 192, 192, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Glow Hover Effect */
+  .glow-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .glow-hover:hover {
+    box-shadow: 0 0 30px rgba(192, 192, 192, 0.15);
   }
 
   /* Typography */
