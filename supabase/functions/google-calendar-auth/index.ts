@@ -18,7 +18,25 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    const action = url.searchParams.get('action');
+    
+    // Support action from query params OR body
+    let action = url.searchParams.get('action');
+    let bodyData: any = {};
+    
+    // Try to parse body for POST requests
+    if (req.method === 'POST') {
+      try {
+        bodyData = await req.json();
+        // If action not in query params, get from body
+        if (!action && bodyData.action) {
+          action = bodyData.action;
+        }
+      } catch (e) {
+        // Body might be empty or invalid JSON
+      }
+    }
+
+    console.log('Action received:', action);
 
     // Get auth URL for OAuth flow
     if (action === 'get-auth-url') {
@@ -41,7 +59,7 @@ serve(async (req) => {
         });
       }
 
-      const { redirect_uri } = await req.json();
+      const redirect_uri = bodyData.redirect_uri;
       
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
@@ -59,7 +77,7 @@ serve(async (req) => {
 
     // Handle OAuth callback
     if (action === 'callback') {
-      const { code, state: userId, redirect_uri } = await req.json();
+      const { code, state: userId, redirect_uri } = bodyData;
       
       if (!code || !userId) {
         return new Response(JSON.stringify({ error: 'Missing code or state' }), {
