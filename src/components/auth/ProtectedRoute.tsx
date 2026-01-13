@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
@@ -58,24 +59,45 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
   // Handle redirects based on onboarding status
   useEffect(() => {
     if (checkingOnboarding || onboardingCompleted === null) return;
-    if (!user) return;
+    if (!user) return; // Auth handling is done by other logic usually, or we redirect to auth
+
+    if (location.pathname === '/planos') return; // Don't redirect if already on plans logic
+
 
     const isOnboardingPage = location.pathname === '/onboarding';
 
-    // User hasn't completed onboarding and is not on onboarding page
-    if (!onboardingCompleted && !isOnboardingPage && requireOnboarding) {
-      navigate('/onboarding', { replace: true });
+    // User has COMPLETED onboarding but is trying to access onboarding page
+    // Redirect them to dashboard
+    if (onboardingCompleted && isOnboardingPage) {
+      // console.log('Onboarding complete, redirecting to dashboard');
+      navigate('/dashboard', { replace: true });
       return;
     }
 
-    // User has completed onboarding but is trying to access onboarding page
-    if (onboardingCompleted && isOnboardingPage) {
-      navigate('/dashboard', { replace: true });
+    // User has NOT completed onboarding and is NOT on onboarding page
+    // Redirect them to onboarding (if required)
+    if (!onboardingCompleted && !isOnboardingPage && requireOnboarding) {
+      // console.log('Onboarding incomplete, redirecting to onboarding');
+      navigate('/onboarding', { replace: true });
       return;
     }
   }, [checkingOnboarding, onboardingCompleted, location.pathname, user, requireOnboarding]);
 
-  if (authLoading || (requireOnboarding && checkingOnboarding)) {
+  // Subscription Check
+  const { status, isLoading: subLoading } = useSubscription();
+
+  useEffect(() => {
+    if (authLoading || checkingOnboarding || subLoading) return;
+    if (!user) return;
+    if (!onboardingCompleted && requireOnboarding) return; // Prioritize onboarding
+
+    // If expired and not on plans/profile/billing pages
+    if (status === 'expired' && location.pathname !== '/planos' && location.pathname !== '/configuracoes') {
+      navigate('/planos');
+    }
+  }, [status, subLoading, location.pathname, user, onboardingCompleted, authLoading, checkingOnboarding]);
+
+  if (authLoading || (requireOnboarding && checkingOnboarding) || subLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
         <Loader2 className="h-8 w-8 animate-spin text-white/60" />
@@ -92,7 +114,7 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
   // 2. Not on onboarding page and onboarding completed
   // 3. requireOnboarding is false
   const isOnboardingPage = location.pathname === '/onboarding';
-  
+
   if (!requireOnboarding) {
     return <>{children}</>;
   }

@@ -9,14 +9,15 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary-hover shadow-soft hover:shadow-medium",
+        default: "bg-black border border-white/10 text-white hover:border-[#00e5ff] hover:text-[#00e5ff] hover:shadow-[0_0_20px_rgba(0,229,255,0.3)] backdrop-blur-md",
+        primary: "bg-[#00e5ff] text-black font-semibold hover:bg-[#00e5ff]/80 shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] border-none",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline: "border border-primary text-primary bg-background hover:bg-primary hover:text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-        accent: "bg-accent text-accent-foreground hover:bg-accent-hover shadow-soft hover:shadow-medium transform hover:scale-105",
-        hero: "bg-gradient-to-r from-primary to-primary-light text-primary-foreground hover:shadow-strong transform hover:scale-105 font-poppins font-semibold",
+        outline: "border border-white/10 bg-transparent text-[#C0C0C0] hover:bg-white/5 hover:text-white hover:border-white/20",
+        secondary: "bg-white/5 text-[#C0C0C0] hover:bg-white/10 hover:text-white border border-white/5",
+        ghost: "hover:bg-white/5 hover:text-[#00e5ff]",
+        link: "text-[#00e5ff] underline-offset-4 hover:underline",
+        accent: "bg-[#C0C0C0] text-black hover:bg-white shadow-[0_0_15px_rgba(192,192,192,0.3)]",
+        hero: "bg-gradient-to-r from-[#00e5ff] to-[#00b2cc] text-black font-bold hover:shadow-[0_0_30px_rgba(0,229,255,0.5)] transform hover:scale-105",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -34,7 +35,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 

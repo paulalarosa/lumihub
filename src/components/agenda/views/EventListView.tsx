@@ -3,6 +3,7 @@ import { ptBR } from 'date-fns/locale';
 import { CalendarX2 } from 'lucide-react';
 import EventCard from '@/components/agenda/EventCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { EmptyState } from '@/components/ui/empty-state';
 
 interface Event {
   id: string;
@@ -87,15 +88,12 @@ export function EventListView({
       <ScrollArea className="flex-1">
         <div className="p-4">
           {sortedDates.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-              <CalendarX2 className="h-12 w-12 mb-4 opacity-50" />
-              <p className="text-lg font-medium">Nenhum evento</p>
-              <p className="text-sm">
-                {selectedDate
-                  ? 'Não há eventos para esta data'
-                  : 'Não há eventos neste mês'}
-              </p>
-            </div>
+            <EmptyState
+              icon={CalendarX2}
+              title="Nenhum evento"
+              description={selectedDate ? 'Não há eventos para esta data' : 'Não há eventos neste mês'}
+              className="bg-transparent border-none"
+            />
           ) : (
             <div className="space-y-6">
               {sortedDates.map(dateStr => (

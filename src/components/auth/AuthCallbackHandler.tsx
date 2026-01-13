@@ -32,30 +32,35 @@ const AuthCallbackHandler = () => {
     }
   }, [searchParams]);
 
-  const handleOAuthCallback = async (code: string, state: string) => {
+  const handleOAuthCallback = async (_code: string, _state: string) => {
     try {
-      const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: {
-          action: 'callback',
-          code,
-          state,
-          redirect_uri: window.location.origin + '/auth/callback'
-        }
-      });
+      // Instead of calling an Edge Function, we just verify the session is active.
+      // Supabase handles the code exchange automatically for us in the background
+      // when using the standard OAuth flow.
+      const { data: { session }, error } = await supabase.auth.getSession();
 
       if (error) {
-        console.error('Callback error:', error);
+        console.error('Session check error:', error);
         setStatus('error');
-        setErrorMessage(error.message || 'Erro ao processar autenticação');
+        setErrorMessage(error.message || 'Erro ao verificar sessão');
         return;
       }
 
-      if (data?.success) {
+      if (session) {
         setStatus('success');
         setTimeout(() => navigate('/dashboard'), 2000);
       } else {
-        setStatus('error');
-        setErrorMessage(data?.error || 'Erro desconhecido');
+        // Wait a moment, sometimes the session takes a split second to persist
+        setTimeout(async () => {
+          const { data: { session: retrySession } } = await supabase.auth.getSession();
+          if (retrySession) {
+            setStatus('success');
+            setTimeout(() => navigate('/dashboard'), 2000);
+          } else {
+            setStatus('error');
+            setErrorMessage('Sessão não encontrada. Tente fazer login novamente.');
+          }
+        }, 1000);
       }
     } catch (err) {
       console.error('OAuth callback error:', err);
@@ -79,7 +84,7 @@ const AuthCallbackHandler = () => {
               </CardDescription>
             </>
           )}
-          
+
           {status === 'success' && (
             <>
               <div className="mx-auto mb-4">
@@ -91,7 +96,7 @@ const AuthCallbackHandler = () => {
               </CardDescription>
             </>
           )}
-          
+
           {status === 'error' && (
             <>
               <div className="mx-auto mb-4">
@@ -104,18 +109,18 @@ const AuthCallbackHandler = () => {
             </>
           )}
         </CardHeader>
-        
+
         {status === 'error' && (
           <CardContent className="space-y-3">
-            <Button 
-              onClick={() => navigate('/onboarding')} 
+            <Button
+              onClick={() => navigate('/onboarding')}
               className="w-full"
             >
               Tentar novamente
             </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/dashboard')} 
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/dashboard')}
               className="w-full"
             >
               Ir para o Dashboard

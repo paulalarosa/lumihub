@@ -3,29 +3,27 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { 
-  ArrowLeft, 
-  User, 
-  Mail, 
-  Phone, 
+import {
+  ArrowLeft,
+  User,
+  Mail,
+  Phone,
   Instagram,
-  MessageSquare,
   Calendar,
   FileText,
-  Plus,
-  Send,
+  Clock,
   Trash2,
-  Tag,
-  StickyNote
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { RecordDialog } from '@/components/clients/RecordDialog';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Client {
   id: string;
@@ -38,19 +36,13 @@ interface Client {
   created_at: string;
 }
 
-interface Interaction {
+interface TreatmentRecord {
   id: string;
-  type: string;
-  content: string;
+  date: string;
+  service_name: string;
+  notes: string | null;
+  photos: string[] | null;
   created_at: string;
-}
-
-interface Project {
-  id: string;
-  name: string;
-  event_type: string | null;
-  event_date: string | null;
-  status: string;
 }
 
 export default function ClienteDetalhes() {
@@ -58,12 +50,10 @@ export default function ClienteDetalhes() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  
+
   const [client, setClient] = useState<Client | null>(null);
-  const [interactions, setInteractions] = useState<Interaction[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [records, setRecords] = useState<TreatmentRecord[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [newNote, setNewNote] = useState('');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -79,7 +69,7 @@ export default function ClienteDetalhes() {
 
   const fetchData = async () => {
     setLoadingData(true);
-    
+
     // Fetch client
     const { data: clientData, error: clientError } = await supabase
       .from('clients')
@@ -92,71 +82,43 @@ export default function ClienteDetalhes() {
       navigate('/clientes');
       return;
     }
-    
+
     setClient(clientData);
 
-    // Fetch interactions
-    const { data: interactionsData } = await supabase
-      .from('client_interactions')
+    // Fetch records
+    const { data: recordsData, error: recordsError } = await supabase
+      .from('treatment_records')
       .select('*')
       .eq('client_id', id)
-      .order('created_at', { ascending: false });
-    
-    setInteractions(interactionsData || []);
+      .order('date', { ascending: false });
 
-    // Fetch projects
-    const { data: projectsData } = await supabase
-      .from('projects')
-      .select('*')
-      .eq('client_id', id)
-      .order('created_at', { ascending: false });
-    
-    setProjects(projectsData || []);
-    
+    if (!recordsError) {
+      setRecords(recordsData || []);
+    }
+
     setLoadingData(false);
   };
 
-  const addInteraction = async () => {
-    if (!newNote.trim()) return;
+  const deleteRecord = async (recordId: string) => {
+    if (!confirm('Tem certeza que deseja excluir este registro?')) return;
 
     const { error } = await supabase
-      .from('client_interactions')
-      .insert({
-        client_id: id,
-        user_id: user!.id,
-        type: 'note',
-        content: newNote.trim()
-      });
-
-    if (error) {
-      toast({ title: "Erro ao adicionar nota", variant: "destructive" });
-    } else {
-      toast({ title: "Nota adicionada!" });
-      setNewNote('');
-      fetchData();
-    }
-  };
-
-  const deleteInteraction = async (interactionId: string) => {
-    if (!confirm('Tem certeza que deseja excluir esta nota?')) return;
-    
-    const { error } = await supabase
-      .from('client_interactions')
+      .from('treatment_records')
       .delete()
-      .eq('id', interactionId);
+      .eq('id', recordId);
 
     if (error) {
-      toast({ title: "Erro ao excluir nota", variant: "destructive" });
+      toast({ title: "Erro ao excluir", variant: "destructive" });
     } else {
-      toast({ title: "Nota excluída!" });
+      toast({ title: "Registro excluído" });
       fetchData();
     }
   };
 
   if (loading || loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5ff]"></div>
       </div>
     );
   }
@@ -164,203 +126,211 @@ export default function ClienteDetalhes() {
   if (!client) return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+    <div className="min-h-screen bg-[#050505] text-[#C0C0C0]">
+      {/* Header with Glassmorphism */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Link to="/clientes">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-poppins font-bold text-xl text-foreground">
-                  {client.name}
-                </h1>
-                {client.tags && client.tags.length > 0 && (
-                  <div className="flex gap-1 mt-1">
-                    {client.tags.map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link to="/clientes">
+                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+                  <ArrowLeft className="h-5 w-5" />
+                </Button>
+              </Link>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00e5ff]/20 to-purple-500/20 flex items-center justify-center border border-white/10">
+                  <User className="h-5 w-5 text-[#00e5ff]" />
+                </div>
+                <div>
+                  <h1 className="font-serif text-xl text-white tracking-wide">
+                    {client.name}
+                  </h1>
+                  <p className="text-xs text-white/40 uppercase tracking-wider">Perfil da Cliente</p>
+                </div>
               </div>
             </div>
+
+            {/* Action Buttons could go here */}
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sidebar - Info */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Informações</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {client.email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{client.email}</span>
-                  </div>
-                )}
-                {client.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{client.phone}</span>
-                  </div>
-                )}
-                {client.instagram && (
-                  <div className="flex items-center gap-3">
-                    <Instagram className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">{client.instagram}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-3">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Cliente desde {format(new Date(client.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+      <main className="container mx-auto px-4 pt-28 pb-12">
+        <Tabs defaultValue="historico" className="space-y-8">
+          <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl w-full max-w-md mx-auto grid grid-cols-2 gap-2">
+            <TabsTrigger
+              value="dados"
+              className="data-[state=active]:bg-[#00e5ff] data-[state=active]:text-black text-white/60 font-medium rounded-lg transition-all"
+            >
+              Dados Pessoais
+            </TabsTrigger>
+            <TabsTrigger
+              value="historico"
+              className="data-[state=active]:bg-[#00e5ff] data-[state=active]:text-black text-white/60 font-medium rounded-lg transition-all"
+            >
+              Histórico / Prontuário
+            </TabsTrigger>
+          </TabsList>
 
-            {client.notes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Anotações</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {client.notes}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <Tabs defaultValue="projetos">
-              <TabsList className="mb-4">
-                <TabsTrigger value="projetos">
-                  Projetos ({projects.length})
-                </TabsTrigger>
-                <TabsTrigger value="historico">
-                  Histórico ({interactions.length})
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="projetos">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>Projetos</CardTitle>
-                    <Link to={`/projetos/novo?cliente=${client.id}`}>
-                      <Button size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Novo Projeto
-                      </Button>
-                    </Link>
-                  </CardHeader>
-                  <CardContent>
-                    {projects.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">
-                        Nenhum projeto com esta cliente ainda
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {projects.map((project) => (
-                          <Link 
-                            key={project.id} 
-                            to={`/projetos/${project.id}`}
-                            className="block"
-                          >
-                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                              <div>
-                                <p className="font-medium">{project.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  {project.event_type}
-                                  {project.event_date && ` • ${format(new Date(project.event_date), "dd/MM/yyyy")}`}
-                                </p>
-                              </div>
-                              <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                                {project.status === 'active' ? 'Ativo' : project.status === 'completed' ? 'Concluído' : 'Cancelado'}
-                              </Badge>
-                            </div>
-                          </Link>
-                        ))}
+          <TabsContent value="dados" className="max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-6"
+            >
+              <Card className="bg-[#1A1A1A]/40 backdrop-blur-lg border border-white/10 p-6 rounded-2xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <Mail className="h-5 w-5 text-[#00e5ff]" />
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="historico">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Histórico de Interações</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Add note form */}
-                    <div className="flex gap-2 mb-6">
-                      <Textarea
-                        placeholder="Adicionar uma nota..."
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                        rows={2}
-                        className="flex-1"
-                      />
-                      <Button onClick={addInteraction} disabled={!newNote.trim()}>
-                        <Send className="h-4 w-4" />
-                      </Button>
+                      <div>
+                        <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Email</p>
+                        <p className="text-white font-light">{client.email || 'Não informado'}</p>
+                      </div>
                     </div>
 
-                    {interactions.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">
-                        Nenhuma interação registrada
-                      </p>
-                    ) : (
-                      <div className="space-y-4">
-                        {interactions.map((interaction) => (
-                          <div 
-                            key={interaction.id}
-                            className="flex gap-3 p-4 border rounded-lg group"
-                          >
-                            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                              <StickyNote className="h-4 w-4 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm whitespace-pre-wrap">{interaction.content}</p>
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {format(new Date(interaction.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                              onClick={() => deleteInteraction(interaction.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        ))}
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <Phone className="h-5 w-5 text-[#00e5ff]" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Telefone</p>
+                        <p className="text-white font-light">{client.phone || 'Não informado'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <Instagram className="h-5 w-5 text-[#00e5ff]" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Instagram</p>
+                        <p className="text-white font-light">{client.instagram || 'Não informado'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <Calendar className="h-5 w-5 text-[#00e5ff]" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Cliente Desde</p>
+                        <p className="text-white font-light">
+                          {format(new Date(client.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {client.notes && (
+                      <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                          <FileText className="h-5 w-5 text-[#00e5ff]" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Observações</p>
+                          <p className="text-white/80 font-light text-sm leading-relaxed whitespace-pre-wrap">
+                            {client.notes}
+                          </p>
+                        </div>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          </TabsContent>
+
+          <TabsContent value="historico" className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-serif text-white">Prontuário Estético</h2>
+                <p className="text-white/40 font-light">Linha do tempo de tratamentos e evoluções</p>
+              </div>
+              <RecordDialog clientId={client.id} onRecordAdded={fetchData} />
+            </div>
+
+            <div className="space-y-8 relative before:absolute before:left-8 before:top-4 before:bottom-4 before:w-[1px] before:bg-gradient-to-b before:from-[#00e5ff]/50 before:via-white/10 before:to-transparent">
+              {records.length === 0 ? (
+                <div className="ml-20 py-12 text-center border border-white/10 rounded-2xl bg-white/5 border-dashed">
+                  <Sparkles className="h-10 w-10 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/40">Nenhum registro encontrado.</p>
+                  <p className="text-white/20 text-sm">Adicione o primeiro tratamento para começar a história.</p>
+                </div>
+              ) : (
+                records.map((record, index) => (
+                  <motion.div
+                    key={record.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="relative pl-20 group"
+                  >
+                    {/* Timeline Node */}
+                    <div className="absolute left-6 top-6 w-4 h-4 rounded-full bg-[#050505] border-2 border-[#00e5ff] z-10 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(0,229,255,0.4)]" />
+
+                    <Card className="bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/5 hover:border-[#00e5ff]/30 transition-all duration-300 overflow-hidden group-hover:shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                      <div className="p-6">
+                        <div className="flex items-start justify-between mb-4">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="border-[#00e5ff]/30 text-[#00e5ff] bg-[#00e5ff]/5">
+                                {record.service_name}
+                              </Badge>
+                              <span className="text-white/30 text-xs flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(record.created_at), "HH:mm")}
+                              </span>
+                            </div>
+                            <h3 className="text-lg font-medium text-white">
+                              {format(new Date(record.date), "d 'de' MMMM, yyyy", { locale: ptBR })}
+                            </h3>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="text-white/20 hover:text-red-400 hover:bg-white/5 -mr-2"
+                            onClick={() => deleteRecord(record.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {record.notes && (
+                          <p className="text-white/70 font-light text-sm leading-relaxed mb-6 bg-black/20 p-4 rounded-lg border border-white/5">
+                            {record.notes}
+                          </p>
+                        )}
+
+                        {record.photos && record.photos.length > 0 && (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {record.photos.map((photo, i) => (
+                              <div key={i} className="aspect-square rounded-lg overflow-hidden border border-white/10 relative group/photo">
+                                <img
+                                  src={photo}
+                                  alt="Tratamento"
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center">
+                                  <a href={photo} target="_blank" rel="noopener noreferrer" className="text-white text-xs font-medium hover:underline">
+                                    Ver Ampliado
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );

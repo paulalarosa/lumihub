@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { 
-  Bot, 
-  X, 
-  Send, 
+import {
+  Bot,
+  X,
+  Send,
   Loader2,
   MessageCircle,
-  Sparkles 
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -54,14 +54,40 @@ export default function AIAssistantChat() {
     }
   }, [messages]);
 
+  const processMessage = async (content: string) => {
+    const lowerContent = content.toLowerCase();
+
+    // Mock RAG / Context Awareness Logic
+    if (lowerContent.includes('clientes') && (lowerContent.includes('quantos') || lowerContent.includes('total') || lowerContent.includes('tenho'))) {
+      try {
+        const { count, error } = await supabase
+          .from('clients')
+          .select('*', { count: 'exact', head: true });
+
+        if (error) throw error;
+        return `Você tem ${count || 0} clientes cadastrados atualmente no sistema.`;
+      } catch (err) {
+        console.error('Error counting clients:', err);
+        return 'Desculpe, não consegui acessar o número de clientes no momento.';
+      }
+    }
+
+    if (lowerContent.includes('ola') || lowerContent.includes('olá') || lowerContent.includes('oi')) {
+      return 'Olá! Sou a Lumi, sua assistente virtual. Como posso ajudar com sua gestão hoje?';
+    }
+
+    // Default response
+    return "Entendi. No momento, minha conexão com o cérebro principal está em modo de demonstração. Posso ajudar consultando seus clientes ou agenda se você for específico (ex: 'Quantos clientes eu tenho?').";
+  };
+
   const sendMessage = async () => {
     // Validate and sanitize input
     const validationResult = messageSchema.safeParse({ content: input });
-    
+
     if (!validationResult.success) {
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: validationResult.error.errors[0].message 
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: validationResult.error.errors[0].message
       }]);
       return;
     }
@@ -69,63 +95,21 @@ export default function AIAssistantChat() {
     if (isLoading || !user) return;
 
     const sanitizedContent = validationResult.data.content;
-    
+
     const userMessage: Message = { role: 'user', content: sanitizedContent };
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
-
-      if (!token) {
-        throw new Error('Não autenticado');
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            messages: [...messages, userMessage],
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        
-        // Handle specific error codes
-        if (response.status === 429) {
-          throw new Error('Limite de requisições atingido. Aguarde alguns segundos e tente novamente.');
-        }
-        if (response.status === 402) {
-          throw new Error('Créditos de IA insuficientes. Entre em contato com o suporte.');
-        }
-        
-        throw new Error(errorData.error || 'Erro ao processar sua mensagem');
-      }
-
-      const data = await response.json();
-      
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: data.reply // Fixed: edge function returns 'reply', not 'content'
+    // Simulate network delay for realism
+    setTimeout(async () => {
+      const reply = await processMessage(sanitizedContent);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: reply
       }]);
-    } catch (error) {
-      console.error('AI Chat error:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `Desculpe, ocorreu um erro: ${error instanceof Error ? error.message : 'Erro desconhecido'}. Tente novamente.`
-      }]);
-    } finally {
       setIsLoading(false);
-    }
+    }, 1000);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -150,7 +134,7 @@ export default function AIAssistantChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full shadow-glow bg-gradient-to-br from-primary to-accent hover:scale-105 transition-transform"
+              className="h-14 w-14 rounded-full bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all hover:scale-105"
             >
               <Sparkles className="h-6 w-6" />
             </Button>
@@ -166,22 +150,27 @@ export default function AIAssistantChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] glass-card rounded-2xl shadow-strong border-0 flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] rounded-2xl border border-white/10 bg-[#050505]/95 backdrop-blur-xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-primary to-accent text-white">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
               <div className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
+                <div className="w-8 h-8 rounded-full bg-[#00e5ff]/20 flex items-center justify-center border border-[#00e5ff]/30">
+                  <Bot className="h-4 w-4 text-[#00e5ff]" />
+                </div>
                 <div>
-                  <h3 className="font-semibold text-sm">Assistente Lumi</h3>
-                  <p className="text-xs opacity-90">Gerenciamento por voz natural</p>
+                  <h3 className="font-semibold text-sm text-white">Lumi AI</h3>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse" />
+                    <p className="text-[10px] text-white/50 uppercase tracking-wider">Online</p>
+                  </div>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 text-white hover:bg-white/20"
+                className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -191,20 +180,20 @@ export default function AIAssistantChat() {
             <ScrollArea className="flex-1 p-4" ref={scrollRef}>
               {messages.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary/10 to-accent/20 flex items-center justify-center mb-4">
-                    <MessageCircle className="h-8 w-8 text-primary" />
+                  <div className="w-16 h-16 rounded-full bg-[#00e5ff]/5 flex items-center justify-center mb-4 border border-[#00e5ff]/20">
+                    <MessageCircle className="h-8 w-8 text-[#00e5ff]" />
                   </div>
-                  <h4 className="font-serif font-semibold text-foreground mb-2">
-                    Olá! Como posso ajudar?
+                  <h4 className="font-serif text-lg font-light text-white mb-2">
+                    Como posso ajudar?
                   </h4>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Posso gerenciar sua agenda, projetos e clientes usando linguagem natural.
+                  <p className="text-sm text-white/40 mb-6 font-light">
+                    Pergunte-me sobre seus clientes, agenda ou projetos.
                   </p>
                   <div className="space-y-2 w-full">
                     {[
-                      "Quais são meus eventos desta semana?",
-                      "Criar um evento para amanhã às 14h",
-                      "Listar meus projetos ativos"
+                      "Quantos clientes eu tenho?",
+                      "Tenho eventos hoje?",
+                      "Resumir minha semana"
                     ].map((suggestion, idx) => (
                       <button
                         key={idx}
@@ -212,7 +201,7 @@ export default function AIAssistantChat() {
                           setInput(suggestion);
                           inputRef.current?.focus();
                         }}
-                        className="w-full text-left text-sm p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-muted-foreground"
+                        className="w-full text-left text-sm p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all text-white/70"
                       >
                         "{suggestion}"
                       </button>
@@ -231,10 +220,10 @@ export default function AIAssistantChat() {
                     >
                       <div
                         className={cn(
-                          "max-w-[85%] rounded-2xl px-4 py-2 text-sm",
+                          "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
                           message.role === 'user'
-                            ? 'bg-gradient-to-r from-primary to-accent text-white rounded-br-md'
-                            : 'bg-muted text-foreground rounded-bl-md'
+                            ? 'bg-white/10 text-white rounded-br-sm'
+                            : 'bg-black/40 border border-[#00e5ff]/30 text-white/90 rounded-bl-sm shadow-[0_0_15px_rgba(0,229,255,0.05)]'
                         )}
                       >
                         <p className="whitespace-pre-wrap">{message.content}</p>
@@ -243,8 +232,8 @@ export default function AIAssistantChat() {
                   ))}
                   {isLoading && (
                     <div className="flex justify-start">
-                      <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3">
-                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      <div className="bg-black/40 border border-[#00e5ff]/20 rounded-2xl rounded-bl-sm px-4 py-3">
+                        <Loader2 className="h-4 w-4 animate-spin text-[#00e5ff]" />
                       </div>
                     </div>
                   )}
@@ -253,7 +242,7 @@ export default function AIAssistantChat() {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-3 border-t border-border/50">
+            <div className="p-3 border-t border-white/10 bg-black/20">
               <div className="flex gap-2">
                 <Input
                   ref={inputRef}
@@ -263,13 +252,13 @@ export default function AIAssistantChat() {
                   placeholder="Digite sua mensagem..."
                   disabled={isLoading}
                   maxLength={2000}
-                  className="flex-1"
+                  className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-[#00e5ff]/50 rounded-xl"
                 />
                 <Button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
                   size="icon"
-                  className="shrink-0 bg-gradient-to-r from-primary to-accent text-white"
+                  className="shrink-0 bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 rounded-xl"
                 >
                   <Send className="h-4 w-4" />
                 </Button>

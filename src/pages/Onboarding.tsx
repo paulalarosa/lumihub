@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Calendar, Loader2, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
@@ -9,35 +9,43 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Onboarding = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
 
+  // Check if we returned from Google Auth
+  useEffect(() => {
+    if (searchParams.get('google_connected') === 'true') {
+      setStep(3);
+      toast.success("Google Calendar conectado!");
+    }
+  }, [searchParams]);
+
   const handleConnectGoogleCalendar = async () => {
     setIsConnecting(true);
-    
+
     try {
-      const { data, error } = await supabase.functions.invoke('google-calendar-auth', {
-        body: {
-          action: 'get-auth-url',
-          redirect_uri: window.location.origin + '/auth/callback'
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          scopes: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly',
+          redirectTo: `${window.location.origin}/auth/callback`,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
         }
       });
 
       if (error) {
-        console.error('Error getting auth URL:', error);
+        console.error('Error connecting Google Calendar:', error);
         toast.error('Erro ao conectar com Google Calendar');
         setIsConnecting(false);
         return;
       }
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        toast.error('URL de autenticação não recebida');
-        setIsConnecting(false);
-      }
+      // Redirect is automatic
     } catch (err) {
       console.error('Connection error:', err);
       toast.error('Erro de conexão');
@@ -47,9 +55,9 @@ const Onboarding = () => {
 
   const handleComplete = async () => {
     if (!user) return;
-    
+
     setIsCompleting(true);
-    
+
     try {
       const { error } = await supabase
         .from('profiles')
@@ -88,15 +96,14 @@ const Onboarding = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl" />
-      
+
       {/* Progress Indicator */}
       <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-2">
         {[1, 2, 3].map((s) => (
           <motion.div
             key={s}
-            className={`h-1 w-12 rounded-full transition-all duration-300 ${
-              s <= step ? 'bg-gradient-to-r from-white/80 to-white/40' : 'bg-white/10'
-            }`}
+            className={`h-1 w-12 rounded-full transition-all duration-300 ${s <= step ? 'bg-gradient-to-r from-white/80 to-white/40' : 'bg-white/10'
+              }`}
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
             transition={{ delay: s * 0.1 }}
@@ -125,7 +132,7 @@ const Onboarding = () => {
               >
                 <Sparkles className="w-10 h-10 text-white/80" />
               </motion.div>
-              
+
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -135,7 +142,7 @@ const Onboarding = () => {
               >
                 Bem-vindo ao Lumi
               </motion.h1>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -144,7 +151,7 @@ const Onboarding = () => {
               >
                 Seu assistente inteligente para gerenciar eventos e clientes com elegância.
               </motion.p>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -182,7 +189,7 @@ const Onboarding = () => {
               >
                 <Calendar className="w-10 h-10 text-white/80" />
               </motion.div>
-              
+
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -191,7 +198,7 @@ const Onboarding = () => {
               >
                 Ative seu Assistente
               </motion.h2>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -218,7 +225,7 @@ const Onboarding = () => {
                   </div>
                 ))}
               </motion.div>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -242,7 +249,7 @@ const Onboarding = () => {
                     </>
                   )}
                 </Button>
-                
+
                 <Button
                   variant="ghost"
                   onClick={handleSkipCalendar}
@@ -276,7 +283,7 @@ const Onboarding = () => {
               >
                 <CheckCircle2 className="w-10 h-10 text-white/80" />
               </motion.div>
-              
+
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -285,7 +292,7 @@ const Onboarding = () => {
               >
                 Tudo Pronto!
               </motion.h2>
-              
+
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -294,7 +301,7 @@ const Onboarding = () => {
               >
                 Seu ambiente está configurado. Vamos começar?
               </motion.p>
-              
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

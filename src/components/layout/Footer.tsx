@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MessageCircle } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -17,7 +17,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed font-light">
-              A plataforma premium para profissionais de beleza que desejam 
+              A plataforma premium para profissionais de beleza que desejam
               elevar sua gestão e oferecer experiências extraordinárias.
             </p>
           </div>
@@ -27,27 +27,19 @@ const Footer = () => {
             <h3 className="font-serif font-light text-lg text-white">Produto</h3>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/recursos" 
+                <Link
+                  to="/recursos"
                   className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
                 >
                   Recursos
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/planos" 
+                <Link
+                  to="/planos"
                   className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
                 >
                   Planos e Preços
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to="/demo" 
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Ver Demonstração
                 </Link>
               </li>
             </ul>
@@ -58,24 +50,24 @@ const Footer = () => {
             <h3 className="font-serif font-light text-lg text-white">Empresa</h3>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/blog" 
+                <Link
+                  to="/blog"
                   className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
                 >
                   Blog
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/contact" 
+                <Link
+                  to="/contato"
                   className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
                 >
                   Contato
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/suporte" 
+                <Link
+                  to="/suporte"
                   className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
                 >
                   Suporte
@@ -86,26 +78,33 @@ const Footer = () => {
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">Contato</h3>
+            <h3 className="font-serif font-light text-lg text-white">Fale Conosco</h3>
             <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <Mail className="h-4 w-4 text-[#C0C0C0]" />
-                <span className="text-white/40 text-sm font-light">
-                  contato@lumi.com.br
+              <a
+                href="mailto:prenata@gmail.com"
+                className="flex items-center space-x-3 group"
+              >
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">
+                  <Mail className="h-4 w-4 text-[#C0C0C0] group-hover:text-[#00e5ff]" />
+                </div>
+                <span className="text-white/40 text-sm font-light group-hover:text-white transition-colors">
+                  Enviar E-mail
                 </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Phone className="h-4 w-4 text-[#C0C0C0]" />
-                <span className="text-white/40 text-sm font-light">
-                  (11) 99999-9999
+              </a>
+
+              <a
+                href="https://wa.me/5521983604870"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 group"
+              >
+                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">
+                  <MessageCircle className="h-4 w-4 text-[#C0C0C0] group-hover:text-[#00e5ff]" />
+                </div>
+                <span className="text-white/40 text-sm font-light group-hover:text-white transition-colors">
+                  WhatsApp
                 </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <MapPin className="h-4 w-4 text-[#C0C0C0]" />
-                <span className="text-white/40 text-sm font-light">
-                  São Paulo, Brasil
-                </span>
-              </div>
+              </a>
             </div>
           </div>
         </div>
@@ -115,14 +114,14 @@ const Footer = () => {
             © 2024 Lumi. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link 
-              to="/termos" 
+            <Link
+              to="/termos"
               className="text-white/30 hover:text-[#C0C0C0] transition-colors text-sm font-light"
             >
               Termos de Uso
             </Link>
-            <Link 
-              to="/privacidade" 
+            <Link
+              to="/privacidade"
               className="text-white/30 hover:text-[#C0C0C0] transition-colors text-sm font-light"
             >
               Política de Privacidade

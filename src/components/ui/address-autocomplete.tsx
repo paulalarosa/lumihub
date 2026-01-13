@@ -24,21 +24,21 @@ let cachedApiKey: string | null = null;
 
 async function fetchApiKey(): Promise<string> {
   if (cachedApiKey) return cachedApiKey;
-  
+
   // Primeiro tenta a variável de ambiente
   const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
   if (envKey) {
     cachedApiKey = envKey;
     return envKey;
   }
-  
+
   // Se não existir, busca da edge function
   const { data, error } = await supabase.functions.invoke('get-maps-key');
-  
+
   if (error || !data?.apiKey) {
     throw new Error("Google Maps API Key não configurada");
   }
-  
+
   cachedApiKey = data.apiKey;
   return data.apiKey;
 }
@@ -55,7 +55,7 @@ function loadGoogleMaps(): Promise<void> {
       }
 
       const apiKey = await fetchApiKey();
-      
+
       const script = document.createElement("script");
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
       script.async = true;
@@ -138,7 +138,7 @@ export function AddressAutocomplete({
   useEffect(() => {
     loadGoogleMaps()
       .then(async () => {
-        console.log('Google Maps carregado com sucesso');
+        // console.log('Google Maps carregado com sucesso');
         setIsApiLoaded(true);
         setIsLoading(false);
         // Guarda a API key para o mapa estático
@@ -205,14 +205,14 @@ export function AddressAutocomplete({
         e.preventDefault();
       }
     };
-    
+
     // Capture phase to intercept before any other handlers
     document.addEventListener('click', handlePacInteraction, true);
     document.addEventListener('mousedown', handlePacInteraction, true);
     document.addEventListener('mouseup', handlePacInteraction, true);
     document.addEventListener('touchstart', handlePacInteraction, true);
     document.addEventListener('touchend', handlePacInteraction, true);
-    
+
     return () => {
       document.removeEventListener('click', handlePacInteraction, true);
       document.removeEventListener('mousedown', handlePacInteraction, true);
@@ -238,7 +238,11 @@ export function AddressAutocomplete({
 
   const handleInputBlur = (e: React.FocusEvent) => {
     e.stopPropagation();
-    onBlur?.();
+    // CRITICAL: Delay blur to allow click events on suggestions to fire first
+    // This prevents the parent Dialog from closing immediately when clicking the dropdown
+    setTimeout(() => {
+      onBlur?.();
+    }, 200);
   };
 
   const handleInputClick = (e: React.MouseEvent) => {
@@ -259,10 +263,10 @@ export function AddressAutocomplete({
           onBlur={handleInputBlur}
           onMouseDown={(e) => e.stopPropagation()}
           placeholder={placeholder}
-          className="bg-card/50 border-0 rounded-2xl px-4 py-3 text-foreground placeholder:text-muted-foreground/60 focus:ring-0 focus:border-0 focus:bg-card/70 transition-all duration-300"
+          className="bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-white/10 transition-all duration-300"
         />
         {isLoading && (
-          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground/60" />
+          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-cyan-400" />
         )}
       </div>
 

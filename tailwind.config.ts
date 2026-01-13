@@ -110,8 +110,10 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
-  			}
-  		},
+  			},
+			neon: '#00e5ff',
+			metallic: '#C0C0C0',
+		},
   		lineHeight: {
   			'relaxed': '1.75',
   			'loose': '2',

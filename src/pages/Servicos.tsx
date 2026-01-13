@@ -1,0 +1,199 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { Sidebar } from "@/components/agenda/CalendarSidebar"; // Assuming we reuse the sidebar or layout
+import ServiceDialog from "@/components/services/ServiceDialog";
+import { EmptyState } from '@/components/ui/empty-state';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Search, Edit2, Trash2, Clock, Sparkles } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/layout/Header";
+
+interface Service {
+    id: string;
+    title: string;
+    price: number;
+    duration_minutes: number;
+    description: string | null;
+}
+
+export default function Servicos() {
+    const { user } = useAuth();
+    const { toast } = useToast();
+    const [services, setServices] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    // Dialog State
+    const [showDialog, setShowDialog] = useState(false);
+    const [selectedService, setSelectedService] = useState<Service | null>(null);
+
+    useEffect(() => {
+        if (user) {
+            fetchServices();
+        }
+    }, [user]);
+
+    const fetchServices = async () => {
+        setLoading(true);
+        const { data, error } = await supabase
+            .from("services")
+            .select("*")
+            .order("title");
+
+        if (error) {
+            console.error("Error fetching services:", error);
+        } else {
+            setServices(data || []);
+        }
+        setLoading(false);
+    };
+
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+
+        const { error } = await supabase.from("services").delete().eq("id", id);
+        if (error) {
+            toast({
+                title: "Erro",
+                description: "Não foi possível excluir o serviço.",
+                variant: "destructive",
+            });
+        } else {
+            toast({
+                title: "Sucesso",
+                description: "Serviço excluído.",
+            });
+            fetchServices();
+        }
+    };
+
+    const handleEdit = (service: Service, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedService(service);
+        setShowDialog(true);
+    };
+
+    const handleNew = () => {
+        setSelectedService(null);
+        setShowDialog(true);
+    };
+
+    const filteredServices = services.filter(s =>
+        s.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const formatDuration = (minutes: number) => {
+        const h = Math.floor(minutes / 60);
+        const m = minutes % 60;
+        if (h > 0 && m > 0) return `${h}h ${m}m`;
+        if (h > 0) return `${h}h`;
+        return `${m}m`;
+    };
+
+    return (
+        <div className="flex min-h-screen bg-[#050505]">
+            {/* Reusing Sidebar roughly if applicable, otherwise just main content */}
+            {/* Assuming global layout handles sidebar, or we wrap it properly. 
+           For this specific file, we'll build the page content. */}
+
+            <div className="flex-1 overflow-y-auto">
+                <Header />
+
+                <main className="p-8 max-w-7xl mx-auto space-y-8">
+
+                    {/* Page Header */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-4xl font-serif text-white font-light">Menu de Serviços</h1>
+                            <p className="text-gray-400 mt-1">Gerencie seu catálogo de serviços e preços.</p>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                                <Input
+                                    placeholder="Buscar..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-9 bg-white/5 border-white/10 text-white rounded-xl w-[200px] focus:w-[250px] transition-all"
+                                />
+                            </div>
+                            <Button
+                                onClick={handleNew}
+                                className="bg-cyan-500 text-black hover:bg-cyan-400 rounded-xl font-semibold shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]"
+                            >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Novo Serviço
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Grid Content */}
+                    {loading ? (
+                        <div className="text-center py-20 text-gray-500">Carregando...</div>
+                    ) : filteredServices.length === 0 ? (
+                        /* Empty State */
+                        /* Empty State */
+                        <EmptyState
+                            icon={Sparkles}
+                            title="Seu menu está em branco"
+                            description="Comece a definir o valor do seu trabalho criando seu primeiro serviço."
+                            actionLabel="Criar Serviço"
+                            onAction={handleNew}
+                            className="bg-white/[0.02] border-dashed border-white/5"
+                        />
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {filteredServices.map(service => (
+                                <div
+                                    key={service.id}
+                                    className="group relative bg-gradient-to-br from-white/[0.03] to-transparent border border-white/5 rounded-2xl p-6 hover:border-cyan-500/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+                                >
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h3 className="text-xl font-serif text-gray-200 group-hover:text-white transition-colors">
+                                            {service.title}
+                                        </h3>
+                                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-cyan-400" onClick={(e) => handleEdit(service, e)}>
+                                                <Edit2 className="h-4 w-4" />
+                                            </Button>
+                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-red-400" onClick={(e) => handleDelete(service.id, e)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-3xl font-light text-cyan-400 mb-4">
+                                        {service.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </p>
+
+                                    <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
+                                        <Clock className="h-4 w-4" />
+                                        {formatDuration(service.duration_minutes)}
+                                    </div>
+
+                                    {service.description && (
+                                        <p className="text-gray-500 text-sm line-clamp-2">
+                                            {service.description}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                </main>
+            </div>
+
+            <ServiceDialog
+                open={showDialog}
+                onOpenChange={setShowDialog}
+                service={selectedService}
+                onSuccess={fetchServices}
+            />
+        </div>
+    );
+}
