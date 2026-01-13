@@ -18,9 +18,9 @@ export default function AdminOverview() {
 
   const fetchStats = async () => {
     try {
-      // Get total users from user_roles table (authenticated users)
+      // Get total users from profiles table
       const { count: userCount } = await supabase
-        .from('user_roles')
+        .from('profiles')
         .select('*', { count: 'exact' });
 
       // Get total revenue from transactions
@@ -51,12 +51,12 @@ export default function AdminOverview() {
   };
 
   if (loading) {
-    return <p className="text-slate-400">Carregando...</p>;
+    return <p className="text-gray-400">Carregando...</p>;
   }
 
   const statCards = [
     { label: 'Total de Usuários', value: stats.totalUsers, icon: Users, color: 'bg-blue-500/20 text-blue-400' },
-    { label: 'Receita Total', value: `R$ ${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'bg-green-500/20 text-green-400' },
+    { label: 'Receita Total', value: `R$ ${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, color: 'bg-[#00e5ff]/20 text-[#00e5ff]' },
     { label: 'Subscrições Ativas', value: stats.activeSubscriptions, icon: TrendingUp, color: 'bg-purple-500/20 text-purple-400' },
     { label: 'Saques Pendentes', value: stats.pendingPayouts, icon: AlertCircle, color: 'bg-red-500/20 text-red-400' },
   ];
@@ -67,11 +67,11 @@ export default function AdminOverview() {
         {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.label} className="bg-slate-800 border-slate-700">
+            <Card key={stat.label} className="bg-[#1A1A1A] border-white/10">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-slate-400 text-sm mb-1">{stat.label}</p>
+                    <p className="text-gray-400 text-sm mb-1">{stat.label}</p>
                     <p className="text-white font-serif text-3xl font-bold">{stat.value}</p>
                   </div>
                   <div className={`p-3 rounded-lg ${stat.color}`}>
@@ -84,10 +84,10 @@ export default function AdminOverview() {
         })}
       </div>
 
-      <Card className="bg-slate-800 border-slate-700">
+      <Card className="bg-[#1A1A1A] border-white/10">
         <CardContent className="p-6">
           <h3 className="text-white font-serif text-xl font-bold mb-4">Últimos Eventos</h3>
-          <p className="text-slate-400 text-sm">Logs de atividade sistema em desenvolvimento...</p>
+          <p className="text-gray-400 text-sm">Logs de atividade sistema em desenvolvimento...</p>
         </CardContent>
       </Card>
     </div>

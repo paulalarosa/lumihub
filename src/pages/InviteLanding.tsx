@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 
 export default function InviteLanding() {
     const [searchParams] = useSearchParams();
-    const token = searchParams.get('token');
+    const { token: paramToken } = useParams();
+    const token = paramToken || searchParams.get('token');
     const navigate = useNavigate();
     const { user } = useAuth();
 
@@ -28,7 +29,7 @@ export default function InviteLanding() {
             const { data, error } = await supabase
                 .from('assistant_invites' as any)
                 .select('*, owner:owner_id(full_name)')
-                .eq('token', token)
+                .or(`invite_code.eq.${token},token.eq.${token}`) // Support both legacy token and new code
                 .eq('status', 'pending')
                 .single();
 

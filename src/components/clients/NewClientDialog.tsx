@@ -47,7 +47,6 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
     }
 
     setLoading(true);
-    console.log("Tentando salvar cliente...", formData, "com user_id:", user.id);
 
     try {
       // 2. Envia para o Supabase

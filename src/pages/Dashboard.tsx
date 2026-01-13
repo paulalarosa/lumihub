@@ -37,6 +37,18 @@ export default function Dashboard() {
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
 
+  // Assistant Check State
+  const [isOwner, setIsOwner] = useState(true);
+
+  useEffect(() => {
+    if (!user) return;
+    const checkRole = async () => {
+      const { data } = await supabase.from('profiles').select('parent_user_id').eq('id', user.id).single();
+      if (data?.parent_user_id) setIsOwner(false);
+    };
+    checkRole();
+  }, [user]);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
@@ -150,16 +162,7 @@ export default function Dashboard() {
   // Let's rely on isAdmin for now (which is based on role='admin'). 
   // But wait, owner is role='admin'? No, owner is normal user.
   // Let's fetch profile to be sure.
-  const [isOwner, setIsOwner] = useState(true);
 
-  useEffect(() => {
-    if (!user) return;
-    const checkRole = async () => {
-      const { data } = await supabase.from('profiles').select('parent_user_id').eq('id', user.id).single();
-      if (data?.parent_user_id) setIsOwner(false);
-    };
-    checkRole();
-  }, [user]);
 
   const stats = [
     ...(isOwner ? [{

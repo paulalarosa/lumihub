@@ -74,7 +74,7 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
 
             // 2. Save Record
             const { error } = await supabase
-                .from('treatment_records')
+                .from('treatment_records' as any)
                 .insert({
                     client_id: clientId,
                     user_id: user.id,
@@ -115,7 +115,7 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
                     Novo Registro
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl bg-[#0A0A0A]/95 backdrop-blur-xl border-white/10 text-white">
+            <DialogContent className="max-w-2xl bg-[#121212]/95 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-serif text-2xl text-white">Novo Prontuário</DialogTitle>
                 </DialogHeader>

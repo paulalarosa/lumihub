@@ -11,7 +11,7 @@ interface AuthContextType {
   roles: AppRole[];
   isAdmin: boolean;
   isAssistant: boolean;
-  signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, fullName?: string, businessName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -36,14 +36,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsAssistant(!error && !!data);
   };
 
-  const fetchRoles = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userId);
+  const fetchRoles = async (userId: string, email?: string) => {
+    try {
+      console.log("Auth Debug: Fetching profile for", userId, email);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role, plan')
+        .eq('id', userId)
+        .maybeSingle();
 
-    if (!error && data) {
-      setRoles(data.map(r => r.role as AppRole));
+      if (error) {
+        console.error("Auth Debug: Error fetching profile", error);
+      }
+
+      console.log("Auth Debug: Profile data", data);
+
+      const fetchedRoles: AppRole[] = [];
+      if (data?.role === 'admin') fetchedRoles.push('admin');
+
+      // Hardcoded admin override for testing
+      if (email === 'prenata@gmail.com') {
+        console.log("Auth Debug: Applying email override for admin");
+        if (!fetchedRoles.includes('admin')) fetchedRoles.push('admin');
+      }
+
+      setRoles(fetchedRoles);
+    } catch (e) {
+      console.error("Auth Debug: Unexpected error", e);
     }
   };
 
@@ -57,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer role fetching with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            fetchRoles(session.user.id);
+            fetchRoles(session.user.id, session.user.email);
             checkIfAssistant(session.user.id);
           }, 0);
         } else {
@@ -72,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchRoles(session.user.id);
+        fetchRoles(session.user.id, session.user.email);
         checkIfAssistant(session.user.id);
       }
       setLoading(false);
@@ -81,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string) => {
+  const signUp = async (email: string, password: string, fullName?: string, businessName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
 
     const { error } = await supabase.auth.signUp({
@@ -90,7 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         emailRedirectTo: redirectUrl,
         data: {
-          full_name: fullName || ''
+          full_name: fullName || '',
+          business_name: businessName || ''
         }
       }
     });

@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Sparkles, 
+import {
+  Sparkles,
   ArrowLeft,
   Users,
   Shield,
@@ -30,17 +30,20 @@ interface UserProfile {
 
 export default function Admin() {
   const navigate = useNavigate();
-  const { user, isAdmin, loading } = useAuth();
+  const { user, isAdmin: authIsAdmin, loading } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
+
+  // Force admin check as requested
+  const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
       return;
     }
-    
+
     if (!loading && !isAdmin) {
       toast({
         title: "Acesso negado",
@@ -60,7 +63,8 @@ export default function Admin() {
 
   const fetchUsers = async () => {
     setLoadingUsers(true);
-    
+
+    // Fetch profiles including role directly from profiles table
     const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
@@ -72,63 +76,41 @@ export default function Admin() {
       return;
     }
 
-    const { data: roles, error: rolesError } = await supabase
-      .from('user_roles')
-      .select('*');
-
-    if (rolesError) {
-      console.error('Error fetching roles:', rolesError);
-    }
-
+    // Map profiles to match UserProfile interface
+    // Note: 'role' is a string in profiles, but the interface expects roles array for legacy compatibility
+    // We will adapt the interface usage or map it here.
     const usersWithRoles = profiles?.map(profile => ({
       ...profile,
-      roles: roles?.filter(r => r.user_id === profile.id).map(r => r.role) || []
+      roles: profile.role === 'admin' ? ['admin'] : ['user']
     })) || [];
 
-    setUsers(usersWithRoles);
+    setUsers(usersWithRoles as UserProfile[]);
     setLoadingUsers(false);
   };
 
   const toggleAdminRole = async (userId: string, currentRoles: string[]) => {
     const isCurrentlyAdmin = currentRoles.includes('admin');
-    
-    if (isCurrentlyAdmin) {
-      // Remove admin role
-      const { error } = await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId)
-        .eq('role', 'admin');
-      
-      if (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível remover o papel de admin",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else {
-      // Add admin role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({ user_id: userId, role: 'admin' });
-      
-      if (error) {
-        toast({
-          title: "Erro",
-          description: "Não foi possível adicionar o papel de admin",
-          variant: "destructive"
-        });
-        return;
-      }
+    const newRole = isCurrentlyAdmin ? 'user' : 'admin';
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: newRole } as any) // Cast to any to avoid type errors if table definition is outdated
+      .eq('id', userId);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: `Não foi possível ${isCurrentlyAdmin ? 'remover' : 'adicionar'} o papel de admin`,
+        variant: "destructive"
+      });
+      return;
     }
-    
+
     toast({
       title: "Sucesso",
       description: isCurrentlyAdmin ? "Admin removido" : "Admin adicionado"
     });
-    
+
     fetchUsers();
   };
 
@@ -327,8 +309,8 @@ export default function Admin() {
               ) : (
                 <div className="space-y-4">
                   {users.map((userItem) => (
-                    <div 
-                      key={userItem.id} 
+                    <div
+                      key={userItem.id}
                       className="flex items-center justify-between p-4 border rounded-lg"
                     >
                       <div>
@@ -336,8 +318,8 @@ export default function Admin() {
                         <p className="text-sm text-muted-foreground">{userItem.email}</p>
                         <div className="flex gap-2 mt-1">
                           {userItem.roles.map(role => (
-                            <Badge 
-                              key={role} 
+                            <Badge
+                              key={role}
                               variant={role === 'admin' ? 'default' : 'secondary'}
                             >
                               {role}
@@ -380,7 +362,7 @@ export default function Admin() {
                     </h3>
                     <div className="space-y-2">
                       {category.items.map((item) => (
-                        <div 
+                        <div
                           key={item.name}
                           className="flex items-center gap-3 text-sm"
                         >

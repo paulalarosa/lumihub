@@ -138,7 +138,6 @@ export function AddressAutocomplete({
   useEffect(() => {
     loadGoogleMaps()
       .then(async () => {
-        // console.log('Google Maps carregado com sucesso');
         setIsApiLoaded(true);
         setIsLoading(false);
         // Guarda a API key para o mapa estático

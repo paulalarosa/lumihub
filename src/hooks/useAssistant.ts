@@ -7,6 +7,7 @@ export interface AssistantInvite {
     id: string;
     email: string;
     token: string;
+    invite_code?: string;
     status: 'pending' | 'accepted' | 'revoked';
     created_at: string;
 }
@@ -27,7 +28,7 @@ export const useAssistant = () => {
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
-            setInvites(data || []);
+            setInvites((data as any) || []);
         } catch (error) {
             console.error('Error fetching invites:', error);
             toast.error('Erro ao carregar convites');
@@ -54,18 +55,26 @@ export const useAssistant = () => {
                 return;
             }
 
-            // 2. Insert Invite
-            const { error: insertError } = await supabase
+            // 2. Generate Code & Insert
+            const namePart = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
+            const randomPart = Math.random().toString(36).substring(2, 6);
+            const inviteCode = `${namePart}-${randomPart}`;
+
+            const { data, error: insertError } = await supabase
                 .from('assistant_invites' as any)
                 .insert([{
                     email,
-                    owner_id: user.id
-                }]);
+                    owner_id: user.id,
+                    invite_code: inviteCode
+                }])
+                .select()
+                .single();
 
             if (insertError) throw insertError;
 
             toast.success(`Convite enviado para ${email}`);
             fetchInvites();
+            return data;
         } catch (error) {
             console.error('Error sending invite:', error);
             toast.error('Erro ao enviar convite');

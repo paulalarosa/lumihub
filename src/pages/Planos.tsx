@@ -2,12 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { 
-  CheckCircle, 
-  X, 
-  ArrowRight, 
+import {
+  CheckCircle,
+  X,
+  ArrowRight,
   Star,
   Zap,
   Crown,
@@ -118,8 +116,7 @@ const Planos = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-background to-muted">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -130,11 +127,11 @@ const Planos = () => {
                 <span className="text-primary"> Negócio</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Escolha o plano ideal para o seu momento profissional. 
+                Escolha o plano ideal para o seu momento profissional.
                 Comece grátis e evolua conforme seu negócio cresce.
               </p>
             </div>
-            
+
             <div className="inline-flex items-center px-4 py-2 rounded-full bg-success/10 text-success font-medium text-sm">
               <CheckCircle className="h-4 w-4 mr-2" />
               14 dias grátis • Sem cartão de crédito • Cancele quando quiser
@@ -148,11 +145,10 @@ const Planos = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
             {plans.map((plan, index) => (
-              <Card 
-                key={index} 
-                className={`relative border-border hover:shadow-medium transition-all duration-300 ${
-                  plan.badge === "Mais Popular" ? "border-accent shadow-medium scale-105" : ""
-                }`}
+              <Card
+                key={index}
+                className={`relative border-border hover:shadow-medium transition-all duration-300 ${plan.badge === "Mais Popular" ? "border-accent shadow-medium scale-105" : ""
+                  }`}
               >
                 {plan.badge && (
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -161,7 +157,7 @@ const Planos = () => {
                     </Badge>
                   </div>
                 )}
-                
+
                 <CardHeader className="text-center pb-8">
                   <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
                     <plan.icon className="h-6 w-6 text-primary" />
@@ -302,7 +298,6 @@ const Planos = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

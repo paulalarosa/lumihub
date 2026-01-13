@@ -32,7 +32,7 @@ export const useSubscription = () => {
             try {
                 const { data: profile, error } = await supabase
                     .from('profiles')
-                    .select('plan, created_at')
+                    .select('plan, created_at, role')
                     .eq('id', user.id)
                     .single();
 
@@ -47,10 +47,11 @@ export const useSubscription = () => {
 
                 let status: SubscriptionStatus = 'trialing';
 
-                if (plan !== 'free') {
-                    status = 'active'; // Paid plans are always active
+                // Priority 1: Admin or Paid Plan
+                if ((p.role === 'admin') || (plan === 'pro') || (plan === 'empire')) {
+                    status = 'active';
                 } else {
-                    // Free plan logic: Check trial
+                    // Priority 2: Free Plan (Trial Logic)
                     if (daysActive > TRIAL_DAYS) {
                         status = 'expired';
                     } else {

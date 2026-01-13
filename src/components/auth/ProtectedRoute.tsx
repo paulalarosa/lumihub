@@ -12,6 +12,8 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRouteProps) => {
   const { user, loading: authLoading } = useAuth();
+  const { status, isLoading: subLoading } = useSubscription();
+
   const navigate = useNavigate();
   const location = useLocation();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -69,7 +71,6 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
     // User has COMPLETED onboarding but is trying to access onboarding page
     // Redirect them to dashboard
     if (onboardingCompleted && isOnboardingPage) {
-      // console.log('Onboarding complete, redirecting to dashboard');
       navigate('/dashboard', { replace: true });
       return;
     }
@@ -77,14 +78,10 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
     // User has NOT completed onboarding and is NOT on onboarding page
     // Redirect them to onboarding (if required)
     if (!onboardingCompleted && !isOnboardingPage && requireOnboarding) {
-      // console.log('Onboarding incomplete, redirecting to onboarding');
       navigate('/onboarding', { replace: true });
       return;
     }
   }, [checkingOnboarding, onboardingCompleted, location.pathname, user, requireOnboarding]);
-
-  // Subscription Check
-  const { status, isLoading: subLoading } = useSubscription();
 
   useEffect(() => {
     if (authLoading || checkingOnboarding || subLoading) return;

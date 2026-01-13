@@ -1,14 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
-import { 
-  Users, 
-  Calendar, 
-  CreditCard, 
-  Palette, 
-  FileText, 
+import {
+  Users,
+  Calendar,
+  CreditCard,
+  Palette,
+  FileText,
   BarChart3,
   ArrowRight,
   CheckCircle,
@@ -131,8 +129,7 @@ const Recursos = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      
+
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-background to-muted">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -143,11 +140,11 @@ const Recursos = () => {
                 <span className="text-primary"> Negócio de Maquiagem</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                Descubra todas as ferramentas que vão transformar a gestão do seu negócio 
+                Descubra todas as ferramentas que vão transformar a gestão do seu negócio
                 e elevar a experiência das suas clientes a um novo patamar.
               </p>
             </div>
-            
+
             <Link to="/cadastro">
               <Button variant="hero" size="lg">
                 Começar Teste Gratuito
@@ -245,7 +242,7 @@ const Recursos = () => {
                 Pronta para começar?
               </h2>
               <p className="text-xl text-primary-foreground/90">
-                Teste todos esses recursos gratuitamente por 14 dias. 
+                Teste todos esses recursos gratuitamente por 14 dias.
                 Sem compromisso, sem cartão de crédito.
               </p>
             </div>
@@ -267,7 +264,6 @@ const Recursos = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

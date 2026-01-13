@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -58,7 +56,7 @@ export default function Contato() {
 
     return (
         <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
-            <Header />
+
 
             <main className="container mx-auto px-4 py-20 lg:py-32">
                 <div className="max-w-6xl mx-auto space-y-24">
@@ -227,7 +225,6 @@ export default function Contato() {
                 </div>
             </main>
 
-            <Footer />
         </div>
     );
 }

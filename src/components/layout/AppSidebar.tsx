@@ -7,7 +7,10 @@ import {
     Users,
     Briefcase,
     CreditCard,
-    Sparkles
+    Sparkles,
+    FileSignature,
+    Megaphone,
+    ShieldCheck
 } from "lucide-react"
 
 import {
@@ -51,6 +54,16 @@ const items = [
         icon: Briefcase,
     },
     {
+        title: "Marketing",
+        url: "/marketing",
+        icon: Megaphone,
+    },
+    {
+        title: "Contratos",
+        url: "/contratos",
+        icon: FileSignature,
+    },
+    {
         title: "Financeiro", // "Financial"
         url: "/dashboard/financial",
         icon: CreditCard,
@@ -68,7 +81,9 @@ const items = [
 ]
 
 export function AppSidebar() {
-    const { user, signOut } = useAuth();
+    const { user, signOut, isAdmin: authIsAdmin } = useAuth();
+    // Force admin for specific user as backup
+    const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
     const location = useLocation();
     const { isMobile } = useSidebar();
 
@@ -110,6 +125,29 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+
+                {/* Admin Section - Only visible for admins */}
+                {isAdmin && (
+                    <SidebarGroup className="mt-auto">
+                        <SidebarGroupLabel className="text-white/50 px-2 text-xs font-semibold uppercase tracking-wider mb-2">Administração</SidebarGroupLabel>
+                        <SidebarGroupContent>
+                            <SidebarMenu>
+                                <SidebarMenuItem>
+                                    <SidebarMenuButton
+                                        asChild
+                                        isActive={isActive('/admin')}
+                                        className="text-[#00e5ff] data-[active=true]:bg-[#00e5ff]/10 data-[active=true]:text-[#00e5ff] hover:bg-[#00e5ff]/5 hover:text-[#00e5ff] transition-all"
+                                    >
+                                        <Link to="/admin">
+                                            <ShieldCheck className="h-4 w-4" />
+                                            <span>Central Admin</span>
+                                        </Link>
+                                    </SidebarMenuButton>
+                                </SidebarMenuItem>
+                            </SidebarMenu>
+                        </SidebarGroupContent>
+                    </SidebarGroup>
+                )}
             </SidebarContent>
 
             <SidebarFooter className="border-t border-white/10 p-4">

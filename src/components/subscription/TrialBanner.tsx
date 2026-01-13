@@ -12,7 +12,10 @@ export function TrialBanner() {
     // But usually ProtectedRoute handles expired redirect.
     // This banner is for "Urgency" during trial.
 
-    if (isLoading || status !== 'trialing') return null;
+    if (isLoading) return null;
+
+    // Explicitly hide for non-trialing logic, or if user is admin/pro
+    if (status !== 'trialing' || daysRemaining === null || plan === 'pro' || plan === 'empire') return null;
 
     return (
         <div className="bg-[#00e5ff]/10 border-b border-[#00e5ff]/20 backdrop-blur-md">
@@ -20,7 +23,7 @@ export function TrialBanner() {
                 <div className="flex items-center gap-2 text-sm text-[#00e5ff]">
                     <Clock className="h-4 w-4 animate-pulse" />
                     <span>
-                        <strong className="font-semibold">Período Gratuito:</strong> Restam {daysRemaining} dias para testar o **Lumia Hub**.
+                        <strong className="font-semibold">Período Gratuito:</strong> Restam {daysRemaining} dias para testar o Lumia Hub.
                     </span>
                 </div>
                 <Button

@@ -465,7 +465,6 @@ export default function EventDialog({
         // NOTE: This was previously using an Edge Function which is not deployed.
         // For now, we will skip server-side sync with assistants until the backend is ready.
         try {
-          // console.log('Skipping assistant calendar sync until Edge Function is deployed.');
           /* 
           await supabase.functions.invoke('google-calendar-sync', { 
             body: { ... } 

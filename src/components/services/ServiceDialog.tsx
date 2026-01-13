@@ -100,12 +100,12 @@ export default function ServiceDialog({
         try {
             if (service) {
                 const { error } = await supabase
-                    .from("services")
+                    .from("services" as any)
                     .update(serviceData)
                     .eq("id", service.id);
                 if (error) throw error;
             } else {
-                const { error } = await supabase.from("services").insert(serviceData);
+                const { error } = await supabase.from("services" as any).insert(serviceData);
                 if (error) throw error;
             }
 
@@ -131,7 +131,7 @@ export default function ServiceDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10">
+            <DialogContent className="max-w-md bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10 text-white">
                 <DialogHeader>
                     <DialogTitle className="font-serif text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                         {service ? "Editar Serviço" : "Novo Serviço"}

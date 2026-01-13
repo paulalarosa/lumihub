@@ -23,14 +23,17 @@ export function AssistantInviteDialog() {
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email) return;
-        await sendInvite(email);
-        setEmail("");
+        const newInvite = await sendInvite(email);
+        if (newInvite) {
+            setEmail("");
+            // Optionally auto-copy or show success, currently handled by toast in hook.
+        }
     };
 
-    const copyLink = (token: string) => {
-        const link = `${window.location.origin}/entrar-equipe?token=${token}`;
+    const copyLink = (code: string) => {
+        const link = `${window.location.origin}/assistente/convite/${code}`;
         navigator.clipboard.writeText(link);
-        setCopiedToken(token);
+        setCopiedToken(code);
         setTimeout(() => setCopiedToken(null), 2000);
     };
 
@@ -42,7 +45,7 @@ export function AssistantInviteDialog() {
                     Convidar Assistente
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] bg-[#0A0A0A] border-white/10 text-white">
+            <DialogContent className="sm:max-w-[500px] bg-[#121212]/95 backdrop-blur-xl border border-white/10 text-white shadow-2xl">
                 <DialogHeader>
                     <DialogTitle className="font-serif text-2xl">Equipe</DialogTitle>
                     <DialogDescription className="text-gray-400">
@@ -87,18 +90,18 @@ export function AssistantInviteDialog() {
                                             <p className="text-sm font-medium truncate">{invite.email}</p>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <Badge variant="outline" className={`text-[10px] h-5 ${invite.status === 'accepted' ? 'text-green-400 border-green-500/20 bg-green-500/10' :
-                                                        invite.status === 'revoked' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
-                                                            'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
+                                                    invite.status === 'revoked' ? 'text-red-400 border-red-500/20 bg-red-500/10' :
+                                                        'text-yellow-400 border-yellow-500/20 bg-yellow-500/10'
                                                     }`}>
                                                     {invite.status === 'pending' ? 'Pendente' :
                                                         invite.status === 'accepted' ? 'Aceito' : 'Revogado'}
                                                 </Badge>
                                                 {invite.status === 'pending' && (
                                                     <button
-                                                        onClick={() => copyLink(invite.token)}
+                                                        onClick={() => copyLink(invite.invite_code || invite.token)}
                                                         className="text-xs text-[#00e5ff] hover:underline flex items-center gap-1"
                                                     >
-                                                        {copiedToken === invite.token ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                                        {copiedToken === (invite.invite_code || invite.token) ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
                                                         Copiar Link
                                                     </button>
                                                 )}

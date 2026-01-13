@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
 import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -11,7 +10,7 @@ import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerAn
 import { MagneticButton } from "@/components/animations/MagneticButton";
 import { useScroll, useParallax } from "@/hooks/useScroll";
 import heroFallback from "@/assets/hero-beauty.jpg";
-import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle, ArrowRight, Star, Sparkles, Crown, Clock, FileSignature, TrendingUp } from "lucide-react";
+import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle, ArrowRight, Star, Sparkles, Crown, Clock, FileSignature, TrendingUp, Bot } from "lucide-react";
 import { motion, useScroll as useFramerScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
 
@@ -33,8 +32,13 @@ const Home = () => {
   const features = [
     { icon: Crown, title: "Gestão de Império", description: "Gerencie clientes, histórico e anotações com a maestria de quem constrói um legado.", size: "large" },
     { icon: Clock, title: "Linha do Tempo Visual", description: "Visualize sua agenda como uma obra de arte, com cronogramas precisos.", size: "normal" },
-    { icon: Sparkles, title: "Moodboard dos Sonhos", description: "Colabore com clientes em referências visuais que inspiram.", size: "normal" },
-    { icon: FileSignature, title: "Contratos Inteligentes", description: "Segurança jurídica com contratos gerados automaticamente.", size: "normal" },
+    {
+      icon: Bot,
+      title: "Lumi IA & Automação",
+      description: "Sua assistente virtual que trabalha enquanto você dorme. Confirmações, lembretes e preenchimento inteligente.",
+      size: "normal"
+    },
+    { icon: FileSignature, title: "Contratos Inteligentes", description: "Segurança jurídica com contratos gerados automaticamente. Assinatura digital integrada na hora.", size: "normal" },
     { icon: CreditCard, title: "Financeiro Automatizado", description: "Receba via Pix e cartão com split automático e sem dores de cabeça.", size: "normal" },
     { icon: TrendingUp, title: "Inteligência de Negócio", description: "Dashboards que mostram o crescimento real do seu faturamento.", size: "large" },
   ];
@@ -55,7 +59,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
-      <Header />
+
 
       {/* Hero Section - Beauty Tech Design */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -112,7 +116,7 @@ const Home = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row gap-5 pt-4">
-                <MagneticButton href="/cadastro" strength={0.35}>
+                <MagneticButton href="/register" strength={0.35}>
                   <Button
                     size="lg"
                     className="w-full sm:w-auto bg-white text-[#050505] hover:bg-white/90 text-base px-8 py-6 rounded-xl font-medium border border-white/20 transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
@@ -121,13 +125,13 @@ const Home = () => {
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </MagneticButton>
-                <MagneticButton href="/demo" strength={0.35}>
+                <MagneticButton href="/register" strength={0.35}>
                   <Button
                     variant="outline"
                     size="lg"
                     className="w-full sm:w-auto bg-transparent border border-[#C0C0C0]/30 text-white/80 hover:bg-white/5 hover:border-[#C0C0C0]/50 text-base px-8 py-6 rounded-xl transition-all duration-300"
                   >
-                    Ver Demo
+                    Criar Conta Grátis
                   </Button>
                 </MagneticButton>
               </div>
@@ -398,7 +402,7 @@ const Home = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/cadastro">
+              <Link to="/register">
                 <Button
                   size="lg"
                   className="w-full sm:w-auto bg-[#050505] text-white hover:bg-[#1a1a1a] text-lg px-8 py-6 rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,0,0,0.3)]"
@@ -407,7 +411,7 @@ const Home = () => {
                   Começar Teste Gratuito
                 </Button>
               </Link>
-              <Link to="/planos">
+              <Link to="/register">
                 <Button
                   variant="outline"
                   size="lg"
@@ -425,7 +429,6 @@ const Home = () => {
         </div>
       </section>
 
-      <Footer />
       <AIAssistantFAB />
     </div>
   );

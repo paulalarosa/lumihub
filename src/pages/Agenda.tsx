@@ -84,7 +84,6 @@ export default function Agenda() {
 
   const fetchGoogleEventsData = async () => {
     const gEvents = await getCalendarEvents();
-    // console.log("Fetched Google Events:", gEvents);
 
     // Map Google Events to our Event interface
     const mappedEvents: Event[] = gEvents.map((gEvent: GoogleCalendarEvent) => {

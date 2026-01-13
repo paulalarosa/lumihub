@@ -11,7 +11,6 @@ export default function Plans() {
     const handleSubscribe = (plan: string) => {
         // In a real app, this would redirect to Stripe Checkout
         // For MVP, we can simulate or show "Em breve"
-        console.log(`Subscribe to ${plan}`);
         window.location.href = `https://wa.me/5511999999999?text=Olá, quero assinar o plano ${plan} do Lumia Hub!`;
     };
 

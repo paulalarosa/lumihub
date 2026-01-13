@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import heroFallback from '@/assets/hero-beauty.jpg';
 
 const posts = [
@@ -42,8 +40,6 @@ const posts = [
 export default function Blog() {
   return (
     <div className="min-h-screen bg-[color:var(--background, #FAFAFA)] text-[#050505]">
-      <Header />
-
       <main className="container mx-auto px-6 py-20">
         <header className="max-w-4xl mx-auto text-center mb-12">
           <h1 className="journal-title text-6xl">Lumi Journal</h1>
@@ -76,8 +72,6 @@ export default function Blog() {
           </form>
         </section>
       </main>
-
-      <Footer />
     </div>
   );
 }
