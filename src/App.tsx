@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Home from "./pages/Home";
 import Recursos from "./pages/Recursos";
 import Planos from "./pages/Planos";
@@ -54,27 +55,95 @@ const App = () => (
             {/* Auth */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-            <Route path="/onboarding" element={<Onboarding />} />
+            <Route path="/onboarding" element={
+              <ProtectedRoute requireOnboarding={false}>
+                <Onboarding />
+              </ProtectedRoute>
+            } />
             
             {/* Protected App Pages */}
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/financial" element={<FinancialDashboard />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
-            <Route path="/clientes" element={<Clientes />} />
-            <Route path="/clientes/:id" element={<ClienteDetalhes />} />
-            <Route path="/projetos" element={<Projetos />} />
-            <Route path="/projetos/novo" element={<Projetos />} />
-            <Route path="/projetos/:id" element={<ProjetoDetalhes />} />
-            <Route path="/projects/:id" element={<ProjectDetails />} />
-            <Route path="/projects/:projectId/contract" element={<ProjectContract />} />
-            <Route path="/configuracoes" element={<Configuracoes />} />
-            <Route path="/agenda" element={<Agenda />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/assistentes" element={<Assistentes />} />
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/financial" element={
+              <ProtectedRoute>
+                <FinancialDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/dashboard" element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/clientes" element={
+              <ProtectedRoute>
+                <Clientes />
+              </ProtectedRoute>
+            } />
+            <Route path="/clientes/:id" element={
+              <ProtectedRoute>
+                <ClienteDetalhes />
+              </ProtectedRoute>
+            } />
+            <Route path="/projetos" element={
+              <ProtectedRoute>
+                <Projetos />
+              </ProtectedRoute>
+            } />
+            <Route path="/projetos/novo" element={
+              <ProtectedRoute>
+                <Projetos />
+              </ProtectedRoute>
+            } />
+            <Route path="/projetos/:id" element={
+              <ProtectedRoute>
+                <ProjetoDetalhes />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:id" element={
+              <ProtectedRoute>
+                <ProjectDetails />
+              </ProtectedRoute>
+            } />
+            <Route path="/projects/:projectId/contract" element={
+              <ProtectedRoute>
+                <ProjectContract />
+              </ProtectedRoute>
+            } />
+            <Route path="/configuracoes" element={
+              <ProtectedRoute>
+                <Configuracoes />
+              </ProtectedRoute>
+            } />
+            <Route path="/agenda" element={
+              <ProtectedRoute>
+                <Agenda />
+              </ProtectedRoute>
+            } />
+            <Route path="/contact" element={
+              <ProtectedRoute>
+                <Contact />
+              </ProtectedRoute>
+            } />
+            <Route path="/assistentes" element={
+              <ProtectedRoute>
+                <Assistentes />
+              </ProtectedRoute>
+            } />
             
             {/* Assistant Portal */}
-            <Route path="/assistente" element={<PortalAssistente />} />
+            <Route path="/assistente" element={
+              <ProtectedRoute>
+                <PortalAssistente />
+              </ProtectedRoute>
+            } />
             <Route path="/assistente/convite/:token" element={<AssistantInvite />} />
             
             {/* Public Client Portal */}
