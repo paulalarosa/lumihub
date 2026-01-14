@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useContracts } from '@/hooks/useContracts';
-import { useClients } from '@/hooks/useClients';
-import { Loader2, Upload, FileText, Sparkles } from 'lucide-react';
+import { useProjects } from '@/hooks/useProjects';
+import { Loader2, Upload, FileText, Sparkles, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ContractDialogProps {
@@ -17,10 +17,10 @@ interface ContractDialogProps {
 
 export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
     const { createContract, uploadContractFile, loading: isSaving } = useContracts();
-    const { clients } = useClients();
+    const { projects } = useProjects();
 
     const [mode, setMode] = useState<'digital' | 'upload'>('digital');
-    const [clientId, setClientId] = useState('');
+    const [projectId, setProjectId] = useState('');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -28,7 +28,7 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
     // Reset form when dialog opens
     useEffect(() => {
         if (open) {
-            setClientId('');
+            setProjectId('');
             setTitle('');
             setContent('');
             setFile(null);
@@ -53,7 +53,7 @@ Cancelamentos com menos de 24h implicam em multa...`;
     };
 
     const handleSubmit = async () => {
-        if (!clientId || !title) {
+        if (!projectId || !title) {
             toast.error('Preencha os campos obrigatórios');
             return;
         }
@@ -76,12 +76,12 @@ Cancelamentos com menos de 24h implicam em multa...`;
             }
 
             await createContract({
-                client_id: clientId,
+                project_id: projectId,
                 title,
                 content: mode === 'digital' ? content : undefined,
                 status: 'draft',
                 attachment_url: attachmentUrl || undefined
-            });
+            } as any);
 
             onOpenChange(false);
         } catch (error) {
@@ -102,15 +102,15 @@ Cancelamentos com menos de 24h implicam em multa...`;
                 <div className="space-y-4 py-2">
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label className="text-gray-400">Cliente</Label>
+                            <Label className="text-gray-400">Projeto</Label>
                             <select
                                 className="w-full h-10 bg-white/5 border border-white/10 rounded-md px-3 text-sm text-white focus:outline-none focus:border-[#00e5ff]"
-                                value={clientId}
-                                onChange={e => setClientId(e.target.value)}
+                                value={projectId}
+                                onChange={e => setProjectId(e.target.value)}
                             >
-                                <option value="" disabled>Selecione um cliente</option>
-                                {clients?.map((client: any) => (
-                                    <option key={client.id} value={client.id}>{client.name}</option>
+                                <option value="" disabled>Selecione um projeto</option>
+                                {projects?.map((project: any) => (
+                                    <option key={project.id} value={project.id}>{project.name}</option>
                                 ))}
                             </select>
                         </div>

@@ -12,13 +12,7 @@ export interface MarketingCampaign {
 
 export const MarketingService = {
     async getAll(): Promise<MarketingCampaign[]> {
-        const { data, error } = await supabase
-            .from('marketing_campaigns')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        return data || [];
+        return []; // marketing_campaigns table removed
     },
 
     async create(campaign: Omit<MarketingCampaign, 'id' | 'user_id' | 'created_at' | 'updated_at'>): Promise<MarketingCampaign> {

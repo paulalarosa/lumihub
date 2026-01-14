@@ -5,16 +5,15 @@ export const BackupService = {
     async generateEncryptedBackup(): Promise<void> {
         // 1. Fetch critical data
         // We use Promise.all to fetch concurrently
-        const [profiles, contracts, marketing] = await Promise.all([
+        const [profiles, contracts] = await Promise.all([
             supabase.from('profiles').select('*'),
-            supabase.from('contracts').select('*'),
-            supabase.from('marketing_campaigns').select('*')
+            supabase.from('contracts').select('*')
         ]);
 
         const backupData = {
             profiles: profiles.data || [],
             contracts: contracts.data || [],
-            marketing: marketing.data || [],
+            marketing: [], // Removed
             timestamp: new Date().toISOString(),
             version: '1.0'
         };

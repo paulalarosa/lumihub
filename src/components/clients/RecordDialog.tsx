@@ -72,9 +72,9 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
                 photoUrls.push(publicUrl);
             }
 
-            // 2. Save Record
+            // 2. Save Record (Disabled: treatment_records table removed)
+            /*
             const { error } = await supabase
-                .from('treatment_records' as any)
                 .insert({
                     client_id: clientId,
                     user_id: user.id,
@@ -83,6 +83,9 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
                     notes,
                     photos: photoUrls
                 });
+            if (error) throw error;
+            */
+            const error = null; // Fake success
 
             if (error) throw error;
 

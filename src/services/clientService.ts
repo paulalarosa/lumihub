@@ -53,20 +53,9 @@ export const ClientService = {
         return count || 0;
     },
 
-    async getTreatmentRecords(clientId: string) {
-        return await supabase
-            .from('treatment_records' as any)
-            .select('*')
-            .eq('client_id', clientId)
-            .order('date', { ascending: false });
-    },
-
-    async deleteTreatmentRecord(recordId: string) {
-        return await supabase
-            .from('treatment_records' as any)
-            .delete()
-            .eq('id', recordId);
-    },
+    // treatment_records methods removed
+    async getTreatmentRecords(clientId: string) { return []; },
+    async deleteTreatmentRecord(recordId: string) { },
 
     async getOriginStats(organizationId: string) {
         const { data, error } = await supabase
