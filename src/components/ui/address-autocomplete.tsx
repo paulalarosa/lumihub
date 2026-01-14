@@ -194,32 +194,7 @@ export function AddressAutocomplete({
     };
   }, [isApiLoaded, handlePlaceChanged]);
 
-  // CRITICAL: Prevent clicks on the autocomplete dropdown from propagating
-  useEffect(() => {
-    const handlePacInteraction = (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('.pac-container') || target.classList.contains('pac-item') || target.closest('.pac-item')) {
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    };
 
-    // Capture phase to intercept before any other handlers
-    document.addEventListener('click', handlePacInteraction, true);
-    document.addEventListener('mousedown', handlePacInteraction, true);
-    document.addEventListener('mouseup', handlePacInteraction, true);
-    document.addEventListener('touchstart', handlePacInteraction, true);
-    document.addEventListener('touchend', handlePacInteraction, true);
-
-    return () => {
-      document.removeEventListener('click', handlePacInteraction, true);
-      document.removeEventListener('mousedown', handlePacInteraction, true);
-      document.removeEventListener('mouseup', handlePacInteraction, true);
-      document.removeEventListener('touchstart', handlePacInteraction, true);
-      document.removeEventListener('touchend', handlePacInteraction, true);
-    };
-  }, []);
 
   const handleOpenGPS = (e: React.MouseEvent) => {
     e.stopPropagation();

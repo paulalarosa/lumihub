@@ -249,7 +249,6 @@ export default function EventDialog({
   const fetchClients = async () => {
     const { data } = await supabase
       .from('clients')
-      .from('clients')
       .select('id, name, phone')
       .order('name');
     if (data) setClients(data);
@@ -536,7 +535,15 @@ export default function EventDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(open) => { if (!open && isAutocompleteOpen) return; onOpenChange(open); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10 sm:max-w-[700px]">
+        <DialogContent
+          className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10 sm:max-w-[700px]"
+          onInteractOutside={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest('.pac-container')) {
+              e.preventDefault();
+            }
+          }}
+        >
           <DialogHeader>
             <DialogTitle className="font-serif text-3xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
               {event ? 'Editar Evento' : 'Novo Evento'}

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -39,7 +39,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ClientService } from '@/services/clientService';
+import { Database } from '@/integrations/supabase/types';
 
+// Use strict type from Database or local interface? 
+// Service returns Supabase type, but we have local Client interface.
+// Ideally usage should match.
+// Local interface:
 interface Client {
   id: string;
   name: string;
@@ -49,11 +55,14 @@ interface Client {
   notes: string | null;
   last_visit: string | null;
   created_at: string;
+  user_id: string;
+  // Add other fields from DB if necessary
 }
 
 export default function Clientes() {
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { organizationId, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -63,34 +72,33 @@ export default function Clientes() {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   // Form state
+  // Ideally use a form library or separate component, but keeping inline for minimal refactor impact
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       navigate('/auth');
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
+    if (organizationId) {
       fetchClients();
     }
-  }, [user]);
+  }, [organizationId]);
 
   const fetchClients = async () => {
+    if (!organizationId) return;
     setLoadingClients(true);
-    const { data, error } = await supabase
-      .from('clients')
-      .select('*')
-      .order('created_at', { ascending: false });
+
+    const { data, error } = await ClientService.list(organizationId);
 
     if (error) {
       toast({ title: "Erro ao carregar clientes", variant: "destructive" });
     } else {
-      // Cast to Client[] since we're using a local interface that matches our needs
       setClients((data as any) || []);
     }
     setLoadingClients(false);
@@ -121,33 +129,29 @@ export default function Clientes() {
       return;
     }
 
-    // Basic Validation for Phone/Email if needed
+    if (!organizationId) {
+      toast({ title: "Erro de organização", variant: "destructive" });
+      return;
+    }
 
-    setLoadingClients(true); // Re-use loading state or add specific submitting state? Let's assume loadingClients is for list only.
-    // Ideally use isSubmitting state
-    const isSubmitting = false; // Placeholder if we don't add state yet
+    setLoadingClients(true);
 
     const clientData = {
       name: name.trim(),
       email: email.trim() || null,
       phone: phone.trim() || null,
       notes: notes.trim() || null,
-      user_id: user!.id
+      user_id: organizationId // SECURITY FIX: Use Organization ID, not user.id
     };
 
     try {
       if (editingClient) {
-        const { error } = await supabase
-          .from('clients')
-          .update(clientData)
-          .eq('id', editingClient.id);
+        const { error } = await ClientService.update(editingClient.id, clientData);
 
         if (error) throw error;
         toast({ title: "Cliente atualizado!" });
       } else {
-        const { error } = await supabase
-          .from('clients')
-          .insert([clientData]);
+        const { error } = await ClientService.create(clientData);
 
         if (error) throw error;
         toast({ title: "Cliente adicionado!" });
@@ -160,14 +164,14 @@ export default function Clientes() {
       console.error("Error saving client:", error);
       toast({ title: "Erro ao salvar cliente", variant: "destructive" });
     } finally {
-      // setLoading(false); 
+      // setLoadingClients(false); // Handled by fetchClients usually, but good to ensure
     }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este cliente?')) return;
 
-    const { error } = await supabase.from('clients').delete().eq('id', id);
+    const { error } = await ClientService.delete(id);
 
     if (error) {
       toast({ title: "Erro ao excluir cliente", variant: "destructive" });
@@ -194,7 +198,7 @@ export default function Clientes() {
     }
   };
 
-  if (loading) {
+  if (authLoading || orgLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050505]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5ff]"></div>

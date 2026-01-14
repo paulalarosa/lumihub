@@ -1,11 +1,11 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Clock, 
-  MapPin, 
-  Users, 
-  Edit2, 
+import {
+  Clock,
+  MapPin,
+  Users,
+  Edit2,
   Trash2,
   User,
   Briefcase,
@@ -48,6 +48,7 @@ interface Event {
   client?: { name: string } | null;
   project?: { name: string } | null;
   assistants?: { id: string; name: string }[];
+  payment_status?: string | null;
 }
 
 interface EventCardProps {
@@ -114,11 +115,11 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           {/* Color indicator */}
-          <div 
+          <div
             className="w-1 h-full min-h-[60px] rounded-full flex-shrink-0"
             style={{ backgroundColor: event.color || '#5A7D7C' }}
           />
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
@@ -129,6 +130,15 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                       {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
                     </Badge>
                   )}
+                  {event.payment_status === 'paid' ? (
+                    <Badge className="bg-green-500/15 text-green-600 hover:bg-green-500/25 border-green-200 text-xs">
+                      Pago
+                    </Badge>
+                  ) : event.payment_status === 'pending' || !event.payment_status ? (
+                    <Badge variant="outline" className="text-gray-400 border-dashed text-xs">
+                      Pendente
+                    </Badge>
+                  ) : null}
                 </div>
                 {event.description && (
                   <p className="text-sm text-muted-foreground line-clamp-2">
@@ -136,7 +146,7 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                   </p>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {/* Calendar export dropdown */}
                 <DropdownMenu>

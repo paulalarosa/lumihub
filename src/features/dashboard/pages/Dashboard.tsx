@@ -1,6 +1,8 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -12,106 +14,107 @@ import {
   Shield,
   FolderOpen,
   Sparkles,
-  Star,
+  ArrowRight,
   CheckCircle2,
-  ExternalLink,
-  ArrowRight
+  ExternalLink
 } from 'lucide-react';
 import { AssistantsPanelCard } from '@/components/dashboard/AssistantsPanelCard';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { getCalendarEvents, GoogleCalendarEvent } from '@/integrations/google/calendar';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { GoogleCalendarEvent } from '@/integrations/google/calendar';
+
+// Services
+import { ClientService } from '@/services/clientService';
+import { ProjectService } from '@/services/projectService';
+import { RevenueService } from '@/services/revenue.service';
+import { EventService } from '@/services/event.service';
+import { CommissionLogic } from '@/services/commissionLogic';
+import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
+import { Gift, AlertCircle, Heart } from 'lucide-react';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
 export default function Dashboard() {
+  /* Full Component Rewrite to safely integrate Financial/Marketing Widgets without messy diffs */
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, loading } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
+  const { organizationId, isOwner, loading: orgLoading } = useOrganization();
 
-  // Real data from Supabase / Google
+  // Real data
   const [clientsCount, setClientsCount] = useState<number>(0);
   const [projectsCount, setProjectsCount] = useState<number>(0);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
+  const [totalCommissions, setTotalCommissions] = useState<number>(0);
   const [upcomingEvents, setUpcomingEvents] = useState<GoogleCalendarEvent[] | any[]>([]);
+  const [marketingTriggers, setMarketingTriggers] = useState<MarketingTrigger[]>([]);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-
-  // Assistant Check State
-  const [isOwner, setIsOwner] = useState(true);
-
-  useEffect(() => {
-    if (!user) return;
-    const checkRole = async () => {
-      const { data } = await supabase.from('profiles').select('parent_user_id').eq('id', user.id).single();
-      if (data?.parent_user_id) setIsOwner(false);
-    };
-    checkRole();
-  }, [user]);
-
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
-  }, [user, loading, navigate]);
+  const [originStats, setOriginStats] = useState<{ name: string, value: number }[]>([]);
 
   // Fetch real data
   useEffect(() => {
-    if (!user) return;
+    if (!organizationId) return;
 
     const fetchDashboardData = async () => {
       try {
         setDataLoading(true);
 
-        // 1. Check Google Connection
-        const { data: { session } } = await supabase.auth.getSession();
-        const googleConnected = !!session?.provider_token;
-        setIsGoogleConnected(googleConnected);
-
-        // 2. Fetch Events (Google or DB)
-        if (googleConnected) {
-          const gEvents = await getCalendarEvents();
-          // Filter only future events and take top 5
-          const futureEvents = gEvents.filter(e => {
-            const date = e.start.dateTime || e.start.date;
-            return date ? new Date(date) >= new Date() : false;
-          }).slice(0, 5);
-          setUpcomingEvents(futureEvents);
-        } else {
-          // Fallback to DB events
-          const today = new Date().toISOString().split('T')[0];
-          const { data: events } = await supabase
-            .from('events')
-            .select('*')
+        // 1. Determine Role and Assistant ID
+        let currentAssistantId = null;
+        if (!isAdmin) {
+          const { data: assistant } = await supabase
+            .from('assistants')
+            .select('id')
             .eq('user_id', user.id)
-            .gte('event_date', today)
-            .order('event_date', { ascending: true })
-            .limit(5);
-          setUpcomingEvents(events || []);
+            .maybeSingle();
+          currentAssistantId = assistant?.id;
         }
 
-        // 3. Get clients count
-        const { count: clientCount } = await supabase
-          .from('clients')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        if (clientCount !== null) setClientsCount(clientCount);
+        // 2. Prepare Promises
+        const promises: any[] = [
+          EventService.getUpcomingEvents(organizationId, user.id, isAdmin ? 'admin' : 'assistant'),
+          ClientService.count(organizationId),
+          ProjectService.count(organizationId),
+        ];
 
-        // 4. Get projects count
-        const { count: projectCount } = await supabase
-          .from('projects')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', user.id);
-        if (projectCount !== null) setProjectsCount(projectCount);
+        // 3. Conditional Financials
+        if (isAdmin) {
+          promises.push(CommissionLogic.getFinancialReport(organizationId));
+        } else if (currentAssistantId) {
+          promises.push(CommissionLogic.getAssistantCommissions(currentAssistantId));
+        } else {
+          promises.push(Promise.resolve({ totalRevenue: 0, totalCommissions: 0 }));
+        }
 
-        // 5. Get revenue
-        const { data: invoices } = await supabase
-          .from('invoices')
-          .select('amount')
-          .eq('user_id', user.id);
-        const payments = invoices || [];
-        const total = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
-        setTotalRevenue(total);
+        // 4. Marketing & Origin (Admin only)
+        if (isAdmin) {
+          promises.push(MarketingLogic.getTriggers(organizationId));
+          promises.push(ClientService.getOriginStats(organizationId));
+        } else {
+          promises.push(Promise.resolve([]));
+          promises.push(Promise.resolve([]));
+        }
+
+        const [
+          eventData,
+          clientCountVal,
+          projectCountVal,
+          financialStats,
+          marketingData,
+          originData
+        ] = await Promise.all(promises);
+
+        setUpcomingEvents(eventData.events);
+        setIsGoogleConnected(eventData.isGoogleConnected);
+        setClientsCount(clientCountVal);
+        setProjectsCount(projectCountVal);
+
+        setTotalRevenue(isAdmin ? financialStats.totalRevenue : 0);
+        setTotalCommissions(financialStats.totalCommissions); // For assistant, this is their own commission
+        setMarketingTriggers(marketingData);
+        setOriginStats(originData);
 
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
@@ -122,7 +125,6 @@ export default function Dashboard() {
 
     fetchDashboardData();
 
-    // Subscribe to realtime updates for counts
     const channel = supabase.channel('dashboard-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, () => fetchDashboardData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => fetchDashboardData())
@@ -131,14 +133,14 @@ export default function Dashboard() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [organizationId]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
   };
 
-  if (loading || dataLoading) {
+  if (orgLoading || dataLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050505]">
         <motion.div
@@ -150,27 +152,16 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) return null;
-
-  // Check if assistant
-  const isAssistant = !!user.user_metadata?.parent_user_id;
-  // Note: user_metadata might not be updated immediately after link. 
-  // Ideally use profiles table data. But for MVP this is OK if we had synced metadata.
-  // Better: we fetched 'profiles' earlier? No we fetched counts.
-  // Actually, we should check the profile table for `parent_user_id`.
-
-  // Let's rely on isAdmin for now (which is based on role='admin'). 
-  // But wait, owner is role='admin'? No, owner is normal user.
-  // Let's fetch profile to be sure.
-
+  if (!user || !organizationId) return null;
 
   const stats = [
     ...(isOwner ? [{
       label: "Faturamento",
       value: `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      description: `Comissões: R$ ${totalCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       icon: DollarSign,
-      ctaLabel: "Novo",
-      ctaLink: "/projetos"
+      ctaLabel: "Detalhes",
+      ctaLink: "/admin"
     }] : []),
     {
       label: "Clientes",
@@ -251,6 +242,47 @@ export default function Dashboard() {
           </p>
         </motion.div>
 
+        {/* Marketing Triggers Section */}
+        {marketingTriggers.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
+            <Card className="border-l-4 border-l-[#00e5ff] border-y-0 border-r-0 bg-gradient-to-r from-[#00e5ff]/5 to-transparent shadow-none">
+              <div className="p-4 flex items-center gap-4 overflow-x-auto">
+                <div className="shrink-0 p-2 bg-[#00e5ff]/10 rounded-full">
+                  <Sparkles className="h-5 w-5 text-[#00e5ff]" />
+                </div>
+                <div className="shrink-0 border-r border-white/10 pr-4 mr-2">
+                  <h3 className="text-white font-medium">Marketing Inteligente</h3>
+                  <p className="text-xs text-blue-300/80">Oportunidades encontradas</p>
+                </div>
+
+                <div className="flex gap-3">
+                  {marketingTriggers.map((trigger, idx) => (
+                    <div key={idx} className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-lg px-3 py-2 shrink-0">
+                      <div className={`p-1.5 rounded-full ${trigger.type === 'birthday' ? 'bg-pink-500/20 text-pink-400' :
+                        trigger.type === 'anniversary' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'
+                        }`}>
+                        {trigger.type === 'birthday' ? <Gift className="h-3 w-3" /> :
+                          trigger.type === 'anniversary' ? <Heart className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                      </div>
+                      <div>
+                        <p className="text-sm text-white font-medium">{trigger.clientName}</p>
+                        <p className="text-[10px] text-gray-400">{trigger.details}</p>
+                      </div>
+                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 rounded-full hover:bg-white/10 ml-1">
+                        <ArrowRight className="h-3 w-3 text-white/50" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Copy Link Card */}
         <div className="mb-8">
           <Card className="bg-gradient-to-r from-[#00e5ff]/10 to-transparent border border-[#00e5ff]/20">
@@ -276,8 +308,6 @@ export default function Dashboard() {
                   onClick={() => {
                     const slug = user.user_metadata?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'seu-link';
                     navigator.clipboard.writeText(`${window.location.origin}/b/${slug}`);
-                    // We don't have access to toast here easily unless we fetch it, wait...
-                    // We can import useToast at top if needed, but for now let's just copy.
                   }}
                 >
                   Copiar
@@ -310,6 +340,39 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* Charts Section */}
+        {isAdmin && originStats.length > 0 && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <Card className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 p-6">
+              <h3 className="text-lg font-medium text-white mb-4">Origem das Clientes</h3>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={originStats}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {originStats.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={['#00e5ff', '#a855f7', '#ec4899', '#f97316'][index % 4]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: '#1A1A1A', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
+                      itemStyle={{ color: '#fff' }}
+                    />
+                    <Legend verticalAlign="bottom" height={36} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+        )}
+
         {/* Stats & Agenda Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
@@ -339,6 +402,9 @@ export default function Dashboard() {
                   </div>
                   <h3 className="text-3xl font-serif text-white mb-1">{stat.value}</h3>
                   <p className="text-sm text-[#C0C0C0]/60">{stat.label}</p>
+                  {(stat as any).description && (
+                    <p className="text-xs text-[#00e5ff]/80 mt-1">{(stat as any).description}</p>
+                  )}
                 </motion.div>
               ))}
             </div>
@@ -370,8 +436,7 @@ export default function Dashboard() {
 
               <div className="space-y-3">
                 {upcomingEvents.length > 0 ? (
-                  upcomingEvents.map((event: any, i) => {
-                    // Normalize Google Event vs DB Event
+                  upcomingEvents.map((event: any, i: number) => {
                     const isGoogle = !!event.summary;
                     const title = isGoogle ? event.summary : event.title;
                     const start = isGoogle ? (event.start.dateTime || event.start.date) : (event.event_date + 'T' + event.start_time);

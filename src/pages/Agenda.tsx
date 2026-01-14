@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import EventDialog from '@/components/agenda/EventDialog';
+import { EventDetailsSidebar } from '@/components/agenda/EventDetailsSidebar';
 import { CalendarHeader } from '@/components/agenda/CalendarHeader';
 import { CalendarSidebar, CalendarSize } from '@/components/agenda/CalendarSidebar';
 import { EventListView } from '@/components/agenda/views/EventListView';
@@ -53,7 +54,7 @@ interface Assistant {
 
 export default function Agenda() {
   const navigate = useNavigate();
-  const { user, loading, signInWithGoogle } = useAuth();
+  const { user, loading, signInWithGoogle, isAdmin } = useAuth();
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -198,6 +199,11 @@ export default function Agenda() {
   const handleMonthChange = (date: Date) => {
     setCurrentDate(date);
     setSelectedDate(null);
+  };
+
+  const handleEventClick = (event: Event) => {
+    setEditingEvent(event);
+    setSidebarOpen(true);
   };
 
   const handleCreateEvent = () => {
@@ -351,7 +357,7 @@ export default function Agenda() {
                 events={allEvents}
                 selectedDate={selectedDate}
                 currentDate={currentDate}
-                onEditEvent={handleEditEvent}
+                onEditEvent={handleEventClick} // Changed from handleEditEvent to open Sidebar
                 onDeleteEvent={handleDeleteEvent}
               />
             )}
@@ -368,7 +374,24 @@ export default function Agenda() {
         onSuccess={() => {
           fetchEvents();
           setDialogOpen(false);
+          // If we were editing from sidebar, keep sidebar closed or refresh it? 
+          // Currently onSuccess closes dialog. Sidebar might need to refresh if it's open.
         }}
+      />
+
+      <EventDetailsSidebar
+        open={sidebarOpen}
+        onOpenChange={setSidebarOpen}
+        event={editingEvent} // Reusing editingEvent state for selected event
+        onEdit={(e) => {
+          setSidebarOpen(false);
+          handleEditEvent(e);
+        }}
+        onDelete={(id) => {
+          handleDeleteEvent(id);
+          setSidebarOpen(false);
+        }}
+        userRole={isAdmin ? 'admin' : 'assistant'} // Using isAdmin from useAuth
       />
     </div>
   );

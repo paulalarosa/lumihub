@@ -10,6 +10,7 @@ import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerAn
 import { MagneticButton } from "@/components/animations/MagneticButton";
 import { useScroll, useParallax } from "@/hooks/useScroll";
 import heroFallback from "@/assets/hero-beauty.jpg";
+import heroImage from "@/assets/hero-image.png";
 import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle, ArrowRight, Star, Sparkles, Crown, Clock, FileSignature, TrendingUp, Bot } from "lucide-react";
 import { motion, useScroll as useFramerScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
@@ -166,7 +167,7 @@ const Home = () => {
                   className="relative rounded-3xl w-full h-auto object-cover border border-white/10"
                   style={{ filter: 'grayscale(20%) contrast(1.1)' }}
                   onError={e => { (e.target as HTMLImageElement).src = heroFallback; }}
-                  src="/lovable-uploads/a31a9b03-93e4-458b-9943-6bacdab4533d.png"
+                  src={heroImage}
                 />
               </div>
             </motion.div>

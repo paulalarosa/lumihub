@@ -217,21 +217,22 @@ export function NewProjectDialog({
           Novo Projeto
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      {/* Dark Mode Styling Fix: Improved background and borders */}
+      <DialogContent className="max-w-lg bg-[#1a1a1a] border-white/10 text-white shadow-2xl">
         <DialogHeader>
-          <DialogTitle>Novo Projeto</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-xl">Novo Projeto</DialogTitle>
+          <DialogDescription className="text-gray-400">
             Crie um novo projeto para um cliente.
           </DialogDescription>
         </DialogHeader>
 
         {loadingClients ? (
           <div className="flex items-center justify-center py-8">
-            <p className="text-slate-600">Carregando clientes...</p>
+            <p className="text-gray-400">Carregando clientes...</p>
           </div>
         ) : clients.length === 0 ? (
           <div className="py-8 text-center">
-            <p className="text-slate-600 mb-4">
+            <p className="text-gray-400 mb-4">
               Nenhum cliente encontrado. Crie um cliente primeiro.
             </p>
             <Button
@@ -240,6 +241,7 @@ export function NewProjectDialog({
                 setOpen(false);
                 onCreateClient?.();
               }}
+              className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
             >
               + Criar Cliente
             </Button>
@@ -248,7 +250,7 @@ export function NewProjectDialog({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Nome */}
             <div className="space-y-2">
-              <Label htmlFor="name">
+              <Label htmlFor="name" className="text-gray-300">
                 Nome do Projeto <span className="text-red-500">*</span>
               </Label>
               <Input
@@ -259,12 +261,13 @@ export function NewProjectDialog({
                 onChange={handleInputChange}
                 disabled={loading}
                 required
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-500/50 focus:ring-cyan-500/50"
               />
             </div>
 
             {/* Cliente */}
             <div className="space-y-2">
-              <Label htmlFor="client_id">
+              <Label htmlFor="client_id" className="text-gray-300">
                 Cliente <span className="text-red-500">*</span>
               </Label>
               <Select
@@ -272,10 +275,10 @@ export function NewProjectDialog({
                 onValueChange={handleClientChange}
                 disabled={loading}
               >
-                <SelectTrigger id="client_id">
+                <SelectTrigger id="client_id" className="bg-white/5 border-white/10 text-white">
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                   {clients.map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
@@ -285,24 +288,31 @@ export function NewProjectDialog({
               </Select>
             </div>
 
-            {/* Tipo de Evento */}
+            {/* Tipo de Evento - Unified Dropdown */}
             <div className="space-y-2">
-              <Label htmlFor="event_type">Tipo de Evento</Label>
-              <Input
-                id="event_type"
-                name="event_type"
-                placeholder="Casamento, Formatura, etc."
+              <Label htmlFor="event_type" className="text-gray-300">Tipo de Evento</Label>
+              <Select
                 value={formData.event_type}
-                onChange={handleInputChange}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, event_type: value }))}
                 disabled={loading}
-              />
+              >
+                <SelectTrigger id="event_type" className="bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder="Selecione o tipo..." />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                  <SelectItem value="noivas">Noivas</SelectItem>
+                  <SelectItem value="pre_wedding">Pré Wedding</SelectItem>
+                  <SelectItem value="producoes_sociais">Produções Sociais</SelectItem>
+                  <SelectItem value="other">Outro</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Grid de 2 colunas para Data e Local */}
             <div className="grid grid-cols-2 gap-4">
               {/* Data do Evento */}
               <div className="space-y-2">
-                <Label htmlFor="event_date">Data do Evento</Label>
+                <Label htmlFor="event_date" className="text-gray-300">Data do Evento</Label>
                 <Input
                   id="event_date"
                   name="event_date"
@@ -310,12 +320,13 @@ export function NewProjectDialog({
                   value={formData.event_date}
                   onChange={handleInputChange}
                   disabled={loading}
+                  className="bg-white/5 border-white/10 text-white focus:border-cyan-500/50 focus:ring-cyan-500/50"
                 />
               </div>
 
               {/* Local */}
               <div className="space-y-2">
-                <Label htmlFor="event_location">Local</Label>
+                <Label htmlFor="event_location" className="text-gray-300">Local</Label>
                 <Input
                   id="event_location"
                   name="event_location"
@@ -323,13 +334,14 @@ export function NewProjectDialog({
                   value={formData.event_location}
                   onChange={handleInputChange}
                   disabled={loading}
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-500/50 focus:ring-cyan-500/50"
                 />
               </div>
             </div>
 
             {/* Notas */}
             <div className="space-y-2">
-              <Label htmlFor="notes">Notas</Label>
+              <Label htmlFor="notes" className="text-gray-300">Notas</Label>
               <textarea
                 id="notes"
                 name="notes"
@@ -338,7 +350,7 @@ export function NewProjectDialog({
                 onChange={handleInputChange}
                 disabled={loading}
                 rows={3}
-                className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
               />
             </div>
 
@@ -349,10 +361,11 @@ export function NewProjectDialog({
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={loading}
+                className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="bg-cyan-600 hover:bg-cyan-700 text-white">
                 {loading ? 'Salvando...' : 'Criar Projeto'}
               </Button>
             </div>

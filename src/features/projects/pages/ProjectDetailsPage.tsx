@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   Calendar,
   User,
   ExternalLink,
@@ -27,12 +26,12 @@ import {
   Copy,
   Check,
   Eye,
-  Settings,
-  Package
+  Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ProjectService } from '@/services/projectService';
 
 interface Project {
   id: string;
@@ -41,7 +40,7 @@ interface Project {
   event_date: string | null;
   event_location: string | null;
   status: string;
-  public_token: string;
+  public_token: string | null;
   notes: string | null;
   clients: {
     id: string;
@@ -83,7 +82,7 @@ interface Service {
   price: number | null;
 }
 
-interface ProjectService {
+interface ProjectServiceItem {
   id: string;
   service_id: string;
   quantity: number;
@@ -94,23 +93,24 @@ interface ProjectService {
   service?: Service;
 }
 
-export default function ProjetoDetalhes() {
+export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { organizationId, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
-  
+
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [projectServices, setProjectServices] = useState<ProjectService[]>([]);
+  const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  
+
   // View mode: internal or public preview
   const [viewMode, setViewMode] = useState<'internal' | 'preview'>('internal');
-  
+
   // Task form
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskVisibility, setNewTaskVisibility] = useState('private');
@@ -134,110 +134,93 @@ export default function ProjetoDetalhes() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       navigate('/auth');
     }
-  }, [user, loading, navigate]);
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user && id) {
+    if (organizationId && id) {
       fetchData();
     }
-  }, [user, id]);
+  }, [organizationId, id]);
 
   const fetchData = async () => {
+    if (!id || !organizationId) return;
     setLoadingData(true);
-    
+
     // Fetch project
-    const { data: projectData, error: projectError } = await supabase
-      .from('projects')
-      .select('*, clients(id, name, email, phone)')
-      .eq('id', id)
-      .maybeSingle();
+    const { data: projectData, error: projectError } = await ProjectService.get(id);
 
     if (projectError || !projectData) {
       toast({ title: "Projeto não encontrado", variant: "destructive" });
       navigate('/projetos');
       return;
     }
-    
-    setProject(projectData);
+
+    // Adapt data if necessary (service returns client as single object likely as 'client' or 'clients')
+    // Based on previous files, let's assume 'clients' is populated if using select string properly.
+    // However, ProjectService uses `client:clients(*)` alias.
+    const adaptedProject: any = { ...projectData };
+    if (adaptedProject.client) {
+      adaptedProject.clients = adaptedProject.client;
+      delete adaptedProject.client;
+    }
+    setProject(adaptedProject as Project);
 
     // Fetch tasks
-    const { data: tasksData } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('project_id', id)
-      .order('sort_order');
-    setTasks(tasksData || []);
+    const { data: tasksData } = await ProjectService.getTasks(id);
+    setTasks((tasksData as any) || []);
 
     // Fetch briefing
-    const { data: briefingData } = await supabase
-      .from('briefings')
-      .select('*')
-      .eq('project_id', id)
-      .maybeSingle();
+    const { data: briefingData } = await ProjectService.getBriefing(id);
     if (briefingData) {
       setBriefing({
         ...briefingData,
         questions: briefingData.questions as any[],
         answers: briefingData.answers as Record<string, any>
-      });
+      } as any);
     }
 
     // Fetch contracts
-    const { data: contractsData } = await supabase
-      .from('contracts')
-      .select('*')
-      .eq('project_id', id)
-      .order('created_at', { ascending: false });
-    setContracts(contractsData || []);
+    const { data: contractsData } = await ProjectService.getContracts(id);
+    setContracts((contractsData as any) || []);
 
     // Fetch services catalog
-    const { data: servicesData } = await supabase
-      .from('services')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order');
-    setServices(servicesData || []);
+    const { data: servicesData } = await ProjectService.getCatalogServices();
+    setServices((servicesData as any) || []);
 
     // Fetch project services
-    const { data: projectServicesData } = await supabase
-      .from('project_services')
-      .select('*, service:services(id, name, description, price)')
-      .eq('project_id', id)
-      .order('created_at');
-    setProjectServices(projectServicesData || []);
-    
+    const { data: projectServicesData } = await ProjectService.getProjectServices(id);
+    setProjectServices((projectServicesData as any) || []);
+
     setLoadingData(false);
   };
 
   const addTask = async () => {
-    if (!newTaskTitle.trim()) return;
+    if (!newTaskTitle.trim() || !id || !organizationId) return;
 
-    const { error } = await supabase
-      .from('tasks')
-      .insert({
-        project_id: id,
-        user_id: user!.id,
-        title: newTaskTitle.trim(),
-        visibility: newTaskVisibility,
-        sort_order: tasks.length
-      });
+    const { error } = await ProjectService.createTask({
+      project_id: id,
+      user_id: organizationId,
+      title: newTaskTitle.trim(),
+      visibility: newTaskVisibility,
+      sort_order: tasks.length
+    });
 
     if (error) {
       toast({ title: "Erro ao adicionar tarefa", variant: "destructive" });
     } else {
       setNewTaskTitle('');
-      fetchData();
+      // Optimistic update or refetch
+      // For simplicity/safety, refetch partial
+      const { data } = await ProjectService.getTasks(id);
+      setTasks((data as any) || []);
     }
   };
 
   const toggleTask = async (taskId: string, completed: boolean) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ is_completed: completed })
-      .eq('id', taskId);
+    const { error } = await ProjectService.updateTask(taskId, { is_completed: completed });
 
     if (!error) {
       setTasks(tasks.map(t => t.id === taskId ? { ...t, is_completed: completed } : t));
@@ -245,7 +228,7 @@ export default function ProjetoDetalhes() {
   };
 
   const deleteTask = async (taskId: string) => {
-    const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+    const { error } = await ProjectService.deleteTask(taskId);
     if (!error) {
       setTasks(tasks.filter(t => t.id !== taskId));
     }
@@ -253,15 +236,15 @@ export default function ProjetoDetalhes() {
 
   const createContract = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const { error } = await supabase
-      .from('contracts')
-      .insert({
-        project_id: id,
-        user_id: user!.id,
-        title: contractTitle.trim(),
-        content: contractContent.trim()
-      });
+    if (!id || !organizationId) return;
+
+    const { error } = await ProjectService.createContract({
+      project_id: id,
+      user_id: organizationId,
+      title: contractTitle.trim(),
+      content: contractContent.trim(),
+      status: 'draft' // ensure default
+    });
 
     if (error) {
       toast({ title: "Erro ao criar contrato", variant: "destructive" });
@@ -270,7 +253,9 @@ export default function ProjetoDetalhes() {
       setIsContractDialogOpen(false);
       setContractTitle('');
       setContractContent('');
-      fetchData();
+      // Refetch contracts
+      const { data } = await ProjectService.getContracts(id);
+      setContracts((data as any) || []);
     }
   };
 
@@ -283,6 +268,8 @@ export default function ProjetoDetalhes() {
   };
 
   const createDefaultBriefing = async () => {
+    if (!id || !organizationId) return;
+
     const defaultQuestions = [
       { id: '1', question: 'Qual é o seu tipo de pele? (oleosa, seca, mista, normal)', type: 'text' },
       { id: '2', question: 'Você tem alguma alergia a cosméticos?', type: 'text' },
@@ -292,23 +279,22 @@ export default function ProjetoDetalhes() {
       { id: '6', question: 'Alguma observação adicional?', type: 'text' }
     ];
 
-    const { error } = await supabase
-      .from('briefings')
-      .insert({
-        project_id: id,
-        user_id: user!.id,
-        questions: defaultQuestions
-      });
+    const { error } = await ProjectService.createBriefing({
+      project_id: id,
+      user_id: organizationId,
+      questions: defaultQuestions
+    });
 
     if (!error) {
       toast({ title: "Questionário criado!" });
-      fetchData();
+      const { data } = await ProjectService.getBriefing(id);
+      if (data) setBriefing(data as any);
     }
   };
 
   const addServiceToProject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedServiceId) return;
+    if (!selectedServiceId || !id || !organizationId) return;
 
     const service = services.find(s => s.id === selectedServiceId);
     if (!service) return;
@@ -317,16 +303,14 @@ export default function ProjetoDetalhes() {
     const price = parseFloat(servicePrice) || (service.price || 0);
     const total = qty * price;
 
-    const { error } = await supabase
-      .from('project_services')
-      .insert({
-        project_id: id,
-        service_id: selectedServiceId,
-        user_id: user!.id,
-        quantity: qty,
-        unit_price: price,
-        total_price: total
-      });
+    const { error } = await ProjectService.addProjectService({
+      project_id: id,
+      service_id: selectedServiceId,
+      user_id: organizationId,
+      quantity: qty,
+      unit_price: price,
+      total_price: total
+    });
 
     if (error) {
       toast({ title: "Erro ao adicionar serviço", variant: "destructive" });
@@ -336,19 +320,20 @@ export default function ProjetoDetalhes() {
       setSelectedServiceId('');
       setServiceQuantity('1');
       setServicePrice('');
-      fetchData();
+      const { data } = await ProjectService.getProjectServices(id);
+      setProjectServices((data as any) || []);
     }
   };
 
   const removeServiceFromProject = async (projectServiceId: string) => {
-    const { error } = await supabase
-      .from('project_services')
-      .delete()
-      .eq('id', projectServiceId);
+    const { error } = await ProjectService.deleteProjectService(projectServiceId);
 
     if (!error) {
       toast({ title: "Serviço removido!" });
-      fetchData();
+      if (id) {
+        const { data } = await ProjectService.getProjectServices(id);
+        setProjectServices((data as any) || []);
+      }
     }
   };
 
@@ -361,10 +346,7 @@ export default function ProjetoDetalhes() {
 
     const newPaidAmount = ps.paid_amount + parseFloat(paymentAmount);
 
-    const { error } = await supabase
-      .from('project_services')
-      .update({ paid_amount: newPaidAmount })
-      .eq('id', paymentServiceId);
+    const { error } = await ProjectService.updateProjectService(paymentServiceId, { paid_amount: newPaidAmount });
 
     if (error) {
       toast({ title: "Erro ao registrar pagamento", variant: "destructive" });
@@ -373,7 +355,10 @@ export default function ProjetoDetalhes() {
       setIsPaymentDialogOpen(false);
       setPaymentServiceId('');
       setPaymentAmount('');
-      fetchData();
+      if (id) {
+        const { data } = await ProjectService.getProjectServices(id);
+        setProjectServices((data as any) || []);
+      }
     }
   };
 
@@ -385,7 +370,7 @@ export default function ProjetoDetalhes() {
     }
   };
 
-  if (loading || loadingData) {
+  if (authLoading || orgLoading || loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -399,7 +384,7 @@ export default function ProjetoDetalhes() {
   const totalServiceAmount = projectServices.reduce((sum, ps) => sum + Number(ps.total_price), 0);
   const totalPaidAmount = projectServices.reduce((sum, ps) => sum + Number(ps.paid_amount), 0);
   const remainingAmount = totalServiceAmount - totalPaidAmount;
-  const paymentProgress = totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0;
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -433,11 +418,11 @@ export default function ProjetoDetalhes() {
                 </div>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2">
               {/* View mode toggle */}
               <div className="flex items-center border rounded-lg overflow-hidden">
-                <Button 
+                <Button
                   variant={viewMode === 'internal' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('internal')}
@@ -446,7 +431,7 @@ export default function ProjetoDetalhes() {
                   <Settings className="h-4 w-4" />
                   Interno
                 </Button>
-                <Button 
+                <Button
                   variant={viewMode === 'preview' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('preview')}
@@ -632,7 +617,7 @@ export default function ProjetoDetalhes() {
                         </p>
                       ) : (
                         tasks.map((task) => (
-                          <div 
+                          <div
                             key={task.id}
                             className="flex items-center justify-between p-3 border rounded-lg"
                           >
@@ -648,8 +633,8 @@ export default function ProjetoDetalhes() {
                                 {task.visibility === 'private' ? 'Privado' : task.visibility === 'shared' ? 'Compartilhado' : 'Cliente'}
                               </Badge>
                             </div>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="icon"
                               onClick={() => deleteTask(task.id)}
                             >
@@ -693,7 +678,7 @@ export default function ProjetoDetalhes() {
                             Enviar para Cliente
                           </Button>
                         </div>
-                        
+
                         <div className="space-y-4 mt-4">
                           {(briefing.questions as any[]).map((q: any) => (
                             <div key={q.id} className="p-4 border rounded-lg">
@@ -732,7 +717,7 @@ export default function ProjetoDetalhes() {
                         <form onSubmit={createContract} className="space-y-4">
                           <div className="space-y-2">
                             <Label>Título</Label>
-                            <Input 
+                            <Input
                               value={contractTitle}
                               onChange={(e) => setContractTitle(e.target.value)}
                               placeholder="Ex: Contrato de Serviços de Maquiagem"
@@ -741,7 +726,7 @@ export default function ProjetoDetalhes() {
                           </div>
                           <div className="space-y-2">
                             <Label>Conteúdo do Contrato</Label>
-                            <Textarea 
+                            <Textarea
                               value={contractContent}
                               onChange={(e) => setContractContent(e.target.value)}
                               placeholder="Digite o conteúdo do contrato..."
@@ -762,18 +747,18 @@ export default function ProjetoDetalhes() {
                     ) : (
                       <div className="space-y-3">
                         {contracts.map((contract) => (
-                          <div 
+                          <div
                             key={contract.id}
                             className="flex items-center justify-between p-4 border rounded-lg"
                           >
                             <div>
                               <p className="font-medium">{contract.title}</p>
                               <Badge variant={
-                                contract.status === 'signed' ? 'default' : 
-                                contract.status === 'sent' ? 'secondary' : 'outline'
+                                contract.status === 'signed' ? 'default' :
+                                  contract.status === 'sent' ? 'secondary' : 'outline'
                               }>
-                                {contract.status === 'signed' ? 'Assinado' : 
-                                 contract.status === 'sent' ? 'Enviado' : 'Rascunho'}
+                                {contract.status === 'signed' ? 'Assinado' :
+                                  contract.status === 'sent' ? 'Enviado' : 'Rascunho'}
                               </Badge>
                             </div>
                             <Button variant="outline" size="sm">
@@ -799,208 +784,141 @@ export default function ProjetoDetalhes() {
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex justify-between text-sm">
-                          <span>Progresso de Pagamento</span>
-                          <span className="font-medium">{paymentProgress.toFixed(0)}%</span>
+                          <span>Pago: R$ {totalPaidAmount.toFixed(2)}</span>
+                          <span>Total: R$ {totalServiceAmount.toFixed(2)}</span>
                         </div>
-                        <Progress value={paymentProgress} className="h-3" />
-                        <div className="grid grid-cols-3 gap-4 text-center mt-4">
-                          <div>
-                            <p className="text-sm text-muted-foreground">Total</p>
-                            <p className="font-semibold">R$ {totalServiceAmount.toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Pago</p>
-                            <p className="font-semibold text-green-600">R$ {totalPaidAmount.toFixed(2)}</p>
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Restante</p>
-                            <p className="font-semibold text-orange-500">R$ {remainingAmount.toFixed(2)}</p>
-                          </div>
-                        </div>
+                        <Progress value={totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0} />
                       </div>
                     </CardContent>
                   </Card>
 
-                  {/* Services */}
+                  {/* Services List */}
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between">
                       <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Package className="h-5 w-5" />
-                          Serviços do Projeto
-                        </CardTitle>
-                        <CardDescription>Adicione serviços do seu catálogo</CardDescription>
+                        <CardTitle>Serviços e Valores</CardTitle>
+                        <CardDescription>O que foi contratado</CardDescription>
                       </div>
-                      <div className="flex gap-2">
-                        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
-                          <DialogTrigger asChild>
-                            <Button variant="outline" disabled={projectServices.length === 0}>
-                              <DollarSign className="h-4 w-4 mr-2" />
-                              Registrar Pagamento
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Registrar Pagamento</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={registerPayment} className="space-y-4">
+                      <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Add Serviço
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Adicionar Serviço</DialogTitle>
+                          </DialogHeader>
+                          <form onSubmit={addServiceToProject} className="space-y-4">
+                            <div className="space-y-2">
+                              <Label>Serviço</Label>
+                              <Select value={selectedServiceId} onValueChange={handleSelectService}>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecione..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {services.map((s) => (
+                                    <SelectItem key={s.id} value={s.id}>
+                                      {s.name} - R$ {s.price}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
                               <div className="space-y-2">
-                                <Label>Serviço</Label>
-                                <Select value={paymentServiceId} onValueChange={setPaymentServiceId}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione o serviço" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {projectServices.map(ps => (
-                                      <SelectItem key={ps.id} value={ps.id}>
-                                        {ps.service?.name} - Falta R$ {(ps.total_price - ps.paid_amount).toFixed(2)}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                              <div className="space-y-2">
-                                <Label>Valor do Pagamento (R$)</Label>
-                                <Input 
+                                <Label>Quantidade</Label>
+                                <Input
                                   type="number"
-                                  step="0.01"
-                                  value={paymentAmount}
-                                  onChange={(e) => setPaymentAmount(e.target.value)}
-                                  placeholder="0.00"
-                                  required
+                                  min="1"
+                                  value={serviceQuantity}
+                                  onChange={(e) => setServiceQuantity(e.target.value)}
                                 />
                               </div>
-                              <Button type="submit" className="w-full">Registrar</Button>
-                            </form>
-                          </DialogContent>
-                        </Dialog>
-
-                        <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-                          <DialogTrigger asChild>
-                            <Button>
-                              <Plus className="h-4 w-4 mr-2" />
-                              Adicionar Serviço
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent>
-                            <DialogHeader>
-                              <DialogTitle>Adicionar Serviço</DialogTitle>
-                            </DialogHeader>
-                            <form onSubmit={addServiceToProject} className="space-y-4">
                               <div className="space-y-2">
-                                <Label>Serviço do Catálogo</Label>
-                                <Select value={selectedServiceId} onValueChange={handleSelectService}>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Selecione um serviço" />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    {services.map(service => (
-                                      <SelectItem key={service.id} value={service.id}>
-                                        {service.name} {service.price && `- R$ ${Number(service.price).toFixed(2)}`}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                {services.length === 0 && (
-                                  <p className="text-xs text-muted-foreground">
-                                    Cadastre serviços em Configurações &gt; Serviços
-                                  </p>
-                                )}
+                                <Label>Valor Unitário (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={servicePrice}
+                                  onChange={(e) => setServicePrice(e.target.value)}
+                                />
                               </div>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label>Quantidade</Label>
-                                  <Input 
-                                    type="number"
-                                    value={serviceQuantity}
-                                    onChange={(e) => setServiceQuantity(e.target.value)}
-                                    min="1"
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <Label>Valor Unitário (R$)</Label>
-                                  <Input 
-                                    type="number"
-                                    step="0.01"
-                                    value={servicePrice}
-                                    onChange={(e) => setServicePrice(e.target.value)}
-                                    placeholder="0.00"
-                                    required
-                                  />
-                                </div>
-                              </div>
-                              <Button type="submit" className="w-full" disabled={!selectedServiceId}>
-                                Adicionar
-                              </Button>
-                            </form>
-                          </DialogContent>
-                        </Dialog>
-                      </div>
+                            </div>
+                            <Button type="submit" className="w-full">Adicionar</Button>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
                     </CardHeader>
                     <CardContent>
-                      {projectServices.length === 0 ? (
-                        <div className="text-center py-8">
-                          <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-muted-foreground">Nenhum serviço adicionado</p>
-                          {services.length === 0 && (
-                            <p className="text-sm text-muted-foreground mt-2">
-                              <Link to="/configuracoes" className="text-primary hover:underline">
-                                Cadastre seus serviços
-                              </Link> primeiro
-                            </p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {projectServices.map((ps) => {
-                            const remaining = ps.total_price - ps.paid_amount;
-                            const progress = ps.total_price > 0 ? (ps.paid_amount / ps.total_price) * 100 : 0;
-                            
-                            return (
-                              <div 
-                                key={ps.id}
-                                className="p-4 border rounded-lg"
-                              >
-                                <div className="flex items-start justify-between mb-3">
-                                  <div>
-                                    <p className="font-medium">{ps.service?.name}</p>
-                                    <p className="text-sm text-muted-foreground">
-                                      {ps.quantity}x R$ {Number(ps.unit_price).toFixed(2)}
-                                    </p>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="font-semibold">R$ {Number(ps.total_price).toFixed(2)}</p>
-                                    <Button 
-                                      variant="ghost" 
-                                      size="sm"
-                                      onClick={() => removeServiceFromProject(ps.id)}
-                                      className="h-6 text-xs text-muted-foreground"
-                                    >
-                                      <Trash2 className="h-3 w-3 mr-1" />
-                                      Remover
-                                    </Button>
-                                  </div>
+                      <div className="space-y-4">
+                        {projectServices.length === 0 ? (
+                          <p className="text-muted-foreground text-center py-4">
+                            Nenhum serviço adicionado
+                          </p>
+                        ) : (
+                          projectServices.map((ps) => (
+                            <div key={ps.id} className="flex flex-col p-4 border rounded-lg gap-3">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <p className="font-medium">{ps.service?.name || ps.notes || 'Serviço Personalizado'}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {ps.quantity}x R$ {ps.unit_price.toFixed(2)}
+                                  </p>
                                 </div>
-                                
-                                <div className="space-y-1">
-                                  <div className="flex justify-between text-xs text-muted-foreground">
-                                    <span>Pago: R$ {Number(ps.paid_amount).toFixed(2)}</span>
-                                    <span>Falta: R$ {remaining.toFixed(2)}</span>
-                                  </div>
-                                  <Progress value={progress} className="h-2" />
+                                <div className="text-right">
+                                  <p className="font-bold">R$ {ps.total_price.toFixed(2)}</p>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 text-red-400 hover:text-red-500 hover:bg-red-50"
+                                    onClick={() => removeServiceFromProject(ps.id)}
+                                  >
+                                    Remover
+                                  </Button>
                                 </div>
-                                
-                                {remaining <= 0 && (
-                                  <Badge variant="default" className="mt-2">
-                                    <Check className="h-3 w-3 mr-1" />
-                                    Quitado
-                                  </Badge>
-                                )}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
+
+                              <div className="flex items-center gap-4 bg-muted/50 p-2 rounded text-sm">
+                                <div className="flex-1">
+                                  <span className="text-muted-foreground">Pago: </span>
+                                  <span className="font-medium text-green-600">R$ {ps.paid_amount.toFixed(2)}</span>
+                                </div>
+                                <Dialog open={isPaymentDialogOpen} onOpenChange={(open) => {
+                                  setIsPaymentDialogOpen(open);
+                                  if (open) setPaymentServiceId(ps.id);
+                                }}>
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline" size="sm" className="h-7 text-xs">
+                                      Registrar Pagamento
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent>
+                                    <DialogHeader>
+                                      <DialogTitle>Registrar Pagamento</DialogTitle>
+                                    </DialogHeader>
+                                    <form onSubmit={registerPayment} className="space-y-4">
+                                      <div className="space-y-2">
+                                        <Label>Valor do Pagamento (R$)</Label>
+                                        <Input
+                                          type="number"
+                                          step="0.01"
+                                          max={(ps.total_price - ps.paid_amount)}
+                                          value={paymentAmount}
+                                          onChange={(e) => setPaymentAmount(e.target.value)}
+                                          placeholder={`Máx: ${(ps.total_price - ps.paid_amount).toFixed(2)}`}
+                                        />
+                                      </div>
+                                      <Button type="submit" className="w-full">Confirmar</Button>
+                                    </form>
+                                  </DialogContent>
+                                </Dialog>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 </div>

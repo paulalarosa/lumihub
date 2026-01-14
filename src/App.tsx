@@ -11,22 +11,21 @@ import Recursos from "./pages/Recursos";
 import Planos from "./pages/Planos";
 import Blog from "./pages/Blog";
 import BlogArticle from "./pages/BlogArticle";
-import Auth from "./pages/Auth";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import ForgotPassword from "./pages/ForgotPassword";
-import UpdatePassword from "./pages/UpdatePassword";
-import AdminUsers from "./pages/admin/Users";
+import Auth from "@/features/auth/pages/Auth";
+import Login from "@/features/auth/pages/Login";
+import Register from "@/features/auth/pages/Register";
+import ForgotPassword from "@/features/auth/pages/ForgotPassword";
+import UpdatePassword from "@/features/auth/pages/UpdatePassword";
+import AdminUsers from "@/features/users/pages/UsersPage";
 import Onboarding from "./pages/Onboarding";
-import Dashboard from "./pages/Dashboard";
+import Dashboard from "@/features/dashboard/pages/Dashboard";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./features/admin/AdminDashboard";
-import Clientes from "./pages/Clientes";
-import ClienteDetalhes from "./pages/ClienteDetalhes";
-import Projetos from "./pages/Projetos";
-import ProjetoDetalhes from "./pages/ProjetoDetalhes";
-import ProjectDetails from "./pages/ProjectDetails";
+import Clientes from "@/features/clients/pages/ClientsPage";
+import ClienteDetalhes from "@/features/clients/pages/ClientDetailsPage";
+import Projetos from "@/features/projects/pages/ProjectsPage";
+import ProjetoDetalhes from "@/features/projects/pages/ProjectDetailsPage";
 import Configuracoes from "./pages/Configuracoes";
 import PortalCliente from "./pages/PortalCliente";
 import PortalAssistente from "./pages/PortalAssistente";
@@ -43,7 +42,7 @@ import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
 import DebugConnection from "./pages/DebugConnection";
 import AuthCallbackHandler from "@/features/auth/AuthCallbackHandler";
-import MFAVerifyPage from "./pages/auth/MFAVerifyPage";
+import MFAVerifyPage from "@/features/auth/pages/MFAVerifyPage";
 import PublicBooking from "./pages/PublicBooking";
 import AppLayout from "./components/ui/layout/AppLayout";
 import MarketingLayout from "./components/ui/layout/MarketingLayout";
@@ -136,11 +135,7 @@ const App = () => (
                       <ProjetoDetalhes />
                     </ProtectedRoute>
                   } />
-                  <Route path="/projects/:id" element={
-                    <ProtectedRoute>
-                      <ProjectDetails />
-                    </ProtectedRoute>
-                  } />
+
                   <Route path="/projects/:projectId/contract" element={
                     <ProtectedRoute>
                       <ProjectContract />

@@ -1,3 +1,4 @@
+import MessageTemplatesSettings from '@/components/settings/MessageTemplatesSettings';
 import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import {
   Edit,
   GripVertical,
   Link2,
+  MessageSquare,
   Package,
   Palette,
   Plus,
@@ -71,14 +73,14 @@ export default function Configuracoes() {
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const { toast } = useToast();
-  
+
   const [settings, setSettings] = useState<ProfessionalSettings | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [paymentAccount, setPaymentAccount] = useState<PaymentAccount | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
-  
+
   // Form state
   const [businessName, setBusinessName] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#5A7D7C');
@@ -86,7 +88,7 @@ export default function Configuracoes() {
   const [instagram, setInstagram] = useState('');
   const [website, setWebsite] = useState('');
   const [bio, setBio] = useState('');
-  
+
   // Service form
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
@@ -94,7 +96,7 @@ export default function Configuracoes() {
   const [serviceDescription, setServiceDescription] = useState('');
   const [servicePrice, setServicePrice] = useState('');
   const [serviceDuration, setServiceDuration] = useState('');
-  
+
   // Payment account form
   const [pixKeyType, setPixKeyType] = useState('');
   const [pixKey, setPixKey] = useState('');
@@ -123,7 +125,7 @@ export default function Configuracoes() {
 
   const fetchData = async () => {
     setLoadingData(true);
-    
+
     // Fetch settings
     const { data: settingsData } = await supabase
       .from('professional_settings')
@@ -147,16 +149,16 @@ export default function Configuracoes() {
       .select('*')
       .eq('user_id', user!.id)
       .order('sort_order');
-    
+
     setServices(servicesData || []);
-    
+
     // Fetch payment account
     const { data: paymentData } = await supabase
       .from('payment_accounts')
       .select('*')
       .eq('user_id', user!.id)
       .maybeSingle();
-    
+
     if (paymentData) {
       setPaymentAccount(paymentData);
       setPixKeyType(paymentData.pix_key_type || '');
@@ -172,13 +174,13 @@ export default function Configuracoes() {
       setDigitalWalletAccount(paymentData.digital_wallet_account || '');
       setPreferredMethod(paymentData.preferred_method || 'pix');
     }
-    
+
     setLoadingData(false);
   };
 
   const saveSettings = async () => {
     setSaving(true);
-    
+
     const { error } = await supabase
       .from('professional_settings')
       .upsert({
@@ -218,7 +220,7 @@ export default function Configuracoes() {
 
   const saveService = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!serviceName.trim()) {
       toast({ title: "Nome é obrigatório", variant: "destructive" });
       return;
@@ -265,9 +267,9 @@ export default function Configuracoes() {
 
   const deleteService = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
-    
+
     const { error } = await supabase.from('services').delete().eq('id', id);
-    
+
     if (!error) {
       toast({ title: "Serviço excluído!" });
       fetchData();
@@ -279,7 +281,7 @@ export default function Configuracoes() {
       .from('services')
       .update({ is_active: isActive })
       .eq('id', id);
-    
+
     if (!error) {
       setServices(services.map(s => s.id === id ? { ...s, is_active: isActive } : s));
     }
@@ -287,7 +289,7 @@ export default function Configuracoes() {
 
   const savePaymentAccount = async () => {
     setSavingPayment(true);
-    
+
     const paymentData = {
       user_id: user!.id,
       pix_key_type: pixKeyType || null,
@@ -375,6 +377,10 @@ export default function Configuracoes() {
               <CreditCard className="h-4 w-4" />
               Plano
             </TabsTrigger>
+            <TabsTrigger value="mensagens" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              Mensagens
+            </TabsTrigger>
           </TabsList>
 
           {/* PERFIL */}
@@ -387,7 +393,7 @@ export default function Configuracoes() {
               <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label>Nome do Negócio</Label>
-                  <Input 
+                  <Input
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
                     placeholder="Ex: Maria Makeup Artist"
@@ -395,7 +401,7 @@ export default function Configuracoes() {
                 </div>
                 <div className="space-y-2">
                   <Label>Telefone/WhatsApp</Label>
-                  <Input 
+                  <Input
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(11) 99999-9999"
@@ -403,7 +409,7 @@ export default function Configuracoes() {
                 </div>
                 <div className="space-y-2">
                   <Label>Instagram</Label>
-                  <Input 
+                  <Input
                     value={instagram}
                     onChange={(e) => setInstagram(e.target.value)}
                     placeholder="@seuperfil"
@@ -411,7 +417,7 @@ export default function Configuracoes() {
                 </div>
                 <div className="space-y-2">
                   <Label>Website</Label>
-                  <Input 
+                  <Input
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
                     placeholder="https://seusite.com"
@@ -419,7 +425,7 @@ export default function Configuracoes() {
                 </div>
                 <div className="space-y-2">
                   <Label>Bio / Sobre você</Label>
-                  <Textarea 
+                  <Textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
                     placeholder="Conte um pouco sobre você e seu trabalho..."
@@ -453,7 +459,7 @@ export default function Configuracoes() {
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       className="h-10 w-20 rounded cursor-pointer"
                     />
-                    <Input 
+                    <Input
                       value={primaryColor}
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       className="w-32"
@@ -467,7 +473,7 @@ export default function Configuracoes() {
                 <div className="p-6 rounded-lg border" style={{ backgroundColor: `${primaryColor}10` }}>
                   <p className="text-sm text-muted-foreground mb-2">Preview:</p>
                   <div className="flex items-center gap-3">
-                    <div 
+                    <div
                       className="w-10 h-10 rounded-lg flex items-center justify-center"
                       style={{ backgroundColor: primaryColor }}
                     >
@@ -516,7 +522,7 @@ export default function Configuracoes() {
                     <form onSubmit={saveService} className="space-y-4">
                       <div className="space-y-2">
                         <Label>Nome do Serviço *</Label>
-                        <Input 
+                        <Input
                           value={serviceName}
                           onChange={(e) => setServiceName(e.target.value)}
                           placeholder="Ex: Maquiagem para Noiva"
@@ -525,7 +531,7 @@ export default function Configuracoes() {
                       </div>
                       <div className="space-y-2">
                         <Label>Descrição</Label>
-                        <Textarea 
+                        <Textarea
                           value={serviceDescription}
                           onChange={(e) => setServiceDescription(e.target.value)}
                           placeholder="Descreva o serviço..."
@@ -535,7 +541,7 @@ export default function Configuracoes() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label>Preço (R$)</Label>
-                          <Input 
+                          <Input
                             type="number"
                             step="0.01"
                             value={servicePrice}
@@ -545,7 +551,7 @@ export default function Configuracoes() {
                         </div>
                         <div className="space-y-2">
                           <Label>Duração (min)</Label>
-                          <Input 
+                          <Input
                             type="number"
                             value={serviceDuration}
                             onChange={(e) => setServiceDuration(e.target.value)}
@@ -568,7 +574,7 @@ export default function Configuracoes() {
                 ) : (
                   <div className="space-y-3">
                     {services.map((service) => (
-                      <div 
+                      <div
                         key={service.id}
                         className={`flex items-center justify-between p-4 border rounded-lg ${!service.is_active ? 'opacity-50' : ''}`}
                       >
@@ -587,15 +593,15 @@ export default function Configuracoes() {
                             checked={service.is_active}
                             onCheckedChange={(checked) => toggleServiceActive(service.id, checked)}
                           />
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={() => openEditService(service)}
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="icon"
                             onClick={() => deleteService(service.id)}
                           >
@@ -643,15 +649,15 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>Chave PIX</Label>
-                      <Input 
+                      <Input
                         value={pixKey}
                         onChange={(e) => setPixKey(e.target.value)}
                         placeholder={
                           pixKeyType === 'cpf' ? '000.000.000-00' :
-                          pixKeyType === 'cnpj' ? '00.000.000/0000-00' :
-                          pixKeyType === 'email' ? 'email@exemplo.com' :
-                          pixKeyType === 'phone' ? '+55 11 99999-9999' :
-                          'Cole sua chave aleatória'
+                            pixKeyType === 'cnpj' ? '00.000.000/0000-00' :
+                              pixKeyType === 'email' ? 'email@exemplo.com' :
+                                pixKeyType === 'phone' ? '+55 11 99999-9999' :
+                                  'Cole sua chave aleatória'
                         }
                       />
                     </div>
@@ -674,7 +680,7 @@ export default function Configuracoes() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Nome do Banco</Label>
-                      <Input 
+                      <Input
                         value={bankName}
                         onChange={(e) => setBankName(e.target.value)}
                         placeholder="Ex: Banco do Brasil, Itaú, Nubank..."
@@ -682,7 +688,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>Código do Banco</Label>
-                      <Input 
+                      <Input
                         value={bankCode}
                         onChange={(e) => setBankCode(e.target.value)}
                         placeholder="Ex: 001, 341, 260..."
@@ -704,7 +710,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>Agência</Label>
-                      <Input 
+                      <Input
                         value={agency}
                         onChange={(e) => setAgency(e.target.value)}
                         placeholder="0000"
@@ -712,7 +718,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>Conta (com dígito)</Label>
-                      <Input 
+                      <Input
                         value={accountNumber}
                         onChange={(e) => setAccountNumber(e.target.value)}
                         placeholder="00000-0"
@@ -722,7 +728,7 @@ export default function Configuracoes() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Nome do Titular</Label>
-                      <Input 
+                      <Input
                         value={accountHolderName}
                         onChange={(e) => setAccountHolderName(e.target.value)}
                         placeholder="Nome completo conforme conta"
@@ -730,7 +736,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>CPF/CNPJ do Titular</Label>
-                      <Input 
+                      <Input
                         value={accountHolderDocument}
                         onChange={(e) => setAccountHolderDocument(e.target.value)}
                         placeholder="000.000.000-00"
@@ -771,7 +777,7 @@ export default function Configuracoes() {
                     </div>
                     <div className="space-y-2">
                       <Label>E-mail ou ID da Conta</Label>
-                      <Input 
+                      <Input
                         value={digitalWalletAccount}
                         onChange={(e) => setDigitalWalletAccount(e.target.value)}
                         placeholder="email@exemplo.com"
@@ -800,11 +806,10 @@ export default function Configuracoes() {
                         key={method.value}
                         type="button"
                         onClick={() => setPreferredMethod(method.value)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${
-                          preferredMethod === method.value 
-                            ? 'border-primary bg-primary/10 text-primary' 
-                            : 'border-border hover:border-primary/50'
-                        }`}
+                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${preferredMethod === method.value
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                          }`}
                       >
                         <method.icon className="h-5 w-5" />
                         {method.label}
