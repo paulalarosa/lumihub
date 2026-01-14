@@ -4,8 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import AdminRoute from "@/components/auth/AdminRoute";
+import ProtectedRoute from "@/features/auth/ProtectedRoute";
+import AdminRoute from "@/features/auth/AdminRoute";
 import Home from "./pages/Home";
 import Recursos from "./pages/Recursos";
 import Planos from "./pages/Planos";
@@ -21,7 +21,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./features/admin/AdminDashboard";
 import Clientes from "./pages/Clientes";
 import ClienteDetalhes from "./pages/ClienteDetalhes";
 import Projetos from "./pages/Projetos";
@@ -42,10 +42,11 @@ import ProjectContract from "./pages/ProjectContract";
 import NotFound from "./pages/NotFound";
 import AIAssistantChat from "./components/ai-assistant/AIAssistantChat";
 import DebugConnection from "./pages/DebugConnection";
-import AuthCallbackHandler from "./components/auth/AuthCallbackHandler";
+import AuthCallbackHandler from "@/features/auth/AuthCallbackHandler";
+import MFAVerifyPage from "./pages/auth/MFAVerifyPage";
 import PublicBooking from "./pages/PublicBooking";
-import AppLayout from "./components/layout/AppLayout";
-import MarketingLayout from "./components/layout/MarketingLayout";
+import AppLayout from "./components/ui/layout/AppLayout";
+import MarketingLayout from "./components/ui/layout/MarketingLayout";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 
 import InviteLanding from "./pages/InviteLanding";
@@ -82,6 +83,7 @@ const App = () => (
                   <Route index element={<Navigate to="/login" replace />} />
                   <Route path="login" element={<Navigate to="/login" replace />} />
                   <Route path="register" element={<Navigate to="/register" replace />} />
+                  <Route path="mfa-verify" element={<MFAVerifyPage />} />
                 </Route>
                 <Route path="/auth/callback" element={<AuthCallbackHandler />} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />

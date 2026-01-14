@@ -1,76 +1,30 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
-import { Sidebar } from "@/components/agenda/CalendarSidebar"; // Assuming we reuse the sidebar or layout
 import ServiceDialog from "@/components/services/ServiceDialog";
 import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Edit2, Trash2, Clock, Sparkles } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/layout/Header";
-
-interface Service {
-    id: string;
-    title: string;
-    price: number;
-    duration_minutes: number;
-    description: string | null;
-}
+import Header from "@/components/ui/layout/Header"; // FIXED IMPORT
+import { useServices } from "@/hooks/useServices";
+import { ServiceItem } from "@/services/services.service";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Servicos() {
     const { user } = useAuth();
-    const { toast } = useToast();
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { services, loading, removeService, refetch } = useServices(user?.id);
     const [searchTerm, setSearchTerm] = useState("");
 
-    // Dialog State
     const [showDialog, setShowDialog] = useState(false);
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
-
-    useEffect(() => {
-        if (user) {
-            fetchServices();
-        }
-    }, [user]);
-
-    const fetchServices = async () => {
-        setLoading(true);
-        const { data, error } = await supabase
-            .from("services")
-            .select("*")
-            .order("title");
-
-        if (error) {
-            console.error("Error fetching services:", error);
-        } else {
-            setServices(data || []);
-        }
-        setLoading(false);
-    };
+    const [selectedService, setSelectedService] = useState<ServiceItem | null>(null);
 
     const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
-
-        const { error } = await supabase.from("services").delete().eq("id", id);
-        if (error) {
-            toast({
-                title: "Erro",
-                description: "Não foi possível excluir o serviço.",
-                variant: "destructive",
-            });
-        } else {
-            toast({
-                title: "Sucesso",
-                description: "Serviço excluído.",
-            });
-            fetchServices();
-        }
+        await removeService(id);
     };
 
-    const handleEdit = (service: Service, e: React.MouseEvent) => {
+    const handleEdit = (service: ServiceItem, e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedService(service);
         setShowDialog(true);
@@ -95,16 +49,11 @@ export default function Servicos() {
 
     return (
         <div className="flex min-h-screen bg-[#050505]">
-            {/* Reusing Sidebar roughly if applicable, otherwise just main content */}
-            {/* Assuming global layout handles sidebar, or we wrap it properly. 
-           For this specific file, we'll build the page content. */}
-
             <div className="flex-1 overflow-y-auto">
                 <Header />
 
                 <main className="p-8 max-w-7xl mx-auto space-y-8">
 
-                    {/* Page Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
                             <h1 className="text-4xl font-serif text-white font-light">Menu de Serviços</h1>
@@ -131,12 +80,13 @@ export default function Servicos() {
                         </div>
                     </div>
 
-                    {/* Grid Content */}
                     {loading ? (
-                        <div className="text-center py-20 text-gray-500">Carregando...</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <Skeleton key={i} className="h-48 w-full bg-white/5 rounded-2xl" />
+                            ))}
+                        </div>
                     ) : filteredServices.length === 0 ? (
-                        /* Empty State */
-                        /* Empty State */
                         <EmptyState
                             icon={Sparkles}
                             title="Seu menu está em branco"
@@ -192,7 +142,7 @@ export default function Servicos() {
                 open={showDialog}
                 onOpenChange={setShowDialog}
                 service={selectedService}
-                onSuccess={fetchServices}
+                onSuccess={refetch}
             />
         </div>
     );

@@ -1,5 +1,7 @@
+
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
+import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 
 type AppRole = 'admin' | 'user';
@@ -11,6 +13,7 @@ interface AuthContextType {
   roles: AppRole[];
   isAdmin: boolean;
   isAssistant: boolean;
+  checkIfAssistant: (userId: string) => Promise<void>;
   signUp: (email: string, password: string, fullName?: string, businessName?: string) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
@@ -37,43 +40,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchRoles = async (userId: string, email?: string) => {
-    try {
-      console.log("Auth Debug: Fetching profile for", userId, email);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role, plan')
-        .eq('id', userId)
-        .maybeSingle();
+    // @ts-ignore
+    const userRole = data?.role;
 
-      if (error) {
-        console.error("Auth Debug: Error fetching profile", error);
-      }
+    const fetchedRoles: AppRole[] = [];
+    if (userRole === 'admin') fetchedRoles.push('admin');
 
-      console.log("Auth Debug: Profile data", data);
-
-      const fetchedRoles: AppRole[] = [];
-      if (data?.role === 'admin') fetchedRoles.push('admin');
-
-      // Hardcoded admin override for testing
-      if (email === 'prenata@gmail.com') {
-        console.log("Auth Debug: Applying email override for admin");
-        if (!fetchedRoles.includes('admin')) fetchedRoles.push('admin');
-      }
-
-      setRoles(fetchedRoles);
-    } catch (e) {
-      console.error("Auth Debug: Unexpected error", e);
+    if (email === 'prenata@gmail.com') {
+      if (!fetchedRoles.includes('admin')) fetchedRoles.push('admin');
     }
+
+    setRoles(fetchedRoles);
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+    const { data: { subscription } } = AuthService.onAuthStateChange(
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Defer role fetching with setTimeout to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
             fetchRoles(session.user.id, session.user.email);
@@ -86,8 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    AuthService.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -143,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await AuthService.signOut();
     setRoles([]);
     setIsAssistant(false);
   };
@@ -158,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       roles,
       isAdmin,
       isAssistant,
+      checkIfAssistant,
       signUp,
       signIn,
       signInWithGoogle,

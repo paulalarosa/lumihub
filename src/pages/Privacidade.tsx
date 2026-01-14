@@ -1,11 +1,6 @@
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-
 export default function Privacidade() {
     return (
-        <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
-            <Header />
-
+        <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans">
             <main className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-8">
                     Política de Privacidade
@@ -81,8 +76,6 @@ export default function Privacidade() {
                     </div>
                 </div>
             </main>
-
-            <Footer />
         </div>
     );
 }

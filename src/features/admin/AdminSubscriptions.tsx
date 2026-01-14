@@ -3,17 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-    CreditCard,
-    TrendingUp,
-    Users,
-    AlertCircle,
-    CheckCircle2,
-    XCircle,
-    ArrowUpCircle,
-    ArrowDownCircle
-} from 'lucide-react';
+import { CheckCircle2, AlertCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import AdminFinancials from '@/features/admin/AdminFinancials';
 
 export default function AdminSubscriptions() {
     const { toast } = useToast();
@@ -22,13 +14,13 @@ export default function AdminSubscriptions() {
     const [stats, setStats] = useState({
         mrr: 0,
         activeSubscribers: 0,
-        churnRate: '0%', // Mocked for now as we need historical data
+        churnRate: '0%',
         growth: '+0%'
     });
 
     const PLAN_PRICES = {
         free: 0,
-        starter: 29.90, // Example prices
+        starter: 29.90,
         pro: 59.90,
         empire: 99.90
     };
@@ -67,9 +59,11 @@ export default function AdminSubscriptions() {
         let subscribers = 0;
 
         profiles.forEach(user => {
-            const plan = user.plan || 'free';
-            if (plan !== 'free' && PLAN_PRICES[plan as keyof typeof PLAN_PRICES]) {
-                mrr += PLAN_PRICES[plan as keyof typeof PLAN_PRICES];
+            const plan = (user.plan || 'free').toLowerCase();
+            // Match against known plans to calculate MRR
+            const price = PLAN_PRICES[plan as keyof typeof PLAN_PRICES] || 0;
+            if (price > 0) {
+                mrr += price;
                 subscribers++;
             }
         });
@@ -77,7 +71,7 @@ export default function AdminSubscriptions() {
         setStats({
             mrr,
             activeSubscribers: subscribers,
-            churnRate: '2.4%', // Placeholder
+            churnRate: '2.4%', // Placeholder until we have cancellation data logs
             growth: '+12.5%' // Placeholder
         });
     };
@@ -96,7 +90,7 @@ export default function AdminSubscriptions() {
                 description: `Usuário alterado para ${newPlan}`
             });
 
-            fetchData(); // Refresh data
+            fetchData();
         } catch (error) {
             toast({
                 title: "Erro ao atualizar plano",
@@ -105,75 +99,10 @@ export default function AdminSubscriptions() {
         }
     };
 
-    if (loading) return <div className="text-gray-400">Carregando dados financeiros...</div>;
-
     return (
-        <div className="space-y-6">
-            {/* Stats Row */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card className="bg-[#1A1A1A] border-white/10">
-                    <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-gray-400 text-sm">MRR (Receita Mensal)</p>
-                                <h3 className="text-2xl font-bold text-white mt-2">
-                                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(stats.mrr)}
-                                </h3>
-                            </div>
-                            <div className="p-2 bg-[#00e5ff]/10 rounded-lg">
-                                <CreditCard className="w-5 h-5 text-[#00e5ff]" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+        <div className="space-y-6 animate-in fade-in duration-500">
+            <AdminFinancials stats={stats} loading={loading} />
 
-                <Card className="bg-[#1A1A1A] border-white/10">
-                    <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-gray-400 text-sm">Assinantes Ativos</p>
-                                <h3 className="text-2xl font-bold text-white mt-2">{stats.activeSubscribers}</h3>
-                            </div>
-                            <div className="p-2 bg-purple-500/10 rounded-lg">
-                                <Users className="w-5 h-5 text-purple-400" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-[#1A1A1A] border-white/10">
-                    <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-gray-400 text-sm">Churn Rate</p>
-                                <h3 className="text-2xl font-bold text-red-400 mt-2">{stats.churnRate}</h3>
-                            </div>
-                            <div className="p-2 bg-red-500/10 rounded-lg">
-                                <TrendingUp className="w-5 h-5 text-red-400" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-[#1A1A1A] border-white/10">
-                    <CardContent className="pt-6">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <p className="text-gray-400 text-sm">Status Integração</p>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                                    <span className="text-white font-medium">Stripe Online</span>
-                                </div>
-                            </div>
-                            <div className="p-2 bg-green-500/10 rounded-lg">
-                                <CheckCircle2 className="w-5 h-5 text-green-400" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Users & Plans Table */}
             <Card className="bg-[#1A1A1A] border-white/10">
                 <CardHeader>
                     <CardTitle className="text-white">Gerenciamento de Assinaturas</CardTitle>
@@ -193,7 +122,11 @@ export default function AdminSubscriptions() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {users.map((user) => (
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={4} className="py-8 text-center text-gray-500">Carregando usuários...</td>
+                                    </tr>
+                                ) : users.map((user) => (
                                     <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition">
                                         <td className="py-3 px-4">
                                             <div>

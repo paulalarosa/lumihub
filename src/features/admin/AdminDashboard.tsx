@@ -2,16 +2,20 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Users, Settings, AlertCircle, LogOut, Menu, X, CreditCard, Megaphone } from 'lucide-react';
+import { BarChart3, Users, Settings, AlertCircle, LogOut, Menu, X, CreditCard, Megaphone, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-import AdminOverview from '@/components/admin/AdminOverview';
-import AdminUsers from '@/components/admin/AdminUsers';
-import AdminConfig from '@/components/admin/AdminConfig';
-import AdminLogs from '@/components/admin/AdminLogs';
-import AdminSubscriptions from '@/components/admin/AdminSubscriptions';
+import AdminOverview from '@/features/admin/AdminOverview';
+import AdminUsers from '@/features/admin/AdminUsers';
+import AdminConfig from '@/features/admin/AdminConfig';
+import AdminLogs from '@/features/admin/AdminLogs';
+import AdminSubscriptions from '@/features/admin/AdminSubscriptions';
+import MFAEnrollment from '@/features/auth/MFAEnrollment';
+import AdminSecurity from '@/features/admin/AdminSecurity';
 
-type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs';
+type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security';
+
+
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -21,10 +25,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Get active tab from URL or default to overview
   const activeTab = (searchParams.get('tab') as AdminTab) || 'overview';
 
-  // Force admin check
   const isAuthorizedAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
 
   useEffect(() => {
@@ -66,6 +68,7 @@ export default function AdminDashboard() {
     { id: 'subscriptions' as AdminTab, label: 'Assinaturas & Planos', icon: CreditCard },
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
     { id: 'config' as AdminTab, label: 'Configurações', icon: Settings },
+    { id: 'security' as AdminTab, label: 'Segurança', icon: ShieldCheck },
     { id: 'logs' as AdminTab, label: 'Logs de Erro', icon: AlertCircle },
   ];
 
@@ -76,14 +79,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-[#121212]">
-      {/* Sidebar */}
       <motion.div
         initial={{ x: -300 }}
         animate={{ x: 0 }}
         className={`${sidebarOpen ? 'w-64' : 'w-20'
           } bg-[#1A1A1A] border-r border-[#00e5ff]/20 flex flex-col transition-all duration-300`}
       >
-        {/* Logo */}
         <div className="p-6 border-b border-[#00e5ff]/20">
           <h1 className="text-white font-serif text-2xl font-bold">
             {sidebarOpen ? 'LUMI' : 'L'}
@@ -93,7 +94,6 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        {/* Menu Items */}
         <nav className="flex-1 p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -102,8 +102,8 @@ export default function AdminDashboard() {
                 key={item.id}
                 onClick={() => setTab(item.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition ${activeTab === item.id
-                    ? 'bg-[#00e5ff]/10 border border-[#00e5ff]/50 text-[#00e5ff]'
-                    : 'text-gray-400 hover:text-white hover:bg-[#2A2A2A]'
+                  ? 'bg-[#00e5ff]/10 border border-[#00e5ff]/50 text-[#00e5ff]'
+                  : 'text-gray-400 hover:text-white hover:bg-[#2A2A2A]'
                   }`}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
@@ -113,7 +113,6 @@ export default function AdminDashboard() {
           })}
         </nav>
 
-        {/* Toggle & Logout */}
         <div className="p-4 border-t border-[#00e5ff]/20 space-y-2">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -132,9 +131,7 @@ export default function AdminDashboard() {
         </div>
       </motion.div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar */}
         <div className="bg-[#1A1A1A] border-b border-[#00e5ff]/10 px-8 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-white font-serif text-3xl font-bold">
@@ -146,7 +143,17 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Content Area */}
+        <div className="bg-[#1A1A1A] border-b border-[#00e5ff]/10 px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-white font-serif text-3xl font-bold">
+              {menuItems.find(m => m.id === activeTab)?.label}
+            </h2>
+            <div className="text-gray-400 text-sm">
+              Admin: {user?.email}
+            </div>
+          </div>
+        </div>
+
         <div className="flex-1 overflow-auto bg-[#121212] p-8">
           {activeTab === 'overview' && <AdminOverview />}
           {activeTab === 'users' && <AdminUsers />}
@@ -159,6 +166,7 @@ export default function AdminDashboard() {
             </div>
           )}
           {activeTab === 'config' && <AdminConfig />}
+          {activeTab === 'security' && <AdminSecurity />}
           {activeTab === 'logs' && <AdminLogs />}
         </div>
       </div>

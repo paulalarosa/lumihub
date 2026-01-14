@@ -97,6 +97,8 @@ export function useContracts() {
         // So we should return the path.
 
         return filePath;
+        // Return the path so we can generate signed URLs on demand (Security Best Practice)
+        return filePath;
     };
 
     const getFileUrl = async (path: string) => {

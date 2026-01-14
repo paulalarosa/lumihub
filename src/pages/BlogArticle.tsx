@@ -1,6 +1,4 @@
 import { useParams, Link } from 'react-router-dom';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { ArrowLeft } from 'lucide-react';
 
 const articleData: Record<string, any> = {
@@ -68,8 +66,7 @@ export default function BlogArticle() {
 
   if (!article) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] text-[#050505]">
-        <Header />
+      <div className=" bg-[#FAFAFA] text-[#050505]">
         <main className="container mx-auto px-6 py-20">
           <Link to="/blog" className="inline-flex items-center gap-2 text-[#374151] hover:text-[#050505]">
             <ArrowLeft className="h-4 w-4" />
@@ -79,14 +76,12 @@ export default function BlogArticle() {
             <p className="text-lg text-[#374151]">Artigo não encontrado.</p>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] text-[#050505]">
-      <Header />
+    <div className="bg-[#FAFAFA] text-[#050505]">
 
       <main className="container mx-auto px-6 py-12">
         {/* Sticky Back Link */}
@@ -126,8 +121,6 @@ export default function BlogArticle() {
           </div>
         </article>
       </main>
-
-      <Footer />
     </div>
   );
 }

@@ -1,21 +1,29 @@
 import { useSubscription } from '@/hooks/useSubscription';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Sparkles } from 'lucide-react';
 
 export function TrialBanner() {
     const { status, daysRemaining, isLoading, plan } = useSubscription();
+    const { isAdmin, user } = useAuth();
     const navigate = useNavigate();
 
-    // Don't show if loading, if active (paid), or if expired (access blocked anyway typically)
-    // Actually, if expired, we might want to show a locked banner if they are on a protected page?
-    // But usually ProtectedRoute handles expired redirect.
-    // This banner is for "Urgency" during trial.
+    // Specific check for hardcoded admin email just in case
+    const isHardcodedAdmin = user?.email === 'prenata@gmail.com';
 
     if (isLoading) return null;
 
-    // Explicitly hide for non-trialing logic, or if user is admin/pro
-    if (status !== 'trialing' || daysRemaining === null || plan === 'pro' || plan === 'empire') return null;
+    // Hide if:
+    // 1. User is admin
+    // 2. User is on a paid plan (pro/empire)
+    // 3. User is not in trial status OR days remaining logic fails
+    // 4. (Optional) if expired, but usually we want to block access or show expired banner. 
+    //    For this specific "Trial Countdown", we hide if not trialing.
+
+    if (isAdmin || isHardcodedAdmin) return null;
+    if (plan === 'pro' || plan === 'empire') return null;
+    if (status !== 'trialing' || typeof daysRemaining !== 'number') return null;
 
     return (
         <div className="bg-[#00e5ff]/10 border-b border-[#00e5ff]/20 backdrop-blur-md">
