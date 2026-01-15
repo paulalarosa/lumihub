@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import SEOHead from '@/components/seo/SEOHead';
 
 export default function Contact() {
   const { toast } = useToast();
@@ -47,9 +48,25 @@ export default function Contact() {
     await sendApplication(payload);
   };
 
+  const applicationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Aplicação Studio Pro",
+    "description": "Formulário de aplicação para o plano Studio Pro da Lumi",
+    "url": "https://lumihub.lovable.app/contact"
+  };
+
   return (
-    <div className="bg-background text-foreground h-full">
-      <main className="container mx-auto px-6 py-20">
+    <>
+      <SEOHead
+        title="Aplicação Studio Pro - Lumi | Eleve sua Carreira"
+        description="Aplique para o plano Studio Pro e receba onboarding dedicado, suporte prioritário e consultoria personalizada para seu studio de beleza."
+        keywords="studio pro lumi, plano premium beleza, consultoria maquiadores, aplicação studio"
+        url="https://lumihub.lovable.app/contact"
+        jsonLd={applicationJsonLd}
+      />
+      <div className="bg-background text-foreground h-full">
+        <main className="container mx-auto px-6 py-20">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
           {/* Left persuasive column */}
           <section className="space-y-8">
@@ -145,5 +162,6 @@ export default function Contact() {
         </div>
       </main>
     </div>
+    </>
   );
 }

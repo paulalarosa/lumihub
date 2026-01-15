@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import heroFallback from '@/assets/hero-beauty.jpg';
+import SEOHead from '@/components/seo/SEOHead';
 
 const posts = [
   {
@@ -38,13 +39,45 @@ const posts = [
 ];
 
 export default function Blog() {
+  const blogJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Lumi Journal",
+    "description": "Insights e dicas para profissionais de beleza sobre carreira, tendências e gestão de negócios",
+    "url": "https://lumihub.lovable.app/blog",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Lumi",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://lumihub.lovable.app/og-image.png"
+      }
+    },
+    "blogPost": posts.map(post => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "datePublished": post.date,
+      "description": post.excerpt,
+      "url": `https://lumihub.lovable.app/blog/${post.id}`
+    }))
+  };
+
   return (
-    <div className="min-h-screen bg-[color:var(--background, #FAFAFA)] text-[#050505]">
-      <main className="container mx-auto px-6 py-20">
-        <header className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="journal-title text-6xl">Lumi Journal</h1>
-          <p className="mt-4 text-lg text-[#374151]">Editorial perspectives on beauty, business and craft — presented like a magazine.</p>
-        </header>
+    <>
+      <SEOHead
+        title="Blog - Lumi Journal | Dicas para Profissionais de Beleza"
+        description="Insights, tendências e estratégias de carreira para maquiadores e profissionais de beleza. Aprenda a crescer seu negócio."
+        keywords="blog beleza, dicas maquiadores, carreira maquiagem, tendências beleza 2026"
+        url="https://lumihub.lovable.app/blog"
+        type="website"
+        jsonLd={blogJsonLd}
+      />
+      <div className="min-h-screen bg-[color:var(--background, #FAFAFA)] text-[#050505]">
+        <main className="container mx-auto px-6 py-20">
+          <header className="max-w-4xl mx-auto text-center mb-12">
+            <h1 className="journal-title text-6xl">Lumi Journal</h1>
+            <p className="mt-4 text-lg text-[#374151]">Editorial perspectives on beauty, business and craft — presented like a magazine.</p>
+          </header>
 
         <section className="masonry">
           {posts.map((post) => (
@@ -73,5 +106,6 @@ export default function Blog() {
         </section>
       </main>
     </div>
+    </>
   );
 }
