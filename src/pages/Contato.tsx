@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, MessageCircle, ArrowRight, Sparkles, Send } from 'lucide-react';
+import SEOHead from '@/components/seo/SEOHead';
 
 export default function Contato() {
     const { toast } = useToast();
@@ -54,8 +55,33 @@ export default function Contato() {
         }, 1000);
     };
 
+    const contactJsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "name": "Contato Lumi",
+        "description": "Entre em contato com a equipe Lumi para dúvidas, suporte ou parcerias",
+        "url": "https://lumihub.lovable.app/contato",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "Lumi",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "availableLanguage": ["Portuguese", "English"]
+            }
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+        <>
+            <SEOHead
+                title="Contato - Lumi | Fale Conosco"
+                description="Entre em contato com a equipe Lumi. Tire suas dúvidas sobre a plataforma de gestão para profissionais de beleza."
+                keywords="contato lumi, suporte maquiadores, falar com lumi, dúvidas plataforma beleza"
+                url="https://lumihub.lovable.app/contato"
+                jsonLd={contactJsonLd}
+            />
+            <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
 
 
             <main className="container mx-auto px-4 py-20 lg:py-32">
@@ -224,7 +250,7 @@ export default function Contato() {
                     </div>
                 </div>
             </main>
-
         </div>
+        </>
     );
 }
