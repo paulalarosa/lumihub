@@ -17,6 +17,7 @@ import {
   Cloud,
   Lock
 } from "lucide-react";
+import SEOHead from "@/components/seo/SEOHead";
 
 const Recursos = () => {
   const mainFeatures = [
@@ -128,6 +129,13 @@ const Recursos = () => {
   ];
 
   return (
+    <>
+      <SEOHead 
+        title="Recursos e Funcionalidades - Lumi | Sistema Completo de Gestão"
+        description="CRM completo, gestão de projetos, moodboard interativo, contratos digitais, pagamentos integrados e muito mais. Conheça todos os recursos da Lumi."
+        keywords="recursos lumi, funcionalidades sistema beleza, crm maquiadora, gestão projetos noivas"
+        url="https://lumihub.lovable.app/recursos"
+      />
     <div className="min-h-screen bg-background">
 
       {/* Hero Section */}
@@ -265,6 +273,7 @@ const Recursos = () => {
       </section>
 
     </div>
+    </>
   );
 };
 

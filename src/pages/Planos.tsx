@@ -11,6 +11,7 @@ import {
   Crown,
   Building
 } from "lucide-react";
+import SEOHead from "@/components/seo/SEOHead";
 
 const Planos = () => {
   const plans = [
@@ -115,7 +116,14 @@ const Planos = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <>
+      <SEOHead 
+        title="Planos e Preços - Lumi | Gestão para Profissionais de Beleza"
+        description="Escolha o plano ideal: Essencial R$39,90, Profissional R$89,90 ou Estúdio R$179,90. Teste grátis por 14 dias sem compromisso."
+        keywords="preços lumi, planos maquiadora, sistema gestão beleza preço, software salão preço"
+        url="https://lumihub.lovable.app/planos"
+      />
+      <div className="min-h-screen bg-background">
 
       {/* Hero Section */}
       <section className="py-20 lg:py-32 bg-gradient-to-br from-background to-muted">
@@ -299,6 +307,7 @@ const Planos = () => {
       </section>
 
     </div>
+    </>
   );
 };
 
