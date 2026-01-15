@@ -14,6 +14,7 @@ import heroImage from "@/assets/hero-image.png";
 import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle, ArrowRight, Star, Sparkles, Crown, Clock, FileSignature, TrendingUp, Bot } from "lucide-react";
 import { motion, useScroll as useFramerScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
+import SEOHead from "@/components/seo/SEOHead";
 
 const Home = () => {
   const { scrollY } = useScroll();
@@ -59,7 +60,23 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
+    <>
+      <SEOHead 
+        title="Lumi - Plataforma de Gestão para Profissionais de Beleza"
+        description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%."
+        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Lumi - Gestão para Profissionais de Beleza",
+          "description": "Plataforma completa para gestão de negócios de beleza",
+          "provider": {
+            "@type": "Organization",
+            "name": "Lumi"
+          }
+        }}
+      />
+      <div className="min-h-screen bg-[#050505] page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
 
 
       {/* Hero Section - Beauty Tech Design */}
@@ -432,6 +449,7 @@ const Home = () => {
 
       <AIAssistantFAB />
     </div>
+    </>
   );
 };
 

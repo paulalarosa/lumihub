@@ -1,14 +1,33 @@
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-User-agent: Twitterbot
-Allow: /
-
-User-agent: facebookexternalhit
-Allow: /
+# Lumi - Robots.txt
+# https://lumihub.lovable.app
 
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /clientes
+Disallow: /projetos
+Disallow: /configuracoes
+Disallow: /agenda
+Disallow: /assistentes
+Disallow: /servicos
+Disallow: /contratos
+Disallow: /marketing
+Disallow: /assistente
+Disallow: /admin
+Disallow: /portal/
+Disallow: /auth/
+
+# Allow marketing pages
+Allow: /
+Allow: /recursos
+Allow: /planos
+Allow: /blog
+Allow: /contato
+Allow: /privacidade
+Allow: /b/
+
+# Crawl-delay for rate limiting
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://lumihub.lovable.app/sitemap.xml
