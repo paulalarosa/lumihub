@@ -23,9 +23,10 @@ import { Loader2 } from "lucide-react";
 
 interface Service {
     id: string;
-    title: string;
-    price: number;
-    duration_minutes: number;
+    name: string;
+    title?: string; // backward compat
+    price: number | null;
+    duration_minutes: number | null;
     description: string | null;
 }
 

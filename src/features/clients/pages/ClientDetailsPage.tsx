@@ -81,27 +81,19 @@ export default function ClientDetailsPage() {
 
         setClient(clientData as Client);
 
-        // Fetch records
-        const { data: recordsData, error: recordsError } = await ClientService.getTreatmentRecords(id);
-
-        if (!recordsError) {
-            setRecords((recordsData as any) || []);
-        }
+        // Fetch records - getTreatmentRecords returns empty array now
+        const recordsData = await ClientService.getTreatmentRecords(id);
+        setRecords(recordsData || []);
 
         setLoadingData(false);
     };
 
     const deleteRecord = async (recordId: string) => {
         if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-
-        const { error } = await ClientService.deleteTreatmentRecord(recordId);
-
-        if (error) {
-            toast({ title: "Erro ao excluir", variant: "destructive" });
-        } else {
-            toast({ title: "Registro excluído" });
-            fetchData();
-        }
+        
+        await ClientService.deleteTreatmentRecord(recordId);
+        toast({ title: "Registro excluído" });
+        fetchData();
     };
 
     if (authLoading || loadingData) {

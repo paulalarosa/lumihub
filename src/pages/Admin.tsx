@@ -77,11 +77,10 @@ export default function Admin() {
     }
 
     // Map profiles to match UserProfile interface
-    // Note: 'role' is a string in profiles, but the interface expects roles array for legacy compatibility
-    // We will adapt the interface usage or map it here.
+    // Role column doesn't exist in current schema - use user_roles table instead
     const usersWithRoles = profiles?.map(profile => ({
       ...profile,
-      roles: profile.role === 'admin' ? ['admin'] : ['user']
+      roles: ['user'] // Default to user, admin check is done via user_roles table
     })) || [];
 
     setUsers(usersWithRoles as UserProfile[]);

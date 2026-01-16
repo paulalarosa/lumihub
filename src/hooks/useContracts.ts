@@ -43,11 +43,17 @@ export function useContracts() {
         setLoading(false);
     };
 
-    const createContract = async (contract: Partial<Contract>) => {
+    const createContract = async (contract: Partial<Contract> & { project_id: string }) => {
         if (!user) return;
         const { data, error } = await supabase
             .from('contracts')
-            .insert([{ ...contract, user_id: user.id }])
+            .insert([{ 
+                title: contract.title || 'Contrato',
+                content: contract.content || '',
+                status: contract.status || 'draft',
+                project_id: contract.project_id,
+                user_id: user.id 
+            }])
             .select()
             .single();
 

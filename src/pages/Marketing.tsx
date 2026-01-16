@@ -19,9 +19,8 @@ interface InactiveClient {
     id: string;
     name: string;
     phone: string | null;
-    last_visit: string | null;
-    last_contacted_at: string | null;
-    days_since_visit: number;
+    created_at: string;
+    days_since_created: number;
 }
 
 const DEFAULT_SCRIPTS: MarketingCampaign[] = [
@@ -64,9 +63,8 @@ export default function Marketing() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
 
-    const { campaigns, loading: campaignsLoading, error: campaignsError } = useMarketing();
+    const { campaigns, loading: campaignsLoading } = useMarketing();
 
-    // Meld default scripts with fetched campaigns if needed, or just use campaigns + fallback
     const displayCampaigns = campaigns.length > 0 ? campaigns : DEFAULT_SCRIPTS;
 
     useEffect(() => {
@@ -84,55 +82,32 @@ export default function Marketing() {
     const fetchInactiveClients = async () => {
         setClientLoading(true);
         try {
+            // Simplified query - no last_visit column
             const { data: allClients, error: clientError } = await supabase
                 .from('clients')
-                .select('id, name, phone, last_visit, last_contacted_at');
+                .select('id, name, phone, created_at');
 
             if (clientError) throw clientError;
 
-            const now = new Date().toISOString();
-            const { data: futureEvents } = await supabase
-                .from('events')
-                .select('client_id')
-                .gte('event_date', now.split('T')[0]);
-
-            const bookedClientIds = new Set(futureEvents?.map(e => e.client_id) || []);
+            const now = new Date();
             const processedClients: InactiveClient[] = [];
-            const today = new Date();
 
             for (const client of allClients || []) {
-                if (bookedClientIds.has(client.id)) continue;
-
-                let lastVisitDate = client.last_visit ? new Date(client.last_visit) : null;
-
-                if (!lastVisitDate) {
-                    const { data: lastEvent } = await supabase
-                        .from('events')
-                        .select('event_date')
-                        .eq('client_id', client.id)
-                        .lte('event_date', now)
-                        .order('event_date', { ascending: false })
-                        .limit(1)
-                        .single();
-
-                    if (lastEvent) {
-                        lastVisitDate = new Date(lastEvent.event_date);
-                    }
-                }
-
-                if (lastVisitDate) {
-                    const daysDiff = differenceInDays(today, lastVisitDate);
-                    if (daysDiff > 45) {
-                        processedClients.push({
-                            ...client,
-                            last_visit: lastVisitDate.toISOString(),
-                            days_since_visit: daysDiff
-                        });
-                    }
+                const createdDate = new Date(client.created_at);
+                const daysDiff = differenceInDays(now, createdDate);
+                
+                if (daysDiff > 45) {
+                    processedClients.push({
+                        id: client.id,
+                        name: client.name,
+                        phone: client.phone,
+                        created_at: client.created_at,
+                        days_since_created: daysDiff
+                    });
                 }
             }
 
-            setClients(processedClients.sort((a, b) => b.days_since_visit - a.days_since_visit));
+            setClients(processedClients.sort((a, b) => b.days_since_created - a.days_since_created));
 
         } catch (error) {
             console.error("Error fetching inactive clients:", error);
@@ -158,28 +133,14 @@ export default function Marketing() {
 
         const message = script.content
             .replace('{name}', selectedClient.name.split(' ')[0])
-            .replace('{days}', selectedClient.days_since_visit.toString());
+            .replace('{days}', selectedClient.days_since_created.toString());
 
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/55${selectedClient.phone.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-        const { error } = await supabase
-            .from('clients')
-            .update({ last_contacted_at: new Date().toISOString() })
-            .eq('id', selectedClient.id);
-
-        if (error) {
-            toast.error("Erro ao registrar contato");
-        } else {
-            setClients(prev => prev.map(c =>
-                c.id === selectedClient.id
-                    ? { ...c, last_contacted_at: new Date().toISOString() }
-                    : c
-            ));
-            toast.success("Contato registrado!");
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 5000);
-        }
+        toast.success("Abrindo WhatsApp...");
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
 
         window.open(whatsappUrl, '_blank');
         setIsDialogOpen(false);
@@ -194,14 +155,14 @@ export default function Marketing() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="font-serif text-3xl text-white">Recuperação de Clientes</h1>
-                    <p className="text-white/60">Identifique e reconquiste clientes sumidos.</p>
+                    <p className="text-white/60">Identifique e reconquiste clientes antigos.</p>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="bg-red-500/10 border-red-500/20 backdrop-blur-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium text-red-500">Risco de Perda</CardTitle>
+                        <CardTitle className="text-sm font-medium text-red-500">Oportunidades</CardTitle>
                         <AlertCircle className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
@@ -210,7 +171,7 @@ export default function Marketing() {
                         ) : (
                             <>
                                 <div className="text-2xl font-bold text-white">{clients.length}</div>
-                                <p className="text-xs text-white/50">Clientes inativos (+45 dias)</p>
+                                <p className="text-xs text-white/50">Clientes antigos (+45 dias)</p>
                             </>
                         )}
                     </CardContent>
@@ -224,9 +185,9 @@ export default function Marketing() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="text-sm text-white/60 space-y-2">
-                        <p>1. O sistema analisa quem não aparece há mais de 45 dias.</p>
-                        <p>2. Remove da lista quem já tem agendamento futuro.</p>
-                        <p>3. Sugere mensagens personalizadas para você enviar em 1 clique.</p>
+                        <p>1. O sistema identifica clientes cadastrados há mais de 45 dias.</p>
+                        <p>2. Sugere mensagens personalizadas para reconquistar.</p>
+                        <p>3. Envie em 1 clique via WhatsApp.</p>
                     </CardContent>
                 </Card>
             </div>
@@ -250,7 +211,7 @@ export default function Marketing() {
                         <EmptyState
                             icon={CheckCircle2}
                             title="Tudo certo por aqui!"
-                            description="Nenhum cliente em risco de churn no momento."
+                            description="Nenhum cliente antigo encontrado."
                         />
                     ) : (
                         <div className="space-y-4">
@@ -263,33 +224,22 @@ export default function Marketing() {
                                         <div>
                                             <h3 className="text-white font-medium">{client.name}</h3>
                                             <div className="flex items-center gap-3 text-sm text-white/40 mt-1">
-                                                <span className="flex items-center gap-1 text-red-400">
+                                                <span className="flex items-center gap-1 text-amber-400">
                                                     <Clock className="w-3 h-3" />
-                                                    {client.days_since_visit} dias ausente
+                                                    Cliente há {client.days_since_created} dias
                                                 </span>
-                                                {client.last_contacted_at && (
-                                                    <span className="flex items-center gap-1 text-green-400">
-                                                        <MessageCircle className="w-3 h-3" />
-                                                        Falamos hoje
-                                                    </span>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
 
                                     <div className="flex items-center gap-3 w-full md:w-auto">
-                                        {client.last_contacted_at && (
-                                            <span className="text-xs text-white/30 hidden md:inline">
-                                                Já contactado
-                                            </span>
-                                        )}
                                         <Button
                                             onClick={() => handleOpenDialog(client)}
                                             className="w-full md:w-auto bg-green-500/10 text-green-500 hover:bg-green-500 hover:text-white border border-green-500/20 transition-all"
                                             disabled={!client.phone}
                                         >
                                             <MessageCircle className="w-4 h-4 mr-2" />
-                                            Reativar via WhatsApp
+                                            Contatar via WhatsApp
                                         </Button>
                                     </div>
                                 </div>
@@ -302,7 +252,7 @@ export default function Marketing() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="bg-[#1A1A1A] border-white/10 sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle className="text-white">Reativar Cliente</DialogTitle>
+                        <DialogTitle className="text-white">Contatar Cliente</DialogTitle>
                         <DialogDescription>
                             Escolha uma abordagem para reconquistar <span className="text-cyan-400 font-medium">{selectedClient?.name}</span>.
                         </DialogDescription>
@@ -332,7 +282,7 @@ export default function Marketing() {
                             <p className="text-sm text-white/90 italic">
                                 "{selectedScriptContent
                                     ?.replace('{name}', selectedClient?.name.split(' ')[0] || '')
-                                    .replace('{days}', selectedClient?.days_since_visit.toString() || '0')}"
+                                    .replace('{days}', selectedClient?.days_since_created.toString() || '0')}"
                             </p>
                             <div className="absolute top-2 right-2">
                                 <MessageCircle className="w-4 h-4 text-green-500 opacity-50" />

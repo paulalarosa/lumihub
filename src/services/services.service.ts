@@ -2,18 +2,19 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface ServiceItem {
     id: string;
-    title: string;
-    price: number;
-    duration_minutes: number;
+    name: string;
+    price: number | null;
+    duration_minutes: number | null;
     description: string | null;
+    is_active: boolean;
 }
 
 export const ServicesService = {
     async getAll(): Promise<ServiceItem[]> {
         const { data, error } = await supabase
             .from("services")
-            .select("*")
-            .order("title");
+            .select("id, name, price, duration_minutes, description, is_active")
+            .order("name");
 
         if (error) throw error;
         return data || [];

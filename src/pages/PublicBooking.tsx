@@ -82,11 +82,11 @@ export default function PublicBooking() {
     const fetchProfileAndServices = async () => {
         try {
             setLoading(true);
-            // 1. Fetch Profile by Slug
+            // 1. Fetch Profile by Slug - only select columns that exist
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, full_name, avatar_url, bio, slug, business_address')
-                .eq('slug', slug)
+                .select('id, full_name, avatar_url')
+                .eq('id', slug)
                 .maybeSingle();
 
             if (profileError || !profileData) {
@@ -94,18 +94,31 @@ export default function PublicBooking() {
             }
 
             setProfile({
-                ...profileData,
-                name: profileData.full_name || 'Profissional'
+                id: profileData.id,
+                name: profileData.full_name || 'Profissional',
+                full_name: profileData.full_name,
+                avatar_url: profileData.avatar_url,
+                bio: null,
+                slug: slug || '',
+                business_address: null
             });
 
             // 2. Fetch Services for this profile
             const { data: servicesData, error: servicesError } = await supabase
                 .from('services')
-                .select('*')
+                .select('id, name, description, price, duration_minutes')
                 .eq('user_id', profileData.id);
 
             if (servicesError) throw servicesError;
-            setServices(servicesData || []);
+            
+            // Map to expected Service type
+            setServices((servicesData || []).map(s => ({
+                id: s.id,
+                name: s.name,
+                description: s.description,
+                price: s.price || 0,
+                duration_minutes: s.duration_minutes || 60
+            })));
 
         } catch (error) {
             console.error("Error fetching public profile:", error);
