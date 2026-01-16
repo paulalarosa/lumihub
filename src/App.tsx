@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import ProtectedRoute from "@/features/auth/ProtectedRoute";
 import AdminRoute from "@/features/auth/AdminRoute";
 import Home from "./pages/Home";
@@ -60,6 +61,7 @@ const App = () => (
       <BrowserRouter>
         <ErrorBoundary>
           <AuthProvider>
+            <AnalyticsProvider>
 
             {/* Public Marketing Pages */}
             <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
@@ -202,6 +204,7 @@ const App = () => (
               </Routes>
             </div>
             <AIAssistantChat />
+            </AnalyticsProvider>
           </AuthProvider>
         </ErrorBoundary>
       </BrowserRouter>
