@@ -36,7 +36,7 @@ export default function Servicos() {
     };
 
     const filteredServices = services.filter(s =>
-        s.title.toLowerCase().includes(searchTerm.toLowerCase())
+        s.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const formatDuration = (minutes: number) => {
@@ -104,7 +104,7 @@ export default function Servicos() {
                                 >
                                     <div className="flex justify-between items-start mb-4">
                                         <h3 className="text-xl font-serif text-gray-200 group-hover:text-white transition-colors">
-                                            {service.title}
+                                            {service.name}
                                         </h3>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Button size="icon" variant="ghost" className="h-8 w-8 text-gray-400 hover:text-cyan-400" onClick={(e) => handleEdit(service, e)}>
@@ -117,12 +117,12 @@ export default function Servicos() {
                                     </div>
 
                                     <p className="text-3xl font-light text-cyan-400 mb-4">
-                                        {service.price.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                        {(service.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
 
                                     <div className="flex items-center gap-2 text-gray-500 text-sm mb-4">
                                         <Clock className="h-4 w-4" />
-                                        {formatDuration(service.duration_minutes)}
+                                        {formatDuration(service.duration_minutes || 0)}
                                     </div>
 
                                     {service.description && (
@@ -141,7 +141,7 @@ export default function Servicos() {
             <ServiceDialog
                 open={showDialog}
                 onOpenChange={setShowDialog}
-                service={selectedService}
+                service={selectedService ? { ...selectedService, title: selectedService.name } : null}
                 onSuccess={refetch}
             />
         </div>
