@@ -87,6 +87,39 @@ export const translations = {
         btn_add_service: "ADICIONAR_SERVIÇO",
         btn_mark_read: "MARCAR_LIDO",
         lbl_notifications: "NOTIFICAÇÕES",
+
+        // Sidebar
+        sidebar_dashboard: "DASHBOARD",
+        sidebar_agenda: "AGENDA",
+        sidebar_clients: "CLIENTES",
+        sidebar_projects: "PROJETOS",
+        sidebar_marketing: "MARKETING",
+        sidebar_contracts: "CONTRATOS",
+        sidebar_financial: "FINANCEIRO",
+        sidebar_services: "SERVIÇOS",
+        sidebar_settings: "CONFIGURAÇÕES",
+        sidebar_admin: "ADMIN",
+        sidebar_logout: "SAIR",
+        sidebar_menu_main: "MENU PRINCIPAL",
+        sidebar_menu_admin: "ADMINISTRAÇÃO",
+
+        // Admin Panel
+        admin_menu_overview: "VISÃO GERAL",
+        admin_menu_users: "USUÁRIOS",
+        admin_menu_subscriptions: "ASSINATURAS",
+        admin_menu_growth: "GROWTH",
+        admin_menu_security: "SEGURANÇA",
+        admin_menu_system: "SISTEMA",
+        admin_menu_logs: "LOGS",
+
+        admin_backup_generate: "GERAR BACKUP COMPLETO (.SQL)",
+        admin_maintenance_mode: "MODO MANUTENÇÃO",
+        admin_new_registrations: "NOVOS CADASTROS",
+        admin_ghost_login: "GHOST LOGIN",
+        admin_reset_pass: "RESET SENHA",
+        admin_block_user: "BLOQUEAR",
+        admin_global_alert: "MENSAGEM GLOBAL DE ALERTA",
+        admin_live_feed: "ATIVIDADE DO SISTEMA",
     },
     en: {
         // Header
@@ -176,5 +209,38 @@ export const translations = {
         btn_add_service: "ADD_SERVICE",
         btn_mark_read: "MARK_READ",
         lbl_notifications: "NOTIFICATIONS",
+
+        // Sidebar
+        sidebar_dashboard: "DASHBOARD",
+        sidebar_agenda: "CALENDAR",
+        sidebar_clients: "CLIENTS",
+        sidebar_projects: "PROJECTS",
+        sidebar_marketing: "MARKETING",
+        sidebar_contracts: "CONTRACTS",
+        sidebar_financial: "FINANCIAL",
+        sidebar_services: "SERVICES",
+        sidebar_settings: "SETTINGS",
+        sidebar_admin: "ADMIN",
+        sidebar_logout: "LOGOUT",
+        sidebar_menu_main: "MAIN MENU",
+        sidebar_menu_admin: "ADMINISTRATION",
+
+        // Admin Panel
+        admin_menu_overview: "OVERVIEW",
+        admin_menu_users: "USERS",
+        admin_menu_subscriptions: "SUBSCRIPTIONS",
+        admin_menu_growth: "GROWTH",
+        admin_menu_security: "SECURITY",
+        admin_menu_system: "SYSTEM",
+        admin_menu_logs: "LOGS",
+
+        admin_backup_generate: "GENERATE FULL BACKUP (.SQL)",
+        admin_maintenance_mode: "MAINTENANCE MODE",
+        admin_new_registrations: "NEW REGISTRATIONS",
+        admin_ghost_login: "GHOST LOGIN",
+        admin_reset_pass: "RESET PASS",
+        admin_block_user: "BLOCK",
+        admin_global_alert: "GLOBAL ALERT MESSAGE",
+        admin_live_feed: "SYSTEM ACTIVITY",
     }
 };

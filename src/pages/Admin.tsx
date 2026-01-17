@@ -1,41 +1,42 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import {
-  Sparkles,
-  ArrowLeft,
-  Users,
-  Shield,
-  CheckCircle,
-  Clock,
-  Settings,
-  Database,
-  CreditCard,
-  Mail
-} from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import {
+  LayoutDashboard,
+  Users,
+  CreditCard,
+  TrendingUp,
+  Shield,
+  Settings,
+  FileText,
+  LogOut,
+  Menu
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-interface UserProfile {
-  id: string;
-  email: string;
-  full_name: string | null;
-  created_at: string;
-  roles: string[];
-}
+// Feature Components
+import AdminOverview from '@/features/admin/AdminOverview';
+import AdminUsers from '@/features/admin/AdminUsers';
+import AdminSubscriptions from '@/features/admin/AdminSubscriptions';
+import AdminGrowth from '@/features/admin/AdminGrowth';
+import AdminSecurity from '@/features/admin/AdminSecurity';
+import AdminConfig from '@/features/admin/AdminConfig';
+import AdminLogs from '@/features/admin/AdminLogs';
+
+type AdminView = 'overview' | 'users' | 'subscriptions' | 'growth' | 'security' | 'system' | 'logs';
 
 export default function Admin() {
   const navigate = useNavigate();
-  const { user, isAdmin: authIsAdmin, loading } = useAuth();
+  const { user, isAdmin: authIsAdmin, loading, signOut } = useAuth();
+  const { t } = useLanguage();
   const { toast } = useToast();
-  const [users, setUsers] = useState<UserProfile[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [activeView, setActiveView] = useState<AdminView>('overview');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Force admin check as requested
+  // Force admin check
   const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
 
   useEffect(() => {
@@ -46,8 +47,8 @@ export default function Admin() {
 
     if (!loading && !isAdmin) {
       toast({
-        title: "Acesso negado",
-        description: "Você não tem permissão para acessar esta área",
+        title: "Acesso Negado",
+        description: "Terminal restrito a administradores nível God Mode.",
         variant: "destructive"
       });
       navigate('/dashboard');
@@ -55,332 +56,130 @@ export default function Admin() {
     }
   }, [user, isAdmin, loading, navigate, toast]);
 
-  useEffect(() => {
-    if (isAdmin) {
-      fetchUsers();
-    }
-  }, [isAdmin]);
-
-  const fetchUsers = async () => {
-    setLoadingUsers(true);
-
-    // Fetch profiles including role directly from profiles table
-    const { data: profiles, error: profilesError } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
-      setLoadingUsers(false);
-      return;
-    }
-
-    // Map profiles to match UserProfile interface
-    // Role column doesn't exist in current schema - use user_roles table instead
-    const usersWithRoles = profiles?.map(profile => ({
-      ...profile,
-      roles: ['user'] // Default to user, admin check is done via user_roles table
-    })) || [];
-
-    setUsers(usersWithRoles as UserProfile[]);
-    setLoadingUsers(false);
-  };
-
-  const toggleAdminRole = async (userId: string, currentRoles: string[]) => {
-    const isCurrentlyAdmin = currentRoles.includes('admin');
-    const newRole = isCurrentlyAdmin ? 'user' : 'admin';
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role: newRole } as any) // Cast to any to avoid type errors if table definition is outdated
-      .eq('id', userId);
-
-    if (error) {
-      toast({
-        title: "Erro",
-        description: `Não foi possível ${isCurrentlyAdmin ? 'remover' : 'adicionar'} o papel de admin`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    toast({
-      title: "Sucesso",
-      description: isCurrentlyAdmin ? "Admin removido" : "Admin adicionado"
-    });
-
-    fetchUsers();
-  };
-
   if (loading || !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-black text-white font-mono">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin h-8 w-8 border-2 border-white border-t-transparent rounded-full"></div>
+          <p className="tracking-widest uppercase text-xs">Acessando Mainframe...</p>
+        </div>
       </div>
     );
   }
 
-  // Lista de funcionalidades para implementar
-  const todoFeatures = [
-    {
-      category: "Autenticação & Usuários",
-      items: [
-        { name: "Sistema de cadastro e login", status: "done" },
-        { name: "Perfis de usuário", status: "done" },
-        { name: "Sistema de roles (admin/user)", status: "done" },
-        { name: "Recuperação de senha", status: "pending" },
-        { name: "Login social (Google)", status: "pending" }
-      ]
-    },
-    {
-      category: "CRM - Clientes",
-      items: [
-        { name: "Cadastro de clientes", status: "done" },
-        { name: "Histórico de interações", status: "done" },
-        { name: "Anotações privadas", status: "done" },
-        { name: "Tags e segmentação", status: "done" }
-      ]
-    },
-    {
-      category: "Projetos & Eventos",
-      items: [
-        { name: "Criar projetos por cliente", status: "done" },
-        { name: "Checklist de tarefas", status: "done" },
-        { name: "Moodboard interativo (URLs externas)", status: "done" },
-        { name: "Questionário de briefing", status: "done" },
-        { name: "Geração de contratos", status: "done" }
-      ]
-    },
-    {
-      category: "Financeiro",
-      items: [
-        { name: "Geração de faturas", status: "done" },
-        { name: "Integração Mercado Pago", status: "done" },
-        { name: "Cadastro de dados bancários (PIX, conta digital)", status: "done" },
-        { name: "Split de pagamentos", status: "pending" },
-        { name: "Relatórios financeiros", status: "pending" },
-        { name: "Recebimento de pagamentos na plataforma", status: "pending" },
-        { name: "Dashboard financeiro do usuário", status: "pending" }
-      ]
-    },
-    {
-      category: "Portal da Cliente",
-      items: [
-        { name: "Link exclusivo por projeto", status: "done" },
-        { name: "Visualização de moodboard", status: "done" },
-        { name: "Preenchimento de briefing", status: "done" },
-        { name: "Visualização de contrato", status: "done" },
-        { name: "Pagamento online", status: "done" }
-      ]
-    },
-    {
-      category: "Agenda & Calendário",
-      items: [
-        { name: "Visualização de agenda (mês/semana/dia/lista)", status: "done" },
-        { name: "Eventos com detalhes completos", status: "done" },
-        { name: "Atribuição de assistentes nos eventos", status: "done" },
-        { name: "Sincronização com Google Calendar", status: "done" },
-        { name: "Portal do assistente (acesso limitado)", status: "done" },
-        { name: "Acesso Pro para assistentes (pago)", status: "done" },
-        { name: "Envio automático de lembretes por email", status: "pending" }
-      ]
-    },
-    {
-      category: "Configurações",
-      items: [
-        { name: "Perfil da maquiadora", status: "done" },
-        { name: "Personalização de marca", status: "done" },
-        { name: "Cardápio de serviços", status: "done" },
-        { name: "Planos e assinatura (integração de pagamento)", status: "pending" }
-      ]
-    },
-    {
-      category: "Upload de Imagens",
-      items: [
-        { name: "Moodboard com upload real de arquivos", status: "pending" },
-        { name: "Foto de perfil/avatar", status: "pending" },
-        { name: "Logo personalizado", status: "pending" }
-      ]
-    }
+  const menuItems = [
+    { id: 'overview', label: t('admin_menu_overview'), icon: LayoutDashboard },
+    { id: 'users', label: t('admin_menu_users'), icon: Users },
+    { id: 'subscriptions', label: t('admin_menu_subscriptions'), icon: CreditCard },
+    { id: 'growth', label: t('admin_menu_growth'), icon: TrendingUp },
+    { id: 'security', label: t('admin_menu_security'), icon: Shield },
+    { id: 'system', label: t('admin_menu_system'), icon: Settings },
+    { id: 'logs', label: t('admin_menu_logs'), icon: FileText },
   ];
 
-  const totalItems = todoFeatures.reduce((acc, cat) => acc + cat.items.length, 0);
-  const doneItems = todoFeatures.reduce((acc, cat) => acc + cat.items.filter(i => i.status === 'done').length, 0);
+  const renderContent = () => {
+    switch (activeView) {
+      case 'overview': return <AdminOverview />;
+      case 'users': return <AdminUsers />;
+      case 'subscriptions': return <AdminSubscriptions />;
+      case 'growth': return <AdminGrowth />;
+      case 'security': return <AdminSecurity />;
+      case 'system': return <AdminConfig />;
+      case 'logs': return <AdminLogs />;
+      default: return <AdminOverview />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
-                  <Shield className="h-5 w-5 text-white" />
-                </div>
-                <span className="font-poppins font-bold text-xl text-foreground">
-                  Painel Admin
-                </span>
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black flex overflow-hidden">
+      {/* Sidebar */}
+      <aside
+        className={cn(
+          "bg-black border-r border-white/10 flex flex-col transition-all duration-300 relative z-20",
+          isSidebarOpen ? "w-64" : "w-20"
+        )}
+      >
+        <div className="p-6 border-b border-white/10 flex items-center justify-between">
+          {isSidebarOpen ? (
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-white flex items-center justify-center">
+                <span className="text-black font-bold text-xs font-serif">A</span>
+              </div>
+              <span className="font-serif font-bold text-lg tracking-tight">ADMIN</span>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center">
+              <div className="w-8 h-8 bg-white flex items-center justify-center">
+                <span className="text-black font-bold text-sm font-serif">A</span>
               </div>
             </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total Usuários</p>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                </div>
-                <Users className="h-8 w-8 text-primary/50" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Admins</p>
-                  <p className="text-2xl font-bold">
-                    {users.filter(u => u.roles.includes('admin')).length}
-                  </p>
-                </div>
-                <Shield className="h-8 w-8 text-primary/50" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Funcionalidades</p>
-                  <p className="text-2xl font-bold">{doneItems}/{totalItems}</p>
-                </div>
-                <CheckCircle className="h-8 w-8 text-green-500/50" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Pendentes</p>
-                  <p className="text-2xl font-bold">{totalItems - doneItems}</p>
-                </div>
-                <Clock className="h-8 w-8 text-yellow-500/50" />
-              </div>
-            </CardContent>
-          </Card>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Users Management */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Gerenciar Usuários
-              </CardTitle>
-              <CardDescription>
-                Controle os acessos e permissões dos usuários
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loadingUsers ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                </div>
-              ) : users.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  Nenhum usuário cadastrado ainda
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {users.map((userItem) => (
-                    <div
-                      key={userItem.id}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div>
-                        <p className="font-medium">{userItem.full_name || 'Sem nome'}</p>
-                        <p className="text-sm text-muted-foreground">{userItem.email}</p>
-                        <div className="flex gap-2 mt-1">
-                          {userItem.roles.map(role => (
-                            <Badge
-                              key={role}
-                              variant={role === 'admin' ? 'default' : 'secondary'}
-                            >
-                              {role}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Admin</span>
-                        <Switch
-                          checked={userItem.roles.includes('admin')}
-                          onCheckedChange={() => toggleAdminRole(userItem.id, userItem.roles)}
-                          disabled={userItem.id === user?.id}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+        <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+          {menuItems.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setActiveView(item.id as AdminView)}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-3 rounded-none transition-all duration-200 group text-sm font-mono uppercase tracking-wider",
+                activeView === item.id
+                  ? "bg-white text-black font-bold"
+                  : "text-gray-400 hover:text-white hover:bg-white/5"
               )}
-            </CardContent>
-          </Card>
+            >
+              <item.icon className={cn("h-4 w-4", activeView === item.id ? "text-black" : "text-gray-400 group-hover:text-white")} />
+              {isSidebarOpen && <span>{item.label}</span>}
+            </button>
+          ))}
+        </nav>
 
-          {/* Features TODO */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Lista de Funcionalidades
-              </CardTitle>
-              <CardDescription>
-                Acompanhe o progresso do desenvolvimento
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[600px] overflow-y-auto">
-              <div className="space-y-6">
-                {todoFeatures.map((category) => (
-                  <div key={category.category}>
-                    <h3 className="font-semibold text-sm text-foreground mb-2">
-                      {category.category}
-                    </h3>
-                    <div className="space-y-2">
-                      {category.items.map((item) => (
-                        <div
-                          key={item.name}
-                          className="flex items-center gap-3 text-sm"
-                        >
-                          {item.status === 'done' ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-yellow-500" />
-                          )}
-                          <span className={item.status === 'done' ? 'text-muted-foreground line-through' : ''}>
-                            {item.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="p-4 border-t border-white/10">
+          <Button
+            variant="ghost"
+            onClick={signOut}
+            className={cn(
+              "w-full flex items-center gap-3 rounded-none text-red-400 hover:text-red-300 hover:bg-red-900/10 font-mono uppercase text-xs tracking-wider",
+              !isSidebarOpen && "justify-center px-0"
+            )}
+          >
+            <LogOut className="h-4 w-4" />
+            {isSidebarOpen && "Sair do Console"}
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-black relative">
+        {/* Top Bar */}
+        <header className="h-16 border-b border-white/10 flex items-center justify-between px-6 bg-black/50 backdrop-blur-md sticky top-0 z-10">
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="text-gray-400 hover:text-white rounded-none hover:bg-white/5"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="h-4 w-[1px] bg-white/10 mx-2"></div>
+            <h1 className="text-white font-mono text-sm uppercase tracking-widest text-opacity-50">
+              Terminal: {t(`admin_menu_${activeView}`)}
+            </h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-mono text-white/50 uppercase tracking-wider">System: Online</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-6 md:p-8 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-black">
+          <div className="max-w-7xl mx-auto animate-in fade-in duration-300 slide-in-from-bottom-4">
+            {renderContent()}
+          </div>
         </div>
       </main>
     </div>

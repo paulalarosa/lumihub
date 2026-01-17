@@ -3,19 +3,46 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { BarChart3, MousePointer, Clock, TrendingUp, Eye, RefreshCw, Users, DollarSign, TrendingDown, Download, Calendar, PieChart as PieChartIcon } from 'lucide-react';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { exportFinancialExcel } from '@/services/reportService';
 import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 
-const COLORS = ['#00e5ff', '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff'];
+const COLORS = ['#ffffff', '#a1a1aa', '#52525b', '#27272a', '#18181b'];
+
+interface DashboardStats {
+    events: any[];
+    stats: {
+        totalEvents: number;
+        totalRevenue: number;
+        newLeads: number;
+        conversionRate: number;
+        growth_client_percentage?: number;
+        growth_revenue_percentage?: number;
+        monthly_revenue?: number;
+        previous_month_revenue?: number;
+        new_clients_month?: number;
+        total_clients?: number;
+    };
+    charts: {
+        revenue: { name: string; value: number }[];
+        clients: { name: string; value: number }[];
+    };
+}
 
 export default function AdminAnalytics() {
     const [events, setEvents] = useState<any[]>([]);
-    const [charts, setCharts] = useState({ revenue: [], clients: [] });
+    const [charts, setCharts] = useState<{ revenue: any[], clients: any[] }>({ revenue: [], clients: [] });
     const [loading, setLoading] = useState(true);
-    const [stats, setStats] = useState({
+    const [stats, setStats] = useState<DashboardStats['stats']>({
         totalEvents: 0,
         totalRevenue: 0,
         newLeads: 0,
-        conversionRate: 0
+        conversionRate: 0,
+        growth_client_percentage: 0,
+        growth_revenue_percentage: 0,
+        monthly_revenue: 0,
+        previous_month_revenue: 0,
+        new_clients_month: 0,
+        total_clients: 0
     });
 
     const { fetchDashboardStats } = useAnalytics();
@@ -30,7 +57,7 @@ export default function AdminAnalytics() {
 
         if (data) {
             setEvents(data.events);
-            setStats(data.stats);
+            setStats(data.stats as DashboardStats['stats']);
             setCharts(data.charts || { revenue: [], clients: [] });
         }
         setLoading(false);
@@ -58,9 +85,9 @@ export default function AdminAnalytics() {
         .slice(0, 10);
 
     const handleExportExcel = () => {
-        if (!stats?.charts?.revenue) return;
+        if (!charts?.revenue) return;
         // Transform data for Excel
-        const dataToExport = stats.charts.revenue.map(item => ({
+        const dataToExport = charts.revenue.map(item => ({
             Mês: item.name,
             Receita: item.value
         }));
@@ -138,7 +165,7 @@ export default function AdminAnalytics() {
                         </div>
                     </div>
                     <p className="text-gray-500 text-[10px] font-mono uppercase tracking-[0.2em] group-hover:text-black/60">Eventos Realizados</p>
-                    <h3 className="text-3xl font-bold text-white mt-1 font-serif group-hover:text-black">{stats?.total_events}</h3>
+                    <h3 className="text-3xl font-bold text-white mt-1 font-serif group-hover:text-black">{stats?.totalEvents}</h3>
                     <p className="text-gray-500 text-xs mt-2 font-mono group-hover:text-black/60">Total histórico</p>
                 </Card>
 
@@ -174,9 +201,9 @@ export default function AdminAnalytics() {
                         </Button>
                     </div>
                     <div className="h-[300px] font-mono text-xs">
-                        {stats?.charts?.revenue && stats.charts.revenue.length > 0 ? (
+                        {charts?.revenue && charts.revenue.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={stats.charts.revenue}>
+                                <AreaChart data={charts.revenue}>
                                     <defs>
                                         <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#FFFFFF" stopOpacity={0.3} />
@@ -311,6 +338,14 @@ export default function AdminAnalytics() {
             </div>
 
             {/* Recent Events */}
+            <Card className="bg-white/5 border-white/10 backdrop-blur-xl rounded-none">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-white/50 font-mono uppercase tracking-widest">Taxa de Conversão</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold text-white font-serif">{stats.conversionRate?.toFixed(1) || 0}%</div>
+                </CardContent>
+            </Card>
             <Card className="bg-white/5 border-white/10">
                 <CardHeader>
                     <CardTitle className="text-white">Eventos Recentes</CardTitle>
@@ -320,7 +355,7 @@ export default function AdminAnalytics() {
                         {events.slice(-20).reverse().map((event, idx) => (
                             <div key={idx} className="flex items-center justify-between p-3 bg-white/5 rounded-lg text-sm">
                                 <div className="flex items-center gap-3">
-                                    <span className="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 text-xs">
+                                    <span className="px-2 py-1 rounded-none bg-white/10 text-white text-xs font-mono uppercase tracking-wider">
                                         {event.category || event.type}
                                     </span>
                                     <span className="text-white/80">{event.action || event.page_path || '-'}</span>

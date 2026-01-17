@@ -123,7 +123,7 @@ const COLORS = [
   '#64B5F6', // Blue
   '#FFB74D', // Orange
   '#BA68C8', // Purple
-  '#00E5FF', // Cyan
+  '#FFFFFF', // White
   '#F06292', // Pink
 ];
 
@@ -536,7 +536,7 @@ export default function EventDialog({
     <>
       <Dialog open={open} onOpenChange={(open) => { if (!open && isAutocompleteOpen) return; onOpenChange(open); }}>
         <DialogContent
-          className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10 sm:max-w-[700px]"
+          className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-white/5 sm:max-w-[700px]"
           onInteractOutside={(e) => {
             const target = e.target as HTMLElement;
             if (target.closest('.pac-container')) {
@@ -555,7 +555,7 @@ export default function EventDialog({
             {/* Event Type Pills */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-wider font-semibold">
-                <Tag className="h-4 w-4 text-cyan-400" />
+                <Tag className="h-4 w-4 text-white" />
                 Tipo de Evento
               </Label>
               <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
@@ -567,7 +567,7 @@ export default function EventDialog({
                     className={`
                       px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border
                       ${eventType === type.value
-                        ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.3)]'
+                        ? 'bg-white/20 text-white border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
                         : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10'}
                     `}
                   >
@@ -582,7 +582,7 @@ export default function EventDialog({
               {/* Service Select */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-gray-300">
-                  <Sparkles className="h-4 w-4 text-cyan-400" />
+                  <Sparkles className="h-4 w-4 text-white" />
                   Selecionar Serviço
                 </Label>
                 <Select value={selectedServiceId} onValueChange={handleServiceSelect}>
@@ -610,7 +610,7 @@ export default function EventDialog({
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={isNoivas ? "Ex: Casamento Ana Silva" : "Ex: Ensaio Pré Wedding"}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 rounded-xl py-6"
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-xl py-6"
               />
             </div>
 
@@ -618,7 +618,7 @@ export default function EventDialog({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="eventDate" className="flex items-center gap-2 text-gray-300">
-                  <CalendarIcon className="h-4 w-4 text-cyan-400" />
+                  <CalendarIcon className="h-4 w-4 text-white" />
                   Data *
                 </Label>
                 <Input
@@ -627,7 +627,7 @@ export default function EventDialog({
                   value={eventDate}
                   onChange={(e) => setEventDate(e.target.value)}
                   required
-                  className="bg-white/5 border-white/10 text-white focus:border-cyan-400/50 rounded-xl"
+                  className="bg-white/5 border-white/10 text-white focus:border-white/50 rounded-xl"
                 />
               </div>
 
@@ -674,7 +674,7 @@ export default function EventDialog({
 
             {/* Conditional Times based on Event Type */}
             <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-4">
-              <Label className="flex items-center gap-2 text-cyan-400 font-medium">
+              <Label className="flex items-center gap-2 text-white font-medium">
                 <Clock className="h-4 w-4" />
                 Cronograma
               </Label>
@@ -724,7 +724,7 @@ export default function EventDialog({
             {/* Address with Google Maps Autocomplete */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-gray-300">
-                <MapPin className="h-4 w-4 text-cyan-400" />
+                <MapPin className="h-4 w-4 text-white" />
                 Localização
               </Label>
               <div onClick={(e) => e.stopPropagation()}>
@@ -778,7 +778,7 @@ export default function EventDialog({
               {/* Reminders */}
               <div className="space-y-2">
                 <Label className="flex items-center gap-2 text-gray-300">
-                  <Bell className="h-4 w-4 text-cyan-400" />
+                  <Bell className="h-4 w-4 text-white" />
                   Lembretes
                 </Label>
                 <div className="flex flex-wrap gap-2">
@@ -807,7 +807,7 @@ export default function EventDialog({
             {/* Assistants Selection */}
             <div className="space-y-3">
               <Label className="flex items-center gap-2 text-gray-300">
-                <Users className="h-4 w-4 text-cyan-400" />
+                <Users className="h-4 w-4 text-white" />
                 Assistentes
               </Label>
 
@@ -823,7 +823,7 @@ export default function EventDialog({
                         className={`
                               flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all border
                               ${isSelected
-                            ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                            ? 'bg-white/20 text-white border-white/40'
                             : 'bg-black/30 text-gray-500 border-transparent hover:bg-black/50 hover:text-gray-300'}
                             `}
                       >

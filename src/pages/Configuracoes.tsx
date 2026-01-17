@@ -2,10 +2,8 @@ import MessageTemplatesSettings from '@/components/settings/MessageTemplatesSett
 import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -13,25 +11,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowLeft,
-  Building2,
+  User,
   CreditCard,
-  Edit,
-  GripVertical,
+  Building2,
+  Smartphone,
+  Save,
   Link2,
   MessageSquare,
-  Package,
   Palette,
-  Plus,
-  QrCode,
-  Save,
-  Smartphone,
-  Trash2,
-  User,
-  Wallet
+  Briefcase,
+  ShieldCheck,
+  Upload,
+  Camera
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
+// Types
 interface ProfessionalSettings {
   id: string;
   business_name: string | null;
@@ -41,16 +39,6 @@ interface ProfessionalSettings {
   instagram: string | null;
   website: string | null;
   bio: string | null;
-}
-
-interface Service {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number | null;
-  duration_minutes: number | null;
-  is_active: boolean;
-  sort_order: number;
 }
 
 interface PaymentAccount {
@@ -75,29 +63,24 @@ export default function Configuracoes() {
   const { toast } = useToast();
 
   const [settings, setSettings] = useState<ProfessionalSettings | null>(null);
-  const [services, setServices] = useState<Service[]>([]);
   const [paymentAccount, setPaymentAccount] = useState<PaymentAccount | null>(null);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [savingPayment, setSavingPayment] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
-  // Form state
+  // Form state - Profile/Business
   const [businessName, setBusinessName] = useState('');
-  const [primaryColor, setPrimaryColor] = useState('#5A7D7C');
+  const [primaryColor, setPrimaryColor] = useState('#ffffff');
   const [phone, setPhone] = useState('');
   const [instagram, setInstagram] = useState('');
   const [website, setWebsite] = useState('');
   const [bio, setBio] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-  // Service form
-  const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const [serviceName, setServiceName] = useState('');
-  const [serviceDescription, setServiceDescription] = useState('');
-  const [servicePrice, setServicePrice] = useState('');
-  const [serviceDuration, setServiceDuration] = useState('');
+  // Form state - User
+  const [fullName, setFullName] = useState('');
 
-  // Payment account form
+  // Form state - Payment
   const [pixKeyType, setPixKeyType] = useState('');
   const [pixKey, setPixKey] = useState('');
   const [bankName, setBankName] = useState('');
@@ -120,13 +103,14 @@ export default function Configuracoes() {
   useEffect(() => {
     if (user) {
       fetchData();
+      setFullName(user.user_metadata?.full_name || '');
     }
   }, [user]);
 
   const fetchData = async () => {
     setLoadingData(true);
 
-    // Fetch settings
+    // Fetch professional settings
     const { data: settingsData } = await supabase
       .from('professional_settings')
       .select('*')
@@ -136,21 +120,13 @@ export default function Configuracoes() {
     if (settingsData) {
       setSettings(settingsData);
       setBusinessName(settingsData.business_name || '');
-      setPrimaryColor(settingsData.primary_color || '#5A7D7C');
+      setPrimaryColor(settingsData.primary_color || '#ffffff');
       setPhone(settingsData.phone || '');
       setInstagram(settingsData.instagram || '');
       setWebsite(settingsData.website || '');
       setBio(settingsData.bio || '');
+      setLogoUrl(settingsData.logo_url);
     }
-
-    // Fetch services
-    const { data: servicesData } = await supabase
-      .from('services')
-      .select('*')
-      .eq('user_id', user!.id)
-      .order('sort_order');
-
-    setServices(servicesData || []);
 
     // Fetch payment account
     const { data: paymentData } = await supabase
@@ -180,143 +156,86 @@ export default function Configuracoes() {
 
   const saveSettings = async () => {
     setSaving(true);
+    try {
+      // 1. Save Professional Settings
+      const { error: settingsError } = await supabase
+        .from('professional_settings')
+        .upsert({
+          user_id: user!.id,
+          business_name: businessName.trim() || null,
+          primary_color: primaryColor,
+          phone: phone.trim() || null,
+          instagram: instagram.trim() || null,
+          website: website.trim() || null,
+          bio: bio.trim() || null,
+          logo_url: logoUrl
+        }, { onConflict: 'user_id' });
 
-    const { error } = await supabase
-      .from('professional_settings')
-      .upsert({
-        user_id: user!.id,
-        business_name: businessName.trim() || null,
-        primary_color: primaryColor,
-        phone: phone.trim() || null,
-        instagram: instagram.trim() || null,
-        website: website.trim() || null,
-        bio: bio.trim() || null
-      }, { onConflict: 'user_id' });
+      if (settingsError) throw settingsError;
 
-    if (error) {
-      toast({ title: "Erro ao salvar configurações", variant: "destructive" });
-    } else {
-      toast({ title: "Configurações salvas!" });
-    }
-    setSaving(false);
-  };
+      // 2. Save Payment Accounts
+      const { error: paymentError } = await supabase
+        .from('payment_accounts')
+        .upsert({
+          user_id: user!.id,
+          pix_key_type: pixKeyType || null,
+          pix_key: pixKey.trim() || null,
+          bank_name: bankName.trim() || null,
+          bank_code: bankCode.trim() || null,
+          account_type: accountType || null,
+          agency: agency.trim() || null,
+          account_number: accountNumber.trim() || null,
+          account_holder_name: accountHolderName.trim() || null,
+          account_holder_document: accountHolderDocument.trim() || null,
+          digital_wallet_type: digitalWalletType || null,
+          digital_wallet_account: digitalWalletAccount.trim() || null,
+          preferred_method: preferredMethod
+        }, { onConflict: 'user_id' });
 
-  const resetServiceForm = () => {
-    setServiceName('');
-    setServiceDescription('');
-    setServicePrice('');
-    setServiceDuration('');
-    setEditingService(null);
-  };
+      if (paymentError) throw paymentError;
 
-  const openEditService = (service: Service) => {
-    setEditingService(service);
-    setServiceName(service.name);
-    setServiceDescription(service.description || '');
-    setServicePrice(service.price?.toString() || '');
-    setServiceDuration(service.duration_minutes?.toString() || '');
-    setIsServiceDialogOpen(true);
-  };
-
-  const saveService = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!serviceName.trim()) {
-      toast({ title: "Nome é obrigatório", variant: "destructive" });
-      return;
-    }
-
-    const serviceData = {
-      name: serviceName.trim(),
-      description: serviceDescription.trim() || null,
-      price: servicePrice ? parseFloat(servicePrice) : null,
-      duration_minutes: serviceDuration ? parseInt(serviceDuration) : null,
-      user_id: user!.id,
-      sort_order: editingService?.sort_order || services.length
-    };
-
-    if (editingService) {
-      const { error } = await supabase
-        .from('services')
-        .update(serviceData)
-        .eq('id', editingService.id);
-
-      if (error) {
-        toast({ title: "Erro ao atualizar serviço", variant: "destructive" });
-      } else {
-        toast({ title: "Serviço atualizado!" });
-        setIsServiceDialogOpen(false);
-        resetServiceForm();
-        fetchData();
+      // 3. Update User Metadata (Name)
+      if (fullName !== user?.user_metadata?.full_name) {
+        const { error: userError } = await supabase.auth.updateUser({
+          data: { full_name: fullName }
+        });
+        if (userError) throw userError;
       }
-    } else {
-      const { error } = await supabase
-        .from('services')
-        .insert(serviceData);
 
-      if (error) {
-        toast({ title: "Erro ao criar serviço", variant: "destructive" });
-      } else {
-        toast({ title: "Serviço adicionado!" });
-        setIsServiceDialogOpen(false);
-        resetServiceForm();
-        fetchData();
-      }
+      toast({ title: "Configurações salvas", description: "Todas as alterações foram aplicadas." });
+    } catch (error: any) {
+      console.error('Save error:', error);
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const deleteService = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este serviço?')) return;
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    setUploadingLogo(true);
+    try {
+      const file = e.target.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user?.id}-${Math.random()}.${fileExt}`;
+      const filePath = `logos/${fileName}`;
 
-    const { error } = await supabase.from('services').delete().eq('id', id);
+      const { error: uploadError } = await supabase.storage
+        .from('avatars') // Using existing avatar bucket for simplicity
+        .upload(filePath, file);
 
-    if (!error) {
-      toast({ title: "Serviço excluído!" });
-      fetchData();
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setLogoUrl(publicUrl);
+    } catch (error: any) {
+      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+    } finally {
+      setUploadingLogo(false);
     }
-  };
-
-  const toggleServiceActive = async (id: string, isActive: boolean) => {
-    const { error } = await supabase
-      .from('services')
-      .update({ is_active: isActive })
-      .eq('id', id);
-
-    if (!error) {
-      setServices(services.map(s => s.id === id ? { ...s, is_active: isActive } : s));
-    }
-  };
-
-  const savePaymentAccount = async () => {
-    setSavingPayment(true);
-
-    const paymentData = {
-      user_id: user!.id,
-      pix_key_type: pixKeyType || null,
-      pix_key: pixKey.trim() || null,
-      bank_name: bankName.trim() || null,
-      bank_code: bankCode.trim() || null,
-      account_type: accountType || null,
-      agency: agency.trim() || null,
-      account_number: accountNumber.trim() || null,
-      account_holder_name: accountHolderName.trim() || null,
-      account_holder_document: accountHolderDocument.trim() || null,
-      digital_wallet_type: digitalWalletType || null,
-      digital_wallet_account: digitalWalletAccount.trim() || null,
-      preferred_method: preferredMethod
-    };
-
-    const { error } = await supabase
-      .from('payment_accounts')
-      .upsert(paymentData, { onConflict: 'user_id' });
-
-    if (error) {
-      console.error('Error saving payment account:', error);
-      toast({ title: "Erro ao salvar dados bancários", variant: "destructive" });
-    } else {
-      toast({ title: "Dados bancários salvos!" });
-    }
-    setSavingPayment(false);
   };
 
   if (loading || loadingData) {
@@ -328,561 +247,321 @@ export default function Configuracoes() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center space-x-4">
-            <Link to="/dashboard">
-              <Button variant="ghost" size="icon">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 border border-white/20 bg-black flex items-center justify-center rounded-none hover:bg-white hover:text-black transition-colors">
-                <User className="h-5 w-5 text-white hover:text-black transition-colors" />
-              </div>
-              <span className="font-serif font-bold text-xl text-white uppercase tracking-wider">
-                SETTINGS // CONFIGURATION
-              </span>
-            </div>
+      <header className="border-b border-border bg-background px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div className="flex items-center gap-4">
+          <Link to="/dashboard">
+            <Button variant="ghost" size="icon" className="rounded-none hover:bg-muted text-muted-foreground hover:text-foreground">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <h1 className="text-xl font-serif font-bold text-foreground tracking-tight">
+              SYSTEM CONFIG
+            </h1>
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+              Control Panel // v2.0
+            </p>
           </div>
         </div>
+        <Button
+          onClick={saveSettings}
+          disabled={saving}
+          className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-xs uppercase tracking-widest px-6"
+        >
+          {saving ? 'PROCESSING...' : 'SAVE_CHANGES'}
+        </Button>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <Tabs defaultValue="perfil">
-          <TabsList className="mb-6">
-            <TabsTrigger value="perfil" className="gap-2">
-              <User className="h-4 w-4" />
-              Perfil
-            </TabsTrigger>
-            <TabsTrigger value="marca" className="gap-2">
-              <Palette className="h-4 w-4" />
-              Marca
-            </TabsTrigger>
-            <TabsTrigger value="servicos" className="gap-2">
-              <Package className="h-4 w-4" />
-              Serviços
-            </TabsTrigger>
-            <TabsTrigger value="financeiro" className="gap-2">
-              <Wallet className="h-4 w-4" />
-              Recebimentos
-            </TabsTrigger>
-            <TabsTrigger value="integracoes" className="gap-2">
-              <Link2 className="h-4 w-4" />
-              Integrações
-            </TabsTrigger>
-            <TabsTrigger value="plano" className="gap-2">
-              <CreditCard className="h-4 w-4" />
-              Plano
-            </TabsTrigger>
-            <TabsTrigger value="mensagens" className="gap-2">
-              <MessageSquare className="h-4 w-4" />
-              Mensagens
-            </TabsTrigger>
+      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+        <Tabs defaultValue="perfil" className="w-full space-y-8">
+          <TabsList className="w-full flex justify-start border-b border-border bg-transparent p-0 h-auto rounded-none gap-8 overflow-x-auto">
+            {['perfil', 'negocio', 'banco', 'automacao', 'integracoes', 'assinatura'].map(tab => (
+              <TabsTrigger
+                key={tab}
+                value={tab}
+                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-2 py-4 font-mono text-xs uppercase tracking-widest"
+              >
+                {tab === 'negocio' ? 'NEGÓCIO' : tab === 'banco' ? 'DADOS BANCÁRIOS' : tab === 'automacao' ? 'AUTOMAÇÃO' : tab === 'integracoes' ? 'INTEGRAÇÕES' : tab.toUpperCase()}
+              </TabsTrigger>
+            ))}
           </TabsList>
 
-          {/* PERFIL */}
-          <TabsContent value="perfil">
-            <Card>
-              <CardHeader>
-                <CardTitle>Informações do Perfil</CardTitle>
-                <CardDescription>Configure suas informações de contato</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Nome do Negócio</Label>
-                  <Input
-                    value={businessName}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    placeholder="Ex: Maria Makeup Artist"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Telefone/WhatsApp</Label>
-                  <Input
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Instagram</Label>
-                  <Input
-                    value={instagram}
-                    onChange={(e) => setInstagram(e.target.value)}
-                    placeholder="@seuperfil"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Website</Label>
-                  <Input
-                    value={website}
-                    onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="https://seusite.com"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Bio / Sobre você</Label>
-                  <Textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    placeholder="Conte um pouco sobre você e seu trabalho..."
-                    rows={4}
-                  />
-                </div>
-                <Button onClick={saveSettings} disabled={saving}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {saving ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* MARCA */}
-          <TabsContent value="marca">
-            <Card>
-              <CardHeader>
-                <CardTitle>Personalização da Marca</CardTitle>
-                <CardDescription>
-                  Personalize a aparência do Portal da Cliente
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <Label>Cor Principal</Label>
-                  <div className="flex items-center gap-4">
-                    <input
-                      type="color"
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="h-10 w-20 rounded cursor-pointer"
-                    />
-                    <Input
-                      value={primaryColor}
-                      onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="w-32"
-                    />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Esta cor será usada no portal da cliente
-                  </p>
-                </div>
-
-                <div className="p-6 rounded-lg border" style={{ backgroundColor: `${primaryColor}10` }}>
-                  <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-10 h-10 rounded-lg flex items-center justify-center"
-                      style={{ backgroundColor: primaryColor }}
-                    >
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                    <span className="font-semibold" style={{ color: primaryColor }}>
-                      {businessName || 'Seu Negócio'}
-                    </span>
-                  </div>
-                </div>
-
-                <Button onClick={saveSettings} disabled={saving}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {saving ? 'Salvando...' : 'Salvar Alterações'}
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* SERVIÇOS */}
-          <TabsContent value="servicos">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Cardápio de Serviços</CardTitle>
-                  <CardDescription>
-                    Cadastre seus serviços e preços
-                  </CardDescription>
-                </div>
-                <Dialog open={isServiceDialogOpen} onOpenChange={(open) => {
-                  setIsServiceDialogOpen(open);
-                  if (!open) resetServiceForm();
-                }}>
-                  <DialogTrigger asChild>
-                    <Button>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Novo Serviço
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingService ? 'Editar Serviço' : 'Novo Serviço'}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={saveService} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label>Nome do Serviço *</Label>
-                        <Input
-                          value={serviceName}
-                          onChange={(e) => setServiceName(e.target.value)}
-                          placeholder="Ex: Maquiagem para Noiva"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Descrição</Label>
-                        <Textarea
-                          value={serviceDescription}
-                          onChange={(e) => setServiceDescription(e.target.value)}
-                          placeholder="Descreva o serviço..."
-                          rows={3}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Preço (R$)</Label>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            value={servicePrice}
-                            onChange={(e) => setServicePrice(e.target.value)}
-                            placeholder="0.00"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Duração (min)</Label>
-                          <Input
-                            type="number"
-                            value={serviceDuration}
-                            onChange={(e) => setServiceDuration(e.target.value)}
-                            placeholder="60"
-                          />
-                        </div>
-                      </div>
-                      <Button type="submit" className="w-full">
-                        {editingService ? 'Salvar Alterações' : 'Adicionar Serviço'}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </CardHeader>
-              <CardContent>
-                {services.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    Nenhum serviço cadastrado
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {services.map((service) => (
-                      <div
-                        key={service.id}
-                        className={`flex items-center justify-between p-4 border rounded-lg ${!service.is_active ? 'opacity-50' : ''}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <GripVertical className="h-5 w-5 text-muted-foreground cursor-grab" />
-                          <div>
-                            <p className="font-medium">{service.name}</p>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              {service.price && <span>R$ {service.price.toFixed(2)}</span>}
-                              {service.duration_minutes && <span>• {service.duration_minutes} min</span>}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <Switch
-                            checked={service.is_active}
-                            onCheckedChange={(checked) => toggleServiceActive(service.id, checked)}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => openEditService(service)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => deleteService(service.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-muted-foreground" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* FINANCEIRO / RECEBIMENTOS */}
-          <TabsContent value="financeiro">
-            <div className="space-y-6">
-              {/* PIX */}
-              <Card>
+          {/* 1. PERFIL */}
+          <TabsContent value="perfil" className="space-y-6 focus-visible:outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Profile Photo */}
+              <Card className="col-span-1 border-border bg-card rounded-none shadow-none">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <QrCode className="h-5 w-5" />
-                    Chave PIX
-                  </CardTitle>
-                  <CardDescription>
-                    Configure sua chave PIX para receber pagamentos instantâneos
-                  </CardDescription>
+                  <CardTitle className="font-serif text-lg">Avatar</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <CardContent className="flex flex-col items-center">
+                  <Avatar className="h-40 w-40 rounded-none border border-border mb-6">
+                    <AvatarImage src={user?.user_metadata?.avatar_url} />
+                    <AvatarFallback className="rounded-none font-mono text-4xl bg-muted text-muted-foreground">
+                      {user?.email?.[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <p className="text-xs text-muted-foreground font-mono text-center mb-4">
+                    SQUARE RATIO <br /> 500x500px RECOMENDADO
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Personal Data */}
+              <Card className="col-span-2 border-border bg-card rounded-none shadow-none">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Dados Pessoais</CardTitle>
+                  <CardDescription className="font-mono text-xs uppercase tracking-widest">Credenciais de Acesso</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Nome Completo</Label>
+                    <Input
+                      value={fullName}
+                      onChange={e => setFullName(e.target.value)}
+                      className="rounded-none border-border bg-background focus-visible:ring-0 focus-visible:border-foreground"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">E-mail (ID)</Label>
+                    <Input
+                      value={user?.email}
+                      disabled
+                      className="rounded-none border-border bg-muted/50 text-muted-foreground cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="pt-4 border-t border-border">
+                    <Button variant="outline" className="rounded-none w-full font-mono text-xs uppercase tracking-widest border-border hover:bg-muted">
+                      Redefinir Senha
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* 2. NEGOCIO */}
+          <TabsContent value="negocio" className="space-y-6 focus-visible:outline-none">
+            <Card className="border-border bg-card rounded-none shadow-none">
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">Identidade Visual</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Logo Upload */}
+                <div className="flex items-start gap-8">
+                  <div className="w-32 h-32 border border-dashed border-border flex items-center justify-center bg-muted/20 relative group">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                    ) : (
+                      <div className="text-center">
+                        <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase">Upload</span>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
+                    {uploadingLogo && (
+                      <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground"></div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-4">
                     <div className="space-y-2">
-                      <Label>Tipo de Chave</Label>
-                      <select
-                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
-                        value={pixKeyType}
-                        onChange={(e) => setPixKeyType(e.target.value)}
-                      >
-                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
-                        <option value="cpf" className="bg-black">CPF</option>
-                        <option value="cnpj" className="bg-black">CNPJ</option>
-                        <option value="email" className="bg-black">E-MAIL</option>
-                        <option value="phone" className="bg-black">TELEFONE</option>
-                        <option value="random" className="bg-black">CHAVE ALEATÓRIA</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Chave PIX</Label>
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Nome do Negócio</Label>
                       <Input
-                        value={pixKey}
-                        onChange={(e) => setPixKey(e.target.value)}
-                        placeholder={
-                          pixKeyType === 'cpf' ? '000.000.000-00' :
-                            pixKeyType === 'cnpj' ? '00.000.000/0000-00' :
-                              pixKeyType === 'email' ? 'email@exemplo.com' :
-                                pixKeyType === 'phone' ? '+55 11 99999-9999' :
-                                  'Cole sua chave aleatória'
-                        }
+                        value={businessName}
+                        onChange={e => setBusinessName(e.target.value)}
+                        className="rounded-none border-border bg-background font-serif text-lg"
+                        placeholder="EX: SILVA BEAUTY STUDIO"
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Cor da Marca (HEX)</Label>
+                      <div className="flex gap-2">
+                        <div className="w-10 h-10 border border-border" style={{ backgroundColor: primaryColor }} />
+                        <Input
+                          value={primaryColor}
+                          onChange={e => setPrimaryColor(e.target.value)}
+                          className="rounded-none border-border bg-background font-mono"
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border">
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Instagram</Label>
+                    <Input value={instagram} onChange={e => setInstagram(e.target.value)} className="rounded-none border-border bg-background" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Website</Label>
+                    <Input value={website} onChange={e => setWebsite(e.target.value)} className="rounded-none border-border bg-background" />
+                  </div>
+                  <div className="col-span-2 space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Bio / Sobre</Label>
+                    <Textarea value={bio} onChange={e => setBio(e.target.value)} className="rounded-none border-border bg-background min-h-[100px]" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* 3. DADOS BANCARIOS */}
+          <TabsContent value="banco" className="space-y-6 focus-visible:outline-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* PIX */}
+              <Card className="border-border bg-card rounded-none shadow-none">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Chave PIX</CardTitle>
+                  <CardDescription className="font-mono text-[10px] uppercase">Principal método de recebimento</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Tipo</Label>
+                    <select
+                      className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
+                      value={pixKeyType}
+                      onChange={(e) => setPixKeyType(e.target.value)}
+                    >
+                      <option value="">SELECIONE...</option>
+                      <option value="cpf">CPF</option>
+                      <option value="cnpj">CNPJ</option>
+                      <option value="email">E-MAIL</option>
+                      <option value="phone">TELEFONE</option>
+                      <option value="random">ALEATÓRIA</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Chave</Label>
+                    <Input
+                      value={pixKey}
+                      onChange={e => setPixKey(e.target.value)}
+                      className="rounded-none border-border bg-background"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Conta Bancária */}
-              <Card>
+              {/* DIGITAL WALLET */}
+              <Card className="border-border bg-card rounded-none shadow-none">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Building2 className="h-5 w-5" />
-                    Conta Bancária
-                  </CardTitle>
-                  <CardDescription>
-                    Dados para transferência bancária (TED/DOC)
-                  </CardDescription>
+                  <CardTitle className="font-serif text-lg">Conta Digital</CardTitle>
+                  <CardDescription className="font-mono text-[10px] uppercase">Integração Gateway</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Nome do Banco</Label>
-                      <Input
-                        value={bankName}
-                        onChange={(e) => setBankName(e.target.value)}
-                        placeholder="Ex: Banco do Brasil, Itaú, Nubank..."
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Código do Banco</Label>
-                      <Input
-                        value={bankCode}
-                        onChange={(e) => setBankCode(e.target.value)}
-                        placeholder="Ex: 001, 341, 260..."
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Plataforma</Label>
+                    <select
+                      className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
+                      value={digitalWalletType}
+                      onChange={(e) => setDigitalWalletType(e.target.value)}
+                    >
+                      <option value="">SELECIONE...</option>
+                      <option value="mercado_pago">MERCADO PAGO</option>
+                      <option value="pagbank">PAGBANK</option>
+                      <option value="nubank">NUBANK</option>
+                    </select>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Conta / Email</Label>
+                    <Input
+                      value={digitalWalletAccount}
+                      onChange={e => setDigitalWalletAccount(e.target.value)}
+                      className="rounded-none border-border bg-background"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* BANK INFO */}
+              <Card className="col-span-1 md:col-span-2 border-border bg-card rounded-none shadow-none">
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Dados Bancários (TED/DOC)</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <Label>Tipo de Conta</Label>
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Banco</Label>
+                      <Input value={bankName} onChange={e => setBankName(e.target.value)} className="rounded-none border-border bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Agência</Label>
+                      <Input value={agency} onChange={e => setAgency(e.target.value)} className="rounded-none border-border bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Conta</Label>
+                      <Input value={accountNumber} onChange={e => setAccountNumber(e.target.value)} className="rounded-none border-border bg-background" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Tipo</Label>
                       <select
-                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
+                        className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
                         value={accountType}
                         onChange={(e) => setAccountType(e.target.value)}
                       >
-                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
-                        <option value="checking" className="bg-black">CONTA CORRENTE</option>
-                        <option value="savings" className="bg-black">CONTA POUPANÇA</option>
+                        <option value="checking">CORRENTE</option>
+                        <option value="savings">POUPANÇA</option>
                       </select>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Agência</Label>
-                      <Input
-                        value={agency}
-                        onChange={(e) => setAgency(e.target.value)}
-                        placeholder="0000"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Conta (com dígito)</Label>
-                      <Input
-                        value={accountNumber}
-                        onChange={(e) => setAccountNumber(e.target.value)}
-                        placeholder="00000-0"
-                      />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Nome do Titular</Label>
-                      <Input
-                        value={accountHolderName}
-                        onChange={(e) => setAccountHolderName(e.target.value)}
-                        placeholder="Nome completo conforme conta"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>CPF/CNPJ do Titular</Label>
-                      <Input
-                        value={accountHolderDocument}
-                        onChange={(e) => setAccountHolderDocument(e.target.value)}
-                        placeholder="000.000.000-00"
-                      />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Conta Digital */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Smartphone className="h-5 w-5" />
-                    Conta Digital
-                  </CardTitle>
-                  <CardDescription>
-                    Configure sua conta digital para recebimentos (integração futura)
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Plataforma</Label>
-                      <select
-                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
-                        value={digitalWalletType}
-                        onChange={(e) => setDigitalWalletType(e.target.value)}
-                      >
-                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
-                        <option value="mercado_pago" className="bg-black">MERCADO PAGO</option>
-                        <option value="pagbank" className="bg-black">PAGBANK</option>
-                        <option value="picpay" className="bg-black">PICPAY</option>
-                        <option value="nubank" className="bg-black">NUBANK</option>
-                        <option value="inter" className="bg-black">BANCO INTER</option>
-                        <option value="c6" className="bg-black">C6 BANK</option>
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>E-mail ou ID da Conta</Label>
-                      <Input
-                        value={digitalWalletAccount}
-                        onChange={(e) => setDigitalWalletAccount(e.target.value)}
-                        placeholder="email@exemplo.com"
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Preferência de Recebimento */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Método Preferido de Recebimento</CardTitle>
-                  <CardDescription>
-                    Escolha como você prefere receber os pagamentos
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-3">
-                    {[
-                      { value: 'pix', label: 'PIX', icon: QrCode },
-                      { value: 'bank', label: 'Conta Bancária', icon: Building2 },
-                      { value: 'digital_wallet', label: 'Conta Digital', icon: Smartphone }
-                    ].map((method) => (
-                      <button
-                        key={method.value}
-                        type="button"
-                        onClick={() => setPreferredMethod(method.value)}
-                        className={`flex items-center gap-2 px-4 py-3 rounded-lg border-2 transition-colors ${preferredMethod === method.value
-                          ? 'border-primary bg-primary/10 text-primary'
-                          : 'border-border hover:border-primary/50'
-                          }`}
-                      >
-                        <method.icon className="h-5 w-5" />
-                        {method.label}
-                      </button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Button onClick={savePaymentAccount} disabled={savingPayment} className="w-full">
-                <Save className="h-4 w-4 mr-2" />
-                {savingPayment ? 'Salvando...' : 'Salvar Dados Bancários'}
-              </Button>
             </div>
           </TabsContent>
 
-          {/* INTEGRAÇÕES */}
-          <TabsContent value="integracoes">
+          {/* 4. AUTOMACAO */}
+          <TabsContent value="automacao" className="space-y-6 focus-visible:outline-none">
+            <MessageTemplatesSettings />
+          </TabsContent>
+
+          {/* 5. INTEGRACOES */}
+          <TabsContent value="integracoes" className="space-y-6 focus-visible:outline-none">
             <IntegrationsTab />
           </TabsContent>
 
-          {/* PLANO */}
-          <TabsContent value="plano">
-            <Card>
+          {/* 6. ASSINATURA */}
+          <TabsContent value="assinatura" className="space-y-6 focus-visible:outline-none">
+            <Card className="border-border bg-card rounded-none shadow-none">
               <CardHeader>
-                <CardTitle>Seu Plano</CardTitle>
-                <CardDescription>
-                  Gerencie sua assinatura
-                </CardDescription>
+                <CardTitle className="font-serif text-lg">Seu Plano</CardTitle>
+                <CardDescription className="font-mono text-xs uppercase tracking-widest">Detalhes da Assinatura</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="p-6 border rounded-lg bg-muted/30 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Plano atual</p>
-                      <p className="text-2xl font-bold">Gratuito</p>
+                <div className="p-6 border border-border bg-muted/20 flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Briefcase className="h-5 w-5 text-foreground" />
+                      <span className="font-serif text-2xl font-bold">PRO</span>
                     </div>
-                    <CreditCard className="h-8 w-8 text-muted-foreground" />
+                    <p className="text-muted-foreground text-sm font-mono max-w-md">
+                      Acesso total a todas as funcionalidades, suporte prioritário e taxas reduzidas.
+                    </p>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Você está usando o plano gratuito com recursos limitados.
-                  </p>
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground font-mono uppercase mb-1">Status</p>
+                    <span className="inline-block px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 font-mono text-xs uppercase rounded-none">
+                      ATIVE
+                    </span>
+                  </div>
                 </div>
-
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Upgrade para desbloquear:</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                      Clientes ilimitados
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                      Portal 100% marca branca
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                      Pagamentos integrados
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 bg-primary rounded-full"></span>
-                      Automações de pós-venda
-                    </li>
-                  </ul>
-                  <Link to="/planos">
-                    <Button className="w-full mt-4">
-                      Ver Planos
-                    </Button>
-                  </Link>
+                <div className="mt-6 flex justify-end">
+                  <Button variant="outline" className="rounded-none font-mono text-xs uppercase tracking-widest border-border">
+                    Gerenciar Assinatura
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
+
         </Tabs>
       </main>
     </div>

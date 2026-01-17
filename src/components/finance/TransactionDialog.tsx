@@ -124,7 +124,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="Ex: Corte de Cabelo"
-                            className="bg-white/5 border-white/10 focus:border-cyan-500/50"
+                            className="bg-white/5 border-white/10 focus:border-white/50"
                         />
                     </div>
 
@@ -135,7 +135,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 value={formData.amount}
                                 onChange={handleAmountChange}
                                 placeholder="R$ 0,00"
-                                className="bg-white/5 border-white/10 focus:border-cyan-500/50 font-mono"
+                                className="bg-white/5 border-white/10 focus:border-white/50 font-mono"
                             />
                         </div>
                         <div className="space-y-2">
@@ -144,7 +144,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 type="date"
                                 value={formData.date}
                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="bg-white/5 border-white/10 focus:border-cyan-500/50"
+                                className="bg-white/5 border-white/10 focus:border-white/50"
                             />
                         </div>
                     </div>
@@ -156,7 +156,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 value={formData.category}
                                 onValueChange={(value) => setFormData({ ...formData, category: value })}
                             >
-                                <SelectTrigger className="bg-white/5 border-white/10 focus:border-cyan-500/50">
+                                <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                     <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -175,7 +175,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 value={formData.payment_method}
                                 onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
                             >
-                                <SelectTrigger className="bg-white/5 border-white/10 focus:border-cyan-500/50">
+                                <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                     <SelectValue placeholder="Selecione" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">

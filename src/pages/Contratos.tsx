@@ -13,7 +13,10 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SignatureCanvas } from "@/components/contracts/SignatureCanvas";
+import { SignatureCanvas } from "@/components/contracts/SignatureCanvas";
 import { ContractDialog } from "@/components/contracts/ContractDialog";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import { ContractDocument } from "@/features/contracts/components/ContractDocument";
 
 interface Contract {
     id: string;
@@ -42,6 +45,7 @@ export default function Contratos() {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isSignOpen, setIsSignOpen] = useState(false);
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     // Form State
     const [newTitle, setNewTitle] = useState("");
@@ -58,17 +62,40 @@ export default function Contratos() {
 
     const fetchContracts = async () => {
         setLoading(true);
-        const { data, error } = await supabase
-            .from('contracts' as any)
-            .select('*, clients(name)')
-            .order('created_at', { ascending: false });
+        setError(null);
+        try {
+            // Safe query with relationship check
+            const { data, error: apiError } = await supabase
+                .from('contracts')
+                .select(`
+                    id, 
+                    title, 
+                    client_id, 
+                    status, 
+                    created_at, 
+                    signed_at, 
+                    content, 
+                    signature_url,
+                    clients ( name )
+                `)
+                .order('created_at', { ascending: false });
 
-        if (error) {
-            toast.error("Erro ao carregar contratos");
-        } else {
-            setContracts(data as any);
+            if (apiError) throw apiError;
+
+            // Transform data safely
+            const safeContracts = (data || []).map((item: any) => ({
+                ...item,
+                clients: Array.isArray(item.clients) ? item.clients[0] : item.clients
+            })) as Contract[];
+
+            setContracts(safeContracts);
+        } catch (err: any) {
+            console.error('Error fetching contracts:', err);
+            setError(err.message || "Falha ao carregar contratos");
+            toast.error("Erro ao carregar sistema de contratos");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const fetchClients = async () => {
@@ -192,12 +219,34 @@ export default function Contratos() {
 
                 <TabsContent value="pending" className="mt-8">
                     {loading ? (
-                        <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
+                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                            <div className="flex gap-1">
+                                <span className="w-2 h-2 bg-white animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="w-2 h-2 bg-white animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="w-2 h-2 bg-white animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </div>
+                            <p className="font-mono text-xs uppercase tracking-widest text-white/50 animate-pulse">
+                                Scanning Database...
+                            </p>
+                        </div>
+                    ) : error ? (
+                        <div className="border border-red-900/50 bg-red-900/10 p-12 text-center">
+                            <Terminal className="w-8 h-8 text-red-500 mx-auto mb-4" />
+                            <h3 className="text-white font-serif uppercase tracking-wider mb-1">SYSTEM_ERROR</h3>
+                            <p className="text-red-400 text-xs font-mono uppercase">{error}</p>
+                            <Button
+                                onClick={fetchContracts}
+                                variant="outline"
+                                className="mt-6 rounded-none border-red-500 text-red-500 hover:bg-red-950 font-mono uppercase text-xs"
+                            >
+                                RETRY_CONNECTION
+                            </Button>
+                        </div>
                     ) : filteredContracts('draft').length === 0 ? (
-                        <div className="border border-dashed border-white/20 p-12 text-center">
-                            <Terminal className="w-8 h-8 text-white/20 mx-auto mb-4" />
+                        <div className="border border-white/10 bg-white/5 p-12 text-center">
+                            <CheckCircle2 className="w-8 h-8 text-white/20 mx-auto mb-4" />
                             <h3 className="text-white font-serif uppercase tracking-wider mb-1">NO_PENDING_DOCUMENTS</h3>
-                            <p className="text-white/40 text-xs font-mono uppercase">ALL_CONTRACTS_PROCESSED.</p>
+                            <p className="text-white/40 text-xs font-mono uppercase tracking-widest">ALL_CONTRACTS_PROCESSED.</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -290,6 +339,34 @@ export default function Contratos() {
                                             <img src={contract.signature_url} alt="Assinatura" className="h-12 object-contain mx-auto opacity-70 hover:opacity-100 invert" />
                                         </div>
                                     )}
+
+                                    <div className="mt-6 border-t border-white/10 pt-4">
+                                        <PDFDownloadLink
+                                            document={
+                                                <ContractDocument
+                                                    contract={{
+                                                        id: contract.id,
+                                                        clientName: contract.clients?.name || "Client Name",
+                                                        totalValue: 0, // Placeholder as per schema limitation
+                                                        eventDate: new Date().toLocaleDateString('pt-BR'), // Placeholder
+                                                        servicesList: ["Makeup Services", "Hair Styling"], // Placeholder
+                                                        terms: contract.content,
+                                                        created_at: contract.created_at
+                                                    }}
+                                                />
+                                            }
+                                            fileName={`contract_${contract.id.slice(0, 8)}.pdf`}
+                                        >
+                                            {({ blob, url, loading, error }) => (
+                                                <Button
+                                                    disabled={loading}
+                                                    className="w-full rounded-none bg-white text-black hover:bg-white/90 border border-transparent text-[10px] font-mono uppercase tracking-widest h-8"
+                                                >
+                                                    {loading ? "GERANDO DOCUMENTO..." : "BAIXAR PDF (OFICIAL)"}
+                                                </Button>
+                                            )}
+                                        </PDFDownloadLink>
+                                    </div>
                                 </div>
                             ))}
                         </div>

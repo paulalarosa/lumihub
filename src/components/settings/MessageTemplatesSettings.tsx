@@ -76,49 +76,60 @@ export default function MessageTemplatesSettings() {
         }
     };
 
-    if (loading) return <div className="p-8 text-center text-muted-foreground">Carregando modelos...</div>;
+    if (loading) return <div className="p-8 text-center text-muted-foreground font-mono uppercase">Carregando modelos...</div>;
 
     return (
-        <Card>
+        <Card className="border-border bg-card rounded-none shadow-none">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="h-5 w-5" />
-                    Modelos de Mensagem (WhatsApp)
+                <CardTitle className="flex items-center gap-2 font-serif text-lg">
+                    Modelos de Mensagem
                 </CardTitle>
-                <CardDescription>
-                    Personalize as mensagens automáticas enviadas para as clientes via WhatsApp.
-                    <br />
-                    Variáveis disponíveis: {'{client_name}'}, {'{date}'}, {'{time}'}, {'{location}'}, {'{professional_name}'}.
+                <CardDescription className="font-mono text-xs uppercase tracking-widest">
+                    CONFIGURAÇÃO WHATSAPP API
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+                <div className="bg-muted/10 border border-border p-4 mb-6">
+                    <p className="text-xs font-mono text-muted-foreground uppercase mb-2">Variáveis de Sistema</p>
+                    <div className="flex flex-wrap gap-2">
+                        {['{client_name}', '{date}', '{time}', '{location}', '{professional_name}'].map(v => (
+                            <span key={v} className="px-2 py-1 bg-background border border-border text-[10px] font-mono text-foreground">
+                                {v}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+
                 {(Object.keys(LABELS) as TemplateType[]).map((type) => (
-                    <div key={type} className="space-y-2 p-4 border border-border rounded-lg bg-card/50">
+                    <div key={type} className="space-y-3 p-6 border border-border bg-background/50">
                         <div className="flex items-center justify-between mb-2">
-                            <Label className="text-base font-semibold">{LABELS[type]}</Label>
+                            <Label className="font-mono text-[10px] uppercase text-foreground tracking-widest border-l-2 border-foreground pl-3">
+                                {LABELS[type]}
+                            </Label>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleReset(type)}
-                                title="Restaurar Padrão"
+                                className="rounded-none h-6 px-2 hover:bg-destructive/10 hover:text-destructive"
+                                title="RESET"
                             >
-                                <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                                <RefreshCw className="h-3 w-3" />
                             </Button>
                         </div>
                         <Textarea
                             value={templates[type]}
                             onChange={(e) => setTemplates(prev => ({ ...prev, [type]: e.target.value }))}
                             rows={3}
-                            className="resize-none"
+                            className="resize-none rounded-none border-border bg-black focus-visible:ring-0 focus-visible:border-foreground"
                         />
                         <div className="flex justify-end pt-2">
                             <Button
                                 size="sm"
                                 onClick={() => handleSave(type)}
                                 disabled={saving === type}
+                                className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-[10px] uppercase tracking-widest h-8 px-6"
                             >
-                                <Save className="h-4 w-4 mr-2" />
-                                {saving === type ? 'Salvando...' : 'Salvar'}
+                                {saving === type ? 'SALVANDO...' : 'SALVAR_MODELO'}
                             </Button>
                         </div>
                     </div>

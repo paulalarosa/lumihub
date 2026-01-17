@@ -195,14 +195,14 @@ export function EventDetailsSidebar({
                         {/* 1. Logistics / Time & Place */}
                         <section className="space-y-4">
                             <h3 className="text-sm uppercase tracking-wider text-gray-400 font-semibold flex items-center gap-2">
-                                <Clock className="h-4 w-4 text-cyan-400" />
+                                <Clock className="h-4 w-4 text-white" />
                                 Logística & Horários
                             </h3>
 
                             <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
                                 <div className="col-span-2 flex items-center gap-3 mb-2">
-                                    <div className="h-8 w-8 rounded-full bg-cyan-500/10 flex items-center justify-center">
-                                        <CalendarIcon className="h-4 w-4 text-cyan-400" />
+                                    <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center">
+                                        <CalendarIcon className="h-4 w-4 text-white" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-white">
@@ -249,7 +249,7 @@ export function EventDetailsSidebar({
                                 {event.client ? (
                                     <div className="flex items-center gap-4">
                                         <Avatar className="h-12 w-12 border border-white/10">
-                                            <AvatarFallback className="bg-cyan-900/50 text-cyan-200">
+                                            <AvatarFallback className="bg-white/5 text-white/50 font-serif">
                                                 {event.client.name.substring(0, 2).toUpperCase()}
                                             </AvatarFallback>
                                         </Avatar>
@@ -354,7 +354,7 @@ function TimeBlock({ label, time }: { label: string, time: string }) {
     return (
         <div className="bg-black/20 p-2 rounded-lg text-center">
             <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">{label}</span>
-            <span className="text-sm font-mono text-cyan-300">{time.slice(0, 5)}</span>
+            <span className="text-sm font-mono text-white">{time.slice(0, 5)}</span>
         </div>
     )
 }

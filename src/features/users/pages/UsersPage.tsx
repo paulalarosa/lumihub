@@ -132,107 +132,107 @@ export default function AdminUsers() {
 
             {/* Stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-xl rounded-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-white/50">Total de Usuários</CardTitle>
+                        <CardTitle className="text-xs font-mono uppercase tracking-widest text-white/50">Total de Usuários</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.total}</div>
+                        <div className="text-3xl font-serif text-white">{stats.total}</div>
                     </CardContent>
                 </Card>
-                <Card className="bg-purple-500/10 border-purple-500/20 backdrop-blur-xl">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-xl rounded-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-purple-400">Assinantes Pro/Empire</CardTitle>
+                        <CardTitle className="text-xs font-mono uppercase tracking-widest text-white/50">Assinantes Pro/Empire</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.pro}</div>
+                        <div className="text-3xl font-serif text-white">{stats.pro}</div>
                     </CardContent>
                 </Card>
-                <Card className="bg-cyan-500/10 border-cyan-500/20 backdrop-blur-xl">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-xl rounded-none">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium text-cyan-400">Usuários Basic/Free</CardTitle>
+                        <CardTitle className="text-xs font-mono uppercase tracking-widest text-white/50">Usuários Basic/Free</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-white">{stats.trial}</div>
+                        <div className="text-3xl font-serif text-white">{stats.trial}</div>
                     </CardContent>
                 </Card>
             </div>
 
             {/* Actions & Filters */}
-            <div className="flex items-center gap-4 bg-[#1A1A1A]/50 p-4 rounded-xl border border-white/5">
+            <div className="flex items-center gap-4 bg-black p-4 border border-white/20">
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                     <Input
-                        placeholder="Buscar por nome ou ID..."
-                        className="pl-10 bg-black/20 border-white/10 text-white placeholder:text-white/30"
+                        placeholder="BUSCAR POR NOME OU ID..."
+                        className="pl-10 bg-transparent border-white/20 text-white placeholder:text-white/30 rounded-none focus:border-white font-mono text-xs uppercase"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Button variant="outline" className="border-white/10 text-white hover:bg-white/5" onClick={fetchUsers}>
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white hover:text-black rounded-none font-mono uppercase text-xs" onClick={fetchUsers}>
                     <Loader2 className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                     Atualizar
                 </Button>
             </div>
 
             {/* Table */}
-            <div className="rounded-xl border border-white/10 bg-[#1A1A1A]/40 overflow-hidden">
+            <div className="border border-white/20 bg-black overflow-hidden">
                 <Table>
                     <TableHeader className="bg-white/5">
-                        <TableRow className="border-white/5 hover:bg-white/5">
-                            <TableHead className="text-white/50">Usuário</TableHead>
-                            <TableHead className="text-white/50">Função</TableHead>
-                            <TableHead className="text-white/50">Plano</TableHead>
-                            <TableHead className="text-white/50">Cadastro</TableHead>
-                            <TableHead className="text-right text-white/50">Ações</TableHead>
+                        <TableRow className="border-white/10 hover:bg-white/5">
+                            <TableHead className="text-white/50 font-mono text-[10px] uppercase tracking-widest">Usuário</TableHead>
+                            <TableHead className="text-white/50 font-mono text-[10px] uppercase tracking-widest">Função</TableHead>
+                            <TableHead className="text-white/50 font-mono text-[10px] uppercase tracking-widest">Plano</TableHead>
+                            <TableHead className="text-white/50 font-mono text-[10px] uppercase tracking-widest">Cadastro</TableHead>
+                            <TableHead className="text-right text-white/50 font-mono text-[10px] uppercase tracking-widest">Ações</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center text-white/50">
+                                <TableCell colSpan={5} className="h-24 text-center text-white/50 font-mono uppercase text-xs">
                                     Carregando...
                                 </TableCell>
                             </TableRow>
                         ) : filteredUsers.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={5} className="h-24 text-center text-white/50">
+                                <TableCell colSpan={5} className="h-24 text-center text-white/50 font-mono uppercase text-xs">
                                     Nenhum usuário encontrado
                                 </TableCell>
                             </TableRow>
                         ) : (
                             filteredUsers.map((user) => (
-                                <TableRow key={user.id} className="border-white/5 hover:bg-white/5">
+                                <TableRow key={user.id} className="border-white/10 hover:bg-white/5">
                                     <TableCell>
                                         <div className="flex flex-col">
-                                            <span className="font-medium text-white">{user.full_name || 'Sem nome'}</span>
-                                            <span className="text-xs text-white/40">{user.id}</span>
+                                            <span className="font-serif text-white text-sm">{user.full_name || 'Sem nome'}</span>
+                                            <span className="text-[10px] text-white/40 font-mono">{user.id}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="outline" className={`${user.role === 'admin' ? 'border-amber-500/50 text-amber-500' : 'border-white/10 text-white/60'}`}>
+                                        <Badge variant="outline" className={`rounded-none font-mono text-[10px] uppercase tracking-widest ${user.role === 'admin' ? 'border-white text-white' : 'border-white/20 text-white/60'}`}>
                                             {user.role === 'admin' ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
                                             {user.role}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="outline" className={`${user.plan === 'empire' ? 'border-purple-500/50 text-purple-400' : user.plan === 'pro' ? 'border-cyan-500/50 text-cyan-400' : 'border-white/10 text-white/60'}`}>
+                                        <Badge variant="outline" className={`rounded-none font-mono text-[10px] uppercase tracking-widest ${user.plan === 'empire' ? 'border-white text-white' : user.plan === 'pro' ? 'border-white/60 text-white/80' : 'border-white/20 text-white/60'}`}>
                                             {user.plan === 'empire' ? <Crown className="w-3 h-3 mr-1" /> : user.plan === 'pro' ? <Star className="w-3 h-3 mr-1" /> : null}
                                             {user.plan || 'Free'}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell className="text-white/60">
+                                    <TableCell className="text-white/60 font-mono text-xs">
                                         {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : '-'}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
                                             {user.role !== 'admin' && (
-                                                <Button size="sm" variant="ghost" className="h-8 text-amber-400 hover:text-amber-300 hover:bg-amber-400/10" onClick={() => handleUpdateRole(user.id, 'admin')}>
+                                                <Button size="sm" variant="ghost" className="h-8 text-white/60 hover:text-white hover:bg-white/10 rounded-none font-mono text-[10px] uppercase" onClick={() => handleUpdateRole(user.id, 'admin')}>
                                                     Promover Admin
                                                 </Button>
                                             )}
                                             {user.plan !== 'pro' && (
-                                                <Button size="sm" variant="ghost" className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-400/10" onClick={() => handleUpdatePlan(user.id, 'pro')}>
+                                                <Button size="sm" variant="ghost" className="h-8 text-white/60 hover:text-white hover:bg-white/10 rounded-none font-mono text-[10px] uppercase" onClick={() => handleUpdatePlan(user.id, 'pro')}>
                                                     Virar Pro
                                                 </Button>
                                             )}

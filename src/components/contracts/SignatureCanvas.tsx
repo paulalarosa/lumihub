@@ -40,7 +40,7 @@ export function SignatureCanvas({ onSave, onCancel }: SignatureCanvasProps) {
                         style: { width: '100%', height: '256px' }
                     }}
                     onEnd={handleEnd}
-                    penColor="#00e5ff" // Cyan neon color
+                    penColor="#ffffff"
                     backgroundColor="rgba(0,0,0,0)" // Transparent
                 />
             </div>
@@ -58,7 +58,7 @@ export function SignatureCanvas({ onSave, onCancel }: SignatureCanvasProps) {
                 <Button
                     onClick={save}
                     disabled={isEmpty}
-                    className="bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
+                    className="bg-white hover:bg-white/90 text-black font-medium"
                 >
                     <Check className="w-4 h-4 mr-2" />
                     Confirmar Assinatura

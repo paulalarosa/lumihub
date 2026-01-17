@@ -406,6 +406,7 @@ export default function Agenda() {
         }}
         userRole={isAdmin ? 'admin' : 'assistant'}
       />
+      <MobileFAB onClick={handleAddEvent} label="Novo Evento" />
     </div>
   );
 }

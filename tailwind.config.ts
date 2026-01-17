@@ -112,7 +112,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				neon: '#00e5ff',
+				neon: '#ffffff',
 				metallic: '#C0C0C0',
 			},
 			lineHeight: {

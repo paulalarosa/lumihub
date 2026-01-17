@@ -1,13 +1,24 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { RotateCcw, Save } from 'lucide-react';
+import { Save, AlertOctagon, UserPlus, Megaphone, Terminal } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { ConfigItem } from '@/types/database';
+import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+type ConfigKey = 'maintenance_mode' | 'allow_registrations' | 'global_alert_message';
 
 export default function AdminConfig() {
-  const [configs, setConfigs] = useState<ConfigItem[]>([]);
-  const [editedConfigs, setEditedConfigs] = useState<Record<string, string>>({});
+  const { t } = useLanguage();
+  const [configs, setConfigs] = useState<Record<string, any>>({
+    maintenance_mode: false,
+    allow_registrations: true,
+    global_alert_message: ''
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -20,16 +31,14 @@ export default function AdminConfig() {
       setLoading(true);
       const { data, error } = await supabase
         .from('system_config' as any)
-        .select('*')
-        .order('key');
+        .select('*');
 
       if (!error && data) {
-        setConfigs(data as any as ConfigItem[]);
-        const edited: Record<string, string> = {};
-        (data as any).forEach((item: any) => {
-          edited[item.key] = item.value || '';
+        const newConfigs: Record<string, any> = {};
+        data.forEach((item: any) => {
+          newConfigs[item.key] = item.value === 'true' ? true : item.value === 'false' ? false : item.value;
         });
-        setEditedConfigs(edited);
+        setConfigs(prev => ({ ...prev, ...newConfigs }));
       }
     } catch (error) {
       console.error('Error fetching config:', error);
@@ -38,112 +47,130 @@ export default function AdminConfig() {
     }
   };
 
-  const handleChange = (key: string, value: string) => {
-    setEditedConfigs(prev => ({
-      ...prev,
-      [key]: value,
-    }));
-  };
-
-  const handleSave = async () => {
+  const handleSave = async (key: string, value: any) => {
     try {
       setSaving(true);
 
-      for (const config of configs) {
-        const newValue = editedConfigs[config.key];
-        if (newValue !== config.value) {
-          const { error } = await supabase
-            .from('system_config' as any)
-            .update({ value: newValue } as any)
-            .eq('key', config.key);
+      // Optimistic update
+      setConfigs(prev => ({ ...prev, [key]: value }));
 
-          if (error) {
-            alert(`Erro ao salvar ${config.key}: ${error.message}`);
-            return;
-          }
-        }
-      }
+      const { error } = await supabase
+        .from('system_config' as any)
+        .upsert({ key, value: String(value) });
 
-      alert('Configurações salvas com sucesso!');
-      fetchConfigs();
+      if (error) throw error;
+
+      toast.success(`Configuração [${key}] atualizada com sucesso.`);
     } catch (error) {
       console.error('Error saving config:', error);
-      alert('Erro ao salvar configurações');
+      toast.error('Falha ao atualizar parâmetros do sistema.');
+      fetchConfigs(); // Revert
     } finally {
       setSaving(false);
     }
   };
 
-  const handleReset = () => {
-    const edited: Record<string, string> = {};
-    configs.forEach((item) => {
-      edited[item.key] = item.value || '';
-    });
-    setEditedConfigs(edited);
-  };
-
   if (loading) {
-    return <p className="text-slate-400">Carregando configurações...</p>;
+    return (
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+        <p className="text-gray-500 font-mono text-xs uppercase animate-pulse">Accessing_Core_Settings...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-slate-800 border-slate-700">
-        <CardContent className="p-6">
-          <div className="space-y-6">
-            {configs.map((config) => (
-              <div key={config.key} className="space-y-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <label className="block text-white font-medium text-sm">{config.key}</label>
-                    {config.description && (
-                      <p className="text-slate-400 text-xs mt-1">{config.description}</p>
-                    )}
-                  </div>
-                  <span className="text-slate-500 text-xs bg-slate-700 px-2 py-1 rounded">
-                    {config.type}
-                  </span>
-                </div>
-
-                {config.type === 'boolean' ? (
-                  <select
-                    value={editedConfigs[config.key]}
-                    onChange={(e) => handleChange(config.key, e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white"
-                  >
-                    <option value="true">Verdadeiro</option>
-                    <option value="false">Falso</option>
-                  </select>
-                ) : (
-                  <input
-                    type={config.type === 'number' ? 'number' : 'text'}
-                    value={editedConfigs[config.key]}
-                    onChange={(e) => handleChange(config.key, e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded text-white"
-                  />
-                )}
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Maintenance Mode */}
+        <Card className="bg-black border border-red-900/30 rounded-none relative overflow-hidden group">
+          <div className={`absolute inset-0 bg-red-900/5 transition-opacity duration-300 ${configs.maintenance_mode ? 'opacity-100' : 'opacity-0'}`} />
+          <CardHeader className="relative z-10">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <AlertOctagon className={`h-5 w-5 ${configs.maintenance_mode ? 'text-red-500' : 'text-gray-500'}`} />
+                <CardTitle className="text-white font-serif tracking-tight">System Lock</CardTitle>
               </div>
-            ))}
-          </div>
+              <Switch
+                checked={configs.maintenance_mode}
+                onCheckedChange={(checked) => handleSave('maintenance_mode', checked)}
+                className="data-[state=checked]:bg-red-600"
+              />
+            </div>
+            <CardDescription className="font-mono text-[10px] uppercase tracking-widest text-red-500/80">
+              {t('admin_maintenance_mode')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="relative z-10">
+            <p className="text-gray-400 text-xs font-mono">
+              When active, only Admin users can access the platform. All other sessions will be terminated or blocked.
+            </p>
+            {configs.maintenance_mode && (
+              <Badge variant="outline" className="mt-4 border-red-500 text-red-500 animate-pulse bg-red-950/30 rounded-none">
+                ACTIVE LOCKDOWN
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
 
-          <div className="flex gap-3 mt-8 pt-6 border-t border-slate-700">
+        {/* New Registrations */}
+        <Card className="bg-black border border-white/20 rounded-none">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-white" />
+                <CardTitle className="text-white font-serif tracking-tight">Access Control</CardTitle>
+              </div>
+              <Switch
+                checked={configs.allow_registrations}
+                onCheckedChange={(checked) => handleSave('allow_registrations', checked)}
+              />
+            </div>
+            <CardDescription className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
+              {t('admin_new_registrations')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-400 text-xs font-mono">
+              Enable or disable public signup forms. Existing invitations will still function.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Global Alert */}
+      <Card className="bg-black border border-white/20 rounded-none">
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Megaphone className="h-5 w-5 text-white" />
+            <CardTitle className="text-white font-serif tracking-tight">Global Broadcast</CardTitle>
+          </div>
+          <CardDescription className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
+            {t('admin_global_alert')}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <Label className="sr-only">Message</Label>
+              <Input
+                value={configs.global_alert_message}
+                onChange={(e) => setConfigs(prev => ({ ...prev, global_alert_message: e.target.value }))}
+                className="bg-white/5 border-white/10 text-white font-mono rounded-none focus:border-white h-10"
+                placeholder="ENTER SYSTEM MESSAGE..."
+              />
+            </div>
             <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => handleSave('global_alert_message', configs.global_alert_message)}
+              className="rounded-none bg-white text-black hover:bg-gray-200 font-mono uppercase tracking-wider text-xs px-6"
             >
-              <Save className="h-4 w-4 mr-2" />
-              {saving ? 'Salvando...' : 'Salvar Alterações'}
-            </Button>
-            <Button
-              onClick={handleReset}
-              variant="ghost"
-              className="text-slate-400 hover:text-white"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Resetar
+              <Terminal className="h-3 w-3 mr-2" />
+              Broadcast
             </Button>
           </div>
+          <p className="text-gray-500 text-[10px] font-mono mt-2">
+            This message will appear as a banner on all user dashboards immediately. Leave empty to disable.
+          </p>
         </CardContent>
       </Card>
     </div>

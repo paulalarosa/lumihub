@@ -22,10 +22,17 @@ if (import.meta.env.VITE_SENTRY_DSN) {
     });
 }
 
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
+import { ThemeProvider } from "@/contexts/ThemeContext";
+
 createRoot(document.getElementById("root")!).render(
-    <LanguageProvider>
-        <App />
-    </LanguageProvider>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <LanguageProvider>
+            <ErrorBoundary>
+                <App />
+            </ErrorBoundary>
+        </LanguageProvider>
+    </ThemeProvider>
 );

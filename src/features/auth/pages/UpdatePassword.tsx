@@ -48,7 +48,7 @@ export default function UpdatePassword() {
                         id="password"
                         type="password"
                         placeholder="Mínimo 6 caracteres"
-                        className="bg-[#1A1A1A] border-white/10 text-white h-12 focus:ring-cyan-500 focus:border-cyan-500 placeholder:text-gray-600"
+                        className="bg-[#1A1A1A] border-white/10 text-white h-12 rounded-none focus:ring-white focus:border-white placeholder:text-gray-600 font-mono"
                         value={password}
                         onChange={e => setPassword(e.target.value)}
                         required

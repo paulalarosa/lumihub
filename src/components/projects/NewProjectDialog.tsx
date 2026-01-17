@@ -261,7 +261,7 @@ export function NewProjectDialog({
                 onChange={handleInputChange}
                 disabled={loading}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-500/50 focus:ring-cyan-500/50"
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
               />
             </div>
 
@@ -320,7 +320,7 @@ export function NewProjectDialog({
                   value={formData.event_date}
                   onChange={handleInputChange}
                   disabled={loading}
-                  className="bg-white/5 border-white/10 text-white focus:border-cyan-500/50 focus:ring-cyan-500/50"
+                  className="bg-white/5 border-white/10 text-white focus:border-white/50 focus:ring-white/50"
                 />
               </div>
 
@@ -334,7 +334,7 @@ export function NewProjectDialog({
                   value={formData.event_location}
                   onChange={handleInputChange}
                   disabled={loading}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-500/50 focus:ring-cyan-500/50"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
                 />
               </div>
             </div>
@@ -350,7 +350,7 @@ export function NewProjectDialog({
                 onChange={handleInputChange}
                 disabled={loading}
                 rows={3}
-                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50"
               />
             </div>
 
@@ -365,7 +365,7 @@ export function NewProjectDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading} className="bg-cyan-600 hover:bg-cyan-700 text-white">
+              <Button type="submit" disabled={loading} className="bg-white hover:bg-white/90 text-black">
                 {loading ? 'Salvando...' : 'Criar Projeto'}
               </Button>
             </div>

@@ -36,11 +36,16 @@ import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
 import { Gift, AlertCircle, Heart } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
+import { OnboardingWizard } from '@/features/onboarding/pages/OnboardingWizard';
+
 export default function Dashboard() {
   /* Full Component Rewrite to safely integrate Financial/Marketing Widgets without messy diffs */
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { organizationId, isOwner, loading: orgLoading } = useOrganization();
+
+  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true); // Default true to avoid flash
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   // Real data
   const [clientsCount, setClientsCount] = useState<number>(0);
@@ -52,6 +57,24 @@ export default function Dashboard() {
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [originStats, setOriginStats] = useState<{ name: string, value: number }[]>([]);
+
+  // Check Onboarding Status
+  useEffect(() => {
+    if (!user) return;
+    const checkOnboarding = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user.id)
+        .single();
+
+      if (data && data.onboarding_completed === false) {
+        setOnboardingCompleted(false);
+      }
+      setCheckingOnboarding(false);
+    };
+    checkOnboarding();
+  }, [user]);
 
   // Fetch real data
   useEffect(() => {
@@ -154,6 +177,10 @@ export default function Dashboard() {
 
   if (!user || !organizationId) return null;
 
+  if (!checkingOnboarding && !onboardingCompleted) {
+    return <OnboardingWizard onComplete={() => setOnboardingCompleted(true)} />;
+  }
+
   const stats = [
     ...(isOwner ? [{
       label: "Faturamento",
@@ -254,28 +281,8 @@ export default function Dashboard() {
             </div>
           )}
 
-          {/* 3. Quick Nav (Vertical / Small) */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-2 row-span-2 lumi-card p-6 border border-white/20 rounded-none flex flex-col justify-center gap-4">
-            {[
-              { label: 'Clientes', icon: Users, path: '/clientes' },
-              { label: 'Projetos', icon: FolderOpen, path: '/projetos' },
-              { label: 'Agenda', icon: Calendar, path: '/agenda' },
-              { label: 'Config', icon: Settings, path: '/configuracoes' },
-            ].map((item, i) => (
-              <Link key={i} to={item.path}>
-                <div className="flex items-center justify-between p-4 border border-white/5 hover:border-white hover:bg-white hover:text-black transition-all group">
-                  <div className="flex items-center gap-3">
-                    <item.icon className="w-5 h-5 text-white/50 group-hover:text-black transition-colors" />
-                    <span className="text-sm text-white/80 group-hover:text-black font-mono uppercase text-xs tracking-wider">{item.label}</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-black group-hover:translate-x-1 transition-transform" />
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          {/* 4. Upcoming Events (Large Block) */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-4 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
+          {/* 3. Agenda (Left - 50%) */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-medium text-white tracking-wide">Agenda</h3>
               <Link to="/agenda" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">VER TODA</Link>
@@ -323,8 +330,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* 5. Team (Conditional) */}
-          <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none">
+          {/* 4. Team (Right - 50%) */}
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full">
             <div className="flex items-center gap-3 mb-4">
               <Users className="w-4 h-4 text-white" />
               <h3 className="text-sm font-medium text-white uppercase tracking-wider">Equipe</h3>

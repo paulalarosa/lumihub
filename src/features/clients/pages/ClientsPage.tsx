@@ -41,6 +41,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ClientService } from '@/services/clientService';
 import { Database } from '@/integrations/supabase/types';
+import { MobileFAB } from '@/components/ui/MobileFAB';
 
 // Use strict type from Database or local interface? 
 // Service returns Supabase type, but we have local Client interface.
@@ -465,6 +466,7 @@ export default function Clientes() {
           )}
         </div>
       </main>
+      <MobileFAB onClick={() => setIsDialogOpen(true)} label="Novo Cliente" />
     </div>
   );
 }

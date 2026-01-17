@@ -3,29 +3,71 @@ import { AppSidebar } from "@/components/ui/layout/AppSidebar";
 import { BottomNav } from "@/components/ui/layout/BottomNav";
 import { Outlet } from "react-router-dom";
 import { TrialBanner } from "@/components/features/subscription/TrialBanner";
-import OnboardingTour from "@/components/onboarding/OnboardingTour";
-import { useState } from "react";
 import { PageTransition } from "../animation/PageTransition";
 import { NotificationBell } from "./NotificationBell";
+import { ModeToggle } from "@/components/ui/mode-toggle";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { OnboardingWizard } from "@/features/onboarding/pages/OnboardingWizard";
 
 export default function AppLayout() {
-    const [runTour, setRunTour] = useState(false);
+    const { user } = useAuth();
+    const [profile, setProfile] = useState<any>(null);
+    const [loadingProfile, setLoadingProfile] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchProfile = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (!error && data) {
+                    setProfile(data);
+                }
+            } catch (error) {
+                console.error("Error fetching profile for layout:", error);
+            } finally {
+                setLoadingProfile(false);
+            }
+        };
+
+        fetchProfile();
+    }, [user]);
+
+    const handleOnboardingComplete = () => {
+        // Optimistically update profile to hide wizard immediately
+        setProfile((prev: any) => ({ ...prev, onboarding_completed: true }));
+        // Reload to ensure fresh state everywhere
+        window.location.reload();
+    };
+
+    // SYSTEM INITIALIZATION CHECK
+    // If we have a user, finished loading profile, and onboarding_completed is false => Show Wizard
+    if (user && !loadingProfile && profile && profile.onboarding_completed === false) {
+        return <OnboardingWizard onComplete={handleOnboardingComplete} />;
+    }
 
     return (
         <SidebarProvider>
             {/* Desktop Sidebar (Left) */}
-            <AppSidebar onStartTour={() => setRunTour(true)} />
+            <AppSidebar />
 
             {/* Main Content Area */}
-            <SidebarInset className="bg-[#050505] min-h-screen mb-[60px] md:mb-0">
-                <div className="sticky top-0 z-50 w-full flex flex-col bg-black/80 backdrop-blur-xl border-b border-white/5">
+            <SidebarInset className="bg-background min-h-screen mb-[60px] md:mb-0 transition-colors duration-300">
+                <div className="sticky top-0 z-50 w-full flex flex-col bg-background/80 backdrop-blur-xl border-b border-border">
                     <TrialBanner />
 
                     {/* App Header (Desktop & Mobile combined logic where possible, or just Desktop) */}
                     <div className="flex h-16 items-center justify-between px-4 sm:px-6">
-                        <div className="flex items-center gap-2 md:hidden">
-                            <SidebarTrigger className="-ml-1 text-white" />
-                            <span className="font-serif text-lg font-bold text-white">LumiHub</span>
+                        <div className="flex items-center gap-4 md:hidden">
+                            <SidebarTrigger className="-ml-1 bg-black border border-white/20 rounded-none h-10 w-10 text-white hover:bg-white hover:text-black transition-colors" />
+                            <span className="font-serif text-lg font-bold text-white tracking-tight">LumiHub</span>
                         </div>
 
                         {/* Spacer for Desktop to align right */}
@@ -33,6 +75,7 @@ export default function AppLayout() {
 
                         {/* Global Actions (Notifications, etc) */}
                         <div className="flex items-center gap-3">
+                            <ModeToggle />
                             <NotificationBell />
                         </div>
                     </div>
@@ -55,7 +98,6 @@ export default function AppLayout() {
             {/* Mobile Bottom Navigation (Fixed) */}
             <BottomNav />
 
-            <OnboardingTour runManual={runTour} onManualClose={() => setRunTour(false)} />
         </SidebarProvider>
     );
 }

@@ -2,7 +2,6 @@ import {
     Calendar,
     Home,
     Settings,
-    User,
     LogOut,
     Users,
     Briefcase,
@@ -10,7 +9,6 @@ import {
     Sparkles,
     FileSignature,
     Megaphone,
-    HelpCircle,
     ShieldCheck
 } from "lucide-react"
 
@@ -31,82 +29,83 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-// Menu items.
-const items = [
-    {
-        title: "Dashboard",
-        url: "/dashboard",
-        icon: Home,
-    },
-    {
-        title: "Agenda",
-        url: "/agenda",
-        icon: Calendar,
-    },
-    {
-        title: "Clientes", // "Clients"
-        url: "/clientes",
-        icon: Users,
-    },
-    {
-        title: "Projetos", // "Projects"
-        url: "/projetos",
-        icon: Briefcase,
-    },
-    {
-        title: "Marketing",
-        url: "/marketing",
-        icon: Megaphone,
-    },
-    {
-        title: "Contratos",
-        url: "/contratos",
-        icon: FileSignature,
-    },
-    {
-        title: "Financeiro", // "Financial"
-        url: "/dashboard/financial",
-        icon: CreditCard,
-    },
-    {
-        title: "Serviços",
-        url: "/servicos",
-        icon: Sparkles,
-    },
-    {
-        title: "Configurações", // "Settings"
-        url: "/configuracoes",
-        icon: Settings,
-    },
-]
-
-export function AppSidebar({ onStartTour }: { onStartTour?: () => void }) {
+export function AppSidebar() {
     const { user, signOut, isAdmin: authIsAdmin } = useAuth();
     // Force admin for specific user as backup
     const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
     const location = useLocation();
-    const { isMobile } = useSidebar();
+    const { t } = useLanguage();
+
+    // Menu items.
+    const items = [
+        {
+            title: t("sidebar_dashboard"),
+            url: "/dashboard",
+            icon: Home,
+        },
+        {
+            title: t("sidebar_agenda"),
+            url: "/agenda",
+            icon: Calendar,
+        },
+        {
+            title: t("sidebar_clients"),
+            url: "/clientes",
+            icon: Users,
+        },
+        {
+            title: t("sidebar_projects"),
+            url: "/projetos",
+            icon: Briefcase,
+        },
+        {
+            title: t("sidebar_marketing"),
+            url: "/marketing",
+            icon: Megaphone,
+        },
+        {
+            title: t("sidebar_contracts"),
+            url: "/contratos",
+            icon: FileSignature,
+        },
+        {
+            title: t("sidebar_financial"),
+            url: "/dashboard/financial",
+            icon: CreditCard,
+        },
+        {
+            title: t("sidebar_services"),
+            url: "/servicos",
+            icon: Sparkles,
+        },
+        {
+            title: t("sidebar_settings"),
+            url: "/configuracoes",
+            icon: Settings,
+        },
+    ]
 
     // Highlight active
     const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
     return (
-        <Sidebar className="border-r border-white/20 bg-black">
-            <SidebarHeader className="border-b border-white/20 p-4 bg-black">
+        <Sidebar className="border-r border-border bg-background">
+            <SidebarHeader className="border-b border-border p-4 bg-background">
                 <div className="flex items-center gap-2 px-2">
-                    <div className="w-8 h-8 flex items-center justify-center border border-white bg-black">
-                        <span className="text-white font-serif font-bold text-lg">L</span>
+                    <div className="w-8 h-8 flex items-center justify-center border border-foreground bg-background">
+                        <span className="text-foreground font-serif font-bold text-lg">L</span>
                     </div>
-                    <span className="font-serif text-xl font-bold text-white tracking-tight">
+                    <span className="font-serif text-xl font-bold text-foreground tracking-tight">
                         LumiHub
                     </span>
                 </div>
             </SidebarHeader>
 
-            <SidebarContent className="bg-black">
+            <SidebarContent className="bg-background">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Menu Principal</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("sidebar_menu_main")}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
@@ -114,7 +113,7 @@ export function AppSidebar({ onStartTour }: { onStartTour?: () => void }) {
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive(item.url)}
-                                        className="data-[active=true]:bg-white data-[active=true]:text-black data-[active=true]:border-r-0 hover:bg-white/10 hover:text-white transition-all text-gray-400 rounded-none border-l-2 border-transparent data-[active=true]:border-transparent"
+                                        className="data-[active=true]:bg-foreground data-[active=true]:text-background data-[active=true]:border-r-0 hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none border-l-2 border-transparent data-[active=true]:border-transparent"
                                     >
                                         <Link to={item.url}>
                                             <item.icon className="h-4 w-4" />
@@ -130,18 +129,18 @@ export function AppSidebar({ onStartTour }: { onStartTour?: () => void }) {
                 {/* Admin Section - Only visible for admins */}
                 {isAdmin && (
                     <SidebarGroup className="mt-auto">
-                        <SidebarGroupLabel className="text-white/40 px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">Administração</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-muted-foreground px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">{t("sidebar_menu_admin")}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 <SidebarMenuItem>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive('/admin')}
-                                        className="text-white data-[active=true]:bg-white data-[active=true]:text-black hover:bg-white/10 hover:text-white transition-all rounded-none"
+                                        className="text-foreground data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all rounded-none"
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
-                                            <span className="font-mono text-xs uppercase tracking-wider">Central Admin</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">{t("sidebar_admin")}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -150,42 +149,33 @@ export function AppSidebar({ onStartTour }: { onStartTour?: () => void }) {
                     </SidebarGroup>
                 )}
 
+
                 <SidebarGroup className="mt-auto pb-4">
                     <SidebarGroupContent>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton
-                                    onClick={onStartTour}
-                                    className="text-gray-400 hover:text-white hover:bg-white/5 transition-all w-full justify-start rounded-none"
-                                >
-                                    <HelpCircle className="h-4 w-4" />
-                                    <span className="font-mono text-xs uppercase tracking-wider">Ajuda / Tutorial</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
+                        {/* Help link removed for new onboarding system */}
                     </SidebarGroupContent>
                 </SidebarGroup>
 
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-white/20 p-4 bg-black">
+            <SidebarFooter className="border-t border-border p-4 bg-background">
                 <div className="flex items-center gap-3 px-2 mb-4">
-                    <Avatar className="h-8 w-8 border border-white/20 rounded-none">
+                    <Avatar className="h-8 w-8 border border-border rounded-none">
                         <AvatarImage src={user?.user_metadata?.avatar_url} />
-                        <AvatarFallback className="bg-black text-white font-mono rounded-none">U</AvatarFallback>
+                        <AvatarFallback className="bg-background text-foreground font-mono rounded-none">U</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col overflow-hidden">
-                        <span className="text-sm font-medium text-white truncate font-serif">{user?.user_metadata?.full_name || 'Usuário'}</span>
-                        <span className="text-[10px] text-white/40 truncate font-mono">{user?.email}</span>
+                        <span className="text-sm font-medium text-foreground truncate font-serif">{user?.user_metadata?.full_name || 'User'}</span>
+                        <span className="text-[10px] text-muted-foreground truncate font-mono">{user?.email}</span>
                     </div>
                 </div>
                 <Button
                     variant="ghost"
-                    className="w-full justify-start text-white/60 hover:text-white hover:bg-white/10 rounded-none uppercase text-xs tracking-wider font-mono border border-transparent hover:border-white/20"
+                    className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-accent rounded-none uppercase text-xs tracking-wider font-mono border border-transparent hover:border-border"
                     onClick={signOut}
                 >
                     <LogOut className="h-4 w-4 mr-2" />
-                    Sair
+                    {t("sidebar_logout")}
                 </Button>
             </SidebarFooter>
         </Sidebar>

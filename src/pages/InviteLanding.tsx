@@ -122,33 +122,33 @@ export default function InviteLanding() {
         <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white p-4 relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[128px]" />
-                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[128px]" />
+                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-white/5 rounded-full blur-[128px]" />
+                <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-white/5 rounded-full blur-[128px]" />
             </div>
 
-            <div className="max-w-md w-full bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-xl relative z-10">
+            <div className="max-w-md w-full bg-black border border-white/20 p-8 rounded-none backdrop-blur-xl relative z-10">
                 <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-[#00e5ff]/10 rounded-full flex items-center justify-center mx-auto border border-[#00e5ff]/20">
-                        <CheckCircle2 className="w-8 h-8 text-[#00e5ff]" />
+                    <div className="w-16 h-16 bg-white/10 rounded-none flex items-center justify-center mx-auto border border-white/20">
+                        <CheckCircle2 className="w-8 h-8 text-white" />
                     </div>
-                    <h1 className="text-2xl font-serif">Convite para Equipe</h1>
-                    <p className="text-gray-300">
+                    <h1 className="text-2xl font-serif uppercase tracking-wider">Convite para Equipe</h1>
+                    <p className="text-gray-400 font-mono text-sm uppercase tracking-wide">
                         Você foi convidado para entrar no time de <strong className="text-white">{inviteData?.owner?.full_name}</strong>.
                     </p>
 
                     <div className="pt-4 space-y-3">
                         {!user ? (
-                            <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg text-sm text-yellow-200">
+                            <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-none text-xs font-mono text-yellow-200 uppercase">
                                 Você precisa fazer login ou criar uma conta para aceitar.
                             </div>
                         ) : (
-                            <p className="text-sm text-gray-400">
+                            <p className="text-xs text-gray-500 font-mono uppercase">
                                 Aceitando como: <span className="text-white">{user.email}</span>
                             </p>
                         )}
 
                         <Button
-                            className="w-full bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 font-medium h-12"
+                            className="w-full bg-white text-black hover:bg-white/90 font-mono uppercase tracking-widest text-xs h-12 rounded-none"
                             onClick={handleAccept}
                         >
                             {user ? 'Aceitar Convite' : 'Fazer Login e Aceitar'}

@@ -132,7 +132,7 @@ export default function ServiceDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-md bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-cyan-500/10 text-white">
+            <DialogContent className="max-w-md bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-white/5 text-white">
                 <DialogHeader>
                     <DialogTitle className="font-serif text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                         {service ? "Editar Serviço" : "Novo Serviço"}
@@ -151,7 +151,7 @@ export default function ServiceDialog({
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="Ex: Maquiagem Social"
                             required
-                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-400/50 focus:ring-1 focus:ring-cyan-400/50 rounded-xl"
+                            className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-xl"
                         />
                     </div>
 
@@ -169,7 +169,7 @@ export default function ServiceDialog({
                                 onChange={(e) => setPrice(e.target.value)}
                                 placeholder="0.00"
                                 required
-                                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-cyan-400/50 rounded-xl"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 rounded-xl"
                             />
                         </div>
 

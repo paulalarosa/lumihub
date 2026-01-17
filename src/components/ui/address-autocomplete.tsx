@@ -237,10 +237,10 @@ export function AddressAutocomplete({
           onBlur={handleInputBlur}
           onMouseDown={(e) => e.stopPropagation()}
           placeholder={placeholder}
-          className="bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-white/10 transition-all duration-300"
+          className="bg-white/5 border-white/10 rounded-xl px-4 py-3 text-white placeholder:text-gray-600 focus:ring-1 focus:ring-white/50 focus:border-white/50 focus:bg-white/10 transition-all duration-300"
         />
         {isLoading && (
-          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-cyan-400" />
+          <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white" />
         )}
       </div>
 
