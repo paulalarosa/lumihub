@@ -13,12 +13,12 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             {/* Left Side - Editorial Image (Desktop Only) */}
             <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]/80 z-10" />
-                <div className="absolute inset-0 bg-black/20 z-10" />
+                <div className="absolute inset-0 bg-black/40 z-10" />
 
                 {/* Editorial Image */}
                 <img
-                    src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1935&auto=format&fit=crop"
-                    alt="Beauty Editorial"
+                    src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1920&auto=format&fit=crop"
+                    alt="Lumi Beauty Studio"
                     className="absolute inset-0 w-full h-full object-cover opacity-90"
                 />
 

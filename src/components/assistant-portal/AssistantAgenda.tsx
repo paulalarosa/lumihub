@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { format, parseISO, isSameMonth, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
+import { format, parseISO, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, MapPin, ExternalLink, Minus, Plus } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, MapPin, ExternalLink, Minus, Plus, CalendarDays } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -84,26 +84,28 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
   const sortedDates = Object.keys(groupedEvents).sort();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Agenda</h2>
-        <p className="text-muted-foreground">
-          Seus eventos atribuídos
+        <h2 className="text-xl font-serif text-white uppercase tracking-widest flex items-center gap-2">
+          <CalendarDays className="h-5 w-5" /> Mission_Timeline
+        </h2>
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1">
+          /// SCHEDULED_OPERATIONS
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+      <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
         {/* Calendar Sidebar */}
         <div className="space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
+          <Card className="bg-black border border-white/20 rounded-none">
+            <CardHeader className="pb-2 border-b border-white/10">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Calendário</CardTitle>
+                <CardTitle className="text-sm font-mono text-white uppercase tracking-widest">NAVIGATOR</CardTitle>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-6 w-6 rounded-none text-white/50 hover:text-white"
                     onClick={() => setCalendarSize(calendarSize === "small" ? "small" : calendarSize === "medium" ? "small" : "medium")}
                     disabled={calendarSize === "small"}
                   >
@@ -112,7 +114,7 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7"
+                    className="h-6 w-6 rounded-none text-white/50 hover:text-white"
                     onClick={() => setCalendarSize(calendarSize === "large" ? "large" : calendarSize === "medium" ? "large" : "medium")}
                     disabled={calendarSize === "large"}
                   >
@@ -121,31 +123,43 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pb-4">
-              <div className="flex items-center justify-between mb-2">
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handlePrevMonth}>
+            <CardContent className="pb-4 pt-4">
+              <div className="flex items-center justify-between mb-4">
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black" onClick={handlePrevMonth}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="font-medium text-sm">
+                <span className="font-mono text-xs text-white uppercase tracking-widest">
                   {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
                 </span>
-                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleNextMonth}>
+                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black" onClick={handleNextMonth}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <div className={cn("overflow-hidden", calendarSizeClasses[calendarSize])}>
-                <Calendar
-                  mode="single"
-                  selected={selectedDate || undefined}
-                  onSelect={handleDateSelect}
-                  month={currentMonth}
-                  onMonthChange={onMonthChange}
-                  modifiers={{ hasEvent: eventDates }}
-                  modifiersStyles={{
-                    hasEvent: { fontWeight: "bold", textDecoration: "underline", textUnderlineOffset: "2px" }
-                  }}
-                  className="pointer-events-auto"
-                />
+              <div className={cn("overflow-hidden invert text-white", calendarSizeClasses[calendarSize])}>
+                {/* Invert filter is a hack to make standard shadcn calendar dark mode compatible if it isn't already, but assuming global styles handle it. 
+                     Better to rely on global styles. Removing invert check if global css handles it. 
+                     Actually, forcing dark theme classes on Calendar container might be safer. */}
+                <div className="calendar-container-noir">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate || undefined}
+                    onSelect={handleDateSelect}
+                    month={currentMonth}
+                    onMonthChange={onMonthChange}
+                    modifiers={{ hasEvent: eventDates }}
+                    modifiersStyles={{
+                      hasEvent: { fontWeight: "bold", border: "1px solid currentColor", borderRadius: "0px" }
+                    }}
+                    className="pointer-events-auto text-white p-0"
+                    classNames={{
+                      day_selected: "bg-white text-black hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none",
+                      day_today: "bg-white/20 text-white rounded-none",
+                      day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-white/20 rounded-none transition-colors",
+                      head_cell: "text-muted-foreground rounded-none w-8 font-normal text-[0.8rem]",
+                      cell: "h-8 w-8 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                    }}
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -154,100 +168,88 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
             <Button
               variant="outline"
               size="sm"
-              className="w-full"
+              className="w-full rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest"
               onClick={() => setSelectedDate(null)}
             >
-              Mostrar todos do mês
+              CLEAR_FILTER
             </Button>
           )}
         </div>
 
         {/* Events List */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">
+          <div className="flex items-center justify-between border-b border-white/20 pb-2">
+            <h3 className="font-mono text-sm text-white uppercase tracking-wider">
               {selectedDate
-                ? `Eventos de ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}`
-                : `Eventos de ${format(currentMonth, "MMMM yyyy", { locale: ptBR })}`}
+                ? `DATE: ${format(selectedDate, "dd.MM.yyyy")}`
+                : `MONTH: ${format(currentMonth, "MM.yyyy")}`}
             </h3>
-            <Badge variant="secondary">
-              {filteredEvents.length} {filteredEvents.length === 1 ? "evento" : "eventos"}
+            <Badge variant="outline" className="rounded-none border-white/20 text-white/50 font-mono text-[10px] uppercase">
+              COUNT: {filteredEvents.length}
             </Badge>
           </div>
 
           {sortedDates.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <CalendarIcon className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">
-                  Nenhum evento encontrado para este período
-                </p>
-              </CardContent>
-            </Card>
+            <div className="border border-white/10 bg-white/5 border-dashed p-12 text-center">
+              <CalendarIcon className="h-12 w-12 mx-auto text-white/20 mb-4" />
+              <p className="text-white/40 font-mono text-xs uppercase tracking-widest">
+                NO_OPERATIONS_SCHEDULED
+              </p>
+            </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {sortedDates.map((dateKey) => (
                 <div key={dateKey}>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 bg-white flex items-center justify-center text-sm font-bold text-black font-mono rounded-none">
                       {format(parseISO(dateKey), "dd")}
                     </div>
                     <div>
-                      <p className="font-medium">
+                      <p className="font-serif text-white uppercase tracking-wider">
                         {format(parseISO(dateKey), "EEEE", { locale: ptBR })}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(parseISO(dateKey), "dd 'de' MMMM", { locale: ptBR })}
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-3 pl-10">
+                  <div className="space-y-4 pl-11">
                     {groupedEvents[dateKey].map((event) => (
-                      <Card key={event.id}>
-                        <CardContent className="p-4">
+                      <Card key={event.id} className="bg-black border border-white/20 rounded-none hover:border-white transition-colors group">
+                        <CardContent className="p-5">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-semibold truncate">{event.title}</h4>
+                              <div className="flex items-center gap-3 mb-2">
+                                <h4 className="font-bold text-white uppercase tracking-wide truncate">{event.title}</h4>
                                 {event.event_type && (
-                                  <Badge variant="outline" className="shrink-0">
+                                  <Badge variant="outline" className="shrink-0 rounded-none border-white/30 text-white/50 text-[9px] uppercase font-mono tracking-widest">
                                     {event.event_type}
                                   </Badge>
                                 )}
                               </div>
 
                               {event.clients?.name && (
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  Cliente: {event.clients.name}
+                                <p className="text-xs text-white/60 mb-3 font-mono uppercase tracking-wide">
+                                  CLIENT: {event.clients.name}
                                 </p>
                               )}
 
-                              {event.description && (
-                                <p className="text-sm text-muted-foreground mb-2">
-                                  {event.description}
-                                </p>
-                              )}
-
-                              <div className="flex flex-wrap gap-4 text-sm">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono text-white/50">
                                 {event.start_time && (
-                                  <span className="flex items-center gap-1 text-muted-foreground">
-                                    <Clock className="h-4 w-4" />
-                                    {event.start_time}
-                                    {event.end_time && ` - ${event.end_time}`}
+                                  <span className="flex items-center gap-2">
+                                    <Clock className="h-3 w-3" />
+                                    {event.start_time} - {event.end_time || "?"}
                                   </span>
                                 )}
 
                                 {(event.location || event.address) && (
                                   <button
                                     onClick={() => openInMaps(event.address || event.location || "")}
-                                    className="flex items-center gap-1 text-muted-foreground hover:text-primary transition-colors"
+                                    className="flex items-center gap-2 hover:text-white transition-colors text-left"
                                   >
-                                    <MapPin className="h-4 w-4" />
+                                    <MapPin className="h-3 w-3" />
                                     <span className="truncate max-w-[200px]">
                                       {event.location || event.address}
                                     </span>
-                                    <ExternalLink className="h-3 w-3" />
+                                    <ExternalLink className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
                                   </button>
                                 )}
                               </div>

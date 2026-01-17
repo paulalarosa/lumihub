@@ -2,10 +2,12 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
+import { TrackedButton } from "@/components/analytics/TrackedButton";
 import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { FloatingGlassShapes } from "@/components/animations/FloatingGlassShapes";
 import { CountUp } from "@/components/animations/CountUp";
+import { ScrambleNumber } from "@/components/ui/animation/ScrambleNumber";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerAnimation";
 import { MagneticButton } from "@/components/animations/MagneticButton";
 import { useScroll, useParallax } from "@/hooks/useScroll";
@@ -15,11 +17,13 @@ import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle,
 import { motion, useScroll as useFramerScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Home = () => {
   const { scrollY } = useScroll();
   const imageY = useParallax(scrollY, [0, 500], [0, 150]);
   const marqueeRef = useRef<HTMLDivElement>(null);
+  const { t } = useLanguage();
 
   const { scrollYProgress } = useFramerScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
@@ -32,25 +36,26 @@ const Home = () => {
   }, []);
 
   const features = [
-    { icon: Crown, title: "Gestão de Império", description: "Gerencie clientes, histórico e anotações com a maestria de quem constrói um legado.", size: "large" },
-    { icon: Clock, title: "Linha do Tempo Visual", description: "Visualize sua agenda como uma obra de arte, com cronogramas precisos.", size: "normal" },
+    { icon: Crown, title: t("feature_1_title"), description: t("feature_1_desc"), size: "large" },
+    { icon: Clock, title: t("feature_2_title"), description: t("feature_2_desc"), size: "normal" },
     {
       icon: Bot,
-      title: "Lumi IA & Automação",
-      description: "Sua assistente virtual que trabalha enquanto você dorme. Confirmações, lembretes e preenchimento inteligente.",
+      title: t("feature_3_title"),
+      description: t("feature_3_desc"),
       size: "normal"
     },
-    { icon: FileSignature, title: "Contratos Inteligentes", description: "Segurança jurídica com contratos gerados automaticamente. Assinatura digital integrada na hora.", size: "normal" },
-    { icon: CreditCard, title: "Financeiro Automatizado", description: "Receba via Pix e cartão com split automático e sem dores de cabeça.", size: "normal" },
-    { icon: TrendingUp, title: "Inteligência de Negócio", description: "Dashboards que mostram o crescimento real do seu faturamento.", size: "large" },
+    { icon: FileSignature, title: t("feature_4_title"), description: t("feature_4_desc"), size: "normal" },
+    { icon: CreditCard, title: t("feature_5_title"), description: t("feature_5_desc"), size: "normal" },
+    { icon: TrendingUp, title: t("feature_6_title"), description: t("feature_6_desc"), size: "large" },
   ];
 
   const benefits = [
-    "Economize 10+ horas por semana em tarefas administrativas",
-    "Aumente sua receita com processos profissionais",
-    "Ofereça experiência premium para suas clientes",
-    "Organize completamente seu negócio"
+    t("benefit_1"),
+    t("benefit_2"),
+    t("benefit_3"),
+    t("benefit_4")
   ];
+
 
   const testimonials = [
     { name: "Maria Silva", role: "Maquiadora Especialista em Noivas", content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!", rating: 5 },
@@ -61,7 +66,7 @@ const Home = () => {
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title="Lumi - Plataforma de Gestão para Profissionais de Beleza"
         description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%."
         keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional"
@@ -76,379 +81,330 @@ const Home = () => {
           }
         }}
       />
-      <div className="min-h-screen bg-[#050505] page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
+      <div className="min-h-screen bg-black page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
 
 
-      {/* Hero Section - Beauty Tech Design */}
-      <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[#050505]" />
-        <FloatingGlassShapes />
-
-        {/* Subtle Grid Pattern */}
-        <div
-          className="absolute inset-0 opacity-[0.02]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
-            backgroundSize: '100px 100px'
-          }}
-        />
-
-        {/* Cyan Glow Orbs */}
-        <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-[150px]" />
-        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-white/3 rounded-full blur-[120px]" />
-
-        <motion.div
-          className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 pt-32"
-          style={{ opacity: heroOpacity, scale: heroScale }}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="space-y-12"
-            >
-              <div className="space-y-8">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="inline-flex items-center px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm"
-                >
-                  <Sparkles className="h-3 w-3 mr-2 text-white/60" />
-                  <span className="text-white/60 text-xs tracking-[0.2em] uppercase font-light">Elevação Visual</span>
-                </motion.div>
-
-                <h1 className="text-6xl lg:text-8xl leading-[0.95] font-serif font-light tracking-[-0.04em]">
-                  <span className="bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent">Lumi—</span>
-                  <br />
-                  <span className="bg-gradient-to-r from-[#C0C0C0] via-white to-[#C0C0C0] bg-clip-text text-transparent">Excelência</span>
-                  <br />
-                  <span className="bg-gradient-to-b from-white/80 to-white/40 bg-clip-text text-transparent">em Arte</span>
-                </h1>
-
-                <p className="text-lg lg:text-xl text-white/50 leading-relaxed max-w-xl font-light">
-                  Uma plataforma minimalista e sofisticada para profissionais de beleza que entendem o valor da elegância. Transforme sua gestão em arte.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-5 pt-4">
-                <MagneticButton href="/register" strength={0.35}>
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto bg-white text-[#050505] hover:bg-white/90 text-base px-8 py-6 rounded-xl font-medium border border-white/20 transition-all duration-300 hover:shadow-[0_0_40px_rgba(255,255,255,0.3)]"
-                  >
-                    Começar Agora
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </Button>
-                </MagneticButton>
-                <MagneticButton href="/register" strength={0.35}>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto bg-transparent border border-[#C0C0C0]/30 text-white/80 hover:bg-white/5 hover:border-[#C0C0C0]/50 text-base px-8 py-6 rounded-xl transition-all duration-300"
-                  >
-                    Criar Conta Grátis
-                  </Button>
-                </MagneticButton>
-              </div>
-
-              <div className="flex items-center space-x-6 text-sm text-white/40">
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-[#C0C0C0] mr-2" />
-                  Teste gratuito por 14 dias
-                </div>
-                <div className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-[#C0C0C0] mr-2" />
-                  Dados 100% seguros
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="relative"
-              style={{ y: imageY }}
-            >
-              <div className="relative">
-                {/* Glow Effect */}
-                <div className="absolute -inset-4 bg-gradient-to-r from-cyan-500/10 via-white/5 to-cyan-500/10 rounded-3xl blur-2xl" />
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#C0C0C0]/20 to-transparent rounded-3xl" />
-                <img
-                  alt="Hero image"
-                  loading="eager"
-                  decoding="async"
-                  className="relative rounded-3xl w-full h-auto object-cover border border-white/10"
-                  style={{ filter: 'grayscale(20%) contrast(1.1)' }}
-                  onError={e => { (e.target as HTMLImageElement).src = heroFallback; }}
-                  src={heroImage}
-                />
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-        >
-          <div className="w-6 h-10 rounded-full border border-white/20 flex justify-center pt-2">
-            <div className="w-1 h-2 bg-white/40 rounded-full" />
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features Section - Bento Grid */}
-      <section className="py-32 bg-[#050505] relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent" />
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* Hero Section - Industrial Editorial Noir */}
+        <section className="relative min-h-screen flex items-center bg-black overflow-hidden bg-noise">
+          {/* Parallax Image Background */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="text-center mb-20 space-y-4"
+            style={{ y: imageY }}
+            className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-20 pointer-events-none z-0"
           >
-            <h2 className="font-serif font-light text-4xl lg:text-6xl bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent tracking-[-0.02em]">
-              Tudo que você precisa
-            </h2>
-            <p className="text-xl text-white/40 max-w-2xl mx-auto font-light">
-              Uma plataforma completa para transformar seu negócio de beleza.
-            </p>
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent z-10" />
+            <img src={heroImage} alt="Hero Texture" className="w-full h-full object-cover grayscale contrast-125" />
           </motion.div>
 
-          <StaggerContainer staggerChildren={0.1} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature, index) => (
-              <StaggerItem key={index}>
-                <motion.div
-                  className={`group relative bg-[#1A1A1A]/40 backdrop-blur-lg border border-white/10 rounded-3xl p-8 h-full transition-all duration-500 hover:border-cyan-500/50 hover:shadow-[0_0_30px_rgba(6,182,212,0.15)] ${feature.size === 'large' ? 'lg:col-span-1' : ''}`}
-                  whileHover={{ y: -5, transition: { duration: 0.3 } }}
-                >
-                  <div className="relative space-y-6">
-                    <feature.icon className="h-10 w-10 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.5)] transition-colors duration-300 stroke-[1.5]" />
+          {/* Grid Lines */}
+          <div className="absolute inset-0 noir-grid-lines opacity-20 pointer-events-none" />
 
-                    <div className="space-y-3">
-                      <h3 className="font-serif font-light text-2xl text-white">
-                        {feature.title}
-                      </h3>
-                      <p className="text-gray-400 leading-relaxed font-light">
-                        {feature.description}
-                      </p>
-                    </div>
+          <div className="container mx-auto px-6 relative z-10 pt-20">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+              className="max-w-5xl"
+            >
+              {/* Badge */}
+              <div className="inline-block border border-white px-3 py-1 mb-8">
+                <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-white">{t("hero_badge")}</span>
+              </div>
+
+              {/* Headline */}
+              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12">
+                {t("hero_title").split(' ').map((word, i) => (
+                  <span key={i}>{word} <br /> </span>
+                )).slice(0, 2)}
+                {/* Simple hack for split, might need better handling if phrases vary length significantly */}
+                {/* Actually let's just use the string directly if possible or dangerouslySetInnerHTML? No, safer to just text. */}
+                {/* Reverting to simple text rendered */}
+                <span dangerouslySetInnerHTML={{ __html: t("hero_title").replace('DO SEU', '<br />DO SEU').replace('BACKSTAGE', 'BACKSTAGE<br/>') }} />
+              </h1>
+              {/* Force re-render isn't great. Let's just output text. The <br/> was key in original design.
+                 Let's assume the translation implies line breaks or we use max-width.
+                 Original:
+                 O BACKSTAGE <br />
+                 DO SEU IMPÉRIO.
+              */}
+              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line">
+                {t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
+              </h1>
+
+              {/* CTA & Subtext */}
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-12 border-t border-white/20 pt-12">
+                <Link to="/register">
+                  <button className="noir-button text-sm w-full md:w-auto">
+                    {t("cta_start")} -&gt;
+                  </button>
+                </Link>
+
+                <p className="font-mono text-xs text-white/60 max-w-sm uppercase tracking-wide leading-relaxed">
+                  {t("hero_subtitle")}
+                </p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Decorative Technical Elements */}
+          <div className="absolute top-0 right-0 p-8 hidden md:block">
+            <div className="font-mono text-[10px] text-white/40 text-right space-y-2">
+              <p>{t("hero_status_online")}</p>
+              <p>{t("hero_loc")}</p>
+              <p>TIME: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
+            </div>
+          </div>
+
+          <div className="absolute bottom-8 left-8 hidden md:block">
+            <div className="w-32 h-32 border border-white/20 rounded-full flex items-center justify-center animate-spin-slow">
+              <div className="w-full h-[1px] bg-white/20" />
+              <div className="absolute h-full w-[1px] bg-white/20" />
+            </div>
+          </div>
+        </section>
+
+        {/* Features Section - Modular Rack Grid */}
+        <section className="py-32 bg-black relative">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-24 space-y-4">
+              <h2 className="font-serif font-light text-6xl text-white tracking-tighter">
+                {t("features_title")}
+              </h2>
+              <p className="font-mono text-sm text-gray-500 uppercase tracking-widest">
+                {t("features_subtitle")}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-white/20 border border-white/20">
+              {features.map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="group bg-black p-8 aspect-square flex flex-col justify-between hover:bg-white transition-colors duration-0"
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="font-mono text-[10px] text-gray-600 group-hover:text-black">
+                      [MOD.0{index + 1}]
+                    </span>
+                    <feature.icon className="h-8 w-8 text-white group-hover:text-black stroke-[1.5]" />
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="font-mono text-lg uppercase tracking-wider text-white group-hover:text-black">
+                      {feature.title}
+                    </h3>
+                    <p className="font-mono text-xs text-gray-500 leading-relaxed group-hover:text-black/70">
+                      {feature.description}
+                      <span className="opacity-0 group-hover:opacity-100 ml-2 inline-block w-2 H-4 bg-black animate-pulse">_</span>
+                    </p>
                   </div>
                 </motion.div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-        </div>
-      </section>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      {/* Benefits Section */}
-      <ErrorBoundary sectionName="Benefits Section">
-        <section className="py-32 bg-[#050505] relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-white/[0.02] rounded-full blur-[100px]" />
+        {/* Benefits Section - Raw Data Terminal */}
+        <section className="py-32 bg-black relative border-t border-white/20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-stretch">
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-              <div className="space-y-10">
-                <div className="space-y-4">
-                  <h2 className="font-serif font-light text-4xl lg:text-5xl bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-                    Por que escolher a Lumi?
+              {/* Left Column: System Checklist */}
+              <div className="flex flex-col justify-center space-y-12">
+                <div className="space-y-6">
+                  <h2 className="font-serif text-5xl text-white leading-none whitespace-pre-line">
+                    {t("benefits_title").replace(" ", "\n")}
                   </h2>
-                  <p className="text-xl text-white/40 font-light">
-                    Mais de 1.000 profissionais já transformaram seus negócios.
-                  </p>
+                  <div className="h-[1px] w-24 bg-white/50" />
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-6 font-mono text-sm">
                   {benefits.map((benefit, index) => (
                     <motion.div
                       key={index}
-                      className="flex items-start space-x-4"
-                      initial={{ opacity: 0, x: -20 }}
+                      initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
+                      transition={{ delay: index * 0.1 }}
+                      className="flex items-start space-x-4 text-gray-400 hover:text-white transition-colors cursor-default"
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#C0C0C0]/10 border border-[#C0C0C0]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <CheckCircle className="h-3 w-3 text-[#C0C0C0]" />
-                      </div>
-                      <span className="text-white/70 font-light text-lg">{benefit}</span>
+                      <span className="text-white shrink-0">[&gt;]</span>
+                      <span className="uppercase tracking-wide">{benefit}</span>
                     </motion.div>
                   ))}
                 </div>
 
                 <Link to="/recursos">
                   <Button
-                    variant="outline"
-                    size="lg"
-                    className="bg-transparent border border-white/10 text-white/70 hover:bg-white/5 hover:border-[#C0C0C0]/30 rounded-xl"
+                    variant="ghost"
+                    className="group rounded-none border border-white/20 px-8 py-6 text-white hover:bg-white hover:text-black transition-all"
                   >
-                    Conhecer Todos os Recursos
-                    <ArrowRight className="h-5 w-5 ml-2" />
+                    <span className="font-mono text-xs uppercase tracking-[0.2em] mr-4">{t("view_all_features")}</span>
+                    <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
                   </Button>
                 </Link>
               </div>
 
-              {/* Stats Bento Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { value: 10, suffix: "+", label: "Horas economizadas por semana" },
-                  { value: 40, suffix: "%", label: "Aumento médio na receita" },
-                  { value: 98, suffix: "%", label: "Satisfação das clientes" },
-                  { value: null, text: "24/7", label: "Suporte disponível" },
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    whileHover={{ scale: 1.02 }}
-                    className="lumi-card p-8 text-center hover:border-cyan-500/20 transition-all duration-300"
-                  >
-                    <div className="text-4xl font-serif font-light text-[#C0C0C0] mb-2">
-                      {stat.value !== null ? (
-                        <CountUp to={stat.value} suffix={stat.suffix} duration={2.5} />
-                      ) : (
-                        stat.text
-                      )}
+              {/* Right Column: Data Scramble Readout */}
+              <div className="flex flex-col justify-center">
+                <div className="border-l-2 border-white pl-12 py-12 space-y-24">
+                  {[
+                    { value: 10, suffix: "+", label: t("stat_hours_label") },
+                    { value: 40, suffix: "%", label: t("stat_revenue_label") },
+                    { value: 98, suffix: "%", label: t("stat_satisfaction_label") },
+                  ].map((stat, i) => (
+                    <div key={i} className="relative">
+                      <div className="font-mono text-7xl md:text-8xl font-bold text-white tracking-tighter leading-none">
+                        <ScrambleNumber value={stat.value} suffix={stat.suffix} />
+                      </div>
+                      <div className="font-mono text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-2 ml-1">
+                         /// {stat.label}
+                      </div>
                     </div>
-                    <div className="text-sm text-white/40 font-light">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </ErrorBoundary>
+                  ))}
 
-      {/* Testimonials - Horizontal Marquee */}
-      <section className="py-32 bg-[#050505] relative overflow-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-          <div className="text-center space-y-4">
-            <h2 className="font-serif font-light text-4xl lg:text-5xl bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-              O que dizem nossas clientes
-            </h2>
-            <p className="text-xl text-white/40 max-w-2xl mx-auto font-light">
-              Profissionais que já transformaram seus negócios com a Lumi.
-            </p>
-          </div>
-        </div>
-
-        {/* Marquee Container */}
-        <div className="relative">
-          {/* Gradient Masks */}
-          <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#050505] to-transparent z-10" />
-          <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#050505] to-transparent z-10" />
-
-          <motion.div
-            ref={marqueeRef}
-            className="flex gap-6"
-            animate={{ x: [0, -1200] }}
-            transition={{
-              duration: 30,
-              repeat: Infinity,
-              ease: "linear",
-              repeatType: "loop"
-            }}
-          >
-            {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 w-[400px] backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl p-8 hover:border-[#C0C0C0]/20 transition-all duration-300"
-              >
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-1">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-[#C0C0C0] text-[#C0C0C0]" />
-                    ))}
-                  </div>
-                  <blockquote className="text-lg text-white/70 italic leading-relaxed font-light">
-                    "{testimonial.content}"
-                  </blockquote>
-                  <div>
-                    <div className="font-serif font-light text-white/90">{testimonial.name}</div>
-                    <div className="text-sm text-white/40">{testimonial.role}</div>
+                  {/* 24/7 Special Stat */}
+                  <div className="relative">
+                    <div className="font-mono text-7xl md:text-8xl font-bold text-white tracking-tighter leading-none">
+                      24/7
+                    </div>
+                    <div className="font-mono text-[10px] text-gray-500 uppercase tracking-[0.3em] mt-2 ml-1">
+                         /// {t("stat_support_label")}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
 
-      {/* Lumi Pro Section */}
-      <section className="py-32 bg-[#050505]">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="font-serif font-light text-4xl lg:text-5xl bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-              Lumi Pro para Assistentes
-            </h2>
-            <p className="text-xl text-white/40 max-w-2xl mx-auto font-light">
-              Eleve sua carreira com ferramentas exclusivas.
-            </p>
+            </div>
           </div>
-          <LumiProCarousel />
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section - Metallic Gradient */}
-      <section className="py-32 relative overflow-hidden">
-        {/* Metallic Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#C0C0C0] via-[#8A8A8A] to-[#3A3A3A]" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCI+PHBhdGggZD0iTTAgMGgxMDB2MTAwSDB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTUwIDAgdjEwMCBNMCA1MCBoMTAwIiBzdHJva2U9InJnYmEoMjU1LDI1NSwyNTUsMC4wNSkiIHN0cm9rZS13aWR0aD0iMSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNwKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-50" />
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto space-y-10"
-          >
-            <div className="space-y-6">
-              <h2 className="font-serif font-light text-4xl lg:text-6xl text-[#050505] tracking-[-0.02em]">
-                Pronta para brilhar?
+        {/* Testimonials - Horizontal Marquee */}
+        <section className="py-32 bg-black relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+            <div className="text-center space-y-4">
+              <h2 className="font-serif font-light text-4xl lg:text-5xl text-white tracking-tight">
+                {t("testimonials_title")}
               </h2>
-              <p className="text-xl text-[#050505]/70 font-light">
-                Junte-se a mais de 1.000 profissionais que já iluminaram seus negócios.
-                Comece seu teste gratuito hoje mesmo.
+              <p className="text-sm font-mono text-white/40 max-w-2xl mx-auto uppercase tracking-widest">
+                {t("testimonials_subtitle")}
               </p>
             </div>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto bg-[#050505] text-white hover:bg-[#1a1a1a] text-lg px-8 py-6 rounded-xl transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,0,0,0.3)]"
+          {/* Marquee Container */}
+          <div className="relative">
+            {/* Gradient Masks */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black to-transparent z-10" />
+            <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black to-transparent z-10" />
+
+            <motion.div
+              ref={marqueeRef}
+              className="flex gap-6"
+              animate={{ x: [0, -1200] }}
+              transition={{
+                duration: 30,
+                repeat: Infinity,
+                ease: "linear",
+                repeatType: "loop"
+              }}
+            >
+              {[...testimonials, ...testimonials, ...testimonials].map((testimonial, index) => (
+                <div
+                  key={index}
+                  className="flex-shrink-0 w-[400px] border border-white/20 bg-black rounded-none p-8 hover:bg-white hover:text-black group transition-all duration-300"
                 >
-                  <Sparkles className="h-5 w-5 mr-2" />
-                  Começar Teste Gratuito
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto bg-transparent border-2 border-[#050505]/30 text-[#050505] hover:bg-[#050505]/10 text-lg px-8 py-6 rounded-xl"
-                >
-                  Ver Planos e Preços
-                </Button>
-              </Link>
-            </div>
+                  <div className="space-y-6">
+                    <div className="flex items-center space-x-1">
+                      {[...Array(testimonial.rating)].map((_, i) => (
+                        <Star key={i} className="h-4 w-4 fill-white text-white group-hover:fill-black group-hover:text-black" />
+                      ))}
+                    </div>
+                    <blockquote className="text-lg text-white/70 italic leading-relaxed font-light group-hover:text-black/70">
+                      "{testimonial.content}"
+                    </blockquote>
+                    <div>
+                      <div className="font-serif font-light text-white group-hover:text-black uppercase">{testimonial.name}</div>
+                      <div className="text-xs font-mono text-white/40 group-hover:text-black/40 uppercase tracking-widest">{testimonial.role}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
 
-            <div className="text-sm text-[#050505]/60 font-light">
-              ✨ Sem compromisso • Cancele quando quiser • Suporte dedicado
+        {/* Lumi Pro Section */}
+        <section className="py-32 bg-black">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 space-y-4">
+              <h2 className="font-serif font-light text-4xl lg:text-5xl text-white">
+                {t("lumipro_title")}
+              </h2>
+              <p className="text-sm font-mono text-white/40 max-w-2xl mx-auto uppercase tracking-widest">
+                {t("lumipro_subtitle")}
+              </p>
             </div>
-          </motion.div>
-        </div>
-      </section>
+            <LumiProCarousel />
+          </div>
+        </section>
 
-      <AIAssistantFAB />
-    </div>
+        {/* CTA Section - Metallic Gradient */}
+        <section className="py-32 relative overflow-hidden bg-black border-t border-white/20">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="max-w-3xl mx-auto space-y-10"
+            >
+              <div className="space-y-6">
+                <h2 className="font-serif text-5xl lg:text-7xl text-white tracking-tighter uppercase">
+                  {t("cta_bottom_title")}
+                </h2>
+                <p className="text-lg text-white/60 font-mono uppercase tracking-widest">
+                  {t("cta_bottom_subtitle")}
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link to="/register">
+                  <TrackedButton
+                    trackingName="cta_start_trial"
+                    trackingLocation="home_cta"
+                    trackingDestination="/register"
+                    size="lg"
+                    className="w-full sm:w-auto bg-white text-black hover:bg-white/80 text-lg px-8 py-6 rounded-none transition-all duration-300 font-mono uppercase tracking-widest"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {t("cta_bottom_start")}
+                  </TrackedButton>
+                </Link>
+                <Link to="/register">
+                  <TrackedButton
+                    trackingName="cta_view_plans"
+                    trackingLocation="home_cta"
+                    trackingDestination="/register"
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto bg-transparent border border-white/20 text-white hover:bg-white hover:text-black text-lg px-8 py-6 rounded-none font-mono uppercase tracking-widest"
+                  >
+                    {t("cta_bottom_plans")}
+                  </TrackedButton>
+                </Link>
+              </div>
+
+              <div className="text-xs text-white/30 font-mono uppercase tracking-widest">
+                {t("cta_secure")}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
+        <AIAssistantFAB />
+      </div>
     </>
   );
 };

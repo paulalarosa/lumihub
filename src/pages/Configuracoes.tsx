@@ -339,11 +339,11 @@ export default function Configuracoes() {
               </Button>
             </Link>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-500 rounded-xl flex items-center justify-center">
-                <User className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 border border-white/20 bg-black flex items-center justify-center rounded-none hover:bg-white hover:text-black transition-colors">
+                <User className="h-5 w-5 text-white hover:text-black transition-colors" />
               </div>
-              <span className="font-poppins font-bold text-xl text-foreground">
-                Configurações
+              <span className="font-serif font-bold text-xl text-white uppercase tracking-wider">
+                SETTINGS // CONFIGURATION
               </span>
             </div>
           </div>
@@ -635,16 +635,16 @@ export default function Configuracoes() {
                     <div className="space-y-2">
                       <Label>Tipo de Chave</Label>
                       <select
-                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
                         value={pixKeyType}
                         onChange={(e) => setPixKeyType(e.target.value)}
                       >
-                        <option value="">Selecione...</option>
-                        <option value="cpf">CPF</option>
-                        <option value="cnpj">CNPJ</option>
-                        <option value="email">E-mail</option>
-                        <option value="phone">Telefone</option>
-                        <option value="random">Chave Aleatória</option>
+                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
+                        <option value="cpf" className="bg-black">CPF</option>
+                        <option value="cnpj" className="bg-black">CNPJ</option>
+                        <option value="email" className="bg-black">E-MAIL</option>
+                        <option value="phone" className="bg-black">TELEFONE</option>
+                        <option value="random" className="bg-black">CHAVE ALEATÓRIA</option>
                       </select>
                     </div>
                     <div className="space-y-2">
@@ -699,13 +699,13 @@ export default function Configuracoes() {
                     <div className="space-y-2">
                       <Label>Tipo de Conta</Label>
                       <select
-                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
                         value={accountType}
                         onChange={(e) => setAccountType(e.target.value)}
                       >
-                        <option value="">Selecione...</option>
-                        <option value="checking">Conta Corrente</option>
-                        <option value="savings">Conta Poupança</option>
+                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
+                        <option value="checking" className="bg-black">CONTA CORRENTE</option>
+                        <option value="savings" className="bg-black">CONTA POUPANÇA</option>
                       </select>
                     </div>
                     <div className="space-y-2">
@@ -762,17 +762,17 @@ export default function Configuracoes() {
                     <div className="space-y-2">
                       <Label>Plataforma</Label>
                       <select
-                        className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                        className="w-full h-10 px-3 rounded-none border border-white/20 bg-black text-white font-mono text-sm uppercase focus:border-white focus:ring-0 appearance-none"
                         value={digitalWalletType}
                         onChange={(e) => setDigitalWalletType(e.target.value)}
                       >
-                        <option value="">Selecione...</option>
-                        <option value="mercado_pago">Mercado Pago</option>
-                        <option value="pagbank">PagBank</option>
-                        <option value="picpay">PicPay</option>
-                        <option value="nubank">Nubank</option>
-                        <option value="inter">Banco Inter</option>
-                        <option value="c6">C6 Bank</option>
+                        <option value="" className="bg-black text-gray-500">SELECIONE...</option>
+                        <option value="mercado_pago" className="bg-black">MERCADO PAGO</option>
+                        <option value="pagbank" className="bg-black">PAGBANK</option>
+                        <option value="picpay" className="bg-black">PICPAY</option>
+                        <option value="nubank" className="bg-black">NUBANK</option>
+                        <option value="inter" className="bg-black">BANCO INTER</option>
+                        <option value="c6" className="bg-black">C6 BANK</option>
                       </select>
                     </div>
                     <div className="space-y-2">

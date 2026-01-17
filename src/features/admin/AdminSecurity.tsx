@@ -133,7 +133,7 @@ export default function AdminSecurity() {
                                                     </TableCell>
                                                     <TableCell className="text-white/70">{log.admin_email}</TableCell>
                                                     <TableCell className="text-white/70">
-                                                        {format(new Date(log.created_at), "dd MMM HH:mm", { locale: ptBR })}
+                                                        {log.created_at ? format(new Date(log.created_at), "dd MMM HH:mm", { locale: ptBR }) : '-'}
                                                     </TableCell>
                                                     <TableCell className="text-right">
                                                         <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">

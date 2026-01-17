@@ -2,6 +2,7 @@ import { format, addMonths, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CalendarHeaderProps {
   currentDate: Date;
@@ -16,6 +17,8 @@ export function CalendarHeader({
   onToday,
   onCreateEvent,
 }: CalendarHeaderProps) {
+  const { t } = useLanguage();
+
   const handlePrevious = () => {
     onNavigate(subMonths(currentDate, 1));
   };
@@ -25,25 +28,30 @@ export function CalendarHeader({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-white/20">
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" onClick={handlePrevious}>
-          <ChevronLeft className="h-4 w-4" />
+        <div className="flex items-center border border-white/20">
+          <Button variant="ghost" size="icon" onClick={handlePrevious} className="rounded-none hover:bg-white hover:text-black w-8 h-8">
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="w-[1px] h-4 bg-white/20"></div>
+          <Button variant="ghost" size="icon" onClick={handleNext} className="rounded-none hover:bg-white hover:text-black w-8 h-8">
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Button variant="outline" onClick={onToday} className="hidden sm:flex rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-8">
+          HOJE
         </Button>
-        <Button variant="outline" size="icon" onClick={handleNext}>
-          <ChevronRight className="h-4 w-4" />
-        </Button>
-        <Button variant="outline" onClick={onToday} className="hidden sm:flex">
-          Hoje
-        </Button>
-        <h2 className="text-lg sm:text-xl font-semibold capitalize ml-2">
+
+        <h2 className="text-lg sm:text-xl font-serif uppercase tracking-wider ml-4 text-white">
           {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
         </h2>
       </div>
 
-      <Button onClick={onCreateEvent} className="gap-2">
+      <Button onClick={onCreateEvent} className="gap-2 rounded-none bg-white text-black hover:bg-white/90 font-mono text-xs uppercase tracking-widest h-10 border border-white">
         <Plus className="h-4 w-4" />
-        <span className="hidden sm:inline">Novo Evento</span>
+        <span className="hidden sm:inline">{t("btn_new_event")}</span>
       </Button>
     </div>
   );

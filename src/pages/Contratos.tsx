@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileSignature, Plus, Search, Loader2, CheckCircle2, Clock } from "lucide-react";
+import { FileSignature, Plus, Search, Loader2, CheckCircle2, Clock, Terminal } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -150,19 +150,19 @@ export default function Contratos() {
         contracts.filter(c => status === 'signed' ? c.status === 'signed' : c.status !== 'signed');
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-12 animate-in fade-in duration-500 bg-black min-h-screen p-6 md:p-10 font-mono text-white selection:bg-white selection:text-black">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/20 pb-6">
                 <div>
-                    <h1 className="font-serif text-3xl text-white">Contratos</h1>
-                    <p className="text-white/60">Gerencie e colete assinaturas digitais.</p>
+                    <h1 className="font-serif text-4xl text-white uppercase tracking-tighter">LEGAL // CONTRACTS</h1>
+                    <p className="text-white/50 text-xs uppercase tracking-widest mt-1">DIGITAL_SIGNATURE_MANAGEMENT_SYSTEM.</p>
                 </div>
 
                 <Button
-                    className="bg-cyan-500 hover:bg-cyan-600 text-black font-medium"
+                    className="rounded-none bg-white text-black hover:bg-white/80 hover:text-black font-mono uppercase tracking-widest text-xs h-10 px-6"
                     onClick={() => setIsCreateOpen(true)}
                 >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Novo Contrato
+                    <Plus className="w-3 h-3 mr-2" />
+                    CREATE_DOCUMENT
                 </Button>
 
                 <ContractDialog
@@ -175,39 +175,52 @@ export default function Contratos() {
             </div>
 
             <Tabs defaultValue="pending" className="w-full">
-                <TabsList className="bg-white/5 border border-white/10">
-                    <TabsTrigger value="pending" className="data-[state=active]:bg-cyan-500/10 data-[state=active]:text-cyan-500">Pendentes</TabsTrigger>
-                    <TabsTrigger value="signed" className="data-[state=active]:bg-cyan-500/10 data-[state=active]:text-cyan-500">Assinados</TabsTrigger>
+                <TabsList className="bg-black border border-white/20 p-0 h-auto rounded-none w-full sm:w-auto flex flex-col sm:flex-row">
+                    <TabsTrigger
+                        value="pending"
+                        className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black text-white/50 font-mono uppercase text-xs tracking-widest h-10 px-6 w-full sm:w-auto border-r border-transparent sm:border-white/20 last:border-0 data-[state=active]:border-transparent transition-all"
+                    >
+                        PENDING_APPROVAL
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="signed"
+                        className="rounded-none data-[state=active]:bg-white data-[state=active]:text-black text-white/50 font-mono uppercase text-xs tracking-widest h-10 px-6 w-full sm:w-auto transition-all"
+                    >
+                        EXECUTED_CONTRACTS
+                    </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="pending" className="mt-6">
+                <TabsContent value="pending" className="mt-8">
                     {loading ? (
-                        <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 text-cyan-500 animate-spin" /></div>
+                        <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
                     ) : filteredContracts('draft').length === 0 ? (
-                        <EmptyState
-                            icon={FileSignature}
-                            title="Nenhum contrato pendente"
-                            description="Você não tem contratos aguardando assinatura."
-                        />
+                        <div className="border border-dashed border-white/20 p-12 text-center">
+                            <Terminal className="w-8 h-8 text-white/20 mx-auto mb-4" />
+                            <h3 className="text-white font-serif uppercase tracking-wider mb-1">NO_PENDING_DOCUMENTS</h3>
+                            <p className="text-white/40 text-xs font-mono uppercase">ALL_CONTRACTS_PROCESSED.</p>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredContracts('draft').map(contract => (
-                                <div key={contract.id} className="lumi-card p-6 space-y-4 hover:border-cyan-500/30 transition-colors">
-                                    <div className="flex justify-between items-start">
-                                        <div className="p-3 rounded-xl bg-cyan-500/10 text-cyan-500">
-                                            <FileSignature className="w-6 h-6" />
+                                <div key={contract.id} className="group bg-black border border-white/20 p-6 hover:border-white transition-all duration-300 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-100 transition-opacity">
+                                        <FileSignature className="w-12 h-12 text-white" />
+                                    </div>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="p-2 border border-white/20 group-hover:bg-white group-hover:text-black transition-colors">
+                                            <FileSignature className="w-4 h-4" />
                                         </div>
-                                        <span className="text-xs px-2 py-1 rounded-full bg-yellow-500/10 text-yellow-500 border border-yellow-500/20">
-                                            Pendente
+                                        <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 border border-white/20 px-2 py-1">
+                                            STATUS: PENDING
                                         </span>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-medium text-white">{contract.title}</h3>
-                                        <p className="text-white/50 text-sm mt-1">{contract.clients?.name}</p>
+                                    <div className="mb-6 relative z-10">
+                                        <h3 className="text-xl font-serif text-white uppercase tracking-tight">{contract.title}</h3>
+                                        <p className="text-white/50 text-xs font-mono uppercase mt-1 tracking-wider">CLIENT: {contract.clients?.name}</p>
                                     </div>
-                                    <div className="flex items-center text-xs text-white/40 gap-2">
+                                    <div className="flex items-center text-[10px] text-white/40 gap-2 font-mono uppercase border-t border-white/10 pt-4">
                                         <Clock className="w-3 h-3" />
-                                        Criado em {format(new Date(contract.created_at), "dd 'de' MMM, yyyy", { locale: ptBR })}
+                                        CREATED: {format(new Date(contract.created_at), "dd MMM yyyy", { locale: ptBR })}
                                     </div>
                                     <Dialog open={isSignOpen && selectedContract?.id === contract.id} onOpenChange={(open) => {
                                         setIsSignOpen(open);
@@ -215,23 +228,25 @@ export default function Contratos() {
                                         else setSelectedContract(null);
                                     }}>
                                         <DialogTrigger asChild>
-                                            <Button className="w-full bg-white/5 hover:bg-white/10 text-white border border-white/10">
-                                                Coletar Assinatura
+                                            <Button className="w-full mt-4 rounded-none bg-white text-black hover:bg-gray-200 border border-transparent text-xs font-mono uppercase tracking-widest">
+                                                SIGNATURE_REQUIRED
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-3xl bg-[#1A1A1A] border-white/10">
-                                            <DialogHeader>
-                                                <DialogTitle>Coletar Assinatura</DialogTitle>
-                                                <DialogDescription>
-                                                    Peça para o cliente assinar abaixo para confirmar o contrato:
-                                                    <span className="font-medium text-cyan-500 ml-1">{contract.title}</span>
+                                        <DialogContent className="max-w-3xl bg-black border border-white/20 rounded-none p-0">
+                                            <DialogHeader className="p-6 border-b border-white/20">
+                                                <DialogTitle className="font-serif text-2xl uppercase text-white">EXECUTE_CONTRACT</DialogTitle>
+                                                <DialogDescription className="font-mono text-xs uppercase text-white/50 tracking-widest">
+                                                    CONFIRMING_AGREEMENT: <span className="text-white font-bold decoration-white decoration-1 underline-offset-4 underline">{contract.title}</span>
                                                 </DialogDescription>
                                             </DialogHeader>
-                                            <div className="space-y-6">
-                                                <div className="p-4 bg-white/5 rounded-lg border border-white/10 max-h-[200px] overflow-y-auto text-sm text-white/80 whitespace-pre-wrap">
+                                            <div className="space-y-6 p-6">
+                                                <div className="p-4 bg-white/5 border border-white/10 max-h-[300px] overflow-y-auto text-sm text-white/70 font-mono whitespace-pre-wrap custom-scrollbar">
                                                     {contract.content}
                                                 </div>
-                                                <SignatureCanvas onSave={handleSignatureSave} />
+                                                <div className="border-t border-white/10 pt-6">
+                                                    <h4 className="font-mono text-xs uppercase text-white/50 mb-4 tracking-widest">SIGNATURE_INPUT_FIELD</h4>
+                                                    <SignatureCanvas onSave={handleSignatureSave} />
+                                                </div>
                                             </div>
                                         </DialogContent>
                                     </Dialog>
@@ -241,38 +256,38 @@ export default function Contratos() {
                     )}
                 </TabsContent>
 
-                <TabsContent value="signed" className="mt-6">
+                <TabsContent value="signed" className="mt-8">
                     {loading ? (
-                        <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 text-cyan-500 animate-spin" /></div>
+                        <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 text-white animate-spin" /></div>
                     ) : filteredContracts('signed').length === 0 ? (
-                        <EmptyState
-                            icon={CheckCircle2}
-                            title="Nenhum contrato assinado"
-                            description="Os contratos assinados aparecerão aqui."
-                        />
+                        <div className="border border-dashed border-white/20 p-12 text-center">
+                            <CheckCircle2 className="w-8 h-8 text-white/20 mx-auto mb-4" />
+                            <h3 className="text-white font-serif uppercase tracking-wider mb-1">NO_EXECUTED_CONTRACTS</h3>
+                            <p className="text-white/40 text-xs font-mono uppercase">ARCHIVE_EMPTY.</p>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredContracts('signed').map(contract => (
-                                <div key={contract.id} className="lumi-card p-6 space-y-4 opacity-75 hover:opacity-100 transition-opacity">
-                                    <div className="flex justify-between items-start">
-                                        <div className="p-3 rounded-xl bg-green-500/10 text-green-500">
-                                            <CheckCircle2 className="w-6 h-6" />
+                                <div key={contract.id} className="group bg-black border border-white/20 p-6 hover:border-white transition-all duration-300 opacity-60 hover:opacity-100">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="p-2 border border-white/20 group-hover:bg-white group-hover:text-black transition-colors">
+                                            <CheckCircle2 className="w-4 h-4" />
                                         </div>
-                                        <span className="text-xs px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
-                                            Assinado
+                                        <span className="text-[10px] font-mono uppercase tracking-widest text-white/50 border border-white/20 px-2 py-1 bg-white/5">
+                                            STATUS: SIGNED
                                         </span>
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-medium text-white">{contract.title}</h3>
-                                        <p className="text-white/50 text-sm mt-1">{contract.clients?.name}</p>
+                                    <div className="mb-4">
+                                        <h3 className="text-xl font-serif text-white uppercase tracking-tight">{contract.title}</h3>
+                                        <p className="text-white/50 text-xs font-mono uppercase mt-1 tracking-wider">CLIENT: {contract.clients?.name}</p>
                                     </div>
-                                    <div className="flex items-center text-xs text-white/40 gap-2">
+                                    <div className="flex items-center text-[10px] text-white/40 gap-2 font-mono uppercase border-t border-white/10 pt-4">
                                         <Clock className="w-3 h-3" />
-                                        Assinado em {contract.signed_at && format(new Date(contract.signed_at), "dd/MM/yyyy HH:mm")}
+                                        SIGNED: {contract.signed_at && format(new Date(contract.signed_at), "dd/MM/yyyy HH:mm")}
                                     </div>
                                     {contract.signature_url && (
-                                        <div className="p-2 bg-white rounded-lg mt-4">
-                                            <img src={contract.signature_url} alt="Assinatura" className="h-12 object-contain mx-auto opacity-80" />
+                                        <div className="p-2 border border-white/10 bg-white/5 mt-4 grayscale hover:grayscale-0 transition-all">
+                                            <img src={contract.signature_url} alt="Assinatura" className="h-12 object-contain mx-auto opacity-70 hover:opacity-100 invert" />
                                         </div>
                                     )}
                                 </div>

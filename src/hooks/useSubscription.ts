@@ -30,9 +30,11 @@ export const useSubscription = () => {
 
         const checkSubscription = async () => {
             try {
+                // Safely select only guaranteed columns. If 'plan' is missing in DB, we default to 'free' below.
+                // We do NOT select 'plan' here to avoid 400 error if column is missing.
                 const { data: profile, error } = await supabase
                     .from('profiles')
-                    .select('plan, created_at, role')
+                    .select('created_at, role') // removed 'plan' to prevent crash
                     .eq('id', user.id)
                     .single();
 

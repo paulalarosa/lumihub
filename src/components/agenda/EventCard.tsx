@@ -16,7 +16,8 @@ import {
   Navigation,
   Calendar as CalendarIcon,
   Download,
-  Tag
+  Terminal,
+  ExternalLink
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -59,9 +60,9 @@ interface EventCardProps {
 }
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
-  'noivas': 'Noivas',
-  'pre_wedding': 'Pré Wedding',
-  'producoes_sociais': 'Produções Sociais'
+  'noivas': 'NOIVAS',
+  'pre_wedding': 'PRE_WEDDING',
+  'producoes_sociais': 'PROD_SOCIAIS'
 };
 
 export default function EventCard({ event, onEdit, onDelete, showDate = false }: EventCardProps) {
@@ -111,37 +112,37 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
   };
 
   return (
-    <Card className="group hover:shadow-md transition-shadow">
+    <Card className="group border border-white/20 bg-black rounded-none hover:border-white transition-all duration-300">
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
-          {/* Color indicator */}
+          {/* Status Bar instead of Color dot */}
           <div
-            className="w-1 h-full min-h-[60px] rounded-full flex-shrink-0"
-            style={{ backgroundColor: event.color || '#5A7D7C' }}
+            className="w-1 h-full min-h-[80px] flex-shrink-0"
+            style={{ backgroundColor: event.color === '#FFFFFF' ? '#333' : event.color || '#333' }}
           />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-foreground">{event.title}</h3>
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <h3 className="font-serif text-white uppercase tracking-wider text-sm">{event.title}</h3>
                   {event.event_type && (
-                    <Badge variant="outline" className="text-xs">
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 border border-white/20 px-1">
                       {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
-                    </Badge>
+                    </span>
                   )}
                   {event.payment_status === 'paid' ? (
-                    <Badge className="bg-green-500/15 text-green-600 hover:bg-green-500/25 border-green-200 text-xs">
-                      Pago
-                    </Badge>
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-black bg-white px-1">
+                      PAGO
+                    </span>
                   ) : event.payment_status === 'pending' || !event.payment_status ? (
-                    <Badge variant="outline" className="text-gray-400 border-dashed text-xs">
-                      Pendente
-                    </Badge>
+                    <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 border border-dashed border-white/30 px-1">
+                      PENDENTE
+                    </span>
                   ) : null}
                 </div>
                 {event.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-xs font-mono text-white/40 line-clamp-2 mb-2 uppercase">
                     {event.description}
                   </p>
                 )}
@@ -151,50 +152,50 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                 {/* Calendar export dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <CalendarIcon className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                      <CalendarIcon className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleAddToGoogle}>
-                      <CalendarIcon className="h-4 w-4 mr-2" />
-                      Adicionar ao Google Calendar
+                  <DropdownMenuContent align="end" className="bg-black border border-white/20 rounded-none">
+                    <DropdownMenuItem onClick={handleAddToGoogle} className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black">
+                      <CalendarIcon className="h-3 w-3 mr-2" />
+                      ADD TO GOOGLE
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportICS}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Baixar .ICS (Apple Calendar)
+                    <DropdownMenuItem onClick={handleExportICS} className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black">
+                      <Download className="h-3 w-3 mr-2" />
+                      DOWNLOAD .ICS
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="ghost" size="icon" onClick={onEdit}>
-                  <Edit2 className="h-4 w-4" />
+                <Button variant="ghost" size="icon" onClick={onEdit} className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                  <Edit2 className="h-3 w-3" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={onDelete}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
+                <Button variant="ghost" size="icon" onClick={onDelete} className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             </div>
 
             {/* Date and basic info */}
-            <div className="flex flex-wrap items-center gap-3 mt-3 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-white/60 font-mono uppercase">
               {showDate && (
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3 w-3" />
                   {format(new Date(event.event_date), "dd/MM", { locale: ptBR })}
                 </span>
               )}
 
               {event.client && (
                 <span className="flex items-center gap-1">
-                  <User className="h-3.5 w-3.5" />
+                  <User className="h-3 w-3" />
                   {event.client.name}
                 </span>
               )}
 
               {event.project && (
                 <span className="flex items-center gap-1">
-                  <Briefcase className="h-3.5 w-3.5" />
+                  <Briefcase className="h-3 w-3" />
                   {event.project.name}
                 </span>
               )}
@@ -202,29 +203,29 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
 
             {/* Noivas - Specific times */}
             {isNoivas && hasNoivasTimes && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-3 text-xs">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3 text-[10px] font-mono text-white/50 uppercase border-t border-white/10 pt-2 border-dashed">
                 {event.arrival_time && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <Car className="h-3 w-3" />
-                    <span>Chegada: {formatTime(event.arrival_time)}</span>
+                    <span>CHEGADA: {formatTime(event.arrival_time)}</span>
                   </div>
                 )}
                 {event.making_of_time && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <Camera className="h-3 w-3" />
-                    <span>Making of: {formatTime(event.making_of_time)}</span>
+                    <span>MAKING_OF: {formatTime(event.making_of_time)}</span>
                   </div>
                 )}
                 {event.ceremony_time && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <Church className="h-3 w-3" />
-                    <span>Cerimônia: {formatTime(event.ceremony_time)}</span>
+                    <span>CERIMÔNIA: {formatTime(event.ceremony_time)}</span>
                   </div>
                 )}
                 {event.advisory_time && (
-                  <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 rounded px-2 py-1">
+                  <div className="flex items-center gap-1">
                     <HeartHandshake className="h-3 w-3" />
-                    <span>Assessoria: {formatTime(event.advisory_time)}</span>
+                    <span>ASSESSORIA: {formatTime(event.advisory_time)}</span>
                   </div>
                 )}
               </div>
@@ -232,9 +233,9 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
 
             {/* Pre Wedding / Produções Sociais - Start and End times */}
             {!isNoivas && hasRegularTimes && (
-              <div className="flex items-center gap-3 mt-3 text-sm text-muted-foreground">
+              <div className="flex items-center gap-3 mt-3 text-xs text-white/50 font-mono border-t border-white/10 pt-2 border-dashed">
                 <span className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5" />
+                  <Clock className="h-3 w-3" />
                   {formatTime(event.start_time)}
                   {event.end_time && ` - ${formatTime(event.end_time)}`}
                 </span>
@@ -248,21 +249,22 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                   e.stopPropagation();
                   handleOpenMaps();
                 }}
-                className="flex items-center gap-1.5 mt-3 text-sm text-primary hover:underline text-left"
+                className="flex items-center gap-1.5 mt-2 text-xs text-white hover:bg-white hover:text-black transition-colors px-1 -ml-1 w-fit font-mono uppercase"
               >
-                <Navigation className="h-3.5 w-3.5 flex-shrink-0" />
-                <span className="truncate">{displayAddress}</span>
+                <Navigation className="h-3 w-3 flex-shrink-0" />
+                <span className="truncate max-w-[200px]">{displayAddress}</span>
+                <ExternalLink className="h-2 w-2 ml-1 opacity-50" />
               </button>
             )}
 
             {event.assistants && event.assistants.length > 0 && (
-              <div className="flex items-center gap-2 mt-3">
-                <Users className="h-3.5 w-3.5 text-muted-foreground" />
+              <div className="flex items-center gap-2 mt-3 border-t border-white/10 pt-2 border-dashed">
+                <Users className="h-3 w-3 text-white/40" />
                 <div className="flex flex-wrap gap-1">
                   {event.assistants.map(assistant => (
-                    <Badge key={assistant.id} variant="secondary" className="text-xs">
+                    <span key={assistant.id} className="text-[9px] font-mono uppercase tracking-widest text-white/60 bg-white/5 px-1">
                       {assistant.name}
-                    </Badge>
+                    </span>
                   ))}
                 </div>
               </div>

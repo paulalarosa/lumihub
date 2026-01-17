@@ -1,40 +1,44 @@
 import { Link } from 'react-router-dom';
 import heroFallback from '@/assets/hero-beauty.jpg';
 import SEOHead from '@/components/seo/SEOHead';
+import { ArrowRight } from 'lucide-react';
 
 const posts = [
   {
     id: 'career-management',
-    title: 'Career Management: Designing a Sustainable Artistic Path',
-    date: 'Jan 5, 2026',
-    read: '6 min read',
+    title: 'Gestão de Carreira: Desenhando um Caminho Artístico Sustentável',
+    date: '05 JAN, 2026',
+    read: '6 MIN LEITURA',
     image: heroFallback,
-    excerpt:
-      'A practical guide to planning your career, diversifying income streams and positioning yourself for premium clients.',
+    excerpt: 'Um guia prático para planejar sua carreira, diversificar fontes de renda e se posicionar para clientes premium.',
+    category: 'NEGÓCIOS'
   },
   {
     id: 'bridal-trends-2026',
-    title: 'Bridal Makeup Trends 2026: Minimal Luxury & Timeless Glow',
-    date: 'Dec 28, 2025',
-    read: '7 min read',
+    title: 'Tendências Noivas 2026: Luxo Minimalista & Glow Atemporal',
+    date: '28 DEZ, 2025',
+    read: '7 MIN LEITURA',
     image: heroFallback,
-    excerpt: 'Key trends shaping bridal beauty this year, from soft sculpting to metallic accents for editorial looks.',
+    excerpt: 'Principais tendências moldando a beleza das noivas este ano, do sculpting suave a acentos metálicos para looks editoriais.',
+    category: 'TENDÊNCIAS'
   },
   {
     id: 'financial-independence',
-    title: 'Financial Independence for Artists: Pricing, Saving & Investing',
-    date: 'Nov 12, 2025',
-    read: '8 min read',
+    title: 'Independência Financeira: Precificação, Poupança & Investimento',
+    date: '12 NOV, 2025',
+    read: '8 MIN LEITURA',
     image: heroFallback,
-    excerpt: 'Strategies to build reliable cashflow, set premium prices and plan for long-term financial freedom.',
+    excerpt: 'Estratégias para construir fluxo de caixa confiável, definir preços premium e planejar liberdade financeira de longo prazo.',
+    category: 'FINANÇAS'
   },
   {
     id: 'art-of-networking',
-    title: 'The Art of Networking: From Collaborations to Brand Partnerships',
-    date: 'Oct 3, 2025',
-    read: '5 min read',
+    title: 'A Arte do Networking: De Colaborações a Parcerias de Marca',
+    date: '03 OUT, 2025',
+    read: '5 MIN LEITURA',
     image: heroFallback,
-    excerpt: 'How to create meaningful professional connections and scale your creative business through partnerships.',
+    excerpt: 'Como criar conexões profissionais significativas e escalar seu negócio criativo através de parcerias estratégicas.',
+    category: 'CRESCIMENTO'
   },
 ];
 
@@ -43,69 +47,104 @@ export default function Blog() {
     "@context": "https://schema.org",
     "@type": "Blog",
     "name": "Lumi Journal",
-    "description": "Insights e dicas para profissionais de beleza sobre carreira, tendências e gestão de negócios",
+    "description": "Perspectivas editoriais sobre o negócio da beleza.",
     "url": "https://lumihub.lovable.app/blog",
-    "publisher": {
-      "@type": "Organization",
-      "name": "Lumi",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://lumihub.lovable.app/og-image.png"
-      }
-    },
-    "blogPost": posts.map(post => ({
-      "@type": "BlogPosting",
-      "headline": post.title,
-      "datePublished": post.date,
-      "description": post.excerpt,
-      "url": `https://lumihub.lovable.app/blog/${post.id}`
-    }))
   };
 
   return (
     <>
       <SEOHead
-        title="Blog - Lumi Journal | Dicas para Profissionais de Beleza"
-        description="Insights, tendências e estratégias de carreira para maquiadores e profissionais de beleza. Aprenda a crescer seu negócio."
-        keywords="blog beleza, dicas maquiadores, carreira maquiagem, tendências beleza 2026"
+        title="JOURNAL - LUMI | EDITORIAL"
+        description="Insights e estratégias para o profissional de beleza moderno."
+        keywords="blog, beleza negócios, carreira, tendências"
         url="https://lumihub.lovable.app/blog"
         type="website"
         jsonLd={blogJsonLd}
       />
-      <div className="min-h-screen bg-[color:var(--background, #FAFAFA)] text-[#050505]">
-        <main className="container mx-auto px-6 py-20">
-          <header className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="journal-title text-6xl">Lumi Journal</h1>
-            <p className="mt-4 text-lg text-[#374151]">Editorial perspectives on beauty, business and craft — presented like a magazine.</p>
-          </header>
+      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
 
-        <section className="masonry">
-          {posts.map((post) => (
-            <article key={post.id} className="masonry-item">
-              <Link to={`/blog/${post.id}`} className="group block overflow-hidden rounded-2xl">
-                <div className="journal-image-wrapper">
-                  <img src={post.image} alt={post.title} className="journal-image" />
-                </div>
-                <div className="p-4">
-                  <h2 className="journal-article-title">{post.title}</h2>
-                  <div className="mt-3 text-sm text-[#374151]">{post.date} • {post.read}</div>
-                  <p className="mt-4 text-[#374151]">{post.excerpt}</p>
-                </div>
-              </Link>
-            </article>
-          ))}
+        <header className="pt-32 pb-20 border-b border-white/20">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col items-center text-center">
+              <span className="font-mono text-xs uppercase tracking-[0.4em] text-white/50 mb-6">
+                Departamento Editorial Lumi
+              </span>
+              <h1 className="font-serif text-6xl md:text-9xl mb-8 tracking-tight">
+                JOURNAL
+              </h1>
+              <p className="font-mono text-sm max-w-lg uppercase leading-relaxed text-white/70">
+                Perspectivas sobre beleza, negócios e arte.
+                <br />Projetado para o artista ambicioso.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <section className="container mx-auto px-4 py-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
+            {posts.map((post) => (
+              <article key={post.id} className="group cursor-pointer">
+                <Link to={`/blog/${post.id}`} className="block">
+                  <div className="relative aspect-[4/3] overflow-hidden mb-8 border border-white/10 group-hover:border-white/50 transition-colors">
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out transform group-hover:scale-105"
+                    />
+                    <div className="absolute top-4 left-4 bg-black border border-white px-3 py-1">
+                      <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+                        {post.category}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex divide-x divide-white/20 font-mono text-xs text-white/40 uppercase tracking-widest">
+                      <span className="pr-3">{post.date}</span>
+                      <span className="pl-3">{post.read}</span>
+                    </div>
+
+                    <h2 className="font-serif text-3xl group-hover:underline decoration-1 underline-offset-4 leading-tight">
+                      {post.title}
+                    </h2>
+
+                    <p className="font-mono text-xs text-white/60 leading-relaxed uppercase max-w-md">
+                      {post.excerpt}
+                    </p>
+
+                    <div className="pt-4 flex items-center text-white/50 group-hover:text-white transition-colors">
+                      <span className="font-mono text-xs uppercase tracking-widest mr-2">LER ARTIGO</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </Link>
+              </article>
+            ))}
+          </div>
         </section>
 
-        <section className="max-w-3xl mx-auto mt-16 p-8 lumi-card">
-          <h3 className="lumi-title text-2xl mb-4">Subscribe to the Journal</h3>
-          <p className="lumi-text text-[#374151] mb-6">Receive curated editorials and the best industry insights, delivered monthly.</p>
-          <form className="flex flex-col sm:flex-row gap-4" onSubmit={(e) => e.preventDefault()}>
-            <input placeholder="Seu email" className="w-full bg-transparent border-0 border-b border-[hsl(var(--surface-border))] py-2 px-0 outline-none" />
-            <button className="lumi-button" type="submit">Subscribe</button>
-          </form>
+        <section className="border-t border-white/20 py-24 bg-white text-black">
+          <div className="container mx-auto px-4 max-w-2xl text-center">
+            <h3 className="font-serif text-4xl mb-6">ASSINE O EDITORIAL</h3>
+            <p className="font-mono text-sm uppercase mb-10 text-black/60">
+              Receba notificações quando publicarmos novos editoriais.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-0 border border-black" onSubmit={(e) => e.preventDefault()}>
+              <input
+                placeholder="ENDEREÇO DE EMAIL"
+                className="w-full bg-transparent border-none py-4 px-6 outline-none font-mono text-sm uppercase placeholder:text-black/30"
+              />
+              <button
+                className="bg-black text-white px-8 py-4 font-mono text-xs uppercase tracking-widest hover:bg-black/80 transition-colors whitespace-nowrap border-l border-black sm:border-l-0"
+                type="submit"
+              >
+                INSCREVER
+              </button>
+            </form>
+          </div>
         </section>
-      </main>
-    </div>
+
+      </div>
     </>
   );
 }

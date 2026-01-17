@@ -1,6 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
+export interface Client {
+    id: string;
+    user_id: string | null;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    instagram: string | null;
+    notes: string | null;
+    origin: string | null;
+    created_at: string;
+}
+
+export interface TreatmentRecord {
+    id: string;
+    client_id: string;
+    date: string;
+    description: string | null;
+    notes: string | null;
+    created_at: string;
+}
+
 export const ClientService = {
     async list(organizationId: string) {
         return await supabase
@@ -54,7 +75,7 @@ export const ClientService = {
     },
 
     // treatment_records methods removed
-    async getTreatmentRecords(clientId: string) { return []; },
+    async getTreatmentRecords(clientId: string) { return { data: [], error: null }; },
     async deleteTreatmentRecord(recordId: string) { },
 
     async getOriginStats(organizationId: string) {

@@ -27,7 +27,9 @@ import {
   Copy,
   Check,
   Eye,
-  Settings
+  Settings,
+  Terminal,
+  Activity
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -150,7 +152,6 @@ export default function ProjectDetailsPage() {
     if (!id || !organizationId) return;
     setLoadingData(true);
 
-    // Fetch project
     const { data: projectData, error: projectError } = await ProjectService.get(id);
 
     if (projectError || !projectData) {
@@ -159,9 +160,6 @@ export default function ProjectDetailsPage() {
       return;
     }
 
-    // Adapt data if necessary (service returns client as single object likely as 'client' or 'clients')
-    // Based on previous files, let's assume 'clients' is populated if using select string properly.
-    // However, ProjectService uses `client:clients(*)` alias.
     const adaptedProject: any = { ...projectData };
     if (adaptedProject.client) {
       adaptedProject.clients = adaptedProject.client;
@@ -169,11 +167,9 @@ export default function ProjectDetailsPage() {
     }
     setProject(adaptedProject as Project);
 
-    // Fetch tasks
     const { data: tasksData } = await ProjectService.getTasks(id);
     setTasks((tasksData as any) || []);
 
-    // Fetch briefing
     const { data: briefingData } = await ProjectService.getBriefing(id);
     if (briefingData) {
       setBriefing({
@@ -183,15 +179,12 @@ export default function ProjectDetailsPage() {
       } as any);
     }
 
-    // Fetch contracts
     const { data: contractsData } = await ProjectService.getContracts(id);
     setContracts((contractsData as any) || []);
 
-    // Fetch services catalog
     const { data: servicesData } = await ProjectService.getCatalogServices();
     setServices((servicesData as any) || []);
 
-    // Fetch project services
     const { data: projectServicesData } = await ProjectService.getProjectServices(id);
     setProjectServices((projectServicesData as any) || []);
 
@@ -213,8 +206,6 @@ export default function ProjectDetailsPage() {
       toast({ title: "Erro ao adicionar tarefa", variant: "destructive" });
     } else {
       setNewTaskTitle('');
-      // Optimistic update or refetch
-      // For simplicity/safety, refetch partial
       const { data } = await ProjectService.getTasks(id);
       setTasks((data as any) || []);
     }
@@ -244,7 +235,7 @@ export default function ProjectDetailsPage() {
       user_id: organizationId,
       title: contractTitle.trim(),
       content: contractContent.trim(),
-      status: 'draft' // ensure default
+      status: 'draft'
     });
 
     if (error) {
@@ -254,7 +245,6 @@ export default function ProjectDetailsPage() {
       setIsContractDialogOpen(false);
       setContractTitle('');
       setContractContent('');
-      // Refetch contracts
       const { data } = await ProjectService.getContracts(id);
       setContracts((data as any) || []);
     }
@@ -373,8 +363,8 @@ export default function ProjectDetailsPage() {
 
   if (authLoading || orgLoading || loadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
@@ -388,22 +378,22 @@ export default function ProjectDetailsPage() {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
       {/* Header */}
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-white/20 bg-black">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-6">
               <Link to="/projetos">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="rounded-none text-white hover:bg-white hover:text-black transition-colors">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
               <div>
-                <h1 className="font-poppins font-bold text-xl text-foreground">
+                <h1 className="font-serif font-bold text-2xl text-white uppercase tracking-tighter">
                   {project.name}
                 </h1>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-4 text-xs font-mono text-white/60 mt-1 uppercase tracking-widest">
                   {project.clients && (
                     <span className="flex items-center gap-1">
                       <User className="h-3 w-3" />
@@ -411,9 +401,9 @@ export default function ProjectDetailsPage() {
                     </span>
                   )}
                   {project.event_date && (
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 border-l border-white/20 pl-4">
                       <Calendar className="h-3 w-3" />
-                      {format(new Date(project.event_date), 'dd/MM/yyyy')}
+                      {project.event_date ? format(new Date(project.event_date), 'dd/MM/yyyy') : 'TBD'}
                     </span>
                   )}
                 </div>
@@ -422,30 +412,31 @@ export default function ProjectDetailsPage() {
 
             <div className="flex items-center gap-2">
               {/* View mode toggle */}
-              <div className="flex items-center border rounded-lg overflow-hidden">
+              <div className="flex items-center border border-white/20 bg-black">
                 <Button
                   variant={viewMode === 'internal' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('internal')}
-                  className="rounded-none gap-2"
+                  className={`rounded-none gap-2 font-mono uppercase text-xs tracking-wider ${viewMode === 'internal' ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}
                 >
-                  <Settings className="h-4 w-4" />
-                  Interno
+                  <Settings className="h-3 w-3" />
+                  INTERNAL
                 </Button>
+                <div className="w-[1px] h-4 bg-white/20"></div>
                 <Button
                   variant={viewMode === 'preview' ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setViewMode('preview')}
-                  className="rounded-none gap-2"
+                  className={`rounded-none gap-2 font-mono uppercase text-xs tracking-wider ${viewMode === 'preview' ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}
                 >
-                  <Eye className="h-4 w-4" />
-                  Prévia Cliente
+                  <Eye className="h-3 w-3" />
+                  PREVIEW
                 </Button>
               </div>
 
-              <Button variant="outline" onClick={copyPortalLink} className="gap-2">
+              <Button variant="outline" onClick={copyPortalLink} className="gap-2 rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest">
                 {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                {copied ? 'Copiado!' : 'Link do Portal'}
+                {copied ? 'COPIED' : 'PORTAL_LINK'}
               </Button>
             </div>
           </div>
@@ -456,38 +447,39 @@ export default function ProjectDetailsPage() {
         {viewMode === 'preview' ? (
           /* PUBLIC PREVIEW - What the client sees */
           <div className="max-w-3xl mx-auto">
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="mb-6 bg-black border border-white/20 rounded-none">
+              <CardHeader className="border-b border-white/10">
+                <CardTitle className="flex items-center gap-2 text-white font-serif uppercase tracking-wide">
                   <Eye className="h-5 w-5" />
-                  Prévia do Portal da Cliente
+                  CLIENT_PORTAL_PREVIEW
                 </CardTitle>
-                <CardDescription>
-                  Isso é o que sua cliente verá ao acessar o link do portal
+                <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">
+                  SIMULATION_MODE :: VIEW_AS_CLIENT
                 </CardDescription>
               </CardHeader>
             </Card>
 
             <div className="space-y-6">
               {/* Contract Preview */}
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white font-serif uppercase tracking-wide">
                     <FileText className="h-5 w-5" />
-                    Contrato
+                    CONTRACTS
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {contracts.filter(c => c.status === 'sent' || c.status === 'signed').length === 0 ? (
-                    <p className="text-muted-foreground">Nenhum contrato enviado ainda</p>
+                    <p className="text-white/40 font-mono text-xs uppercase">NO_CONTRACTS_AVAILABLE</p>
                   ) : (
                     <div className="space-y-3">
                       {contracts.filter(c => c.status === 'sent' || c.status === 'signed').map(contract => (
-                        <div key={contract.id} className="p-4 border rounded-lg">
+                        <div key={contract.id} className="p-4 border border-white/10 rounded-none bg-white/5">
                           <div className="flex items-center justify-between">
-                            <span className="font-medium">{contract.title}</span>
-                            <Badge variant={contract.status === 'signed' ? 'default' : 'secondary'}>
-                              {contract.status === 'signed' ? 'Assinado' : 'Aguardando assinatura'}
+                            <span className="font-mono text-sm text-white">{contract.title}</span>
+                            <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${contract.status === 'signed' ? 'bg-white text-black border-white' : 'text-white border-white/40'
+                              }`}>
+                              {contract.status === 'signed' ? 'SIGNED' : 'PENDING'}
                             </Badge>
                           </div>
                         </div>
@@ -498,27 +490,28 @@ export default function ProjectDetailsPage() {
               </Card>
 
               {/* Briefing Preview */}
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white font-serif uppercase tracking-wide">
                     <ClipboardList className="h-5 w-5" />
-                    Briefing
+                    BRIEFING_DATA
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {!briefing ? (
-                    <p className="text-muted-foreground">Nenhum questionário criado</p>
+                    <p className="text-white/40 font-mono text-xs uppercase">NO_DATA_AVAILABLE</p>
                   ) : (
                     <div className="space-y-4">
-                      <Badge variant={briefing.is_submitted ? 'default' : 'secondary'}>
-                        {briefing.is_submitted ? 'Respondido' : 'Aguardando resposta'}
+                      <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${briefing.is_submitted ? 'bg-white text-black border-white' : 'text-white border-white/40'
+                        }`}>
+                        {briefing.is_submitted ? 'COMPLETED' : 'WAITING_INPUT'}
                       </Badge>
                       {briefing.is_submitted && (
                         <div className="space-y-3 mt-4">
                           {(briefing.questions as any[]).map((q: any) => (
-                            <div key={q.id} className="text-sm">
-                              <p className="font-medium">{q.question}</p>
-                              <p className="text-muted-foreground">{briefing.answers[q.id] || '-'}</p>
+                            <div key={q.id} className="text-sm font-mono">
+                              <p className="text-white/60 mb-1 uppercase tracking-wide text-xs">{q.question}</p>
+                              <p className="text-white border-l border-white/20 pl-3">{briefing.answers[q.id] || '-'}</p>
                             </div>
                           ))}
                         </div>
@@ -534,112 +527,113 @@ export default function ProjectDetailsPage() {
           <>
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">Tarefas</p>
-                  <p className="text-2xl font-bold">{completedTasks}/{tasks.length}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">TASKS</p>
+                  <p className="text-2xl font-serif text-white">{completedTasks}/{tasks.length}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">Total Serviços</p>
-                  <p className="text-2xl font-bold">R$ {totalServiceAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">TOTAL_VALUE</p>
+                  <p className="text-2xl font-serif text-white">R$ {totalServiceAmount.toFixed(2)}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">Recebido</p>
-                  <p className="text-2xl font-bold text-green-600">R$ {totalPaidAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">RECEIVED</p>
+                  <p className="text-2xl font-serif text-white">R$ {totalPaidAmount.toFixed(2)}</p>
                 </CardContent>
               </Card>
-              <Card>
+              <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground">A Receber</p>
-                  <p className="text-2xl font-bold text-orange-500">R$ {remainingAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">PENDING</p>
+                  <p className="text-2xl font-serif text-white/70 border-b border-white/20 inline-block">R$ {remainingAmount.toFixed(2)}</p>
                 </CardContent>
               </Card>
             </div>
 
-            <Tabs defaultValue="tarefas">
-              <TabsList className="mb-4 flex-wrap">
-                <TabsTrigger value="tarefas" className="gap-2">
-                  <CheckSquare className="h-4 w-4" />
-                  Tarefas
+            <Tabs defaultValue="tarefas" className="space-y-6">
+              <TabsList className="bg-black border border-white/20 p-0 rounded-none h-12 w-full flex justify-start overflow-x-auto">
+                <TabsTrigger value="tarefas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
+                  TASKS
                 </TabsTrigger>
-                <TabsTrigger value="briefing" className="gap-2">
-                  <ClipboardList className="h-4 w-4" />
-                  Briefing
+                <div className="w-[1px] h-full bg-white/20"></div>
+                <TabsTrigger value="briefing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
+                  BRIEFING
                 </TabsTrigger>
-                <TabsTrigger value="contratos" className="gap-2">
-                  <FileText className="h-4 w-4" />
-                  Contratos
+                <div className="w-[1px] h-full bg-white/20"></div>
+                <TabsTrigger value="contratos" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
+                  CONTRACTS
                 </TabsTrigger>
-                <TabsTrigger value="financeiro" className="gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Financeiro
+                <div className="w-[1px] h-full bg-white/20"></div>
+                <TabsTrigger value="financeiro" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
+                  FINANCIAL
                 </TabsTrigger>
               </TabsList>
 
               {/* TAREFAS */}
               <TabsContent value="tarefas">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Checklist de Tarefas</CardTitle>
-                    <CardDescription>Organize as tarefas do projeto</CardDescription>
+                <Card className="bg-black border border-white/20 rounded-none">
+                  <CardHeader className="border-b border-white/10">
+                    <CardTitle className="text-white font-serif uppercase tracking-wide">TASK_MANAGER</CardTitle>
+                    <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">OPERATIONAL_CHECKLIST</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <div className="flex gap-2 mb-6">
                       <Input
-                        placeholder="Nova tarefa..."
+                        placeholder="INPUT_NEW_TASK..."
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && addTask()}
-                        className="flex-1"
+                        className="flex-1 bg-black border-white/20 rounded-none text-white font-mono uppercase focus:border-white placeholder:text-white/30"
                       />
                       <Select value={newTaskVisibility} onValueChange={setNewTaskVisibility}>
-                        <SelectTrigger className="w-32">
+                        <SelectTrigger className="w-40 bg-black border-white/20 rounded-none text-white font-mono uppercase text-xs">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="private">Privado</SelectItem>
-                          <SelectItem value="shared">Compartilhado</SelectItem>
-                          <SelectItem value="client">Cliente</SelectItem>
+                        <SelectContent className="bg-black border border-white/20 rounded-none text-white">
+                          <SelectItem value="private" className="font-mono uppercase text-xs focus:bg-white focus:text-black">PRIVATE</SelectItem>
+                          <SelectItem value="shared" className="font-mono uppercase text-xs focus:bg-white focus:text-black">SHARED</SelectItem>
+                          <SelectItem value="client" className="font-mono uppercase text-xs focus:bg-white focus:text-black">CLIENT_VISIBLE</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Button onClick={addTask}>
+                      <Button onClick={addTask} className="bg-white text-black hover:bg-white/80 rounded-none aspect-square p-0 w-10">
                         <Plus className="h-4 w-4" />
                       </Button>
                     </div>
 
                     <div className="space-y-2">
                       {tasks.length === 0 ? (
-                        <p className="text-muted-foreground text-center py-8">
-                          Nenhuma tarefa ainda
+                        <p className="text-white/20 text-center py-8 font-mono uppercase text-xs tracking-widest border border-white/10 border-dashed">
+                          NO_TASKS_PENDING
                         </p>
                       ) : (
                         tasks.map((task) => (
                           <div
                             key={task.id}
-                            className="flex items-center justify-between p-3 border rounded-lg"
+                            className="flex items-center justify-between p-3 border border-white/10 bg-white/5 hover:bg-white/10 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <Checkbox
                                 checked={task.is_completed}
                                 onCheckedChange={(checked) => toggleTask(task.id, checked as boolean)}
+                                className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-black rounded-none"
                               />
-                              <span className={task.is_completed ? 'line-through text-muted-foreground' : ''}>
+                              <span className={`font-mono text-sm uppercase ${task.is_completed ? 'line-through text-white/30' : 'text-white'}`}>
                                 {task.title}
                               </span>
-                              <Badge variant="outline" className="text-xs">
-                                {task.visibility === 'private' ? 'Privado' : task.visibility === 'shared' ? 'Compartilhado' : 'Cliente'}
+                              <Badge variant="outline" className="text-[9px] rounded-none border-white/20 text-white/50 font-mono uppercase tracking-widest">
+                                {task.visibility}
                               </Badge>
                             </div>
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => deleteTask(task.id)}
+                              className="text-white/30 hover:text-white hover:bg-transparent rounded-none"
                             >
-                              <Trash2 className="h-4 w-4 text-muted-foreground" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         ))
@@ -651,41 +645,42 @@ export default function ProjectDetailsPage() {
 
               {/* BRIEFING */}
               <TabsContent value="briefing">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Questionário de Briefing</CardTitle>
-                    <CardDescription>Informações coletadas da cliente</CardDescription>
+                <Card className="bg-black border border-white/20 rounded-none">
+                  <CardHeader className="border-b border-white/10">
+                    <CardTitle className="text-white font-serif uppercase tracking-wide">BRIEFING_DATA</CardTitle>
+                    <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">CLIENT_INPUTS</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {!briefing ? (
-                      <div className="text-center py-12">
-                        <ClipboardList className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground mb-4">
-                          Nenhum questionário criado ainda
+                      <div className="text-center py-12 border border-white/10 border-dashed bg-white/5">
+                        <ClipboardList className="h-12 w-12 text-white/20 mx-auto mb-4" />
+                        <p className="text-white/40 mb-4 font-mono text-xs uppercase tracking-widest">
+                          NO_BRIEFING_INITIATED
                         </p>
-                        <Button onClick={createDefaultBriefing}>
+                        <Button onClick={createDefaultBriefing} className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
                           <Plus className="h-4 w-4 mr-2" />
-                          Criar Questionário
+                          Initialize_Briefing
                         </Button>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <Badge variant={briefing.is_submitted ? 'default' : 'secondary'}>
-                            {briefing.is_submitted ? 'Respondido' : 'Aguardando Resposta'}
+                          <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest px-3 py-1 ${briefing.is_submitted ? 'bg-white text-black border-white' : 'text-white/50 border-white/30'
+                            }`}>
+                            {briefing.is_submitted ? 'STATUS: COMPLETED' : 'STATUS: WAITING'}
                           </Badge>
-                          <Button variant="outline" size="sm" onClick={copyPortalLink}>
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Enviar para Cliente
+                          <Button variant="outline" size="sm" onClick={copyPortalLink} className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase">
+                            <ExternalLink className="h-3 w-3 mr-2" />
+                            Send_to_client
                           </Button>
                         </div>
 
-                        <div className="space-y-4 mt-4">
+                        <div className="space-y-4 mt-6">
                           {(briefing.questions as any[]).map((q: any) => (
-                            <div key={q.id} className="p-4 border rounded-lg">
-                              <p className="font-medium mb-2">{q.question}</p>
-                              <p className="text-muted-foreground">
-                                {briefing.answers[q.id] || 'Não respondido'}
+                            <div key={q.id} className="p-4 border border-white/10 bg-white/5">
+                              <p className="font-mono text-xs text-white/60 mb-2 uppercase tracking-wide">Q. {q.question}</p>
+                              <p className="font-serif text-white pl-4 border-l border-white/20">
+                                {briefing.answers[q.id] || '---'}
                               </p>
                             </div>
                           ))}
@@ -698,73 +693,73 @@ export default function ProjectDetailsPage() {
 
               {/* CONTRATOS */}
               <TabsContent value="contratos">
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
+                <Card className="bg-black border border-white/20 rounded-none">
+                  <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
                     <div>
-                      <CardTitle>Contratos</CardTitle>
-                      <CardDescription>Gerencie os contratos do projeto</CardDescription>
+                      <CardTitle className="text-white font-serif uppercase tracking-wide">LEGAL_DOCS</CardTitle>
+                      <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">CONTRACTS & AGREEMENTS</CardDescription>
                     </div>
                     <Dialog open={isContractDialogOpen} onOpenChange={setIsContractDialogOpen}>
                       <DialogTrigger asChild>
-                        <Button>
-                          <Plus className="h-4 w-4 mr-2" />
-                          Novo Contrato
+                        <Button className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                          <Plus className="h-3 w-3 mr-2" />
+                          NEW_CONTRACT
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl">
+                      <DialogContent className="max-w-2xl bg-black border border-white/20 rounded-none">
                         <DialogHeader>
-                          <DialogTitle>Novo Contrato</DialogTitle>
+                          <DialogTitle className="text-white font-serif uppercase tracking-wide">DRAFT_CONTRACT</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={createContract} className="space-y-4">
                           <div className="space-y-2">
-                            <Label>Título</Label>
+                            <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">TITLE</Label>
                             <Input
                               value={contractTitle}
                               onChange={(e) => setContractTitle(e.target.value)}
-                              placeholder="Ex: Contrato de Serviços de Maquiagem"
+                              placeholder="DOC_REFERENCE"
+                              className="bg-black border-white/20 rounded-none text-white font-mono focus:border-white"
                               required
                             />
                           </div>
                           <div className="space-y-2">
-                            <Label>Conteúdo do Contrato</Label>
+                            <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">CONTENT</Label>
                             <Textarea
                               value={contractContent}
                               onChange={(e) => setContractContent(e.target.value)}
-                              placeholder="Digite o conteúdo do contrato..."
+                              placeholder="LEGAL_TEXT_BODY..."
                               rows={10}
+                              className="bg-black border-white/20 rounded-none text-white font-mono focus:border-white"
                               required
                             />
                           </div>
-                          <Button type="submit" className="w-full">Criar Contrato</Button>
+                          <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                            GENERATE_DOCUMENT
+                          </Button>
                         </form>
                       </DialogContent>
                     </Dialog>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     {contracts.length === 0 ? (
-                      <p className="text-muted-foreground text-center py-8">
-                        Nenhum contrato criado
+                      <p className="text-white/20 text-center py-8 font-mono uppercase text-xs tracking-widest border border-white/10 border-dashed">
+                        NO_DOCUMENTS_FILED
                       </p>
                     ) : (
                       <div className="space-y-3">
                         {contracts.map((contract) => (
                           <div
                             key={contract.id}
-                            className="flex items-center justify-between p-4 border rounded-lg"
+                            className="flex items-center justify-between p-4 border border-white/10 bg-white/5 hover:border-white/30 transition-colors"
                           >
                             <div>
-                              <p className="font-medium">{contract.title}</p>
-                              <Badge variant={
-                                contract.status === 'signed' ? 'default' :
-                                  contract.status === 'sent' ? 'secondary' : 'outline'
-                              }>
-                                {contract.status === 'signed' ? 'Assinado' :
-                                  contract.status === 'sent' ? 'Enviado' : 'Rascunho'}
+                              <p className="font-serif text-white uppercase tracking-wide text-sm mb-1">{contract.title}</p>
+                              <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest border-white/20 text-white/50`}>
+                                STATUS: {contract.status}
                               </Badge>
                             </div>
-                            <Button variant="outline" size="sm">
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              Ver
+                            <Button variant="outline" size="sm" className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase">
+                              <ExternalLink className="h-3 w-3 mr-2" />
+                              VIEW
                             </Button>
                           </div>
                         ))}
@@ -778,148 +773,176 @@ export default function ProjectDetailsPage() {
               <TabsContent value="financeiro">
                 <div className="space-y-6">
                   {/* Payment Progress */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Resumo Financeiro</CardTitle>
+                  <Card className="bg-black border border-white/20 rounded-none">
+                    <CardHeader className="border-b border-white/10">
+                      <CardTitle className="text-white font-serif uppercase tracking-wide">FINANCIAL_OVERVIEW</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6">
                       <div className="space-y-4">
-                        <div className="flex justify-between text-sm">
-                          <span>Pago: R$ {totalPaidAmount.toFixed(2)}</span>
-                          <span>Total: R$ {totalServiceAmount.toFixed(2)}</span>
+                        <div className="flex justify-between text-sm font-mono text-white/70 uppercase tracking-widest">
+                          <span>PAID: R$ {totalPaidAmount.toFixed(2)}</span>
+                          <span>TOTAL: R$ {totalServiceAmount.toFixed(2)}</span>
                         </div>
-                        <Progress value={totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0} />
+                        <Progress value={totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0} className="h-2 rounded-none bg-white/10" />
+                        <div className="text-right">
+                          <span className="text-[10px] text-white/30 font-mono uppercase tracking-widest">
+                            {((totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0)).toFixed(1)}% RECOVERED
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Services List */}
-                  <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
+                  <Card className="bg-black border border-white/20 rounded-none">
+                    <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
                       <div>
-                        <CardTitle>Serviços e Valores</CardTitle>
-                        <CardDescription>O que foi contratado</CardDescription>
+                        <CardTitle className="text-white font-serif uppercase tracking-wide">SERVICES_BREAKDOWN</CardTitle>
                       </div>
-                      <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Serviço
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Adicionar Serviço</DialogTitle>
-                          </DialogHeader>
-                          <form onSubmit={addServiceToProject} className="space-y-4">
-                            <div className="space-y-2">
-                              <Label>Serviço</Label>
-                              <Select value={selectedServiceId} onValueChange={handleSelectService}>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Selecione..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {services.map((s) => (
-                                    <SelectItem key={s.id} value={s.id}>
-                                      {s.name} - R$ {s.price}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                      <div className="flex gap-2">
+                        {/* Add Service Dialog */}
+                        <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm" className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest">
+                              <Plus className="h-3 w-3 mr-2" /> ADD_SERVICE
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-black border border-white/20 rounded-none">
+                            <DialogHeader>
+                              <DialogTitle className="text-white font-serif uppercase">ADD_SERVICE_ITEM</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={addServiceToProject} className="space-y-4">
                               <div className="space-y-2">
-                                <Label>Quantidade</Label>
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  value={serviceQuantity}
-                                  onChange={(e) => setServiceQuantity(e.target.value)}
-                                />
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">SERVICE_TYPE</Label>
+                                <Select value={selectedServiceId} onValueChange={handleSelectService}>
+                                  <SelectTrigger className="bg-black border-white/20 rounded-none text-white font-mono uppercase">
+                                    <SelectValue placeholder="SELECT..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-black border border-white/20 rounded-none text-white">
+                                    {services.map(s => (
+                                      <SelectItem key={s.id} value={s.id} className="font-mono uppercase focus:bg-white focus:text-black">
+                                        {s.name} - R$ {s.price}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="flex gap-4">
+                                <div className="space-y-2 flex-1">
+                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">QTY</Label>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    value={serviceQuantity}
+                                    onChange={(e) => setServiceQuantity(e.target.value)}
+                                    className="bg-black border-white/20 rounded-none text-white font-mono"
+                                  />
+                                </div>
+                                <div className="space-y-2 flex-1">
+                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">PRICE (UNIT)</Label>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    value={servicePrice}
+                                    onChange={(e) => setServicePrice(e.target.value)}
+                                    className="bg-black border-white/20 rounded-none text-white font-mono"
+                                  />
+                                </div>
+                              </div>
+                              <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                                CONFIRM_ADDITION
+                              </Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
+
+                        {/* Add Payment Dialog */}
+                        <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                              <DollarSign className="h-3 w-3 mr-2" /> LOG_PAYMENT
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-black border border-white/20 rounded-none">
+                            <DialogHeader>
+                              <DialogTitle className="text-white font-serif uppercase">REGISTER_INCOME</DialogTitle>
+                            </DialogHeader>
+                            <form onSubmit={registerPayment} className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">ALLOCATE_TO_SERVICE</Label>
+                                <Select value={paymentServiceId} onValueChange={setPaymentServiceId}>
+                                  <SelectTrigger className="bg-black border-white/20 rounded-none text-white font-mono uppercase">
+                                    <SelectValue placeholder="SELECT..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-black border border-white/20 rounded-none text-white">
+                                    {projectServices.map(ps => (
+                                      <SelectItem key={ps.id} value={ps.id} className="font-mono uppercase focus:bg-white focus:text-black">
+                                        {ps.service?.name} (Rem: R$ {(ps.total_price - ps.paid_amount).toFixed(2)})
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                               <div className="space-y-2">
-                                <Label>Valor Unitário (R$)</Label>
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">AMOUNT</Label>
                                 <Input
                                   type="number"
                                   step="0.01"
-                                  value={servicePrice}
-                                  onChange={(e) => setServicePrice(e.target.value)}
+                                  value={paymentAmount}
+                                  onChange={(e) => setPaymentAmount(e.target.value)}
+                                  placeholder="0.00"
+                                  className="bg-black border-white/20 rounded-none text-white font-mono"
                                 />
                               </div>
-                            </div>
-                            <Button type="submit" className="w-full">Adicionar</Button>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        {projectServices.length === 0 ? (
-                          <p className="text-muted-foreground text-center py-4">
-                            Nenhum serviço adicionado
-                          </p>
-                        ) : (
-                          projectServices.map((ps) => (
-                            <div key={ps.id} className="flex flex-col p-4 border rounded-lg gap-3">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <p className="font-medium">{ps.service?.name || ps.notes || 'Serviço Personalizado'}</p>
-                                  <p className="text-sm text-muted-foreground">
-                                    {ps.quantity}x R$ {ps.unit_price.toFixed(2)}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-bold">R$ {ps.total_price.toFixed(2)}</p>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 text-red-400 hover:text-red-500 hover:bg-red-50"
-                                    onClick={() => removeServiceFromProject(ps.id)}
-                                  >
-                                    Remover
-                                  </Button>
-                                </div>
-                              </div>
-
-                              <div className="flex items-center gap-4 bg-muted/50 p-2 rounded text-sm">
-                                <div className="flex-1">
-                                  <span className="text-muted-foreground">Pago: </span>
-                                  <span className="font-medium text-green-600">R$ {ps.paid_amount.toFixed(2)}</span>
-                                </div>
-                                <Dialog open={isPaymentDialogOpen} onOpenChange={(open) => {
-                                  setIsPaymentDialogOpen(open);
-                                  if (open) setPaymentServiceId(ps.id);
-                                }}>
-                                  <DialogTrigger asChild>
-                                    <Button variant="outline" size="sm" className="h-7 text-xs">
-                                      Registrar Pagamento
-                                    </Button>
-                                  </DialogTrigger>
-                                  <DialogContent>
-                                    <DialogHeader>
-                                      <DialogTitle>Registrar Pagamento</DialogTitle>
-                                    </DialogHeader>
-                                    <form onSubmit={registerPayment} className="space-y-4">
-                                      <div className="space-y-2">
-                                        <Label>Valor do Pagamento (R$)</Label>
-                                        <Input
-                                          type="number"
-                                          step="0.01"
-                                          max={(ps.total_price - ps.paid_amount)}
-                                          value={paymentAmount}
-                                          onChange={(e) => setPaymentAmount(e.target.value)}
-                                          placeholder={`Máx: ${(ps.total_price - ps.paid_amount).toFixed(2)}`}
-                                        />
-                                      </div>
-                                      <Button type="submit" className="w-full">Confirmar</Button>
-                                    </form>
-                                  </DialogContent>
-                                </Dialog>
-                              </div>
-                            </div>
-                          ))
-                        )}
+                              <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                                PROCESS_TRANSACTION
+                              </Button>
+                            </form>
+                          </DialogContent>
+                        </Dialog>
                       </div>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                      {projectServices.length === 0 ? (
+                        <div className="p-12 text-center text-white/30 font-mono uppercase text-xs tracking-widest">
+                          NO_SERVICES_LINKED
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-white/10">
+                          {projectServices.map((ps) => (
+                            <div key={ps.id} className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors">
+                              <div>
+                                <p className="font-serif text-white uppercase text-sm mb-1">{ps.service?.name}</p>
+                                <div className="flex gap-4 text-[10px] text-white/50 font-mono uppercase tracking-widest">
+                                  <span>QTY: {ps.quantity}</span>
+                                  <span>UNIT: R$ {ps.unit_price.toFixed(2)}</span>
+                                  <span>TOTAL: R$ {ps.total_price.toFixed(2)}</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <p className="font-mono text-xs text-white uppercase">
+                                    PAID: R$ {ps.paid_amount.toFixed(2)}
+                                  </p>
+                                  {ps.paid_amount < ps.total_price && (
+                                    <p className="text-[10px] text-white/40 uppercase tracking-widest">
+                                      PENDING: R$ {(ps.total_price - ps.paid_amount).toFixed(2)}
+                                    </p>
+                                  )}
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeServiceFromProject(ps.id)}
+                                  className="text-white/20 hover:text-white hover:bg-transparent rounded-none"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 </div>

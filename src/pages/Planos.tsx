@@ -1,312 +1,258 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TrackedButton } from "@/components/analytics/TrackedButton";
 import { Badge } from "@/components/ui/badge";
 import {
-  CheckCircle,
-  X,
   ArrowRight,
-  Star,
   Zap,
   Crown,
-  Building
+  Star,
+  Check,
+  X
 } from "lucide-react";
 import SEOHead from "@/components/seo/SEOHead";
 
 const Planos = () => {
   const plans = [
     {
-      name: "Essencial",
+      name: "ACESSO ESSENCIAL",
       price: "39,90",
-      period: "mês",
-      description: "Perfeito para começar a profissionalizar seu negócio",
+      period: "MÊS",
+      description: "ACESSO SISTEMA NÍVEL 1",
       badge: null,
       icon: Zap,
       features: [
-        { name: "Até 5 clientes ativas", included: true },
-        { name: "CRM básico", included: true },
-        { name: "Gestão de projetos", included: true },
-        { name: "Moodboard interativo", included: true },
-        { name: "Questionários personalizados", included: true },
-        { name: "Contratos básicos", included: true },
-        { name: "Portal da cliente", included: true },
-        { name: "Marca branca 100%", included: false },
-        { name: "Pagamentos integrados", included: false },
-        { name: "Relatórios avançados", included: false },
-        { name: "Usuários da equipe", included: false },
-        { name: "Automações", included: false }
+        { name: "10 CLIENTES ATIVOS", included: true },
+        { name: "PACK TÉCNICO BÁSICO (PDF)", included: true },
+        { name: "AGENDA INTELIGENTE", included: true },
+        { name: "CONTRATOS DIGITAIS", included: true },
+        { name: "PORTAL DA CLIENTE", included: true },
+        { name: "DASHBOARD FINANCEIRO", included: false },
+        { name: "CÁLCULO DE COMISSÃO", included: false },
+        { name: "SUPORTE IA", included: false }
       ],
-      limitations: "Marca d'água da Lovable no portal da cliente",
-      cta: "Começar Teste Gratuito",
-      ctaVariant: "outline" as const
+      limitations: "ARTISTA SOLO // INICIANTE",
+      cta: "INICIAR_TESTE",
+      ctaVariant: "outline" as const,
+      highlight: false
     },
     {
-      name: "Profissional",
+      name: "ACESSO PROFISSIONAL",
       price: "89,90",
-      period: "mês",
-      description: "Para maquiadoras que querem crescer e escalar",
-      badge: "Mais Popular",
+      period: "MÊS",
+      description: "SUÍTE DE GESTÃO AVANÇADA",
+      badge: "MAIS POPULAR",
       icon: Star,
       features: [
-        { name: "Clientes ilimitadas", included: true },
-        { name: "CRM completo", included: true },
-        { name: "Gestão de projetos avançada", included: true },
-        { name: "Moodboard interativo", included: true },
-        { name: "Questionários inteligentes", included: true },
-        { name: "Contratos profissionais", included: true },
-        { name: "Portal 100% marca branca", included: true },
-        { name: "Pagamentos integrados", included: true },
-        { name: "Relatórios financeiros", included: true },
-        { name: "Construtor de pacotes", included: true },
-        { name: "1 usuário adicional", included: false },
-        { name: "Automações avançadas", included: false }
+        { name: "CLIENTES ILIMITADOS", included: true },
+        { name: "PACK TÉCNICO GOLD", included: true },
+        { name: "ANALYTICS COMPLETO", included: true },
+        { name: "PORTAL DA NOIVA CUSTOM", included: true },
+        { name: "MOODBOARD INTERATIVO", included: true },
+        { name: "FICHAS DE ANAMNESE", included: true },
+        { name: "CÁLCULO DE COMISSÃO", included: false },
+        { name: "SUPORTE IA", included: false }
       ],
-      limitations: "Taxa de 2,5% sobre pagamentos processados",
-      cta: "Começar Agora",
-      ctaVariant: "accent" as const
+      limitations: null,
+      cta: "MIGRAR_AGORA",
+      ctaVariant: "default" as const, // We will manually style this
+      highlight: true
     },
     {
-      name: "Estúdio",
+      name: "ACESSO STUDIO",
       price: "149,90",
-      period: "mês",
-      description: "Para estúdios e equipes que precisam de máxima eficiência",
-      badge: "Melhor Valor",
+      period: "MÊS",
+      description: "SOLUÇÕES PARA EQUIPES & IMPÉRIOS",
+      badge: "MELHOR VALOR",
       icon: Crown,
       features: [
-        { name: "Clientes ilimitadas", included: true },
-        { name: "CRM completo + IA", included: true },
-        { name: "Gestão de projetos avançada", included: true },
-        { name: "Moodboard colaborativo", included: true },
-        { name: "Questionários inteligentes", included: true },
-        { name: "Contratos profissionais", included: true },
-        { name: "Portal 100% marca branca", included: true },
-        { name: "Pagamentos integrados", included: true },
-        { name: "Relatórios avançados + BI", included: true },
-        { name: "Construtor de pacotes", included: true },
-        { name: "Até 3 usuários da equipe", included: true },
-        { name: "Automações completas", included: true }
+        { name: "TUDO DO PRO", included: true },
+        { name: "GESTÃO DE EQUIPE", included: true },
+        { name: "AUTO COMISSÕES", included: true },
+        { name: "IA OPERACIONAL", included: true },
+        { name: "PERFORMANCE DO ARTISTA", included: true },
+        { name: "ACESSO MULTI-USUÁRIO", included: true },
+        { name: "SUPORTE PRIORITÁRIO", included: true },
+        { name: "INTEGRAÇÃO API", included: true }
       ],
-      limitations: "Taxa reduzida de 1,0% sobre pagamentos",
-      cta: "Começar Agora",
-      ctaVariant: "hero" as const
+      limitations: null,
+      cta: "MIGRAR_AGORA",
+      ctaVariant: "outline" as const,
+      highlight: false
     }
   ];
 
   const faqs = [
     {
-      question: "Posso cancelar a qualquer momento?",
-      answer: "Sim! Não há fidelidade. Você pode cancelar sua assinatura a qualquer momento através do painel de configurações."
+      question: "POSSO CANCELAR A QUALQUER MOMENTO?",
+      answer: "SIM. SEM CONTRATOS DE FIDELIDADE. CONTROLE TOTAL DO SEU ACESSO."
     },
     {
-      question: "Como funciona o teste gratuito?",
-      answer: "Você tem 14 dias para testar todas as funcionalidades do plano Profissional gratuitamente, sem precisar informar cartão de crédito."
+      question: "COMO FUNCIONA O TRIAL?",
+      answer: "14 DIAS DE ACESSO TOTAL AO SISTEMA. SEM CARTÃO DE CRÉDITO NECESSÁRIO."
     },
     {
-      question: "Vocês oferecem suporte?",
-      answer: "Sim! Oferecemos suporte via chat, email e videochamada para todos os planos. O plano Estúdio tem prioridade no atendimento."
+      question: "EXISTE SUPORTE TÉCNICO?",
+      answer: "SIM. SUPORTE DEDICADO VIA CHAT E EMAIL. PRIORIDADE PARA PLANOS STUDIO."
     },
     {
-      question: "Como funcionam as taxas de pagamento?",
-      answer: "As taxas são aplicadas apenas sobre os pagamentos processados pela plataforma. Você recebe o valor líquido diretamente na sua conta."
-    },
-    {
-      question: "Posso migrar entre planos?",
-      answer: "Claro! Você pode fazer upgrade ou downgrade do seu plano a qualquer momento. As mudanças são aplicadas no próximo ciclo de cobrança."
+      question: "TAXAS DE PAGAMENTO?",
+      answer: "APENAS SOBRE TRANSAÇÕES PROCESSADAS. REPASSE LÍQUIDO AUTOMÁTICO."
     }
   ];
 
   return (
     <>
-      <SEOHead 
-        title="Planos e Preços - Lumi | Gestão para Profissionais de Beleza"
-        description="Escolha o plano ideal: Essencial R$39,90, Profissional R$89,90 ou Estúdio R$179,90. Teste grátis por 14 dias sem compromisso."
-        keywords="preços lumi, planos maquiadora, sistema gestão beleza preço, software salão preço"
+      <SEOHead
+        title="SYSTEM ACCESS - LUMI | DATA DRIVEN BEAUTY"
+        description="Escolha seu nível de acesso. Ferramentas de gestão profissional para artistas da beleza moderna."
+        keywords="preços, lumi, tecnologia beleza, sistema de gestão"
         url="https://lumihub.lovable.app/planos"
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
 
-      {/* Hero Section */}
-      <section className="py-20 lg:py-32 bg-gradient-to-br from-background to-muted">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="space-y-4">
-              <h1 className="font-poppins font-bold text-4xl lg:text-6xl text-foreground">
-                Planos que crescem com seu
-                <span className="text-primary"> Negócio</span>
-              </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                Escolha o plano ideal para o seu momento profissional.
-                Comece grátis e evolua conforme seu negócio cresce.
-              </p>
-            </div>
-
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-success/10 text-success font-medium text-sm">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              14 dias grátis • Sem cartão de crédito • Cancele quando quiser
+        {/* Header Block */}
+        <section className="border-b border-white/20 pt-32 pb-16">
+          <div className="container mx-auto px-4 text-center">
+            <h1 className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-white/60 mb-6">
+              ARQUITETURA DO SISTEMA // MODELOS DE PREÇO
+            </h1>
+            <h2 className="font-serif text-5xl md:text-7xl text-white mb-8">
+              BLUEPRINTS DE DADOS
+            </h2>
+            <div className="flex items-center justify-center gap-4 text-xs font-mono uppercase tracking-widest text-white/80">
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-white" />
+                SEM CARTÃO DE CRÉDITO
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-white" />
+                14 DIAS GRÁTIS
+              </span>
+              <span className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-white" />
+                CANCELE QUANDO QUISER
+              </span>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing Cards */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+        {/* Pricing Grid */}
+        <section className="container mx-auto px-4 py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-white/20">
             {plans.map((plan, index) => (
-              <Card
+              <div
                 key={index}
-                className={`relative border-border hover:shadow-medium transition-all duration-300 ${plan.badge === "Mais Popular" ? "border-accent shadow-medium scale-105" : ""
-                  }`}
+                className={`
+                  relative p-10 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-white/20 last:border-r-0
+                  ${plan.highlight ? 'bg-white text-black' : 'bg-black text-white'}
+                `}
               >
                 {plan.badge && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge variant={plan.badge === "Mais Popular" ? "default" : "secondary"} className="bg-accent text-accent-foreground px-4 py-1">
-                      {plan.badge}
-                    </Badge>
+                  <div className={`
+                    absolute top-0 right-0 px-4 py-2 text-xs font-mono uppercase tracking-widest border-l border-b
+                    ${plan.highlight ? 'bg-black text-white border-black' : 'bg-white text-black border-white'}
+                  `}>
+                    {plan.badge}
                   </div>
                 )}
 
-                <CardHeader className="text-center pb-8">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <plan.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle className="font-poppins text-2xl text-foreground">
+                <div className="mb-10">
+                  <plan.icon className={`w-8 h-8 mb-6 ${plan.highlight ? 'text-black' : 'text-white'}`} strokeWidth={1} />
+                  <h3 className="font-mono text-sm uppercase tracking-widest mb-2 opacity-80">
                     {plan.name}
-                  </CardTitle>
-                  <div className="space-y-2">
-                    <div className="flex items-baseline justify-center space-x-1">
-                      <span className="text-sm text-muted-foreground">R$</span>
-                      <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                      <span className="text-sm text-muted-foreground">/{plan.period}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      {plan.description}
-                    </p>
+                  </h3>
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="font-serif text-sm">R$</span>
+                    <span className="font-mono text-5xl tracking-tighter font-light">{plan.price}</span>
+                    <span className="font-mono text-xs uppercase opacity-60">/{plan.period}</span>
                   </div>
-                </CardHeader>
+                  <p className={`text-xs font-mono uppercase tracking-wide ${plan.highlight ? 'text-black/60' : 'text-white/60'}`}>
+                    {plan.description}
+                  </p>
+                </div>
 
-                <CardContent className="space-y-6">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center space-x-3">
+                <div className="flex-grow mb-10">
+                  <ul className="space-y-4">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-center gap-4 text-xs font-mono tracking-wide uppercase">
                         {feature.included ? (
-                          <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+                          <div className={`w-1.5 h-1.5 flex-shrink-0 ${plan.highlight ? 'bg-black' : 'bg-white'}`} />
                         ) : (
-                          <X className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                          <div className={`w-1.5 h-1.5 flex-shrink-0 ${plan.highlight ? 'bg-black/10' : 'bg-white/10'}`} />
                         )}
-                        <span className={`text-sm ${feature.included ? "text-foreground" : "text-muted-foreground"}`}>
+                        <span className={feature.included ? (plan.highlight ? 'opacity-100' : 'opacity-100') : 'opacity-30 line-through'}>
                           {feature.name}
                         </span>
                       </li>
                     ))}
                   </ul>
+                </div>
 
-                  {plan.limitations && (
-                    <div className="border-t border-border pt-4">
-                      <p className="text-xs text-muted-foreground">
-                        * {plan.limitations}
-                      </p>
-                    </div>
-                  )}
-
-                  <Link to="/cadastro" className="block">
-                    <Button variant={plan.ctaVariant} className="w-full" size="lg">
+                <div className="mt-auto">
+                  <Link to="/cadastro" className="block w-full">
+                    <Button
+                      className={`
+                        w-full h-12 rounded-none font-mono text-xs uppercase tracking-[0.2em] transition-all
+                        ${plan.highlight
+                          ? 'bg-black text-white hover:bg-black/80 hover:scale-[1.02]'
+                          : 'bg-white text-black hover:bg-white/90 hover:scale-[1.02]'
+                        }
+                      `}
+                    >
                       {plan.cta}
-                      <ArrowRight className="h-4 w-4 ml-2" />
                     </Button>
                   </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features Comparison */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="font-poppins font-bold text-3xl lg:text-4xl text-foreground">
-              Todos os planos incluem
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            {[
-              "Acesso via web e mobile",
-              "Backup automático na nuvem",
-              "Segurança LGPD completa",
-              "Suporte técnico especializado",
-              "Atualizações constantes",
-              "Integração com redes sociais",
-              "Templates profissionais",
-              "Treinamento incluso"
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-success flex-shrink-0" />
-                <span className="text-sm text-foreground">{feature}</span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-background">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-16 space-y-4">
-              <h2 className="font-poppins font-bold text-3xl lg:text-4xl text-foreground">
-                Perguntas Frequentes
-              </h2>
-            </div>
-
-            <div className="space-y-6">
-              {faqs.map((faq, index) => (
-                <Card key={index} className="border-border">
-                  <CardContent className="p-6">
-                    <h3 className="font-poppins font-semibold text-lg text-foreground mb-3">
-                      {faq.question}
-                    </h3>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {faq.answer}
-                    </p>
-                  </CardContent>
-                </Card>
+        {/* Feature Matrix / "All Plans Include" */}
+        <section className="border-t border-white/20 py-20 bg-black">
+          <div className="container mx-auto px-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+              {[
+                "CRIPTOGRAFIA DE DADOS",
+                "SYNC NA NUVEM",
+                "ACESSO MOBILE",
+                "UPDATES AUTOMÁTICOS"
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center text-center p-6 border border-white/10 hover:border-white/50 transition-colors">
+                  <div className="w-2 h-2 bg-white mb-4" />
+                  <span className="font-mono text-xs uppercase tracking-widest text-white/80">{item}</span>
+                </div>
               ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary to-primary-light text-primary-foreground">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="max-w-3xl mx-auto space-y-8">
-            <div className="space-y-4">
-              <h2 className="font-poppins font-bold text-3xl lg:text-4xl">
-                Pronta para começar?
-              </h2>
-              <p className="text-xl text-primary-foreground/90">
-                Teste gratuitamente por 14 dias. Sem compromisso, sem cartão de crédito.
-              </p>
-            </div>
-
-            <Link to="/cadastro">
-              <Button variant="accent" size="lg">
-                <Building className="h-5 w-5 mr-2" />
-                Começar Teste Gratuito
-              </Button>
-            </Link>
-
-            <div className="text-sm text-primary-foreground/80">
-              ✨ Mais de 1.000 maquiadoras já transformaram seus negócios
+        {/* FAQ - Brutalist List */}
+        <section className="border-t border-white/20 py-24">
+          <div className="container mx-auto px-4 max-w-4xl">
+            <h2 className="font-mono text-xs uppercase tracking-widest text-white/40 mb-12 text-center">
+              SYSTEM FAQ // DÚVIDAS_COMUNS
+            </h2>
+            <div className="space-y-0 divide-y divide-white/20 border-t border-b border-white/20">
+              {faqs.map((faq, index) => (
+                <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-8 py-10 group hover:bg-white/5 transition-colors">
+                  <div className="md:col-span-1 font-mono text-xs text-white/30">
+                    {(index + 1).toString().padStart(2, '0')}
+                  </div>
+                  <div className="md:col-span-5 font-mono text-sm uppercase tracking-wider text-white">
+                    {faq.question}
+                  </div>
+                  <div className="md:col-span-6 font-mono text-xs text-white/60 leading-relaxed uppercase">
+                    {faq.answer}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-    </div>
+      </div>
     </>
   );
 };

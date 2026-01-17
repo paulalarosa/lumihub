@@ -1,81 +1,89 @@
-export default function Privacidade() {
+import SEOHead from "@/components/seo/SEOHead";
+
+const Privacidade = () => {
     return (
-        <div className="min-h-screen bg-[#050505] text-[#C0C0C0] font-sans">
-            <main className="container mx-auto px-4 py-12 md:py-20 max-w-4xl">
-                <h1 className="text-4xl md:text-5xl font-serif font-bold text-white mb-8">
-                    Política de Privacidade
-                </h1>
+        <>
+            <SEOHead
+                title="POLÍTICA DE PRIVACIDADE - LUMI | SECURE"
+                description="Protocolos de proteção de dados e privacidade da Lumi."
+                keywords="privacidade, dados, lgpd, segurança, lumi"
+                url="https://lumihub.lovable.app/privacidade"
+            />
+            <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pt-32 pb-20">
+                <div className="container mx-auto px-4">
+                    <div className="max-w-3xl mx-auto border-l border-white/20 pl-8 md:pl-12 py-4">
+                        <header className="mb-20 space-y-4">
+                            <h1 className="font-serif text-5xl md:text-6xl tracking-tight leading-none text-white">
+                                POLÍTICA DE <br /> PRIVACIDADE
+                            </h1>
+                            <div className="flex items-center space-x-4 font-mono text-xs uppercase tracking-widest text-white/40">
+                                <span>LAST_UPDATE: 2026.01.16</span>
+                                <span>//</span>
+                                <span>DATA_PROTECTION_PROTOCOL</span>
+                            </div>
+                        </header>
 
-                <div className="space-y-8 text-lg font-light leading-relaxed">
-                    <section className="space-y-4">
-                        <h2 className="text-2xl font-serif font-semibold text-white">1. Introdução</h2>
-                        <p className="text-white/70">
-                            A sua privacidade é fundamental para nós. Esta política descreve como o LumiHub coleta,
-                            usa e protege suas informações pessoais ao utilizar nossa plataforma.
-                            Ao utilizar nossos serviços, você concorda com a coleta e uso de informações de acordo com esta política.
-                        </p>
-                    </section>
+                        <div className="space-y-12 font-sans font-light text-gray-300 leading-relaxed text-sm md:text-base">
+                            <section className="space-y-4">
+                                <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">01. COLETA DE DADOS</h2>
+                                <p>
+                                    Coletamos informações essenciais para a operação do Sistema ("Data Points"), incluindo: dados de cadastro
+                                    (nome, email, telefone), dados financeiros para processamento de pagamentos e dados de uso da plataforma
+                                    para melhoria contínua da experiência.
+                                </p>
+                            </section>
 
-                    <section className="space-y-4">
-                        <h2 className="text-2xl font-serif font-semibold text-white">2. Coleta de Dados</h2>
-                        <p className="text-white/70">
-                            Coletamos informações que você nos fornece diretamente, como nome, endereço de e-mail
-                            e outras informações de contato ao criar uma conta. Também podemos coletar dados de uso
-                            automaticamente para melhorar a performance da plataforma.
-                        </p>
-                    </section>
+                            <section className="space-y-4">
+                                <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">02. USO DAS INFORMAÇÕES</h2>
+                                <p>
+                                    As informações coletadas são utilizadas exclusivamente para:
+                                </p>
+                                <ul className="list-disc pl-4 space-y-2 marker:text-white/50">
+                                    <li>Fornecer e manter os serviços operacionais;</li>
+                                    <li>Processar transações financeiras com segurança;</li>
+                                    <li>Notificar sobre atualizações do sistema (System Updates);</li>
+                                    <li>Prevenir fraudes e garantir a segurança da rede.</li>
+                                </ul>
+                            </section>
 
-                    <div className="p-6 rounded-2xl bg-[#00e5ff]/5 border border-[#00e5ff]/20 shadow-[0_0_30px_rgba(0,229,255,0.05)]">
-                        <section className="space-y-4">
-                            <h2 className="text-2xl font-serif font-semibold text-white flex items-center gap-2">
-                                3. Uso de Dados do Google
-                                <span className="text-xs bg-[#00e5ff]/10 text-[#00e5ff] px-2 py-1 rounded-full border border-[#00e5ff]/20 font-sans tracking-wide">
-                                    GOOGLE API COMPLIANCE
-                                </span>
-                            </h2>
-                            <p className="text-[#00e5ff]/90 font-medium">
-                                O LumiHub utiliza dados da sua Agenda Google apenas para exibir seus compromissos dentro da plataforma.
-                                Não armazenamos seus dados externamente nem compartilhamos com terceiros.
-                            </p>
-                            <p className="text-white/70">
-                                O uso das informações recebidas das APIs do Google pelo LumiHub adere à
-                                <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="text-[#00e5ff] hover:underline ml-1">
-                                    Política de Dados do Usuário dos Serviços de API do Google
-                                </a>, incluindo os requisitos de uso limitado.
-                            </p>
-                        </section>
-                    </div>
+                            <section className="space-y-4">
+                                <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">03. COMPARTILHAMENTO DE DADOS</h2>
+                                <p>
+                                    A Lumi não vende ou aluga seus dados pessoais. O compartilhamento ocorre apenas com parceiros essenciais
+                                    para a execução do serviço (ex: gateways de pagamento, serviços de hospedagem), que são obrigados contratualmente
+                                    a manter o sigilo e segurança das informações.
+                                </p>
+                            </section>
 
-                    <section className="space-y-4">
-                        <h2 className="text-2xl font-serif font-semibold text-white">4. Segurança</h2>
-                        <p className="text-white/70">
-                            Implementamos medidas de segurança técnicas e organizacionais para proteger seus dados
-                            contra acesso não autorizado, alteração ou destruição. Utilizamos criptografia e protocolos
-                            seguros (HTTPS) em todas as comunicações.
-                        </p>
-                    </section>
+                            <section className="space-y-4">
+                                <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">04. SEGURANÇA (ENCRYPTION)</h2>
+                                <p>
+                                    Implementamos medidas de segurança técnicas e organizacionais ("Military Grade") para proteger seus dados
+                                    contra acesso não autorizado, alteração, divulgação ou destruição. Utilizamos criptografia SSL em todas
+                                    as transmissões de dados.
+                                </p>
+                            </section>
 
-                    <section className="space-y-4">
-                        <h2 className="text-2xl font-serif font-semibold text-white">5. Seus Direitos</h2>
-                        <p className="text-white/70">
-                            Você tem o direito de acessar, corrigir ou excluir seus dados pessoais a qualquer momento.
-                            Para exercer esses direitos, entre em contato com nosso suporte.
-                        </p>
-                    </section>
+                            <section className="space-y-4">
+                                <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">05. COOKIES & RASTREAMENTO</h2>
+                                <p>
+                                    Utilizamos cookies e tecnologias similares para rastrear a atividade em nosso Sistema e manter certas
+                                    informações. Você pode instruir seu navegador a recusar todos os cookies, mas isso pode limitar
+                                    funcionalidades da plataforma.
+                                </p>
+                            </section>
 
-                    <section className="space-y-4">
-                        <h2 className="text-2xl font-serif font-semibold text-white">6. Contato</h2>
-                        <p className="text-white/70">
-                            Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco através
-                            da nossa página de <a href="/contato" className="text-[#00e5ff] hover:underline">Contato</a>.
-                        </p>
-                    </section>
-
-                    <div className="pt-8 border-t border-white/10 text-sm text-white/40">
-                        Última atualização: {new Date().toLocaleDateString('pt-BR')}
+                            <section className="border-t border-white/10 pt-12 mt-20">
+                                <p className="font-mono text-xs text-white/30 uppercase tracking-widest text-center">
+                                    /// SECURE_CONNECTION_ESTABLISHED
+                                </p>
+                            </section>
+                        </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </div>
+        </>
     );
-}
+};
+
+export default Privacidade;

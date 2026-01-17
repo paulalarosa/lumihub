@@ -50,7 +50,7 @@ export function CalendarSidebar({
     if (!acc[dateStr]) {
       acc[dateStr] = [];
     }
-    acc[dateStr].push(event.color || '#5A7D7C');
+    acc[dateStr].push(event.color || '#FFFFFF');
     return acc;
   }, {} as Record<string, string[]>);
 
@@ -75,15 +75,15 @@ export function CalendarSidebar({
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full font-mono">
       {/* Mini Calendar */}
-      <div className="border rounded-lg p-3 bg-card">
+      <div className="border border-white/20 rounded-none p-3 bg-black">
         {/* Size controls */}
         {onCalendarSizeChange && (
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 border-b border-white/10 pb-2">
             <button
               onClick={onClearDateFilter}
-              className="text-sm font-medium text-primary hover:underline cursor-pointer"
+              className="text-sm font-medium text-white hover:text-white/70 uppercase tracking-widest cursor-pointer"
             >
               {format(currentDate, 'MMMM yyyy', { locale: ptBR })}
             </button>
@@ -91,7 +91,7 @@ export function CalendarSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 rounded-none hover:bg-white hover:text-black"
                 onClick={handleDecreaseSize}
                 disabled={calendarSize === 'small'}
               >
@@ -100,7 +100,7 @@ export function CalendarSidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 rounded-none hover:bg-white hover:text-black"
                 onClick={handleIncreaseSize}
                 disabled={calendarSize === 'large'}
               >
@@ -117,6 +117,10 @@ export function CalendarSidebar({
           onMonthChange={onMonthChange}
           locale={ptBR}
           className={calendarClassName}
+          classNames={{
+            day_selected: "bg-white text-black hover:bg-white/90 focus:bg-white focus:text-black rounded-none",
+            day_today: "bg-transparent border border-white text-white rounded-none",
+          }}
           modifiers={{
             hasEvent: (date) => {
               const dateStr = format(date, 'yyyy-MM-dd');
@@ -127,7 +131,7 @@ export function CalendarSidebar({
             hasEvent: {
               fontWeight: 'bold',
               textDecoration: 'underline',
-              textDecorationColor: 'hsl(var(--primary))',
+              textDecorationColor: '#ffffff',
               textDecorationThickness: '2px',
               textUnderlineOffset: '3px',
             },
@@ -136,40 +140,34 @@ export function CalendarSidebar({
       </div>
 
       {/* Assistants List */}
-      <div className="mt-4 border rounded-lg bg-card flex-1 min-h-0">
-        <div className="p-3 border-b">
-          <h3 className="font-medium flex items-center gap-2">
+      <div className="mt-4 border border-white/20 rounded-none bg-black flex-1 min-h-0">
+        <div className="p-3 border-b border-white/20">
+          <h3 className="font-mono text-xs uppercase tracking-widest flex items-center gap-2 text-white">
             <User className="h-4 w-4" />
-            Assistentes
+            EQUIPE_PRO
           </h3>
         </div>
         <ScrollArea className="h-[200px]">
           <div className="p-3 space-y-3">
             {assistants.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                Nenhum assistente cadastrado
+              <p className="text-xs font-mono text-white/40 text-center py-4 uppercase tracking-widest">
+                NO_ASSISTANTS_FOUND
               </p>
             ) : (
               assistants.map((assistant) => (
                 <div
                   key={assistant.id}
-                  className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                  className="flex items-start gap-3 p-2 rounded-none border border-transparent hover:border-white/20 hover:bg-white/5 transition-colors group"
                 >
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="h-4 w-4 text-primary" />
+                  <div className="w-8 h-8 rounded-none border border-white/20 bg-black flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-black transition-colors">
+                    <User className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">{assistant.name}</p>
+                    <p className="font-mono text-xs uppercase truncate text-white">{assistant.name}</p>
                     {assistant.email && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+                      <p className="text-[10px] text-white/50 flex items-center gap-1 truncate font-mono">
                         <Mail className="h-3 w-3 shrink-0" />
                         {assistant.email}
-                      </p>
-                    )}
-                    {assistant.phone && (
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Phone className="h-3 w-3 shrink-0" />
-                        {assistant.phone}
                       </p>
                     )}
                   </div>
@@ -181,20 +179,20 @@ export function CalendarSidebar({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 border rounded-lg p-3 bg-card">
-        <h3 className="font-medium text-sm mb-2">Tipos de Evento</h3>
+      <div className="mt-4 border border-white/20 rounded-none p-3 bg-black">
+        <h3 className="font-mono text-xs uppercase tracking-widest mb-2 text-white">EVENT_TYPES</h3>
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#5A7D7C' }} />
-            <span>Noivas</span>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase text-white/70">
+            <div className="w-2 h-2 rounded-none bg-white" />
+            <span>NOIVAS</span>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#D4A574' }} />
-            <span>Pré Wedding</span>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase text-white/70">
+            <div className="w-2 h-2 rounded-none border border-white" />
+            <span>PRE_WEDDING</span>
           </div>
-          <div className="flex items-center gap-2 text-xs">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#8B7355' }} />
-            <span>Produções Sociais</span>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase text-white/70">
+            <div className="w-2 h-2 rounded-none bg-white/40" />
+            <span>SOCIAL</span>
           </div>
         </div>
       </div>

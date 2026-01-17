@@ -1,70 +1,43 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { generateClientPDF } from '@/services/reportService';
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import { ClientService, Client, TreatmentRecord } from '@/services/clientService';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { RecordDialog } from '@/components/client/RecordDialog';
 import {
     ArrowLeft,
     User,
+    Download,
     Mail,
     Phone,
     Instagram,
     Calendar,
     FileText,
-    Clock,
-    Trash2,
-    Sparkles
+    Sparkles,
+    Trash2
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { RecordDialog } from '@/components/clients/RecordDialog';
-import { motion } from 'framer-motion';
-import { ClientService } from '@/services/clientService';
-
-interface Client {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-    instagram: string | null;
-    notes: string | null;
-    tags: string[] | null;
-    created_at: string;
-}
-
-interface TreatmentRecord {
-    id: string;
-    date: string;
-    service_name: string;
-    notes: string | null;
-    photos: string[] | null;
-    created_at: string;
-}
 
 export default function ClientDetailsPage() {
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams();
     const navigate = useNavigate();
-    const { user, loading: authLoading } = useAuth();
     const { toast } = useToast();
-
     const [client, setClient] = useState<Client | null>(null);
     const [records, setRecords] = useState<TreatmentRecord[]>([]);
     const [loadingData, setLoadingData] = useState(true);
+    const [events, setEvents] = useState<any[]>([]);
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            navigate('/auth');
-        }
-    }, [user, authLoading, navigate]);
-
-    useEffect(() => {
-        if (user && id) {
+        if (id) {
             fetchData();
         }
-    }, [user, id]);
+    }, [id]);
 
     const fetchData = async () => {
         if (!id) return;
@@ -81,25 +54,70 @@ export default function ClientDetailsPage() {
 
         setClient(clientData as Client);
 
-        // Fetch records - getTreatmentRecords returns empty array now
-        const recordsData = await ClientService.getTreatmentRecords(id);
+        // Fetch records
+        const { data: recordsData } = await ClientService.getTreatmentRecords(id);
         setRecords(recordsData || []);
+
+        // Fetch events for PDF
+        const { data: eventsData, error: eventsError } = await supabase
+            .from('events')
+            .select(`
+                *,
+                project_services (
+                    id,
+                    quantity,
+                    unit_price,
+                    total_price,
+                    services (name)
+                )
+            `)
+            .eq('client_id', id)
+            .order('event_date', { ascending: false });
+
+        if (eventsData) {
+            setEvents(eventsData);
+        }
 
         setLoadingData(false);
     };
 
-    const deleteRecord = async (recordId: string) => {
-        if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-        
-        await ClientService.deleteTreatmentRecord(recordId);
-        toast({ title: "Registro excluído" });
-        fetchData();
+    const handleExportPDF = () => {
+        if (!client) return;
+        generateClientPDF(client, events);
+        toast({
+            title: "Relatório gerado",
+            description: "O download do PDF foi iniciado.",
+        });
     };
 
-    if (authLoading || loadingData) {
+    const deleteRecord = async (recordId: string) => {
+        try {
+            const { error } = await supabase
+                .from('treatment_records')
+                .delete()
+                .eq('id', recordId);
+
+            if (error) throw error;
+
+            toast({
+                title: "Registro excluído",
+                description: "O registro foi removido com sucesso."
+            });
+            fetchData();
+        } catch (error) {
+            console.error("Error deleting record:", error);
+            toast({
+                title: "Erro",
+                description: "Não foi possível excluir o registro.",
+                variant: "destructive"
+            });
+        }
+    };
+
+    if (loadingData) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#050505]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5ff]"></div>
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
         );
     }
@@ -107,49 +125,62 @@ export default function ClientDetailsPage() {
     if (!client) return null;
 
     return (
-        <div className="min-h-screen bg-[#050505] text-[#C0C0C0]">
-            {/* Header with Glassmorphism */}
-            <header className="fixed top-0 left-0 right-0 z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
+        <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
+            {/* Header */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/20">
                 <div className="container mx-auto px-4 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             <Link to="/clientes">
-                                <Button variant="ghost" size="icon" className="text-white/60 hover:text-white hover:bg-white/5">
+                                <Button variant="ghost" size="icon" className="text-white hover:bg-white hover:text-black rounded-none">
                                     <ArrowLeft className="h-5 w-5" />
                                 </Button>
                             </Link>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00e5ff]/20 to-purple-500/20 flex items-center justify-center border border-white/10">
-                                    <User className="h-5 w-5 text-[#00e5ff]" />
+                            <div className="flex items-center space-x-4">
+                                <div className="w-10 h-10 border border-white flex items-center justify-center bg-black">
+                                    <User className="h-5 w-5 text-white" />
                                 </div>
                                 <div>
-                                    <h1 className="font-serif text-xl text-white tracking-wide">
+                                    <h1 className="font-serif text-2xl text-white tracking-tight uppercase">
                                         {client.name}
                                     </h1>
-                                    <p className="text-xs text-white/40 uppercase tracking-wider">Perfil da Cliente</p>
+                                    <div className="text-[10px] text-gray-500 uppercase tracking-[0.3em]">
+                                        /// CLIENT_PROFILE
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Action Buttons could go here */}
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="border-white/50 text-white hover:bg-white hover:text-black rounded-none uppercase text-xs tracking-widest font-mono"
+                                onClick={handleExportPDF}
+                            >
+                                <Download className="w-3 h-3 mr-2" />
+                                Ficha Técnica
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <main className="container mx-auto px-4 pt-28 pb-12">
                 <Tabs defaultValue="historico" className="space-y-8">
-                    <TabsList className="bg-white/5 border border-white/10 p-1 rounded-xl w-full max-w-md mx-auto grid grid-cols-2 gap-2">
+                    <TabsList className="bg-black border border-white/20 p-0 rounded-none w-full max-w-md mx-auto grid grid-cols-2">
                         <TabsTrigger
                             value="dados"
-                            className="data-[state=active]:bg-[#00e5ff] data-[state=active]:text-black text-white/60 font-medium rounded-lg transition-all"
+                            className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 font-mono text-xs uppercase tracking-widest rounded-none h-10 transition-all"
                         >
                             Dados Pessoais
                         </TabsTrigger>
                         <TabsTrigger
                             value="historico"
-                            className="data-[state=active]:bg-[#00e5ff] data-[state=active]:text-black text-white/60 font-medium rounded-lg transition-all"
+                            className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 font-mono text-xs uppercase tracking-widest rounded-none h-10 transition-all"
                         >
-                            Histórico / Prontuário
+                            Prontuário
                         </TabsTrigger>
                     </TabsList>
 
@@ -159,61 +190,61 @@ export default function ClientDetailsPage() {
                             animate={{ opacity: 1, y: 0 }}
                             className="space-y-6"
                         >
-                            <Card className="bg-[#1A1A1A]/40 backdrop-blur-lg border border-white/10 p-6 rounded-2xl">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="space-y-6">
+                            <Card className="bg-black border border-white/20 p-8 rounded-none">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                    <div className="space-y-8">
                                         <div className="flex items-start gap-4">
-                                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                                <Mail className="h-5 w-5 text-[#00e5ff]" />
+                                            <div className="p-2 border border-white/20 bg-white/5">
+                                                <Mail className="h-4 w-4 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Email</p>
-                                                <p className="text-white font-light">{client.email || 'Não informado'}</p>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Email</p>
+                                                <p className="text-white font-mono text-sm">{client.email || 'N/A'}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-4">
-                                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                                <Phone className="h-5 w-5 text-[#00e5ff]" />
+                                            <div className="p-2 border border-white/20 bg-white/5">
+                                                <Phone className="h-4 w-4 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Telefone</p>
-                                                <p className="text-white font-light">{client.phone || 'Não informado'}</p>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Telefone</p>
+                                                <p className="text-white font-mono text-sm">{client.phone || 'N/A'}</p>
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-4">
-                                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                                <Instagram className="h-5 w-5 text-[#00e5ff]" />
+                                            <div className="p-2 border border-white/20 bg-white/5">
+                                                <Instagram className="h-4 w-4 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Instagram</p>
-                                                <p className="text-white font-light">{client.instagram || 'Não informado'}</p>
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Instagram</p>
+                                                <p className="text-white font-mono text-sm">{client.instagram || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="space-y-6">
+                                    <div className="space-y-8">
                                         <div className="flex items-start gap-4">
-                                            <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                                <Calendar className="h-5 w-5 text-[#00e5ff]" />
+                                            <div className="p-2 border border-white/20 bg-white/5">
+                                                <Calendar className="h-4 w-4 text-white" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Cliente Desde</p>
-                                                <p className="text-white font-light">
-                                                    {format(new Date(client.created_at), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                                                <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Cliente Desde</p>
+                                                <p className="text-white font-mono text-sm">
+                                                    {client.created_at ? format(new Date(client.created_at), "dd.MM.yyyy", { locale: ptBR }) : 'N/A'}
                                                 </p>
                                             </div>
                                         </div>
 
                                         {client.notes && (
                                             <div className="flex items-start gap-4">
-                                                <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                                    <FileText className="h-5 w-5 text-[#00e5ff]" />
+                                                <div className="p-2 border border-white/20 bg-white/5">
+                                                    <FileText className="h-4 w-4 text-white" />
                                                 </div>
                                                 <div className="flex-1">
-                                                    <p className="text-sm text-white/40 uppercase tracking-widest font-light mb-1">Observações</p>
-                                                    <p className="text-white/80 font-light text-sm leading-relaxed whitespace-pre-wrap">
+                                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-1">Observações</p>
+                                                    <p className="text-gray-300 font-mono text-xs leading-relaxed whitespace-pre-wrap border-l border-white/20 pl-4">
                                                         {client.notes}
                                                     </p>
                                                 </div>
@@ -226,20 +257,19 @@ export default function ClientDetailsPage() {
                     </TabsContent>
 
                     <TabsContent value="historico" className="max-w-4xl mx-auto">
-                        <div className="flex items-center justify-between mb-8">
+                        <div className="flex items-center justify-between mb-12">
                             <div>
-                                <h2 className="text-2xl font-serif text-white">Prontuário Estético</h2>
-                                <p className="text-white/40 font-light">Linha do tempo de tratamentos e evoluções</p>
+                                <h2 className="text-3xl font-serif text-white uppercase tracking-tight">Timeline</h2>
+                                <p className="text-gray-500 font-mono text-xs uppercase tracking-widest">Procedimentos & Evolução</p>
                             </div>
                             <RecordDialog clientId={client.id} onRecordAdded={fetchData} />
                         </div>
 
-                        <div className="space-y-8 relative before:absolute before:left-8 before:top-4 before:bottom-4 before:w-[1px] before:bg-gradient-to-b before:from-[#00e5ff]/50 before:via-white/10 before:to-transparent">
+                        <div className="space-y-0 relative before:absolute before:left-[19px] before:top-4 before:bottom-4 before:w-[1px] before:bg-white/20">
                             {records.length === 0 ? (
-                                <div className="ml-20 py-12 text-center border border-white/10 rounded-2xl bg-white/5 border-dashed">
-                                    <Sparkles className="h-10 w-10 text-white/20 mx-auto mb-4" />
-                                    <p className="text-white/40">Nenhum registro encontrado.</p>
-                                    <p className="text-white/20 text-sm">Adicione o primeiro tratamento para começar a história.</p>
+                                <div className="ml-16 py-12 text-center border border-white/10 bg-white/5 border-dashed">
+                                    <Sparkles className="h-8 w-8 text-white/20 mx-auto mb-4" />
+                                    <p className="text-gray-500 font-mono text-xs uppercase">Sem registros no banco de dados.</p>
                                 </div>
                             ) : (
                                 records.map((record, index) => (
@@ -248,32 +278,31 @@ export default function ClientDetailsPage() {
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.1 }}
-                                        className="relative pl-20 group"
+                                        className="relative pl-16 pb-12 group last:pb-0"
                                     >
                                         {/* Timeline Node */}
-                                        <div className="absolute left-6 top-6 w-4 h-4 rounded-full bg-[#050505] border-2 border-[#00e5ff] z-10 group-hover:scale-125 transition-transform duration-300 shadow-[0_0_10px_rgba(0,229,255,0.4)]" />
+                                        <div className="absolute left-[15px] top-6 w-[9px] h-[9px] bg-black border border-white z-10 group-hover:bg-white transition-colors" />
 
-                                        <Card className="bg-[#1A1A1A]/60 backdrop-blur-xl border border-white/5 hover:border-[#00e5ff]/30 transition-all duration-300 overflow-hidden group-hover:shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+                                        <Card className="bg-black border border-white/20 rounded-none hover:bg-white hover:text-black group-hover:border-white transition-all duration-300">
                                             <div className="p-6">
-                                                <div className="flex items-start justify-between mb-4">
+                                                <div className="flex items-start justify-between mb-6">
                                                     <div>
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <Badge variant="outline" className="border-[#00e5ff]/30 text-[#00e5ff] bg-[#00e5ff]/5">
+                                                        <div className="flex items-center gap-3 mb-2">
+                                                            <div className="bg-white text-black px-2 py-0.5 text-[10px] font-mono uppercase font-bold border border-white group-hover:bg-black group-hover:text-white">
                                                                 {record.service_name}
-                                                            </Badge>
-                                                            <span className="text-white/30 text-xs flex items-center gap-1">
-                                                                <Clock className="h-3 w-3" />
-                                                                {format(new Date(record.created_at), "HH:mm")}
+                                                            </div>
+                                                            <span className="text-gray-500 group-hover:text-black/60 text-xs font-mono">
+                                                                {format(new Date(record.created_at), "HH:mm")} • ID.{record.id.substring(0, 4)}
                                                             </span>
                                                         </div>
-                                                        <h3 className="text-lg font-medium text-white">
-                                                            {format(new Date(record.date), "d 'de' MMMM, yyyy", { locale: ptBR })}
+                                                        <h3 className="text-xl font-serif">
+                                                            {record.date ? format(new Date(record.date), "dd 'de' MMMM, yyyy", { locale: ptBR }) : 'Data inválida'}
                                                         </h3>
                                                     </div>
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="text-white/20 hover:text-red-400 hover:bg-white/5 -mr-2"
+                                                        className="text-gray-500 hover:text-red-500 hover:bg-transparent rounded-none -mr-2"
                                                         onClick={() => deleteRecord(record.id)}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -281,25 +310,23 @@ export default function ClientDetailsPage() {
                                                 </div>
 
                                                 {record.notes && (
-                                                    <p className="text-white/70 font-light text-sm leading-relaxed mb-6 bg-black/20 p-4 rounded-lg border border-white/5">
+                                                    <p className="text-gray-400 group-hover:text-black/80 font-mono text-xs leading-relaxed mb-6 pl-4 border-l border-white/20 group-hover:border-black/20">
                                                         {record.notes}
                                                     </p>
                                                 )}
 
                                                 {record.photos && record.photos.length > 0 && (
-                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                                                         {record.photos.map((photo, i) => (
-                                                            <div key={i} className="aspect-square rounded-lg overflow-hidden border border-white/10 relative group/photo">
+                                                            <div key={i} className="aspect-square border border-white/10 relative group/photo overflow-hidden">
                                                                 <img
                                                                     src={photo}
                                                                     alt="Tratamento"
-                                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover/photo:scale-110"
+                                                                    className="w-full h-full object-cover grayscale group-hover/photo:grayscale-0 transition-all duration-500"
                                                                 />
-                                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/photo:opacity-100 transition-opacity flex items-center justify-center">
-                                                                    <a href={photo} target="_blank" rel="noopener noreferrer" className="text-white text-xs font-medium hover:underline">
-                                                                        Ver Ampliado
-                                                                    </a>
-                                                                </div>
+                                                                <a href={photo} target="_blank" rel="noopener noreferrer" className="absolute inset-0 bg-black/50 opacity-0 group-hover/photo:opacity-100 flex items-center justify-center text-white text-[10px] uppercase font-mono tracking-widest">
+                                                                    Ver Imagem
+                                                                </a>
                                                             </div>
                                                         ))}
                                                     </div>

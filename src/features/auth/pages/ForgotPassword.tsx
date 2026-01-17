@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
 
 export default function ForgotPassword() {
     const { toast } = useToast();
@@ -24,15 +24,15 @@ export default function ForgotPassword() {
 
         if (error) {
             toast({
-                title: "Erro ao enviar email",
+                title: "FALHA_TRANSMISSÃO",
                 description: error.message,
                 variant: "destructive"
             });
         } else {
             setEmailSent(true);
             toast({
-                title: "Verifique seu email",
-                description: "Enviamos um link para recuperação da senha."
+                title: "RECUPERAÇÃO_INICIADA",
+                description: "VERIFICAR_CANAIS_SEGUROS"
             });
         }
         setIsSubmitting(false);
@@ -40,18 +40,18 @@ export default function ForgotPassword() {
 
     return (
         <AuthLayout
-            title="Recuperar Senha"
-            subtitle="Digite seu email para receber o link"
+            title="RECUPERAR_ACESSO"
+            subtitle="INICIAR_PROTOCOLO_RESET_SENHA"
         >
             {!emailSent ? (
                 <form onSubmit={handleSubmit} className="space-y-6 text-left">
                     <div className="space-y-2">
-                        <Label htmlFor="email" className="text-sm font-medium text-gray-200">E-mail</Label>
+                        <Label htmlFor="email" className="block text-[10px] font-mono uppercase tracking-widest text-white/50 mb-1.5">EMAIL_RECUPERAÇÃO</Label>
                         <Input
                             id="email"
                             type="email"
-                            placeholder="seu@email.com"
-                            className="bg-[#1A1A1A] border-white/10 text-white h-12 focus:ring-cyan-500 focus:border-cyan-500 placeholder:text-gray-600"
+                            placeholder="OPERATIVA@LUMI.COM"
+                            className="block w-full rounded-none bg-black border-white/20 text-white focus:border-white focus:ring-0 h-11 placeholder:text-white/20 font-mono text-sm"
                             value={email}
                             onChange={e => setEmail(e.target.value)}
                             required
@@ -60,31 +60,36 @@ export default function ForgotPassword() {
 
                     <Button
                         type="submit"
-                        className="w-full h-12 bg-white text-black hover:bg-white/90 font-medium"
+                        className="w-full h-12 bg-white text-black hover:bg-gray-200 rounded-none font-mono uppercase tracking-widest text-xs font-bold"
                         disabled={isSubmitting}
                     >
-                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Enviar Link de Recuperação"}
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "ENVIAR_LINK_RESGATE"}
                     </Button>
 
-                    <div className="text-center mt-4">
-                        <Link to="/login" className="text-sm text-gray-400 hover:text-white flex items-center justify-center">
-                            <ArrowLeft className="w-4 h-4 mr-2" />
-                            Voltar para o Login
+                    <div className="text-center mt-6">
+                        <Link to="/login" className="text-[10px] text-white/40 hover:text-white flex items-center justify-center font-mono uppercase tracking-widest transition-colors group">
+                            <ArrowLeft className="w-3 h-3 mr-2 group-hover:-translate-x-1 transition-transform" />
+                            RETORNAR_AO_LOGIN
                         </Link>
                     </div>
                 </form>
             ) : (
-                <div className="text-center space-y-4">
-                    <div className="bg-[#00e5ff]/10 p-4 rounded-lg border border-[#00e5ff]/20">
-                        <p className="text-sm text-gray-200">
-                            Enviamos um email para <strong>{email}</strong> com instruções para redefinir sua senha.
+                <div className="text-center space-y-6">
+                    <div className="border border-white/20 bg-white/5 p-6 rounded-none flex flex-col items-center">
+                        <ShieldAlert className="h-10 w-10 text-white/80 mb-4" />
+                        <p className="text-xs text-white/80 font-mono uppercase tracking-wide mb-2">
+                            TRANSMISSÃO_COM_SUCESSO
+                        </p>
+                        <p className="text-[10px] text-white/50 font-mono">
+                            INSTRUÇÕES_ENVIADAS_PARA: <br />
+                            <span className="text-white border-b border-white/20 pb-0.5">{email}</span>
                         </p>
                     </div>
                     <Link
                         to="/login"
-                        className="inline-block mt-4 text-sm text-[#00e5ff] hover:underline"
+                        className="inline-block mt-4 text-xs text-white border-b border-white hover:border-transparent transition-colors font-mono uppercase tracking-widest"
                     >
-                        Voltar para o Login
+                        RETORNAR_AO_LOGIN
                     </Link>
                 </div>
             )}

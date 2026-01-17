@@ -3,12 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  Bot,
   X,
   Send,
   Loader2,
-  MessageCircle,
-  Sparkles
+  Terminal,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,7 +21,6 @@ const messageSchema = z.object({
     .trim()
     .min(1, { message: "Mensagem não pode estar vazia" })
     .max(2000, { message: "Mensagem muito longa (máximo 2000 caracteres)" })
-    // Sanitize potentially dangerous patterns
     .transform(val => val.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ''))
     .transform(val => val.replace(/javascript:/gi, ''))
     .transform(val => val.replace(/on\w+\s*=/gi, ''))
@@ -65,29 +63,28 @@ export default function AIAssistantChat() {
           .select('*', { count: 'exact', head: true });
 
         if (error) throw error;
-        return `Você tem ${count || 0} clientes cadastrados atualmente no sistema.`;
+        return `SYSTEM_QUERY_RESULT: ${count || 0} CLIENT_RECORDS_FOUND.`;
       } catch (err) {
         console.error('Error counting clients:', err);
-        return 'Desculpe, não consegui acessar o número de clientes no momento.';
+        return 'ERROR: UNABLE_TO_ACCESS_DATABASE.';
       }
     }
 
     if (lowerContent.includes('ola') || lowerContent.includes('olá') || lowerContent.includes('oi')) {
-      return 'Olá! Sou a Lumi, sua assistente virtual. Como posso ajudar com sua gestão hoje?';
+      return 'LUMI_OS_V2.0 ONLINE. AWAITING_COMMAND.';
     }
 
     // Default response
-    return "Entendi. No momento, minha conexão com o cérebro principal está em modo de demonstração. Posso ajudar consultando seus clientes ou agenda se você for específico (ex: 'Quantos clientes eu tenho?').";
+    return "COMMAND_RECEIVED. PROCESSING... [DEMO_MODE]. TRY: 'QUANTOS CLIENTES EU TENHO?'";
   };
 
   const sendMessage = async () => {
-    // Validate and sanitize input
     const validationResult = messageSchema.safeParse({ content: input });
 
     if (!validationResult.success) {
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: validationResult.error.errors[0].message
+        content: `ERROR: ${validationResult.error.errors[0].message.toUpperCase()}`
       }]);
       return;
     }
@@ -101,7 +98,6 @@ export default function AIAssistantChat() {
     setInput('');
     setIsLoading(true);
 
-    // Simulate network delay for realism
     setTimeout(async () => {
       const reply = await processMessage(sanitizedContent);
       setMessages(prev => [...prev, {
@@ -123,7 +119,6 @@ export default function AIAssistantChat() {
 
   return (
     <>
-      {/* Floating Button */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -134,107 +129,85 @@ export default function AIAssistantChat() {
           >
             <Button
               onClick={() => setIsOpen(true)}
-              className="h-14 w-14 rounded-full bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black shadow-[0_0_20px_rgba(0,229,255,0.4)] transition-all hover:scale-105"
+              className="h-14 w-14 rounded-none bg-black hover:bg-white text-white hover:text-black border border-white transition-all duration-0"
             >
-              <Sparkles className="h-6 w-6" />
+              <Terminal className="h-6 w-6" />
             </Button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Chat Panel */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] h-[520px] rounded-2xl border border-white/10 bg-[#050505]/95 backdrop-blur-xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-6 right-6 z-50 w-[400px] h-[600px] rounded-none border border-white bg-black shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] flex flex-col overflow-hidden font-mono"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/5">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#00e5ff]/20 flex items-center justify-center border border-[#00e5ff]/30">
-                  <Bot className="h-4 w-4 text-[#00e5ff]" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm text-white">Lumi AI</h3>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#00e5ff] animate-pulse" />
-                    <p className="text-[10px] text-white/50 uppercase tracking-wider">Online</p>
-                  </div>
-                </div>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white bg-black select-none">
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 bg-white animate-pulse" />
+                <h3 className="font-mono text-xs text-white uppercase tracking-widest">
+                  LUMI_CORE // V.2.0
+                </h3>
               </div>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={() => setIsOpen(false)}
-                className="h-8 w-8 text-white/50 hover:text-white hover:bg-white/10"
+                className="h-auto px-2 py-1 text-[10px] text-white hover:bg-white hover:text-black rounded-none border border-transparent hover:border-transparent transition-colors duration-0 uppercase tracking-widest"
               >
-                <X className="h-4 w-4" />
+                [ CLOSE ]
               </Button>
             </div>
 
             {/* Messages */}
-            <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+            <ScrollArea className="flex-1 p-4 bg-black" ref={scrollRef}>
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center px-4">
-                  <div className="w-16 h-16 rounded-full bg-[#00e5ff]/5 flex items-center justify-center mb-4 border border-[#00e5ff]/20">
-                    <MessageCircle className="h-8 w-8 text-[#00e5ff]" />
-                  </div>
-                  <h4 className="font-serif text-lg font-light text-white mb-2">
-                    Como posso ajudar?
-                  </h4>
-                  <p className="text-sm text-white/40 mb-6 font-light">
-                    Pergunte-me sobre seus clientes, agenda ou projetos.
+                <div className="h-full flex flex-col items-center justify-center text-center px-4 opacity-50">
+                  <Terminal className="h-12 w-12 text-white mb-6 stroke-[1]" />
+                  <p className="font-mono text-xs text-white uppercase tracking-widest mb-2">
+                    SYSTEM_READY
                   </p>
-                  <div className="space-y-2 w-full">
-                    {[
-                      "Quantos clientes eu tenho?",
-                      "Tenho eventos hoje?",
-                      "Resumir minha semana"
-                    ].map((suggestion, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setInput(suggestion);
-                          inputRef.current?.focus();
-                        }}
-                        className="w-full text-left text-sm p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all text-white/70"
-                      >
-                        "{suggestion}"
-                      </button>
-                    ))}
-                  </div>
+                  <p className="font-mono text-[10px] text-white/50 uppercase tracking-widest">
+                    INITIALIZE_INPUT...
+                  </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {messages.map((message, idx) => (
                     <div
                       key={idx}
                       className={cn(
-                        "flex",
-                        message.role === 'user' ? 'justify-end' : 'justify-start'
+                        "flex flex-col gap-1",
+                        message.role === 'user' ? 'items-end' : 'items-start'
                       )}
                     >
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] uppercase tracking-widest text-white/40">
+                          {message.role === 'user' ? '[USR]' : '[LUMI]'}
+                        </span>
+                      </div>
                       <div
                         className={cn(
-                          "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
+                          "max-w-[85%] rounded-none px-4 py-3 text-xs font-mono leading-relaxed border",
                           message.role === 'user'
-                            ? 'bg-white/10 text-white rounded-br-sm'
-                            : 'bg-black/40 border border-[#00e5ff]/30 text-white/90 rounded-bl-sm shadow-[0_0_15px_rgba(0,229,255,0.05)]'
+                            ? 'bg-white text-black border-white ml-auto'
+                            : 'bg-black text-white border-white/20 mr-auto'
                         )}
                       >
-                        <p className="whitespace-pre-wrap">{message.content}</p>
+                        <p className="whitespace-pre-wrap uppercase">{message.content}</p>
                       </div>
                     </div>
                   ))}
                   {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="bg-black/40 border border-[#00e5ff]/20 rounded-2xl rounded-bl-sm px-4 py-3">
-                        <Loader2 className="h-4 w-4 animate-spin text-[#00e5ff]" />
-                      </div>
+                    <div className="flex flex-col items-start gap-1 p-2">
+                      <span className="font-mono text-[10px] text-white/50 bg-black uppercase tracking-widest animate-pulse">
+                         /// PROCESSING_DATA...
+                      </span>
                     </div>
                   )}
                 </div>
@@ -242,25 +215,25 @@ export default function AIAssistantChat() {
             </ScrollArea>
 
             {/* Input */}
-            <div className="p-3 border-t border-white/10 bg-black/20">
-              <div className="flex gap-2">
+            <div className="p-0 border-t border-white/20 bg-black">
+              <div className="flex gap-0 relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-xs text-white/50 pointer-events-none">{">"}</span>
                 <Input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Digite sua mensagem..."
+                  placeholder="ENTER_COMMAND..."
                   disabled={isLoading}
                   maxLength={2000}
-                  className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/20 focus:border-[#00e5ff]/50 rounded-xl"
+                  className="flex-1 bg-transparent border-none text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none font-mono text-xs h-12 pl-8 uppercase"
                 />
                 <Button
                   onClick={sendMessage}
                   disabled={!input.trim() || isLoading}
-                  size="icon"
-                  className="shrink-0 bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 rounded-xl"
+                  className="h-12 w-16 shrink-0 bg-transparent text-white hover:bg-white hover:text-black rounded-none border-l border-white/20 transition-colors duration-0"
                 >
-                  <Send className="h-4 w-4" />
+                  <span className="font-mono text-[10px] uppercase tracking-widest">[ -&gt; ]</span>
                 </Button>
               </div>
             </div>

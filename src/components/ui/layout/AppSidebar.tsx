@@ -10,6 +10,7 @@ import {
     Sparkles,
     FileSignature,
     Megaphone,
+    HelpCircle,
     ShieldCheck
 } from "lucide-react"
 
@@ -80,7 +81,7 @@ const items = [
     },
 ]
 
-export function AppSidebar() {
+export function AppSidebar({ onStartTour }: { onStartTour?: () => void }) {
     const { user, signOut, isAdmin: authIsAdmin } = useAuth();
     // Force admin for specific user as backup
     const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
@@ -91,21 +92,21 @@ export function AppSidebar() {
     const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + "/");
 
     return (
-        <Sidebar className="border-r border-white/10 bg-[#050505]/95 backdrop-blur-xl">
-            <SidebarHeader className="border-b border-white/10 p-4">
+        <Sidebar className="border-r border-white/20 bg-black">
+            <SidebarHeader className="border-b border-white/20 p-4 bg-black">
                 <div className="flex items-center gap-2 px-2">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00e5ff] to-[#7000ff] flex items-center justify-center">
-                        <span className="text-white font-bold text-lg">L</span>
+                    <div className="w-8 h-8 flex items-center justify-center border border-white bg-black">
+                        <span className="text-white font-serif font-bold text-lg">L</span>
                     </div>
-                    <span className="font-serif text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+                    <span className="font-serif text-xl font-bold text-white tracking-tight">
                         LumiHub
                     </span>
                 </div>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="bg-black">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-white/50">Menu Principal</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Menu Principal</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
@@ -113,11 +114,11 @@ export function AppSidebar() {
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive(item.url)}
-                                        className="data-[active=true]:bg-[#00e5ff]/10 data-[active=true]:text-[#00e5ff] hover:bg-white/5 hover:text-white transition-all text-gray-400"
+                                        className="data-[active=true]:bg-white data-[active=true]:text-black data-[active=true]:border-r-0 hover:bg-white/10 hover:text-white transition-all text-gray-400 rounded-none border-l-2 border-transparent data-[active=true]:border-transparent"
                                     >
                                         <Link to={item.url}>
                                             <item.icon className="h-4 w-4" />
-                                            <span>{item.title}</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -129,18 +130,18 @@ export function AppSidebar() {
                 {/* Admin Section - Only visible for admins */}
                 {isAdmin && (
                     <SidebarGroup className="mt-auto">
-                        <SidebarGroupLabel className="text-white/50 px-2 text-xs font-semibold uppercase tracking-wider mb-2">Administração</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-white/40 px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">Administração</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 <SidebarMenuItem>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive('/admin')}
-                                        className="text-[#00e5ff] data-[active=true]:bg-[#00e5ff]/10 data-[active=true]:text-[#00e5ff] hover:bg-[#00e5ff]/5 hover:text-[#00e5ff] transition-all"
+                                        className="text-white data-[active=true]:bg-white data-[active=true]:text-black hover:bg-white/10 hover:text-white transition-all rounded-none"
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
-                                            <span>Central Admin</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">Central Admin</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -148,22 +149,39 @@ export function AppSidebar() {
                         </SidebarGroupContent>
                     </SidebarGroup>
                 )}
+
+                <SidebarGroup className="mt-auto pb-4">
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    onClick={onStartTour}
+                                    className="text-gray-400 hover:text-white hover:bg-white/5 transition-all w-full justify-start rounded-none"
+                                >
+                                    <HelpCircle className="h-4 w-4" />
+                                    <span className="font-mono text-xs uppercase tracking-wider">Ajuda / Tutorial</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
+
             </SidebarContent>
 
-            <SidebarFooter className="border-t border-white/10 p-4">
+            <SidebarFooter className="border-t border-white/20 p-4 bg-black">
                 <div className="flex items-center gap-3 px-2 mb-4">
-                    <Avatar className="h-8 w-8 border border-white/10">
+                    <Avatar className="h-8 w-8 border border-white/20 rounded-none">
                         <AvatarImage src={user?.user_metadata?.avatar_url} />
-                        <AvatarFallback>U</AvatarFallback>
+                        <AvatarFallback className="bg-black text-white font-mono rounded-none">U</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col overflow-hidden">
-                        <span className="text-sm font-medium text-white truncate">{user?.user_metadata?.full_name || 'Usuário'}</span>
-                        <span className="text-xs text-white/50 truncate">{user?.email}</span>
+                        <span className="text-sm font-medium text-white truncate font-serif">{user?.user_metadata?.full_name || 'Usuário'}</span>
+                        <span className="text-[10px] text-white/40 truncate font-mono">{user?.email}</span>
                     </div>
                 </div>
                 <Button
                     variant="ghost"
-                    className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                    className="w-full justify-start text-white/60 hover:text-white hover:bg-white/10 rounded-none uppercase text-xs tracking-wider font-mono border border-transparent hover:border-white/20"
                     onClick={signOut}
                 >
                     <LogOut className="h-4 w-4 mr-2" />

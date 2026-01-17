@@ -51,6 +51,8 @@ interface TimeSlot {
 export default function PublicBooking() {
     const { slug } = useParams<{ slug: string }>();
     const { toast } = useToast();
+    const [searchParams] = useState(new URLSearchParams(window.location.search));
+    const refParam = searchParams.get('ref');
 
     // State
     const [profile, setProfile] = useState<Profile | null>(null);
@@ -82,10 +84,10 @@ export default function PublicBooking() {
     const fetchProfileAndServices = async () => {
         try {
             setLoading(true);
-            // 1. Fetch Profile by Slug - only select columns that exist
+            // 1. Fetch Profile by Slug
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, full_name, avatar_url')
+                .select('id, full_name, avatar_url, bio')
                 .eq('id', slug)
                 .maybeSingle();
 
@@ -98,7 +100,7 @@ export default function PublicBooking() {
                 name: profileData.full_name || 'Profissional',
                 full_name: profileData.full_name,
                 avatar_url: profileData.avatar_url,
-                bio: null,
+                bio: profileData.bio,
                 slug: slug || '',
                 business_address: null
             });
@@ -110,7 +112,7 @@ export default function PublicBooking() {
                 .eq('user_id', profileData.id);
 
             if (servicesError) throw servicesError;
-            
+
             // Map to expected Service type
             setServices((servicesData || []).map(s => ({
                 id: s.id,
@@ -223,16 +225,44 @@ export default function PublicBooking() {
             if (!profile || !selectedService || !selectedDate || !selectedTime) throw new Error("Missing data");
 
             const dateStr = format(selectedDate, 'yyyy-MM-dd');
+            let clientId = null;
 
-            // Create Event
-            // Note: For a real app, we should probably check/create a 'client' record first 
-            // OR just store the raw name/phone in the event description for now if public 
-            // insert into clients table is restricted (which it usually is).
-            // For MVP: We insert into 'events' with client info in description or title.
+            // 1. Try to find or create client to track the lead source
+            try {
+                // Determine tags
+                const tags: string[] = [];
+                if (refParam) tags.push(`ref:${refParam}`);
+                tags.push('origem:agendamento_online');
 
-            // BETTER: Create a 'pending_appointments' table. 
-            // BUT current task says "Allow PUBLIC insert events with status pending".
-            // Let's assume the 'events' table can take these.
+                // Try to find existing client by phone (if RLS allows select, often it doesn't for public)
+                // Assuming we might fail here, so we wrap in try/catch.
+                // NOTE: In a real secure app, this should be an RPC 'create_booking_and_client'.
+                // Proceeding with best-effort client creation.
+
+                // We will try to insert. If conflict (phone unique key?), we ideally update. 
+                // But typically client phone is not unique in many simple schemas, OR RLS blocks access.
+                // Let's attempt to insert a new client.
+                const { data: newClient, error: clientError } = await supabase
+                    .from('clients')
+                    .insert({
+                        name: clientName,
+                        phone: clientPhone,
+                        user_id: profile.id, // Assign to the professional
+                        tags: tags,
+                        last_contacted_at: new Date().toISOString(),
+                        origin: 'site_booking'
+                    })
+                    .select()
+                    .single();
+
+                if (!clientError && newClient) {
+                    clientId = newClient.id;
+                } else {
+                    console.log('Could not create client record (likely perms):', clientError);
+                }
+            } catch (err) {
+                console.log('Client creation skipped:', err);
+            }
 
             const description = `Agendamento Online\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${selectedService.name}`;
 
@@ -245,8 +275,9 @@ export default function PublicBooking() {
                     event_date: dateStr,
                     start_time: selectedTime,
                     duration_minutes: selectedService.duration_minutes,
-                    is_active: true, // Wait, maybe false for 'pending'? schema says boolean
-                    // status: 'pending' // if we had a status column
+                    is_active: true,
+                    total_value: selectedService.price, // Populate new column
+                    client_id: clientId // If we managed to create/find it
                 });
 
             if (error) throw error;

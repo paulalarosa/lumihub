@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 
 export interface Contract {
     id: string;
-    client_id: string;
+    project_id: string;
     title: string;
     content?: string;
     status: 'draft' | 'sent' | 'signed';
@@ -13,7 +13,7 @@ export interface Contract {
     signature_url?: string;
     signed_at?: string;
     attachment_url?: string;
-    client?: {
+    project?: {
         name: string;
     };
 }
@@ -30,7 +30,7 @@ export function useContracts() {
             .from('contracts')
             .select(`
                 *,
-                client:clients(name)
+                project:projects(name)
             `)
             .order('created_at', { ascending: false });
 
@@ -47,12 +47,12 @@ export function useContracts() {
         if (!user) return;
         const { data, error } = await supabase
             .from('contracts')
-            .insert([{ 
+            .insert([{
                 title: contract.title || 'Contrato',
                 content: contract.content || '',
                 status: contract.status || 'draft',
                 project_id: contract.project_id,
-                user_id: user.id 
+                user_id: user.id
             }])
             .select()
             .single();

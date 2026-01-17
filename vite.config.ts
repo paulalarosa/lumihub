@@ -2,6 +2,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -11,6 +12,37 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+      manifest: {
+        name: 'LumiHub - Gestão para Maquiadoras',
+        short_name: 'LumiHub',
+        description: 'Plataforma de gestão completa para profissionais de beleza.',
+        theme_color: '#000000',
+        background_color: '#000000',
+        display: 'standalone',
+        orientation: 'portrait',
+        icons: [
+          {
+            src: 'pwa-icon.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-icon.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          }
+        ]
+      }
+    }),
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   base: './', // Ensure relative paths for S3

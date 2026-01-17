@@ -192,6 +192,7 @@ export default function Clientes() {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Nunca";
     try {
+      if (!dateString) return 'Data desconhecida';
       return format(new Date(dateString), "d 'de' MMM, yyyy", { locale: ptBR });
     } catch (e) {
       return "Data inválida";
@@ -207,24 +208,29 @@ export default function Clientes() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col font-mono selection:bg-white selection:text-black">
       {/* Header */}
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b border-white/20 bg-black">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link to="/dashboard">
-                <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="text-white hover:bg-white hover:text-black rounded-none">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-[#00e5ff]/10 rounded-xl flex items-center justify-center border border-[#00e5ff]/20">
-                  <User className="h-5 w-5 text-[#00e5ff]" />
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-white flex items-center justify-center">
+                  <User className="h-5 w-5 text-black" />
                 </div>
-                <span className="font-serif font-bold text-xl text-white">
-                  Meus Clientes
-                </span>
+                <div>
+                  <h1 className="font-serif text-2xl text-white tracking-tight">
+                    MEUS CLIENTES
+                  </h1>
+                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">
+                    /// DATABASE ACCESS
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -233,58 +239,58 @@ export default function Clientes() {
               if (!open) resetForm();
             }}>
               <DialogTrigger asChild>
-                <Button className="gap-2 bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 border-none shadow-[0_0_20px_rgba(0,229,255,0.3)]">
-                  <Plus className="h-4 w-4" />
+                <Button className="rounded-none bg-white text-black hover:bg-gray-300 font-mono text-xs uppercase tracking-widest h-10 px-6">
+                  <Plus className="h-4 w-4 mr-2" />
                   Novo Cliente
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-md bg-[#0a0a0a] border-white/10 text-white">
+              <DialogContent className="max-w-md bg-black border border-white p-6 rounded-none text-white">
                 <DialogHeader>
-                  <DialogTitle className="text-white font-serif">
-                    {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
+                  <DialogTitle className="text-white font-serif text-2xl">
+                    {editingClient ? 'EDITAR CLIENTE' : 'NOVO CLIENTE'}
                   </DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6 mt-4">
                   <div className="space-y-2">
-                    <Label className="text-white/70">Nome *</Label>
+                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Nome *</Label>
                     <Input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Nome da cliente"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50"
+                      placeholder="NOME COMPLETO"
+                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/70">Email</Label>
+                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Email</Label>
                     <Input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="email@exemplo.com"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50"
+                      placeholder="EMAIL@EXEMPLO.COM"
+                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/70">Telefone</Label>
+                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Telefone</Label>
                     <Input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      placeholder="(11) 99999-9999"
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50"
+                      placeholder="(00) 00000-0000"
+                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-white/70">Anotações</Label>
+                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Anotações</Label>
                     <Textarea
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Preferências, alergias, detalhes..."
+                      placeholder="OBSERVAÇÕES TÉCNICAS..."
                       rows={3}
-                      className="bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50"
+                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none font-mono text-sm resize-none"
                     />
                   </div>
-                  <Button type="submit" className="w-full bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90">
-                    {editingClient ? 'Salvar Alterações' : 'Adicionar Cliente'}
+                  <Button type="submit" className="w-full bg-white text-black hover:bg-gray-300 rounded-none font-mono text-xs uppercase tracking-widest h-12">
+                    {editingClient ? 'SALVAR DADOS' : 'REGISTRAR CLIENTE'}
                   </Button>
                 </form>
               </DialogContent>
@@ -293,14 +299,14 @@ export default function Clientes() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {/* Search */}
-        <div className="mb-6">
+        <div className="mb-8">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-white/40" />
+            <Search className="absolute left-4 top-4 h-4 w-4 text-white/40" />
             <Input
-              placeholder="Buscar por nome, email ou telefone..."
-              className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-[#00e5ff]/50 rounded-xl"
+              placeholder="BUSCAR NO SISTEMA..."
+              className="pl-12 bg-black border border-white/20 text-white placeholder:text-white/30 focus:border-white rounded-none h-12 font-mono text-sm"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -310,94 +316,95 @@ export default function Clientes() {
         {/* Client List */}
         <div className="space-y-4">
           {loadingClients ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5ff]"></div>
+            <div className="flex justify-center py-20">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 border border-white/20 border-t-white animate-spin rounded-full" />
+                <span className="font-mono text-xs uppercase tracking-widest text-white/50">Carregando Dados...</span>
+              </div>
             </div>
           ) : filteredClients.length === 0 ? (
             /* Empty State */
-            /* Empty State */
             <EmptyState
               icon={Star}
-              title={searchTerm ? 'Nenhum resultado encontrado' : 'Sua lista de estrelas está vazia'}
-              description={searchTerm ? 'Tente buscar por outro termo.' : 'Adicione seu primeiro cliente para começar a organizar seu império.'}
-              actionLabel={!searchTerm ? 'Adicionar Primeiro Cliente' : undefined}
+              title={searchTerm ? 'REGISTRO NÃO ENCONTRADO' : 'DATABASE VAZIO'}
+              description={searchTerm ? 'Verifique os termos de busca.' : 'Inicie o cadastro de clientes para popular o sistema.'}
+              actionLabel={!searchTerm ? 'INICIAR CADASTRO' : undefined}
               onAction={!searchTerm ? () => setIsDialogOpen(true) : undefined}
+              className="border border-white/10 rounded-none bg-black"
             />
           ) : (
             /* Data Table */
-            /* Data Table (Desktop) & Cards (Mobile) */
-            <div className="space-y-4">
-              {/* Desktop Table - Hidden on Mobile */}
-              <div className="hidden md:block bg-white/5 border border-white/10 rounded-xl overflow-hidden backdrop-blur-sm">
+            <div className="space-y-6">
+              {/* Desktop Table */}
+              <div className="hidden md:block">
                 <Table>
-                  <TableHeader className="bg-white/5">
-                    <TableRow className="border-white/10 hover:bg-white/5">
-                      <TableHead className="text-white/60">Cliente</TableHead>
-                      <TableHead className="text-white/60">Contato</TableHead>
-                      <TableHead className="text-white/60">Última Visita</TableHead>
-                      <TableHead className="text-white/60 text-right">Ações</TableHead>
+                  <TableHeader>
+                    <TableRow className="border-b border-white hover:bg-transparent">
+                      <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">Cliente</TableHead>
+                      <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">Contato</TableHead>
+                      <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">Última Visita</TableHead>
+                      <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12 text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredClients.map((client) => (
-                      <TableRow key={client.id} className="border-white/10 hover:bg-white/5 transition-colors">
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-10 w-10 border border-white/10">
+                      <TableRow key={client.id} className="border-b border-white/10 hover:bg-white hover:text-black group transition-colors duration-0">
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10 border border-white/20 rounded-none group-hover:border-black">
                               <AvatarImage src={client.avatar_url || ''} />
-                              <AvatarFallback className="bg-white/10 text-white/70">
+                              <AvatarFallback className="bg-white/10 text-white rounded-none group-hover:bg-black group-hover:text-white font-mono">
                                 {client.name.substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <span className="font-medium text-white">{client.name}</span>
+                              <span className="font-mono text-sm uppercase font-bold">{client.name}</span>
                               {client.email && (
-                                <span className="text-xs text-white/50">{client.email}</span>
+                                <span className="text-xs text-gray-500 font-mono group-hover:text-black/60">{client.email}</span>
                               )}
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>
                           {client.phone ? (
-                            <div className="flex items-center gap-2 text-sm text-white/70 bg-white/5 px-2 py-1 rounded-md w-fit">
-                              <Phone className="h-3 w-3 text-[#00e5ff]" />
-                              <span>{client.phone}</span>
-                            </div>
+                            <span className="font-mono text-xs">{client.phone}</span>
                           ) : (
-                            <span className="text-white/30 text-sm">-</span>
+                            <span className="text-gray-600 group-hover:text-black/40 text-xs font-mono">-</span>
                           )}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2 text-sm text-white/60">
-                            <Calendar className="h-3 w-3" />
-                            <span>{formatDate(client.last_visit)}</span>
+                          <div className="flex items-center gap-2 font-mono text-xs">
+                            <span className="w-2 h-2 bg-gray-600 group-hover:bg-black" />
+                            {formatDate(client.last_visit)}
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-[#0a0a0a] border-white/10 text-white">
-                              <DropdownMenuItem className="focus:bg-white/10 focus:text-white" onClick={() => navigate(`/clientes/${client.id}`)}>
-                                <Eye className="h-4 w-4 mr-2" />
-                                Ver Detalhes
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="focus:bg-white/10 focus:text-white" onClick={() => openEditDialog(client)}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="text-red-400 focus:text-red-300 focus:bg-red-500/10"
-                                onClick={() => handleDelete(client.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/clientes/${client.id}`)}
+                              className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(client)}
+                              className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(client.id)}
+                              className="h-8 w-8 p-0 rounded-none text-red-500 hover:bg-red-600 hover:text-white"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -405,62 +412,51 @@ export default function Clientes() {
                 </Table>
               </div>
 
-              {/* Mobile Cards - Visible on Mobile only */}
+              {/* Mobile Cards */}
               <div className="grid grid-cols-1 gap-4 md:hidden">
                 {filteredClients.map((client) => (
-                  <div key={client.id} className="bg-white/5 border border-white/10 rounded-xl p-4 backdrop-blur-sm shadow-sm relative">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-12 w-12 border border-white/10">
+                  <div key={client.id} className="bg-black border border-white/20 p-6 rounded-none relative">
+                    <div className="flex items-start justify-between mb-6">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="h-12 w-12 border border-white rounded-none">
                           <AvatarImage src={client.avatar_url || ''} />
-                          <AvatarFallback className="bg-white/10 text-white/70">
+                          <AvatarFallback className="bg-black text-white font-mono rounded-none border border-white/20">
                             {client.name.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-medium text-white text-lg">{client.name}</h3>
+                          <h3 className="font-serif text-xl text-white">{client.name}</h3>
                           {client.phone && (
-                            <div className="flex items-center gap-1.5 text-sm text-white/70 mt-1">
-                              <Phone className="h-3 w-3 text-[#00e5ff]" />
-                              <span>{client.phone}</span>
+                            <div className="font-mono text-xs text-gray-500 mt-1">
+                              {client.phone}
                             </div>
                           )}
                         </div>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 -mr-2 text-white/60 hover:text-white hover:bg-white/10">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-[#0a0a0a] border-white/10 text-white z-50">
-                          <DropdownMenuItem className="focus:bg-white/10 focus:text-white" onClick={() => navigate(`/clientes/${client.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Ver Detalhes
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="focus:bg-white/10 focus:text-white" onClick={() => openEditDialog(client)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-red-400 focus:text-red-300 focus:bg-red-500/10"
-                            onClick={() => handleDelete(client.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
 
-                    <div className="mt-4 pt-3 border-t border-white/5 flex items-center justify-between text-sm text-white/50">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3" />
-                        <span> {formatDate(client.last_visit)}</span>
-                      </div>
-                      {client.email && (
-                        <span className="truncate max-w-[150px]">{client.email}</span>
-                      )}
+                    <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-4">
+                      <Button
+                        variant="outline"
+                        className="rounded-none border-white/20 text-xs font-mono uppercase h-10 hover:bg-white hover:text-black"
+                        onClick={() => navigate(`/clientes/${client.id}`)}
+                      >
+                        Ver
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="rounded-none border-white/20 text-xs font-mono uppercase h-10 hover:bg-white hover:text-black"
+                        onClick={() => openEditDialog(client)}
+                      >
+                        Editar
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="rounded-none border-red-900 text-red-500 text-xs font-mono uppercase h-10 hover:bg-red-600 hover:text-white hover:border-red-600"
+                        onClick={() => handleDelete(client.id)}
+                      >
+                        Excluir
+                      </Button>
                     </div>
                   </div>
                 ))}

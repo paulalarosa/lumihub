@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { format, parseISO, isPast, isToday } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { CheckCircle2, Circle, Clock, Filter } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, Circle, Clock, Filter, CheckSquare, ListTodo, Check } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 interface Task {
   id: string;
@@ -46,10 +45,17 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
 
       if (error) throw error;
 
-      toast.success(task.is_completed ? "Tarefa reaberta" : "Tarefa concluída!");
+      toast({
+        title: task.is_completed ? "TASK_REOPENED" : "TASK_COMPLETED",
+        description: "STATUS_UPDATED_SUCCESSFULLY",
+      });
       onTaskUpdate();
     } catch (error) {
-      toast.error("Erro ao atualizar tarefa");
+      toast({
+        title: "ERROR",
+        description: "FAILED_TO_UPDATE_TASK_STATUS",
+        variant: "destructive"
+      });
     } finally {
       setUpdatingTask(null);
     }
@@ -67,53 +73,55 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
   const completedCount = tasks.filter((t) => t.is_completed).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">Tarefas</h2>
-        <p className="text-muted-foreground">
-          Gerencie suas tarefas atribuídas
+        <h2 className="text-xl font-serif text-white uppercase tracking-widest flex items-center gap-2">
+          <ListTodo className="h-5 w-5" /> Operations_List
+        </h2>
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1">
+          /// TASK_MANAGEMENT_SYSTEM
         </p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
+        <Card className="bg-black border border-white/20 rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">{tasks.length}</p>
-                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-mono text-white">{tasks.length}</p>
+                <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono">TOTAL_OBJECTIVES</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-                <Filter className="h-5 w-5 text-muted-foreground" />
+              <div className="h-10 w-10 rounded-none border border-white/20 bg-white/5 flex items-center justify-center">
+                <Filter className="h-5 w-5 text-white/50" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-black border border-white/20 rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">{pendingCount}</p>
-                <p className="text-sm text-muted-foreground">Pendentes</p>
+                <p className="text-2xl font-mono text-white">{pendingCount}</p>
+                <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono">PENDING</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
-                <Circle className="h-5 w-5 text-orange-600" />
+              <div className="h-10 w-10 rounded-none border border-white/20 bg-white/5 flex items-center justify-center">
+                <Circle className="h-5 w-5 text-white" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-black border border-white/20 rounded-none">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-2xl font-bold">{completedCount}</p>
-                <p className="text-sm text-muted-foreground">Concluídas</p>
+                <p className="text-2xl font-mono text-white/50">{completedCount}</p>
+                <p className="text-[10px] text-white/30 uppercase tracking-widest font-mono">COMPLETED</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <div className="h-10 w-10 rounded-none border border-white/20 bg-white/5 flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5 text-white/30" />
               </div>
             </div>
           </CardContent>
@@ -121,44 +129,47 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
       </div>
 
       {/* Filter Buttons */}
-      <div className="flex gap-2">
+      <div className="flex gap-2 bg-black border border-white/20 p-1 w-fit">
         <Button
-          variant={filter === "all" ? "default" : "outline"}
+          variant={filter === "all" ? "secondary" : "ghost"}
           size="sm"
           onClick={() => setFilter("all")}
+          className={`rounded-none font-mono text-xs uppercase tracking-widest h-7 ${filter === "all" ? "bg-white text-black hover:bg-white/90" : "text-white/50 hover:text-white hover:bg-white/10"}`}
         >
-          Todas
+          ALL
         </Button>
+        <div className="w-[1px] bg-white/10 h-4 self-center mx-1"></div>
         <Button
-          variant={filter === "pending" ? "default" : "outline"}
+          variant={filter === "pending" ? "secondary" : "ghost"}
           size="sm"
           onClick={() => setFilter("pending")}
+          className={`rounded-none font-mono text-xs uppercase tracking-widest h-7 ${filter === "pending" ? "bg-white text-black hover:bg-white/90" : "text-white/50 hover:text-white hover:bg-white/10"}`}
         >
-          Pendentes ({pendingCount})
+          PENDING
         </Button>
+        <div className="w-[1px] bg-white/10 h-4 self-center mx-1"></div>
         <Button
-          variant={filter === "completed" ? "default" : "outline"}
+          variant={filter === "completed" ? "secondary" : "ghost"}
           size="sm"
           onClick={() => setFilter("completed")}
+          className={`rounded-none font-mono text-xs uppercase tracking-widest h-7 ${filter === "completed" ? "bg-white text-black hover:bg-white/90" : "text-white/50 hover:text-white hover:bg-white/10"}`}
         >
-          Concluídas ({completedCount})
+          COMPLETED
         </Button>
       </div>
 
       {/* Tasks List */}
       {filteredTasks.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">
-              {filter === "pending"
-                ? "Nenhuma tarefa pendente"
-                : filter === "completed"
-                ? "Nenhuma tarefa concluída"
-                : "Nenhuma tarefa encontrada"}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="border border-white/10 bg-white/5 border-dashed p-12 text-center">
+          <CheckSquare className="h-12 w-12 mx-auto text-white/20 mb-4" />
+          <p className="text-white/40 font-mono text-xs uppercase tracking-widest">
+            {filter === "pending"
+              ? "NO_PENDING_TASKS"
+              : filter === "completed"
+                ? "NO_COMPLETED_tasks"
+                : "NO_Record_Found"}
+          </p>
+        </div>
       ) : (
         <div className="space-y-3">
           {filteredTasks.map((task) => {
@@ -168,36 +179,39 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
               <Card
                 key={task.id}
                 className={cn(
-                  "transition-colors",
-                  task.is_completed && "opacity-60"
+                  "bg-black border border-white/20 rounded-none transition-all hover:border-white group",
+                  task.is_completed && "opacity-50 hover:opacity-100 border-white/10 bg-transparent"
                 )}
               >
                 <CardContent className="p-4">
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      checked={task.is_completed}
-                      onCheckedChange={() => handleToggleComplete(task)}
-                      disabled={updatingTask === task.id}
-                      className="mt-1"
-                    />
+                  <div className="flex items-start gap-4">
+                    <div className="pt-1">
+                      <Checkbox
+                        checked={task.is_completed}
+                        onCheckedChange={() => handleToggleComplete(task)}
+                        disabled={updatingTask === task.id}
+                        className="rounded-none border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-black h-5 w-5"
+                      />
+                    </div>
+
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-1">
                           <p
                             className={cn(
-                              "font-medium",
-                              task.is_completed && "line-through text-muted-foreground"
+                              "font-mono text-sm uppercase tracking-wide text-white leading-tight",
+                              task.is_completed && "line-through text-white/50"
                             )}
                           >
                             {task.title}
                           </p>
                           {task.projects?.name && (
-                            <p className="text-sm text-muted-foreground">
-                              Projeto: {task.projects.name}
+                            <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
+                              PROJECT: {task.projects.name}
                             </p>
                           )}
                           {task.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
+                            <p className="text-xs text-white/60 mt-2 font-mono border-l-2 border-white/10 pl-2">
                               {task.description}
                             </p>
                           )}
@@ -205,21 +219,20 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
 
                         {task.due_date && (
                           <Badge
-                            variant={
-                              dueDateStatus === "overdue"
-                                ? "destructive"
-                                : dueDateStatus === "today"
-                                ? "default"
-                                : "secondary"
-                            }
-                            className="shrink-0"
+                            variant="outline"
+                            className={cn(
+                              "shrink-0 rounded-none border-white/20 font-mono text-[9px] uppercase tracking-widest",
+                              dueDateStatus === "overdue" ? "text-red-400 border-red-900/50 bg-red-900/10" :
+                                dueDateStatus === "today" ? "text-white bg-white/20 border-white" :
+                                  "text-white/50"
+                            )}
                           >
                             <Clock className="h-3 w-3 mr-1" />
                             {dueDateStatus === "overdue"
-                              ? "Atrasada"
+                              ? "OVERDUE"
                               : dueDateStatus === "today"
-                              ? "Hoje"
-                              : format(parseISO(task.due_date), "dd/MM")}
+                                ? "TODAY"
+                                : format(parseISO(task.due_date), "dd.MM")}
                           </Badge>
                         )}
                       </div>

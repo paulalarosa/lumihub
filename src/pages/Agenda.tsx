@@ -7,7 +7,8 @@ import {
   ArrowLeft,
   Calendar as CalendarIcon,
   Menu,
-  Link as LinkIcon
+  Link as LinkIcon,
+  Terminal
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
@@ -108,7 +109,7 @@ export default function Agenda() {
         location: gEvent.location || null,
         address: gEvent.location || null,
         notes: gEvent.htmlLink, // Storing link in notes for now
-        color: '#4285F4', // Google Blue
+        color: '#FFFFFF', // Monochrome
         client_id: null,
         project_id: null,
         reminder_days: [],
@@ -273,21 +274,21 @@ export default function Agenda() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-black flex flex-col text-white font-mono selection:bg-white selection:text-black">
       {/* Header */}
-      <header className="border-b border-white/10 bg-black/40 backdrop-blur-md shrink-0">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b border-white/20 bg-black sticky top-0 z-10">
+        <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <Link to="/dashboard">
-                <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="rounded-none text-white hover:text-black hover:bg-white transition-colors">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
@@ -296,22 +297,24 @@ export default function Agenda() {
               {isMobile && (
                 <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                   <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" className="border-white/10 bg-transparent text-white/70">
+                    <Button variant="outline" size="icon" className="rounded-none border-white/20 bg-transparent text-white hover:bg-white/10">
                       <Menu className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-80 p-4 bg-[#050505] border-r-white/10">
-                    {sidebarContent}
+                  <SheetContent side="left" className="w-80 p-0 bg-black border-r border-white/20 rounded-none">
+                    <div className="p-4">
+                      {sidebarContent}
+                    </div>
                   </SheetContent>
                 </Sheet>
               )}
 
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#00e5ff]/10 rounded-xl flex items-center justify-center border border-[#00e5ff]/20">
-                  <CalendarIcon className="h-5 w-5 text-[#00e5ff]" />
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 border border-white/20 bg-black flex items-center justify-center rounded-none hover:bg-white hover:text-black transition-all group">
+                  <Terminal className="h-5 w-5 text-white group-hover:text-black transition-colors" />
                 </div>
-                <span className="font-bold text-xl text-white hidden sm:inline">
-                  Agenda
+                <span className="font-serif font-bold text-2xl text-white uppercase tracking-tighter hidden sm:inline">
+                  AGENDA // SYSTEM
                 </span>
               </div>
             </div>
@@ -319,47 +322,59 @@ export default function Agenda() {
             <Button
               onClick={handleConnectGoogle}
               variant="outline"
-              className="gap-2 border-white/10 text-white/70 hover:text-white hover:bg-white/5 hover:border-[#00e5ff]/30"
+              className="gap-2 rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10"
             >
-              <LinkIcon className="h-4 w-4" />
-              <span className="hidden sm:inline">Conectar Google Agenda</span>
+              <LinkIcon className="h-3 w-3" />
+              <span className="hidden sm:inline">LINK_GOOGLE_CALENDAR</span>
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-6 flex flex-col min-h-0">
+      <main className="flex-1 container mx-auto px-6 py-8 flex flex-col min-h-0">
         {/* Calendar Header */}
-        <CalendarHeader
-          currentDate={currentDate}
-          onNavigate={handleNavigate}
-          onToday={handleToday}
-          onCreateEvent={handleCreateEvent}
-        />
+        <div className="mb-6">
+          <CalendarHeader
+            currentDate={currentDate}
+            onNavigate={handleNavigate}
+            onToday={handleToday}
+            onCreateEvent={handleCreateEvent}
+          />
+        </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex gap-6 mt-6 min-h-0">
+        <div className="flex-1 flex gap-8 mt-2 min-h-0">
           {/* Desktop Sidebar */}
           {!isMobile && (
-            <div className="w-72 shrink-0">
+            <div className="w-80 shrink-0 border border-white/20 p-4 bg-black">
               {sidebarContent}
             </div>
           )}
 
           {/* Event List View */}
-          <div className="flex-1 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-sm overflow-hidden min-h-[500px]">
+          <div className="flex-1 border border-white/20 bg-black relative min-h-[500px]">
+            {/* Grid background effect */}
+            <div className="absolute inset-0 pointer-events-none opacity-10"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}>
+            </div>
+
             {loadingEvents ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00e5ff]"></div>
+              <div className="flex items-center justify-center h-full relative z-10">
+                <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
               </div>
             ) : (
-              <EventListView
-                events={allEvents}
-                selectedDate={selectedDate}
-                currentDate={currentDate}
-                onEditEvent={handleEventClick} // Changed from handleEditEvent to open Sidebar
-                onDeleteEvent={handleDeleteEvent}
-              />
+              <div className="relative z-10 h-full">
+                <EventListView
+                  events={allEvents}
+                  selectedDate={selectedDate}
+                  currentDate={currentDate}
+                  onEditEvent={handleEventClick}
+                  onDeleteEvent={handleDeleteEvent}
+                />
+              </div>
             )}
           </div>
         </div>
@@ -374,15 +389,13 @@ export default function Agenda() {
         onSuccess={() => {
           fetchEvents();
           setDialogOpen(false);
-          // If we were editing from sidebar, keep sidebar closed or refresh it? 
-          // Currently onSuccess closes dialog. Sidebar might need to refresh if it's open.
         }}
       />
 
       <EventDetailsSidebar
         open={sidebarOpen}
         onOpenChange={setSidebarOpen}
-        event={editingEvent} // Reusing editingEvent state for selected event
+        event={editingEvent}
         onEdit={(e) => {
           setSidebarOpen(false);
           handleEditEvent(e);
@@ -391,7 +404,7 @@ export default function Agenda() {
           handleDeleteEvent(id);
           setSidebarOpen(false);
         }}
-        userRole={isAdmin ? 'admin' : 'assistant'} // Using isAdmin from useAuth
+        userRole={isAdmin ? 'admin' : 'assistant'}
       />
     </div>
   );

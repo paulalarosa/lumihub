@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
-  
+  const { language, setLanguage, t } = useLanguage();
+
   // Check if we're on the home page (dark bg)
   const isHomePage = location.pathname === '/';
 
@@ -20,19 +22,18 @@ const Header = () => {
   }, []);
 
   const navigation = [
-    { name: "Recursos", href: "/recursos" },
-    { name: "Planos", href: "/planos" },
-    { name: "Blog", href: "/blog" },
-    { name: "Contato", href: "/contact" },
+    { name: t("header_features"), href: "/recursos" },
+    { name: t("header_plans"), href: "/planos" },
+    { name: t("header_blog"), href: "/blog" },
+    { name: "Contato", href: "/contato" }, // Keeping generic for now or add to dictionary
   ];
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled || !isHomePage
-          ? 'bg-[#050505]/90 backdrop-blur-xl border-b border-white/10' 
-          : 'bg-transparent'
-      }`}
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || !isHomePage
+        ? 'bg-[#050505]/90 backdrop-blur-xl border-b border-white/10'
+        : 'bg-transparent'
+        }`}
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18 py-4">
@@ -50,7 +51,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             {navigation.map((item) => (
               <Link
-                key={item.name}
+                key={item.href} // Changed key to href to be unique regardless of lang
                 to={item.href}
                 className="text-white/60 hover:text-white transition-colors duration-200 font-light text-sm tracking-wide"
               >
@@ -60,22 +61,41 @@ const Header = () => {
           </nav>
 
           {/* Desktop CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link to="/auth">
-              <Button 
-                variant="ghost" 
-                className="text-white/60 hover:text-white hover:bg-white/5"
+          <div className="hidden md:flex items-center space-x-6">
+            {/* Language Toggle */}
+            <div className="flex items-center space-x-2 font-mono text-[10px] tracking-widest select-none">
+              <span
+                className={`cursor-pointer transition-colors ${language === 'pt' ? 'text-white font-bold' : 'text-white/40 hover:text-white'}`}
+                onClick={() => setLanguage('pt')}
               >
-                Entrar
-              </Button>
-            </Link>
-            <Link to="/auth">
-              <Button 
-                className="bg-white text-[#050505] hover:bg-white/90 border-0 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                PT
+              </span>
+              <span className="text-white/20">/</span>
+              <span
+                className={`cursor-pointer transition-colors ${language === 'en' ? 'text-white font-bold' : 'text-white/40 hover:text-white'}`}
+                onClick={() => setLanguage('en')}
               >
-                Começar Grátis
-              </Button>
-            </Link>
+                EN
+              </span>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Link to="/auth">
+                <Button
+                  variant="ghost"
+                  className="text-white hover:text-white hover:bg-white/5 font-mono text-xs uppercase tracking-widest"
+                >
+                  {t("header_login")}
+                </Button>
+              </Link>
+              <Link to="/auth">
+                <Button
+                  className="bg-white text-[#050505] hover:bg-white/90 border-0 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] rounded-none font-mono text-xs uppercase tracking-widest px-6"
+                >
+                  {t("header_start")}
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Mobile menu button */}
@@ -97,7 +117,7 @@ const Header = () => {
             <nav className="flex flex-col space-y-4">
               {navigation.map((item) => (
                 <Link
-                  key={item.name}
+                  key={item.href}
                   to={item.href}
                   className="text-white/70 hover:text-white transition-colors duration-200 font-light py-2"
                   onClick={() => setIsMenuOpen(false)}
@@ -105,18 +125,32 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="flex flex-col space-y-3 pt-4 border-t border-white/10">
+              <div className="flex justify-center space-x-6 py-4 border-y border-white/10">
+                <span
+                  className={`cursor-pointer font-mono text-xs ${language === 'pt' ? 'text-white underline' : 'text-white/60'}`}
+                  onClick={() => { setLanguage('pt'); setIsMenuOpen(false); }}
+                >
+                  PORTUGUÊS
+                </span>
+                <span
+                  className={`cursor-pointer font-mono text-xs ${language === 'en' ? 'text-white underline' : 'text-white/60'}`}
+                  onClick={() => { setLanguage('en'); setIsMenuOpen(false); }}
+                >
+                  ENGLISH
+                </span>
+              </div>
+              <div className="flex flex-col space-y-3 pt-4">
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button 
-                    variant="outline" 
-                    className="w-full bg-transparent border-white/20 text-white hover:bg-white/5"
+                  <Button
+                    variant="outline"
+                    className="w-full bg-transparent border-white/20 text-white hover:bg-white/5 font-mono uppercase tracking-widest text-xs"
                   >
-                    Entrar
+                    {t("header_login")}
                   </Button>
                 </Link>
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full bg-white text-[#050505] hover:bg-white/90">
-                    Começar Grátis
+                  <Button className="w-full bg-white text-[#050505] hover:bg-white/90 font-mono uppercase tracking-widest text-xs">
+                    {t("header_start")}
                   </Button>
                 </Link>
               </div>

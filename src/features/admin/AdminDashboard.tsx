@@ -12,8 +12,9 @@ import AdminLogs from '@/features/admin/AdminLogs';
 import AdminSubscriptions from '@/features/admin/AdminSubscriptions';
 import MFAEnrollment from '@/features/auth/MFAEnrollment';
 import AdminSecurity from '@/features/admin/AdminSecurity';
+import AdminAnalytics from '@/features/admin/AdminAnalytics';
 
-type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security';
+type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security' | 'analytics';
 
 
 
@@ -69,6 +70,7 @@ export default function AdminDashboard() {
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
     { id: 'config' as AdminTab, label: 'Configurações', icon: Settings },
     { id: 'security' as AdminTab, label: 'Segurança', icon: ShieldCheck },
+    { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3 },
     { id: 'logs' as AdminTab, label: 'Logs de Erro', icon: AlertCircle },
   ];
 
@@ -137,7 +139,7 @@ export default function AdminDashboard() {
             <h2 className="text-white font-serif text-3xl font-bold">
               {menuItems.find(m => m.id === activeTab)?.label}
             </h2>
-            <div className="text-gray-400 text-sm">
+            <div className="text-gray-400 text-sm flex items-center">
               Admin: {user?.email}
             </div>
           </div>
@@ -167,6 +169,7 @@ export default function AdminDashboard() {
           )}
           {activeTab === 'config' && <AdminConfig />}
           {activeTab === 'security' && <AdminSecurity />}
+          {activeTab === 'analytics' && <AdminAnalytics />}
           {activeTab === 'logs' && <AdminLogs />}
         </div>
       </div>

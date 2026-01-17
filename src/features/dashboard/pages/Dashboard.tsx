@@ -146,7 +146,7 @@ export default function Dashboard() {
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          className="w-12 h-12 border-2 border-[#00e5ff] border-t-transparent rounded-full"
+          className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full"
         />
       </div>
     );
@@ -180,49 +180,13 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050505] text-[#C0C0C0] overflow-hidden selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+    <div className="min-h-screen bg-[#000000] text-white overflow-hidden selection:bg-white selection:text-black">
 
-      {/* Background Ambience */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-[#00e5ff]/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-[#F5E6D3]/5 rounded-full blur-[100px]" />
-      </div>
-
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00e5ff]/20 to-[#00e5ff]/5 border border-[#00e5ff]/20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-              <Sparkles className="h-5 w-5 text-[#00e5ff]" />
-            </div>
-            <div>
-              <h1 className="font-serif text-2xl text-white tracking-tight">LumiHub</h1>
-            </div>
-          </Link>
-
-          <div className="flex items-center gap-2">
-            {isAdmin && (
-              <Link to="/admin">
-                <Button variant="ghost" size="sm" className="hidden md:flex text-[#C0C0C0] hover:text-white hover:bg-white/5">
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin
-                </Button>
-              </Link>
-            )}
-            <Link to="/configuracoes">
-              <Button variant="ghost" size="icon" className="text-[#C0C0C0] hover:text-white hover:bg-white/5">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </Link>
-            <Button variant="ghost" size="icon" onClick={handleSignOut} className="text-[#C0C0C0] hover:text-white hover:bg-white/5">
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
-        </div>
-      </header>
+      {/* Background Ambience - Minimal Noise */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-noise opacity-50" />
 
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto px-6 pt-32 pb-20">
+      <main className="relative z-10 px-6 py-8">
 
         {/* Welcome Section */}
         <motion.div
@@ -231,277 +195,141 @@ export default function Dashboard() {
           className="mb-12"
         >
           <div className="flex items-center gap-4 mb-2">
-            <div className="h-px w-12 bg-gradient-to-r from-[#00e5ff] to-transparent" />
-            <span className="text-[#00e5ff] text-sm font-medium tracking-wider uppercase">Dashboard</span>
+            <div className="h-[1px] w-12 bg-white/20" />
+            <span className="font-mono uppercase tracking-[0.3em] text-gray-500 text-xs">Control Center</span>
           </div>
-          <h1 className="font-serif text-4xl md:text-5xl text-white leading-tight mb-4">
-            Bem-vinda, {user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
+          <h1 className="font-serif text-5xl tracking-tight text-white mb-4">
+            Bem-vinda, <br />
+            {user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
-          <p className="text-[#C0C0C0]/80 text-lg max-w-xl font-light">
-            Seu studio digital está pronto. Aqui está o resumo das suas atividades hoje.
-          </p>
         </motion.div>
 
-        {/* Marketing Triggers Section */}
-        {marketingTriggers.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
-          >
-            <Card className="border-l-4 border-l-[#00e5ff] border-y-0 border-r-0 bg-gradient-to-r from-[#00e5ff]/5 to-transparent shadow-none">
-              <div className="p-4 flex items-center gap-4 overflow-x-auto">
-                <div className="shrink-0 p-2 bg-[#00e5ff]/10 rounded-full">
-                  <Sparkles className="h-5 w-5 text-[#00e5ff]" />
-                </div>
-                <div className="shrink-0 border-r border-white/10 pr-4 mr-2">
-                  <h3 className="text-white font-medium">Marketing Inteligente</h3>
-                  <p className="text-xs text-blue-300/80">Oportunidades encontradas</p>
-                </div>
+        {/* Bento Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 auto-rows-[minmax(180px,auto)]">
 
-                <div className="flex gap-3">
-                  {marketingTriggers.map((trigger, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-lg px-3 py-2 shrink-0">
-                      <div className={`p-1.5 rounded-full ${trigger.type === 'birthday' ? 'bg-pink-500/20 text-pink-400' :
-                        trigger.type === 'anniversary' ? 'bg-purple-500/20 text-purple-400' : 'bg-orange-500/20 text-orange-400'
-                        }`}>
-                        {trigger.type === 'birthday' ? <Gift className="h-3 w-3" /> :
-                          trigger.type === 'anniversary' ? <Heart className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
-                      </div>
-                      <div>
-                        <p className="text-sm text-white font-medium">{trigger.clientName}</p>
-                        <p className="text-[10px] text-gray-400">{trigger.details}</p>
-                      </div>
-                      <Button size="sm" variant="ghost" className="h-6 w-6 p-0 rounded-full hover:bg-white/10 ml-1">
-                        <ArrowRight className="h-3 w-3 text-white/50" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
+          {/* 1. Metric Cards (Top Row) */}
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: index * 0.1 }}
+              className="col-span-1 md:col-span-2 lg:col-span-2 lumi-card p-6 border border-white/20 relative overflow-hidden group hover:bg-white hover:text-black transition-colors duration-300 rounded-none"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
+                <stat.icon className="w-6 h-6 text-white group-hover:text-black" />
               </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Copy Link Card */}
-        <div className="mb-8">
-          <Card className="bg-gradient-to-r from-[#00e5ff]/10 to-transparent border border-[#00e5ff]/20">
-            <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 rounded-xl bg-[#00e5ff]/10 border border-[#00e5ff]/20">
-                  <Sparkles className="h-6 w-6 text-[#00e5ff]" />
-                </div>
-                <div>
-                  <h3 className="text-white font-medium text-lg">Seu Link de Agendamento</h3>
-                  <p className="text-[#C0C0C0]/60 max-w-lg">
-                    Compartilhe este link em sua bio do Instagram ou WhatsApp para que clientes agendem sozinhos.
-                  </p>
-                </div>
+              <div className="mt-8">
+                <h3 className="font-mono text-3xl md:text-4xl text-white group-hover:text-black font-light tracking-tighter">{stat.value}</h3>
+                <p className="text-xs text-white/40 group-hover:text-black/60 uppercase tracking-widest mt-2">{stat.label}</p>
               </div>
-              <div className="flex items-center gap-3 w-full md:w-auto bg-black/40 p-1.5 rounded-xl border border-white/5 pl-4">
-                <span className="text-sm text-gray-400 truncate flex-1 md:w-auto">
-                  lumihub.app/b/{user.user_metadata?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'seu-link'}
-                </span>
-                <Button
-                  size="sm"
-                  className="bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black font-medium"
-                  onClick={() => {
-                    const slug = user.user_metadata?.full_name?.toLowerCase().replace(/\s+/g, '-') || 'seu-link';
-                    navigator.clipboard.writeText(`${window.location.origin}/b/${slug}`);
-                  }}
-                >
-                  Copiar
+              {(stat as any).description && (
+                <div className="mt-4 pt-4 border-t border-white/10 group-hover:border-black/10">
+                  <p className="font-mono text-xs text-white/60 group-hover:text-black/60">{(stat as any).description}</p>
+                </div>
+              )}
+              <Link to={stat.ctaLink} className="absolute bottom-6 right-6">
+                <Button className="bg-white text-black rounded-none hover:bg-gray-200 text-xs uppercase tracking-widest px-4 h-8 group-hover:bg-black group-hover:text-white transition-colors">
+                  {stat.ctaLabel}
                 </Button>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Quick Nav Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {[
-            { label: 'Clientes', icon: Users, path: '/clientes', color: 'text-blue-400' },
-            { label: 'Projetos', icon: FolderOpen, path: '/projetos', color: 'text-purple-400' },
-            { label: 'Agenda', icon: Calendar, path: '/agenda', color: 'text-emerald-400' },
-            { label: 'Configurações', icon: Settings, path: '/configuracoes', color: 'text-orange-400' },
-          ].map((item, i) => (
-            <Link key={i} to={item.path}>
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="group relative p-6 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all duration-300"
-              >
-                <item.icon className={`h-8 w-8 ${item.color} mb-4 opacity-80 group-hover:opacity-100 transition-opacity`} />
-                <span className="text-white font-medium">{item.label}</span>
-                <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ArrowRight className="h-4 w-4 text-white/50" />
-                </div>
-              </motion.div>
-            </Link>
+              </Link>
+            </motion.div>
           ))}
-        </div>
 
-        {/* Charts Section */}
-        {isAdmin && originStats.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <Card className="bg-[#1A1A1A]/40 backdrop-blur-xl border border-white/5 p-6">
-              <h3 className="text-lg font-medium text-white mb-4">Origem das Clientes</h3>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={originStats}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {originStats.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#00e5ff', '#a855f7', '#ec4899', '#f97316'][index % 4]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ backgroundColor: '#1A1A1A', borderColor: 'rgba(255,255,255,0.1)', color: '#fff' }}
-                      itemStyle={{ color: '#fff' }}
-                    />
-                    <Legend verticalAlign="bottom" height={36} />
-                  </PieChart>
-                </ResponsiveContainer>
+          {/* 2. Marketing / Actions (Middle Row) */}
+          {marketingTriggers.length > 0 && (
+            <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none">
+              <div className="flex items-center gap-3 mb-4">
+                <Sparkles className="w-4 h-4 text-white" />
+                <h3 className="text-sm font-medium text-white uppercase tracking-wider">Insights</h3>
               </div>
-            </Card>
-          </div>
-        )}
-
-        {/* Stats & Agenda Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-          {/* Left Column: Stats */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Metrics */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="p-6 rounded-2xl bg-gradient-to-b from-white/[0.04] to-transparent border border-white/5 backdrop-blur-sm"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="p-3 rounded-lg bg-white/5">
-                      <stat.icon className="h-5 w-5 text-[#00e5ff]" />
-                    </div>
-                    {stat.ctaLink && (
-                      <Link to={stat.ctaLink}>
-                        <Button variant="ghost" size="sm" className="h-8 text-xs text-white/50 hover:text-white hover:bg-white/5">
-                          {stat.ctaLabel}
-                        </Button>
-                      </Link>
-                    )}
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                {marketingTriggers.map((trigger, idx) => (
+                  <div key={idx} className="flex-shrink-0 min-w-[200px] p-4 border border-white/10 hover:border-white transition-colors">
+                    <p className="text-white text-sm font-medium">{trigger.clientName}</p>
+                    <p className="text-xs text-white/50">{trigger.details}</p>
                   </div>
-                  <h3 className="text-3xl font-serif text-white mb-1">{stat.value}</h3>
-                  <p className="text-sm text-[#C0C0C0]/60">{stat.label}</p>
-                  {(stat as any).description && (
-                    <p className="text-xs text-[#00e5ff]/80 mt-1">{(stat as any).description}</p>
-                  )}
-                </motion.div>
-              ))}
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. Quick Nav (Vertical / Small) */}
+          <div className="col-span-1 md:col-span-4 lg:col-span-2 row-span-2 lumi-card p-6 border border-white/20 rounded-none flex flex-col justify-center gap-4">
+            {[
+              { label: 'Clientes', icon: Users, path: '/clientes' },
+              { label: 'Projetos', icon: FolderOpen, path: '/projetos' },
+              { label: 'Agenda', icon: Calendar, path: '/agenda' },
+              { label: 'Config', icon: Settings, path: '/configuracoes' },
+            ].map((item, i) => (
+              <Link key={i} to={item.path}>
+                <div className="flex items-center justify-between p-4 border border-white/5 hover:border-white hover:bg-white hover:text-black transition-all group">
+                  <div className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5 text-white/50 group-hover:text-black transition-colors" />
+                    <span className="text-sm text-white/80 group-hover:text-black font-mono uppercase text-xs tracking-wider">{item.label}</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-black group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* 4. Upcoming Events (Large Block) */}
+          <div className="col-span-1 md:col-span-4 lg:col-span-4 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-medium text-white tracking-wide">Agenda</h3>
+              <Link to="/agenda" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">VER TODA</Link>
             </div>
 
-            {/* Upcoming Events */}
-            <Card className="border-0 bg-transparent shadow-none">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="font-serif text-2xl text-white mb-2 flex items-center gap-3">
-                    Agenda
-                    {isGoogleConnected ? (
-                      <Badge variant="outline" className="border-green-500/30 bg-green-500/10 text-green-400 gap-1.5 py-1 px-3">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Sincronizada
-                      </Badge>
-                    ) : (
-                      <Link to="/configuracoes">
-                        <Badge variant="outline" className="border-[#00e5ff]/30 bg-[#00e5ff]/10 text-[#00e5ff] hover:bg-[#00e5ff]/20 cursor-pointer transition-colors gap-1.5 py-1 px-3">
-                          Conectar
-                        </Badge>
-                      </Link>
-                    )}
-                  </h2>
+            <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
+              {upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event: any, i: number) => {
+                  const isGoogle = !!event.summary;
+                  const title = isGoogle ? event.summary : event.title;
+                  // FIX: Safer Date Parsing
+                  let start = new Date().toISOString();
+                  if (isGoogle) {
+                    start = event.start.dateTime || event.start.date;
+                  } else if (event.event_date) {
+                    start = event.event_date + (event.start_time ? ('T' + event.start_time) : '');
+                  }
+
+                  const dateObj = new Date(start);
+                  // Fallback if date is invalid
+                  const isValidDate = !isNaN(dateObj.getTime());
+                  const day = isValidDate ? dateObj.getDate() : '--';
+                  const month = isValidDate ? format(dateObj, 'MMM', { locale: ptBR }) : '';
+                  const time = isValidDate ? format(dateObj, 'HH:mm') : '';
+
+                  return (
+                    <div key={i} className="flex items-center gap-4 p-4 border border-white/10 hover:border-white transition-colors group">
+                      <div className="text-center w-12 pt-1 border-r border-white/10 group-hover:border-white/20 pr-4">
+                        <span className="block text-[10px] text-white/40 group-hover:text-white/60 uppercase">{month}</span>
+                        <span className="block text-xl font-mono text-white group-hover:text-white">{day}</span>
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="text-sm text-white font-medium truncate group-hover:underline decoration-1 underline-offset-4">{title}</h4>
+                        <p className="text-xs text-white/40 font-mono mt-0.5">{time}</p>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-white/30">
+                  <Calendar className="w-12 h-12 mb-4 opacity-20" />
+                  <p className="text-sm">Sem eventos próximos</p>
                 </div>
-                <Link to="/agenda" className="text-sm text-[#00e5ff] hover:text-[#00e5ff]/80 transition-colors flex items-center gap-1">
-                  Ver completa <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-
-              <div className="space-y-3">
-                {upcomingEvents.length > 0 ? (
-                  upcomingEvents.map((event: any, i: number) => {
-                    const isGoogle = !!event.summary;
-                    const title = isGoogle ? event.summary : event.title;
-                    const start = isGoogle ? (event.start.dateTime || event.start.date) : (event.event_date + 'T' + event.start_time);
-                    const dateObj = new Date(start);
-                    const day = dateObj.getDate();
-                    const month = format(dateObj, 'MMM', { locale: ptBR });
-                    const time = format(dateObj, 'HH:mm');
-
-                    return (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.1 }}
-                        className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all group"
-                      >
-                        <div className="flex flex-col items-center justify-center w-14 h-14 rounded-lg bg-white/5 border border-white/5 text-center">
-                          <span className="text-xs text-white/50 uppercase">{month}</span>
-                          <span className="text-xl font-serif text-white">{day}</span>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-white font-medium mb-1 group-hover:text-[#00e5ff] transition-colors">{title}</h4>
-                          <p className="text-sm text-white/40 flex items-center gap-2">
-                            <Calendar className="w-3 h-3" />
-                            {time} • {isGoogle ? 'Google Calendar' : 'Local'}
-                          </p>
-                        </div>
-                        {isGoogle && (
-                          <a href={event.htmlLink} target="_blank" rel="noreferrer">
-                            <Button size="icon" variant="ghost" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                              <ExternalLink className="w-4 h-4 text-white/60" />
-                            </Button>
-                          </a>
-                        )}
-                      </motion.div>
-                    );
-                  })
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-8 rounded-2xl bg-white/[0.02] border border-white/5 border-dashed">
-                    <Calendar className="w-10 h-10 text-white/20 mb-3" />
-                    <p className="text-white/40 mb-4">Nenhum compromisso próximo</p>
-                    <Link to="/agenda">
-                      <Button variant="outline" className="border-white/10 text-white hover:bg-white/5 hover:text-[#00e5ff]">
-                        + Novo Evento
-                      </Button>
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </Card>
+              )}
+            </div>
           </div>
 
-          {/* Right Column: Assistants */}
-          <div>
-            <Card className="h-full border border-white/5 bg-white/[0.02] backdrop-blur-xl shadow-2xl">
-              <CardHeader>
-                <CardTitle className="font-serif text-xl text-white flex items-center gap-2">
-                  <Users className="h-5 w-5 text-[#00e5ff]" />
-                  Equipe
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AssistantsPanelCard />
-              </CardContent>
-            </Card>
+          {/* 5. Team (Conditional) */}
+          <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none">
+            <div className="flex items-center gap-3 mb-4">
+              <Users className="w-4 h-4 text-white" />
+              <h3 className="text-sm font-medium text-white uppercase tracking-wider">Equipe</h3>
+            </div>
+            <AssistantsPanelCard />
           </div>
 
         </div>

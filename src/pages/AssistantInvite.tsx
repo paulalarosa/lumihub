@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader2, UserPlus, CheckCircle, Sparkles, Crown, Star, ArrowRight, Heart } from "lucide-react";
+import { Loader2, Check, ArrowRight, Terminal, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AssistantInvite = () => {
@@ -31,29 +31,21 @@ const AssistantInvite = () => {
 
   const onboardingSteps = [
     {
-      title: "Bem-vinda ao Time VIP",
-      subtitle: "Você foi convidada para fazer parte de uma equipe exclusiva",
-      icon: Crown,
-      color: "from-yellow-400 to-orange-500"
+      title: "ACCESS_GRANTED",
+      subtitle: "RESTRICTED ENVIRONMENT. AUTHORIZED PERSONNEL ONLY.",
+      icon: Terminal,
     },
     {
-      title: "Crie sua Conta Premium",
-      subtitle: "Acesse ferramentas exclusivas para profissionais",
-      icon: Star,
-      color: "from-purple-400 to-pink-500"
-    },
-    {
-      title: "Comece sua Jornada",
-      subtitle: "Descubra oportunidades incríveis esperando por você",
-      icon: Sparkles,
-      color: "from-blue-400 to-cyan-500"
+      title: "SECURE_CHANNEL",
+      subtitle: "ESTABLISHING ENCRYPTED CONNECTION WITH HOST.",
+      icon: User,
     }
   ];
 
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
-        setError("Token de convite inválido");
+        setError("INVALID TOKEN");
         setLoading(false);
         return;
       }
@@ -66,13 +58,13 @@ const AssistantInvite = () => {
           .single();
 
         if (assistantError || !assistantData) {
-          setError("Convite não encontrado ou expirado");
+          setError("INVITE NOT FOUND OR EXPIRED");
           setLoading(false);
           return;
         }
 
         if (assistantData.is_registered) {
-          setError("Este convite já foi utilizado. Faça login para acessar o portal.");
+          setError("INVITE ALREADY REDEEMED. PLEASE LOGIN.");
           setLoading(false);
           return;
         }
@@ -86,14 +78,14 @@ const AssistantInvite = () => {
 
         setAssistant({
           ...assistantData,
-          professional_name: profileData?.full_name || "Profissional"
+          professional_name: profileData?.full_name || "UNKNOWN_HOST"
         });
 
         if (assistantData.email) {
           setEmail(assistantData.email);
         }
       } catch (err) {
-        setError("Erro ao validar convite");
+        setError("VALIDATION_ERROR");
       } finally {
         setLoading(false);
       }
@@ -108,12 +100,12 @@ const AssistantInvite = () => {
     if (!assistant) return;
 
     if (password !== confirmPassword) {
-      toast.error("As senhas não coincidem");
+      toast.error("PASSWORDS DO NOT MATCH");
       return;
     }
 
     if (password.length < 6) {
-      toast.error("A senha deve ter pelo menos 6 caracteres");
+      toast.error("PASSWORD MUST BE 6+ CHARS");
       return;
     }
 
@@ -147,19 +139,14 @@ const AssistantInvite = () => {
 
         if (updateError) throw updateError;
 
-        toast.success("Conta criada com sucesso! Bem-vinda ao portal.");
+        toast.success("ACCOUNT CREATED. WELCOME.");
         navigate("/assistente");
       }
     } catch (err: any) {
-      toast.error(err.message || "Erro ao criar conta");
+      toast.error(err.message || "CREATION FAILED");
     } finally {
       setSubmitting(false);
     }
-  };
-
-  const renderCurrentIcon = () => {
-    const IconComponent = onboardingSteps[currentStep].icon;
-    return <IconComponent className="h-10 w-10 text-white" />;
   };
 
   const nextStep = () => {
@@ -176,56 +163,43 @@ const AssistantInvite = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-accent/5">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5 }}
-          className="text-center"
-        >
-          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Validando seu convite VIP...</p>
-        </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-black text-white p-4 font-mono">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-white mx-auto mb-4" />
+          <p className="text-xs uppercase tracking-widest">VALIDATING_HANDSHAKE...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Card className="w-full max-w-md">
-            <CardHeader className="text-center">
-              <CardTitle className="text-destructive">Ops!</CardTitle>
-              <CardDescription>{error}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center">
-              <Button onClick={() => navigate("/auth")} variant="outline">
-                Ir para Login
-              </Button>
-            </CardContent>
-          </Card>
-        </motion.div>
+      <div className="min-h-screen flex items-center justify-center bg-black text-white p-4 font-mono">
+        <Card className="w-full max-w-md bg-black border border-white/20 rounded-none">
+          <CardHeader className="text-center border-b border-white/10 pb-6">
+            <CardTitle className="text-red-500 font-mono uppercase tracking-widest">ERROR: {error}</CardTitle>
+          </CardHeader>
+          <CardContent className="flex justify-center pt-6">
+            <Button onClick={() => navigate("/auth")} variant="outline" className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono uppercase text-xs">
+              MIGRATE TO LOGIN
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-accent/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 selection:bg-white selection:text-black font-mono">
+      <div className="w-full max-w-2xl">
         {/* Progress Indicator */}
-        <div className="flex justify-center mb-8">
-          <div className="flex space-x-2">
+        <div className="flex justify-start mb-12 border-b border-white/20 pb-4">
+          <div className="flex space-x-1">
             {onboardingSteps.map((_, index) => (
               <motion.div
                 key={index}
-                className={`h-2 w-12 rounded-full ${
-                  index <= currentStep ? 'bg-primary' : 'bg-muted'
-                }`}
+                className={`h-1 w-12 rounded-none ${index <= currentStep ? 'bg-white' : 'bg-white/20'
+                  }`}
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ duration: 0.3, delay: index * 0.1 }}
@@ -239,192 +213,140 @@ const AssistantInvite = () => {
             // Onboarding Steps
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
-              transition={{ duration: 0.5 }}
-              className="text-center"
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="text-left"
             >
-              <Card className="max-w-md mx-auto border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
-                <CardContent className="pt-12 pb-12">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                    className={`mx-auto w-20 h-20 bg-gradient-to-br ${onboardingSteps[currentStep].color} rounded-full flex items-center justify-center mb-6 shadow-lg`}
-                  >
-                    {renderCurrentIcon()}
-                  </motion.div>
+              <div className="border-l-2 border-white pl-8 mb-12">
+                <div className="mb-6">
+                  {(() => {
+                    const Icon = onboardingSteps[currentStep].icon;
+                    return <Icon className="h-8 w-8 text-white" />;
+                  })()}
+                </div>
 
-                  <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                    className="text-3xl font-bold mb-2"
-                  >
-                    {onboardingSteps[currentStep].title}
-                  </motion.h1>
+                <h1 className="text-4xl font-bold mb-4 font-serif uppercase tracking-tighter">
+                  {onboardingSteps[currentStep].title}
+                </h1>
+                <p className="text-white/60 font-mono text-sm uppercase tracking-widest">
+                  {onboardingSteps[currentStep].subtitle}
+                </p>
+              </div>
 
-                  <motion.p
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="text-muted-foreground mb-8"
-                  >
-                    {onboardingSteps[currentStep].subtitle}
-                  </motion.p>
+              {currentStep === 0 && assistant && (
+                <div className="bg-white/5 border border-white/10 p-6 mb-8 rounded-none">
+                  <p className="text-xs text-white/50 uppercase tracking-widest mb-2">INVITED_BY</p>
+                  <p className="text-xl font-serif text-white">{assistant.professional_name}</p>
+                </div>
+              )}
 
-                  {currentStep === 0 && assistant && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="bg-primary/10 rounded-lg p-4 mb-6"
-                    >
-                      <p className="text-sm text-primary font-medium mb-1">Convidada por:</p>
-                      <p className="font-semibold">{assistant.professional_name}</p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Prepare-se para uma jornada incrível! ✨
-                      </p>
-                    </motion.div>
-                  )}
-
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                  >
-                    <Button
-                      onClick={nextStep}
-                      className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg"
-                      size="lg"
-                    >
-                      Continuar
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </motion.div>
-                </CardContent>
-              </Card>
+              <Button
+                onClick={nextStep}
+                className="w-full md:w-auto px-8 h-12 bg-white text-black hover:bg-white/80 rounded-none font-mono text-xs uppercase tracking-widest"
+              >
+                INITIALIZE_PROTOCOL <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </motion.div>
           ) : (
             // Registration Form
             <motion.div
               key="registration"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.3 }}
             >
-              <Card className="max-w-md mx-auto border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
-                <CardHeader className="text-center space-y-4">
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                    className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg"
-                  >
-                    <Heart className="h-8 w-8 text-white" />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <CardTitle className="text-2xl">Bem-vinda, {assistant?.name}!</CardTitle>
-                    <CardDescription className="mt-2">
-                      Você foi convidada por <strong className="text-primary">{assistant?.professional_name}</strong> para fazer parte do time VIP.
-                    </CardDescription>
-                  </motion.div>
-                </CardHeader>
-                <CardContent>
-                  <motion.form
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    onSubmit={handleSubmit}
-                    className="space-y-4"
-                  >
+              <div className="border border-white/20 bg-black p-8 md:p-12 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-20">
+                  <Terminal className="w-24 h-24 text-white" />
+                </div>
+
+                <div className="relative z-10">
+                  <div className="mb-8 border-b border-white/10 pb-6">
+                    <h2 className="text-2xl font-serif uppercase text-white mb-2">CREATE_IDENTITY</h2>
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 bg-green-500 rounded-none animate-pulse"></span>
+                      <p className="text-xs font-mono uppercase tracking-widest text-white/60">
+                        INVITE_CODE: {token?.substring(0, 8)}...
+                      </p>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="email">E-mail</Label>
+                      <Label htmlFor="email" className="font-mono text-xs uppercase">E-mail</Label>
                       <Input
                         id="email"
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="seu@email.com"
+                        placeholder="OPERATOR@LUMI.COM"
                         required
-                        className="h-12"
+                        className="h-12 bg-black border-white/20 rounded-none focus:border-white text-white font-mono text-xs uppercase placeholder:text-white/20"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Senha</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        required
-                        className="h-12"
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="password" className="font-mono text-xs uppercase">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="******"
+                          required
+                          className="h-12 bg-black border-white/20 rounded-none focus:border-white text-white font-mono text-xs uppercase placeholder:text-white/20"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="confirmPassword" className="font-mono text-xs uppercase">Confirm</Label>
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="******"
+                          required
+                          className="h-12 bg-black border-white/20 rounded-none focus:border-white text-white font-mono text-xs uppercase placeholder:text-white/20"
+                        />
+                      </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                      <Input
-                        id="confirmPassword"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Digite a senha novamente"
-                        required
-                        className="h-12"
-                      />
-                    </div>
-
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.5 }}
-                      className="pt-4"
-                    >
+                    <div className="pt-6">
                       <Button
                         type="submit"
-                        className="w-full h-12 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg"
+                        className="w-full h-12 bg-white text-black hover:bg-gray-200 rounded-none font-mono text-xs uppercase tracking-widest"
                         disabled={submitting}
                       >
                         {submitting ? (
                           <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Criando conta...
+                            PROCESSING...
                           </>
                         ) : (
                           <>
-                            <CheckCircle className="mr-2 h-4 w-4" />
-                            Entrar no Portal VIP
+                            <Check className="mr-2 h-4 w-4" />
+                            ESTABLISH_UPLINK
                           </>
                         )}
                       </Button>
-                    </motion.div>
-                  </motion.form>
+                    </div>
+                  </form>
 
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="mt-6 text-center"
-                  >
+                  <div className="mt-6 text-center">
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="link"
                       onClick={prevStep}
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-white/40 hover:text-white font-mono text-[10px] uppercase tracking-widest"
                     >
-                      ← Voltar
+                      ← ABORT
                     </Button>
-                  </motion.div>
-                </CardContent>
-              </Card>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
