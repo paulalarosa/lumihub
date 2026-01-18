@@ -45,9 +45,47 @@ export const getCalendarEvents = async (): Promise<GoogleCalendarEvent[]> => {
         }
 
         const data = await response.json();
-        return data.items || [];
+        const items = data.items || [];
+
+        // Deduplication Logic
+        const uniqueEvents = [...new Map(items.map((item: any) => [item.id, item])).values()];
+
+        return uniqueEvents as GoogleCalendarEvent[];
     } catch (error) {
         console.error("Error fetching Google Calendar events:", error);
         return [];
+    }
+};
+
+export const deleteCalendarEvent = async (googleEventId: string): Promise<boolean> => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session?.provider_token) {
+        console.warn("No provider token found.");
+        return false;
+    }
+
+    try {
+        const response = await fetch(
+            `https://www.googleapis.com/calendar/v3/calendars/primary/events/${googleEventId}`,
+            {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${session.provider_token}`,
+                }
+            }
+        );
+
+        if (!response.ok) {
+            // 410 Gone means it's already deleted, which counts as success
+            if (response.status === 410) return true;
+            console.error(`Google Calendar Delete Error: ${response.statusText}`);
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting Google Calendar event:", error);
+        return false;
     }
 };

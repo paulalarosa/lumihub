@@ -35,6 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ProjectService } from '@/services/projectService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Project {
   id: string;
@@ -250,12 +251,46 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  const copyPortalLink = () => {
-    const link = `${window.location.origin}/portal/${project?.public_token}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    toast({ title: "Link copiado!" });
-    setTimeout(() => setCopied(false), 2000);
+  const copyPortalLink = async () => {
+    if (!project?.clients?.id) {
+      toast({ title: "Erro", description: "Cliente não vinculado ao projeto.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      const clientId = project.clients.id;
+
+      // 1. Ensure PIN (secret_code) exists in wedding_clients
+      const { data: client, error: clientError } = await supabase
+        .from('wedding_clients')
+        .select('secret_code')
+        .eq('id', clientId)
+        .single();
+
+      if (clientError) throw clientError;
+
+      if (!client.secret_code) {
+        const newPin = Math.floor(1000 + Math.random() * 9000).toString();
+        const { error: updateError } = await supabase
+          .from('wedding_clients')
+          .update({ secret_code: newPin })
+          .eq('id', clientId);
+
+        if (updateError) throw updateError;
+        toast({ title: "PIN Gerado", description: `Novo PIN: ${newPin}` });
+      }
+
+      // 2. Generate Link directly using ID
+      const link = `${window.location.origin}/portal/${clientId}/login`;
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast({ title: "Link Copiado!", description: `Link enviado para a área de transferência.` });
+      setTimeout(() => setCopied(false), 2000);
+
+    } catch (e) {
+      console.error("Portal Link Error", e);
+      toast({ title: "Erro ao gerar link", variant: "destructive" });
+    }
   };
 
   const createDefaultBriefing = async () => {

@@ -14,8 +14,8 @@ import {
   Calendar as CalendarIcon,
   Activity,
   ShieldAlert,
-  ChevronRight,
-  Lock
+  Lock,
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,7 +40,6 @@ const PortalAssistente = () => {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState("");
 
-  // Mock earnings Data (In production this would come from the database)
   const earningsData = {
     thisMonth: 2850.00,
     lastMonth: 2200.00,
@@ -220,26 +219,27 @@ const PortalAssistente = () => {
     );
   }
 
+  // Get assistant first name for header
+  const assistantFirstName = assistant?.name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || 'Assistante';
+
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono selection:bg-white selection:text-black pb-24">
 
-      {/* 1. Header / Status Bar */}
+      {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-[#050505] border-b border-neutral-800 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              {/* Monochrome Pulse */}
-              <div className="w-1.5 h-1.5 bg-white animate-pulse rounded-full"></div>
-              <span className="text-[10px] text-neutral-500 uppercase tracking-[0.2em] font-bold">SYSTEM_ONLINE</span>
-            </div>
+            <h1 className="text-xl font-serif text-white tracking-wide">
+              Bem-vinda, {assistantFirstName}
+            </h1>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="rounded-none text-neutral-500 hover:text-white hover:bg-transparent font-mono text-[10px] uppercase tracking-widest"
+            className="rounded-none text-neutral-500 hover:text-white hover:bg-transparent font-mono text-[10px] uppercase tracking-widest h-auto p-0"
           >
-            [ LOGOUT ]
+            [ LEAVE ]
           </Button>
         </div>
       </header>
@@ -247,32 +247,33 @@ const PortalAssistente = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-24">
 
-        {/* UPSELL BANNER - THE EMPIRE TRAP */}
-        <div className="mb-12 border border-white p-8 bg-black relative overflow-hidden group">
-          {/* Diagonal Stripes Background Effect */}
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 12px)' }}></div>
+        {/* UPSELL BANNER - THE EMPIRE */}
+        <div className="w-full bg-black border border-white/10 p-12 mb-12 relative overflow-hidden group">
+          {/* Subtle Texture */}
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 11px)' }}></div>
 
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-            <div>
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-                <Lock className="w-4 h-4 text-white" />
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white">Backstage Access</p>
-              </div>
-              <h2 className="text-2xl md:text-3xl font-serif text-white uppercase tracking-wider mb-2">
-                VOCÊ ESTÁ NO BACKSTAGE.
+          <div className="relative z-10 flex flex-col items-center text-center gap-8">
+            <div className="space-y-4 max-w-4xl">
+              <h2 className="text-2xl md:text-4xl font-serif text-white uppercase tracking-widest leading-tight">
+                VOCÊ ESTÁ NO BACKSTAGE. <br className="hidden md:block" />
+                PRONTA PARA O PALCO?
               </h2>
-              <p className="text-xs text-neutral-400 font-mono uppercase tracking-widest max-w-md">
-                Pronta para construir seu próprio império? Tenha sua agenda, clientes e contratos.
+              <p className="font-sans text-neutral-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
+                O Lumi PRO foi feito para assistentes que decidiram construir seu próprio império. Agenda própria, contratos blindados e gestão financeira de elite.
               </p>
             </div>
+
             <Button
-              onClick={() => { setSelectedFeature("Upgrade Full"); setPremiumModalOpen(true); }}
-              className="bg-white text-black hover:bg-neutral-200 rounded-none h-12 px-8 font-bold uppercase tracking-[0.2em] text-xs border border-transparent transition-all hover:scale-105"
+              onClick={() => navigate('/planos')}
+              className="bg-white text-black px-10 py-6 font-bold tracking-tighter rounded-none hover:bg-transparent hover:text-white hover:border hover:border-white transition-all uppercase text-xs md:text-sm h-auto"
             >
-              CRIAR MEU IMPÉRIO
+              COMEÇAR MEU IMPÉRIO
             </Button>
           </div>
         </div>
+
+        {/* Divider */}
+        <div className="w-full border-b border-neutral-800 mb-12" />
 
         {activeTab === 'dashboard' && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -284,7 +285,7 @@ const PortalAssistente = () => {
                 {format(new Date(), "HH:mm")}
               </h1>
               <p className="text-xs text-neutral-500 font-mono uppercase tracking-widest mt-2 border-l border-neutral-800 pl-3">
-                {format(new Date(), "dd.MM.yyyy", { locale: ptBR })} • UTC-3
+                {format(new Date(), "bd 'de' MMMM", { locale: ptBR })} • UTC-3
               </p>
             </div>
 
@@ -292,7 +293,7 @@ const PortalAssistente = () => {
             <section>
               <div className="flex items-center justify-between mb-4 border-b border-neutral-800 pb-2">
                 <h2 className="text-xs text-white font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Activity className="h-3 w-3" /> NEXT_MISSION_DATA
+                  <Activity className="h-3 w-3" /> NEXT_MISSION
                 </h2>
                 {nextEvent && <span className="text-[9px] text-white bg-neutral-900 border border-neutral-800 px-2 py-1 uppercase tracking-widest">CONFIRMED</span>}
               </div>
@@ -358,7 +359,6 @@ const PortalAssistente = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Earnings Card */}
                 <div className="border border-neutral-800 bg-black p-8 relative">
                   <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-4">TOTAL_EARNINGS (YTD)</p>
                   <div className="flex items-baseline gap-2">
@@ -378,7 +378,6 @@ const PortalAssistente = () => {
                   </div>
                 </div>
 
-                {/* Stats List */}
                 <div className="border border-neutral-800 bg-neutral-900/20 p-8 flex flex-col justify-center gap-6">
                   <div className="flex justify-between items-center">
                     <span className="text-[10px] text-neutral-500 uppercase tracking-widest">THIS_MONTH</span>
@@ -398,7 +397,7 @@ const PortalAssistente = () => {
           </div>
         )}
 
-        {/* Other Tabs with Noir Style */}
+        {/* Other Tabs */}
         {activeTab === 'agenda' && (
           <AssistantAgenda events={events} currentMonth={currentMonth} onMonthChange={setCurrentMonth} />
         )}
@@ -426,7 +425,7 @@ const PortalAssistente = () => {
 
       </main>
 
-      {/* Navigation Bar (Strict Black & White) */}
+      {/* Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-[#050505] border-t border-neutral-800 z-50 pb-safe">
         <div className="grid grid-cols-4 h-20">
           <button

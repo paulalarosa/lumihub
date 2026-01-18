@@ -18,6 +18,7 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
   const location = useLocation();
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -27,12 +28,9 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
       return;
     }
 
-    if (requireOnboarding) {
-      checkOnboardingStatus();
-    } else {
-      setCheckingOnboarding(false);
-    }
-  }, [user, authLoading, requireOnboarding]);
+    // Always check status to get role, even if requireOnboarding is false
+    checkOnboardingStatus();
+  }, [user, authLoading]);
 
   const checkOnboardingStatus = async () => {
     if (!user) return;
@@ -40,15 +38,16 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('onboarding_completed')
+        .select('onboarding_completed, role')
         .eq('id', user.id)
         .maybeSingle();
 
       if (error) {
         console.error('Error checking onboarding status:', error);
-        setOnboardingCompleted(true); // Assume completed on error to prevent blocking
+        setOnboardingCompleted(true); // Fail safe
       } else {
         setOnboardingCompleted(data?.onboarding_completed ?? false);
+        setUserRole(data?.role || 'professional');
       }
     } catch (err) {
       console.error('Onboarding check error:', err);
@@ -58,43 +57,52 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
     }
   };
 
-  // Handle redirects based on onboarding status
+  // Handle redirects
   useEffect(() => {
     if (checkingOnboarding || onboardingCompleted === null) return;
-    if (!user) return; // Auth handling is done by other logic usually, or we redirect to auth
-
-    if (location.pathname === '/planos') return; // Don't redirect if already on plans logic
-
+    if (!user) return;
 
     const isOnboardingPage = location.pathname === '/onboarding';
+    const isAssistantPortal = location.pathname === '/portal-assistente';
 
-    // User has COMPLETED onboarding but is trying to access onboarding page
-    // Redirect them to dashboard
+    // 1. ASSISTANT GUARD
+    if (userRole === 'assistant') {
+      if (!isAssistantPortal) {
+        navigate('/portal-assistente', { replace: true });
+      }
+      return;
+    }
+
+    // 2. ADMIN/PROFESSIONAL LOGIC
+    if (location.pathname === '/planos') return;
+
+    // Completed onboarding trying to access onboarding page
     if (onboardingCompleted && isOnboardingPage) {
       navigate('/dashboard', { replace: true });
       return;
     }
 
-    // User has NOT completed onboarding and is NOT on onboarding page
-    // Redirect them to onboarding (if required)
+    // Not completed onboarding and not on onboarding page
     if (!onboardingCompleted && !isOnboardingPage && requireOnboarding) {
       navigate('/onboarding', { replace: true });
       return;
     }
-  }, [checkingOnboarding, onboardingCompleted, location.pathname, user, requireOnboarding]);
+  }, [checkingOnboarding, onboardingCompleted, userRole, location.pathname, user, requireOnboarding]);
 
+  // Subscription check (only for admins/pros)
   useEffect(() => {
     if (authLoading || checkingOnboarding || subLoading) return;
-    if (!user) return;
-    if (!onboardingCompleted && requireOnboarding) return; // Prioritize onboarding
+    if (!user || userRole === 'assistant') return; // Skip for assistants
+    if (!onboardingCompleted && requireOnboarding) return;
 
-    // If expired and not on plans/profile/billing pages
+    // Allow 'trial' status to access Dashboard
+    // Only redirect if explicitly 'expired' and not on billing pages
     if (status === 'expired' && location.pathname !== '/planos' && location.pathname !== '/configuracoes') {
       navigate('/planos');
     }
-  }, [status, subLoading, location.pathname, user, onboardingCompleted, authLoading, checkingOnboarding]);
+  }, [status, subLoading, location.pathname, user, onboardingCompleted, authLoading, checkingOnboarding, userRole]);
 
-  if (authLoading || (requireOnboarding && checkingOnboarding) || subLoading) {
+  if (authLoading || checkingOnboarding || subLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-950">
         <Loader2 className="h-8 w-8 animate-spin text-white/60" />
@@ -102,29 +110,24 @@ const ProtectedRoute = ({ children, requireOnboarding = true }: ProtectedRoutePr
     );
   }
 
-  if (!user) {
+  if (!user) return null;
+
+  // Allow rendering based on logic
+  const isOnboardingPage = location.pathname === '/onboarding';
+  const isAssistantPortal = location.pathname === '/portal-assistente';
+
+  // Assistant Logic
+  if (userRole === 'assistant') {
+    if (isAssistantPortal) return <>{children}</>;
+    // If not portal, we are waiting for redirect
     return null;
   }
 
-  // Allow rendering if:
-  // 1. On onboarding page and onboarding not completed
-  // 2. Not on onboarding page and onboarding completed
-  // 3. requireOnboarding is false
-  const isOnboardingPage = location.pathname === '/onboarding';
+  // Admin/Pro Logic
+  if (!requireOnboarding) return <>{children}</>;
+  if (isOnboardingPage && !onboardingCompleted) return <>{children}</>;
+  if (!isOnboardingPage && onboardingCompleted) return <>{children}</>;
 
-  if (!requireOnboarding) {
-    return <>{children}</>;
-  }
-
-  if (isOnboardingPage && !onboardingCompleted) {
-    return <>{children}</>;
-  }
-
-  if (!isOnboardingPage && onboardingCompleted) {
-    return <>{children}</>;
-  }
-
-  // Waiting for redirect
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-950">
       <Loader2 className="h-8 w-8 animate-spin text-white/60" />

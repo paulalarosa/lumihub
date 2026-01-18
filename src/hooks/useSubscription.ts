@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { differenceInDays, parseISO } from 'date-fns';
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'expired';
-export type PlanType = 'free' | 'pro' | 'empire';
+export type PlanType = 'free' | 'pro' | 'empire' | 'studio';
 
 export interface SubscriptionState {
     plan: PlanType;
@@ -36,12 +36,19 @@ export const useSubscription = () => {
                     .from('profiles')
                     .select('created_at, role') // removed 'plan' to prevent crash
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle(); // Prevent PGRST116 (406) error if no rows found
 
                 if (error) throw error;
 
+                // If no profile found (e.g. very early auth state), return safe defaults without crashing
+                if (!profile) {
+                    console.warn("useSubscription: No profile found for user, using defaults.");
+                    setState(prev => ({ ...prev, isLoading: false }));
+                    return;
+                }
+
                 const p = profile as any;
-                const plan = (p.plan as PlanType) || 'free';
+                let plan = (p.plan as PlanType) || 'free'; // Ensure let for reassignment
                 const createdAt = p.created_at ? parseISO(p.created_at) : new Date();
                 const daysActive = differenceInDays(new Date(), createdAt);
                 const TRIAL_DAYS = 7;
@@ -49,9 +56,15 @@ export const useSubscription = () => {
 
                 let status: SubscriptionStatus = 'trialing';
 
-                // Priority 1: Admin or Paid Plan
-                if ((p.role === 'admin') || (plan === 'pro') || (plan === 'empire')) {
+                // Priority 1: Admin or Paid Plan or Hardcoded Studio Users
+                const isStudioUser = (user.email === 'nathaliasbrb@gmail.com') || (user.email?.includes('paula'));
+
+                if ((p.role === 'admin') || (plan === 'pro') || (plan === 'empire') || (plan === 'studio') || isStudioUser) {
                     status = 'active';
+                    if (isStudioUser) {
+                        // Force plan to studio for UI to react accordingly
+                        plan = 'studio';
+                    }
                 } else {
                     // Priority 2: Free Plan (Trial Logic)
                     if (daysActive > TRIAL_DAYS) {

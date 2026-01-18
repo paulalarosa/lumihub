@@ -31,7 +31,7 @@ export function AssistantInviteDialog() {
     };
 
     const copyLink = (code: string) => {
-        const link = `${window.location.origin}/assistente/convite/${code}`;
+        const link = `${window.location.origin}/invite?token=${code}`;
         navigator.clipboard.writeText(link);
         setCopiedToken(code);
         setTimeout(() => setCopiedToken(null), 2000);

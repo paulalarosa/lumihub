@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    VitePWA({
+    /* VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
       manifest: {
@@ -42,7 +42,7 @@ export default defineConfig(({ mode }) => ({
           }
         ]
       }
-    }),
+    }), */
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   base: './', // Ensure relative paths for S3

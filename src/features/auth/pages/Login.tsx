@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Terminal } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Login() {
@@ -37,7 +38,24 @@ export default function Login() {
                 title: t("login_toast_granted"),
                 description: t("login_toast_session")
             });
-            navigate('/dashboard');
+
+            // Check if user is an assistant
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: assistant } = await supabase
+                    .from('assistants')
+                    .select('id')
+                    .eq('assistant_user_id', user.id)
+                    .maybeSingle();
+
+                if (assistant) {
+                    navigate('/portal-assistente');
+                } else {
+                    navigate('/dashboard');
+                }
+            } else {
+                navigate('/dashboard');
+            }
         }
         setIsSubmitting(false);
     };

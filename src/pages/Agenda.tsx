@@ -45,6 +45,7 @@ interface Event {
   client?: { name: string } | null;
   project?: { name: string } | null;
   assistants?: { id: string; name: string }[];
+  google_calendar_event_id?: string | null;
 }
 
 interface Assistant {
@@ -219,10 +220,45 @@ export default function Agenda() {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    // If it's a google event, we currently don't support deleting from here
-    if (eventId.length > 36) { // Heuristic: uuid is 36 chars. Google IDs are usually different (or we check event_type)
-      // Better to check specific property or separate lists
+    const eventToDelete = allEvents.find(e => e.id === eventId);
+
+    // Google Deletion Sync
+    if (eventToDelete?.google_calendar_event_id) {
+      const { deleteCalendarEvent } = await import('@/integrations/google/calendar');
+      const googleDeleted = await deleteCalendarEvent(eventToDelete.google_calendar_event_id);
+
+      if (!googleDeleted) {
+        toast({ title: "Erro no Google Calendar", description: "Não foi possível apagar o evento do Google.", variant: "destructive" });
+        // We continue to delete locally to ensure consistency, but warn user. 
+        // User asked "Only after confirming delete on Google, delete from Supabase".
+        // However, if Google fails because it's already gone (410), deleteCalendarEvent returns true.
+        // If it fails for other reasons (Auth), we might be stuck.
+        // Let's assume we proceed but warn, OR prevent? 
+        // "Só depois de confirmar..." implies preventing local delete if Google fails?
+        // This is risky (stuck event). I'll stick to warning but proceeding is usually safer for local state.
+        // BUT standard interpretation: `if (success) deleteLocal()`
+        // let's try to follow strict request: if (!googleDeleted) return;
+
+        // Logic update:
+        // If Google delete fails (returns false), we STOP local delete to force user to retry or fix auth.
+        return;
+      }
     }
+
+    // Google-only event (heuristic)
+    if (eventId.length > 36) {
+      // ... existing logic for pure google events ...
+      // Use deleteCalendarEvent for them too if ID is passed? 
+      // But here we rely on Supabase deletion logic usually.
+      // Actually pure Google Events don't have Supabase ID usually unless mapped. 
+      // If eventId IS the Google ID (long string), we just call Google delete.
+      const { deleteCalendarEvent } = await import('@/integrations/google/calendar');
+      await deleteCalendarEvent(eventId);
+      toast({ title: "Evento Google excluído" });
+      fetchGoogleEventsData(); // Refresh
+      return;
+    }
+
     const { error } = await supabase
       .from('events')
       .delete()
@@ -257,7 +293,11 @@ export default function Agenda() {
     }
   };
 
-  const allEvents = [...events, ...googleEvents];
+  // DEDUPLICATION LOGIC:
+  // Key by 'google_calendar_event_id' if available (Supabase event), or 'id' (Google event or Supabase event without link).
+  // We merge [...googleEvents, ...events] so that Supabase events (coming last) overwrite Google events with the same Key.
+  const mergedRaw = [...googleEvents, ...events];
+  const allEvents = Array.from(new Map(mergedRaw.map(e => [e.google_calendar_event_id || e.id, e])).values());
 
   const sidebarContent = (
     <CalendarSidebar

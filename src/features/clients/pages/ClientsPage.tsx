@@ -41,6 +41,8 @@ import { ClientService } from '@/services/clientService';
 import { MobileFAB } from '@/components/ui/MobileFAB';
 import { ClientForm, ClientFormData } from '../components/ClientForm';
 
+import { supabase } from '@/integrations/supabase/client';
+
 // Extended Client interface
 interface Client {
   id: string;
@@ -159,10 +161,40 @@ export default function Clientes() {
     }
   };
 
-  const copyPortalLink = (clientId: string) => {
-    const link = `${window.location.origin}/portal/${clientId}/login`;
-    navigator.clipboard.writeText(link);
-    toast({ title: "Link do Portal copiado!" });
+  const copyPortalLink = async (clientId: string) => {
+    try {
+      // 1. Ensure PIN (secret_code) exists in wedding_clients
+      const { data: client, error: clientError } = await supabase
+        .from('wedding_clients')
+        .select('secret_code')
+        .eq('id', clientId)
+        .single();
+
+      if (clientError) throw clientError;
+
+      if (!client.secret_code) {
+        const newPin = Math.floor(1000 + Math.random() * 9000).toString();
+        const { error: updateError } = await supabase
+          .from('wedding_clients')
+          .update({ secret_code: newPin })
+          .eq('id', clientId);
+
+        if (updateError) throw updateError;
+        toast({ title: "PIN Gerado", description: `Novo PIN: ${newPin}` });
+      }
+
+      // 2. Copy Link DIRECTLY using Client ID (Bypassing bride_access RLS issues)
+      const link = `${window.location.origin}/portal/${clientId}/login`;
+      await navigator.clipboard.writeText(link);
+      toast({
+        title: "Link do Portal Copiado!",
+        description: "Envie este link para a noiva."
+      });
+
+    } catch (e) {
+      console.error("Link Copy Error", e);
+      toast({ title: "Erro ao gerar link", description: "Não foi possível configurar o portal.", variant: "destructive" });
+    }
   };
 
   const filteredClients = clients.filter(client => {

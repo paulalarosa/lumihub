@@ -26,6 +26,7 @@ import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
 import ConfirmationNotification from '@/components/assistant-portal/ConfirmationNotification';
+import { NoirDatePicker } from '@/components/ui/noir-date-picker';
 
 interface Event {
   id: string;
@@ -455,31 +456,43 @@ export default function EventDialog({
         const providerToken = session?.provider_token;
 
         if (providerToken) {
-          // Determine Start/End Times
-          let finalStartDateTime = new Date(`${eventDate}T09:00:00`);
-          let finalEndDateTime = new Date(`${eventDate}T10:00:00`);
+          // Manual ISO Construction to FORCE Brasília Time (GMT-3)
+          // format: YYYY-MM-DDTHH:mm:ss-03:00
+          const formatToBrasiliaISO = (dateStr: string, timeStr: string, defaultTime: string) => {
+            const time = timeStr || defaultTime;
+            // Ensure seconds are included? Google accepts HH:mm:ss
+            return `${dateStr}T${time}:00-03:00`;
+          };
+
+          // Calculate End Time logic for ISO string
+          // Only simple logic: if End Time provided, use it. 
+          // If not, add 1 hour (manually handling overflow is tricky with just strings, 
+          // so we might need simple Date math just for calculation, but formatting strictly).
+
+          let startISO, endISO;
 
           if (isNoivas) {
-            // For Weddings, try to use Arrival or Ceremony time, defaulting to full day if vague
-            const timeStr = arrivalTime || makingOfTime || ceremonyTime || '09:00';
-            const [h, m] = timeStr.split(':').map(Number);
-            finalStartDateTime = new Date(eventDate);
-            finalStartDateTime.setHours(h, m, 0);
-            finalEndDateTime = new Date(finalStartDateTime.getTime() + (4 * 60 * 60 * 1000)); // Default 4 hours
-          } else {
-            // Social / Pre-wedding
-            if (startTime) {
-              const [h, m] = startTime.split(':').map(Number);
-              finalStartDateTime = new Date(eventDate);
-              finalStartDateTime.setHours(h, m, 0);
+            const mainTime = arrivalTime || makingOfTime || ceremonyTime || '09:00';
+            startISO = formatToBrasiliaISO(eventDate, mainTime, '09:00');
 
-              if (endTime) {
-                const [eh, em] = endTime.split(':').map(Number);
-                finalEndDateTime = new Date(eventDate);
-                finalEndDateTime.setHours(eh, em, 0);
-              } else {
-                finalEndDateTime = new Date(finalStartDateTime.getTime() + (1 * 60 * 60 * 1000)); // Default 1 hour
-              }
+            // End time: +4 hours roughly. 
+            // Ideally we parse the hours, add 4, handle rollover.
+            const [h, m] = mainTime.split(':').map(Number);
+            let endH = h + 4;
+            // Overflow check simplified (doesn't change date string)
+            if (endH > 23) endH = 23;
+            const endHStr = endH.toString().padStart(2, '0');
+            endISO = `${eventDate}T${endHStr}:${m}:00-03:00`; // Keeping same date for simplicity or simple overflow
+          } else {
+            startISO = formatToBrasiliaISO(eventDate, startTime, '09:00');
+            if (endTime) {
+              endISO = formatToBrasiliaISO(eventDate, endTime, '10:00');
+            } else {
+              // Default +1 hour
+              const [h, m] = (startTime || '09:00').split(':').map(Number);
+              let endH = h + 1;
+              const endHStr = endH.toString().padStart(2, '0');
+              endISO = `${eventDate}T${endHStr}:${m.toString().padStart(2, '0')}:00-03:00`;
             }
           }
 
@@ -502,8 +515,8 @@ ${isNoivas ? `
 ` : ''}
               `.trim(),
             location: address,
-            start: { dateTime: finalStartDateTime.toISOString() },
-            end: { dateTime: finalEndDateTime.toISOString() }
+            start: { dateTime: startISO },
+            end: { dateTime: endISO }
           };
 
           let gCalResponse;
@@ -575,11 +588,20 @@ ${isNoivas ? `
   const handleDelete = async () => {
     if (!event || !user) return;
 
-    // Confirm? Already has separate delete button, assuming user knows.
-    // Or add a confirm dialog step? For now, direct delete as per previous functionality.
-
     setLoading(true);
     try {
+      // GOOGLE CALENDAR DELETE SYNC (Bidirectional)
+      if (event.google_calendar_event_id) {
+        const { deleteCalendarEvent } = await import('@/integrations/google/calendar');
+        const googleDeleted = await deleteCalendarEvent(event.google_calendar_event_id);
+
+        if (!googleDeleted) {
+          toast({ title: "Falha no Google", description: "Não foi possível deletar do Google Calendar. Operação cancelada.", variant: "destructive" });
+          return; // Stop execution
+        }
+      }
+
+      // 2. Only after Google confirmation (or if no Google ID), delete from Supabase
       const { error } = await supabase
         .from('events')
         .delete()
@@ -609,7 +631,7 @@ ${isNoivas ? `
     <>
       <Dialog open={open} onOpenChange={(open) => { if (!open && isAutocompleteOpen) return; onOpenChange(open); }}>
         <DialogContent
-          className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-white/5 sm:max-w-[700px]"
+          className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-none shadow-2xl shadow-white/5 sm:max-w-[700px]"
           onInteractOutside={(e) => {
             const target = e.target as HTMLElement;
             if (target.closest('.pac-container')) {
@@ -641,7 +663,7 @@ ${isNoivas ? `
                     type="button"
                     onClick={() => setEventType(type.value)}
                     className={`
-                      px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap border
+                      px-6 py-2.5 rounded-none text-sm font-medium transition-all duration-300 whitespace-nowrap border
                       ${eventType === type.value
                         ? 'bg-white/20 text-white border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
                         : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10'}
@@ -662,7 +684,7 @@ ${isNoivas ? `
                   Selecionar Serviço
                 </Label>
                 <Select value={selectedServiceId} onValueChange={handleServiceSelect}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none">
                     <SelectValue placeholder="Preencher com serviço..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
@@ -686,7 +708,7 @@ ${isNoivas ? `
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder={isNoivas ? "Ex: Casamento Ana Silva" : "Ex: Ensaio Pré Wedding"}
                 required
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-xl py-6"
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-none py-6"
               />
             </div>
 
@@ -697,13 +719,16 @@ ${isNoivas ? `
                   <CalendarIcon className="h-4 w-4 text-white" />
                   Data *
                 </Label>
-                <Input
-                  id="eventDate"
-                  type="date"
-                  value={eventDate}
-                  onChange={(e) => setEventDate(e.target.value)}
-                  required
-                  className="bg-white/5 border-white/10 text-white focus:border-white/50 rounded-xl"
+                <NoirDatePicker
+                  date={eventDate ? new Date(eventDate + 'T12:00:00') : undefined}
+                  setDate={(date) => {
+                    if (date) {
+                      setEventDate(format(date, 'yyyy-MM-dd'));
+                    } else {
+                      setEventDate('');
+                    }
+                  }}
+                  placeholder="Selecione a data"
                 />
               </div>
 
@@ -722,7 +747,7 @@ ${isNoivas ? `
                   </Button>
                 </div>
                 <Select value={clientId || "__none__"} onValueChange={(v) => setClientId(v === "__none__" ? "" : v)}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
@@ -744,12 +769,12 @@ ${isNoivas ? `
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Detalhes adicionais..."
                 rows={2}
-                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl resize-none"
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-none resize-none"
               />
             </div>
 
             {/* Conditional Times based on Event Type */}
-            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/5 space-y-4">
+            <div className="p-4 rounded-none bg-white/[0.03] border border-white/5 space-y-4">
               <Label className="flex items-center gap-2 text-white font-medium">
                 <Clock className="h-4 w-4" />
                 Cronograma

@@ -5,6 +5,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Google Places Autocomplete Fix */
+.pac-container {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  font-family: inherit;
+  border-radius: 0 !important;
+  /* Noir style */
+  background-color: #050505 !important;
+  border: 1px solid #333 !important;
+  color: #fff !important;
+}
+
+.pac-item {
+  cursor: pointer;
+  padding: 10px;
+  border-color: #333 !important;
+  color: #999 !important;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.pac-item-query {
+  color: #fff !important;
+}
+
+
 /* Lumi Design System - Beauty Tech (Dark/Silver/Neon) */
 
 @layer base {

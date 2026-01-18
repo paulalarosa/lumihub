@@ -9,7 +9,6 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { OnboardingWizard } from "@/features/onboarding/pages/OnboardingWizard";
 
 export default function AppLayout() {
     const { user } = useAuth();
@@ -47,11 +46,10 @@ export default function AppLayout() {
         window.location.reload();
     };
 
-    // SYSTEM INITIALIZATION CHECK
-    // If we have a user, finished loading profile, and onboarding_completed is false => Show Wizard
-    if (user && !loadingProfile && profile && profile.onboarding_completed === false) {
-        return <OnboardingWizard onComplete={handleOnboardingComplete} />;
-    }
+    // SYSTEM INITIALIZATION CHECK - Handled by ProtectedRoute now
+    // if (user && !loadingProfile && profile && profile.onboarding_completed === false) {
+    //    return <OnboardingWizard onComplete={handleOnboardingComplete} />;
+    // }
 
     return (
         <SidebarProvider>

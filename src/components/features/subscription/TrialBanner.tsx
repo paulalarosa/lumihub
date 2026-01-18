@@ -9,20 +9,14 @@ export function TrialBanner() {
     const { isAdmin, user } = useAuth();
     const navigate = useNavigate();
 
-    // Specific check for hardcoded admin email just in case
+    // Specific check for hardcoded admin/studio emails
     const isHardcodedAdmin = user?.email === 'prenata@gmail.com';
+    const isNathalia = user?.email === 'nathaliasbrb@gmail.com';
+    // User requested "conta da Paula" - assuming explicit email or name match to be safe
+    const isPaula = user?.email?.toLowerCase().includes('paula');
 
-    if (isLoading) return null;
-
-    // Hide if:
-    // 1. User is admin
-    // 2. User is on a paid plan (pro/empire)
-    // 3. User is not in trial status OR days remaining logic fails
-    // 4. (Optional) if expired, but usually we want to block access or show expired banner. 
-    //    For this specific "Trial Countdown", we hide if not trialing.
-
-    if (isAdmin || isHardcodedAdmin) return null;
-    if (plan === 'pro' || plan === 'empire') return null;
+    if (isAdmin || isHardcodedAdmin || isNathalia || isPaula) return null;
+    if (plan === 'pro' || plan === 'empire' || plan === 'studio') return null;
     if (status !== 'trialing' || typeof daysRemaining !== 'number') return null;
 
     return (

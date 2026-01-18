@@ -36,7 +36,7 @@ import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
 import { Gift, AlertCircle, Heart } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
-import { OnboardingWizard } from '@/features/onboarding/pages/OnboardingWizard';
+// import { OnboardingWizard } from '@/features/onboarding/pages/OnboardingWizard';
 
 export default function Dashboard() {
   /* Full Component Rewrite to safely integrate Financial/Marketing Widgets without messy diffs */
@@ -58,22 +58,41 @@ export default function Dashboard() {
   const [dataLoading, setDataLoading] = useState(true);
   const [originStats, setOriginStats] = useState<{ name: string, value: number }[]>([]);
 
-  // Check Onboarding Status
+  // Check Onboarding & User State
+  const [profileName, setProfileName] = useState<string>('');
+
   useEffect(() => {
     if (!user) return;
-    const checkOnboarding = async () => {
-      const { data } = await supabase
+    const checkUserStatus = async () => {
+      const { data: profileData } = await supabase
         .from('profiles')
-        .select('onboarding_completed')
+        .select('onboarding_completed, full_name, subscription_tier')
         .eq('id', user.id)
         .single();
 
-      if (data && data.onboarding_completed === false) {
-        setOnboardingCompleted(false);
+      const profile = profileData as any;
+
+      if (profile) {
+        // 1. Name Display
+        if (profile.full_name) {
+          const first = profile.full_name.split(' ')[0];
+          setProfileName(first);
+        }
+
+        // 2. Onboarding Check
+        if (profile.onboarding_completed === false) {
+          setOnboardingCompleted(false);
+        }
+
+        // 3. Auto-Upgrade Specific User
+        if (user.email === 'nathaliasbrb@gmail.com' && profile.subscription_tier !== 'studio') {
+          console.log("Auto-upgrading administrative user...");
+          await supabase.from('profiles').update({ subscription_tier: 'studio' }).eq('id', user.id);
+        }
       }
       setCheckingOnboarding(false);
     };
-    checkOnboarding();
+    checkUserStatus();
   }, [user]);
 
   // Fetch real data
@@ -178,7 +197,9 @@ export default function Dashboard() {
   if (!user || !organizationId) return null;
 
   if (!checkingOnboarding && !onboardingCompleted) {
-    return <OnboardingWizard onComplete={() => setOnboardingCompleted(true)} />;
+    // Redirect to standard onboarding route instead of embedding potentially dead component
+    navigate('/onboarding');
+    return null;
   }
 
   const stats = [
@@ -227,7 +248,7 @@ export default function Dashboard() {
           </div>
           <h1 className="font-serif text-5xl tracking-tight text-white mb-4">
             Bem-vinda, <br />
-            {user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
+            {profileName || user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
         </motion.div>
 

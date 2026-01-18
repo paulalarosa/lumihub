@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Calendar, Loader2, CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, Loader2, CheckCircle2, ArrowRight, Sparkles, Terminal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -54,17 +54,26 @@ const Onboarding = () => {
   };
 
   const handleComplete = async () => {
-    if (!user) return;
+    // 1. Get freshet user data
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return;
 
     setIsCompleting(true);
 
     try {
-      // NOTE: 'google_calendar_connected' column does not exist in 'profiles' table,
-      // so we only update 'onboarding_completed'.
+      // 2. UPSERT Profile (Critical Fix)
       const { error } = await supabase
         .from('profiles')
-        .update({ onboarding_completed: true })
-        .eq('id', user.id);
+        .upsert({
+          id: userData.user.id,
+          email: userData.user.email,
+          full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'Profissional',
+          role: 'professional',
+          subscription_tier: 'trial',
+          onboarding_completed: true,
+          // has_completed_onboarding: true, // Legacy support
+          updated_at: new Date().toISOString()
+        } as any, { onConflict: 'id' });
 
       if (error) {
         console.error('Error completing onboarding:', error);
@@ -73,8 +82,13 @@ const Onboarding = () => {
         return;
       }
 
+      // 3. FORCE REFRESH TO BREAK LOOP
+      console.log("Refreshing session to apply roles...");
+      await supabase.auth.refreshSession();
+
       toast.success('Bem-vindo ao Lumi!');
-      navigate('/dashboard');
+      window.location.href = '/dashboard';
+
     } catch (err) {
       console.error('Complete error:', err);
       toast.error('Erro ao finalizar');
@@ -93,22 +107,22 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 overflow-hidden relative font-sans selection:bg-black selection:text-white">
-      {/* Background Effects - Concrete Texture */}
-      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-40 mix-blend-multiply" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#000000_1px,transparent_1px),linear-gradient(to_bottom,#000000_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.03]" />
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 overflow-hidden relative font-sans selection:bg-white selection:text-black">
+      {/* Background Effects - Noise & Grid */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-10" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1a1a1a_1px,transparent_1px),linear-gradient(to_bottom,#1a1a1a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20" />
 
       {/* Progress Indicator - Minimalist Studio */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-2">
+      <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
         {[1, 2, 3].map((s) => (
           <div key={s} className="flex items-center">
-            <div className={`h-1 w-8 transition-colors duration-300 ${s <= step ? 'bg-black' : 'bg-neutral-300'}`} />
+            <div className={`h-0.5 w-8 transition-colors duration-300 ${s <= step ? 'bg-white' : 'bg-neutral-800'}`} />
           </div>
         ))}
       </div>
 
       <AnimatePresence mode="wait">
-        {/* Step 1: Welcome */}
+        {/* Step 1: Welcome (Studio Setup) */}
         {step === 1 && (
           <motion.div
             key="step1"
@@ -119,17 +133,17 @@ const Onboarding = () => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
-              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
-                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">Studio Setup</span>
-                <Sparkles className="w-4 h-4 text-neutral-400" />
+            <div className="bg-black border border-white/10 p-12 relative shadow-2xl shadow-black/50 rounded-none">
+              <div className="mb-10 flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-[10px] font-mono font-bold tracking-[0.2em] uppercase text-neutral-500">Configuração do Estúdio</span>
+                <Sparkles className="w-3 h-3 text-neutral-500" />
               </div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 tracking-tight"
+                className="text-4xl md:text-5xl font-serif text-white mb-6 tracking-wide leading-tight"
               >
                 LUMI HUB
               </motion.h1>
@@ -138,10 +152,10 @@ const Onboarding = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-neutral-500 text-lg mb-12 font-medium leading-relaxed"
+                className="text-neutral-400 text-lg mb-12 font-sans font-light leading-relaxed"
               >
-                The digital backstage for your empire. <br />
-                Precision. Control. Aesthetic.
+                O backstage digital para o seu império. <br />
+                <span className="text-white">Precisão. Controle. Estética.</span>
               </motion.p>
 
               <motion.div
@@ -151,10 +165,10 @@ const Onboarding = () => {
               >
                 <Button
                   onClick={() => setStep(2)}
-                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
+                  className="w-full h-14 text-xs font-bold bg-white text-black hover:bg-neutral-200 rounded-none transition-all duration-300 uppercase tracking-[0.2em]"
                 >
-                  Initialize
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  INICIAR IMPÉRIO
+                  <ArrowRight className="ml-2 h-3 w-3" />
                 </Button>
               </motion.div>
             </div>
@@ -172,28 +186,28 @@ const Onboarding = () => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
-              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
-                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">Integration</span>
-                <Calendar className="w-4 h-4 text-neutral-400" />
+            <div className="bg-black border border-white/10 p-12 relative shadow-2xl shadow-black/50 rounded-none">
+              <div className="mb-10 flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-[10px] font-mono font-bold tracking-[0.2em] uppercase text-neutral-500">Integração</span>
+                <Calendar className="w-3 h-3 text-neutral-500" />
               </div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl font-bold text-neutral-900 mb-6 tracking-tight"
+                className="text-3xl font-serif text-white mb-6 tracking-wide"
               >
-                Sync Command
+                Comando de Sync
               </motion.h2>
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-neutral-500 text-base mb-10 font-medium"
+                className="text-neutral-400 text-sm mb-10 font-sans leading-relaxed"
               >
-                Integrate Google Calendar to enable intelligent scheduling.
+                Integre o Google Calendar para habilitar o agendamento inteligente.
               </motion.p>
 
               <motion.div
@@ -203,13 +217,13 @@ const Onboarding = () => {
                 className="space-y-4 mb-10"
               >
                 {[
-                  'Unified Timeline',
-                  'Automated Blocking',
-                  'Client Synchronization'
+                  'Linha do Tempo Unificada',
+                  'Bloqueio Automático',
+                  'Sincronização com Clientes'
                 ].map((feature, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 bg-neutral-900 rounded-full" />
-                    <span className="text-neutral-600 text-sm font-semibold tracking-wide">{feature}</span>
+                    <div className="w-1 h-1 bg-white rounded-none" />
+                    <span className="text-neutral-500 text-xs font-mono uppercase tracking-wider">{feature}</span>
                   </div>
                 ))}
               </motion.div>
@@ -223,17 +237,17 @@ const Onboarding = () => {
                 <Button
                   onClick={handleConnectGoogleCalendar}
                   disabled={isConnecting}
-                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
+                  className="w-full h-14 text-xs font-bold bg-white text-black hover:bg-neutral-200 rounded-none transition-all duration-300 uppercase tracking-[0.2em]"
                 >
                   {isConnecting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Connecting...
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      CONECTANDO...
                     </>
                   ) : (
                     <>
-                      <Calendar className="mr-2 h-4 w-4" />
-                      Connect Provider
+                      <Calendar className="mr-2 h-3 w-3" />
+                      CONECTAR PROVEDOR
                     </>
                   )}
                 </Button>
@@ -241,9 +255,9 @@ const Onboarding = () => {
                 <Button
                   variant="ghost"
                   onClick={handleSkipCalendar}
-                  className="w-full h-10 text-neutral-400 hover:text-neutral-900 hover:bg-transparent text-xs font-semibold uppercase tracking-widest"
+                  className="w-full h-10 text-neutral-500 hover:text-white hover:bg-transparent text-[10px] font-mono uppercase tracking-[0.2em] rounded-none"
                 >
-                  Skip Configuration
+                  PULAR CONFIGURAÇÃO
                 </Button>
               </motion.div>
             </div>
@@ -261,28 +275,28 @@ const Onboarding = () => {
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
-              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
-                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">System Ready</span>
-                <CheckCircle2 className="w-4 h-4 text-neutral-400" />
+            <div className="bg-black border border-white/10 p-12 relative shadow-2xl shadow-black/50 rounded-none">
+              <div className="mb-10 flex justify-between items-center border-b border-white/10 pb-4">
+                <span className="text-[10px] font-mono font-bold tracking-[0.2em] uppercase text-neutral-500">Sistema Pronto</span>
+                <CheckCircle2 className="w-3 h-3 text-neutral-500" />
               </div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl font-bold text-neutral-900 mb-6 tracking-tight"
+                className="text-3xl font-serif text-white mb-6 tracking-wide"
               >
-                All Systems Go
+                Sistemas Operantes
               </motion.h2>
 
               <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
-                className="text-neutral-500 text-lg mb-12 font-medium"
+                className="text-neutral-400 text-sm mb-12 font-sans leading-relaxed"
               >
-                Your studio environment has been successfully deployed.
+                Seu ambiente de estúdio foi implantado com sucesso.
               </motion.p>
 
               <motion.div
@@ -293,17 +307,17 @@ const Onboarding = () => {
                 <Button
                   onClick={handleComplete}
                   disabled={isCompleting}
-                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
+                  className="w-full h-14 text-xs font-bold bg-white text-black hover:bg-neutral-200 rounded-none transition-all duration-300 uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                 >
                   {isCompleting ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Finalizing...
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      FINALIZANDO...
                     </>
                   ) : (
                     <>
-                      Enter Dashboard
-                      <ArrowRight className="ml-2 h-4 w-4" />
+                      ACESSAR DASHBOARD
+                      <Terminal className="ml-2 h-3 w-3" />
                     </>
                   )}
                 </Button>

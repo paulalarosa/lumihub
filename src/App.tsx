@@ -23,6 +23,8 @@ import UpdatePassword from "@/features/auth/pages/UpdatePassword";
 import AdminUsers from "@/features/users/pages/UsersPage";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "@/features/dashboard/pages/Dashboard";
+import BrideLoginPage from "./pages/BrideLoginPage";
+import BrideDashboardPage from "./pages/BrideDashboardPage";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./features/admin/AdminDashboard";
@@ -56,10 +58,7 @@ import { ErrorFallback } from "./components/ui/error-fallback";
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import InviteLanding from "./pages/InviteLanding";
 
-// Bride Portal Imports
-import BrideLayout from "@/layouts/BrideLayout";
-import BrideLoginPage from "@/features/portal/pages/BrideLoginPage";
-import BrideDashboardPage from "@/features/portal/pages/BrideDashboardPage";
+
 
 const queryClient = new QueryClient();
 
@@ -139,14 +138,21 @@ const App = () => {
                           <FinancialDashboard />
                         </ProtectedRoute>
                       } />
+
                       <Route element={<AdminRoute />}>
                         <Route path="/admin" element={<AdminDashboard />} />
                         <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
                         <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
                       </Route>
+
                       <Route path="/clientes" element={
                         <ProtectedRoute>
                           <Clientes />
+                        </ProtectedRoute>
+                      } />
+                      <Route path="/agenda" element={
+                        <ProtectedRoute>
+                          <Agenda />
                         </ProtectedRoute>
                       } />
                       <Route path="/clientes/:id" element={
@@ -180,11 +186,6 @@ const App = () => {
                           <Configuracoes />
                         </ProtectedRoute>
                       } />
-                      <Route path="/agenda" element={
-                        <ProtectedRoute>
-                          <Agenda />
-                        </ProtectedRoute>
-                      } />
                       <Route path="/assistentes" element={
                         <ProtectedRoute>
                           <Assistentes />
@@ -207,26 +208,21 @@ const App = () => {
                       } />
                     </Route>
 
-                    {/* Assistant Portal */}
-                    <Route path="/portal" element={
+                    {/* Assistant Portal - Explicit Route */}
+                    <Route path="/portal-assistente" element={
                       <ProtectedRoute requireOnboarding={false}>
                         <PortalAssistente />
                       </ProtectedRoute>
                     } />
+
                     <Route path="/assistente/convite/:token" element={<InviteLanding />} />
 
                     {/* Public Client Booking */}
                     <Route path="/b/:slug" element={<PublicBooking />} />
 
-                    {/* Legacy Public Client Portal - Keeping for backward compatibility if needed */}
-                    <Route path="/portal/:token" element={<PortalCliente />} />
-
-                    {/* NEW: Bride Portal */}
-                    <Route path="/portal/:clientId" element={<BrideLayout />}>
-                      <Route path="login" element={<BrideLoginPage />} />
-                      <Route path="dashboard" element={<BrideDashboardPage />} />
-                      <Route index element={<Navigate to="login" replace />} />
-                    </Route>
+                    {/* Password-less Portal (Restored) - Outside AppLayout */}
+                    <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
+                    <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
 
                     {/* Catch-all */}
                     <Route path="*" element={<Dashboard />} /> {/* Redirect * to Dashboard instead of NotFound to catch all */}
@@ -239,7 +235,7 @@ const App = () => {
           </Sentry.ErrorBoundary>
         </BrowserRouter>
       </TooltipProvider>
-    </QueryClientProvider>
+    </QueryClientProvider >
   );
 };
 
