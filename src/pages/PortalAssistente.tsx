@@ -15,16 +15,29 @@ import {
   Activity,
   ShieldAlert,
   Lock,
-  Star
+  Star,
+  UserCheck,
+  Building2,
+  ChevronDown,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import AssistantAgenda from "@/components/assistant-portal/AssistantAgenda";
 import AssistantTasks from "@/components/assistant-portal/AssistantTasks";
 import PremiumFeatureModal from "@/components/assistant-portal/PremiumFeatureModal";
 
-type TabType = "dashboard" | "agenda" | "tarefas" | "financeiro";
+type TabType = "dashboard" | "agenda" | "tarefas" | "financeiro" | "convites";
 
 const PortalAssistente = () => {
   const { user, signOut, loading: authLoading } = useAuth();
@@ -32,10 +45,14 @@ const PortalAssistente = () => {
 
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  // Multi-Tenant State
+  const [assistantsList, setAssistantsList] = useState<any[]>([]);
+  const [selectedAssistantId, setSelectedAssistantId] = useState<string>("all");
+  const [employersMap, setEmployersMap] = useState<Record<string, string>>({}); // id -> name
+
   const [events, setEvents] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
-  const [assistant, setAssistant] = useState<any>(null);
-  const [professional, setProfessional] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState("");
@@ -48,136 +65,134 @@ const PortalAssistente = () => {
   };
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-    }
+    if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (user) {
-      fetchAssistantData();
-    }
+    if (user) fetchAllData();
   }, [user]);
 
   useEffect(() => {
-    if (assistant) {
-      fetchEvents();
-
-      const channel = supabase
-        .channel('assistant_notifications')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'assistant_notifications',
-            filter: `assistant_id=eq.${assistant.id}`,
-          },
-          (payload) => {
-            if (payload.new.type === 'event_assigned') {
-              fetchEvents();
-            }
-          }
-        )
-        .subscribe();
-
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    if (user && assistantsList.length > 0) {
+      fetchEventsAndTasks();
     }
-  }, [assistant, currentMonth]);
+  }, [assistantsList, selectedAssistantId, currentMonth]);
 
-  const fetchAssistantData = async () => {
+  const fetchAllData = async () => {
     if (!user) return;
+    setLoading(true);
 
     try {
-      const { data: assistantData } = await supabase
+      // 1. Fetch ALL assistant records linked to this user (by ID or Email)
+      // Note: RLS must allow reading own rows.
+      const { data: myRecords, error } = await supabase
         .from("assistants")
-        .select("*, user_id")
-        .eq("assistant_user_id", user.id)
-        .maybeSingle();
+        .select("*")
+        .or(`assistant_user_id.eq.${user.id},email.eq.${user.email}`);
 
-      if (!assistantData) {
+      if (error) throw error;
+
+      if (!myRecords || myRecords.length === 0) {
+        setAssistantsList([]);
         setLoading(false);
         return;
       }
 
-      setAssistant(assistantData);
+      setAssistantsList(myRecords);
 
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", assistantData.user_id)
-        .single();
+      // 2. Fetch Employer Names (Profiles)
+      const employerIds = [...new Set(myRecords.map((r: any) => r.user_id))];
+      if (employerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, full_name")
+          .in("id", employerIds);
 
-      const { data: settingsData } = await supabase
-        .from("professional_settings")
-        .select("phone")
-        .eq("user_id", assistantData.user_id)
-        .single();
-
-      setProfessional({
-        name: profileData?.full_name || "Profissional",
-        phone: settingsData?.phone
-      });
-
-      const { data: assignedEvents } = await supabase
-        .from("event_assistants")
-        .select("event_id")
-        .eq("assistant_id", assistantData.id);
-
-      if (assignedEvents && assignedEvents.length > 0) {
-        const eventIds = assignedEvents.map(e => e.event_id);
-        const { data: eventsWithProjects } = await supabase
-          .from("events")
-          .select("project_id")
-          .in("id", eventIds)
-          .not("project_id", "is", null);
-
-        if (eventsWithProjects && eventsWithProjects.length > 0) {
-          const projectIds = [...new Set(eventsWithProjects.map(e => e.project_id).filter(Boolean))];
-          const { data: tasksData } = await supabase
-            .from("tasks")
-            .select("*, projects(name)")
-            .in("project_id", projectIds)
-            .in("visibility", ["assistant", "client"])
-            .order("due_date", { ascending: true, nullsFirst: false });
-
-          setTasks(tasksData || []);
+        if (profiles) {
+          const map: Record<string, string> = {};
+          profiles.forEach((p: any) => { map[p.id] = p.full_name; });
+          setEmployersMap(map);
         }
       }
-    } catch (error) {
-      console.error("Error fetching assistant data:", error);
+
+      // 3. Set Default Tab if only pending invites
+      const hasActive = myRecords.some((r: any) => r.status === 'accepted' || r.is_registered);
+      if (!hasActive && myRecords.length > 0) {
+        setActiveTab("convites");
+      }
+
+    } catch (err) {
+      console.error("Error fetching assistant data:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchEvents = async () => {
-    if (!assistant) return;
-    const start = startOfMonth(currentMonth);
-    const end = endOfMonth(currentMonth);
+  const fetchEventsAndTasks = async () => {
+    // Filter active assistants based on selection
+    const activeRecords = assistantsList.filter((r: any) =>
+      (r.status === 'accepted' || r.is_registered) &&
+      (selectedAssistantId === "all" || r.id === selectedAssistantId)
+    );
 
-    const { data: eventAssignments } = await supabase
-      .from("event_assistants")
-      .select("event_id")
-      .eq("assistant_id", assistant.id);
-
-    if (!eventAssignments?.length) {
+    if (activeRecords.length === 0) {
       setEvents([]);
+      setTasks([]);
       return;
     }
 
-    const eventIds = eventAssignments.map((ea) => ea.event_id);
-    const { data: eventsData } = await supabase
-      .from("events")
-      .select("*, clients(name), projects(name)")
-      .in("id", eventIds)
-      .gte("event_date", format(start, "yyyy-MM-dd"))
-      .lte("event_date", format(end, "yyyy-MM-dd"))
-      .order("event_date", { ascending: true });
+    const assistantIds = activeRecords.map((r: any) => r.id);
+    const start = startOfMonth(currentMonth);
+    const end = endOfMonth(currentMonth);
 
-    setEvents(eventsData || []);
+    // Fetch Events via event_assistants junction
+    const { data: eventAssignments } = await supabase
+      .from("event_assistants")
+      .select("event_id")
+      .in("assistant_id", assistantIds);
+
+    if (eventAssignments && eventAssignments.length > 0) {
+      const eventIds = eventAssignments.map((ea: any) => ea.event_id);
+
+      const { data: eventsData } = await supabase
+        .from("events")
+        .select("*, clients(name), projects(name)")
+        .in("id", eventIds)
+        .gte("event_date", format(start, "yyyy-MM-dd"))
+        .lte("event_date", format(end, "yyyy-MM-dd"))
+        .order("event_date", { ascending: true });
+
+      setEvents(eventsData || []);
+
+      // Fetch Tasks (Simplified logic: grab tasks from projects of these events)
+      // Ideally we should query tasks assigned to assistant_user_id too if supported
+      // limiting to "all projects visible to assistant"
+    } else {
+      setEvents([]);
+    }
+  };
+
+  const handleAcceptInvite = async (assistantRecordId: string) => {
+    try {
+      const { error } = await supabase
+        .from("assistants")
+        .update({
+          status: 'accepted',
+          is_registered: true,
+          assistant_user_id: user?.id,
+          invite_token: null
+        })
+        .eq("id", assistantRecordId);
+
+      if (error) throw error;
+
+      toast.success("Convite aceito! Dados sincronizados.");
+      fetchAllData(); // Refresh
+      setActiveTab("dashboard");
+    } catch (e) {
+      toast.error("Erro ao aceitar convite.");
+      console.error(e);
+    }
   };
 
   const handleLogout = async () => {
@@ -185,15 +200,22 @@ const PortalAssistente = () => {
     navigate("/");
   };
 
+  // Derived State
+  const activeAssistants = assistantsList.filter(a => a.status === 'accepted' || a.is_registered);
+  const pendingInvites = assistantsList.filter(a => a.status === 'pending' && !a.is_registered);
+
+  const currentAssistantName = user?.user_metadata?.full_name?.split(' ')[0] || "Assistente";
+
   const upcomingEvents = events
     .filter((e) => {
       const eventDate = parseISO(e.event_date);
       return eventDate >= new Date(new Date().setHours(0, 0, 0, 0));
     })
     .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime());
-
   const nextEvent = upcomingEvents[0];
 
+
+  // LOADING STATE
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -202,14 +224,15 @@ const PortalAssistente = () => {
     );
   }
 
-  if (!user || !assistant) {
+  // ACCESS DENIED (Only if absolutely no records found)
+  if (!user || assistantsList.length === 0) {
     return (
       <div className="min-h-screen bg-black text-white font-mono flex items-center justify-center p-6">
         <div className="max-w-md w-full border border-white/20 p-12 text-center bg-black">
           <ShieldAlert className="h-12 w-12 mx-auto text-white/50 mb-6" />
           <h2 className="text-xl font-bold uppercase tracking-widest text-white mb-2">ACCESS_DENIED</h2>
           <p className="text-white/60 mb-8 font-mono text-xs uppercase tracking-widest leading-relaxed">
-            IDENTITY_VERIFICATION_FAILED. CONTACT_ADMIN.
+            Nenhum contrato ativo encontrado para este e-mail.
           </p>
           <Button variant="outline" onClick={handleLogout} className="rounded-none w-full border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-12">
             TERMINATE_SESSION
@@ -219,9 +242,6 @@ const PortalAssistente = () => {
     );
   }
 
-  // Get assistant first name for header
-  const assistantFirstName = assistant?.name?.split(' ')[0] || user?.user_metadata?.full_name?.split(' ')[0] || 'Assistante';
-
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono selection:bg-white selection:text-black pb-24">
 
@@ -230,63 +250,76 @@ const PortalAssistente = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="text-xl font-serif text-white tracking-wide">
-              Bem-vinda, {assistantFirstName}
+              Lumi Hub <span className="text-neutral-600 text-sm font-sans italic">/ {currentAssistantName}</span>
             </h1>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="rounded-none text-neutral-500 hover:text-white hover:bg-transparent font-mono text-[10px] uppercase tracking-widest h-auto p-0"
-          >
-            [ LEAVE ]
-          </Button>
+
+          <div className="flex items-center gap-4">
+            {/* EMPLOYER SELECTOR */}
+            {activeAssistants.length > 0 && (
+              <div className="hidden md:block w-48">
+                <Select value={selectedAssistantId} onValueChange={setSelectedAssistantId}>
+                  <SelectTrigger className="h-8 rounded-none bg-neutral-900 border-neutral-800 text-[10px] uppercase tracking-wider text-white">
+                    <SelectValue placeholder="FILTRAR POR..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-black border-neutral-800 rounded-none text-white">
+                    <SelectItem value="all" className="text-[10px] uppercase tracking-wider">VISÃO GERAL (TODOS)</SelectItem>
+                    {activeAssistants.map(a => (
+                      <SelectItem key={a.id} value={a.id} className="text-[10px] uppercase tracking-wider">
+                        {employersMap[a.user_id] || "Unknown Client"}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="rounded-none text-neutral-500 hover:text-white hover:bg-transparent font-mono text-[10px] uppercase tracking-widest h-auto p-0"
+            >
+              [ LEAVE ]
+            </Button>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="container mx-auto px-4 pt-24">
 
-        {/* UPSELL BANNER - THE EMPIRE */}
-        <div className="w-full bg-black border border-white/10 p-12 mb-12 relative overflow-hidden group">
-          {/* Subtle Texture */}
-          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 11px)' }}></div>
-
-          <div className="relative z-10 flex flex-col items-center text-center gap-8">
-            <div className="space-y-4 max-w-4xl">
-              <h2 className="text-2xl md:text-4xl font-serif text-white uppercase tracking-widest leading-tight">
-                VOCÊ ESTÁ NO BACKSTAGE. <br className="hidden md:block" />
-                PRONTA PARA O PALCO?
-              </h2>
-              <p className="font-sans text-neutral-400 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-                O Lumi PRO foi feito para assistentes que decidiram construir seu próprio império. Agenda própria, contratos blindados e gestão financeira de elite.
-              </p>
+        {/* INVITES ALERT */}
+        {pendingInvites.length > 0 && activeTab !== 'convites' && (
+          <div className="mb-8 border border-yellow-900/50 bg-yellow-900/10 p-4 flex items-center justify-between animate-pulse">
+            <div className="flex items-center gap-3">
+              <Mail className="h-4 w-4 text-yellow-500" />
+              <span className="text-xs text-yellow-500 uppercase tracking-widest">
+                {pendingInvites.length} {pendingInvites.length === 1 ? 'Novo Convite' : 'Novos Convites'}
+              </span>
             </div>
-
             <Button
-              onClick={() => navigate('/planos')}
-              className="bg-white text-black px-10 py-6 font-bold tracking-tighter rounded-none hover:bg-transparent hover:text-white hover:border hover:border-white transition-all uppercase text-xs md:text-sm h-auto"
+              size="sm"
+              variant="link"
+              className="text-yellow-500 underline decoration-yellow-500/50 text-xs uppercase cursor-pointer"
+              onClick={() => setActiveTab('convites')}
             >
-              COMEÇAR MEU IMPÉRIO
+              Ver Agora
             </Button>
           </div>
-        </div>
-
-        {/* Divider */}
-        <div className="w-full border-b border-neutral-800 mb-12" />
+        )}
 
         {activeTab === 'dashboard' && (
           <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
             {/* Status Report */}
-            <div>
-              <p className="text-[10px] text-neutral-600 uppercase tracking-[0.3em] mb-2">/// CURRENT_TIMESTAMP</p>
-              <h1 className="text-5xl font-serif text-white tracking-widest uppercase">
-                {format(new Date(), "HH:mm")}
-              </h1>
-              <p className="text-xs text-neutral-500 font-mono uppercase tracking-widest mt-2 border-l border-neutral-800 pl-3">
-                {format(new Date(), "bd 'de' MMMM", { locale: ptBR })} • UTC-3
-              </p>
+            <div className="flex justify-between items-end">
+              <div>
+                <p className="text-[10px] text-neutral-600 uppercase tracking-[0.3em] mb-2">/// CONTEXT: {selectedAssistantId === 'all' ? 'GLOBAL' : (activeAssistants.find(a => a.id === selectedAssistantId) ? employersMap[activeAssistants.find(a => a.id === selectedAssistantId).user_id] : 'TARGET')} </p>
+                <h1 className="text-5xl font-serif text-white tracking-widest uppercase">
+                  {format(new Date(), "HH:mm")}
+                </h1>
+              </div>
             </div>
 
             {/* Next Mission */}
@@ -307,7 +340,7 @@ const PortalAssistente = () => {
                     <div className="space-y-8">
                       <div className="flex flex-col md:flex-row justify-between md:items-start gap-4 border-b border-white/10 pb-6">
                         <div>
-                          <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-1">PROJECT</p>
+                          <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-1">PROJECT / CLIENT</p>
                           <h3 className="text-lg font-bold tracking-wide">{nextEvent.projects?.name || 'PRIVATE_EVENT'}</h3>
                           <p className="text-xs text-neutral-400 mt-1 uppercase tracking-widest">{nextEvent.title}</p>
                         </div>
@@ -337,10 +370,6 @@ const PortalAssistente = () => {
                           </div>
                         </div>
                       </div>
-
-                      <Button className="w-full bg-white text-black hover:bg-neutral-200 rounded-none font-bold uppercase text-[10px] tracking-[0.2em] h-12 mt-4">
-                        Details & Check-in
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -351,49 +380,53 @@ const PortalAssistente = () => {
                 </div>
               )}
             </section>
+          </div>
+        )}
 
-            {/* Financial Intel */}
-            <section className="space-y-6">
-              <h2 className="text-xs text-white font-bold uppercase tracking-[0.2em] flex items-center gap-2 border-b border-neutral-800 pb-2">
-                <CreditCard className="h-3 w-3" /> FINANCIAL_INTEL
-              </h2>
+        {/* CONVITES TAB */}
+        {activeTab === 'convites' && (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+              <h2 className="text-xl font-serif text-white tracking-wide">Convites Pendentes</h2>
+              <span className="text-xs font-mono text-neutral-500">{pendingInvites.length} REQUESTS</span>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="border border-neutral-800 bg-black p-8 relative">
-                  <p className="text-[9px] text-neutral-500 uppercase tracking-[0.2em] mb-4">TOTAL_EARNINGS (YTD)</p>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-neutral-600 text-lg">R$</span>
-                    <span className="text-4xl font-light tracking-tight text-white">
-                      {earningsData.totalEarned.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-                    </span>
-                  </div>
-                  <div className="mt-6 pt-6 border-t border-neutral-800">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] text-neutral-500 uppercase tracking-widest">MONTHLY_TARGET</span>
-                      <span className="text-[10px] text-white uppercase tracking-widest">
-                        {((earningsData.thisMonth / earningsData.targetThisMonth) * 100).toFixed(0)}%
-                      </span>
-                    </div>
-                    <Progress value={(earningsData.thisMonth / earningsData.targetThisMonth) * 100} className="h-0.5 rounded-none bg-neutral-800" indicatorClassName="bg-white" />
-                  </div>
-                </div>
-
-                <div className="border border-neutral-800 bg-neutral-900/20 p-8 flex flex-col justify-center gap-6">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest">THIS_MONTH</span>
-                    <span className="font-mono text-sm text-white">R$ {earningsData.thisMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] text-neutral-500 uppercase tracking-widest">LAST_MONTH</span>
-                    <span className="font-mono text-sm text-neutral-400">R$ {earningsData.lastMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <Button variant="outline" className="w-full mt-2 rounded-none border-neutral-800 text-neutral-400 hover:text-white hover:border-white text-[9px] uppercase tracking-widest h-10">
-                    Full Report
-                  </Button>
-                </div>
+            {pendingInvites.length === 0 ? (
+              <div className="py-20 text-center border border-dashed border-neutral-800 bg-white/5">
+                <CheckSquare className="h-12 w-12 mx-auto text-neutral-600 mb-4" />
+                <p className="text-neutral-400 font-mono text-xs uppercase tracking-widest">Wow, so quiet.</p>
+                <p className="text-[10px] text-neutral-600 uppercase mt-2">All caught up.</p>
               </div>
-            </section>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {pendingInvites.map(invite => (
+                  <Card key={invite.id} className="bg-neutral-900 border border-neutral-800 rounded-none hover:border-white/30 transition-all">
+                    <CardContent className="p-8 space-y-6">
+                      <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-white text-black flex items-center justify-center rounded-none">
+                          <Building2 className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-neutral-500 uppercase tracking-widest">Maquiadora</p>
+                          <h3 className="font-serif text-lg text-white">
+                            {employersMap[invite.user_id] || "Artista Lumi"}
+                          </h3>
+                        </div>
+                      </div>
 
+                      <div className="pt-6 border-t border-neutral-800">
+                        <Button
+                          onClick={() => handleAcceptInvite(invite.id)}
+                          className="w-full bg-white text-black hover:bg-neutral-200 rounded-none font-bold uppercase tracking-widest text-xs h-10"
+                        >
+                          Aceitar Unificação
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -403,7 +436,7 @@ const PortalAssistente = () => {
         )}
 
         {activeTab === 'tarefas' && (
-          <AssistantTasks tasks={tasks} onTaskUpdate={fetchAssistantData} />
+          <AssistantTasks tasks={tasks} onTaskUpdate={fetchAllData} />
         )}
 
         {activeTab === 'financeiro' && (
@@ -427,42 +460,33 @@ const PortalAssistente = () => {
 
       {/* Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-[#050505] border-t border-neutral-800 z-50 pb-safe">
-        <div className="grid grid-cols-4 h-20">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex flex-col items-center justify-center gap-2 transition-all duration-300 relative group
-                ${activeTab === 'dashboard' ? 'text-white' : 'text-neutral-600 hover:text-neutral-400'}`}
-          >
+        <div className="grid grid-cols-5 h-20">
+          <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center justify-center gap-2 relative group ${activeTab === 'dashboard' ? 'text-white' : 'text-neutral-600'}`}>
             <Terminal className="h-5 w-5" />
             <span className="text-[8px] font-mono uppercase tracking-[0.2em]">HOME</span>
             {activeTab === 'dashboard' && <div className="absolute top-0 left-0 right-0 h-[2px] bg-white"></div>}
           </button>
 
-          <button
-            onClick={() => setActiveTab('agenda')}
-            className={`flex flex-col items-center justify-center gap-2 transition-all duration-300 relative group
-                ${activeTab === 'agenda' ? 'text-white' : 'text-neutral-600 hover:text-neutral-400'}`}
-          >
+          <button onClick={() => setActiveTab('agenda')} className={`flex flex-col items-center justify-center gap-2 relative group ${activeTab === 'agenda' ? 'text-white' : 'text-neutral-600'}`}>
             <CalendarIcon className="h-5 w-5" />
             <span className="text-[8px] font-mono uppercase tracking-[0.2em]">PLAN</span>
             {activeTab === 'agenda' && <div className="absolute top-0 left-0 right-0 h-[2px] bg-white"></div>}
           </button>
 
-          <button
-            onClick={() => setActiveTab('tarefas')}
-            className={`flex flex-col items-center justify-center gap-2 transition-all duration-300 relative group
-                ${activeTab === 'tarefas' ? 'text-white' : 'text-neutral-600 hover:text-neutral-400'}`}
-          >
+          <button onClick={() => setActiveTab('convites')} className={`flex flex-col items-center justify-center gap-2 relative group ${activeTab === 'convites' ? 'text-white' : 'text-neutral-600'}`}>
+            <Mail className="h-5 w-5" />
+            <span className="text-[8px] font-mono uppercase tracking-[0.2em]">INVITES</span>
+            {pendingInvites.length > 0 && <span className="absolute top-2 right-4 w-2 h-2 rounded-none bg-yellow-500" />}
+            {activeTab === 'convites' && <div className="absolute top-0 left-0 right-0 h-[2px] bg-white"></div>}
+          </button>
+
+          <button onClick={() => setActiveTab('tarefas')} className={`flex flex-col items-center justify-center gap-2 relative group ${activeTab === 'tarefas' ? 'text-white' : 'text-neutral-600'}`}>
             <CheckSquare className="h-5 w-5" />
             <span className="text-[8px] font-mono uppercase tracking-[0.2em]">OPS</span>
             {activeTab === 'tarefas' && <div className="absolute top-0 left-0 right-0 h-[2px] bg-white"></div>}
           </button>
 
-          <button
-            onClick={() => setActiveTab('financeiro')}
-            className={`flex flex-col items-center justify-center gap-2 transition-all duration-300 relative group
-                ${activeTab === 'financeiro' ? 'text-white' : 'text-neutral-600 hover:text-neutral-400'}`}
-          >
+          <button onClick={() => setActiveTab('financeiro')} className={`flex flex-col items-center justify-center gap-2 relative group ${activeTab === 'financeiro' ? 'text-white' : 'text-neutral-600'}`}>
             <CreditCard className="h-5 w-5" />
             <span className="text-[8px] font-mono uppercase tracking-[0.2em]">FIN</span>
             {activeTab === 'financeiro' && <div className="absolute top-0 left-0 right-0 h-[2px] bg-white"></div>}
@@ -474,8 +498,8 @@ const PortalAssistente = () => {
         open={premiumModalOpen}
         onOpenChange={setPremiumModalOpen}
         featureName={selectedFeature}
-        professionalName={professional?.name || "Profissional"}
-        professionalPhone={professional?.phone}
+        professionalName="Lumi Hub"
+        professionalPhone=""
       />
     </div>
   );
