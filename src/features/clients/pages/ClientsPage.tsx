@@ -4,22 +4,20 @@ import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import {
   ArrowLeft,
   Plus,
   Search,
   User,
-  Phone,
   MoreVertical,
   Trash2,
   Edit,
   Eye,
   Star,
-  Calendar
+  Link as LinkIcon,
+  Gem // Replacing Ring
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -40,13 +38,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ClientService } from '@/services/clientService';
-import { Database } from '@/integrations/supabase/types';
 import { MobileFAB } from '@/components/ui/MobileFAB';
+import { ClientForm, ClientFormData } from '../components/ClientForm';
 
-// Use strict type from Database or local interface? 
-// Service returns Supabase type, but we have local Client interface.
-// Ideally usage should match.
-// Local interface:
+// Extended Client interface
 interface Client {
   id: string;
   name: string;
@@ -57,7 +52,9 @@ interface Client {
   last_visit: string | null;
   created_at: string;
   user_id: string;
-  // Add other fields from DB if necessary
+  bride_status?: boolean;
+  wedding_date?: string | null;
+  secret_code?: string | null;
 }
 
 export default function Clientes() {
@@ -71,13 +68,6 @@ export default function Clientes() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
-
-  // Form state
-  // Ideally use a form library or separate component, but keeping inline for minimal refactor impact
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -105,31 +95,12 @@ export default function Clientes() {
     setLoadingClients(false);
   };
 
-  const resetForm = () => {
-    setName('');
-    setEmail('');
-    setPhone('');
-    setNotes('');
-    setEditingClient(null);
-  };
-
   const openEditDialog = (client: Client) => {
     setEditingClient(client);
-    setName(client.name);
-    setEmail(client.email || '');
-    setPhone(client.phone || '');
-    setNotes(client.notes || '');
     setIsDialogOpen(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!name.trim()) {
-      toast({ title: "Nome é obrigatório", variant: "destructive" });
-      return;
-    }
-
+  const handleFormSubmit = async (formData: ClientFormData) => {
     if (!organizationId) {
       toast({ title: "Erro de organização", variant: "destructive" });
       return;
@@ -138,12 +109,18 @@ export default function Clientes() {
     setLoadingClients(true);
 
     const clientData = {
-      name: name.trim(),
-      email: email.trim() || null,
-      phone: phone.trim() || null,
-      notes: notes.trim() || null,
-      user_id: organizationId // SECURITY FIX: Use Organization ID, not user.id
+      name: formData.name.trim(),
+      email: formData.email.trim() || null,
+      phone: formData.phone.trim() || null,
+      notes: formData.notes.trim() || null,
+      user_id: organizationId,
+      bride_status: Boolean(formData.bride_status),
+      // Force NULL if date is empty, undefined or invalid
+      wedding_date: formData.wedding_date ? new Date(formData.wedding_date).toISOString() : null,
+      // Force NULL if secret_code is empty string or just whitespace (and ensure String type)
+      secret_code: formData.secret_code ? String(formData.secret_code).trim() || null : null,
     };
+
 
     try {
       if (editingClient) {
@@ -159,13 +136,13 @@ export default function Clientes() {
       }
 
       setIsDialogOpen(false);
-      resetForm();
+      setEditingClient(null);
       fetchClients();
     } catch (error) {
       console.error("Error saving client:", error);
       toast({ title: "Erro ao salvar cliente", variant: "destructive" });
     } finally {
-      // setLoadingClients(false); // Handled by fetchClients usually, but good to ensure
+      setLoadingClients(false);
     }
   };
 
@@ -182,6 +159,12 @@ export default function Clientes() {
     }
   };
 
+  const copyPortalLink = (clientId: string) => {
+    const link = `${window.location.origin}/portal/${clientId}/login`;
+    navigator.clipboard.writeText(link);
+    toast({ title: "Link do Portal copiado!" });
+  };
+
   const filteredClients = clients.filter(client => {
     return (
       client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -193,7 +176,6 @@ export default function Clientes() {
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Nunca";
     try {
-      if (!dateString) return 'Data desconhecida';
       return format(new Date(dateString), "d 'de' MMM, yyyy", { locale: ptBR });
     } catch (e) {
       return "Data inválida";
@@ -237,7 +219,7 @@ export default function Clientes() {
 
             <Dialog open={isDialogOpen} onOpenChange={(open) => {
               setIsDialogOpen(open);
-              if (!open) resetForm();
+              if (!open) setEditingClient(null);
             }}>
               <DialogTrigger asChild>
                 <Button className="rounded-none bg-white text-black hover:bg-gray-300 font-mono text-xs uppercase tracking-widest h-10 px-6">
@@ -250,50 +232,23 @@ export default function Clientes() {
                   <DialogTitle className="text-white font-serif text-2xl">
                     {editingClient ? 'EDITAR CLIENTE' : 'NOVO CLIENTE'}
                   </DialogTitle>
+                  <DialogDescription className="sr-only">
+                    Formulário para gerenciamento de dados do cliente.
+                  </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Nome *</Label>
-                    <Input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="NOME COMPLETO"
-                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Email</Label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="EMAIL@EXEMPLO.COM"
-                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Telefone</Label>
-                    <Input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="(00) 00000-0000"
-                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Anotações</Label>
-                    <Textarea
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
-                      placeholder="OBSERVAÇÕES TÉCNICAS..."
-                      rows={3}
-                      className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none font-mono text-sm resize-none"
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-white text-black hover:bg-gray-300 rounded-none font-mono text-xs uppercase tracking-widest h-12">
-                    {editingClient ? 'SALVAR DADOS' : 'REGISTRAR CLIENTE'}
-                  </Button>
-                </form>
+                <ClientForm
+                  onSubmit={handleFormSubmit}
+                  initialData={editingClient ? {
+                    name: editingClient.name,
+                    email: editingClient.email || '',
+                    phone: editingClient.phone || '',
+                    notes: editingClient.notes || '',
+                    bride_status: editingClient.bride_status || false,
+                    wedding_date: editingClient.wedding_date ? new Date(editingClient.wedding_date) : undefined,
+                    secret_code: editingClient.secret_code || ''
+                  } : undefined}
+                  submitLabel={editingClient ? 'SALVAR DADOS' : 'REGISTRAR CLIENTE'}
+                />
               </DialogContent>
             </Dialog>
           </div>
@@ -359,7 +314,12 @@ export default function Clientes() {
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                              <span className="font-mono text-sm uppercase font-bold">{client.name}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-sm uppercase font-bold">{client.name}</span>
+                                {client.bride_status && (
+                                  <Gem className="h-3 w-3 text-[#00e5ff] group-hover:text-black" />
+                                )}
+                              </div>
                               {client.email && (
                                 <span className="text-xs text-gray-500 font-mono group-hover:text-black/60">{client.email}</span>
                               )}
@@ -381,6 +341,19 @@ export default function Clientes() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
+                            {/* Actions Dropdown or Buttons */}
+                            {client.bride_status && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => copyPortalLink(client.id)}
+                                className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                                title="Copiar Link do Portal"
+                              >
+                                <LinkIcon className="h-4 w-4" />
+                              </Button>
+                            )}
+
                             <Button
                               variant="ghost"
                               size="sm"
@@ -426,7 +399,10 @@ export default function Clientes() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <h3 className="font-serif text-xl text-white">{client.name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-serif text-xl text-white">{client.name}</h3>
+                            {client.bride_status && <Gem className="h-4 w-4 text-[#00e5ff]" />}
+                          </div>
                           {client.phone && (
                             <div className="font-mono text-xs text-gray-500 mt-1">
                               {client.phone}
@@ -434,6 +410,22 @@ export default function Clientes() {
                           )}
                         </div>
                       </div>
+
+                      {client.bride_status && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="bg-black border-white/20 rounded-none text-white">
+                            <DropdownMenuItem onClick={() => copyPortalLink(client.id)}>
+                              <LinkIcon className="h-4 w-4 mr-2" />
+                              Copiar Link Portal
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 border-t border-white/10 pt-4">

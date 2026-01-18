@@ -40,6 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const fetchRoles = async (userId: string, email?: string) => {
+    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
     // @ts-ignore
     const userRole = data?.role;
 
@@ -115,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        scopes: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly',
+        scopes: 'https://www.googleapis.com/auth/calendar',
         redirectTo: `${window.location.origin}/dashboard`,
         queryParams: {
           access_type: 'offline',

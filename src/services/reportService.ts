@@ -205,7 +205,7 @@ export const exportMonthlyClosing = (events: any[]) => {
 
         return {
             'Data': event.event_date ? format(new Date(event.event_date), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A',
-            'Cliente': event.clients?.name || 'Cliente Removida',
+            'Cliente': event.wedding_clients?.name || 'Cliente Removida',
             'Evento': event.title,
             'Valor Total': total,
             'Comíssão Equipe': commission,

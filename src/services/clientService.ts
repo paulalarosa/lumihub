@@ -25,7 +25,7 @@ export interface TreatmentRecord {
 export const ClientService = {
     async list(organizationId: string) {
         return await supabase
-            .from('clients')
+            .from('wedding_clients')
             .select('*')
             .eq('user_id', organizationId)
             .order('created_at', { ascending: false });
@@ -36,23 +36,23 @@ export const ClientService = {
         // For 'get', id is unique enough, but ensuring it belongs to org is better conceptually.
         // However, standard pattern:
         return await supabase
-            .from('clients')
+            .from('wedding_clients')
             .select('*')
             .eq('id', id)
             .single();
     },
 
-    async create(client: Database['public']['Tables']['clients']['Insert']) {
+    async create(client: Database['public']['Tables']['wedding_clients']['Insert']) {
         return await supabase
-            .from('clients')
+            .from('wedding_clients')
             .insert(client)
             .select()
             .single();
     },
 
-    async update(id: string, updates: Database['public']['Tables']['clients']['Update']) {
+    async update(id: string, updates: Database['public']['Tables']['wedding_clients']['Update']) {
         return await supabase
-            .from('clients')
+            .from('wedding_clients')
             .update(updates)
             .eq('id', id)
             .select()
@@ -61,14 +61,14 @@ export const ClientService = {
 
     async delete(id: string) {
         return await supabase
-            .from('clients')
+            .from('wedding_clients')
             .delete()
             .eq('id', id);
     },
 
     async count(organizationId: string) {
         const { count } = await supabase
-            .from('clients')
+            .from('wedding_clients')
             .select('id', { count: 'exact', head: true })
             .eq('user_id', organizationId);
         return count || 0;
@@ -80,7 +80,7 @@ export const ClientService = {
 
     async getOriginStats(organizationId: string) {
         const { data, error } = await supabase
-            .from('clients')
+            .from('wedding_clients')
             .select('origin')
             .eq('user_id', organizationId);
 

@@ -103,7 +103,7 @@ export function useAnalytics() {
 
       // 2. Get Real DB Stats
       const { data: clients, count: clientsCount } = await supabase
-        .from('clients')
+        .from('wedding_clients')
         .select('created_at, last_visit', { count: 'exact' });
 
       const { data: eventsData } = await supabase

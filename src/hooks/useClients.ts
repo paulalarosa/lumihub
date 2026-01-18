@@ -18,7 +18,7 @@ export function useClients() {
         const fetchClients = async () => {
             if (!user) return;
             const { data, error } = await supabase
-                .from('clients')
+                .from('wedding_clients')
                 .select('id, name, email, phone')
                 .order('name');
 

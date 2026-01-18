@@ -29,12 +29,12 @@ export function RecordDialog({ open, onOpenChange, clientId, onSuccess }: Record
         setLoading(true);
         // Mock submission for now
         setTimeout(() => {
-            console.log("Creating record:", {
-                client_id: clientId,
-                date: date,
-                description: title,
-                notes: notes
-            });
+            // console.log("Creating record:", {
+            //     client_id: clientId,
+            //     date: date,
+            //     description: title,
+            //     notes: notes
+            // });
 
             toast({
                 title: "RECORD_LOGGED",

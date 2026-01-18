@@ -13,7 +13,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SignatureCanvas } from "@/components/contracts/SignatureCanvas";
-import { SignatureCanvas } from "@/components/contracts/SignatureCanvas";
+
 import { ContractDialog } from "@/components/contracts/ContractDialog";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { ContractDocument } from "@/features/contracts/components/ContractDocument";
@@ -100,7 +100,7 @@ export default function Contratos() {
 
     const fetchClients = async () => {
         const { data } = await supabase
-            .from('clients')
+            .from('wedding_clients')
             .select('id, name')
             .order('name');
         if (data) setClients(data);

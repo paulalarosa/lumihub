@@ -39,10 +39,10 @@ export default function AdminFinancials({ stats, loading }: AdminFinancialsProps
                     .from('events')
                     .select(`
                         *,
-                        clients (name),
+                        wedding_clients (name),
                         event_assistants (
                             assistant_id,
-                            assistants (name)
+                            assistant:profiles (name)
                         )
                     `)
                     .gte('event_date', start)

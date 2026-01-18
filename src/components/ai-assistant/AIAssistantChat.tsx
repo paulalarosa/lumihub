@@ -59,7 +59,7 @@ export default function AIAssistantChat() {
     if (lowerContent.includes('clientes') && (lowerContent.includes('quantos') || lowerContent.includes('total') || lowerContent.includes('tenho'))) {
       try {
         const { count, error } = await supabase
-          .from('clients')
+          .from('wedding_clients')
           .select('*', { count: 'exact', head: true });
 
         if (error) throw error;

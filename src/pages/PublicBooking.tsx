@@ -243,7 +243,7 @@ export default function PublicBooking() {
                 // But typically client phone is not unique in many simple schemas, OR RLS blocks access.
                 // Let's attempt to insert a new client.
                 const { data: newClient, error: clientError } = await supabase
-                    .from('clients')
+                    .from('wedding_clients')
                     .insert({
                         name: clientName,
                         phone: clientPhone,
@@ -258,10 +258,10 @@ export default function PublicBooking() {
                 if (!clientError && newClient) {
                     clientId = newClient.id;
                 } else {
-                    console.log('Could not create client record (likely perms):', clientError);
+                    // console.log('Could not create client record (likely perms):', clientError);
                 }
             } catch (err) {
-                console.log('Client creation skipped:', err);
+                // console.log('Client creation skipped:', err);
             }
 
             const description = `Agendamento Online\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${selectedService.name}`;

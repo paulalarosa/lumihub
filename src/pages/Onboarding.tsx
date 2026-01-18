@@ -30,7 +30,7 @@ const Onboarding = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          scopes: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly',
+          scopes: 'https://www.googleapis.com/auth/calendar',
           redirectTo: `${window.location.origin}/auth/callback`,
           queryParams: {
             access_type: 'offline',
@@ -59,6 +59,8 @@ const Onboarding = () => {
     setIsCompleting(true);
 
     try {
+      // NOTE: 'google_calendar_connected' column does not exist in 'profiles' table,
+      // so we only update 'onboarding_completed'.
       const { error } = await supabase
         .from('profiles')
         .update({ onboarding_completed: true })
@@ -91,23 +93,17 @@ const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 overflow-hidden relative">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950" />
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 overflow-hidden relative font-sans selection:bg-black selection:text-white">
+      {/* Background Effects - Concrete Texture */}
+      <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-40 mix-blend-multiply" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#000000_1px,transparent_1px),linear-gradient(to_bottom,#000000_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.03]" />
 
-      {/* Progress Indicator */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 flex gap-2">
+      {/* Progress Indicator - Minimalist Studio */}
+      <div className="absolute top-12 left-1/2 -translate-x-1/2 flex items-center gap-2">
         {[1, 2, 3].map((s) => (
-          <motion.div
-            key={s}
-            className={`h-1 w-12 rounded-full transition-all duration-300 ${s <= step ? 'bg-gradient-to-r from-white/80 to-white/40' : 'bg-white/10'
-              }`}
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: s * 0.1 }}
-          />
+          <div key={s} className="flex items-center">
+            <div className={`h-1 w-8 transition-colors duration-300 ${s <= step ? 'bg-black' : 'bg-neutral-300'}`} />
+          </div>
         ))}
       </div>
 
@@ -120,49 +116,45 @@ const Onboarding = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mx-auto mb-8 w-20 h-20 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/10"
-              >
-                <Sparkles className="w-10 h-10 text-white/80" />
-              </motion.div>
+            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
+              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
+                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">Studio Setup</span>
+                <Sparkles className="w-4 h-4 text-neutral-400" />
+              </div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-4xl md:text-5xl font-bold text-center mb-4 bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent"
-                style={{ fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em' }}
+                transition={{ delay: 0.2 }}
+                className="text-4xl md:text-5xl font-bold text-neutral-900 mb-6 tracking-tight"
               >
-                Bem-vindo ao Lumi
+                LUMI HUB
               </motion.h1>
 
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-center text-white/50 text-lg mb-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-neutral-500 text-lg mb-12 font-medium leading-relaxed"
               >
-                Seu assistente inteligente para gerenciar eventos e clientes com elegância.
+                The digital backstage for your empire. <br />
+                Precision. Control. Aesthetic.
               </motion.p>
 
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
                 <Button
                   onClick={() => setStep(2)}
-                  className="w-full h-14 text-lg font-medium bg-white text-neutral-950 hover:bg-white/90 rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
                 >
-                  Começar
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Initialize
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </motion.div>
             </div>
@@ -177,75 +169,71 @@ const Onboarding = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mx-auto mb-8 w-20 h-20 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/10"
-              >
-                <Calendar className="w-10 h-10 text-white/80" />
-              </motion.div>
+            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
+              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
+                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">Integration</span>
+                <Calendar className="w-4 h-4 text-neutral-400" />
+              </div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent"
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold text-neutral-900 mb-6 tracking-tight"
               >
-                Ative seu Assistente
+                Sync Command
               </motion.h2>
 
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-center text-white/50 text-base mb-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-neutral-500 text-base mb-10 font-medium"
               >
-                Conecte seu Google Calendar para sincronizar automaticamente seus eventos.
+                Integrate Google Calendar to enable intelligent scheduling.
               </motion.p>
 
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="space-y-4 mb-8"
+                transition={{ delay: 0.4 }}
+                className="space-y-4 mb-10"
               >
                 {[
-                  'Sincronização automática em tempo real',
-                  'Gestão inteligente de compromissos',
-                  'Lembretes personalizados'
+                  'Unified Timeline',
+                  'Automated Blocking',
+                  'Client Synchronization'
                 ].map((feature, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                    <CheckCircle2 className="w-5 h-5 text-white/60 shrink-0" />
-                    <span className="text-white/70 text-sm">{feature}</span>
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="w-1.5 h-1.5 bg-neutral-900 rounded-full" />
+                    <span className="text-neutral-600 text-sm font-semibold tracking-wide">{feature}</span>
                   </div>
                 ))}
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.5 }}
                 className="space-y-3"
               >
                 <Button
                   onClick={handleConnectGoogleCalendar}
                   disabled={isConnecting}
-                  className="w-full h-14 text-lg font-medium bg-white text-neutral-950 hover:bg-white/90 rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
                 >
                   {isConnecting ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Conectando...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting...
                     </>
                   ) : (
                     <>
-                      <Calendar className="mr-2 h-5 w-5" />
-                      Conectar Google Calendar
+                      <Calendar className="mr-2 h-4 w-4" />
+                      Connect Provider
                     </>
                   )}
                 </Button>
@@ -253,10 +241,9 @@ const Onboarding = () => {
                 <Button
                   variant="ghost"
                   onClick={handleSkipCalendar}
-                  className="w-full h-12 text-white/40 hover:text-white/60 hover:bg-white/5 rounded-xl"
+                  className="w-full h-10 text-neutral-400 hover:text-neutral-900 hover:bg-transparent text-xs font-semibold uppercase tracking-widest"
                 >
-                  Pular por agora
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  Skip Configuration
                 </Button>
               </motion.div>
             </div>
@@ -271,56 +258,52 @@ const Onboarding = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="relative z-10 w-full max-w-lg"
           >
-            <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl">
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                className="mx-auto mb-8 w-20 h-20 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 flex items-center justify-center border border-white/10"
-              >
-                <CheckCircle2 className="w-10 h-10 text-white/80" />
-              </motion.div>
+            <div className="bg-white border border-neutral-200 p-12 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.1)] relative rounded-sm">
+              <div className="mb-10 flex justify-between items-center border-b border-neutral-100 pb-4">
+                <span className="text-xs font-bold tracking-widest uppercase text-neutral-400">System Ready</span>
+                <CheckCircle2 className="w-4 h-4 text-neutral-400" />
+              </div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-3xl md:text-4xl font-bold text-center mb-4 bg-gradient-to-b from-white via-white/90 to-white/60 bg-clip-text text-transparent"
+                transition={{ delay: 0.2 }}
+                className="text-3xl font-bold text-neutral-900 mb-6 tracking-tight"
               >
-                Tudo Pronto!
+                All Systems Go
               </motion.h2>
 
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-center text-white/50 text-lg mb-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                className="text-neutral-500 text-lg mb-12 font-medium"
               >
-                Seu ambiente está configurado. Vamos começar?
+                Your studio environment has been successfully deployed.
               </motion.p>
 
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
                 <Button
                   onClick={handleComplete}
                   disabled={isCompleting}
-                  className="w-full h-14 text-lg font-medium bg-white text-neutral-950 hover:bg-white/90 rounded-xl transition-all duration-300 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                  className="w-full h-14 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-md hover:shadow-lg uppercase tracking-wider"
                 >
                   {isCompleting ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Finalizando...
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Finalizing...
                     </>
                   ) : (
                     <>
-                      Acessar Dashboard
-                      <ArrowRight className="ml-2 h-5 w-5" />
+                      Enter Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
                     </>
                   )}
                 </Button>

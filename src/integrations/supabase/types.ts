@@ -205,12 +205,12 @@ export type Database = {
             foreignKeyName: "client_interactions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
         ]
       }
-      clients: {
+      wedding_clients: {
         Row: {
           avatar_url: string | null
           created_at: string
@@ -225,6 +225,9 @@ export type Database = {
           last_contacted_at: string | null
           updated_at: string
           user_id: string
+          secret_code?: string | null
+          bride_status?: boolean
+          wedding_date?: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -240,6 +243,9 @@ export type Database = {
           last_contacted_at?: string | null
           updated_at?: string
           user_id: string
+          secret_code?: string | null
+          bride_status?: boolean
+          wedding_date?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -255,6 +261,9 @@ export type Database = {
           last_contacted_at?: string | null
           updated_at?: string
           user_id?: string
+          secret_code?: string | null
+          bride_status?: boolean
+          wedding_date?: string | null
         }
         Relationships: []
       }
@@ -434,7 +443,7 @@ export type Database = {
             foreignKeyName: "events_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
           {
@@ -854,7 +863,7 @@ export type Database = {
             foreignKeyName: "projects_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
         ]

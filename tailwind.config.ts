@@ -26,6 +26,7 @@ export default {
 					'Cambria',
 					'Times New Roman',
 					'Times',
+					'Playfair Display',
 					'serif'
 				],
 				inter: [

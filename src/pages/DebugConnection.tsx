@@ -57,7 +57,7 @@ export default function DebugConnection() {
     // 2. Teste de Leitura de Dados
     try {
       const { count, error } = await supabase
-        .from('clients')
+        .from('wedding_clients')
         .select('*', { count: 'exact', head: true });
 
       if (error) {
@@ -258,11 +258,10 @@ export default function DebugConnection() {
             results.map((result, idx) => (
               <Card
                 key={idx}
-                className={`p-6 bg-white border-l-4 transition-all ${
-                  result.success
+                className={`p-6 bg-white border-l-4 transition-all ${result.success
                     ? 'border-l-green-500 border-slate-200'
                     : 'border-l-red-500 border-slate-200'
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-4">
                   <div className="mt-1">
@@ -277,11 +276,10 @@ export default function DebugConnection() {
                       {result.name}
                     </h3>
                     <p
-                      className={`text-sm mb-2 ${
-                        result.success
+                      className={`text-sm mb-2 ${result.success
                           ? 'text-green-700'
                           : 'text-red-700'
-                      }`}
+                        }`}
                     >
                       {result.message}
                     </p>

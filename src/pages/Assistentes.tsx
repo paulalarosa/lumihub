@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
+import {
   ArrowLeft,
   Plus,
   Users,
@@ -25,6 +25,7 @@ import {
   Check
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { fetchAssistants as fetchAssistantsService } from '@/features/team/services/teamService';
 
 interface Assistant {
   id: string;
@@ -66,10 +67,7 @@ export default function Assistentes() {
 
   const fetchAssistants = async () => {
     setLoadingAssistants(true);
-    const { data, error } = await supabase
-      .from('assistants')
-      .select('*')
-      .order('name');
+    const { data, error } = await fetchAssistantsService();
 
     if (error) {
       console.error('Error fetching assistants:', error);
@@ -105,11 +103,16 @@ export default function Assistentes() {
 
     setSaving(true);
 
+    // Generate a simple random token if creating new
+    const token = crypto.randomUUID();
+
     const assistantData = {
       user_id: user.id,
       name,
       email: email || null,
-      phone: phone || null
+      phone: phone || null,
+      // Only set invite_token on creation
+      ...(!editingAssistant ? { invite_token: token } : {})
     };
 
     try {
@@ -174,6 +177,14 @@ export default function Assistentes() {
   };
 
   const copyInviteLink = (token: string) => {
+    if (!token) {
+      toast({
+        title: "Erro",
+        description: "Token de convite inválido ou pendente.",
+        variant: "destructive"
+      });
+      return;
+    }
     const link = `${window.location.origin}/assistente/convite/${token}`;
     navigator.clipboard.writeText(link);
     setCopiedToken(token);
@@ -186,34 +197,39 @@ export default function Assistentes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white selection:text-black">
       {/* Header */}
-      <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b border-white/10 bg-[#050505]">
+        <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link to="/agenda">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="hover:bg-white/10 rounded-none text-white">
                   <ArrowLeft className="h-5 w-5" />
                 </Button>
               </Link>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-light rounded-xl flex items-center justify-center">
-                  <Users className="h-5 w-5 text-white" />
+                <div className="w-10 h-10 bg-white flex items-center justify-center rounded-none shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                  <Users className="h-5 w-5 text-black" />
                 </div>
-                <span className="font-poppins font-bold text-xl text-foreground">
-                  Assistentes
-                </span>
+                <div>
+                  <h1 className="font-serif text-2xl text-white tracking-wide">
+                    Equipe
+                  </h1>
+                  <p className="text-xs text-gray-400 uppercase tracking-widest font-mono">
+                    Gerenciamento
+                  </p>
+                </div>
               </div>
             </div>
-            <Button onClick={() => handleOpenDialog()} className="gap-2">
+            <Button onClick={() => handleOpenDialog()} className="gap-2 bg-white text-black hover:bg-gray-200 rounded-none border border-transparent font-semibold uppercase tracking-wider text-xs px-6">
               <Plus className="h-4 w-4" />
               Nova Assistente
             </Button>
@@ -222,58 +238,58 @@ export default function Assistentes() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <Card>
+        <Card className="bg-[#0A0A0A] border-white/5 rounded-none shadow-none">
           <CardHeader>
-            <CardTitle>Minhas Assistentes</CardTitle>
-            <CardDescription>
+            <CardTitle className="font-serif text-xl tracking-wide text-white">Minhas Assistentes</CardTitle>
+            <CardDescription className="text-gray-500 font-mono text-xs uppercase tracking-wider">
               Gerencie suas assistentes e envie convites para elas acessarem a agenda
             </CardDescription>
           </CardHeader>
           <CardContent>
             {loadingAssistants ? (
-              <div className="flex justify-center py-8">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-none h-6 w-6 border-b-2 border-white"></div>
               </div>
             ) : assistants.length === 0 ? (
-              <div className="text-center py-12">
-                <Users className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground mb-4">
+              <div className="text-center py-20 border border-dashed border-white/10 bg-white/[0.02]">
+                <Users className="h-12 w-12 mx-auto text-gray-700 mb-4" />
+                <p className="text-gray-400 mb-6 font-light">
                   Nenhuma assistente cadastrada
                 </p>
-                <Button onClick={() => handleOpenDialog()}>
+                <Button onClick={() => handleOpenDialog()} variant="outline" className="border-white/20 text-white hover:bg-white hover:text-black rounded-none uppercase text-xs tracking-widest">
                   <Plus className="h-4 w-4 mr-2" />
-                  Cadastrar Assistente
+                  Cadastrar Primeira
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-0 divide-y divide-white/5 border border-white/5">
                 {assistants.map(assistant => (
                   <div
                     key={assistant.id}
-                    className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                    className="flex items-center justify-between p-6 hover:bg-white/[0.02] transition-colors group"
                   >
                     <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium">{assistant.name}</h3>
+                      <div className="flex items-center gap-3">
+                        <h3 className="font-medium text-lg text-white group-hover:text-white/90 transition-colors uppercase tracking-wide font-serif">{assistant.name}</h3>
                         {assistant.is_registered ? (
-                          <Badge variant="default" className="text-xs">
+                          <Badge variant="outline" className="rounded-none border-green-900/50 text-green-500 bg-green-500/10 text-[10px] uppercase tracking-wider px-2 py-0.5">
                             Registrada
                           </Badge>
                         ) : (
-                          <Badge variant="secondary" className="text-xs">
+                          <Badge variant="outline" className="rounded-none border-yellow-900/50 text-yellow-500 bg-yellow-500/10 text-[10px] uppercase tracking-wider px-2 py-0.5">
                             Pendente
                           </Badge>
                         )}
                       </div>
-                      <div className="flex flex-wrap gap-4 mt-2 text-sm text-muted-foreground">
+                      <div className="flex flex-wrap gap-6 mt-3 text-sm text-gray-400">
                         {assistant.email && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-2 hover:text-white transition-colors">
                             <Mail className="h-3.5 w-3.5" />
                             {assistant.email}
                           </span>
                         )}
                         {assistant.phone && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-2 hover:text-white transition-colors">
                             <Phone className="h-3.5 w-3.5" />
                             {assistant.phone}
                           </span>
@@ -281,36 +297,41 @@ export default function Assistentes() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                       {!assistant.is_registered && (
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => copyInviteLink(assistant.invite_token)}
-                          className="gap-2"
+                          className="gap-2 rounded-none border-white/10 hover:bg-white hover:text-black hover:border-white transition-all text-xs uppercase tracking-wider bg-transparent text-gray-300"
                         >
                           {copiedToken === assistant.invite_token ? (
-                            <Check className="h-4 w-4" />
+                            <Check className="h-3 w-3" />
                           ) : (
-                            <Copy className="h-4 w-4" />
+                            <Copy className="h-3 w-3" />
                           )}
-                          Copiar Convite
+                          Copiar Link
                         </Button>
                       )}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleOpenDialog(assistant)}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDelete(assistant.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
+                      <div className="flex bg-white/5 border border-white/5">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenDialog(assistant)}
+                          className="rounded-none hover:bg-white/10 hover:text-white text-gray-400 h-9 w-9"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <div className="w-px bg-white/5"></div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDelete(assistant.id)}
+                          className="rounded-none hover:bg-red-500/10 hover:text-red-400 text-gray-500 h-9 w-9"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -322,55 +343,59 @@ export default function Assistentes() {
 
       {/* Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-none bg-[#0A0A0A] border border-white/10 text-white sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl font-serif tracking-wide">
               {editingAssistant ? 'Editar Assistente' : 'Nova Assistente'}
             </DialogTitle>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-6 mt-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nome *</Label>
+              <Label htmlFor="name" className="text-xs uppercase tracking-wider text-gray-400">Nome *</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Nome da assistente"
+                placeholder="NOME COMPLETO"
                 required
+                className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email" className="text-xs uppercase tracking-wider text-gray-400">E-mail</Label>
               <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@exemplo.com"
+                placeholder="EMAIL@EXEMPLO.COM"
+                className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone">Telefone</Label>
+              <Label htmlFor="phone" className="text-xs uppercase tracking-wider text-gray-400">Telefone</Label>
               <Input
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(00) 00000-0000"
+                className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-4">
+            <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setDialogOpen(false)}
+                className="rounded-none border-white/10 text-gray-400 hover:text-white hover:bg-white/5 hover:border-white/30 uppercase text-xs tracking-wider"
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={saving}>
+              <Button type="submit" disabled={saving} className="rounded-none bg-white text-black hover:bg-gray-200 border-none uppercase text-xs tracking-wider font-semibold px-6">
                 {saving ? 'Salvando...' : editingAssistant ? 'Salvar' : 'Cadastrar'}
               </Button>
             </div>

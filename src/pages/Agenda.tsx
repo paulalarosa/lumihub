@@ -8,8 +8,9 @@ import {
   Calendar as CalendarIcon,
   Menu,
   Link as LinkIcon,
-  Terminal
+  Terminal,
 } from 'lucide-react';
+import { MobileFAB } from '@/components/ui/MobileFAB';
 import { useToast } from '@/hooks/use-toast';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -133,7 +134,7 @@ export default function Agenda() {
       .from('events')
       .select(`
         *,
-        client:clients(name),
+        client:wedding_clients(name),
         project:projects(name)
       `)
       .gte('event_date', format(fetchStart, 'yyyy-MM-dd'))
@@ -406,7 +407,7 @@ export default function Agenda() {
         }}
         userRole={isAdmin ? 'admin' : 'assistant'}
       />
-      <MobileFAB onClick={handleAddEvent} label="Novo Evento" />
+      <MobileFAB onClick={handleCreateEvent} label="Novo Evento" />
     </div>
   );
 }

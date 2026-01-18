@@ -124,10 +124,15 @@ export function AddressAutocomplete({
   const [isLoading, setIsLoading] = useState(true);
   const [isApiLoaded, setIsApiLoaded] = useState(false);
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [inputValue, setInputValue] = useState(value || "");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     latitude && longitude ? { lat: latitude, lng: longitude } : null
   );
   const [isSelected, setIsSelected] = useState(!!latitude && !!longitude);
+
+  useEffect(() => {
+    setInputValue(value || "");
+  }, [value]);
 
   useEffect(() => {
     if (latitude && longitude) {
@@ -154,9 +159,17 @@ export function AddressAutocomplete({
     if (!autocompleteRef.current) return;
 
     const place = autocompleteRef.current.getPlace();
+    const address = place.formatted_address || place.name;
 
-    if (place.formatted_address) {
-      onChange(place.formatted_address);
+    if (address) {
+      // PREVENT FLICKER: Update local state immediately
+      setInputValue(address);
+      onChange(address);
+
+      // Force input value just in case
+      if (inputRef.current) {
+        inputRef.current.value = address;
+      }
     }
 
     if (place.geometry?.location) {
@@ -181,7 +194,7 @@ export function AddressAutocomplete({
     const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
       types: ["address"],
       componentRestrictions: { country: "br" },
-      fields: ["formatted_address", "geometry"],
+      fields: ["formatted_address", "geometry", "name"], // Added 'name' explicitly
     });
 
     autocomplete.addListener("place_changed", handlePlaceChanged);
@@ -216,7 +229,7 @@ export function AddressAutocomplete({
     // This prevents the parent Dialog from closing immediately when clicking the dropdown
     setTimeout(() => {
       onBlur?.();
-    }, 200);
+    }, 300);
   };
 
   const handleInputClick = (e: React.MouseEvent) => {
@@ -230,8 +243,11 @@ export function AddressAutocomplete({
         <Input
           ref={inputRef}
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            onChange(e.target.value);
+          }}
           onClick={handleInputClick}
           onFocus={handleInputFocus}
           onBlur={handleInputBlur}

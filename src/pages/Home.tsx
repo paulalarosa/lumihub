@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
 import { TrackedButton } from "@/components/analytics/TrackedButton";
 import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { FloatingGlassShapes } from "@/components/animations/FloatingGlassShapes";
 import { CountUp } from "@/components/animations/CountUp";
 import { ScrambleNumber } from "@/components/ui/animation/ScrambleNumber";
@@ -18,6 +17,10 @@ import { motion, useScroll as useFramerScroll, useTransform } from "framer-motio
 import { useEffect, useRef } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import { useLanguage } from "@/contexts/LanguageContext";
+
+// New Imports
+import Header from "@/components/ui/layout/Header";
+import Footer from "@/components/ui/layout/Footer";
 
 const Home = () => {
   const { scrollY } = useScroll();
@@ -81,6 +84,7 @@ const Home = () => {
           }
         }}
       />
+      <Header />
       <div className="min-h-screen bg-black page-transition overflow-x-hidden" onScroll={e => scrollY.set((e.target as any).scrollTop)}>
 
 
@@ -111,21 +115,7 @@ const Home = () => {
               </div>
 
               {/* Headline */}
-              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12">
-                {t("hero_title").split(' ').map((word, i) => (
-                  <span key={i}>{word} <br /> </span>
-                )).slice(0, 2)}
-                {/* Simple hack for split, might need better handling if phrases vary length significantly */}
-                {/* Actually let's just use the string directly if possible or dangerouslySetInnerHTML? No, safer to just text. */}
-                {/* Reverting to simple text rendered */}
-                <span dangerouslySetInnerHTML={{ __html: t("hero_title").replace('DO SEU', '<br />DO SEU').replace('BACKSTAGE', 'BACKSTAGE<br/>') }} />
-              </h1>
-              {/* Force re-render isn't great. Let's just output text. The <br/> was key in original design.
-                 Let's assume the translation implies line breaks or we use max-width.
-                 Original:
-                 O BACKSTAGE <br />
-                 DO SEU IMPÉRIO.
-              */}
+              {/* Headline */}
               <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line">
                 {t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
               </h1>
@@ -404,6 +394,7 @@ const Home = () => {
         </section>
 
         <AIAssistantFAB />
+        <Footer />
       </div>
     </>
   );

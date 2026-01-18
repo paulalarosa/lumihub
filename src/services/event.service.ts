@@ -15,11 +15,13 @@ export const EventService = {
         if (googleConnected && role !== 'assistant') {
             try {
                 const gEvents = await getCalendarEvents();
-                // Filter only future events and take top 5
-                events = gEvents.filter(e => {
-                    const date = e.start.dateTime || e.start.date;
-                    return date ? new Date(date) >= new Date() : false;
-                }).slice(0, 5);
+                if (gEvents) {
+                    // Filter only future events and take top 5
+                    events = gEvents.filter(e => {
+                        const date = e.start.dateTime || e.start.date;
+                        return date ? new Date(date) >= new Date() : false;
+                    }).slice(0, 5);
+                }
             } catch (e) {
                 console.error("Failed to fetch google events", e);
             }

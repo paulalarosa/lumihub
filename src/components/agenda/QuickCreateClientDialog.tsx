@@ -38,7 +38,7 @@ export default function QuickCreateClientDialog({
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('clients')
+        .from('wedding_clients')
         .insert({
           user_id: user.id,
           name: name.trim(),

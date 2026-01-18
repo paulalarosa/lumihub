@@ -21,7 +21,7 @@ export class MarketingLogic {
 
             // Re-engagement based on created_at (simplified - birth_date doesn't exist)
             const { data: clients } = await supabase
-                .from('clients')
+                .from('wedding_clients')
                 .select('id, name, created_at')
                 .eq('user_id', organizationId);
 

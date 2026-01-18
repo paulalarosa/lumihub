@@ -75,7 +75,7 @@ export function NewProjectDialog({
       }
 
       const { data, error } = await supabase
-        .from('clients')
+        .from('wedding_clients')
         .select('id, name')
         .eq('user_id', user.id)
         .order('name', { ascending: true });

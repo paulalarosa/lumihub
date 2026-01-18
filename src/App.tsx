@@ -56,6 +56,11 @@ import { ErrorFallback } from "./components/ui/error-fallback";
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import InviteLanding from "./pages/InviteLanding";
 
+// Bride Portal Imports
+import BrideLayout from "@/layouts/BrideLayout";
+import BrideLoginPage from "@/features/portal/pages/BrideLoginPage";
+import BrideDashboardPage from "@/features/portal/pages/BrideDashboardPage";
+
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -89,10 +94,11 @@ const App = () => {
               <AnalyticsProvider>
 
                 {/* Public Marketing Pages */}
-                <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+                <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
                   <Routes>
+                    {/* Public Marketing Pages */}
+                    <Route path="/" element={<Home />} />
                     <Route element={<MarketingLayout />}>
-                      <Route path="/" element={<Home />} />
                       <Route path="/recursos" element={<Recursos />} />
                       <Route path="/planos" element={<Planos />} />
                       <Route path="/blog" element={<Blog />} />
@@ -199,12 +205,6 @@ const App = () => {
                           <Marketing />
                         </ProtectedRoute>
                       } />
-                      {/* Assistant Portal - also uses layout? Maybe separate layout for assistant? 
-                    For now, use AppLayout but Sidebar might need to adapt. 
-                    Assistant Dashboard is /assistente (PortalAssistente). 
-                    Let's keep it in layout for now. 
-                */}
-
                     </Route>
 
                     {/* Assistant Portal */}
@@ -218,11 +218,19 @@ const App = () => {
                     {/* Public Client Booking */}
                     <Route path="/b/:slug" element={<PublicBooking />} />
 
-                    {/* Public Client Portal */}
+                    {/* Legacy Public Client Portal - Keeping for backward compatibility if needed */}
                     <Route path="/portal/:token" element={<PortalCliente />} />
 
+                    {/* NEW: Bride Portal */}
+                    <Route path="/portal/:clientId" element={<BrideLayout />}>
+                      <Route path="login" element={<BrideLoginPage />} />
+                      <Route path="dashboard" element={<BrideDashboardPage />} />
+                      <Route index element={<Navigate to="login" replace />} />
+                    </Route>
+
                     {/* Catch-all */}
-                    <Route path="*" element={<NotFound />} />
+                    <Route path="*" element={<Dashboard />} /> {/* Redirect * to Dashboard instead of NotFound to catch all */}
+                    <Route path="/404" element={<NotFound />} />
                   </Routes>
                 </div>
                 <AIController />

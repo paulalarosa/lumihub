@@ -8,7 +8,7 @@ declare global {
   }
 }
 
-export type EventCategory = 
+export type EventCategory =
   | 'cta_click'
   | 'page_view'
   | 'conversion'
@@ -66,7 +66,6 @@ class AnalyticsService {
 
     // Console log para debug em desenvolvimento
     if (import.meta.env.DEV) {
-      console.log('[Analytics] Event:', { category, action, label, value, customParameters });
     }
 
     // Enviar para Google Analytics
@@ -241,12 +240,12 @@ class AnalyticsService {
     try {
       const events = JSON.parse(localStorage.getItem('lumi_analytics') || '[]');
       events.push(event);
-      
+
       // Keep only last 100 events
       if (events.length > 100) {
         events.shift();
       }
-      
+
       localStorage.setItem('lumi_analytics', JSON.stringify(events));
     } catch (error) {
       console.error('[Analytics] Error storing event:', error);

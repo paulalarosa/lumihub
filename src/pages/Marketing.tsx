@@ -85,7 +85,7 @@ export default function Marketing() {
         try {
             // Simplified query - no last_visit column
             const { data: allClients, error: clientError } = await supabase
-                .from('clients')
+                .from('wedding_clients')
                 .select('id, name, phone, created_at');
 
             if (clientError) throw clientError;

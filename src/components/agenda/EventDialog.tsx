@@ -1,49 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { format, addMinutes, parse } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  X, Calendar as CalendarIcon, Clock, Tag, Sparkles, MapPin, Bell, Users, Palette, MessageCircle
+} from 'lucide-react';
+
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { format, addMinutes, parse } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import {
-  X,
-  Calendar as CalendarIcon,
-  Clock,
-  User,
-  FileText,
-  Check,
-  ChevronDown,
-  MessageCircle,
-  MapPin,
-  Sparkles,
-  Bell,
-  Users,
-  Palette,
-  Camera,
-  Car,
-  Church,
-  HeartHandshake,
-  Tag,
-  Plus
-} from 'lucide-react';
+
 import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
@@ -71,6 +49,7 @@ interface Event {
   project_id: string | null;
   reminder_days: number[];
   assistants?: { id: string; name: string }[];
+  google_calendar_event_id?: string | null; // Added field
 }
 
 interface Assistant {
@@ -248,7 +227,7 @@ export default function EventDialog({
 
   const fetchClients = async () => {
     const { data } = await supabase
-      .from('clients')
+      .from('wedding_clients')
       .select('id, name, phone')
       .order('name');
     if (data) setClients(data);
@@ -460,18 +439,7 @@ export default function EventDialog({
 
         await supabase.from('assistant_notifications').insert(notifications);
 
-        // Sync to Google Calendar for each assistant
-        // NOTE: This was previously using an Edge Function which is not deployed.
-        // For now, we will skip server-side sync with assistants until the backend is ready.
-        try {
-          /* 
-          await supabase.functions.invoke('google-calendar-sync', { 
-            body: { ... } 
-          }); 
-          */
-        } catch (calendarError) {
-          console.warn('Calendar sync logic skipped:', calendarError);
-        }
+
 
         // Show confirmation notification for each tagged assistant
         const taggedAssistants = assistants.filter(a => selectedAssistants.includes(a.id));
@@ -481,17 +449,122 @@ export default function EventDialog({
         }
       }
 
+      // Sync to Google Calendar (Client-Side)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const providerToken = session?.provider_token;
+
+        if (providerToken) {
+          // Determine Start/End Times
+          let finalStartDateTime = new Date(`${eventDate}T09:00:00`);
+          let finalEndDateTime = new Date(`${eventDate}T10:00:00`);
+
+          if (isNoivas) {
+            // For Weddings, try to use Arrival or Ceremony time, defaulting to full day if vague
+            const timeStr = arrivalTime || makingOfTime || ceremonyTime || '09:00';
+            const [h, m] = timeStr.split(':').map(Number);
+            finalStartDateTime = new Date(eventDate);
+            finalStartDateTime.setHours(h, m, 0);
+            finalEndDateTime = new Date(finalStartDateTime.getTime() + (4 * 60 * 60 * 1000)); // Default 4 hours
+          } else {
+            // Social / Pre-wedding
+            if (startTime) {
+              const [h, m] = startTime.split(':').map(Number);
+              finalStartDateTime = new Date(eventDate);
+              finalStartDateTime.setHours(h, m, 0);
+
+              if (endTime) {
+                const [eh, em] = endTime.split(':').map(Number);
+                finalEndDateTime = new Date(eventDate);
+                finalEndDateTime.setHours(eh, em, 0);
+              } else {
+                finalEndDateTime = new Date(finalStartDateTime.getTime() + (1 * 60 * 60 * 1000)); // Default 1 hour
+              }
+            }
+          }
+
+          const googleEvent = {
+            summary: isNoivas ? `👰 ${title}` : title,
+            description: `
+LUMI HUB EVENT
+--------------
+${description || 'Sem descrição'}
+
+📍 Local: ${address || 'Não informado'}
+👤 Cliente: ${clientName || 'N/A'}
+
+${isNoivas ? `
+🕒 Cronograma:
+- Chegada: ${arrivalTime || '--'}
+- Making Of: ${makingOfTime || '--'}
+- Cerimônia: ${ceremonyTime || '--'}
+- Assessoria: ${advisoryTime || '--'}
+` : ''}
+              `.trim(),
+            location: address,
+            start: { dateTime: finalStartDateTime.toISOString() },
+            end: { dateTime: finalEndDateTime.toISOString() }
+          };
+
+          let gCalResponse;
+          const existingGoogleId = event?.google_calendar_event_id;
+
+          if (existingGoogleId) {
+            // UPDATE
+            gCalResponse = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${existingGoogleId}`, {
+              method: 'PATCH',
+              headers: {
+                'Authorization': `Bearer ${providerToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(googleEvent)
+            });
+          } else {
+            // CREATE
+            gCalResponse = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${providerToken}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(googleEvent)
+            });
+          }
+
+          if (gCalResponse.ok) {
+            const gData = await gCalResponse.json();
+
+
+            if (!existingGoogleId && gData.id) {
+              // Update Supabase with the new Google Event ID
+              await supabase
+                .from('events')
+                .update({ google_calendar_event_id: gData.id })
+                .eq('id', eventId);
+            }
+
+            toast({ title: "Sincronizado", description: "Evento atualizado no Google Calendar." });
+          } else {
+
+            // Don't error the whole save, just warn
+            toast({ title: "Atenção", description: "Evento salvo no Lumi, mas houve erro ao sincronizar com Google.", variant: "destructive" });
+          }
+        }
+      } catch (calendarError) {
+        console.error('Calendar sync logic skipped:', calendarError);
+      }
+
       toast({
         title: "Sucesso",
         description: event ? "Evento atualizado com sucesso!" : "Novo evento criado com vigor!",
       });
 
       onSuccess();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving event:', error);
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível salvar o evento",
+        description: (error instanceof Error ? error.message : "Não foi possível salvar o evento"),
         variant: "destructive"
       });
     } finally {
@@ -548,6 +621,9 @@ export default function EventDialog({
             <DialogTitle className="font-serif text-3xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
               {event ? 'Editar Evento' : 'Novo Evento'}
             </DialogTitle>
+            <DialogDescription className="text-gray-400 font-mono text-xs uppercase tracking-wider">
+              Preencha os dados abaixo para {event ? 'atualizar o' : 'agendar um novo'} compromisso.
+            </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6 mt-4">
@@ -787,7 +863,7 @@ export default function EventDialog({
                       id="reminder1"
                       checked={reminderDays.includes(1)}
                       onCheckedChange={() => toggleReminder(1)}
-                      className="border-white/20 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                      className="border-zinc-600 data-[state=checked]:bg-zinc-100 data-[state=checked]:text-black"
                     />
                     <Label htmlFor="reminder1" className="text-gray-400 font-normal">1 dia</Label>
                   </div>
@@ -796,7 +872,7 @@ export default function EventDialog({
                       id="reminder7"
                       checked={reminderDays.includes(7)}
                       onCheckedChange={() => toggleReminder(7)}
-                      className="border-white/20 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                      className="border-zinc-600 data-[state=checked]:bg-zinc-100 data-[state=checked]:text-black"
                     />
                     <Label htmlFor="reminder7" className="text-gray-400 font-normal">1 semana</Label>
                   </div>
@@ -897,7 +973,7 @@ export default function EventDialog({
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black font-medium min-w-[120px]"
+                className="bg-zinc-100 hover:bg-zinc-200 text-black font-medium min-w-[120px] border border-transparent"
               >
                 {loading ? "Salvando..." : "Salvar Agendamento"}
               </Button>

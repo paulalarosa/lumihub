@@ -32,7 +32,7 @@ interface Project {
   status: string;
   public_token: string;
   created_at: string;
-  clients: {
+  wedding_clients: {
     id: string;
     name: string;
   } | null;
@@ -86,7 +86,7 @@ export default function Projetos() {
 
     const { data: projectsData, error: projectsError } = await supabase
       .from('projects')
-      .select('*, clients(id, name)')
+      .select('*, wedding_clients(id, name)')
       .order('created_at', { ascending: false });
 
     if (!projectsError) {
@@ -94,7 +94,7 @@ export default function Projetos() {
     }
 
     const { data: clientsData } = await supabase
-      .from('clients')
+      .from('wedding_clients')
       .select('id, name')
       .order('name');
 
@@ -143,7 +143,7 @@ export default function Projetos() {
 
   const filteredProjects = projects.filter(project =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.clients?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    project.wedding_clients?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const eventTypes = [
@@ -363,10 +363,10 @@ export default function Projetos() {
                   </CardHeader>
                   <CardContent className="pt-4">
                     <div className="space-y-3 text-xs text-white/60 font-mono uppercase tracking-wide">
-                      {project.clients && (
+                      {project.wedding_clients && (
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-white/40" />
-                          <span className="text-white/80">{project.clients.name}</span>
+                          <span className="text-white/80">{project.wedding_clients.name}</span>
                         </div>
                       )}
                       {project.event_date && (

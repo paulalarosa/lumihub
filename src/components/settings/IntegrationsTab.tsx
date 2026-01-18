@@ -144,7 +144,7 @@ export default function IntegrationsTab() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          scopes: 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.readonly',
+          scopes: 'https://www.googleapis.com/auth/calendar',
           redirectTo: `${window.location.origin}/configuracoes`,
           queryParams: {
             access_type: 'offline',
