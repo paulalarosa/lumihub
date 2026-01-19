@@ -104,10 +104,50 @@ const Planos = () => {
   return (
     <>
       <SEOHead
-        title="SYSTEM ACCESS - LUMI | DATA DRIVEN BEAUTY"
-        description="Escolha seu nível de acesso. Ferramentas de gestão profissional para artistas da beleza moderna."
-        keywords="preços, lumi, tecnologia beleza, sistema de gestão"
+        title="Planos e Preços - Lumi"
+        description="Escolha o plano ideal para seu negócio de beleza. Planos a partir de R$39,90/mês com teste gratuito de 14 dias. Sem cartão de crédito."
+        keywords="preços lumi, planos lumi, quanto custa lumi, sistema gestão beleza preço, software maquiadora preço"
         url="https://lumihub.lovable.app/planos"
+        type="service"
+        breadcrumbs={[
+          { name: "Home", url: "https://lumihub.lovable.app" },
+          { name: "Planos", url: "https://lumihub.lovable.app/planos" }
+        ]}
+        faq={faqs.map(f => ({ question: f.question, answer: f.answer }))}
+        priceRange="R$39-R$149"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Product",
+          "name": "Lumi - Plataforma de Gestão",
+          "description": "Software de gestão para profissionais de beleza",
+          "brand": { "@type": "Brand", "name": "Lumi" },
+          "offers": [
+            {
+              "@type": "Offer",
+              "name": "Essencial",
+              "price": "39.90",
+              "priceCurrency": "BRL",
+              "priceValidUntil": "2027-12-31",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Profissional",
+              "price": "89.90",
+              "priceCurrency": "BRL",
+              "priceValidUntil": "2027-12-31",
+              "availability": "https://schema.org/InStock"
+            },
+            {
+              "@type": "Offer",
+              "name": "Studio",
+              "price": "149.90",
+              "priceCurrency": "BRL",
+              "priceValidUntil": "2027-12-31",
+              "availability": "https://schema.org/InStock"
+            }
+          ]
+        }}
       />
       <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
 

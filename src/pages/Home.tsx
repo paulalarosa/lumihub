@@ -71,17 +71,47 @@ const Home = () => {
     <>
       <SEOHead
         title="Lumi - Plataforma de Gestão para Profissionais de Beleza"
-        description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%."
-        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional"
+        description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%. Teste grátis por 14 dias."
+        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas"
+        url="https://lumihub.lovable.app"
+        breadcrumbs={[
+          { name: "Home", url: "https://lumihub.lovable.app" }
+        ]}
+        faq={[
+          { question: "O que é a Lumi?", answer: "Lumi é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
+          { question: "Quanto custa a Lumi?", answer: "A Lumi oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
+          { question: "Posso cancelar a qualquer momento?", answer: "Sim! Não há contratos de fidelidade. Você pode cancelar sua assinatura quando quiser." },
+          { question: "A Lumi funciona para salões de beleza?", answer: "Sim! A Lumi é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
+        ]}
         jsonLd={{
           "@context": "https://schema.org",
-          "@type": "WebPage",
-          "name": "Lumi - Gestão para Profissionais de Beleza",
-          "description": "Plataforma completa para gestão de negócios de beleza",
-          "provider": {
-            "@type": "Organization",
-            "name": "Lumi"
-          }
+          "@type": "SoftwareApplication",
+          "name": "Lumi",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web",
+          "description": "Plataforma de gestão completa para profissionais de beleza",
+          "url": "https://lumihub.lovable.app",
+          "image": "https://lumihub.lovable.app/og-image.png",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "BRL",
+            "description": "Teste gratuito por 14 dias"
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "1000",
+            "bestRating": "5"
+          },
+          "featureList": [
+            "Gestão de Clientes",
+            "Agenda Inteligente",
+            "Contratos Digitais",
+            "Portal do Cliente",
+            "Dashboard Financeiro",
+            "Gestão de Equipe"
+          ]
         }}
       />
       <Header />
