@@ -91,10 +91,27 @@ const Recursos = () => {
   return (
     <>
       <SEOHead
-        title="RECURSOS DO SISTEMA - LUMI | CAPACIDADES"
-        description="Explore a suíte completa de ferramentas de gestão. CRM, Finanças, IA e mais."
-        keywords="recursos, lumi, capacidades sistema, tecnologia beleza"
+        title="Recursos e Funcionalidades - Lumi"
+        description="Conheça todos os recursos da Lumi: gestão de clientes, agenda inteligente, contratos digitais, dashboard financeiro, IA assistente e muito mais."
+        keywords="funcionalidades lumi, recursos sistema beleza, crm para maquiadoras, agenda para profissionais beleza, contratos digitais noivas"
         url="https://lumihub.lovable.app/recursos"
+        breadcrumbs={[
+          { name: "Home", url: "https://lumihub.lovable.app" },
+          { name: "Recursos", url: "https://lumihub.lovable.app/recursos" }
+        ]}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Recursos da Lumi",
+          "description": "Lista completa de funcionalidades da plataforma Lumi",
+          "numberOfItems": mainFeatures.length,
+          "itemListElement": mainFeatures.map((feature, index) => ({
+            "@type": "ListItem",
+            "position": index + 1,
+            "name": feature.title,
+            "description": feature.description
+          }))
+        }}
       />
       <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
 
