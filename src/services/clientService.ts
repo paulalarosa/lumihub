@@ -11,6 +11,9 @@ export interface Client {
     notes: string | null;
     origin: string | null;
     created_at: string;
+    is_bride?: boolean;
+    access_pin?: string | null;
+    portal_link?: string | null;
 }
 
 export interface TreatmentRecord {
@@ -24,11 +27,17 @@ export interface TreatmentRecord {
 
 export const ClientService = {
     async list(organizationId: string) {
-        return await supabase
-            .from('wedding_clients')
-            .select('*')
-            .eq('user_id', organizationId)
-            .order('created_at', { ascending: false });
+        try {
+            return await supabase
+                .from('wedding_clients' as any)
+                .select('id, full_name, name:full_name, email, phone, notes, instagram, origin, created_at, user_id, assistant_commission, parent_user_id, is_bride, access_pin, portal_link')
+                .eq('user_id', organizationId)
+                .order('created_at', { ascending: false });
+        } catch (error: any) {
+            console.error("ClientService List Error:", error);
+            // Return empty array on crash to prevent white screen
+            return { data: [], error };
+        }
     },
 
     async get(id: string) {
@@ -36,23 +45,23 @@ export const ClientService = {
         // For 'get', id is unique enough, but ensuring it belongs to org is better conceptually.
         // However, standard pattern:
         return await supabase
-            .from('wedding_clients')
-            .select('*')
+            .from('wedding_clients' as any)
+            .select('id, full_name, name:full_name, email, phone, notes, instagram, origin, created_at, user_id, assistant_commission, parent_user_id, is_bride, access_pin, portal_link')
             .eq('id', id)
             .single();
     },
 
-    async create(client: Database['public']['Tables']['wedding_clients']['Insert']) {
+    async create(client: any) {
         return await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .insert(client)
             .select()
             .single();
     },
 
-    async update(id: string, updates: Database['public']['Tables']['wedding_clients']['Update']) {
+    async update(id: string, updates: any) {
         return await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .update(updates)
             .eq('id', id)
             .select()
@@ -61,14 +70,14 @@ export const ClientService = {
 
     async delete(id: string) {
         return await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .delete()
             .eq('id', id);
     },
 
     async count(organizationId: string) {
         const { count } = await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .select('id', { count: 'exact', head: true })
             .eq('user_id', organizationId);
         return count || 0;
@@ -80,7 +89,7 @@ export const ClientService = {
 
     async getOriginStats(organizationId: string) {
         const { data, error } = await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .select('origin')
             .eq('user_id', organizationId);
 

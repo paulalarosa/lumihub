@@ -5,13 +5,14 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Edit2, Trash2, Clock, Sparkles, Terminal } from "lucide-react";
-import Header from "@/components/ui/layout/Header";
 import { useServices } from "@/hooks/useServices";
 import { ServiceItem } from "@/services/services.service";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Servicos() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { services, loading, removeService, refetch } = useServices(user?.id);
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -50,14 +51,14 @@ export default function Servicos() {
     return (
         <div className="flex min-h-screen bg-black text-white selection:bg-white selection:text-black font-mono">
             <div className="flex-1 overflow-y-auto">
-                <Header />
+
 
                 <main className="p-6 md:p-10 max-w-7xl mx-auto space-y-12">
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/20 pb-6">
                         <div>
-                            <h1 className="text-4xl lg:text-5xl font-serif text-white uppercase tracking-tighter">SERVICE // MENU</h1>
-                            <p className="text-white/50 mt-2 font-mono text-xs uppercase tracking-widest">CATALOG_CONFIGURATION_SYSTEM</p>
+                            <h1 className="text-4xl lg:text-5xl font-serif text-white uppercase tracking-tighter">{t('pages.services.title')}</h1>
+                            <p className="text-white/50 mt-2 font-mono text-xs uppercase tracking-widest">{t('pages.services.subtitle')}</p>
                         </div>
 
                         <div className="flex flex-col md:flex-row gap-3 md:items-center">
@@ -75,7 +76,7 @@ export default function Servicos() {
                                 className="bg-white text-black hover:bg-gray-200 rounded-none font-mono text-xs uppercase tracking-widest h-10 px-6"
                             >
                                 <Plus className="h-4 w-4 mr-2" />
-                                CREATE_SERVICE
+                                {t('pages.services.new')}
                             </Button>
                         </div>
                     </div>

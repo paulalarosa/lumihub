@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { useContracts } from '@/hooks/useContracts';
 import { useProjects } from '@/hooks/useProjects';
-import { Loader2, Upload, FileText, Sparkles, FolderOpen } from 'lucide-react';
+import { Loader2, Upload, FileText, Sparkles, Bot } from 'lucide-react';
 import { toast } from 'sonner';
+import { SmartContractEditor } from './SmartContractEditor';
 
 interface ContractDialogProps {
     open: boolean;
@@ -36,22 +36,6 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
         }
     }, [open]);
 
-    const handleAiSuggest = () => {
-        const template =
-            `CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE BELEZA
-
-CLÁUSULA 1: DO OBJETO
-O presente contrato tem como objeto a prestação de serviços de beleza...
-
-CLÁUSULA 2: DO AGENDAMENTO
-O serviço será realizado na data agendada...
-
-CLÁUSULA 3: DO CANCELAMENTO
-Cancelamentos com menos de 24h implicam em multa...`;
-        setContent(template);
-        toast.success("Sugestão de contrato gerada!");
-    };
-
     const handleSubmit = async () => {
         if (!projectId || !title) {
             toast.error('Preencha os campos obrigatórios');
@@ -69,7 +53,7 @@ Cancelamentos com menos de 24h implicam em multa...`;
                 const path = await uploadContractFile(file);
                 attachmentUrl = path;
             } else {
-                if (!content) {
+                if (!content || content === '<p></p>') {
                     toast.error('Adicione o conteúdo do contrato');
                     return;
                 }
@@ -84,77 +68,80 @@ Cancelamentos com menos de 24h implicam em multa...`;
             } as any);
 
             onOpenChange(false);
+            toast.success("Contrato salvo com sucesso!");
         } catch (error) {
             console.error(error);
+            toast.error("Erro ao salvar contrato");
         }
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[700px] bg-[#121212] text-white border-white/10">
-                <DialogHeader>
-                    <DialogTitle>Novo Contrato</DialogTitle>
-                    <DialogDescription className="text-gray-400">
-                        Crie um contrato digital ou faça upload de um arquivo.
+            <DialogContent className="sm:max-w-[1000px] w-[95vw] h-[90vh] sm:h-auto bg-[#050505] text-white border-white/10 flex flex-col rounded-none p-0 overflow-hidden">
+                <DialogHeader className="p-6 border-b border-white/10 bg-black/50">
+                    <div className="flex items-center gap-3">
+                        <Bot className="w-5 h-5 text-white" />
+                        <DialogTitle className="text-2xl font-serif font-light tracking-wide text-white">NOVO CONTRATO INTELIGENTE</DialogTitle>
+                    </div>
+                    <DialogDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">
+                        Crie contratos com auxílio da Lumi IA ou faça upload.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <Label className="text-gray-400">Projeto</Label>
+                <div className="flex-1 overflow-y-auto py-6 px-6 space-y-8 bg-[#050505]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-3">
+                            <Label className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Projeto Vinculado</Label>
                             <select
-                                className="w-full h-10 bg-white/5 border border-white/10 rounded-md px-3 text-sm text-white focus:outline-none focus:border-[#00e5ff]"
+                                className="w-full h-12 bg-transparent border-b border-white/20 rounded-none px-0 text-sm text-white focus:outline-none focus:border-white transition-colors font-mono"
                                 value={projectId}
                                 onChange={e => setProjectId(e.target.value)}
                             >
-                                <option value="" disabled>Selecione um projeto</option>
+                                <option value="" disabled className="bg-black text-gray-500">SELECIONE UM PROJETO...</option>
                                 {projects?.map((project: any) => (
-                                    <option key={project.id} value={project.id}>{project.name}</option>
+                                    <option key={project.id} value={project.id} className="bg-black text-white">{project.name}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="space-y-2">
-                            <Label className="text-gray-400">Título</Label>
+                        <div className="space-y-3">
+                            <Label className="text-white/40 font-mono text-[10px] uppercase tracking-widest">Título do Documento</Label>
                             <Input
-                                placeholder="Ex: Contrato Noiva"
-                                className="bg-white/5 border-white/10 text-white"
+                                placeholder="EX: CONTRATO DE PRESTAÇÃO DE SERVIÇOS"
+                                className="bg-transparent border-0 border-b border-white/20 rounded-none px-0 text-white focus:border-white focus:ring-0 placeholder:text-white/20 font-mono text-sm h-12"
                                 value={title}
                                 onChange={e => setTitle(e.target.value)}
                             />
                         </div>
                     </div>
 
-                    <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-white/5">
-                            <TabsTrigger value="digital">📄 Editor Inteligente (IA)</TabsTrigger>
-                            <TabsTrigger value="upload">tj Upload de Arquivo (PDF)</TabsTrigger>
+                    <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full flex-1 flex flex-col">
+                        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-white/10 p-0 h-auto rounded-none">
+                            <TabsTrigger
+                                value="digital"
+                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white text-white/40 font-mono text-xs uppercase tracking-widest py-3 transition-all"
+                            >
+                                <Sparkles className="w-3 h-3 mr-2" />
+                                Editor Inteligente (Lumi IA)
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="upload"
+                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white text-white/40 font-mono text-xs uppercase tracking-widest py-3 transition-all"
+                            >
+                                <Upload className="w-3 h-3 mr-2" />
+                                Upload de PDF
+                            </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="digital" className="space-y-4 mt-4">
-                            <div className="flex justify-between items-center bg-white/5 p-2 rounded-lg border border-white/5">
-                                <span className="text-xs text-gray-400">Utilize IA para agilizar</span>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="border-[#00e5ff]/30 text-[#00e5ff] hover:bg-[#00e5ff]/10 h-8"
-                                    onClick={handleAiSuggest}
-                                >
-                                    <Sparkles className="w-3 h-3 mr-2" />
-                                    Gerar com Lumi IA
-                                </Button>
-                            </div>
-
-                            <Textarea
-                                placeholder="Digite as cláusulas do contrato aqui..."
-                                className="min-h-[250px] bg-white/5 border-white/10 text-white font-mono text-sm leading-relaxed"
-                                value={content}
-                                onChange={e => setContent(e.target.value)}
+                        <TabsContent value="digital" className="mt-8 flex-1">
+                            <SmartContractEditor
+                                content={content}
+                                onChange={setContent}
+                                projectId={projectId}
                             />
                         </TabsContent>
 
-                        <TabsContent value="upload" className="mt-4">
-                            <div className="border-2 border-dashed border-white/10 rounded-xl h-[250px] flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors">
+                        <TabsContent value="upload" className="mt-8">
+                            <div className="border border-dashed border-white/20 h-[400px] flex flex-col items-center justify-center bg-white/[0.02] hover:bg-white/[0.05] transition-colors group cursor-pointer relative">
                                 <input
                                     type="file"
                                     id="file-upload"
@@ -164,18 +151,22 @@ Cancelamentos com menos de 24h implicam em multa...`;
                                         if (e.target.files?.[0]) setFile(e.target.files[0]);
                                     }}
                                 />
-                                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center p-6 w-full h-full justify-center">
+                                <label htmlFor="file-upload" className="cursor-pointer flex flex-col items-center p-6 w-full h-full justify-center absolute inset-0 z-10">
                                     {file ? (
                                         <>
-                                            <FileText className="w-12 h-12 text-[#00e5ff] mb-4" />
-                                            <span className="text-white font-medium">{file.name}</span>
-                                            <span className="text-xs text-gray-400 mt-2">Clique para trocar</span>
+                                            <div className="w-16 h-16 border border-white/20 flex items-center justify-center mb-6 bg-black">
+                                                <FileText className="w-6 h-6 text-white" />
+                                            </div>
+                                            <span className="text-white font-serif text-xl tracking-wide">{file.name}</span>
+                                            <span className="text-[10px] text-white/40 mt-3 font-mono uppercase tracking-widest group-hover:text-white transition-colors">Clique para trocar arquivo</span>
                                         </>
                                     ) : (
                                         <>
-                                            <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                                            <span className="text-gray-300 font-medium">Clique para selecionar</span>
-                                            <span className="text-xs text-gray-500 mt-2">Apenas PDF</span>
+                                            <div className="w-16 h-16 border border-white/10 flex items-center justify-center mb-6 group-hover:border-white/40 transition-colors">
+                                                <Upload className="w-6 h-6 text-white/40 group-hover:text-white transition-colors" />
+                                            </div>
+                                            <span className="text-white/60 font-serif text-lg tracking-wide group-hover:text-white transition-colors">UPLOAD DE PDF</span>
+                                            <span className="text-[10px] text-white/30 mt-3 font-mono uppercase tracking-widest">Arraste ou clique para selecionar</span>
                                         </>
                                     )}
                                 </label>
@@ -184,16 +175,16 @@ Cancelamentos com menos de 24h implicam em multa...`;
                     </Tabs>
                 </div>
 
-                <DialogFooter className="pt-4">
-                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-gray-400 hover:text-white">
-                        Cancelar
+                <DialogFooter className="p-6 border-t border-white/10 bg-black/50 gap-4">
+                    <Button variant="ghost" onClick={() => onOpenChange(false)} className="text-white/40 hover:text-white hover:bg-transparent font-mono text-xs uppercase tracking-widest rounded-none">
+                        CANCELAR
                     </Button>
                     <Button
-                        className="bg-white text-black hover:bg-white/90 font-medium min-w-[150px]"
+                        className="bg-white text-black hover:bg-white/90 font-mono text-xs uppercase tracking-widest font-bold rounded-none px-8 h-10 border border-transparent"
                         onClick={handleSubmit}
                         disabled={isSaving}
                     >
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Salvar Contrato"}
+                        {isSaving ? <Loader2 className="w-3 h-3 animate-spin mr-2" /> : "SALVAR DOCUMENTO"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

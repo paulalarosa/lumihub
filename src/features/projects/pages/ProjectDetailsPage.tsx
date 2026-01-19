@@ -260,20 +260,20 @@ export default function ProjectDetailsPage() {
     try {
       const clientId = project.clients.id;
 
-      // 1. Ensure PIN (secret_code) exists in wedding_clients
+      // 1. Ensure PIN (access_pin) exists in wedding_clients
       const { data: client, error: clientError } = await supabase
         .from('wedding_clients')
-        .select('secret_code')
+        .select('access_pin')
         .eq('id', clientId)
         .single();
 
       if (clientError) throw clientError;
 
-      if (!client.secret_code) {
+      if (!client.access_pin) {
         const newPin = Math.floor(1000 + Math.random() * 9000).toString();
         const { error: updateError } = await supabase
           .from('wedding_clients')
-          .update({ secret_code: newPin })
+          .update({ access_pin: newPin })
           .eq('id', clientId);
 
         if (updateError) throw updateError;

@@ -17,9 +17,9 @@ export interface ClientFormData {
     email: string;
     phone: string;
     notes: string;
-    bride_status: boolean;
+    is_bride: boolean;
     wedding_date?: Date;
-    secret_code?: string;
+    access_pin?: string;
 }
 
 interface ClientFormProps {
@@ -35,9 +35,9 @@ export function ClientForm({ initialData, onSubmit, isLoading, submitLabel = "Sa
         email: "",
         phone: "",
         notes: "",
-        bride_status: initialData?.bride_status || false,
+        is_bride: initialData?.is_bride || false,
         wedding_date: initialData?.wedding_date,
-        secret_code: initialData?.secret_code || "",
+        access_pin: initialData?.access_pin || "",
     });
 
     useEffect(() => {
@@ -100,14 +100,14 @@ export function ClientForm({ initialData, onSubmit, isLoading, submitLabel = "Sa
                         </Label>
                     </div>
                     <Switch
-                        id="bride_status"
-                        checked={formData.bride_status}
-                        onCheckedChange={(checked) => handleChange("bride_status", checked)}
+                        id="is_bride"
+                        checked={formData.is_bride}
+                        onCheckedChange={(checked) => handleChange("is_bride", checked)}
                         className="data-[state=checked]:bg-zinc-100 data-[state=unchecked]:bg-zinc-800 border-zinc-700"
                     />
                 </div>
 
-                {formData.bride_status && (
+                {formData.is_bride && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
                         <div className="space-y-2">
                             <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">Data do Casamento</Label>
@@ -143,11 +143,11 @@ export function ClientForm({ initialData, onSubmit, isLoading, submitLabel = "Sa
                         <div className="space-y-2">
                             <Label className="text-xs uppercase tracking-widest text-gray-500 font-mono">PIN de Acesso (4 dígitos)</Label>
                             <Input
-                                value={formData.secret_code}
+                                value={formData.access_pin}
                                 onChange={(e) => {
                                     // Only allow numbers and max 4 chars
                                     const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                                    handleChange("secret_code", val);
+                                    handleChange("access_pin", val);
                                 }}
                                 placeholder="0000"
                                 className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm tracking-[0.5em] text-center font-bold"

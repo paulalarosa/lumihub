@@ -160,6 +160,7 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
 
                 // @ts-ignore
                 yPos = doc.lastAutoTable.finalY + 15;
+
             } else {
                 doc.setFontSize(9);
                 doc.setTextColor(colors.textLight);

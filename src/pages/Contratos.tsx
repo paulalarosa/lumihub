@@ -64,9 +64,9 @@ export default function Contratos() {
         setLoading(true);
         setError(null);
         try {
-            // Safe query with relationship check
-            const { data, error: apiError } = await supabase
-                .from('contracts')
+            // 1. Fetch Contracts First (No Joins)
+            const { data: contractsData, error: apiError } = await supabase
+                .from('contracts' as any)
                 .select(`
                     id, 
                     title, 
@@ -75,17 +75,37 @@ export default function Contratos() {
                     created_at, 
                     signed_at, 
                     content, 
-                    signature_url,
-                    clients ( name )
+                    signature_url
                 `)
                 .order('created_at', { ascending: false });
 
             if (apiError) throw apiError;
 
-            // Transform data safely
-            const safeContracts = (data || []).map((item: any) => ({
+            // 2. Manually Fetch Clients for these contracts
+            const clientIds = (contractsData || [])
+                .map((c: any) => c.client_id)
+                .filter(Boolean);
+
+            let clientsMap: Record<string, any> = {};
+
+            if (clientIds.length > 0) {
+                // Trying wedding_clients first as per physical schema
+                const { data: clientsData } = await supabase
+                    .from('wedding_clients' as any)
+                    .select('id, name:full_name')
+                    .in('id', clientIds);
+
+                if (clientsData) {
+                    clientsData.forEach((c: any) => {
+                        clientsMap[c.id] = c;
+                    });
+                }
+            }
+
+            // 3. Merge Data
+            const safeContracts = (contractsData || []).map((item: any) => ({
                 ...item,
-                clients: Array.isArray(item.clients) ? item.clients[0] : item.clients
+                clients: clientsMap[item.client_id] || { name: 'Cliente Desconhecido' }
             })) as Contract[];
 
             setContracts(safeContracts);
@@ -100,7 +120,7 @@ export default function Contratos() {
 
     const fetchClients = async () => {
         const { data } = await supabase
-            .from('wedding_clients')
+            .from('wedding_clients' as any)
             .select('id, name')
             .order('name');
         if (data) setClients(data);

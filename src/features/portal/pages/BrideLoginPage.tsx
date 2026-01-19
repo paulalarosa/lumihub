@@ -16,38 +16,57 @@ export default function BrideLoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!clientId) return;
+        console.log('ID extraído da URL:', clientId); // Debug requested
+        if (!clientId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId)) {
+            toast({
+                title: "Login Inválido",
+                description: "Link de acesso incorreto.",
+                variant: "destructive"
+            });
+            return;
+        }
 
         setLoading(true);
 
         try {
-            const { data, error } = await supabase
-                .from("wedding_clients")
-                .select("secret_code")
-                .eq("id", clientId)
-                .single();
+            const finalPin = String(pin).trim();
 
-            if (error || !data) {
-                throw new Error("Cliente não encontrado");
-            }
+            // Secure RPC Validation
+            const { data, error } = await supabase.rpc('validate_bride_pin', {
+                client_id: clientId,
+                pin_code: finalPin
+            });
 
-            if (data.secret_code === pin) {
-                // Success
-                localStorage.setItem(`bride_auth_${clientId}`, "true");
-                navigate(`/portal/${clientId}/dashboard`);
+            if (error) throw error;
+
+            if (data === true) {
+                // BYPASS STANDARD AUTH - Manual Session Management
+                localStorage.setItem('bride_auth_id', clientId);
+
+                // Redundant/Helper keys (keeping for safety if other components read them)
+                localStorage.setItem('bride_portal_session', clientId);
+                localStorage.setItem('is_bride_authenticated', 'true');
+                localStorage.setItem(`bride_pin_${clientId}`, finalPin);
+
+                toast({
+                    title: "Bem-vinda de volta!",
+                    description: "Acesso autorizado com sucesso."
+                });
+
+                // Force Immediate Redirect - Clearing any previous state
+                window.location.href = `/portal/${clientId}/dashboard`;
             } else {
                 toast({
                     title: "Acesso Negado",
-                    description: "Código de segurança inválido.",
+                    description: "PIN incorreto ou acesso não autorizado.",
                     variant: "destructive"
                 });
             }
-
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error("Login Error:", error);
             toast({
                 title: "Erro no sistema",
-                description: "Não foi possível validar as credenciais.",
+                description: "Tente novamente mais tarde.",
                 variant: "destructive"
             });
         } finally {
@@ -56,11 +75,8 @@ export default function BrideLoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-6 font-sans selection:bg-white selection:text-black">
-
-            {/* Main Container - Industrial Border */}
-            <div className="w-full max-w-md border border-neutral-800 bg-[#050505] p-12 relative">
-
+        <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-white selection:text-black">
+            <div className="w-full max-w-sm relative">
                 {/* Decorative Corners */}
                 <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white" />
                 <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-white" />
@@ -136,7 +152,7 @@ export default function BrideLoginPage() {
                         Secure Environment
                     </p>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

@@ -58,20 +58,20 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="font-semibold text-gray-900">Histórico de Assinaturas</h3>
-      <div className="space-y-3">
+      <h3 className="font-mono text-xs uppercase tracking-widest text-white/50 border-b border-white/10 pb-2">Histórico de Assinaturas</h3>
+      <div className="space-y-2">
         {signatures.map((signature) => (
           <div
             key={signature.id}
-            className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition"
+            className="border border-white/10 rounded-none p-4 hover:bg-white/5 transition bg-black"
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <p className="font-medium text-gray-900">
+                <p className="font-serif text-white tracking-wide text-sm">
                   {signature.signed_by || 'Contrato Assinado'}
                 </p>
                 {signature.signed_at && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-[10px] text-white/40 font-mono mt-1">
                     {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
                       locale: ptBR,
                     })}
@@ -79,8 +79,8 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
                 )}
               </div>
               {signature.signature_data && (
-                <div className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-sm bg-green-100 text-green-700 rounded">
-                  <Download className="w-4 h-4" />
+                <div className="ml-4 inline-flex items-center gap-2 px-3 py-1 text-[10px] bg-white text-black font-mono uppercase tracking-wider rounded-none">
+                  <Download className="w-3 h-3" />
                   Assinado
                 </div>
               )}

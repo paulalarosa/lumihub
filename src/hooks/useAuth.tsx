@@ -1,163 +1,144 @@
-
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { AuthService } from '@/services/authService';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
 
-type AppRole = 'admin' | 'user';
-
+// Define context type for better safety
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  roles: AppRole[];
-  isAdmin: boolean;
-  isAssistant: boolean;
-  checkIfAssistant: (userId: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName?: string, businessName?: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signInWithGoogle: () => Promise<{ error: Error | null }>;
+  role: string | null;
+  signIn: (email: string, pass: string) => Promise<any>;
   signOut: () => Promise<void>;
+  signInWithGoogle: () => Promise<any>;
+  signUp: (email: string, pass: string) => Promise<any>;
+  isAdmin?: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [roles, setRoles] = useState<AppRole[]>([]);
-  const [isAssistant, setIsAssistant] = useState(false);
+  const [role, setRole] = useState<string | null>('professional'); // Default to professional to prevent redirects
 
-  const checkIfAssistant = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('assistants')
-      .select('id')
-      .eq('assistant_user_id', userId)
-      .maybeSingle();
+  // Use ref to track internal state changes and avoid dependency loops
+  const lastUserId = useRef<string | null>(null);
 
-    setIsAssistant(!error && !!data);
-  };
+  // Helper: Fetch Role with Fallback
+  const fetchRole = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
 
-  const fetchRoles = async (userId: string, email?: string) => {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single();
-    // @ts-ignore
-    const userRole = data?.role;
+      if (error) {
+        // console.warn("Auth: Error fetching role, defaulting to professional.", error);
+        return 'professional';
+      }
 
-    const fetchedRoles: AppRole[] = [];
-    if (userRole === 'admin') fetchedRoles.push('admin');
-
-    if (email === 'prenata@gmail.com') {
-      if (!fetchedRoles.includes('admin')) fetchedRoles.push('admin');
+      // Default to professional to be safe if column is null
+      return data?.role || 'professional';
+    } catch (err) {
+      // console.error("Auth: Crash fetching role", err);
+      return 'professional';
     }
-
-    setRoles(fetchedRoles);
   };
 
   useEffect(() => {
-    const { data: { subscription } } = AuthService.onAuthStateChange(
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    let mounted = true;
 
-        if (session?.user) {
-          setTimeout(() => {
-            fetchRoles(session.user.id, session.user.email);
-            checkIfAssistant(session.user.id);
-          }, 0);
-        } else {
-          setRoles([]);
-          setIsAssistant(false);
+    const handleSession = async (currentSession: Session | null) => {
+      if (!mounted) return;
+
+      const currentId = currentSession?.user?.id ?? null;
+
+      // OPTIMIZATION: If user ID hasn't changed, don't trigger full reload logic
+      // But ensure loading is resolved
+      if (currentId === lastUserId.current) {
+        setSession(currentSession);
+        if (loading) setLoading(false);
+        return;
+      }
+
+      // START LOADING
+      setLoading(true);
+      lastUserId.current = currentId;
+
+      if (currentSession?.user) {
+        // 1. Update basic auth
+        setSession(currentSession);
+        setUser(currentSession.user);
+
+        // 2. Fetch Role
+        const userRole = await fetchRole(currentSession.user.id);
+
+        // 3. FINISH
+        if (mounted) {
+          setRole(userRole);
+          setLoading(false);
+        }
+      } else {
+        // 1. Clear everything
+        setSession(null);
+        setUser(null);
+        setRole(null);
+
+        // 2. FINISH
+        if (mounted) {
+          setLoading(false);
         }
       }
-    );
+    };
 
-    AuthService.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRoles(session.user.id, session.user.email);
-        checkIfAssistant(session.user.id);
-      }
-      setLoading(false);
+    // Initialize
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    // Subscribe
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const signUp = async (email: string, password: string, fullName?: string, businessName?: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName || '',
-          business_name: businessName || ''
-        }
-      }
-    });
-
-    return { error: error as Error | null };
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-
-    return { error: error as Error | null };
-  };
-
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        scopes: 'https://www.googleapis.com/auth/calendar',
-        redirectTo: `${window.location.origin}/dashboard`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent'
-        }
-      }
-    });
-    return { error: error as Error | null };
-  };
+  // Standard Functions exposed
+  const signIn = (email: string, pass: string) => supabase.auth.signInWithPassword({ email, password: pass });
 
   const signOut = async () => {
-    await AuthService.signOut();
-    setRoles([]);
-    setIsAssistant(false);
+    setLoading(true);
+    await supabase.auth.signOut();
+
+    setRole(null);
+    setUser(null);
+    setSession(null);
+    lastUserId.current = null;
+    setLoading(false);
   };
 
-  const isAdmin = roles.includes('admin');
+  const signInWithGoogle = () => supabase.auth.signInWithOAuth({ provider: 'google' });
+  const signUp = (email: string, pass: string) => supabase.auth.signUp({ email, password: pass });
+
+  const isAdmin = role === 'studio' || role === 'admin';
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      loading,
-      roles,
-      isAdmin,
-      isAssistant,
-      checkIfAssistant,
-      signUp,
-      signIn,
-      signInWithGoogle,
-      signOut
-    }}>
+    <AuthContext.Provider value={{ user, session, loading, role, signIn, signOut, signInWithGoogle, signUp, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (context === undefined) throw new Error('useAuth must be used within AuthProvider');
   return context;
-}
+};

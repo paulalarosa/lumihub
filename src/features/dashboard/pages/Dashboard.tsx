@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -43,6 +44,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
   const { organizationId, isOwner, loading: orgLoading } = useOrganization();
+  const { t } = useLanguage();
 
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true); // Default true to avoid flash
   const [checkingOnboarding, setCheckingOnboarding] = useState(true);
@@ -75,7 +77,7 @@ export default function Dashboard() {
       if (profile) {
         // 1. Name Display
         if (profile.full_name) {
-          const first = profile.full_name.split(' ')[0];
+          const first = (profile.full_name || '').split(' ')[0];
           setProfileName(first);
         }
 
@@ -87,6 +89,7 @@ export default function Dashboard() {
         // 3. Auto-Upgrade Specific User
         if (user.email === 'nathaliasbrb@gmail.com' && profile.subscription_tier !== 'studio') {
           console.log("Auto-upgrading administrative user...");
+          // @ts-ignore
           await supabase.from('profiles').update({ subscription_tier: 'studio' }).eq('id', user.id);
         }
       }
@@ -168,7 +171,7 @@ export default function Dashboard() {
     fetchDashboardData();
 
     const channel = supabase.channel('dashboard-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients' }, () => fetchDashboardData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wedding_clients' }, () => fetchDashboardData())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'projects' }, () => fetchDashboardData())
       .subscribe();
 
@@ -194,35 +197,44 @@ export default function Dashboard() {
     );
   }
 
-  if (!user || !organizationId) return null;
+  if (!user) return <div className="p-8 text-center text-white">Carregando sessão...</div>;
+  if (orgLoading || !organizationId) return (
+    <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+        className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full"
+      />
+      <p className="ml-4 text-white/50">Carregando organização...</p>
+    </div>
+  );
 
   if (!checkingOnboarding && !onboardingCompleted) {
-    // Redirect to standard onboarding route instead of embedding potentially dead component
     navigate('/onboarding');
-    return null;
+    return <div className="p-8 text-center text-white">Redirecionando para Onboarding...</div>;
   }
 
   const stats = [
     ...(isOwner ? [{
-      label: "Faturamento",
+      label: t('dashboard.stats.revenue'),
       value: `R$ ${totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-      description: `Comissões: R$ ${totalCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+      description: `${t('dashboard.stats.commissions')}: R$ ${totalCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       icon: DollarSign,
-      ctaLabel: "Detalhes",
+      ctaLabel: t('dashboard.actions.details'),
       ctaLink: "/admin"
     }] : []),
     {
-      label: "Clientes",
+      label: t('dashboard.stats.clients'),
       value: clientsCount.toString(),
       icon: Users,
-      ctaLabel: "Adicionar",
+      ctaLabel: t('dashboard.actions.add_client'),
       ctaLink: "/clientes"
     },
     {
-      label: "Projetos",
+      label: t('dashboard.stats.projects'),
       value: projectsCount.toString(),
       icon: FolderOpen,
-      ctaLabel: "Criar",
+      ctaLabel: t('dashboard.actions.create_project'),
       ctaLink: "/projetos"
     }
   ];
@@ -244,11 +256,10 @@ export default function Dashboard() {
         >
           <div className="flex items-center gap-4 mb-2">
             <div className="h-[1px] w-12 bg-white/20" />
-            <span className="font-mono uppercase tracking-[0.3em] text-gray-500 text-xs">Control Center</span>
+            <span className="font-mono uppercase tracking-[0.3em] text-gray-500 text-xs">{t('dashboard.control_center')}</span>
           </div>
           <h1 className="font-serif text-5xl tracking-tight text-white mb-4">
-            Bem-vinda, <br />
-            {profileName || user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
+            {profileName || user.email?.split('@')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
         </motion.div>
 
@@ -289,7 +300,7 @@ export default function Dashboard() {
             <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none">
               <div className="flex items-center gap-3 mb-4">
                 <Sparkles className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-medium text-white uppercase tracking-wider">Insights</h3>
+                <h3 className="text-sm font-medium text-white uppercase tracking-wider">{t('dashboard.sections.insights')}</h3>
               </div>
               <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
                 {marketingTriggers.map((trigger, idx) => (
@@ -303,10 +314,10 @@ export default function Dashboard() {
           )}
 
           {/* 3. Agenda (Left - 50%) */}
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
+          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-medium text-white tracking-wide">Agenda</h3>
-              <Link to="/agenda" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">VER TODA</Link>
+              <h3 className="text-lg font-medium text-white tracking-wide">{t('dashboard.sections.agenda')}</h3>
+              <Link to="/agenda" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">{t('dashboard.view_all')}</Link>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
@@ -345,7 +356,7 @@ export default function Dashboard() {
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-white/30">
                   <Calendar className="w-12 h-12 mb-4 opacity-20" />
-                  <p className="text-sm">Sem eventos próximos</p>
+                  <p className="text-sm">{t('dashboard.no_events')}</p>
                 </div>
               )}
             </div>
@@ -355,12 +366,54 @@ export default function Dashboard() {
           <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full">
             <div className="flex items-center gap-3 mb-4">
               <Users className="w-4 h-4 text-white" />
-              <h3 className="text-sm font-medium text-white uppercase tracking-wider">Equipe</h3>
+              <h3 className="text-sm font-medium text-white uppercase tracking-wider">{t('dashboard.sections.team')}</h3>
             </div>
             <AssistantsPanelCard />
           </div>
 
         </div>
+
+        {/* 5. Origin Analytics (New Row) */}
+        <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none mt-6">
+          <div className="flex items-center gap-3 mb-6">
+            <CheckCircle2 className="w-4 h-4 text-white" />
+            <h3 className="text-sm font-medium text-white uppercase tracking-wider">{t('dashboard.sections.origin')}</h3>
+          </div>
+
+          <div className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={originStats}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  paddingAngle={5}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {originStats.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={['#FFFFFF', '#333333', '#666666', '#999999', '#CCCCCC'][index % 5]} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid #333' }}
+                  itemStyle={{ color: '#fff', fontSize: '12px', textTransform: 'uppercase' }}
+                />
+                <Legend
+                  verticalAlign="middle"
+                  align="right"
+                  layout="vertical"
+                  iconType="circle"
+                  wrapperStyle={{ fontSize: '12px', textTransform: 'uppercase', color: '#fff' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </main>
     </div>
   );

@@ -21,7 +21,7 @@ export default function BrideLoginPage() {
         // Optional: Fetch client name for greeting
         const fetchName = async () => {
             const { data } = await supabase
-                .from('wedding_clients')
+                .from('wedding_clients' as any)
                 .select('name')
                 .eq('id', clientId)
                 .single();
@@ -37,23 +37,19 @@ export default function BrideLoginPage() {
         setLoading(true);
 
         try {
+            // Secure RPC Call
             const { data, error } = await supabase
-                .from("wedding_clients")
-                .select("secret_code")
-                .eq("id", clientId)
-                .single();
-
-            if (error || !data) {
-                // If checking logic fails, we fallback or show error
-                toast({
-                    title: "Erro de Configuração",
-                    description: "Cliente não encontrado ou PIN não configurado.",
-                    variant: "destructive"
+                .rpc('validate_bride_pin', {
+                    client_id: clientId,
+                    pin_code: pin
                 });
-                return;
-            }
 
-            if (data.secret_code === pin) {
+            if (error) throw error;
+
+            // Check validity from RPC response
+            const response = data as any;
+
+            if (response && response.valid) {
                 // Success
                 localStorage.setItem(`bride_auth_${clientId}`, "true");
                 navigate(`/portal/${clientId}/dashboard`);

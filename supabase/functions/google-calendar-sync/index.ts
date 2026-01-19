@@ -44,13 +44,13 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 }
 
 function formatEventForGoogle(event: EventData) {
-  const startDateTime = event.start_time 
-    ? `${event.event_date}T${event.start_time}` 
+  const startDateTime = event.start_time
+    ? `${event.event_date}T${event.start_time}`
     : event.event_date;
-  
-  const endDateTime = event.end_time 
-    ? `${event.event_date}T${event.end_time}` 
-    : event.start_time 
+
+  const endDateTime = event.end_time
+    ? `${event.event_date}T${event.end_time}`
+    : event.start_time
       ? `${event.event_date}T${event.start_time.split(':').map((v: string, i: number) => i === 0 ? String(parseInt(v) + 1).padStart(2, '0') : v).join(':')}`
       : event.event_date;
 
@@ -60,7 +60,7 @@ function formatEventForGoogle(event: EventData) {
     summary: event.title,
     description: event.description || '',
     location: event.address || event.location || '',
-    start: isAllDay 
+    start: isAllDay
       ? { date: event.event_date }
       : { dateTime: startDateTime, timeZone: 'America/Sao_Paulo' },
     end: isAllDay
@@ -104,7 +104,7 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-    
+
     if (authError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
@@ -114,14 +114,9 @@ serve(async (req) => {
 
     const { action, event_id, event_data } = await req.json();
 
-    // Get user's Google integration
+    // Get user's Google integration via Secure RPC
     const { data: integration, error: integrationError } = await supabase
-      .from('user_integrations')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('provider', 'google')
-      .eq('is_active', true)
-      .single();
+      .rpc('get_google_integration', { p_user_id: user.id });
 
     if (integrationError || !integration) {
       return new Response(JSON.stringify({ error: 'Google Calendar not connected' }), {
@@ -135,7 +130,7 @@ serve(async (req) => {
     if (new Date(integration.token_expires_at) <= new Date()) {
       console.log('Token expired, refreshing...');
       accessToken = await refreshAccessToken(integration.refresh_token);
-      
+
       if (!accessToken) {
         return new Response(JSON.stringify({ error: 'Failed to refresh token' }), {
           status: 401,
@@ -143,14 +138,12 @@ serve(async (req) => {
         });
       }
 
-      // Update stored token
-      await supabase
-        .from('user_integrations')
-        .update({
-          access_token: accessToken,
-          token_expires_at: new Date(Date.now() + 3600 * 1000).toISOString(),
-        })
-        .eq('id', integration.id);
+      // Update stored token secure via RPC
+      await supabase.rpc('update_google_token', {
+        p_integration_id: integration.id,
+        p_access_token: accessToken,
+        p_expires_in: 3600
+      });
     }
 
     const calendarId = integration.calendar_id || 'primary';
@@ -171,7 +164,7 @@ serve(async (req) => {
       });
 
       const result = await response.json();
-      
+
       if (result.error) {
         console.error('Error creating Google event:', result);
         return new Response(JSON.stringify({ error: result.error.message }), {
@@ -241,7 +234,7 @@ serve(async (req) => {
       });
 
       const result = await response.json();
-      
+
       if (result.error) {
         console.error('Error updating Google event:', result);
         return new Response(JSON.stringify({ error: result.error.message }), {
@@ -300,7 +293,7 @@ serve(async (req) => {
       );
 
       const result = await response.json();
-      
+
       if (result.error) {
         console.error('Error fetching Google events:', result);
         return new Response(JSON.stringify({ error: result.error.message }), {
@@ -380,7 +373,7 @@ serve(async (req) => {
 
       for (const event of localEvents || []) {
         const googleEvent = formatEventForGoogle(event as EventData);
-        
+
         const response = await fetch(baseUrl, {
           method: 'POST',
           headers: {
@@ -391,7 +384,7 @@ serve(async (req) => {
         });
 
         const result = await response.json();
-        
+
         if (!result.error) {
           await supabase
             .from('events')

@@ -18,7 +18,7 @@ interface Event {
   address: string | null;
   event_type: string | null;
   description: string | null;
-  clients?: { name: string } | null;
+  client?: { name: string } | null;
   projects?: { name: string } | null;
 }
 
@@ -226,9 +226,9 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                                 )}
                               </div>
 
-                              {event.clients?.name && (
+                              {event.client?.name && (
                                 <p className="text-xs text-white/60 mb-3 font-mono uppercase tracking-wide">
-                                  CLIENT: {event.clients.name}
+                                  CLIENT: {event.client.name}
                                 </p>
                               )}
 

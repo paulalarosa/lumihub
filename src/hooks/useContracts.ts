@@ -76,7 +76,7 @@ export function useContracts() {
         const filePath = `${fileName}`;
 
         const { error: uploadError } = await supabase.storage
-            .from('contract-files')
+            .from('contracts')
             .upload(filePath, file);
 
         if (uploadError) {
@@ -84,7 +84,7 @@ export function useContracts() {
         }
 
         const { data: { publicUrl } } = supabase.storage
-            .from('contract-files')
+            .from('contracts')
             .getPublicUrl(filePath);
 
         // Since bucket is private, we might need a signed URL instead
@@ -109,7 +109,7 @@ export function useContracts() {
 
     const getFileUrl = async (path: string) => {
         const { data, error } = await supabase.storage
-            .from('contract-files')
+            .from('contracts')
             .createSignedUrl(path, 3600); // 1 hour
 
         if (error) throw error;

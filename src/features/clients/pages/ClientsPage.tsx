@@ -54,9 +54,10 @@ interface Client {
   last_visit: string | null;
   created_at: string;
   user_id: string;
-  bride_status?: boolean;
+  is_bride?: boolean; // Renamed from bride_status
   wedding_date?: string | null;
-  secret_code?: string | null;
+  access_pin?: string | null; // Renamed from secret_code
+  portal_link?: string | null;
 }
 
 export default function Clientes() {
@@ -110,30 +111,44 @@ export default function Clientes() {
 
     setLoadingClients(true);
 
-    const clientData = {
-      name: formData.name.trim(),
+    // Initial payload construction
+    const clientData: any = {
+      full_name: formData.name.trim(), // Mapping to DB column 'full_name'
+      name: formData.name.trim(), // Keep alias just in case
       email: formData.email.trim() || null,
       phone: formData.phone.trim() || null,
       notes: formData.notes.trim() || null,
       user_id: organizationId,
-      bride_status: Boolean(formData.bride_status),
+      is_bride: Boolean(formData.is_bride),
       // Force NULL if date is empty, undefined or invalid
       wedding_date: formData.wedding_date ? new Date(formData.wedding_date).toISOString() : null,
-      // Force NULL if secret_code is empty string or just whitespace (and ensure String type)
-      secret_code: formData.secret_code ? String(formData.secret_code).trim() || null : null,
+      // Force NULL if access_pin is empty string
+      access_pin: formData.access_pin ? String(formData.access_pin).trim() || null : null,
     };
-
 
     try {
       if (editingClient) {
+        // If it involves bride status, ensure portal link is there
+        if (clientData.is_bride) {
+          clientData.portal_link = `https://lumihub.com/portal/${editingClient.id}`;
+        }
+
         const { error } = await ClientService.update(editingClient.id, clientData);
 
         if (error) throw error;
         toast({ title: "Cliente atualizado!" });
       } else {
-        const { error } = await ClientService.create(clientData);
+        // Create
+        const { data: newClient, error } = await ClientService.create(clientData);
 
         if (error) throw error;
+
+        // Post-create update for portal link if needed
+        if (clientData.is_bride && (newClient as any)?.id) {
+          const link = `https://lumihub.com/portal/${(newClient as any).id}`;
+          await ClientService.update((newClient as any).id, { portal_link: link });
+        }
+
         toast({ title: "Cliente adicionado!" });
       }
 
@@ -163,20 +178,20 @@ export default function Clientes() {
 
   const copyPortalLink = async (clientId: string) => {
     try {
-      // 1. Ensure PIN (secret_code) exists in wedding_clients
+      // 1. Ensure PIN (access_pin) exists in wedding_clients
       const { data: client, error: clientError } = await supabase
-        .from('wedding_clients')
-        .select('secret_code')
+        .from('wedding_clients' as any)
+        .select('access_pin')
         .eq('id', clientId)
         .single();
 
       if (clientError) throw clientError;
 
-      if (!client.secret_code) {
+      if (!(client as any).access_pin) {
         const newPin = Math.floor(1000 + Math.random() * 9000).toString();
         const { error: updateError } = await supabase
-          .from('wedding_clients')
-          .update({ secret_code: newPin })
+          .from('wedding_clients' as any)
+          .update({ access_pin: newPin } as any)
           .eq('id', clientId);
 
         if (updateError) throw updateError;
@@ -275,9 +290,9 @@ export default function Clientes() {
                     email: editingClient.email || '',
                     phone: editingClient.phone || '',
                     notes: editingClient.notes || '',
-                    bride_status: editingClient.bride_status || false,
+                    is_bride: editingClient.is_bride || false,
                     wedding_date: editingClient.wedding_date ? new Date(editingClient.wedding_date) : undefined,
-                    secret_code: editingClient.secret_code || ''
+                    access_pin: editingClient.access_pin || ''
                   } : undefined}
                   submitLabel={editingClient ? 'SALVAR DADOS' : 'REGISTRAR CLIENTE'}
                 />
@@ -348,7 +363,7 @@ export default function Clientes() {
                             <div className="flex flex-col">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-sm uppercase font-bold">{client.name}</span>
-                                {client.bride_status && (
+                                {client.is_bride && (
                                   <Gem className="h-3 w-3 text-[#00e5ff] group-hover:text-black" />
                                 )}
                               </div>
@@ -374,7 +389,7 @@ export default function Clientes() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             {/* Actions Dropdown or Buttons */}
-                            {client.bride_status && (
+                            {client.is_bride && (
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -433,7 +448,7 @@ export default function Clientes() {
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-serif text-xl text-white">{client.name}</h3>
-                            {client.bride_status && <Gem className="h-4 w-4 text-[#00e5ff]" />}
+                            {client.is_bride && <Gem className="h-4 w-4 text-[#00e5ff]" />}
                           </div>
                           {client.phone && (
                             <div className="font-mono text-xs text-gray-500 mt-1">
@@ -443,7 +458,7 @@ export default function Clientes() {
                         </div>
                       </div>
 
-                      {client.bride_status && (
+                      {client.is_bride && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-white">

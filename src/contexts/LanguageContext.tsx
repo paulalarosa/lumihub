@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { translations } from '@/utils/translations';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Language = 'pt' | 'en';
 
@@ -12,29 +12,20 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [language, setLanguage] = useState<Language>('pt');
+    const { t, i18n } = useTranslation();
 
-    const t = (key: string): string => {
-        // Check if key exists in the current language
-        const currentLangTranslations = translations[language] as Record<string, string>;
-        if (key in currentLangTranslations) {
-            return currentLangTranslations[key];
-        }
-
-        // Fallback to Portuguese if missing
-        const fallbackTranslations = translations['pt'] as Record<string, string>;
-        if (key in fallbackTranslations) {
-            console.warn(`Translation missing for key "${key}" in language "${language}". Falling back to PT.`);
-            return fallbackTranslations[key];
-        }
-
-        // Return key itself if completely missing
-        console.warn(`Translation missing for key "${key}".`);
-        return key;
+    const setLanguage = (lang: Language) => {
+        i18n.changeLanguage(lang);
     };
 
     return (
-        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+        <LanguageContext.Provider
+            value={{
+                language: (i18n.language as Language) || 'pt',
+                setLanguage,
+                t: (key) => t(key, { defaultValue: key }) // Bridge for compatibility
+            }}
+        >
             {children}
         </LanguageContext.Provider>
     );
@@ -42,8 +33,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
     const context = useContext(LanguageContext);
-    if (context === undefined) {
-        throw new Error('useLanguage must be used within a LanguageProvider');
+    if (!context) {
+        // Safe fallback if context is missing (though it shouldn't be now)
+        return {
+            language: 'pt' as Language,
+            setLanguage: () => { },
+            t: (k: string) => k
+        };
     }
     return context;
 }

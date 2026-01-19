@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Terminal
 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
@@ -32,7 +33,7 @@ interface Project {
   status: string;
   public_token: string;
   created_at: string;
-  wedding_clients: {
+  client: {
     id: string;
     name: string;
   } | null;
@@ -48,6 +49,7 @@ export default function Projetos() {
   const [searchParams] = useSearchParams();
   const { user, loading } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
@@ -86,11 +88,11 @@ export default function Projetos() {
 
     const { data: projectsData, error: projectsError } = await supabase
       .from('projects')
-      .select('*, wedding_clients(id, name)')
+      .select('*, client:wedding_clients(id, name)')
       .order('created_at', { ascending: false });
 
     if (!projectsError) {
-      setProjects(projectsData || []);
+      setProjects((projectsData as any) || []);
     }
 
     const { data: clientsData } = await supabase
@@ -143,7 +145,7 @@ export default function Projetos() {
 
   const filteredProjects = projects.filter(project =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    project.wedding_clients?.name.toLowerCase().includes(searchTerm.toLowerCase())
+    project.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const eventTypes = [
@@ -181,8 +183,8 @@ export default function Projetos() {
                   <FolderOpen className="h-5 w-5 text-white group-hover:text-black transition-colors" />
                 </div>
                 <div>
-                  <h1 className="font-serif font-bold text-2xl text-white uppercase tracking-tighter">PROJECTS</h1>
-                  <div className="text-[10px] text-white/50 uppercase tracking-[0.3em]">/// WORKFLOW_MANAGER</div>
+                  <h1 className="font-serif font-bold text-2xl text-white uppercase tracking-tighter">{t('pages.projects.title')}</h1>
+                  <div className="text-[10px] text-white/50 uppercase tracking-[0.3em]">{t('pages.projects.subtitle')}</div>
                 </div>
               </div>
             </div>
@@ -194,7 +196,7 @@ export default function Projetos() {
               <DialogTrigger asChild>
                 <Button className="gap-2 bg-white text-black hover:bg-gray-200 rounded-none font-mono text-xs uppercase tracking-widest">
                   <Plus className="h-4 w-4" />
-                  NEW_PROJECT
+                  {t('pages.projects.new')}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-md bg-black border border-white/20 rounded-none text-white">
@@ -363,10 +365,10 @@ export default function Projetos() {
                   </CardHeader>
                   <CardContent className="pt-4">
                     <div className="space-y-3 text-xs text-white/60 font-mono uppercase tracking-wide">
-                      {project.wedding_clients && (
+                      {project.client && (
                         <div className="flex items-center gap-2">
                           <User className="h-4 w-4 text-white/40" />
-                          <span className="text-white/80">{project.wedding_clients.name}</span>
+                          <span className="text-white/80">{project.client.name}</span>
                         </div>
                       )}
                       {project.event_date && (

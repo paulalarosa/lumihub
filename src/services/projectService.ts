@@ -7,7 +7,7 @@ export const ProjectService = {
             .from('projects')
             .select(`
         *,
-        client:clients(*)
+        client:wedding_clients(*)
       `)
             .eq('user_id', organizationId)
             .order('created_at', { ascending: false });
@@ -18,7 +18,7 @@ export const ProjectService = {
             .from('projects')
             .select(`
         *,
-        client:clients(*),
+        client:wedding_clients(*),
         invoices(*),
         contracts(*)
       `)

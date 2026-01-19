@@ -18,11 +18,11 @@ serve(async (req) => {
 
   try {
     const url = new URL(req.url);
-    
+
     // Support action from query params OR body
     let action = url.searchParams.get('action');
     let bodyData: any = {};
-    
+
     // Try to parse body for POST requests
     if (req.method === 'POST') {
       try {
@@ -51,7 +51,7 @@ serve(async (req) => {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       const token = authHeader.replace('Bearer ', '');
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      
+
       if (authError || !user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,
@@ -60,7 +60,7 @@ serve(async (req) => {
       }
 
       const redirect_uri = bodyData.redirect_uri;
-      
+
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
       authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID);
       authUrl.searchParams.set('redirect_uri', redirect_uri);
@@ -78,7 +78,7 @@ serve(async (req) => {
     // Handle OAuth callback
     if (action === 'callback') {
       const { code, state: userId, redirect_uri } = bodyData;
-      
+
       if (!code || !userId) {
         return new Response(JSON.stringify({ error: 'Missing code or state' }), {
           status: 400,
@@ -125,23 +125,20 @@ serve(async (req) => {
 
       // Store tokens in user_integrations
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-      
-      const { error: upsertError } = await supabase
-        .from('user_integrations')
-        .upsert({
-          user_id: userId,
-          provider: 'google',
-          access_token: tokenData.access_token,
-          refresh_token: tokenData.refresh_token,
-          token_expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString(),
-          calendar_id: calendarId,
-          is_active: true,
-          sync_enabled: true,
-          last_sync_at: null,
-        }, { onConflict: 'user_id,provider' });
 
-      if (upsertError) {
-        console.error('Error saving integration:', upsertError);
+      // Store tokens in user_integrations via Secure RPC
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+      const { error: rpcError } = await supabase.rpc('save_google_integration', {
+        p_user_id: userId,
+        p_access_token: tokenData.access_token,
+        p_refresh_token: tokenData.refresh_token,
+        p_calendar_id: calendarId,
+        p_expires_in: tokenData.expires_in
+      });
+
+      if (rpcError) {
+        console.error('Error saving integration:', rpcError);
         return new Response(JSON.stringify({ error: 'Failed to save integration' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -168,7 +165,7 @@ serve(async (req) => {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       const token = authHeader.replace('Bearer ', '');
       const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-      
+
       if (authError || !user) {
         return new Response(JSON.stringify({ error: 'Unauthorized' }), {
           status: 401,

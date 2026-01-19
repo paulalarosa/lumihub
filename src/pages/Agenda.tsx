@@ -23,7 +23,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { getCalendarEvents, GoogleCalendarEvent } from '@/integrations/google/calendar';
 
-interface Event {
+export interface Event {
   id: string;
   title: string;
   description: string | null;
@@ -41,10 +41,14 @@ interface Event {
   color: string;
   client_id: string | null;
   project_id: string | null;
-  reminder_days: number[];
-  client?: { name: string } | null;
+  reminder_days?: number[];
+  client?: { id: string; name: string; phone?: string; email?: string } | null;
   project?: { name: string } | null;
   assistants?: { id: string; name: string }[];
+  total_value?: number;
+  payment_method?: string;
+  payment_status?: 'pending' | 'paid';
+  assistant_commission?: number;
   google_calendar_event_id?: string | null;
 }
 
@@ -57,7 +61,8 @@ interface Assistant {
 
 export default function Agenda() {
   const navigate = useNavigate();
-  const { user, loading, signInWithGoogle, isAdmin } = useAuth();
+  const { user, loading, signInWithGoogle, role } = useAuth();
+  const isAdmin = role === 'admin' || role === 'professional';
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -115,10 +120,11 @@ export default function Agenda() {
         client_id: null,
         project_id: null,
         reminder_days: [],
-        client: { name: 'Google Agenda' },
+        client: { id: 'google', name: 'Google Agenda' },
         project: null,
-        assistants: []
-      };
+        assistants: [],
+        total_value: 0
+      } as Event;
     });
 
     setGoogleEvents(mappedEvents);
@@ -126,47 +132,70 @@ export default function Agenda() {
 
   const fetchEvents = async () => {
     setLoadingEvents(true);
-
-    // Always fetch full month plus surrounding days for calendar display
     const fetchStart = startOfWeek(startOfMonth(currentDate), { locale: ptBR });
     const fetchEnd = endOfWeek(endOfMonth(currentDate), { locale: ptBR });
 
-    const { data, error } = await supabase
-      .from('events')
-      .select(`
-        *,
-        client:wedding_clients(name),
-        project:projects(name)
-      `)
-      .gte('event_date', format(fetchStart, 'yyyy-MM-dd'))
-      .lte('event_date', format(fetchEnd, 'yyyy-MM-dd'))
-      .order('event_date', { ascending: true });
+    try {
+      const { data: supabaseEvents, error } = await supabase
+        .from('events')
+        .select(`
+          *,
+          project:projects(name)
+        `)
+        .gte('event_date', format(fetchStart, 'yyyy-MM-dd'))
+        .lte('event_date', format(fetchEnd, 'yyyy-MM-dd'))
+        .order('event_date', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching events:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar os eventos",
-        variant: "destructive"
-      });
-    } else {
-      // Fetch assistants for each event
-      const eventsWithAssistants = await Promise.all(
-        (data || []).map(async (event) => {
+      if (error) throw error;
+
+      // 1. Fetch Clients Manually
+      const clientIds = Array.from(new Set((supabaseEvents || []).map(e => e.client_id).filter(Boolean)));
+      let clientMap: Record<string, any> = {};
+
+      if (clientIds.length > 0) {
+        const { data: clientsData } = await supabase
+          .from('wedding_clients' as any)
+          .select('id, name:full_name, phone, email')
+          .in('id', clientIds);
+
+        if (clientsData) {
+          clientMap = clientsData.reduce((acc: any, client: any) => {
+            acc[client.id] = client;
+            return acc;
+          }, {});
+        }
+      }
+
+      // 2. Fetch assistants for each event
+      const eventsWithDetails = await Promise.all(
+        (supabaseEvents || []).map(async (event) => {
           const { data: eventAssistants } = await supabase
             .from('event_assistants')
-            .select('assistant_id, assistants(id, name)')
+            .select('assistant_id, assistant:assistants(id, name)')
             .eq('event_id', event.id);
+
+          // Merge Client Data
+          const clientData = event.client_id ? clientMap[event.client_id] : null;
 
           return {
             ...event,
-            assistants: eventAssistants?.map((ea: any) => ea.assistants) || []
-          };
+            client: clientData ? { id: clientData.id, name: clientData.name, phone: clientData.phone, email: clientData.email } : null,
+            assistants: eventAssistants?.map((ea: any) => ea.assistant) || []
+          } as Event;
         })
       );
-      setEvents(eventsWithAssistants as Event[]);
+
+      setEvents([...eventsWithDetails, ...googleEvents]);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      toast({
+        title: 'Erro ao carregar eventos',
+        description: 'Não foi possível carregar os eventos do calendário.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingEvents(false);
     }
-    setLoadingEvents(false);
   };
 
   const fetchAssistants = async () => {

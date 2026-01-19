@@ -1,8 +1,9 @@
-/// <reference types="@types/google.maps" />
-import { useEffect, useRef, useState } from "react";
-import { Loader2, Navigation, ExternalLink } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Loader2, Navigation, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -12,50 +13,24 @@ interface AddressAutocompleteProps {
   onBlur?: () => void;
   placeholder?: string;
   className?: string;
-  showMiniMap?: boolean;
+  showMiniMap?: boolean; // Kept for API compatibility, though map might be removed if we don't have SDK
   latitude?: number | null;
   longitude?: number | null;
 }
 
-// Global Promise for loading the API
-let googleMapsPromise: Promise<void> | null = null;
-let cachedApiKey: string | null = null;
-
-async function fetchApiKey(): Promise<string> {
-  if (cachedApiKey) return cachedApiKey;
-  const envKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-  if (envKey) {
-    cachedApiKey = envKey;
-    return envKey;
-  }
-  const { data, error } = await supabase.functions.invoke('get-maps-key');
-  if (error || !data?.apiKey) throw new Error("Google Maps API Key não configurada");
-  cachedApiKey = data.apiKey;
-  return data.apiKey;
+interface PlaceSuggestion {
+  description: string;
+  place_id: string;
 }
 
-function loadGoogleMaps(): Promise<void> {
-  if (googleMapsPromise) return googleMapsPromise;
-  googleMapsPromise = new Promise(async (resolve, reject) => {
-    try {
-      if (window.google?.maps?.places?.PlaceAutocompleteElement) {
-        resolve();
-        return;
-      }
-      const apiKey = await fetchApiKey();
-      const script = document.createElement("script");
-      // Load 'places' library explicitly
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Falha ao carregar Google Maps"));
-      document.head.appendChild(script);
-    } catch (error) {
-      reject(error);
-    }
-  });
-  return googleMapsPromise;
+// Simple debounce utility
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+  return debouncedValue;
 }
 
 // Deep link helper
@@ -85,78 +60,98 @@ export function AddressAutocomplete({
   latitude,
   longitude,
 }: AddressAutocompleteProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [inputValue, setInputValue] = useState(value);
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
     latitude && longitude ? { lat: latitude, lng: longitude } : null
   );
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const debouncedSearch = useDebounce(inputValue, 500);
+
+  // Sync internal state if external value changes (and it's different from what we typed)
+  useEffect(() => {
+    if (value !== inputValue) {
+      setInputValue(value);
+    }
+  }, [value]);
 
   useEffect(() => {
     if (latitude && longitude) setCoords({ lat: latitude, lng: longitude });
   }, [latitude, longitude]);
 
+  // Load Google Maps Script if not loaded
   useEffect(() => {
-    let autocompleteElement: any = null;
+    if (!window.google && !document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')) {
+      const script = document.createElement("script");
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
-    loadGoogleMaps()
-      .then(() => {
-        setIsLoading(false);
-        if (!containerRef.current) return;
+      if (!apiKey) {
+        console.error("VITE_GOOGLE_MAPS_API_KEY missing");
+        return;
+      }
 
-        // Clean up previous instances if any (though strict mode might cause double init)
-        containerRef.current.innerHTML = '';
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+      script.async = true;
+      script.defer = true;
+      document.body.appendChild(script);
+    }
+  }, []);
 
-        // Init V3 Element
-        // @ts-ignore - TS might not know PlaceAutocompleteElement yet
-        autocompleteElement = new google.maps.places.PlaceAutocompleteElement();
+  useEffect(() => {
+    const searchPlaces = async () => {
+      // If empty or just selected (matched value), don't search
+      if (!debouncedSearch || debouncedSearch === value) {
+        setSuggestions([]);
+        return;
+      }
 
-        // Configuration
-        autocompleteElement.id = "pac-input";
-        autocompleteElement.classList.add("lumi-autocomplete-input");
-        // We can inject styles via class or direct style, but Shadow DOM limits specific internal styling.
-        // We rely on CSS variables where supported or simple outer styling.
+      // Check if Google Maps is loaded
+      if (!window.google || !window.google.maps || !window.google.maps.places) {
+        // Wait retry? Or just let the script load... 
+        // Ideally we wait for load event, but for debounce simple check is ok for now.
+        return;
+      }
 
-        containerRef.current.appendChild(autocompleteElement);
+      setLoading(true);
+      try {
+        const autocompleteService = new window.google.maps.places.AutocompleteService();
 
-        // Pre-fill if value exists (V3 accepts name property? Or we just assume it's blank init)
-        // autocompleteElement.value = value || ""; // Not standard prop on the element class directly?
-        // Actually, strictly speaking, setting value programmatically on the element isn't always straightforward 
-        // without accessing the internal input shadow part, but let's try standard attribute.
-        // If not, we rely on user typing. 
-        // NOTE: If creating a NEW record, it's empty. If editing, we might want to show text.
-        // However, the V3 element is a search widget. Better to start empty or let user search?
-        // For now, let's leave it managed by the widget.
-
-        // Event Listener
-        autocompleteElement.addEventListener("gmp-placeselect", async (e: any) => {
-          const place = e.place;
-          await place.fetchFields({ fields: ["displayName", "formattedAddress", "location"] });
-
-          const address = place.formattedAddress || place.displayName;
-          const lat = place.location?.lat();
-          const lng = place.location?.lng();
-
-          if (address) {
-            onChange(address);
-            // Verify if we can update the internal input value or if it updates auto.
+        autocompleteService.getPlacePredictions(
+          { input: debouncedSearch, language: 'pt-BR', componentRestrictions: { country: 'br' } },
+          (predictions, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+              setSuggestions(predictions);
+              setShowSuggestions(true);
+            } else {
+              setSuggestions([]);
+            }
+            setLoading(false);
           }
-          if (lat && lng) {
-            setCoords({ lat, lng });
-            onCoordinatesChange?.(lat, lng);
-          }
-        });
+        );
 
-      })
-      .catch((err) => {
-        console.error(err);
-        setIsLoading(false);
-      });
-
-    return () => {
-      // Cleanup
-      if (containerRef.current) containerRef.current.innerHTML = '';
+      } catch (err) {
+        console.error("Error fetching places (client-side):", err);
+        setLoading(false);
+      }
     };
-  }, []); // Run once on mount
+
+    searchPlaces();
+  }, [debouncedSearch, value]);
+
+
+  // Handle selection
+  const handleSelect = async (place: PlaceSuggestion) => {
+    setInputValue(place.description);
+    onChange(place.description);
+    setShowSuggestions(false);
+
+    // If we need details (lat/lng), we can us PlacesService
+    // const placesService = new google.maps.places.PlacesService(document.createElement('div'));
+    // placesService.getDetails({ placeId: place.place_id }, (result, status) => ...);
+  };
 
   const handleOpenGPS = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -165,37 +160,57 @@ export function AddressAutocomplete({
     }
   };
 
+  // Click outside to close
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <div className={cn("space-y-4 relative z-[9999]", className)}>
-      {/* Container for V3 Element */}
-      <div
-        ref={containerRef}
-        className="w-full noir-autocomplete-wrapper"
-        style={{ minHeight: '50px' }}
-      >
-        {isLoading && <Loader2 className="animate-spin h-5 w-5 text-white absolute top-3 left-4" />}
+    <div ref={containerRef} className={cn("relative space-y-2", className)}>
+      <div className="relative">
+        <Input
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            setShowSuggestions(true);
+          }}
+          onFocus={() => {
+            onFocus?.();
+            if (suggestions.length > 0) setShowSuggestions(true);
+          }}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none pr-10 focus-visible:ring-0 focus-visible:border-[#00e5ff]/50 transition-colors"
+        />
+        {loading && (
+          <div className="absolute right-3 top-2.5">
+            <Loader2 className="h-4 w-4 animate-spin text-white/50" />
+          </div>
+        )}
       </div>
 
-      {/* Style Injection for the Custom Element (Attempting to override Shadow DOM variables if possible or just outer) */}
-      <style>{`
-          .noir-autocomplete-wrapper gmp-place-autocomplete {
-             --gmp-px-color-surface: #000;
-             --gmp-px-color-on-surface: #fff;
-             --gmp-px-color-surface-variant: #111;
-             --gmp-px-color-on-surface-variant: #ccc;
-             --gmp-px-color-primary: #fff;
-             --gmp-px-font-family-base: 'DM Mono', monospace;
-             border: 1px solid rgba(255,255,255,0.1);
-          }
-          /* Attempt to force z-index on the popover if exposed */
-          .pac-container, .gmp-pac-container {
-             z-index: 99999 !important;
-             pointer-events: auto !important;
-          }
-        `}</style>
+      {showSuggestions && suggestions.length > 0 && (
+        <ul className="absolute z-[9999] w-full bg-[#1A1A1A] border border-white/10 shadow-xl max-h-60 overflow-y-auto rounded-none top-full mt-1">
+          {suggestions.map((suggestion) => (
+            <li
+              key={suggestion.place_id}
+              onClick={() => handleSelect(suggestion)}
+              className="px-4 py-3 text-sm text-white/80 hover:bg-white/5 hover:text-white cursor-pointer flex items-center gap-3 transition-colors border-b border-white/5 last:border-0"
+            >
+              <MapPin className="h-4 w-4 text-white/40 shrink-0" />
+              <span>{suggestion.description}</span>
+            </li>
+          ))}
+        </ul>
+      )}
 
-      {/* GPS Button / Mini Map Indicator */}
-      {value && coords && (
+      {value && (
         <div className="flex justify-end">
           <button
             type="button"

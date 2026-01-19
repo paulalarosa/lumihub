@@ -20,6 +20,7 @@ import { format, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale';
 import TransactionDialog from '@/components/finance/TransactionDialog';
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Transaction {
   id: string;
@@ -34,6 +35,7 @@ interface Transaction {
 
 export default function FinancialDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [metrics, setMetrics] = useState({
@@ -131,10 +133,10 @@ export default function FinancialDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/20 pb-6">
         <div>
           <h1 className="font-serif text-3xl md:text-5xl text-white tracking-tighter uppercase mb-2">
-            FINANCIAL // CONTROL
+            {t('pages.finance.title')}
           </h1>
           <p className="text-white/40 font-mono text-xs uppercase tracking-widest">
-            REVENUE STREAM MANAGEMENT SYSTEM
+            {t('pages.finance.subtitle')}
           </p>
         </div>
         <div className="flex gap-4">
@@ -144,14 +146,14 @@ export default function FinancialDashboard() {
             className="rounded-none border-white/20 text-white hover:bg-white hover:text-black transition-all font-mono text-xs uppercase"
           >
             <Minus className="mr-2 h-4 w-4" />
-            LOG_EXPENSE
+            {t('pages.finance.log_expense')}
           </Button>
           <Button
             onClick={() => handleOpenDialog('income')}
             className="rounded-none bg-white text-black hover:bg-white/80 transition-all font-mono text-xs uppercase"
           >
             <Plus className="mr-2 h-4 w-4" />
-            ADD_REVENUE
+            {t('pages.finance.add_income')}
           </Button>
         </div>
       </div>
@@ -167,7 +169,7 @@ export default function FinancialDashboard() {
                   <TrendingUp className="h-5 w-5" />
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-white/50 border border-white/10 px-2 py-1">
-                  TOTAL_INCOME
+                  {t('pages.finance.income')}
                 </span>
               </div>
               <div className="space-y-1">
@@ -188,7 +190,7 @@ export default function FinancialDashboard() {
                   <TrendingDown className="h-5 w-5" />
                 </div>
                 <span className="font-mono text-[10px] uppercase tracking-widest text-white/50 border border-white/10 px-2 py-1">
-                  TOTAL_EXPENSE
+                  {t('pages.finance.expense')}
                 </span>
               </div>
               <div className="space-y-1">

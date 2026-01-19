@@ -14,6 +14,7 @@ import { useWindowSize } from 'react-use';
 import { useMarketing } from "@/hooks/useMarketing";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarketingCampaign } from "@/services/marketing";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface InactiveClient {
     id: string;
@@ -56,6 +57,7 @@ const DEFAULT_SCRIPTS: MarketingCampaign[] = [
 
 export default function Marketing() {
     const { user } = useAuth();
+    const { t } = useLanguage();
     const { width, height } = useWindowSize();
     const [clients, setClients] = useState<InactiveClient[]>([]);
     const [clientLoading, setClientLoading] = useState(true);
@@ -83,10 +85,15 @@ export default function Marketing() {
     const fetchInactiveClients = async () => {
         setClientLoading(true);
         try {
-            // Simplified query - no last_visit column
-            const { data: allClients, error: clientError } = await supabase
-                .from('wedding_clients')
-                .select('id, name, phone, created_at');
+            // Enhanced query to check for active projects
+            const { data, error: clientError } = await supabase
+                .from('wedding_clients' as any)
+                .select('id, name:full_name, phone, created_at, projects(status)');
+
+            if (clientError) throw clientError;
+
+            // Cast to bypass complex join typing
+            const allClients = data as any[];
 
             if (clientError) throw clientError;
 
@@ -97,7 +104,11 @@ export default function Marketing() {
                 const createdDate = new Date(client.created_at);
                 const daysDiff = differenceInDays(now, createdDate);
 
-                if (daysDiff > 45) {
+                // Check for ANY active project
+                const hasActiveProject = client.projects?.some((p: any) => p.status === 'active' || p.status === 'ongoing');
+
+                // Logic: Created > 45 days AND NO active project
+                if (daysDiff > 45 && !hasActiveProject) {
                     processedClients.push({
                         id: client.id,
                         name: client.name,
@@ -155,9 +166,9 @@ export default function Marketing() {
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/20 pb-6">
                 <div>
-                    <h1 className="font-serif text-4xl text-white uppercase tracking-tighter">RETENTION // PROTOCOLS</h1>
+                    <h1 className="font-serif text-4xl text-white uppercase tracking-tighter">{t('pages.marketing.title')}</h1>
                     <p className="text-white/50 text-xs uppercase tracking-widest mt-1">
-                        IDENTIFY_AND_REENGAGE_DORMANT_TARGETS.
+                        {t('pages.marketing.subtitle')}
                     </p>
                 </div>
             </div>

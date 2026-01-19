@@ -36,52 +36,52 @@ export function AppSidebar() {
     // Force admin for specific user as backup
     const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com';
     const location = useLocation();
-    const { t } = useLanguage();
+    const { t, setLanguage, language } = useLanguage();
 
     // Menu items.
     const items = [
         {
-            title: t("sidebar_dashboard"),
+            title: t("SIDEBAR_DASHBOARD"),
             url: "/dashboard",
             icon: Home,
         },
         {
-            title: t("sidebar_agenda"),
+            title: t("SIDEBAR_AGENDA"),
             url: "/agenda",
             icon: Calendar,
         },
         {
-            title: t("sidebar_clients"),
+            title: t("SIDEBAR_CLIENTS"),
             url: "/clientes",
             icon: Users,
         },
         {
-            title: t("sidebar_projects"),
+            title: t("SIDEBAR_PROJECTS"),
             url: "/projetos",
             icon: Briefcase,
         },
         {
-            title: t("sidebar_marketing"),
+            title: t("SIDEBAR_MARKETING"),
             url: "/marketing",
             icon: Megaphone,
         },
         {
-            title: t("sidebar_contracts"),
+            title: t("SIDEBAR_CONTRACTS"),
             url: "/contratos",
             icon: FileSignature,
         },
         {
-            title: t("sidebar_financial"),
+            title: t("SIDEBAR_FINANCIAL"),
             url: "/dashboard/financial",
             icon: CreditCard,
         },
         {
-            title: t("sidebar_services"),
+            title: t("SIDEBAR_SERVICES"),
             url: "/servicos",
             icon: Sparkles,
         },
         {
-            title: t("sidebar_settings"),
+            title: t("SIDEBAR_SETTINGS"),
             url: "/configuracoes",
             icon: Settings,
         },
@@ -105,7 +105,7 @@ export function AppSidebar() {
 
             <SidebarContent className="bg-background">
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("sidebar_menu_main")}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("SIDEBAR_MENU_MAIN")}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
@@ -129,7 +129,7 @@ export function AppSidebar() {
                 {/* Admin Section - Only visible for admins */}
                 {isAdmin && (
                     <SidebarGroup className="mt-auto">
-                        <SidebarGroupLabel className="text-muted-foreground px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">{t("sidebar_menu_admin")}</SidebarGroupLabel>
+                        <SidebarGroupLabel className="text-muted-foreground px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">{t("SIDEBAR_MENU_ADMIN")}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 <SidebarMenuItem>
@@ -140,7 +140,7 @@ export function AppSidebar() {
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
-                                            <span className="font-mono text-xs uppercase tracking-wider">{t("sidebar_admin")}</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">{t("SIDEBAR_ADMIN")}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -175,8 +175,25 @@ export function AppSidebar() {
                     onClick={signOut}
                 >
                     <LogOut className="h-4 w-4 mr-2" />
-                    {t("sidebar_logout")}
+                    {t("SIDEBAR_LOGOUT")}
                 </Button>
+
+                {/* Language Switcher */}
+                <div className="flex gap-2 px-2 mt-4 justify-center">
+                    <button
+                        onClick={() => setLanguage('pt')}
+                        className={`text-[10px] font-mono font-bold uppercase ${language === 'pt' ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
+                    >
+                        PT
+                    </button>
+                    <span className="text-[10px] text-zinc-700">|</span>
+                    <button
+                        onClick={() => setLanguage('en')}
+                        className={`text-[10px] font-mono font-bold uppercase ${language === 'en' ? 'text-white' : 'text-zinc-600 hover:text-white'}`}
+                    >
+                        EN
+                    </button>
+                </div>
             </SidebarFooter>
         </Sidebar>
     )

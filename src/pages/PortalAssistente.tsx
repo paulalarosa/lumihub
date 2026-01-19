@@ -156,7 +156,7 @@ const PortalAssistente = () => {
 
       const { data: eventsData } = await supabase
         .from("events")
-        .select("*, clients(name), projects(name)")
+        .select("*, client:wedding_clients(name), projects(name)")
         .in("id", eventIds)
         .gte("event_date", format(start, "yyyy-MM-dd"))
         .lte("event_date", format(end, "yyyy-MM-dd"))

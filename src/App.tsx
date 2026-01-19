@@ -1,5 +1,4 @@
 import { Toaster } from "@/components/ui/toaster";
-import * as Sentry from "@sentry/react";
 import { useEffect, useState } from "react";
 import { SplashScreen } from "./components/ui/layout/SplashScreen";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -23,8 +22,9 @@ import UpdatePassword from "@/features/auth/pages/UpdatePassword";
 import AdminUsers from "@/features/users/pages/UsersPage";
 import Onboarding from "./pages/Onboarding";
 import Dashboard from "@/features/dashboard/pages/Dashboard";
-import BrideLoginPage from "./pages/BrideLoginPage";
-import BrideDashboardPage from "./pages/BrideDashboardPage";
+import BrideLoginPage from "@/features/portal/pages/BrideLoginPage";
+import BrideDashboardPage from "@/features/portal/pages/BrideDashboardPage";
+import BrideProtectedRoute from "@/features/portal/components/BrideProtectedRoute";
 import FinancialDashboard from "./pages/FinancialDashboard";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./features/admin/AdminDashboard";
@@ -54,10 +54,11 @@ import PublicBooking from "./pages/PublicBooking";
 import AppLayout from "./components/ui/layout/AppLayout";
 import MarketingLayout from "./components/ui/layout/MarketingLayout";
 import { ErrorFallback } from "./components/ui/error-fallback";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import InviteLanding from "./pages/InviteLanding";
-
 
 
 const queryClient = new QueryClient();
@@ -65,10 +66,8 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
-  // Test Sentry Connection
+  // Test Sentry Connection (Removed)
   useEffect(() => {
-    Sentry.captureMessage("LumiHub Sentry Test");
-
     // Simulate loading time (or wait for resources)
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -83,160 +82,165 @@ const App = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Sentry.ErrorBoundary fallback={({ error, resetError }: any) => <ErrorFallback error={error} resetErrorBoundary={resetError} />}>
-            <AuthProvider>
-              <AnalyticsProvider>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <LanguageProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <ScrollToTop />
+              <AuthProvider>
+                <AnalyticsProvider>
 
-                {/* Public Marketing Pages */}
-                <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
-                  <Routes>
-                    {/* Public Marketing Pages */}
-                    <Route path="/" element={<Home />} />
-                    <Route element={<MarketingLayout />}>
-                      <Route path="/recursos" element={<Recursos />} />
-                      <Route path="/planos" element={<Planos />} />
-                      <Route path="/blog" element={<Blog />} />
-                      <Route path="/blog/:slug" element={<BlogArticle />} />
-                      <Route path="/contato" element={<Contato />} />
-                      <Route path="/privacidade" element={<Privacidade />} />
-                      <Route path="/termos" element={<Termos />} />
-                    </Route>
-                    <Route path="/debug" element={<DebugConnection />} />
+                  {/* Public Marketing Pages */}
+                  <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
+                    <Routes>
+                      {/* Public Marketing Pages */}
+                      <Route path="/" element={<Home />} />
+                      <Route element={<MarketingLayout />}>
+                        <Route path="/recursos" element={<Recursos />} />
+                        <Route path="/planos" element={<Planos />} />
+                        <Route path="/blog" element={<Blog />} />
+                        <Route path="/blog/:slug" element={<BlogArticle />} />
+                        <Route path="/contato" element={<Contato />} />
+                        <Route path="/privacidade" element={<Privacidade />} />
+                        <Route path="/termos" element={<Termos />} />
+                      </Route>
+                      <Route path="/debug" element={<DebugConnection />} />
 
-                    {/* Auth */}
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-                    <Route path="/auth">
-                      <Route index element={<Navigate to="/login" replace />} />
-                      <Route path="login" element={<Navigate to="/login" replace />} />
-                      <Route path="register" element={<Navigate to="/register" replace />} />
-                      <Route path="mfa-verify" element={<MFAVerifyPage />} />
-                    </Route>
-                    <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-                    <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/auth/update-password" element={<UpdatePassword />} />
-                    <Route path="/onboarding" element={
-                      <ProtectedRoute requireOnboarding={false}>
-                        <Onboarding />
-                      </ProtectedRoute>
-                    } />
-
-                    {/* Protected App Pages with Layout */}
-                    <Route element={<AppLayout />}>
-                      <Route path="/dashboard" element={
-                        <ProtectedRoute>
-                          <Dashboard />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/dashboard/financial" element={
-                        <ProtectedRoute>
-                          <FinancialDashboard />
+                      {/* Auth */}
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/auth">
+                        <Route index element={<Navigate to="/login" replace />} />
+                        <Route path="login" element={<Navigate to="/login" replace />} />
+                        <Route path="register" element={<Navigate to="/register" replace />} />
+                        <Route path="mfa-verify" element={<MFAVerifyPage />} />
+                      </Route>
+                      <Route path="/auth/callback" element={<AuthCallbackHandler />} />
+                      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/auth/update-password" element={<UpdatePassword />} />
+                      <Route path="/onboarding" element={
+                        <ProtectedRoute requireOnboarding={false}>
+                          <Onboarding />
                         </ProtectedRoute>
                       } />
 
-                      <Route element={<AdminRoute />}>
-                        <Route path="/admin" element={<AdminDashboard />} />
-                        <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
-                        <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
+                      {/* Protected App Pages with Layout */}
+                      <Route element={<AppLayout />}>
+                        <Route path="/dashboard" element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dashboard/financial" element={
+                          <ProtectedRoute>
+                            <FinancialDashboard />
+                          </ProtectedRoute>
+                        } />
+
+                        <Route element={<AdminRoute />}>
+                          <Route path="/admin" element={<AdminDashboard />} />
+                          <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
+                          <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
+                        </Route>
+
+                        <Route path="/clientes" element={
+                          <ProtectedRoute>
+                            <Clientes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/agenda" element={
+                          <ProtectedRoute>
+                            <Agenda />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/clientes/:id" element={
+                          <ProtectedRoute>
+                            <ClienteDetalhes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos" element={
+                          <ProtectedRoute>
+                            <Projetos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos/novo" element={
+                          <ProtectedRoute>
+                            <Projetos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos/:id" element={
+                          <ProtectedRoute>
+                            <ProjetoDetalhes />
+                          </ProtectedRoute>
+                        } />
+
+                        <Route path="/projects/:projectId/contract" element={
+                          <ProtectedRoute>
+                            <ProjectContract />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/configuracoes" element={
+                          <ProtectedRoute>
+                            <Configuracoes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/assistentes" element={
+                          <ProtectedRoute>
+                            <Assistentes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/servicos" element={
+                          <ProtectedRoute>
+                            <Servicos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/contratos" element={
+                          <ProtectedRoute>
+                            <Contratos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/marketing" element={
+                          <ProtectedRoute>
+                            <Marketing />
+                          </ProtectedRoute>
+                        } />
                       </Route>
 
-                      <Route path="/clientes" element={
-                        <ProtectedRoute>
-                          <Clientes />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/agenda" element={
-                        <ProtectedRoute>
-                          <Agenda />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/clientes/:id" element={
-                        <ProtectedRoute>
-                          <ClienteDetalhes />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/projetos" element={
-                        <ProtectedRoute>
-                          <Projetos />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/projetos/novo" element={
-                        <ProtectedRoute>
-                          <Projetos />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/projetos/:id" element={
-                        <ProtectedRoute>
-                          <ProjetoDetalhes />
+                      {/* Assistant Portal - Explicit Route */}
+                      <Route path="/portal-assistente" element={
+                        <ProtectedRoute requireOnboarding={false}>
+                          <PortalAssistente />
                         </ProtectedRoute>
                       } />
 
-                      <Route path="/projects/:projectId/contract" element={
-                        <ProtectedRoute>
-                          <ProjectContract />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/configuracoes" element={
-                        <ProtectedRoute>
-                          <Configuracoes />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/assistentes" element={
-                        <ProtectedRoute>
-                          <Assistentes />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/servicos" element={
-                        <ProtectedRoute>
-                          <Servicos />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/contratos" element={
-                        <ProtectedRoute>
-                          <Contratos />
-                        </ProtectedRoute>
-                      } />
-                      <Route path="/marketing" element={
-                        <ProtectedRoute>
-                          <Marketing />
-                        </ProtectedRoute>
-                      } />
-                    </Route>
+                      <Route path="/assistente/convite/:token" element={<InviteLanding />} />
 
-                    {/* Assistant Portal - Explicit Route */}
-                    <Route path="/portal-assistente" element={
-                      <ProtectedRoute requireOnboarding={false}>
-                        <PortalAssistente />
-                      </ProtectedRoute>
-                    } />
+                      {/* Public Client Booking */}
+                      <Route path="/b/:slug" element={<PublicBooking />} />
 
-                    <Route path="/assistente/convite/:token" element={<InviteLanding />} />
+                      {/* Password-less Portal (Restored) - Outside AppLayout */}
+                      <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
+                      {/* Password-less Portal Check */}
+                      <Route element={<BrideProtectedRoute />}>
+                        <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
+                      </Route>
 
-                    {/* Public Client Booking */}
-                    <Route path="/b/:slug" element={<PublicBooking />} />
-
-                    {/* Password-less Portal (Restored) - Outside AppLayout */}
-                    <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
-                    <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
-
-                    {/* Catch-all */}
-                    <Route path="*" element={<Dashboard />} /> {/* Redirect * to Dashboard instead of NotFound to catch all */}
-                    <Route path="/404" element={<NotFound />} />
-                  </Routes>
-                </div>
-                <AIController />
-              </AnalyticsProvider>
-            </AuthProvider>
-          </Sentry.ErrorBoundary>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider >
+                      {/* Catch-all */}
+                      <Route path="*" element={<Dashboard />} /> {/* Redirect * to Dashboard instead of NotFound to catch all */}
+                      <Route path="/404" element={<NotFound />} />
+                    </Routes>
+                  </div>
+                  <AIController />
+                </AnalyticsProvider>
+              </AuthProvider>
+            </BrowserRouter>
+          </TooltipProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 
-export default Sentry.withProfiler(App);
+export default App;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+npimport { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -38,7 +38,9 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
     company_name: "",
     notes: "",
     origin: "",
-    referred_by: ""
+    referred_by: "",
+    is_bride: false,
+    access_pin: ""
   });
 
   useEffect(() => {
@@ -49,14 +51,15 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
 
   const loadClients = async () => {
     if (!user) return;
-    const { data } = await ClientService.list(user.id); // Assuming user.id is organizationId
+    const { data } = await ClientService.list(user.id);
     if (data) {
       setClients(data);
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+    setFormData({ ...formData, [e.target.name]: value });
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -77,27 +80,40 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
     setLoading(true);
 
     try {
-      // 2. Envia via Service
-      const payload = {
-        name: formData.name,
+      // 1. Prepare Payload
+      const payload: any = {
+        full_name: formData.name, // Mapping to correct column
+        name: formData.name, // Keep for check
         email: formData.email || null,
         phone: formData.phone || null,
-        company_name: formData.company_name || null,
+        // company_name removed/mapped if needed, but not in schema shown
         notes: formData.notes || null,
-        status: "active",
-        user_id: user.id,
         origin: formData.origin || null,
-        referred_by: formData.referred_by || null
+        // referred_by not in schema, ignoring
+        user_id: user.id,
+        is_bride: formData.is_bride,
+        access_pin: formData.access_pin || null
       };
 
-      const { error } = await ClientService.create(payload as any); // Cast as any for new fields until types regen
+      console.log('Payload sent to Supabase:', payload); // Debug requested
 
-      if (error) {
-        console.error("Erro detalhado do Supabase:", error);
-        throw error;
+
+      // 2. Create Client
+      const { data: newClient, error } = await ClientService.create(payload);
+
+      if (error) throw error;
+
+      // 3. Generate Portal Link if Bride
+      if (formData.is_bride && (newClient as any)?.id) {
+        const clientId = (newClient as any).id;
+        const portalLink = `https://lumihub.com/portal/${clientId}`;
+
+        await ClientService.update(clientId, {
+          portal_link: portalLink
+        } as any);
       }
 
-      toast.success("Cliente criado com sucesso!");
+      toast.success(formData.is_bride ? "Noiva cadastrada com sucesso!" : "Cliente criado com sucesso!");
       setOpen(false);
       setFormData({ name: "", email: "", phone: "", company_name: "", notes: "", origin: "", referred_by: "" });
 
@@ -128,17 +144,17 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
             <Label htmlFor="name" className="text-white">Nome Completo *</Label>
-            <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Maria Silva" className="bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+            <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Maria Silva" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="origin" className="text-white">Origem</Label>
               <Select onValueChange={(v) => handleSelectChange('origin', v)} value={formData.origin}>
-                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none focus:ring-0 focus:border-white/40">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                <SelectContent className="bg-[#1A1A1A] border-white/10 text-white rounded-none">
                   <SelectItem value="instagram">Instagram</SelectItem>
                   <SelectItem value="google">Google</SelectItem>
                   <SelectItem value="indicacao">Indicação</SelectItem>
@@ -151,10 +167,10 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
               <div className="grid gap-2">
                 <Label htmlFor="referred_by" className="text-white">Indicado por</Label>
                 <Select onValueChange={(v) => handleSelectChange('referred_by', v)} value={formData.referred_by}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none focus:ring-0 focus:border-white/40">
                     <SelectValue placeholder="Selecione Cliente" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#1A1A1A] border-white/10 text-white max-h-60 overflow-y-auto">
+                  <SelectContent className="bg-[#1A1A1A] border-white/10 text-white max-h-60 overflow-y-auto rounded-none">
                     {clients.map(c => (
                       <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                     ))}
@@ -166,7 +182,7 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
             {formData.origin !== 'indicacao' && (
               <div className="grid gap-2">
                 <Label htmlFor="company_name" className="text-white">Empresa (Opcional)</Label>
-                <Input id="company_name" name="company_name" value={formData.company_name} onChange={handleChange} placeholder="Ex: Lumi Inc." className="bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+                <Input id="company_name" name="company_name" value={formData.company_name} onChange={handleChange} placeholder="Ex: Lumi Inc." className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
               </div>
             )}
           </div>
@@ -174,21 +190,52 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="email" className="text-white">Email</Label>
-              <Input id="email" name="email" value={formData.email} onChange={handleChange} placeholder="maria@email.com" className="bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+              <Input id="email" name="email" value={formData.email} onChange={handleChange} placeholder="maria@email.com" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="phone" className="text-white">Telefone</Label>
-              <Input id="phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="(11) 99999-9999" className="bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+              <Input id="phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="(11) 99999-9999" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
             </div>
           </div>
+
+          <div className="flex items-center space-x-2 my-2">
+            <input
+              type="checkbox"
+              id="is_bride"
+              name="is_bride"
+              checked={formData.is_bride}
+              onChange={handleChange}
+              className="h-4 w-4 rounded border-gray-300 bg-white/10 text-[#00e5ff] focus:ring-[#00e5ff]"
+            />
+            <Label htmlFor="is_bride" className="text-white font-medium cursor-pointer">
+              É Noiva? (Gerar Portal)
+            </Label>
+          </div>
+
+          {formData.is_bride && (
+            <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+              <Label htmlFor="access_pin" className="text-white">PIN de Acesso (4 dígitos)</Label>
+              <Input
+                id="access_pin"
+                name="access_pin"
+                value={formData.access_pin}
+                onChange={handleChange}
+                maxLength={4}
+                placeholder="1234"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40 tracking-[0.5em] font-mono"
+              />
+              <p className="text-xs text-white/50">Este PIN será usado para acessar o Portal da Noiva.</p>
+            </div>
+          )}
+
           <div className="grid gap-2">
             <Label htmlFor="notes" className="text-white">Observações</Label>
-            <Textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} placeholder="Detalhes extras..." className="bg-white/5 border-white/10 text-white placeholder:text-white/30" />
+            <Textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} placeholder="Detalhes extras..." className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} className="border-white/10 text-white hover:bg-white/5 hover:text-white">Cancelar</Button>
-          <Button onClick={handleSave} disabled={loading} className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90">
+          <Button variant="outline" onClick={() => setOpen(false)} className="border-white/10 text-white hover:bg-white/5 hover:text-white rounded-none uppercase tracking-wider text-xs font-bold">Cancelar</Button>
+          <Button onClick={handleSave} disabled={loading} className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 rounded-none uppercase tracking-wider text-xs font-bold">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar Cliente
           </Button>

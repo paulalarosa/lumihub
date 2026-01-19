@@ -22,7 +22,7 @@ export function useOrganization() {
                 // We need to fetch the profile to see if there is a parent_user_id
                 const { data: profile, error } = await supabase
                     .from('profiles')
-                    .select('parent_user_id')
+                    .select('id, parent_user_id, role, subscription_tier')
                     .eq('id', user.id)
                     .single();
 
