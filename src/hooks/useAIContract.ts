@@ -39,7 +39,7 @@ Assinatura do Contratante
         setIsGenerating(true);
         await new Promise(resolve => setTimeout(resolve, 1000));
         setIsGenerating(false);
-        return text + "\n\n[Cláusula refinada pela Lumi AI com linguagem jurídica formal]";
+        return text + "\n\n[Cláusula refinada pela KONTROL AI com linguagem jurídica formal]";
     };
 
     return {

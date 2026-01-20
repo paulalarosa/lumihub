@@ -4,10 +4,10 @@ const Privacidade = () => {
     return (
         <>
             <SEOHead
-                title="POLÍTICA DE PRIVACIDADE - LUMI | SECURE"
-                description="Protocolos de proteção de dados e privacidade da Lumi."
-                keywords="privacidade, dados, lgpd, segurança, lumi"
-                url="https://lumihub.lovable.app/privacidade"
+                title="POLÍTICA DE PRIVACIDADE - KONTROL | SECURE"
+                description="Protocolos de proteção de dados e privacidade do KONTROL."
+                keywords="privacidade, dados, lgpd, segurança, kontrol"
+                url="https://khaoskontrol.com.br/privacidade"
             />
             <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pt-32 pb-20">
                 <div className="container mx-auto px-4">
@@ -17,7 +17,7 @@ const Privacidade = () => {
                                 POLÍTICA DE <br /> PRIVACIDADE
                             </h1>
                             <div className="flex items-center space-x-4 font-mono text-xs uppercase tracking-widest text-white/40">
-                                <span>LAST_UPDATE: 2026.01.16</span>
+                                <span>LAST_UPDATE: 2026.01.20</span>
                                 <span>//</span>
                                 <span>DATA_PROTECTION_PROTOCOL</span>
                             </div>
@@ -49,7 +49,7 @@ const Privacidade = () => {
                             <section className="space-y-4">
                                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">03. COMPARTILHAMENTO DE DADOS</h2>
                                 <p>
-                                    A Lumi não vende ou aluga seus dados pessoais. O compartilhamento ocorre apenas com parceiros essenciais
+                                    O KONTROL não vende ou aluga seus dados pessoais. O compartilhamento ocorre apenas com parceiros essenciais
                                     para a execução do serviço (ex: gateways de pagamento, serviços de hospedagem), que são obrigados contratualmente
                                     a manter o sigilo e segurança das informações.
                                 </p>

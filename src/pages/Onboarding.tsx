@@ -86,7 +86,7 @@ const Onboarding = () => {
       console.log("Refreshing session to apply roles...");
       await supabase.auth.refreshSession();
 
-      toast.success('Bem-vindo ao Lumi!');
+      toast.success('Bem-vindo ao KONTROL!');
       window.location.href = '/dashboard';
 
     } catch (err) {
@@ -145,7 +145,7 @@ const Onboarding = () => {
                 transition={{ delay: 0.2 }}
                 className="text-4xl md:text-5xl font-serif text-white mb-6 tracking-wide leading-tight"
               >
-                LUMI HUB
+                KONTROL
               </motion.h1>
 
               <motion.p

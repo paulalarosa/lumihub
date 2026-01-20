@@ -1,5 +1,5 @@
 /**
- * Email templates for Lumi Studio Pro applications
+ * Email templates for KONTROL Studio Pro applications
  * Used by the send-application Supabase Edge Function
  */
 
@@ -16,93 +16,99 @@ export const adminNotificationTemplate = (props: EmailTemplateProps): string => 
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Aplicação - Lumi Studio Pro</title>
+    <title>Nova Aplicação - KONTROL</title>
     <style>
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Courier New', Courier, monospace;
         margin: 0;
         padding: 0;
-        background-color: #f5f5f5;
+        background-color: #000000;
+        color: #e5e5e5;
       }
       .email-container {
         max-width: 600px;
         margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: #0c0c0c;
+        border: 1px solid #333;
       }
       .header {
-        background: linear-gradient(135deg, #050505 0%, #374151 100%);
+        background-color: #000000;
         padding: 32px 24px;
         text-align: center;
+        border-bottom: 1px solid #333;
       }
       .header h1 {
         color: #ffffff;
-        font-size: 28px;
+        font-size: 24px;
         margin: 0;
-        font-weight: 600;
+        font-weight: normal;
+        letter-spacing: 2px;
+        text-transform: uppercase;
       }
       .content {
         padding: 32px 24px;
       }
       .content h2 {
-        color: #050505;
-        font-size: 18px;
+        color: #ffffff;
+        font-size: 16px;
         margin-top: 0;
-        margin-bottom: 16px;
+        margin-bottom: 24px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
       .content p {
-        color: #374151;
+        color: #a3a3a3;
         font-size: 14px;
         line-height: 1.6;
         margin: 12px 0;
       }
       .info-box {
-        background-color: #fafafa;
-        border-left: 4px solid #050505;
+        background-color: #111;
+        border-left: 2px solid #fff;
         padding: 16px;
         margin: 20px 0;
-        border-radius: 4px;
       }
       .info-label {
-        color: #050505;
-        font-weight: 600;
-        font-size: 13px;
+        color: #666;
+        font-weight: bold;
+        font-size: 10px;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
       }
       .info-value {
-        color: #374151;
+        color: #fff;
         font-size: 14px;
-        margin-top: 4px;
       }
       .button-container {
         text-align: center;
-        margin: 24px 0;
+        margin: 32px 0;
       }
       .button {
         display: inline-block;
-        background-color: #050505;
-        color: #ffffff;
-        padding: 12px 32px;
+        background-color: #fff;
+        color: #000;
+        padding: 14px 32px;
         text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 12px;
+        font-weight: bold;
       }
       .button:hover {
-        background-color: #374151;
+        background-color: #ccc;
       }
       .footer {
-        background-color: #f5f5f5;
+        background-color: #000;
         padding: 24px;
         text-align: center;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #333;
       }
       .footer p {
-        color: #9ca3af;
-        font-size: 12px;
+        color: #555;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         margin: 0;
       }
     </style>
@@ -110,12 +116,12 @@ export const adminNotificationTemplate = (props: EmailTemplateProps): string => 
   <body>
     <div class="email-container">
       <div class="header">
-        <h1>✨ Nova Aplicação Studio Pro</h1>
+        <h1>KONTROL // SYSTEM</h1>
       </div>
 
       <div class="content">
-        <h2>Uma nova maquiadora está interessada em Studio Pro!</h2>
-        <p>Você recebeu uma nova aplicação para o plano Studio Pro. Veja os detalhes abaixo:</p>
+        <h2>Nova Aplicação Recebida</h2>
+        <p>Um novo lead solicitou acesso ao sistema.</p>
 
         <div class="info-box">
           <div class="info-label">Nome</div>
@@ -124,35 +130,30 @@ export const adminNotificationTemplate = (props: EmailTemplateProps): string => 
 
         <div class="info-box">
           <div class="info-label">Email</div>
-          <div class="info-value"><a href="mailto:${props.userEmail}" style="color: #050505; text-decoration: none;">${props.userEmail}</a></div>
+          <div class="info-value"><a href="mailto:${props.userEmail}" style="color: #fff; text-decoration: none;">${props.userEmail}</a></div>
         </div>
 
         ${props.userInstagram ? `
         <div class="info-box">
           <div class="info-label">Instagram</div>
-          <div class="info-value"><a href="https://instagram.com/${props.userInstagram.replace('@', '')}" style="color: #050505; text-decoration: none;">@${props.userInstagram.replace('@', '')}</a></div>
+          <div class="info-value"><a href="https://instagram.com/${props.userInstagram.replace('@', '')}" style="color: #fff; text-decoration: none;">@${props.userInstagram.replace('@', '')}</a></div>
         </div>
         ` : ''}
 
         ${props.userChallenge ? `
         <div class="info-box">
-          <div class="info-label">Maior Desafio</div>
+          <div class="info-label">Desafio Principal</div>
           <div class="info-value">${props.userChallenge}</div>
         </div>
         ` : ''}
 
         <div class="button-container">
-          <a href="https://lumihub.vercel.app/admin" class="button">Revisar Aplicação</a>
+          <a href="https://khaoskontrol.com.br/admin" class="button">ACESSAR PAINEL</a>
         </div>
-
-        <p style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
-          <strong>Próximos Passos:</strong><br>
-          Revise a aplicação, entre em contato com a candidata no WhatsApp e agende uma demonstração personalizada do Studio Pro.
-        </p>
       </div>
 
       <div class="footer">
-        <p>© 2026 Lumi. Plataforma para Maquiadoras e Beauty Artists Profissionais.</p>
+        <p>AUTHENTICATED BY KONTROL SYSTEM</p>
       </div>
     </div>
   </body>
@@ -165,132 +166,126 @@ export const userConfirmationTemplate = (props: EmailTemplateProps): string => `
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recebemos sua Aplicação - Lumi Studio Pro</title>
+    <title>Sua aplicação foi recebida - KONTROL</title>
     <style>
       body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-family: 'Courier New', Courier, monospace;
         margin: 0;
         padding: 0;
-        background-color: #f5f5f5;
+        background-color: #000000;
+        color: #e5e5e5;
       }
       .email-container {
         max-width: 600px;
         margin: 0 auto;
-        background-color: #ffffff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background-color: #0c0c0c;
+        border: 1px solid #333;
       }
       .header {
-        background: linear-gradient(135deg, #050505 0%, #374151 100%);
-        padding: 32px 24px;
+        background-color: #000000;
+        padding: 40px 24px;
         text-align: center;
+        border-bottom: 1px solid #333;
       }
       .header h1 {
         color: #ffffff;
-        font-size: 28px;
+        font-size: 32px;
         margin: 0;
-        font-weight: 600;
-      }
-      .header p {
-        color: #e5e7eb;
-        font-size: 14px;
-        margin: 8px 0 0 0;
+        font-weight: normal;
+        letter-spacing: 4px;
+        text-transform: uppercase;
       }
       .content {
-        padding: 32px 24px;
+        padding: 40px 32px;
       }
       .greeting {
-        color: #050505;
-        font-size: 16px;
-        margin-bottom: 16px;
+        color: #ffffff;
+        font-size: 18px;
+        margin-bottom: 24px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
       }
       .content p {
-        color: #374151;
+        color: #a3a3a3;
         font-size: 14px;
-        line-height: 1.6;
-        margin: 12px 0;
+        line-height: 1.8;
+        margin: 16px 0;
       }
       .highlight-box {
-        background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-        border-left: 4px solid #050505;
-        padding: 16px;
-        margin: 20px 0;
-        border-radius: 4px;
+        background-color: #111;
+        border: 1px solid #333;
+        padding: 24px;
+        margin: 32px 0;
       }
       .highlight-title {
-        color: #050505;
-        font-weight: 600;
-        margin: 0 0 8px 0;
-        font-size: 14px;
+        color: #fff;
+        font-weight: bold;
+        margin: 0 0 12px 0;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
       }
       .highlight-text {
-        color: #374151;
+        color: #ccc;
         margin: 0;
         font-size: 13px;
       }
-      .next-steps {
-        background-color: #fafafa;
-        padding: 20px;
-        border-radius: 8px;
-        margin: 24px 0;
+      .steps-list {
+        margin: 32px 0;
+        padding: 0;
+        list-style: none;
       }
-      .next-steps h3 {
-        color: #050505;
+      .step-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+      .step-number {
+        color: #fff;
+        font-weight: bold;
+        margin-right: 16px;
         font-size: 14px;
-        margin-top: 0;
-        margin-bottom: 12px;
       }
-      .next-steps ol {
-        color: #374151;
+      .step-text {
+        color: #aaa;
         font-size: 13px;
-        padding-left: 20px;
-        margin: 0;
-      }
-      .next-steps li {
-        margin-bottom: 8px;
-        line-height: 1.5;
       }
       .button-container {
         text-align: center;
-        margin: 24px 0;
+        margin: 40px 0;
       }
       .button {
         display: inline-block;
-        background-color: #050505;
-        color: #ffffff;
-        padding: 12px 32px;
+        background-color: #fff;
+        color: #000;
+        padding: 16px 40px;
         text-decoration: none;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        font-size: 12px;
+        font-weight: bold;
       }
       .button:hover {
-        background-color: #374151;
-      }
-      .whatsapp-link {
-        color: #25d366;
-        text-decoration: none;
-        font-weight: 600;
+        background-color: #ccc;
       }
       .footer {
-        background-color: #f5f5f5;
-        padding: 24px;
+        background-color: #000;
+        padding: 32px;
         text-align: center;
-        border-top: 1px solid #e5e7eb;
+        border-top: 1px solid #333;
       }
       .footer p {
-        color: #9ca3af;
-        font-size: 12px;
-        margin: 6px 0;
+        color: #444;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin: 8px 0;
       }
-      .footer-social {
-        margin-top: 12px;
-      }
-      .footer-social a {
-        color: #374151;
+      .footer-links a {
+        color: #666;
         text-decoration: none;
-        font-size: 12px;
+        font-size: 10px;
+        text-transform: uppercase;
         margin: 0 8px;
       }
     </style>
@@ -298,52 +293,52 @@ export const userConfirmationTemplate = (props: EmailTemplateProps): string => `
   <body>
     <div class="email-container">
       <div class="header">
-        <h1>Aplicação Recebida! ✨</h1>
-        <p>Seu interesse em Studio Pro foi registrado com sucesso</p>
+        <h1>KONTROL</h1>
+        <p style="font-size: 10px; color: #666; letter-spacing: 2px; text-transform: uppercase; margin-top: 8px;">Sistema de Gestão de Elite</p>
       </div>
 
       <div class="content">
-        <p class="greeting">Olá ${props.userName},</p>
+        <p class="greeting">Olá, ${props.userName}</p>
 
-        <p>Muito obrigada por sua aplicação para <strong>Studio Pro</strong>! Estamos entusiasmadas em explorar como Lumi pode transformar a gestão do seu negócio de beleza.</p>
+        <p>Sua aplicação para acessar o ecossistema <strong>KONTROL</strong> foi recebida com sucesso. Agradecemos seu interesse em profissionalizar sua gestão.</p>
 
         <div class="highlight-box">
-          <div class="highlight-title">O que acontece agora?</div>
+          <div class="highlight-title">Status da Solicitação</div>
           <div class="highlight-text">
-            Nosso time vai revisar sua aplicação e você será contatada em <strong>até 24 horas</strong> pelo WhatsApp para:
+            Nossa equipe de admissão analisará seu perfil nas próximas 24 horas. Entraremos em contato via WhatsApp para confirmar seus dados.
           </div>
         </div>
 
-        <div class="next-steps">
-          <h3>Próximas Etapas</h3>
-          <ol>
-            <li><strong>Entrevista Rápida:</strong> Conhecer melhor você e seus desafios</li>
-            <li><strong>Demo Personalizada:</strong> Mostrar as features mais relevantes para seu negócio</li>
-            <li><strong>Plano Customizado:</strong> Proposta adaptada ao seu caso específico</li>
-            <li><strong>Suporte Premium:</strong> Onboarding completo e acesso à nossa concierge</li>
-          </ol>
-        </div>
+        <ul class="steps-list">
+          <li class="step-item">
+            <span class="step-number">01</span>
+            <span class="step-text"><strong style="color:#fff">Análise de Perfil</strong> — Verificação de alinhamento com a metodologia.</span>
+          </li>
+          <li class="step-item">
+            <span class="step-number">02</span>
+            <span class="step-text"><strong style="color:#fff">Briefing Inicial</strong> — Entrevista rápida para entender seus objetivos.</span>
+          </li>
+          <li class="step-item">
+            <span class="step-number">03</span>
+            <span class="step-text"><strong style="color:#fff">Acesso Liberado</strong> — Configuração do seu ambiente KONTROL.</span>
+          </li>
+        </ul>
 
         <div class="button-container">
-          <a href="https://wa.me/5521983604870" class="button">Iniciar Conversa no WhatsApp</a>
+          <a href="https://wa.me/5521983604870" class="button">FALAR COM CONCIERGE</a>
         </div>
 
-        <p style="font-size: 13px; color: #9ca3af; text-align: center; margin: 24px 0;">
-          Ou abra um chat direto: <a href="https://wa.me/5521983604870" class="whatsapp-link">+55 21 98360-4870</a>
-        </p>
-
-        <p style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; font-size: 13px;">
-          <strong>Dúvidas?</strong> Você pode responder este email ou entrar em contato no <a href="https://wa.me/5521983604870" class="whatsapp-link">WhatsApp</a> a qualquer momento. Estamos aqui para ajudar!
+        <p style="text-align: center; font-size: 11px; color: #555;">
+          Dúvidas imediatas? <a href="https://wa.me/5521983604870" style="color: #fff; text-decoration: none;">+55 21 98360-4870</a>
         </p>
       </div>
 
       <div class="footer">
-        <p><strong>Lumi — Plataforma para Maquiadoras Profissionais</strong></p>
-        <p>CRM, Agenda, Pagamentos e Tudo Mais para Escalar seu Negócio</p>
-        <div class="footer-social">
-          <a href="https://instagram.com/lumiapp">Instagram</a> •
-          <a href="https://lumihub.vercel.app">Website</a> •
-          <a href="https://wa.me/5521983604870">WhatsApp</a>
+        <p>KONTROL // KHAOS STUDIO</p>
+        <p style="margin-bottom: 24px;">Copyright © 2026</p>
+        <div class="footer-links">
+          <a href="https://instagram.com/khaos.kontrol">Instagram</a>
+          <a href="https://khaoskontrol.com.br">Website</a>
         </div>
       </div>
     </div>

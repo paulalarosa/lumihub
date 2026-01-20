@@ -91,19 +91,19 @@ const Recursos = () => {
   return (
     <>
       <SEOHead
-        title="Recursos e Funcionalidades - Lumi"
-        description="Conheça todos os recursos da Lumi: gestão de clientes, agenda inteligente, contratos digitais, dashboard financeiro, IA assistente e muito mais."
-        keywords="funcionalidades lumi, recursos sistema beleza, crm para maquiadoras, agenda para profissionais beleza, contratos digitais noivas"
-        url="https://lumihub.lovable.app/recursos"
+        title="Recursos e Funcionalidades - KONTROL"
+        description="Conheça todos os recursos do KONTROL: gestão de clientes, agenda inteligente, contratos digitais, dashboard financeiro, IA assistente e muito mais."
+        keywords="funcionalidades kontrol, recursos sistema beleza, crm para maquiadoras, agenda para profissionais beleza, contratos digitais noivas"
+        url="https://khaoskontrol.com.br/recursos"
         breadcrumbs={[
-          { name: "Home", url: "https://lumihub.lovable.app" },
-          { name: "Recursos", url: "https://lumihub.lovable.app/recursos" }
+          { name: "Home", url: "https://khaoskontrol.com.br" },
+          { name: "Recursos", url: "https://khaoskontrol.com.br/recursos" }
         ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "ItemList",
-          "name": "Recursos da Lumi",
-          "description": "Lista completa de funcionalidades da plataforma Lumi",
+          "name": "Recursos do KONTROL",
+          "description": "Lista completa de funcionalidades da plataforma KONTROL",
           "numberOfItems": mainFeatures.length,
           "itemListElement": mainFeatures.map((feature, index) => ({
             "@type": "ListItem",

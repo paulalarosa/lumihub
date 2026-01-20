@@ -136,7 +136,23 @@ export default function Projetos() {
     if (error) {
       toast({ title: "Erro ao criar projeto", variant: "destructive" });
     } else {
-      toast({ title: "Projeto criado!" });
+      toast({ title: "Projeto inicializado" });
+
+      // Trigger Welcome Email & PIN Generation
+      supabase.functions.invoke('send-welcome-email', {
+        body: {
+          clientId: clientId,
+          projectName: name.trim()
+        }
+      }).then(({ error: fnError }) => {
+        if (fnError) {
+          console.error("Failed to send welcome email:", fnError);
+          toast({ title: "Projeto criado, mas houve erro no email de boas-vindas.", variant: "destructive" });
+        } else {
+          toast({ title: "Email de acesso enviado para a cliente!" });
+        }
+      });
+
       setIsDialogOpen(false);
       resetForm();
       navigate(`/projetos/${data.id}`);

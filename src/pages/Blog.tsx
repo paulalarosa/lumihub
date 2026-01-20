@@ -46,18 +46,18 @@ export default function Blog() {
   const blogJsonLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "Lumi Journal",
+    "name": "KONTROL Journal",
     "description": "Perspectivas editoriais sobre o negócio da beleza.",
-    "url": "https://lumihub.lovable.app/blog",
+    "url": "https://khaoskontrol.com.br/blog",
   };
 
   return (
     <>
       <SEOHead
-        title="JOURNAL - LUMI | EDITORIAL"
+        title="JOURNAL - KONTROL | EDITORIAL"
         description="Insights e estratégias para o profissional de beleza moderno."
         keywords="blog, beleza negócios, carreira, tendências"
-        url="https://lumihub.lovable.app/blog"
+        url="https://khaoskontrol.com.br/blog"
         type="website"
         jsonLd={blogJsonLd}
       />
@@ -67,7 +67,7 @@ export default function Blog() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col items-center text-center">
               <span className="font-mono text-xs uppercase tracking-[0.4em] text-white/50 mb-6">
-                Departamento Editorial Lumi
+                Departamento Editorial KONTROL
               </span>
               <h1 className="font-serif text-6xl md:text-9xl mb-8 tracking-tight">
                 JOURNAL

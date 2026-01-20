@@ -25,8 +25,9 @@ import AdminGrowth from '@/features/admin/AdminGrowth';
 import AdminSecurity from '@/features/admin/AdminSecurity';
 import AdminConfig from '@/features/admin/AdminConfig';
 import AdminLogs from '@/features/admin/AdminLogs';
+import { ApiStatusDashboard } from '@/features/admin/ApiStatusDashboard';
 
-type AdminView = 'overview' | 'users' | 'subscriptions' | 'growth' | 'security' | 'system' | 'logs';
+type AdminView = 'overview' | 'users' | 'subscriptions' | 'growth' | 'security' | 'system' | 'logs' | 'api-status';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export default function Admin() {
     { id: 'security', label: t('admin_menu_security'), icon: Shield },
     { id: 'system', label: t('admin_menu_system'), icon: Settings },
     { id: 'logs', label: t('admin_menu_logs'), icon: FileText },
+    { id: 'api-status', label: 'Status da API', icon: Activity },
   ];
 
   const renderContent = () => {
@@ -86,6 +88,7 @@ export default function Admin() {
       case 'security': return <AdminSecurity />;
       case 'system': return <AdminConfig />;
       case 'logs': return <AdminLogs />;
+      case 'api-status': return <ApiStatusDashboard />;
       default: return <AdminOverview />;
     }
   };

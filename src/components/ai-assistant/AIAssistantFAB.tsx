@@ -14,7 +14,7 @@ export default function AIAssistantFAB() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'LUMI_ASSISTANT ONLINE. INITIALIZE_QUERY?',
+      text: 'KONTROL_ASSISTANT ONLINE. INITIALIZE_QUERY?',
       sender: 'assistant',
       timestamp: new Date(),
     },
@@ -82,7 +82,7 @@ export default function AIAssistantFAB() {
             <div className="bg-black border-b border-white p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-white animate-pulse" />
-                <h3 className="text-xs text-white uppercase tracking-widest">LUMI_PUBLIC_TERMINAL</h3>
+                <h3 className="text-xs text-white uppercase tracking-widest">KONTROL_PUBLIC_TERMINAL</h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -100,12 +100,12 @@ export default function AIAssistantFAB() {
                   className={`flex flex-col ${message.sender === 'user' ? 'items-end' : 'items-start'}`}
                 >
                   <span className="text-[8px] text-white/40 uppercase tracking-widest mb-1">
-                    {message.sender === 'user' ? '[GUEST]' : '[LUMI]'}
+                    {message.sender === 'user' ? '[GUEST]' : '[SYSTEM]'}
                   </span>
                   <div
                     className={`max-w-[85%] px-3 py-2 rounded-none text-xs border ${message.sender === 'user'
-                        ? 'bg-white text-black border-white'
-                        : 'bg-black text-white border-white/20'
+                      ? 'bg-white text-black border-white'
+                      : 'bg-black text-white border-white/20'
                       }`}
                   >
                     <p className="uppercase leading-relaxed">{message.text}</p>

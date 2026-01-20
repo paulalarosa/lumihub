@@ -105,7 +105,7 @@ export default function BrideLoginPage() {
                         <p className="text-neutral-500 text-[10px] uppercase tracking-[0.4em] mb-2 font-medium">
                             {clientName ? `Olá, ${clientName}` : 'Bem-vinda ao'}
                         </p>
-                        <h1 className="text-4xl font-serif text-white tracking-tight italic">Lumi Bride</h1>
+                        <h1 className="text-4xl font-serif text-white tracking-tight italic">KONTROL CLIENT</h1>
                     </div>
                 </div>
 

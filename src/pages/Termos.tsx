@@ -4,10 +4,10 @@ const Termos = () => {
     return (
         <>
             <SEOHead
-                title="TERMOS DE USO - LUMI | PROTOCOL"
-                description="Termos de uso e condições da plataforma Lumi."
-                keywords="termos, condições, legal, lumi"
-                url="https://lumihub.lovable.app/termos"
+                title="TERMOS DE USO - KONTROL | PROTOCOL"
+                description="Termos de uso e condições da plataforma KONTROL."
+                keywords="termos, condições, legal, kontrol"
+                url="https://khaoskontrol.com.br/termos"
             />
             <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black pt-32 pb-20">
                 <div className="container mx-auto px-4">
@@ -17,9 +17,9 @@ const Termos = () => {
                                 TERMOS DE USO
                             </h1>
                             <div className="flex items-center space-x-4 font-mono text-xs uppercase tracking-widest text-white/40">
-                                <span>LAST_UPDATE: 2026.01.16</span>
+                                <span>LAST_UPDATE: 2026.01.20</span>
                                 <span>//</span>
-                                <span>PROTOCOL_V2</span>
+                                <span>PROTOCOL_V3</span>
                             </div>
                         </header>
 
@@ -27,8 +27,8 @@ const Termos = () => {
                             <section className="space-y-4">
                                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">01. INTRODUÇÃO</h2>
                                 <p>
-                                    Ao acessar ou usar a Plataforma Lumi ("Sistema"), você concorda em cumprir estes Termos de Uso.
-                                    Estes termos regem o uso do software, serviços e qualquer outro conteúdo disponibilizado pela Lumi.
+                                    Ao acessar ou usar a Plataforma KONTROL ("Sistema"), você concorda em cumprir estes Termos de Uso.
+                                    Estes termos regem o uso do software, serviços e qualquer outro conteúdo disponibilizado pelo KONTROL.
                                     Se você não concordar com estes termos, não deverá acessar o Sistema.
                                 </p>
                             </section>
@@ -36,7 +36,7 @@ const Termos = () => {
                             <section className="space-y-4">
                                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">02. LICENÇA DE USO</h2>
                                 <p>
-                                    A Lumi concede a você uma licença limitada, não exclusiva, intransferível e revogável para usar o Sistema
+                                    O KONTROL concede a você uma licença limitada, não exclusiva, intransferível e revogável para usar o Sistema
                                     apenas para seus fins comerciais internos e profissionais.
                                 </p>
                                 <p>
@@ -52,7 +52,7 @@ const Termos = () => {
                                     Qualquer atividade realizada através da sua conta será de sua total responsabilidade.
                                 </p>
                                 <p>
-                                    A Lumi reserva-se o direito de suspender terminais (contas) que apresentem atividades suspeitas ou violem
+                                    O KONTROL reserva-se o direito de suspender terminais (contas) que apresentem atividades suspeitas ou violem
                                     nossos protocolos de segurança.
                                 </p>
                             </section>
@@ -69,7 +69,7 @@ const Termos = () => {
                             <section className="space-y-4">
                                 <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-white mb-6">05. PROPRIEDADE INTELECTUAL</h2>
                                 <p>
-                                    Todo o design, código, gráficos e interfaces ("Interface Industrial Noir") são propriedade exclusiva da Lumi.
+                                    Todo o design, código, gráficos e interfaces ("Interface Industrial Noir") são propriedade exclusiva do KONTROL (Khaos Studio).
                                     O uso não autorizado destes materiais pode violar leis de direitos autorais e marcas registradas.
                                 </p>
                             </section>

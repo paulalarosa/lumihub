@@ -226,7 +226,7 @@ export default function InviteLanding() {
                             </div>
                         </div>
                         <h1 className="text-3xl md:text-4xl font-serif text-white uppercase tracking-widest mb-2">
-                            Lumi Hub
+                            KONTROL
                         </h1>
                         <p className="text-[10px] text-neutral-500 font-bold uppercase tracking-[0.3em] mb-6">
                             Precisão. Controle. Estética.

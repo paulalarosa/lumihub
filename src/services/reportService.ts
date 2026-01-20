@@ -42,11 +42,11 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
     doc.setTextColor(colors.primary);
     doc.setFontSize(28);
     doc.setFont('helvetica', 'bold');
-    doc.text('LumiHub', 20, 25);
+    doc.text('KONTROL', 20, 25);
 
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
-    doc.text('EXCELLENCE IN BEAUTY MANAGEMENT', 20, 32);
+    doc.text('EXCELLENCE IN BEAUTY MANAGEMENT // KHAOS STUDIO', 20, 32);
 
     // Report Title
     doc.setFontSize(16);
@@ -184,7 +184,7 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
         doc.line(20, 280, 190, 280);
-        doc.text('LumiHub - Gestão Inteligente para Profissionais de Beleza', 105, 287, { align: 'center' });
+        doc.text('KONTROL - Gestão Inteligente para Profissionais de Beleza', 105, 287, { align: 'center' });
         doc.text(`Página ${i} de ${pageCount}`, 190, 287, { align: 'right' });
     }
 
@@ -230,5 +230,5 @@ export const exportMonthlyClosing = (events: any[]) => {
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Fechamento Mensal");
-    XLSX.writeFile(wb, `Lumi_Fechamento_${format(new Date(), 'MM-yyyy')}.xlsx`);
+    XLSX.writeFile(wb, `Kontrol_Fechamento_${format(new Date(), 'MM-yyyy')}.xlsx`);
 };

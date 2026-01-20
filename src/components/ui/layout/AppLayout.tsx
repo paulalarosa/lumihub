@@ -65,7 +65,7 @@ export default function AppLayout() {
                     <div className="flex h-16 items-center justify-between px-4 sm:px-6">
                         <div className="flex items-center gap-4 md:hidden">
                             <SidebarTrigger className="-ml-1 bg-black border border-white/20 rounded-none h-10 w-10 text-white hover:bg-white hover:text-black transition-colors" />
-                            <span className="font-serif text-lg font-bold text-white tracking-tight">LumiHub</span>
+                            <span className="font-serif text-lg font-bold text-white tracking-tight">KONTROL</span>
                         </div>
 
                         {/* Spacer for Desktop to align right */}

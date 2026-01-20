@@ -5,10 +5,10 @@ export const translations = {
         header_features: "RECURSOS",
         header_blog: "BLOG",
         header_login: "LOGIN",
-        header_start: "ACESSO SISTEMA",
+        header_start: "ACESSO KONTROL",
 
         // Home - Hero
-        hero_badge: "Lumi System v.2.0",
+        hero_badge: "KONTROL System v.2.0",
         hero_title: "O BACKSTAGE DO SEU IMPÉRIO.",
         hero_subtitle: "Gestão minimalista para profissionais que não aceitam o básico. Controle total da sua carreira em preto e branco.",
         cta_start: "INICIAR_SISTEMA",
@@ -22,7 +22,7 @@ export const translations = {
         feature_1_desc: "Gerencie clientes, histórico e anotações com a maestria de quem constrói um legado.",
         feature_2_title: "LINHA DO TEMPO VISUAL",
         feature_2_desc: "Visualize sua agenda como uma obra de arte, com cronogramas precisos.",
-        feature_3_title: "LUMI IA & AUTOMAÇÃO",
+        feature_3_title: "KONTROL AI & AUTOMAÇÃO",
         feature_3_desc: "Sua assistente virtual que trabalha enquanto você dorme. Confirmações, lembretes e preenchimento inteligente.",
         feature_4_title: "CONTRATOS INTELIGENTES",
         feature_4_desc: "Segurança jurídica com contratos gerados automaticamente. Assinatura digital integrada na hora.",
@@ -50,7 +50,7 @@ export const translations = {
         testimonials_subtitle: "/// REGISTROS_VERIFICADOS",
 
         // Home - Lumi Pro
-        lumipro_title: "LUMI PRO",
+        lumipro_title: "KONTROL PRO",
         lumipro_subtitle: "/// AREA_ASSISTENTES",
 
         // Home - CTA
@@ -62,7 +62,7 @@ export const translations = {
 
         // Login
         login_title: "TERMINAL_DE_ACESSO",
-        login_subtitle: "AUTENTICAÇÃO//SISTEMA_LUMI",
+        login_subtitle: "AUTENTICAÇÃO//KONTROL_SYSTEM",
         login_google: "ENTRAR_COM_GOOGLE",
         login_or: "OU_USE_CREDENCIAIS",
         login_email: "ENDEREÇO_DE_EMAIL",
@@ -130,7 +130,7 @@ export const translations = {
         header_start: "SYSTEM ACCESS",
 
         // Home - Hero
-        hero_badge: "Lumi System v.2.0",
+        hero_badge: "KONTROL System v.2.0",
         hero_title: "YOUR EMPIRE'S BACKSTAGE.",
         hero_subtitle: "Minimalist management for professionals who refuse basic. Total control of your career in black and white.",
         cta_start: "INITIALIZE_SYSTEM",
@@ -144,7 +144,7 @@ export const translations = {
         feature_1_desc: "Manage clients, history, and notes with the mastery of one building a legacy.",
         feature_2_title: "VISUAL TIMELINE",
         feature_2_desc: "Visualize your schedule as a work of art, with precise timelines.",
-        feature_3_title: "LUMI AI & AUTOMATION",
+        feature_3_title: "KONTROL AI & AUTOMATION",
         feature_3_desc: "Your virtual assistant working while you sleep. Confirmations, reminders, and smart filling.",
         feature_4_title: "SMART CONTRACTS",
         feature_4_desc: "Legal security with automatically generated contracts. Integrated digital signature on the spot.",
@@ -172,7 +172,7 @@ export const translations = {
         testimonials_subtitle: "/// VERIFIED_RECORDS",
 
         // Home - Lumi Pro
-        lumipro_title: "LUMI PRO",
+        lumipro_title: "KONTROL PRO",
         lumipro_subtitle: "/// ASSISTANT_AREA",
 
         // Home - CTA
@@ -184,7 +184,7 @@ export const translations = {
 
         // Login
         login_title: "ACCESS_TERMINAL",
-        login_subtitle: "AUTHENTICATION//LUMI_SYSTEM",
+        login_subtitle: "AUTHENTICATION//KONTROL_SYSTEM",
         login_google: "LOGIN_WITH_GOOGLE",
         login_or: "OR_USE_CREDENTIALS",
         login_email: "EMAIL_ADDRESS",

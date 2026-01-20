@@ -238,7 +238,7 @@ class AnalyticsService {
   // Store events locally for analysis
   private storeLocalEvent(event: Record<string, any>) {
     try {
-      const events = JSON.parse(localStorage.getItem('lumi_analytics') || '[]');
+      const events = JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
       events.push(event);
 
       // Keep only last 100 events
@@ -246,7 +246,7 @@ class AnalyticsService {
         events.shift();
       }
 
-      localStorage.setItem('lumi_analytics', JSON.stringify(events));
+      localStorage.setItem('kontrol_analytics', JSON.stringify(events));
     } catch (error) {
       console.error('[Analytics] Error storing event:', error);
     }
@@ -255,7 +255,7 @@ class AnalyticsService {
   // Get stored events
   getStoredEvents(): Record<string, any>[] {
     try {
-      return JSON.parse(localStorage.getItem('lumi_analytics') || '[]');
+      return JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
     } catch {
       return [];
     }
@@ -263,7 +263,7 @@ class AnalyticsService {
 
   // Clear stored events
   clearStoredEvents() {
-    localStorage.removeItem('lumi_analytics');
+    localStorage.removeItem('kontrol_analytics');
   }
 
   // Get session analytics summary

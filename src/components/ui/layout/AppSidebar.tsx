@@ -95,10 +95,10 @@ export function AppSidebar() {
             <SidebarHeader className="border-b border-border p-4 bg-background">
                 <div className="flex items-center gap-2 px-2">
                     <div className="w-8 h-8 flex items-center justify-center border border-foreground bg-background">
-                        <span className="text-foreground font-serif font-bold text-lg">L</span>
+                        <span className="text-foreground font-serif font-bold text-lg">K</span>
                     </div>
                     <span className="font-serif text-xl font-bold text-foreground tracking-tight">
-                        LumiHub
+                        KONTROL
                     </span>
                 </div>
             </SidebarHeader>

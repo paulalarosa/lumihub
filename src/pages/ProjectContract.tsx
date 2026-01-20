@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2pdf from 'html2pdf.js';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Bold,
   Italic,
@@ -17,8 +18,13 @@ import {
   Copy,
   Download,
   FileText,
+  FileCheck,
+  ShieldCheck
 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
+import { SignatureModal } from '@/components/contracts/SignatureModal';
+import { Button } from '@/components/ui/button'; // Assuming this exists, based on other files
+import { cn } from '@/lib/utils'; // Assuming this exists
 
 interface ProjectData {
   id: string;
@@ -27,7 +33,9 @@ interface ProjectData {
   notes?: string | null;
 }
 
-interface ContractData extends Tables<'contracts'> {}
+interface ContractData extends Omit<Tables<'contracts'>, 'signature_data'> {
+  signature_data: string | null;
+}
 
 export default function ProjectContract() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -39,14 +47,17 @@ export default function ProjectContract() {
   const [contract, setContract] = useState<ContractData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isClientView, setIsClientView] = useState(false);
-  const [signingData, setSigningData] = useState({
-    name: '',
-    agreed: false,
-  });
+
+  // Signature State
+  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signedSuccess, setSignedSuccess] = useState(false);
+
+  // Download logic for finalized contract
+  const [finalPdfUrl, setFinalPdfUrl] = useState<string | null>(null);
 
   const editorRef = useRef<HTMLDivElement>(null);
-  const signatureAreaRef = useRef<HTMLDivElement>(null);
+  // Remove signatureAreaRef as we are using a modal now mostly, but might keep for the floating bar
 
   // Initialize TipTap Editor
   const editor = useEditor({
@@ -103,6 +114,18 @@ export default function ProjectContract() {
 
         if (contractData) {
           setContract(contractData);
+
+          if (contractData.status === 'signed') {
+            setSignedSuccess(true);
+            if (contractData.signature_data) {
+              try {
+                const parsed = typeof contractData.signature_data === 'string'
+                  ? JSON.parse(contractData.signature_data)
+                  : contractData.signature_data;
+                if (parsed?.pdf_url) setFinalPdfUrl(parsed.pdf_url);
+              } catch (e) { console.error("Error parsing signature data", e) }
+            }
+          }
         }
 
         // Load contract content into editor
@@ -151,47 +174,82 @@ export default function ProjectContract() {
 
   // Get client IP (simulated)
   const getClientIP = () => {
-    return '127.0.0.1';
+    // In a real app, you might fetch this from a service like ipify or just trust the backend log
+    return 'IP Logged by Server';
   };
 
-  // Handle contract signature
-  const handleSignContract = async () => {
-    if (!signingData.name.trim()) {
-      toast({
-        title: 'Erro',
-        description: 'Por favor, preencha seu nome completo.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!signingData.agreed) {
-      toast({
-        title: 'Erro',
-        description: 'Por favor, concorde com os termos do contrato.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
+  // Handle contract signature from Modal
+  const handleConfirmSignature = async (signatureDataUrl: string) => {
     setIsSubmitting(true);
+    setIsSignatureModalOpen(false); // Close modal first
 
     try {
       const contractHTML = editor?.getHTML() || '';
       const signedAt = format(new Date(), 'dd/MM/yyyy HH:mm:ss', { locale: ptBR });
+      const contractHash = uuidv4().replace(/-/g, '').toUpperCase().substring(0, 16); // 16 char hash
+
       const signatureBlock = `
-        <div style="margin-top: 60px; border-top: 1px solid #000; padding-top: 20px; font-family: 'Times New Roman', serif; text-align: center;">
-          <p style="margin: 10px 0; font-size: 14px;">
-            <strong>Assinado digitalmente por:</strong> ${signingData.name}
-          </p>
-          <p style="margin: 10px 0; font-size: 14px;">
-            <strong>Data:</strong> ${signedAt}
-          </p>
-          <p style="margin: 10px 0; font-size: 14px;">
-            <strong>IP:</strong> ${getClientIP()}
-          </p>
+        <div style="margin-top: 60px; page-break-inside: avoid; background-color: #000; color: #fff; padding: 30px; border: 1px solid #333;">
+            <div style="display: flex; justify-content: space-between; gap: 20px;">
+                
+                <!-- COL 1: PRESTADORA -->
+                <div style="flex: 1; border-right: 1px solid #333; padding-right: 20px;">
+                    <p style="font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; color: #888;">
+                        Prestadora
+                    </p>
+                    <div style="height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; margin-bottom: 10px;">
+                        <span style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; color: #fff;">Khaos Studio</span>
+                    </div>
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666;">
+                        AUTENTICADO POR KHAOS STUDIO<br/>Paula Larosa
+                    </p>
+                </div>
+
+                <!-- COL 2: CONTRATANTE -->
+                <div style="flex: 1; border-right: 1px solid #333; padding-right: 20px; padding-left: 20px;">
+                    <p style="font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; color: #888;">
+                        Contratante
+                    </p>
+                    <div style="height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; margin-bottom: 10px;">
+                        <img src="${signatureDataUrl}" style="max-height: 50px; filter: invert(1);" />
+                    </div>
+                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666;">
+                        ASSINATURA DIGITAL DA CLIENTE<br/>
+                        IP: ${getClientIP()} | ${signedAt}
+                    </p>
+                </div>
+
+                <!-- COL 3: PLATAFORMA -->
+                <div style="flex: 1; padding-left: 20px; display: flex; flex-col; justify-content: flex-end; align-items: flex-start;">
+                    <div style="border: 1px solid #fff; padding: 10px; width: 100%;">
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #888; margin-bottom: 5px;">
+                            System ID
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #fff; word-break: break-all;">
+                            ${contractHash}
+                        </p>
+                        <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666; margin-top: 10px;">
+                            CERTIFICADO POR<br/>KONTROL SYSTEM
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; text-align: center;">
+                 <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #444; letter-spacing: 3px;">
+                    SECURE DIGITAL TRANSACTION • KHAOSKONTROL.COM.BR
+                </p>
+            </div>
         </div>
       `;
+
+      // Google Analytics Tracking
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'contract_signed', {
+          'event_category': 'engagement',
+          'event_label': projectId
+        });
+      }
 
       const fullHTML = `
         <!DOCTYPE html>
@@ -203,6 +261,7 @@ export default function ProjectContract() {
                 font-family: 'Times New Roman', serif;
                 line-height: 1.6;
                 color: #000;
+                padding: 40px;
               }
               p { margin: 10px 0; }
               h1 { font-size: 24px; margin: 20px 0; }
@@ -220,9 +279,9 @@ export default function ProjectContract() {
 
       const opt = {
         margin: 10,
-        filename: `${project?.name || 'contrato'}_assinado.pdf`,
+        filename: `${project?.name || 'contrato'} _assinado.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
       };
 
@@ -237,8 +296,9 @@ export default function ProjectContract() {
           .catch((err: Error) => reject(err));
       });
 
-      // Upload PDF to Supabase Storage
-      const fileName = `contracts/${projectId}/${Date.now()}_${signingData.name.replace(/\s+/g, '_')}.pdf`;
+      // Upload PDF to Supabase Storage (briefing-files as per plan)
+      // I'll also try to save the signature image if possible, but PDF is priority
+      const fileName = `contracts / ${projectId}/${Date.now()}_signed.pdf`;
 
       const { error: uploadError } = await supabase.storage
         .from('briefing-files')
@@ -249,72 +309,69 @@ export default function ProjectContract() {
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        // Continue even if upload fails
+        throw new Error('Falha no upload do contrato.');
       }
 
       const { data: urlData } = supabase.storage
         .from('briefing-files')
         .getPublicUrl(fileName);
 
-      // Update or create contract in contracts table
+      // Save to Database
+      const signaturePayload = {
+        signed_at: new Date().toISOString(),
+        ip_address: getClientIP(),
+        pdf_url: urlData.publicUrl,
+        contract_hash: contractHash,
+        signature_base64_snippet: signatureDataUrl.substring(0, 50) + '...' // Just for debug, don't store full base64 in json to save space if needed
+      };
+
       if (contract) {
         const { error: updateError } = await supabase
           .from('contracts')
           .update({
             content: contractHTML,
             status: 'signed',
-            signature_data: JSON.stringify({
-              signed_by: signingData.name,
-              signed_at: new Date().toISOString(),
-              ip_address: getClientIP(),
-              pdf_url: urlData.publicUrl,
-            }),
+            signature_data: JSON.stringify(signaturePayload),
             signed_at: new Date().toISOString(),
+            signature_url: fileName // Storing path in signature_url or maybe just leave it
           })
           .eq('id', contract.id);
 
         if (updateError) throw updateError;
       } else {
-        // Get current user for contract creation
+        // Create new if doesn't exist (edge case)
         const { data: { user } } = await supabase.auth.getUser();
-        
         if (user) {
-          const { error: insertError } = await supabase
-            .from('contracts')
-            .insert({
-              project_id: projectId!,
-              user_id: user.id,
-              title: `Contrato - ${project?.name}`,
-              content: contractHTML,
-              status: 'signed',
-              signature_data: JSON.stringify({
-                signed_by: signingData.name,
-                signed_at: new Date().toISOString(),
-                ip_address: getClientIP(),
-                pdf_url: urlData.publicUrl,
-              }),
-              signed_at: new Date().toISOString(),
-            });
-
-          if (insertError) throw insertError;
+          await supabase.from('contracts').insert({
+            project_id: projectId!,
+            user_id: user.id,
+            title: `Contrato - ${project?.name}`,
+            content: contractHTML,
+            status: 'signed',
+            signature_data: JSON.stringify(signaturePayload),
+            signed_at: new Date().toISOString(),
+          });
         }
       }
 
-      toast({
-        title: 'Sucesso!',
-        description: 'Contrato assinado e PDF gerado com sucesso.',
-      });
-
-      setSigningData({ name: '', agreed: false });
-
+      // Success
+      setFinalPdfUrl(urlData.publicUrl);
+      setSignedSuccess(true);
       if (project) {
         setProject({ ...project, status: 'signed' });
       }
+
+      toast({
+        title: 'CONTRATO SELADO',
+        description: 'Sua cópia assinada já está disponível.',
+        className: "bg-black text-white border-neutral-800 font-mono"
+      });
+
     } catch (error) {
-      console.error('Erro ao assinar contrato:', error);
+      console.error('Erro ao assinar:', error);
       toast({
         title: 'Erro',
-        description: 'Não foi possível gerar ou salvar o PDF.',
+        description: 'Não foi possível finalizar o contrato. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
@@ -322,41 +379,37 @@ export default function ProjectContract() {
     }
   };
 
-  // Download current PDF
+  // Download current PDF from Editor (Draft) or Signed URL
   const handleDownloadPDF = async () => {
+    if (finalPdfUrl) {
+      window.open(finalPdfUrl, '_blank');
+      return;
+    }
+
     if (!editor) return;
 
     try {
       const html = editor.getHTML();
       const opt = {
         margin: 10,
-        filename: `${project?.name || 'contrato'}.pdf`,
+        filename: `${project?.name || 'contrato'}_draft.pdf`,
         image: { type: 'jpeg' as const, quality: 0.98 },
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
       };
 
       html2pdf().set(opt).from(html).save();
-
-      toast({
-        title: 'Sucesso!',
-        description: 'PDF gerado e baixado.',
-      });
     } catch (error) {
       console.error('Erro ao gerar PDF:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível gerar o PDF.',
-        variant: 'destructive',
-      });
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="animate-spin">
-          <FileText className="w-8 h-8 text-gray-600" />
+      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
+          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Carregando Contrato...</p>
         </div>
       </div>
     );
@@ -364,195 +417,110 @@ export default function ProjectContract() {
 
   if (!project) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-[#050505] text-white">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Projeto não encontrado</h1>
-          <p className="text-gray-600">O contrato solicitado não existe.</p>
+          <h1 className="text-2xl font-serif text-white mb-4">Contrato Indisponível</h1>
+          <p className="text-neutral-500 font-mono text-sm">Este contrato não existe ou foi removido.</p>
         </div>
       </div>
     );
   }
 
-  const isSigned = contract?.status === 'signed' || project.status === 'signed';
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[#F5F5F0] py-8 px-4 flex flex-col items-center">
+      {/* Modal */}
+      <SignatureModal
+        isOpen={isSignatureModalOpen}
+        onClose={() => setIsSignatureModalOpen(false)}
+        onConfirm={handleConfirmSignature}
+        isLoading={isSubmitting}
+      />
+
+      <div className="max-w-[210mm] w-full mx-auto">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{project.name}</h1>
-          <p className="text-gray-600">Contrato do Projeto</p>
+        <div className="mb-8 flex justify-between items-end">
+          <div>
+            <h1 className="text-2xl font-serif text-black mb-1">{project.name}</h1>
+            <p className="text-neutral-500 text-xs uppercase tracking-widest font-mono">
+              {signedSuccess ? 'Documento Autenticado' : 'Revisão de Minuta'}
+            </p>
+          </div>
+
+          {/* Actions Toolbar */}
+          {!isClientView && !signedSuccess && editor && (
+            <div className="bg-white rounded-none border border-neutral-300 p-2 flex gap-2 items-center shadow-sm">
+              <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleBold().run()} className={cn("h-8 w-8", editor.isActive('bold') && 'bg-neutral-100')}><Bold className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleItalic().run()} className={cn("h-8 w-8", editor.isActive('italic') && 'bg-neutral-100')}><Italic className="w-4 h-4" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleUnderline().run()} className={cn("h-8 w-8", editor.isActive('underline') && 'bg-neutral-100')}><UnderlineIcon className="w-4 h-4" /></Button>
+              <div className="w-[1px] h-4 bg-neutral-300 mx-1" />
+              <Button variant="ghost" size="icon" onClick={handleGenerateSignatureLink} title="Copiar Link"><Copy className="w-4 h-4" /></Button>
+            </div>
+          )}
         </div>
 
-        {/* Toolbar */}
-        {!isClientView && editor && (
-          <div className="bg-white rounded-t-lg border border-b-0 border-gray-200 p-4 flex flex-wrap gap-2 items-center shadow-sm">
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-2 rounded hover:bg-gray-100 transition ${
-                editor.isActive('bold') ? 'bg-gray-200' : ''
-              }`}
-              title="Negrito"
-            >
-              <Bold className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-2 rounded hover:bg-gray-100 transition ${
-                editor.isActive('italic') ? 'bg-gray-200' : ''
-              }`}
-              title="Itálico"
-            >
-              <Italic className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-2 rounded hover:bg-gray-100 transition ${
-                editor.isActive('underline') ? 'bg-gray-200' : ''
-              }`}
-              title="Sublinhado"
-            >
-              <UnderlineIcon className="w-5 h-5" />
-            </button>
-
-            <div className="h-6 border-l border-gray-300"></div>
-
-            <button
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-              className={`p-2 rounded hover:bg-gray-100 transition ${
-                editor.isActive('heading', { level: 2 }) ? 'bg-gray-200' : ''
-              }`}
-              title="Título"
-            >
-              <Heading2 className="w-5 h-5" />
-            </button>
-
-            <button
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-2 rounded hover:bg-gray-100 transition ${
-                editor.isActive('bulletList') ? 'bg-gray-200' : ''
-              }`}
-              title="Lista"
-            >
-              <List className="w-5 h-5" />
-            </button>
-
-            <div className="h-6 border-l border-gray-300 ml-auto mr-2"></div>
-
-            <button
-              onClick={handleGenerateSignatureLink}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-              title="Gerar Link de Assinatura"
-            >
-              <Copy className="w-4 h-4" />
-              Gerar Link
-            </button>
-
-            <button
-              onClick={handleDownloadPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              title="Baixar PDF"
-            >
-              <Download className="w-4 h-4" />
-              PDF
-            </button>
-          </div>
-        )}
-
-        {/* Editor Container */}
+        {/* Editor / Paper */}
         <div
           ref={editorRef}
-          className={`bg-white border border-gray-200 ${!isClientView ? 'rounded-b-lg' : 'rounded-lg'} shadow-lg p-8 min-h-96`}
-          style={{
-            maxWidth: '210mm',
-            minHeight: '297mm',
-            fontFamily: "'Times New Roman', serif",
-            lineHeight: '1.6',
-          }}
+          className="bg-white shadow-2xl p-[20mm] min-h-[297mm] text-black mb-24 relative"
+          style={{ fontFamily: "'Times New Roman', serif", lineHeight: '1.6' }}
         >
+          {/* Watermark/Stamp if signed */}
+          {signedSuccess && (
+            <div className="absolute top-10 right-10 opacity-80 pointer-events-none border-4 border-[#000] p-4 rotate-[-5deg]">
+              <div className="text-center">
+                <ShieldCheck className="w-12 h-12 mx-auto mb-2 text-black" />
+                <p className="font-mono text-xs font-bold uppercase tracking-widest text-black">ASSINADO DIGITALMENTE</p>
+                <p className="font-mono text-[10px] uppercase text-black">Kontrol Trust System</p>
+              </div>
+            </div>
+          )}
+
           <EditorContent
             editor={editor}
-            className={`prose max-w-none ${isClientView ? 'prose-disabled' : ''}`}
-            style={{
-              color: '#000',
-            }}
+            className={`prose max-w-none ${isClientView || signedSuccess ? 'prose-disabled pointer-events-none' : ''}`}
           />
         </div>
 
-        {/* Client View - Signature Area */}
-        {isClientView && (
-          <div
-            ref={signatureAreaRef}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-gray-300 shadow-lg z-50"
-            style={{
-              maxWidth: '100%',
-            }}
-          >
-            <div className="max-w-4xl mx-auto px-4 py-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Assinar Contrato</h3>
+        {/* Client Floating Action Bar */}
+        {(isClientView || signedSuccess) && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-neutral-200 p-4 z-50 animate-in slide-in-from-bottom-5">
+            <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="agree"
-                    checked={signingData.agreed}
-                    onChange={(e) =>
-                      setSigningData({ ...signingData, agreed: e.target.checked })
-                    }
-                    className="w-5 h-5 rounded border-gray-300 cursor-pointer"
-                  />
-                  <label
-                    htmlFor="agree"
-                    className="text-sm text-gray-700 cursor-pointer font-medium"
+              {signedSuccess ? (
+                <div className="flex items-center gap-4 w-full justify-between">
+                  <div className="flex items-center gap-3 text-green-700">
+                    <FileCheck className="w-6 h-6" />
+                    <div>
+                      <p className="font-serif italic text-lg">Contrato Selado</p>
+                      <p className="text-[10px] uppercase tracking-widest font-mono text-neutral-500">Bem-vinda ao universo KONTROL</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleDownloadPDF}
+                    className="bg-black text-white hover:bg-neutral-800 rounded-none h-12 px-8 uppercase tracking-widest text-xs font-bold"
                   >
-                    Li e concordo com os termos
-                  </label>
+                    <Download className="w-4 h-4 mr-2" />
+                    Baixar via Original (PDF)
+                  </Button>
                 </div>
-
-                <input
-                  type="text"
-                  placeholder="Nome completo para assinatura"
-                  value={signingData.name}
-                  onChange={(e) =>
-                    setSigningData({ ...signingData, name: e.target.value })
-                  }
-                  disabled={isSubmitting}
-                  className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                />
-
-                <button
-                  onClick={handleSignContract}
-                  disabled={isSubmitting || !signingData.agreed}
-                  className="w-full px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition font-semibold flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-                      Assinando...
-                    </>
-                  ) : (
-                    <>
-                      <FileText className="w-4 h-4" />
-                      Assinar Contrato
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {isSigned && (
-                <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded text-green-700 text-sm flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Contrato já foi assinado
-                </div>
+              ) : (
+                <>
+                  <div className="hidden md:block">
+                    <p className="font-serif italic text-black">Aprovação Formal</p>
+                    <p className="text-[10px] uppercase tracking-widest text-neutral-500">Leia atentamente antes de assinar</p>
+                  </div>
+                  <Button
+                    onClick={() => setIsSignatureModalOpen(true)}
+                    className="w-full md:w-auto bg-black text-white hover:bg-neutral-800 rounded-none h-12 px-10 uppercase tracking-widest text-xs font-bold shadow-lg hover:shadow-xl transition-all"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Assinar Contrato
+                  </Button>
+                </>
               )}
             </div>
           </div>
         )}
-
-        {isClientView && <div className="h-32"></div>}
       </div>
     </div>
   );

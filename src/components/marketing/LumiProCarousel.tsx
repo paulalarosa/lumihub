@@ -29,8 +29,8 @@ interface Slide {
 const slides: Slide[] = [
   {
     icon: Sparkles,
-    title: "Lumi: A Sua Nova Fase Profissional",
-    description: "Eleve seu posicionamento no mercado com a Lumi. Saia do suporte e assuma o controle da sua carreira com as ferramentas de gestão mais modernas do mundo da beleza."
+    title: "KONTROL: A Sua Nova Fase Profissional",
+    description: "Eleve seu posicionamento no mercado com o KONTROL. Saia do suporte e assuma o controle da sua carreira com as ferramentas de gestão mais modernas do mundo da beleza."
   },
   {
     icon: TrendingUp,
@@ -40,7 +40,7 @@ const slides: Slide[] = [
   {
     icon: MapPin,
     title: "Agendamento Inteligente e GPS",
-    description: "Libere sua própria agenda Lumi. Seus clientes agendam, o endereço é validado via Google Maps e você recebe a rota direta para o seu app de GPS favorito."
+    description: "Libere sua própria agenda KONTROL. Seus clientes agendam, o endereço é validado via Google Maps e você recebe a rota direta para o seu app de GPS favorito."
   },
   {
     icon: Users,
@@ -49,7 +49,7 @@ const slides: Slide[] = [
   },
   {
     icon: Crown,
-    title: "Desbloqueie a Lumi Pro",
+    title: "Desbloqueie o KONTROL PRO",
     description: "Transforme sua rotina com acesso ilimitado a todas as funções premium. Clique abaixo e faça seu upgrade para o Plano Pro hoje mesmo!"
   }
 ];
@@ -120,7 +120,7 @@ export function LumiProCarousel() {
 
                   {/* Technical Label */}
                   <div className="absolute bottom-4 right-4 font-mono text-[10px] text-white/30">
-                    SEQ.0{index + 1} // LUMI_PRO_MODULE
+                    SEQ.0{index + 1} // KONTROL_PRO_MODULE
                   </div>
                 </div>
               </motion.div>
@@ -137,8 +137,8 @@ export function LumiProCarousel() {
               <div
                 key={index}
                 className={`h-1 transition-all duration-300 ${currentSlide === index
-                    ? "w-8 bg-white"
-                    : "w-4 bg-white/20"
+                  ? "w-8 bg-white"
+                  : "w-4 bg-white/20"
                   }`}
               />
             ))}

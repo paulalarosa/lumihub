@@ -40,8 +40,8 @@ interface SEOHeadProps {
 }
 
 const SITE_NAME = 'Lumi';
-const DEFAULT_IMAGE = 'https://lumihub.lovable.app/og-image.png';
-const BASE_URL = 'https://lumihub.lovable.app';
+const DEFAULT_IMAGE = 'https://khaoskontrol.com.br/og-image.png';
+const BASE_URL = 'https://khaoskontrol.com.br';
 
 const SEOHead = ({
   title = 'Lumi - Plataforma de Gestão para Profissionais de Beleza',
@@ -270,7 +270,7 @@ const SEOHead = ({
 
     // Clear existing dynamic schemas and add new ones
     document.querySelectorAll('script[data-seo="dynamic"]').forEach(el => el.remove());
-    
+
     schemas.forEach((schema, index) => {
       const script = document.createElement('script');
       script.type = 'application/ld+json';

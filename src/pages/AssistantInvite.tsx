@@ -281,7 +281,7 @@ const AssistantInvite = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="OPERATOR@LUMI.COM"
+                        placeholder="OPERATOR@KONTROL.COM"
                         required
                         className="h-12 bg-black border-white/20 rounded-none focus:border-white text-white font-mono text-xs uppercase placeholder:text-white/20"
                       />

@@ -144,7 +144,7 @@ export default function BridePortal() {
             <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
                 <div className="w-full max-w-sm text-center space-y-8">
                     <div className="space-y-2">
-                        <p className="text-[#333] tracking-[0.5em] text-[10px] font-mono uppercase">Lumi Hub</p>
+                        <p className="text-[#333] tracking-[0.5em] text-[10px] font-mono uppercase">KONTROL</p>
                         <h1 className="text-3xl text-white font-serif tracking-wide uppercase">Backstage da Noiva</h1>
                     </div>
 

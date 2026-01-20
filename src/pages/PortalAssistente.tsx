@@ -250,7 +250,7 @@ const PortalAssistente = () => {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex flex-col">
             <h1 className="text-xl font-serif text-white tracking-wide">
-              Lumi Hub <span className="text-neutral-600 text-sm font-sans italic">/ {currentAssistantName}</span>
+              KONTROL <span className="text-neutral-600 text-sm font-sans italic">/ {currentAssistantName}</span>
             </h1>
           </div>
 
@@ -409,7 +409,7 @@ const PortalAssistente = () => {
                         <div>
                           <p className="text-[10px] text-neutral-500 uppercase tracking-widest">Maquiadora</p>
                           <h3 className="font-serif text-lg text-white">
-                            {employersMap[invite.user_id] || "Artista Lumi"}
+                            {employersMap[invite.user_id] || "Artista KONTROL"}
                           </h3>
                         </div>
                       </div>
@@ -498,7 +498,7 @@ const PortalAssistente = () => {
         open={premiumModalOpen}
         onOpenChange={setPremiumModalOpen}
         featureName={selectedFeature}
-        professionalName="Lumi Hub"
+        professionalName="KONTROL"
         professionalPhone=""
       />
     </div>

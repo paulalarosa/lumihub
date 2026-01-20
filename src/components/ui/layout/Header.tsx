@@ -42,10 +42,10 @@ const Header = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
             <div className="w-10 h-10 bg-gradient-to-br from-foreground/20 to-foreground/5 border border-foreground/20 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-metallic/40">
-              <span className="text-xl font-serif font-bold text-foreground">L</span>
+              <span className="text-xl font-serif font-bold text-foreground">K</span>
             </div>
             <span className="font-serif font-light text-2xl text-foreground tracking-tight">
-              Lumi
+              KONTROL
             </span>
           </Link>
 

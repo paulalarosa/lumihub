@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { fetchWithRetry } from "../_shared/retry.ts";
+import { Logger } from "../_shared/logger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +12,8 @@ const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID')!;
 const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+const logger = new Logger('google-calendar-sync');
 
 interface EventData {
   title: string;
@@ -23,24 +27,29 @@ interface EventData {
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      refresh_token: refreshToken,
-      grant_type: 'refresh_token',
-    }),
-  });
+  try {
+    const response = await fetchWithRetry('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token',
+      }),
+    });
 
-  const data = await response.json();
-  if (data.error) {
-    console.error('Token refresh error:', data);
+    const data = await response.json();
+    if (data.error) {
+      await logger.error('Token refresh error:', { error: data });
+      return null;
+    }
+
+    return data.access_token;
+  } catch (error) {
+    await logger.error('Failed to refresh token after retries', { error });
     return null;
   }
-
-  return data.access_token;
 }
 
 function formatEventForGoogle(event: EventData) {
@@ -152,9 +161,9 @@ serve(async (req) => {
     // CREATE event in Google Calendar
     if (action === 'create') {
       const googleEvent = formatEventForGoogle(event_data as EventData);
-      console.log('Creating Google Calendar event:', googleEvent);
+      await logger.info('Creating Google Calendar event', { googleEvent });
 
-      const response = await fetch(baseUrl, {
+      const response = await fetchWithRetry(baseUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -166,7 +175,7 @@ serve(async (req) => {
       const result = await response.json();
 
       if (result.error) {
-        console.error('Error creating Google event:', result);
+        await logger.error('Error creating Google event', { error: result });
         return new Response(JSON.stringify({ error: result.error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -199,7 +208,7 @@ serve(async (req) => {
       if (!localEvent?.google_calendar_event_id) {
         // Event doesn't exist in Google, create it instead
         const googleEvent = formatEventForGoogle(event_data as EventData);
-        const response = await fetch(baseUrl, {
+        const response = await fetchWithRetry(baseUrl, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`,
@@ -222,9 +231,9 @@ serve(async (req) => {
       }
 
       const googleEvent = formatEventForGoogle(event_data as EventData);
-      console.log('Updating Google Calendar event:', localEvent.google_calendar_event_id);
+      await logger.info('Updating Google Calendar event', { eventId: localEvent.google_calendar_event_id });
 
-      const response = await fetch(`${baseUrl}/${localEvent.google_calendar_event_id}`, {
+      const response = await fetchWithRetry(`${baseUrl}/${localEvent.google_calendar_event_id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${accessToken}`,
@@ -264,7 +273,7 @@ serve(async (req) => {
 
       console.log('Deleting Google Calendar event:', localEvent.google_calendar_event_id);
 
-      const response = await fetch(`${baseUrl}/${localEvent.google_calendar_event_id}`, {
+      const response = await fetchWithRetry(`${baseUrl}/${localEvent.google_calendar_event_id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${accessToken}` },
       });
@@ -287,7 +296,7 @@ serve(async (req) => {
       const timeMin = new Date().toISOString();
       const timeMax = new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString();
 
-      const response = await fetch(
+      const response = await fetchWithRetry(
         `${baseUrl}?timeMin=${encodeURIComponent(timeMin)}&timeMax=${encodeURIComponent(timeMax)}&singleEvents=true&orderBy=startTime`,
         { headers: { 'Authorization': `Bearer ${accessToken}` } }
       );
@@ -374,7 +383,7 @@ serve(async (req) => {
       for (const event of localEvents || []) {
         const googleEvent = formatEventForGoogle(event as EventData);
 
-        const response = await fetch(baseUrl, {
+        const response = await fetchWithRetry(baseUrl, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${accessToken}`,

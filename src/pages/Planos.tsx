@@ -107,11 +107,11 @@ const Planos = () => {
         title="Planos e Preços - Lumi"
         description="Escolha o plano ideal para seu negócio de beleza. Planos a partir de R$39,90/mês com teste gratuito de 14 dias. Sem cartão de crédito."
         keywords="preços lumi, planos lumi, quanto custa lumi, sistema gestão beleza preço, software maquiadora preço"
-        url="https://lumihub.lovable.app/planos"
+        url="https://khaoskontrol.com.br/planos"
         type="service"
         breadcrumbs={[
-          { name: "Home", url: "https://lumihub.lovable.app" },
-          { name: "Planos", url: "https://lumihub.lovable.app/planos" }
+          { name: "Home", url: "https://khaoskontrol.com.br" },
+          { name: "Planos", url: "https://khaoskontrol.com.br/planos" }
         ]}
         faq={faqs.map(f => ({ question: f.question, answer: f.answer }))}
         priceRange="R$39-R$149"

@@ -1,10 +1,13 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Logger } from "../_shared/logger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const logger = new Logger('create-payment');
 
 interface ProjectData {
   name: string;
@@ -29,13 +32,32 @@ serve(async (req) => {
       );
     }
 
-    console.log('Creating Mercado Pago payment for invoice:', invoice_id);
+    await logger.info('Creating Mercado Pago payment', { invoice_id, payer_email });
 
     // Create Supabase client with service role to fetch invoice details
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    // RATE LIMITING CHECK
+    // Check if there was a payment attempt for this invoice in the last 1 minute
+    const oneMinuteAgo = new Date(Date.now() - 60000).toISOString();
+    const { data: recentLogs } = await supabaseAdmin
+      .from('system_logs')
+      .select('id')
+      .eq('source', 'create-payment')
+      .contains('metadata', { invoice_id }) // JSONB containment check
+      .gt('created_at', oneMinuteAgo)
+      .limit(5); // If more than 5 attempts in a minute, block
+
+    if (recentLogs && recentLogs.length >= 3) {
+      await logger.warn('Rate limit exceeded for invoice', { invoice_id });
+      return new Response(
+        JSON.stringify({ error: 'Too many attempts. Please wait a minute.' }),
+        { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Fetch invoice with related project data to verify it exists and get amount
     const { data: invoice, error: invoiceError } = await supabaseAdmin
@@ -56,7 +78,7 @@ serve(async (req) => {
       .single();
 
     if (invoiceError || !invoice) {
-      console.error('Invoice not found:', invoiceError);
+      await logger.warn('Invoice not found', { invoice_id });
       return new Response(
         JSON.stringify({ error: 'Invoice not found' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -71,16 +93,17 @@ serve(async (req) => {
       );
     }
 
-    // Extract project data - handle both array and object formats
+    // Extract project data e.g. [ { name, public_token } ] or { name, public_token }
+    // handle both array and object formats
     const projectsData = invoice.projects;
     let project: ProjectData | null = null;
-    
+
     if (Array.isArray(projectsData) && projectsData.length > 0) {
       project = projectsData[0] as ProjectData;
     } else if (projectsData && typeof projectsData === 'object') {
       project = projectsData as ProjectData;
     }
-    
+
     let isAuthorized = false;
 
     const authHeader = req.headers.get('Authorization');
@@ -93,21 +116,19 @@ serve(async (req) => {
       );
 
       const { data: { user } } = await supabaseAuth.auth.getUser();
-      
+
       if (user && user.id === invoice.user_id) {
         isAuthorized = true;
-        console.log('Authorized: Invoice owner');
       }
     }
 
     // Allow public access if project has a public_token (client portal)
     if (!isAuthorized && project?.public_token) {
       isAuthorized = true;
-      console.log('Authorized: Public project token');
     }
 
     if (!isAuthorized) {
-      console.error('Unauthorized access attempt for invoice:', invoice_id);
+      await logger.warn('Unauthorized access attempt', { invoice_id });
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -116,14 +137,14 @@ serve(async (req) => {
 
     const accessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
     if (!accessToken) {
-      console.error('MERCADO_PAGO_ACCESS_TOKEN not configured');
+      await logger.error('MERCADO_PAGO_ACCESS_TOKEN missing');
       return new Response(
         JSON.stringify({ error: 'Mercado Pago não configurado' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create Mercado Pago preference with validated data from database
+    // Create Mercado Pago preference
     const preferenceData = {
       items: [
         {
@@ -144,8 +165,6 @@ serve(async (req) => {
       notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercadopago-webhook`,
     };
 
-    console.log('Creating preference with data:', JSON.stringify(preferenceData));
-
     const response = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
@@ -158,17 +177,17 @@ serve(async (req) => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Mercado Pago API error:', data);
+      await logger.error('Mercado Pago API error', { error: data });
       return new Response(
         JSON.stringify({ error: 'Erro ao criar pagamento' }),
         { status: response.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Payment preference created:', data.id);
+    await logger.info('Payment preference created', { preference_id: data.id });
 
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         init_point: data.init_point,
         sandbox_init_point: data.sandbox_init_point,
         preference_id: data.id
@@ -177,7 +196,7 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error in create-payment function:', error);
+    await logger.error('Internal server error', { error });
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

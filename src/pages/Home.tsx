@@ -63,35 +63,35 @@ const Home = () => {
   const testimonials = [
     { name: "Maria Silva", role: "Maquiadora Especialista em Noivas", content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!", rating: 5 },
     { name: "Ana Costa", role: "Maquiadora & Beauty Artist", content: "O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicação.", rating: 5 },
-    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que a Lumi trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
+    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que o KONTROL trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
     { name: "Camila Santos", role: "Nail Designer", content: "Finalmente tenho controle total das minhas finanças e agenda em um só lugar.", rating: 5 },
   ];
 
   return (
     <>
       <SEOHead
-        title="Lumi - Plataforma de Gestão para Profissionais de Beleza"
+        title="KONTROL // Control Center"
         description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%. Teste grátis por 14 dias."
-        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas"
-        url="https://lumihub.lovable.app"
+        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas, kontrol system"
+        url="https://khaoskontrol.com.br"
         breadcrumbs={[
-          { name: "Home", url: "https://lumihub.lovable.app" }
+          { name: "Home", url: "https://khaoskontrol.com.br" }
         ]}
         faq={[
-          { question: "O que é a Lumi?", answer: "Lumi é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
-          { question: "Quanto custa a Lumi?", answer: "A Lumi oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
+          { question: "O que é o KONTROL?", answer: "KONTROL é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
+          { question: "Quanto custa o KONTROL?", answer: "O KONTROL oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
           { question: "Posso cancelar a qualquer momento?", answer: "Sim! Não há contratos de fidelidade. Você pode cancelar sua assinatura quando quiser." },
-          { question: "A Lumi funciona para salões de beleza?", answer: "Sim! A Lumi é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
+          { question: "O KONTROL funciona para salões de beleza?", answer: "Sim! O KONTROL é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
         ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "Lumi",
+          "name": "KONTROL",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
           "description": "Plataforma de gestão completa para profissionais de beleza",
-          "url": "https://lumihub.lovable.app",
-          "image": "https://lumihub.lovable.app/og-image.png",
+          "url": "https://khaoskontrol.com.br",
+          "image": "https://khaoskontrol.com.br/og-image.png",
           "offers": {
             "@type": "Offer",
             "price": "0",
@@ -153,7 +153,17 @@ const Home = () => {
               {/* CTA & Subtext */}
               <div className="flex flex-col md:flex-row items-start md:items-center gap-12 border-t border-white/20 pt-12">
                 <Link to="/register">
-                  <button className="noir-button text-sm w-full md:w-auto">
+                  <button
+                    className="noir-button text-sm w-full md:w-auto"
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && (window as any).gtag) {
+                        (window as any).gtag('event', 'generate_lead', {
+                          'event_category': 'conversion',
+                          'event_label': 'hero_cta'
+                        });
+                      }
+                    }}
+                  >
                     {t("cta_start")} -&gt;
                   </button>
                 </Link>
@@ -397,6 +407,14 @@ const Home = () => {
                     trackingDestination="/register"
                     size="lg"
                     className="w-full sm:w-auto bg-white text-black hover:bg-white/80 text-lg px-8 py-6 rounded-none transition-all duration-300 font-mono uppercase tracking-widest"
+                    onClick={() => {
+                      if (typeof window !== 'undefined' && (window as any).gtag) {
+                        (window as any).gtag('event', 'generate_lead', {
+                          'event_category': 'conversion',
+                          'event_label': 'bottom_cta_trial'
+                        });
+                      }
+                    }}
                   >
                     <Sparkles className="h-4 w-4 mr-2" />
                     {t("cta_bottom_start")}

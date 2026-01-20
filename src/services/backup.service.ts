@@ -62,7 +62,7 @@ export const BackupService = {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `lumihub_backup_${new Date().toISOString().split('T')[0]}.enc`;
+        a.download = `kontrol_backup_${new Date().toISOString().split('T')[0]}.enc`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

@@ -58,7 +58,7 @@ export default function Contato() {
                 title="CONTATO - LUMI | SUPORTE"
                 description="Entre em contato. Suporte, parcerias e concierge."
                 keywords="contato, lumi, suporte, ajuda"
-                url="https://lumihub.lovable.app/contato"
+                url="https://khaoskontrol.com.br/contato"
             />
             <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
 

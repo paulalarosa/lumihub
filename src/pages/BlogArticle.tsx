@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 const articleData: Record<string, any> = {
   'career-management': {
     title: 'Career Management: Designing a Sustainable Artistic Path',
-    author: 'Lumi Editorial',
+    author: 'KONTROL Editorial',
     date: 'January 5, 2026',
     content: `
       <p>In an industry where creativity meets commerce, the most successful beauty professionals are those who think beyond the immediate project. Career management for makeup artists, maquiadores, and beauty entrepreneurs is not just about executing beautiful work—it's about building a sustainable, scalable business that aligns with your values and financial goals.</p>

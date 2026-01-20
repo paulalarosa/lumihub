@@ -10,10 +10,10 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl font-serif font-bold text-white">L</span>
+                <span className="text-xl font-serif font-bold text-white">K</span>
               </div>
               <span className="font-serif font-light text-2xl text-white">
-                Lumi
+                KONTROL
               </span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed font-light">
@@ -111,7 +111,7 @@ const Footer = () => {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-white/30 text-sm font-light">
-            © 2024 Lumi. Todos os direitos reservados.
+            © 2026 KONTROL. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link
