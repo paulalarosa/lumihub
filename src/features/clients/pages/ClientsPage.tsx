@@ -150,6 +150,25 @@ export default function Clientes() {
         }
 
         toast({ title: "Cliente adicionado!" });
+
+        // Send Welcome Email if Bride
+        if (clientData.is_bride && clientData.email) {
+          try {
+            toast({ title: "Enviando email de boas-vindas...", duration: 2000 });
+            const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+              body: {
+                clientId: (newClient as any).id,
+                subject: "Bem-vinda ao KONTROL" // Custom subject as requested
+              }
+            });
+
+            if (emailError) throw emailError;
+            toast({ title: "Email enviado com sucesso!", variant: "default" });
+          } catch (emailErr) {
+            console.error("Failed to send welcome email", emailErr);
+            toast({ title: "Erro ao enviar email", description: "O cliente foi salvo, mas o email falhou.", variant: "destructive" });
+          }
+        }
       }
 
       setIsDialogOpen(false);

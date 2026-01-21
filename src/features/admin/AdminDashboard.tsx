@@ -13,8 +13,9 @@ import AdminSubscriptions from '@/features/admin/AdminSubscriptions';
 import MFAEnrollment from '@/features/auth/MFAEnrollment';
 import AdminSecurity from '@/features/admin/AdminSecurity';
 import AdminAnalytics from '@/features/admin/AdminAnalytics';
+import AdminIntegrations from '@/features/admin/AdminIntegrations';
 
-type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security' | 'analytics';
+type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security' | 'analytics' | 'integrations';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -64,6 +65,7 @@ export default function AdminDashboard() {
   const menuItems = [
     { id: 'overview' as AdminTab, label: 'Visão Geral', icon: BarChart3 },
     { id: 'users' as AdminTab, label: 'Usuários', icon: Users },
+    { id: 'integrations' as AdminTab, label: 'Integrações (Status)', icon: Settings },
     { id: 'subscriptions' as AdminTab, label: 'Assinaturas & Planos', icon: CreditCard },
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
     { id: 'config' as AdminTab, label: 'Configurações', icon: Settings },
@@ -175,6 +177,7 @@ export default function AdminDashboard() {
             {activeTab === 'security' && <AdminSecurity />}
             {activeTab === 'analytics' && <AdminAnalytics />}
             {activeTab === 'logs' && <AdminLogs />}
+            {activeTab === 'integrations' && <AdminIntegrations />}
           </div>
         </div>
       </div>

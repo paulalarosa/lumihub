@@ -8,12 +8,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GOOGLE_CLIENT_ID = Deno.env.get('GOOGLE_CLIENT_ID')!;
-const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!;
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
 const logger = new Logger('google-calendar-sync');
+
+// Utility to safely get env vars without crashing
+function getEnv(key: string): string | null {
+  const val = Deno.env.get(key);
+  if (!val) {
+    console.error(`Missing environment variable: ${key}`);
+    return null;
+  }
+  return val;
+}
+
+const GOOGLE_CLIENT_ID = getEnv('GOOGLE_CLIENT_ID');
+const GOOGLE_CLIENT_SECRET = getEnv('GOOGLE_CLIENT_SECRET');
+const SUPABASE_URL = getEnv('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = getEnv('SUPABASE_SERVICE_ROLE_KEY');
 
 interface EventData {
   title: string;
@@ -32,8 +42,8 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
+        client_id: GOOGLE_CLIENT_ID!,
+        client_secret: GOOGLE_CLIENT_SECRET!,
         refresh_token: refreshToken,
         grant_type: 'refresh_token',
       }),
@@ -106,6 +116,26 @@ serve(async (req) => {
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // CRITICAL: Check configuration before proceeding
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+      const missing = [];
+      if (!SUPABASE_URL) missing.push('SUPABASE_URL');
+      if (!SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY');
+      if (!GOOGLE_CLIENT_ID) missing.push('GOOGLE_CLIENT_ID');
+      if (!GOOGLE_CLIENT_SECRET) missing.push('GOOGLE_CLIENT_SECRET');
+
+      await logger.error(`Service configuration error: Missing keys [${missing.join(', ')}]`);
+
+      return new Response(JSON.stringify({
+        error: 'Service configuration error',
+        details: 'Missing API Keys',
+        missing_keys: missing
+      }), {
+        status: 503, // Service Unavailable
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

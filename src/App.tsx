@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
-import ProtectedRoute from "@/features/auth/ProtectedRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/features/auth/AdminRoute";
 import Home from "./pages/Home";
 import Recursos from "./pages/Recursos";
@@ -59,6 +59,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import InviteLanding from "./pages/InviteLanding";
+import { GoogleAnalytics } from "./components/analytics/GoogleAnalytics";
 
 
 const queryClient = new QueryClient();
@@ -89,6 +90,7 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <GoogleAnalytics />
               <AuthProvider>
                 <AnalyticsProvider>
 

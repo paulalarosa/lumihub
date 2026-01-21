@@ -6,6 +6,19 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+import { Logger } from "../_shared/logger.ts";
+
+const logger = new Logger('mercadopago-webhook');
+
+function getEnv(key: string): string | null {
+  const val = Deno.env.get(key);
+  if (!val) {
+    console.error(`Missing environment variable: ${key}`);
+    return null;
+  }
+  return val;
+}
+
 // HMAC-SHA256 signature validation for Mercado Pago webhooks
 async function validateSignature(
   xSignature: string | null,
@@ -81,12 +94,12 @@ serve(async (req) => {
 
     // Get the webhook secret for signature validation
     const webhookSecret = Deno.env.get('MERCADO_PAGO_WEBHOOK_SECRET');
-    
+
     // Validate signature if webhook secret is configured
     if (webhookSecret) {
       const dataId = body.data?.id?.toString() || '';
       const isValid = await validateSignature(xSignature, xRequestId, dataId, webhookSecret);
-      
+
       if (!isValid) {
         console.error('Invalid webhook signature - rejecting request');
         return new Response(JSON.stringify({ error: 'Invalid signature' }), {
@@ -102,7 +115,7 @@ serve(async (req) => {
     // Mercado Pago sends notifications with different types
     if (body.type === 'payment') {
       const paymentId = body.data?.id;
-      
+
       if (!paymentId) {
         console.log('No payment ID in webhook');
         return new Response(JSON.stringify({ received: true }), {
@@ -110,11 +123,11 @@ serve(async (req) => {
         });
       }
 
-      const accessToken = Deno.env.get('MERCADO_PAGO_ACCESS_TOKEN');
+      const accessToken = getEnv('MERCADO_PAGO_ACCESS_TOKEN');
       if (!accessToken) {
-        console.error('MERCADO_PAGO_ACCESS_TOKEN not configured');
-        return new Response(JSON.stringify({ error: 'Not configured' }), {
-          status: 500,
+        await logger.error('MERCADO_PAGO_ACCESS_TOKEN not configured - Cannot fetch payment details');
+        return new Response(JSON.stringify({ error: 'Service configuration error', details: 'Missing Payment Access Token' }), {
+          status: 503,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
@@ -151,7 +164,7 @@ serve(async (req) => {
 
         const { error } = await supabase
           .from('invoices')
-          .update({ 
+          .update({
             status: 'paid',
             paid_at: new Date().toISOString()
           })

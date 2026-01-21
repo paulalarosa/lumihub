@@ -148,9 +148,62 @@ export function AddressAutocomplete({
     onChange(place.description);
     setShowSuggestions(false);
 
-    // If we need details (lat/lng), we can us PlacesService
-    // const placesService = new google.maps.places.PlacesService(document.createElement('div'));
-    // placesService.getDetails({ placeId: place.place_id }, (result, status) => ...);
+    // Optimize: Check cache for this place_id first
+    try {
+      const { data: cached } = await supabase
+        .from('geo_cache')
+        .select('response')
+        .eq('query', place.place_id)
+        .maybeSingle();
+
+      if (cached?.response) {
+        console.log('Using cached place details');
+        const location = cached.response.geometry.location;
+        if (onCoordinatesChange) onCoordinatesChange(location.lat, location.lng);
+        setCoords({ lat: location.lat, lng: location.lng });
+        return;
+      }
+
+      // Not in cache, fetch from Google
+      if (window.google && window.google.maps && window.google.maps.places) {
+        setLoading(true);
+        const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
+
+        placesService.getDetails(
+          { placeId: place.place_id, fields: ['geometry'] },
+          async (result, status) => {
+            setLoading(false);
+            if (status === window.google.maps.places.PlacesServiceStatus.OK && result?.geometry?.location) {
+              const lat = result.geometry.location.lat();
+              const lng = result.geometry.location.lng();
+
+              if (onCoordinatesChange) onCoordinatesChange(lat, lng);
+              setCoords({ lat, lng });
+
+              // Save to cache (valid for 30 days per ToS for lat/lng)
+              // Ensure we store simple JSON, not Google objects
+              const cachePayload = {
+                geometry: {
+                  location: { lat, lng }
+                }
+              };
+
+              const expiresAt = new Date();
+              expiresAt.setDate(expiresAt.getDate() + 30); // 30 days cache
+
+              await supabase.from('geo_cache').upsert({
+                query: place.place_id,
+                response: cachePayload,
+                expires_at: expiresAt.toISOString()
+              });
+            }
+          }
+        );
+      }
+    } catch (err) {
+      console.error("Error getting place details:", err);
+      // Fallback or just ignore cache error
+    }
   };
 
   const handleOpenGPS = (e: React.MouseEvent) => {
