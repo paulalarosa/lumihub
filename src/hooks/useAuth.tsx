@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 
@@ -18,6 +19,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,8 +103,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     // Subscribe
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       handleSession(session);
+
+      if (event === 'SIGNED_IN' && session) {
+        // Remove hash from URL to clean access_token
+        if (window.location.hash && window.location.hash.includes('access_token')) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+
+        // Redirect if on public pages
+        if (window.location.pathname === '/login' || window.location.pathname === '/' || window.location.pathname === '/auth/login') {
+          // Check callback logic or default to dashboard
+          navigate('/dashboard');
+        }
+      }
     });
 
     return () => {
@@ -125,7 +141,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   };
 
-  const signInWithGoogle = () => supabase.auth.signInWithOAuth({ provider: 'google' });
+  const signInWithGoogle = () => supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
   const signUp = (email: string, pass: string) => supabase.auth.signUp({ email, password: pass });
 
   const isAdmin = role === 'studio' || role === 'admin';
