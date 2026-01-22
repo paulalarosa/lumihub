@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => ({
     }), */
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
-  base: './', // Ensure relative paths for S3
+  base: '/', // Absolute path for dynamic routes
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
   },

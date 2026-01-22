@@ -14,8 +14,9 @@ import MFAEnrollment from '@/features/auth/MFAEnrollment';
 import AdminSecurity from '@/features/admin/AdminSecurity';
 import AdminAnalytics from '@/features/admin/AdminAnalytics';
 import AdminIntegrations from '@/features/admin/AdminIntegrations';
+import AdminAssistants from '@/features/admin/AdminAssistants';
 
-type AdminTab = 'overview' | 'users' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security' | 'analytics' | 'integrations';
+type AdminTab = 'overview' | 'users' | 'assistants' | 'subscriptions' | 'marketing' | 'config' | 'logs' | 'security' | 'analytics' | 'integrations';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ export default function AdminDashboard() {
   const menuItems = [
     { id: 'overview' as AdminTab, label: 'Visão Geral', icon: BarChart3 },
     { id: 'users' as AdminTab, label: 'Usuários', icon: Users },
+    { id: 'assistants' as AdminTab, label: 'Assistentes', icon: Users },
     { id: 'integrations' as AdminTab, label: 'Integrações (Status)', icon: Settings },
     { id: 'subscriptions' as AdminTab, label: 'Assinaturas & Planos', icon: CreditCard },
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
@@ -163,6 +165,7 @@ export default function AdminDashboard() {
           <div className="max-w-7xl mx-auto">
             {activeTab === 'overview' && <AdminOverview />}
             {activeTab === 'users' && <AdminUsers />}
+            {activeTab === 'assistants' && <AdminAssistants />}
             {activeTab === 'subscriptions' && <AdminSubscriptions />}
             {activeTab === 'marketing' && (
               <div className="text-muted-foreground text-center py-20 border border-border bg-card p-12">

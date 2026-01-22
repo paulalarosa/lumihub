@@ -1,6 +1,7 @@
 {
     "name": "KONTROL - Gestão para Casamentos",
     "short_name": "KONTROL",
+    "start_url": "/",
     "icons": [
         {
             "src": "/android-chrome-192x192.png",

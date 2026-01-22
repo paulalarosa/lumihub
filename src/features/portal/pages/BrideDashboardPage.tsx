@@ -30,6 +30,7 @@ export default function BrideDashboardPage() {
     const { clientId } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [bride, setBride] = useState<BrideData | null>(null);
     const [events, setEvents] = useState<Event[]>([]);
     const [daysLeft, setDaysLeft] = useState<number>(0);
@@ -58,6 +59,8 @@ export default function BrideDashboardPage() {
 
     const fetchData = async (pin: string) => {
         setLoading(true);
+        console.log("Portal: Fetching data for", { clientId, pin });
+
         try {
             // Secure Fetch via RPC
             const { data, error } = await supabase.rpc('get_bride_dashboard_data' as any, {
@@ -65,8 +68,12 @@ export default function BrideDashboardPage() {
                 p_pin: pin
             });
 
-            if (error) throw error;
+            if (error) {
+                console.error("Portal: RPC Error", error);
+                throw error;
+            }
 
+            console.log("Portal: RPC Response", data);
             const safeData = data as any; // Cast to bypass type check
 
             if (safeData) {
@@ -83,8 +90,19 @@ export default function BrideDashboardPage() {
                 const eventsList = safeData.events || [];
                 setEvents(eventsList);
 
-                // Calculate Financials from Events
-                const totalVal = eventsList.reduce((sum: number, e: any) => sum + (e.total_value || 0), 0);
+                // 3. Contracts / Projects
+                if (safeData.contracts) {
+                    setContracts(safeData.contracts);
+                }
+
+                // Calculate Financials
+                // Prefer project value if available, otherwise sum events
+                let totalVal = 0;
+                if (safeData.contracts && safeData.contracts.length > 0) {
+                    totalVal = safeData.contracts.reduce((sum: number, c: any) => sum + (c.total_value || 0), 0);
+                } else {
+                    totalVal = eventsList.reduce((sum: number, e: any) => sum + (e.total_value || 0), 0);
+                }
                 setTotalContract(totalVal);
 
                 // Determine Paid Amount (Logic simplified or inferred if RPC doesn't return invoices)
@@ -110,6 +128,8 @@ export default function BrideDashboardPage() {
                 localStorage.removeItem(`bride_auth_${clientId}`);
                 localStorage.removeItem(`bride_pin_${clientId}`);
                 navigate(`/portal/${clientId}/login`);
+            } else {
+                setError("Não foi possível carregar os dados. Tente novamente mais tarde.");
             }
         } finally {
             setLoading(false);
@@ -131,6 +151,17 @@ export default function BrideDashboardPage() {
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
                     <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Loading System</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] text-white">
+                <div className="flex flex-col items-center gap-4 text-center">
+                    <p className="text-red-500 font-serif text-xl">{error}</p>
+                    <Button onClick={() => window.location.reload()} variant="outline">Tentar Novamente</Button>
                 </div>
             </div>
         );
