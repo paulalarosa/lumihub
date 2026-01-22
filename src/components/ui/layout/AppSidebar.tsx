@@ -9,7 +9,8 @@ import {
     Sparkles,
     FileSignature,
     Megaphone,
-    ShieldCheck
+    ShieldCheck,
+    Scissors
 } from "lucide-react"
 
 import {
@@ -29,7 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function AppSidebar() {
     const { user, signOut, isAdmin: authIsAdmin } = useAuth();
@@ -41,47 +42,42 @@ export function AppSidebar() {
     // Menu items.
     const items = [
         {
-            title: t("SIDEBAR_DASHBOARD"),
+            title: t("sidebar.dashboard"),
             url: "/dashboard",
             icon: Home,
         },
         {
-            title: t("SIDEBAR_AGENDA"),
+            title: t("sidebar.calendar"),
             url: "/agenda",
             icon: Calendar,
         },
         {
-            title: t("SIDEBAR_CLIENTS"),
+            title: t("sidebar.clients"),
             url: "/clientes",
             icon: Users,
         },
         {
-            title: t("SIDEBAR_PROJECTS"),
+            title: t("sidebar.projects"),
             url: "/projetos",
             icon: Briefcase,
         },
         {
-            title: t("SIDEBAR_MARKETING"),
-            url: "/marketing",
-            icon: Megaphone,
-        },
-        {
-            title: t("SIDEBAR_CONTRACTS"),
-            url: "/contratos",
-            icon: FileSignature,
-        },
-        {
-            title: t("SIDEBAR_FINANCIAL"),
+            title: t("sidebar.finance"),
             url: "/dashboard/financial",
             icon: CreditCard,
         },
         {
-            title: t("SIDEBAR_SERVICES"),
-            url: "/servicos",
-            icon: Sparkles,
+            title: t("sidebar.contracts"),
+            url: "/contratos",
+            icon: FileSignature,
         },
         {
-            title: t("SIDEBAR_SETTINGS"),
+            title: t("sidebar.services"),
+            url: "/servicos",
+            icon: Scissors,
+        },
+        {
+            title: t("sidebar.settings"),
             url: "/configuracoes",
             icon: Settings,
         },
@@ -140,7 +136,7 @@ export function AppSidebar() {
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
-                                            <span className="font-mono text-xs uppercase tracking-wider">{t("SIDEBAR_ADMIN")}</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">ADMIN</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
@@ -175,7 +171,7 @@ export function AppSidebar() {
                     onClick={signOut}
                 >
                     <LogOut className="h-4 w-4 mr-2" />
-                    {t("SIDEBAR_LOGOUT")}
+                    {t("sidebar.logout") || "SAIR"}
                 </Button>
 
                 {/* Language Switcher */}

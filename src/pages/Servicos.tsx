@@ -8,7 +8,7 @@ import { Plus, Search, Edit2, Trash2, Clock, Sparkles, Terminal } from "lucide-r
 import { useServices } from "@/hooks/useServices";
 import { ServiceItem } from "@/services/services.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function Servicos() {
     const { user } = useAuth();

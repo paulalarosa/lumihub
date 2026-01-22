@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -54,7 +54,36 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
         category: "",
         date: format(new Date(), "yyyy-MM-dd"),
         payment_method: "pix",
+        project_id: "",
+        service_id: "",
+        assistant_id: "",
     });
+
+    const [projects, setProjects] = useState<any[]>([]);
+    const [services, setServices] = useState<any[]>([]);
+    const [assistants, setAssistants] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (open && user) {
+            fetchOptions();
+        }
+    }, [open, user]);
+
+    const fetchOptions = async () => {
+        // Fetch Projects
+        const { data: p } = await supabase.from('projects').select('id, name');
+        if (p) setProjects(p);
+
+        // Fetch Services
+        const { data: s } = await supabase.from('services').select('id, name');
+        if (s) setServices(s);
+
+        // Fetch Assistants (Profiles with role 'assistant' or similar)
+        // Assume 'profiles' has role. Or use proper table. User mentioned assistant_id.
+        // Let's try fetching profiles where role is assistant.
+        const { data: a } = await supabase.from('profiles').select('id, full_name').eq('role', 'assistant');
+        if (a) setAssistants(a);
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,6 +107,9 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                 category: formData.category,
                 date: formData.date,
                 payment_method: formData.payment_method,
+                project_id: formData.project_id || null, // Link to project
+                service_id: formData.service_id || null, // Link to service
+                assistant_id: formData.assistant_id || null, // Link to assistant
             });
 
             if (error) throw error;
@@ -148,6 +180,62 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                             />
                         </div>
                     </div>
+
+                    {/* New Fields: Project, Service, Assistant */}
+                    {type === 'income' && (
+                        <div className="space-y-4 border-t border-white/10 pt-4 mt-2">
+                            <div className="space-y-2">
+                                <Label>Vincular a Projeto (Noiva)</Label>
+                                <Select
+                                    value={formData.project_id}
+                                    onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                                >
+                                    <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                                        <SelectValue placeholder="Selecione o Projeto" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                                        {projects.map(p => (
+                                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Serviço Dedicado</Label>
+                                <Select
+                                    value={formData.service_id}
+                                    onValueChange={(value) => setFormData({ ...formData, service_id: value })}
+                                >
+                                    <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                                        <SelectValue placeholder="Selecione o Serviço" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                                        {services.map(s => (
+                                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Assistente Responsável (Opcional)</Label>
+                                <Select
+                                    value={formData.assistant_id}
+                                    onValueChange={(value) => setFormData({ ...formData, assistant_id: value })}
+                                >
+                                    <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                                        <SelectValue placeholder="Selecione" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                                        {assistants.map(a => (
+                                            <SelectItem key={a.id} value={a.id}>{a.full_name || 'Sem nome'}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">

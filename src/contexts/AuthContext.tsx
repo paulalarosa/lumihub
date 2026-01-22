@@ -1,22 +1,10 @@
-import React, { createContext, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 
-// Define context type for better safety
-export interface AuthContextType {
-    user: User | null;
-    session: Session | null;
-    loading: boolean;
-    role: string | null;
-    signIn: (email: string, pass: string) => Promise<any>;
-    signOut: () => Promise<void>;
-    signInWithGoogle: () => Promise<any>;
-    signUp: (email: string, pass: string) => Promise<any>;
-    isAdmin?: boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import { AuthContextType } from '@/types/auth';
+import { AuthContext } from '@/contexts/AuthContextDefinition';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const navigate = useNavigate();

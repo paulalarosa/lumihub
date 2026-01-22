@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
@@ -36,6 +36,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ProjectService } from '@/services/projectService';
 import { supabase } from '@/integrations/supabase/client';
+import { useLanguage } from '@/hooks/useLanguage'; // Import Hook from Hooks
+import { ContratosTab } from '../sections/contratos';
 
 interface Project {
   id: string;
@@ -52,6 +54,14 @@ interface Project {
     email: string | null;
     phone: string | null;
   } | null;
+  client?: {
+    id: string;
+    full_name: string;
+    email: string | null;
+    phone: string | null;
+    cpf?: string | null;
+    address?: string | null;
+  };
 }
 
 interface Task {
@@ -103,6 +113,9 @@ export default function ProjectDetailsPage() {
   const { user, loading: authLoading } = useAuth();
   const { organizationId, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
+  // Removed duplicate 't' declaration here as it is declared later or earlier.
+  // Actually, I'll keep one at the top and remove others.
+  const { t } = useLanguage();
 
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -110,7 +123,11 @@ export default function ProjectDetailsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
+  const [transactions, setTransactions] = useState<any[]>([]); // New state for transactions
   const [loadingData, setLoadingData] = useState(true);
+
+  // Tabs State (Controlled)
+  const [activeTab, setActiveTab] = useState('tarefas');
 
   // View mode: internal or public preview
   const [viewMode, setViewMode] = useState<'internal' | 'preview'>('internal');
@@ -119,10 +136,7 @@ export default function ProjectDetailsPage() {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskVisibility, setNewTaskVisibility] = useState('private');
 
-  // Contract form
-  const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
-  const [contractTitle, setContractTitle] = useState('');
-  const [contractContent, setContractContent] = useState('');
+
 
   // Service form
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
@@ -134,8 +148,11 @@ export default function ProjectDetailsPage() {
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
   const [paymentServiceId, setPaymentServiceId] = useState('');
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [paymentDescription, setPaymentDescription] = useState('');
 
   const [copied, setCopied] = useState(false);
+
+  // Removed duplicate t declaration
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -163,8 +180,12 @@ export default function ProjectDetailsPage() {
 
     const adaptedProject: any = { ...projectData };
     if (adaptedProject.client) {
-      adaptedProject.clients = adaptedProject.client;
-      delete adaptedProject.client;
+      adaptedProject.clients = {
+        ...adaptedProject.client,
+        name: adaptedProject.client.full_name || adaptedProject.client.name
+      };
+      // Keep client for components that expect it (like ContratosTab)
+      // delete adaptedProject.client;
     }
     setProject(adaptedProject as Project);
 
@@ -180,17 +201,62 @@ export default function ProjectDetailsPage() {
       } as any);
     }
 
-    const { data: contractsData } = await ProjectService.getContracts(id);
-    setContracts((contractsData as any) || []);
+    const { data: contractsData } = await supabase
+      .from('contracts')
+      .select('*')
+      .or(`project_id.eq.${id},client_id.eq.${projectData.client_id || projectData.client?.id}`);
+    setContracts(contractsData || []);
 
-    const { data: servicesData } = await ProjectService.getCatalogServices();
-    setServices((servicesData as any) || []);
+    // Services Catalog (Fixed: Removed default_price)
+    const { data: servicesData } = await supabase
+      .from('services')
+      .select('id, name, price');
 
-    const { data: projectServicesData } = await ProjectService.getProjectServices(id);
-    setProjectServices((projectServicesData as any) || []);
+    // Map default_price to price for consistency if needed or update interface
+    setServices((servicesData?.map(s => ({ ...s, price: s.price })) as any) || []);
+
+    // Linked Services (Joined) - Using Service for consistency
+    const { data: linkedServices } = await ProjectService.getProjectServices(id);
+    setProjectServices((linkedServices as any) || []);
+
+    // Transactions (Already here but confirmed)
+    const { data: transData } = await supabase
+      .from('transactions')
+      .select('*') // Select all to get types
+      .eq('project_id', id);
+    setTransactions(transData || []);
 
     setLoadingData(false);
   };
+
+  // Realtime Subscription
+  useEffect(() => {
+    if (!id) return;
+
+    const channel = supabase
+      .channel('project-updates')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'contracts', filter: `project_id=eq.${id}` },
+        () => {
+          // Refresh data on contract change
+          fetchData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `project_id=eq.${id}` },
+        () => {
+          // Refresh data on transaction change
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id]);
 
   const addTask = async () => {
     if (!newTaskTitle.trim() || !id || !organizationId) return;
@@ -227,29 +293,7 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  const createContract = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!id || !organizationId) return;
 
-    const { error } = await ProjectService.createContract({
-      project_id: id,
-      user_id: organizationId,
-      title: contractTitle.trim(),
-      content: contractContent.trim(),
-      status: 'draft'
-    });
-
-    if (error) {
-      toast({ title: "Erro ao criar contrato", variant: "destructive" });
-    } else {
-      toast({ title: "Contrato criado!" });
-      setIsContractDialogOpen(false);
-      setContractTitle('');
-      setContractContent('');
-      const { data } = await ProjectService.getContracts(id);
-      setContracts((data as any) || []);
-    }
-  };
 
   const copyPortalLink = async () => {
     if (!project?.clients?.id) {
@@ -260,9 +304,9 @@ export default function ProjectDetailsPage() {
     try {
       const clientId = project.clients.id;
 
-      // 1. Ensure PIN (access_pin) exists in wedding_clients
+      // 1. Ensure PIN (access_pin) exists in clients
       const { data: client, error: clientError } = await supabase
-        .from('wedding_clients')
+        .from('clients')
         .select('access_pin')
         .eq('id', clientId)
         .single();
@@ -272,7 +316,7 @@ export default function ProjectDetailsPage() {
       if (!client.access_pin) {
         const newPin = Math.floor(1000 + Math.random() * 9000).toString();
         const { error: updateError } = await supabase
-          .from('wedding_clients')
+          .from('clients')
           .update({ access_pin: newPin })
           .eq('id', clientId);
 
@@ -365,27 +409,61 @@ export default function ProjectDetailsPage() {
 
   const registerPayment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!paymentServiceId || !paymentAmount) return;
+
+    // 1. Clean Amount
+    const cleanAmount = typeof paymentAmount === 'string'
+      ? parseFloat(paymentAmount.replace('R$', '').replace('.', '').replace(',', '.'))
+      : parseFloat(paymentAmount);
+
+    if (isNaN(cleanAmount)) {
+      toast({ title: "Valor inválido", variant: "destructive" });
+      return;
+    }
+
+    // 2. Validate IDs
+    if (!id || (!project?.client_id && !project?.clients?.id)) {
+      console.error("ERRO CRÍTICO: IDs faltando. Project:", id, "Client:", project?.client_id || project?.clients?.id);
+      toast({ title: "Erro interno: Identificação do projeto ausente.", variant: "destructive" });
+      return;
+    }
 
     const ps = projectServices.find(s => s.id === paymentServiceId);
-    if (!ps) return;
+    const finalDescription = paymentDescription.trim() || (ps ? `Pagamento: ${ps.service?.name}` : 'Pagamento Geral');
 
-    const newPaidAmount = ps.paid_amount + parseFloat(paymentAmount);
+    const payload = {
+      project_id: id,
+      client_id: project.client_id || project.clients?.id,
+      amount: cleanAmount,
+      description: finalDescription,
+      type: 'income',
+      status: 'completed',
+      date: new Date().toISOString(),
+      category: 'Projeto'
+    };
 
-    const { error } = await ProjectService.updateProjectService(paymentServiceId, { paid_amount: newPaidAmount });
+    console.log("Enviando Pagamento:", payload);
 
-    if (error) {
-      toast({ title: "Erro ao registrar pagamento", variant: "destructive" });
-    } else {
-      toast({ title: "Pagamento registrado!" });
-      setIsPaymentDialogOpen(false);
-      setPaymentServiceId('');
-      setPaymentAmount('');
-      if (id) {
-        const { data } = await ProjectService.getProjectServices(id);
-        setProjectServices((data as any) || []);
-      }
+    // 3. Insert Transaction
+    const { error: transError } = await supabase.from('transactions').insert([payload]);
+
+    if (transError) {
+      console.error("Erro Supabase:", transError);
+      toast({ title: "Erro ao registrar transação", description: transError.message, variant: "destructive" });
+      return;
     }
+
+    // 4. Update Service Paid Amount (if linked)
+    if (ps) {
+      const newPaidAmount = (ps.paid_amount || 0) + cleanAmount;
+      await ProjectService.updateProjectService(paymentServiceId, { paid_amount: newPaidAmount });
+    }
+
+    toast({ title: "Pagamento registrado!" });
+    setIsPaymentDialogOpen(false);
+    setPaymentServiceId('');
+    setPaymentAmount('');
+    setPaymentDescription('');
+    fetchData();
   };
 
   const handleSelectService = (serviceId: string) => {
@@ -407,9 +485,19 @@ export default function ProjectDetailsPage() {
   if (!project) return null;
 
   const completedTasks = tasks.filter(t => t.is_completed).length;
-  const totalServiceAmount = projectServices.reduce((sum, ps) => sum + Number(ps.total_price), 0);
-  const totalPaidAmount = projectServices.reduce((sum, ps) => sum + Number(ps.paid_amount), 0);
-  const remainingAmount = totalServiceAmount - totalPaidAmount;
+
+  // Financial Logic Update
+  const totalServiceAmount = projectServices.reduce((sum, ps) => sum + (Number(ps.price || ps.unit_price || ps.total_price) * (Number(ps.quantity) || 1)), 0);
+
+
+  // Received = Sum of Income Transactions
+  const totalReceived = transactions
+    .filter(t => t.type === 'income')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
+  const totalPaidAmount = totalReceived; // Alias
+
+  const remainingAmount = totalServiceAmount - totalReceived;
 
 
   return (
@@ -455,7 +543,7 @@ export default function ProjectDetailsPage() {
                   className={`rounded-none gap-2 font-mono uppercase text-xs tracking-wider ${viewMode === 'internal' ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}
                 >
                   <Settings className="h-3 w-3" />
-                  INTERNAL
+                  {t('dashboard.internal')}
                 </Button>
                 <div className="w-[1px] h-4 bg-white/20"></div>
                 <Button
@@ -465,7 +553,7 @@ export default function ProjectDetailsPage() {
                   className={`rounded-none gap-2 font-mono uppercase text-xs tracking-wider ${viewMode === 'preview' ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}
                 >
                   <Eye className="h-3 w-3" />
-                  PREVIEW
+                  {t('dashboard.preview')}
                 </Button>
               </div>
 
@@ -564,46 +652,47 @@ export default function ProjectDetailsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">TASKS</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">{t('dashboard.tasks')}</p>
                   <p className="text-2xl font-serif text-white">{completedTasks}/{tasks.length}</p>
                 </CardContent>
               </Card>
               <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">TOTAL_VALUE</p>
-                  <p className="text-2xl font-serif text-white">R$ {totalServiceAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">{t('dashboard.total_value')}</p>
+                  <p className="text-2xl font-serif text-white">{Number(totalServiceAmount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </CardContent>
               </Card>
               <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">RECEIVED</p>
-                  <p className="text-2xl font-serif text-white">R$ {totalPaidAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">{t('dashboard.received')}</p>
+                  <p className="text-2xl font-serif text-white">{Number(totalReceived || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </CardContent>
               </Card>
               <Card className="bg-black border border-white/20 rounded-none">
                 <CardContent className="pt-6">
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">PENDING</p>
-                  <p className="text-2xl font-serif text-white/70 border-b border-white/20 inline-block">R$ {remainingAmount.toFixed(2)}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-widest font-mono mb-1">{t('dashboard.pending')}</p>
+                  <p className="text-2xl font-serif text-white/70 border-b border-white/20 inline-block">{Number(remainingAmount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                 </CardContent>
               </Card>
             </div>
 
-            <Tabs defaultValue="tarefas" className="space-y-6">
+            {/* Controlled Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
               <TabsList className="bg-black border border-white/20 p-0 rounded-none h-12 w-full flex justify-start overflow-x-auto">
                 <TabsTrigger value="tarefas" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
-                  TASKS
+                  {t('dashboard.tasks')}
                 </TabsTrigger>
                 <div className="w-[1px] h-full bg-white/20"></div>
                 <TabsTrigger value="briefing" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
-                  BRIEFING
+                  {t('dashboard.briefing')}
                 </TabsTrigger>
                 <div className="w-[1px] h-full bg-white/20"></div>
                 <TabsTrigger value="contratos" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
-                  CONTRACTS
+                  {t('dashboard.contracts')}
                 </TabsTrigger>
                 <div className="w-[1px] h-full bg-white/20"></div>
                 <TabsTrigger value="financeiro" className="data-[state=active]:bg-white data-[state=active]:text-black text-white/60 rounded-none h-full px-6 font-mono text-xs uppercase tracking-widest transition-all">
-                  FINANCIAL
+                  {t('dashboard.financial')}
                 </TabsTrigger>
               </TabsList>
 
@@ -611,7 +700,7 @@ export default function ProjectDetailsPage() {
               <TabsContent value="tarefas">
                 <Card className="bg-black border border-white/20 rounded-none">
                   <CardHeader className="border-b border-white/10">
-                    <CardTitle className="text-white font-serif uppercase tracking-wide">TASK_MANAGER</CardTitle>
+                    <CardTitle className="text-white font-serif uppercase tracking-wide">{t('dashboard.task_manager')}</CardTitle>
                     <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">OPERATIONAL_CHECKLIST</CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -728,80 +817,14 @@ export default function ProjectDetailsPage() {
 
               {/* CONTRATOS */}
               <TabsContent value="contratos">
-                <Card className="bg-black border border-white/20 rounded-none">
-                  <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
-                    <div>
-                      <CardTitle className="text-white font-serif uppercase tracking-wide">LEGAL_DOCS</CardTitle>
-                      <CardDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">CONTRACTS & AGREEMENTS</CardDescription>
-                    </div>
-                    <Dialog open={isContractDialogOpen} onOpenChange={setIsContractDialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
-                          <Plus className="h-3 w-3 mr-2" />
-                          NEW_CONTRACT
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl bg-black border border-white/20 rounded-none">
-                        <DialogHeader>
-                          <DialogTitle className="text-white font-serif uppercase tracking-wide">DRAFT_CONTRACT</DialogTitle>
-                        </DialogHeader>
-                        <form onSubmit={createContract} className="space-y-4">
-                          <div className="space-y-2">
-                            <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">TITLE</Label>
-                            <Input
-                              value={contractTitle}
-                              onChange={(e) => setContractTitle(e.target.value)}
-                              placeholder="DOC_REFERENCE"
-                              className="bg-black border-white/20 rounded-none text-white font-mono focus:border-white"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">CONTENT</Label>
-                            <Textarea
-                              value={contractContent}
-                              onChange={(e) => setContractContent(e.target.value)}
-                              placeholder="LEGAL_TEXT_BODY..."
-                              rows={10}
-                              className="bg-black border-white/20 rounded-none text-white font-mono focus:border-white"
-                              required
-                            />
-                          </div>
-                          <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
-                            GENERATE_DOCUMENT
-                          </Button>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                  </CardHeader>
-                  <CardContent className="p-6">
-                    {contracts.length === 0 ? (
-                      <p className="text-white/20 text-center py-8 font-mono uppercase text-xs tracking-widest border border-white/10 border-dashed">
-                        NO_DOCUMENTS_FILED
-                      </p>
-                    ) : (
-                      <div className="space-y-3">
-                        {contracts.map((contract) => (
-                          <div
-                            key={contract.id}
-                            className="flex items-center justify-between p-4 border border-white/10 bg-white/5 hover:border-white/30 transition-colors"
-                          >
-                            <div>
-                              <p className="font-serif text-white uppercase tracking-wide text-sm mb-1">{contract.title}</p>
-                              <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest border-white/20 text-white/50`}>
-                                STATUS: {contract.status}
-                              </Badge>
-                            </div>
-                            <Button variant="outline" size="sm" className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase">
-                              <ExternalLink className="h-3 w-3 mr-2" />
-                              VIEW
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <ContratosTab
+                  projectId={id || ''}
+                  contracts={contracts}
+                  setContracts={setContracts}
+                  project={project}
+                  projectServices={projectServices}
+                  totalValue={projectServices.reduce((acc, curr) => acc + (Number(curr.total_price) || 0), 0)}
+                />
               </TabsContent>
 
               {/* FINANCEIRO */}
@@ -810,18 +833,18 @@ export default function ProjectDetailsPage() {
                   {/* Payment Progress */}
                   <Card className="bg-black border border-white/20 rounded-none">
                     <CardHeader className="border-b border-white/10">
-                      <CardTitle className="text-white font-serif uppercase tracking-wide">FINANCIAL_OVERVIEW</CardTitle>
+                      <CardTitle className="text-white font-serif uppercase tracking-wide">VISÃO FINANCEIRA GERAL</CardTitle>
                     </CardHeader>
                     <CardContent className="p-6">
                       <div className="space-y-4">
                         <div className="flex justify-between text-sm font-mono text-white/70 uppercase tracking-widest">
-                          <span>PAID: R$ {totalPaidAmount.toFixed(2)}</span>
-                          <span>TOTAL: R$ {totalServiceAmount.toFixed(2)}</span>
+                          <span>PAGO: {Number(totalPaidAmount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                          <span>TOTAL: {Number(totalServiceAmount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                         </div>
                         <Progress value={totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0} className="h-2 rounded-none bg-white/10" />
                         <div className="text-right">
                           <span className="text-[10px] text-white/30 font-mono uppercase tracking-widest">
-                            {((totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0)).toFixed(1)}% RECOVERED
+                            {((totalServiceAmount > 0 ? (totalPaidAmount / totalServiceAmount) * 100 : 0)).toFixed(1)}% RECUPERADO
                           </span>
                         </div>
                       </div>
@@ -832,31 +855,34 @@ export default function ProjectDetailsPage() {
                   <Card className="bg-black border border-white/20 rounded-none">
                     <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
                       <div>
-                        <CardTitle className="text-white font-serif uppercase tracking-wide">SERVICES_BREAKDOWN</CardTitle>
+                        <CardTitle className="text-white font-serif uppercase tracking-wide">DETALHAMENTO DE SERVIÇOS</CardTitle>
                       </div>
                       <div className="flex gap-2">
                         {/* Add Service Dialog */}
                         <Dialog open={isServiceDialogOpen} onOpenChange={setIsServiceDialogOpen}>
                           <DialogTrigger asChild>
                             <Button variant="outline" size="sm" className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest">
-                              <Plus className="h-3 w-3 mr-2" /> ADD_SERVICE
+                              <Plus className="h-3 w-3 mr-2" /> {t('dashboard.add_service') || 'ADICIONAR ITEM DE SERVIÇO'}
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="bg-black border border-white/20 rounded-none">
                             <DialogHeader>
-                              <DialogTitle className="text-white font-serif uppercase">ADD_SERVICE_ITEM</DialogTitle>
+                              <DialogTitle className="text-white font-serif uppercase">ADICIONAR ITEM DE SERVIÇO</DialogTitle>
+                              <DialogDescription className="sr-only">
+                                Selecione um serviço do catálogo para vincular a este projeto.
+                              </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={addServiceToProject} className="space-y-4">
                               <div className="space-y-2">
-                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">SERVICE_TYPE</Label>
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">TIPO DE SERVIÇO</Label>
                                 <Select value={selectedServiceId} onValueChange={handleSelectService}>
                                   <SelectTrigger className="bg-black border-white/20 rounded-none text-white font-mono uppercase">
-                                    <SelectValue placeholder="SELECT..." />
+                                    <SelectValue placeholder="SELECIONE..." />
                                   </SelectTrigger>
                                   <SelectContent className="bg-black border border-white/20 rounded-none text-white">
                                     {services.map(s => (
                                       <SelectItem key={s.id} value={s.id} className="font-mono uppercase focus:bg-white focus:text-black">
-                                        {s.name} - R$ {s.price}
+                                        {s.name} - {Number(s.price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
@@ -864,7 +890,7 @@ export default function ProjectDetailsPage() {
                               </div>
                               <div className="flex gap-4">
                                 <div className="space-y-2 flex-1">
-                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">QTY</Label>
+                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">QTD</Label>
                                   <Input
                                     type="number"
                                     min="1"
@@ -874,7 +900,7 @@ export default function ProjectDetailsPage() {
                                   />
                                 </div>
                                 <div className="space-y-2 flex-1">
-                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">PRICE (UNIT)</Label>
+                                  <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">PREÇO (UNIT)</Label>
                                   <Input
                                     type="number"
                                     step="0.01"
@@ -885,7 +911,7 @@ export default function ProjectDetailsPage() {
                                 </div>
                               </div>
                               <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
-                                CONFIRM_ADDITION
+                                CONFIRMAR ADIÇÃO
                               </Button>
                             </form>
                           </DialogContent>
@@ -895,31 +921,44 @@ export default function ProjectDetailsPage() {
                         <Dialog open={isPaymentDialogOpen} onOpenChange={setIsPaymentDialogOpen}>
                           <DialogTrigger asChild>
                             <Button className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
-                              <DollarSign className="h-3 w-3 mr-2" /> LOG_PAYMENT
+                              <DollarSign className="h-3 w-3 mr-2" /> REGISTRAR PAGAMENTO
                             </Button>
                           </DialogTrigger>
                           <DialogContent className="bg-black border border-white/20 rounded-none">
                             <DialogHeader>
-                              <DialogTitle className="text-white font-serif uppercase">REGISTER_INCOME</DialogTitle>
+                              <DialogTitle className="text-white font-serif uppercase">REGISTRAR RECEBIMENTO</DialogTitle>
+                              <DialogDescription className="sr-only">
+                                Registre um pagamento recebido vinculado a um serviço específico.
+                              </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={registerPayment} className="space-y-4">
                               <div className="space-y-2">
-                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">ALLOCATE_TO_SERVICE</Label>
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">VINCULAR A SERVIÇO (OPCIONAL)</Label>
                                 <Select value={paymentServiceId} onValueChange={setPaymentServiceId}>
                                   <SelectTrigger className="bg-black border-white/20 rounded-none text-white font-mono uppercase">
-                                    <SelectValue placeholder="SELECT..." />
+                                    <SelectValue placeholder="GERAL (SEM VÍNCULO)" />
                                   </SelectTrigger>
                                   <SelectContent className="bg-black border border-white/20 rounded-none text-white">
+                                    <SelectItem value="none" className="font-mono uppercase focus:bg-white focus:text-black">GERAL (SEM VÍNCULO)</SelectItem>
                                     {projectServices.map(ps => (
                                       <SelectItem key={ps.id} value={ps.id} className="font-mono uppercase focus:bg-white focus:text-black">
-                                        {ps.service?.name} (Rem: R$ {(ps.total_price - ps.paid_amount).toFixed(2)})
+                                        {ps.service?.name} (Rem: {Number((ps.total_price - ps.paid_amount) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
                                       </SelectItem>
                                     ))}
                                   </SelectContent>
                                 </Select>
                               </div>
                               <div className="space-y-2">
-                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">AMOUNT</Label>
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">DESCRIÇÃO</Label>
+                                <Input
+                                  value={paymentDescription}
+                                  onChange={(e) => setPaymentDescription(e.target.value)}
+                                  placeholder="Ex: Entrada, Parcela 1..."
+                                  className="bg-black border-white/20 rounded-none text-white font-mono"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">VALOR DO PAGAMENTO (R$)</Label>
                                 <Input
                                   type="number"
                                   step="0.01"
@@ -930,7 +969,7 @@ export default function ProjectDetailsPage() {
                                 />
                               </div>
                               <Button type="submit" className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
-                                PROCESS_TRANSACTION
+                                REGISTRAR
                               </Button>
                             </form>
                           </DialogContent>
@@ -940,7 +979,7 @@ export default function ProjectDetailsPage() {
                     <CardContent className="p-0">
                       {projectServices.length === 0 ? (
                         <div className="p-12 text-center text-white/30 font-mono uppercase text-xs tracking-widest">
-                          NO_SERVICES_LINKED
+                          NENHUM SERVIÇO VINCULADO
                         </div>
                       ) : (
                         <div className="divide-y divide-white/10">
@@ -949,19 +988,19 @@ export default function ProjectDetailsPage() {
                               <div>
                                 <p className="font-serif text-white uppercase text-sm mb-1">{ps.service?.name}</p>
                                 <div className="flex gap-4 text-[10px] text-white/50 font-mono uppercase tracking-widest">
-                                  <span>QTY: {ps.quantity}</span>
-                                  <span>UNIT: R$ {ps.unit_price.toFixed(2)}</span>
-                                  <span>TOTAL: R$ {ps.total_price.toFixed(2)}</span>
+                                  <span>QTD: {ps.quantity}</span>
+                                  <span>UNIT: {Number(ps.unit_price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                  <span>TOTAL: {Number(ps.total_price || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                                 </div>
                               </div>
                               <div className="flex items-center gap-4">
                                 <div className="text-right">
                                   <p className="font-mono text-xs text-white uppercase">
-                                    PAID: R$ {ps.paid_amount.toFixed(2)}
+                                    PAGO: {Number(ps.paid_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                   </p>
                                   {ps.paid_amount < ps.total_price && (
                                     <p className="text-[10px] text-white/40 uppercase tracking-widest">
-                                      PENDING: R$ {(ps.total_price - ps.paid_amount).toFixed(2)}
+                                      PENDENTE: {Number((ps.total_price - ps.paid_amount) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
                                   )}
                                 </div>

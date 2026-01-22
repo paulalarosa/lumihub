@@ -14,7 +14,7 @@ import { useWindowSize } from 'react-use';
 import { useMarketing } from "@/hooks/useMarketing";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarketingCampaign } from "@/services/marketing";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface InactiveClient {
     id: string;

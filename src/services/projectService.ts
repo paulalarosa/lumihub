@@ -14,16 +14,30 @@ export const ProjectService = {
     },
 
     async get(id: string) {
-        return await supabase
+        const { data, error } = await supabase
             .from('projects')
             .select(`
-        *,
-        client:wedding_clients(*),
-        invoices(*),
-        contracts(*)
-      `)
+                *,
+                client:clients (
+                    id,
+                    full_name,
+                    email,
+                    phone,
+                    cpf,
+                    address
+                ),
+                invoices(*),
+                contracts(*)
+            `)
             .eq('id', id)
             .single();
+
+        if (error) {
+            console.error("ProjectService.get error:", error);
+            // Return null data to prevent crash, caller handles error check
+            return { data: null, error };
+        }
+        return { data, error: null };
     },
 
     async create(project: Database['public']['Tables']['projects']['Insert']) {

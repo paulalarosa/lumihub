@@ -1,6 +1,5 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -37,7 +36,6 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
     const editor = useEditor({
         extensions: [
             StarterKit,
-            Underline,
         ],
         content: content,
         editorProps: {
@@ -59,8 +57,8 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                 .from('projects')
                 .select(`
                     *,
-                    client:wedding_clients (
-                        name,
+                    client:clients (
+                        full_name,
                         email,
                         phone,
                         cpf,
@@ -113,8 +111,8 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
 
         // Simulated AI Generation with Real Data and Formal Legal Tone
         setTimeout(() => {
-            const clientName = projectData.client?.name || '<strong style="color: #ff4d4d">[PREENCHER NOME]</strong>';
-            const clientCPF = projectData.client?.cpf || '<strong style="color: #ff4d4d">[PREENCHER CPF]</strong>';
+            const clientName = projectData.client?.full_name || projectData.client?.name || '<strong style="color: #ff4d4d">[PREENCHER NOME]</strong>';
+            const clientCPF = projectData.client?.cpf || "________________";
             // Start time placeholder or real data if available (assuming projectData might have it, otherwise placeholder)
             const startTime = projectData.event_time ? projectData.event_time.slice(0, 5) : '<strong style="color: #ff4d4d">[DEFINIR HORÁRIO]</strong>';
 

@@ -16,7 +16,7 @@ import { Users, Calendar, CreditCard, Palette, FileText, BarChart3, CheckCircle,
 import { motion, useScroll as useFramerScroll, useTransform } from "framer-motion";
 import { useEffect, useRef } from "react";
 import SEOHead from "@/components/seo/SEOHead";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // New Imports
 import Header from "@/components/ui/layout/Header";

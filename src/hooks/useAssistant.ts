@@ -38,7 +38,12 @@ export const useAssistant = () => {
     };
 
     const sendInvite = async (email: string) => {
-        if (!user) return;
+        if (!user) {
+            console.error("Assistant Hook: No user logged in.");
+            toast.error("Você precisa estar logado.");
+            return;
+        }
+        console.log("Assistant Hook: User ID:", user.id);
         setLoading(true);
         try {
             // 1. Check if already invited
@@ -55,18 +60,20 @@ export const useAssistant = () => {
                 return;
             }
 
-            // 2. Generate Code & Insert
             const namePart = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-');
             const randomPart = Math.random().toString(36).substring(2, 6);
             const inviteCode = `${namePart}-${randomPart}`;
 
+            const payload = {
+                email,
+                owner_id: user.id,
+                invite_code: inviteCode
+            };
+            console.log('Dados enviados para salvar assistente (Invite):', payload);
+
             const { data, error: insertError } = await supabase
                 .from('assistant_invites' as any)
-                .insert([{
-                    email,
-                    owner_id: user.id,
-                    invite_code: inviteCode
-                }])
+                .insert([payload])
                 .select()
                 .single();
 

@@ -20,7 +20,7 @@ import { format, subMonths, startOfMonth, endOfMonth, parseISO } from 'date-fns'
 import { ptBR } from 'date-fns/locale';
 import TransactionDialog from '@/components/finance/TransactionDialog';
 import { toast } from "sonner";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface Transaction {
   id: string;
