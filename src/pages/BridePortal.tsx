@@ -141,10 +141,10 @@ export default function BridePortal() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
+            <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
                 <div className="w-full max-w-sm text-center space-y-8">
                     <div className="space-y-2">
-                        <p className="text-[#333] tracking-[0.5em] text-[10px] font-mono uppercase">KONTROL</p>
+                        <p className="text-zinc-800 tracking-[0.5em] text-[10px] font-mono uppercase">KONTROL</p>
                         <h1 className="text-3xl text-white font-serif tracking-wide uppercase">Backstage da Noiva</h1>
                     </div>
 
@@ -155,7 +155,7 @@ export default function BridePortal() {
                             value={enteredPin}
                             onChange={(e) => setEnteredPin(e.target.value)}
                             placeholder="****"
-                            className="bg-transparent border-b border-[#333] rounded-none text-center text-3xl tracking-[1em] h-16 text-white placeholder:text-[#222] focus:border-white transition-colors focus:ring-0 px-0"
+                            className="bg-transparent border-b border-zinc-800 rounded-none text-center text-3xl tracking-[1em] h-16 text-white placeholder:text-zinc-800 focus:border-white transition-colors focus:ring-0 px-0"
                             autoFocus
                         />
                         <Button
@@ -172,12 +172,12 @@ export default function BridePortal() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black pb-20">
+        <div className="min-h-screen bg-neutral-950 text-white selection:bg-white selection:text-black pb-20">
             {/* Header */}
-            <header className="p-8 border-b border-[#111]">
+            <header className="p-8 border-b border-zinc-900">
                 <div className="flex justify-between items-end">
                     <div>
-                        <p className="text-[10px] uppercase tracking-[0.3em] text-[#666] mb-2 font-mono">Bem-vinda</p>
+                        <p className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 mb-2 font-mono">Bem-vinda</p>
                         <h1 className="text-4xl font-serif italic">
                             Olá, <span className="not-italic">{bride?.name.split(' ')[0]}</span>
                         </h1>
@@ -188,12 +188,12 @@ export default function BridePortal() {
             <main className="container mx-auto px-4 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
 
                 {/* 1. Counter */}
-                <div className="lg:col-span-3 text-center py-12 border-y border-[#111]">
+                <div className="lg:col-span-3 text-center py-12 border-y border-zinc-900">
                     <div className="flex items-center justify-center gap-6">
                         <span className="text-9xl font-serif leading-none">{daysLeft}</span>
                         <div className="flex flex-col items-start gap-2">
                             <span className="h-px w-12 bg-white/20"></span>
-                            <span className="text-xs uppercase tracking-[0.4em] text-[#666] -rotate-90 origin-left translate-y-6">Dias</span>
+                            <span className="text-xs uppercase tracking-[0.4em] text-zinc-500 -rotate-90 origin-left translate-y-6">Dias</span>
                         </div>
                     </div>
                     <p className="mt-8 text-neutral-500 font-serif italic text-lg">Para o grande dia</p>
@@ -201,55 +201,55 @@ export default function BridePortal() {
 
                 {/* 2. Agenda */}
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-[#111] pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                         <h3 className="text-xl font-serif">Agenda</h3>
-                        <CalendarDays className="h-4 w-4 text-[#444]" />
+                        <CalendarDays className="h-4 w-4 text-zinc-600" />
                     </div>
                     <div className="space-y-4">
                         {events.length > 0 ? events.map(evt => (
-                            <div key={evt.id} className="group border border-[#111] p-4 hover:border-white/20 transition-colors">
+                            <div key={evt.id} className="group border border-zinc-900 p-4 hover:border-white/20 transition-colors">
                                 <div className="flex justify-between items-start mb-2">
-                                    <span className="text-xs font-mono text-[#666]">{format(new Date(evt.event_date + 'T12:00:00'), 'dd/MM/yyyy')}</span>
-                                    {evt.start_time && <span className="text-xs font-mono text-[#666]">{evt.start_time.slice(0, 5)}</span>}
+                                    <span className="text-xs font-mono text-zinc-500">{format(new Date(evt.event_date + 'T12:00:00'), 'dd/MM/yyyy')}</span>
+                                    {evt.start_time && <span className="text-xs font-mono text-zinc-500">{evt.start_time.slice(0, 5)}</span>}
                                 </div>
-                                <h4 className="text-sm uppercase tracking-wide group-hover:text-[#ccc] transition-colors">{evt.title}</h4>
+                                <h4 className="text-sm uppercase tracking-wide group-hover:text-zinc-300 transition-colors">{evt.title}</h4>
                             </div>
                         )) : (
-                            <p className="text-xs text-[#444] font-mono italic">Nenhum evento próximo.</p>
+                            <p className="text-xs text-zinc-600 font-mono italic">Nenhum evento próximo.</p>
                         )}
                     </div>
                 </div>
 
                 {/* 3. Financial */}
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-[#111] pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                         <h3 className="text-xl font-serif">Financeiro</h3>
-                        <DollarSign className="h-4 w-4 text-[#444]" />
+                        <DollarSign className="h-4 w-4 text-zinc-600" />
                     </div>
-                    <div className="border border-[#111] p-6 space-y-6">
+                    <div className="border border-zinc-900 p-6 space-y-6">
                         <div>
-                            <p className="text-[10px] uppercase tracking-wider text-[#666] mb-1">Total Contrato</p>
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Total Contrato</p>
                             <p className="text-xl font-mono">{financials.total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                         <div>
-                            <p className="text-[10px] uppercase tracking-wider text-[#666] mb-1">Status</p>
-                            <div className="w-full bg-[#111] h-1 mt-2">
+                            <p className="text-[10px] uppercase tracking-wider text-zinc-500 mb-1">Status</p>
+                            <div className="w-full bg-zinc-900 h-1 mt-2">
                                 <div className="bg-white h-full w-[10%]"></div>
                             </div>
-                            <p className="text-right text-[10px] text-[#444] mt-1">10% Pago</p>
+                            <p className="text-right text-[10px] text-zinc-600 mt-1">10% Pago</p>
                         </div>
                     </div>
                 </div>
 
                 {/* 4. Docs */}
                 <div className="space-y-6">
-                    <div className="flex items-center justify-between border-b border-[#111] pb-4">
+                    <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
                         <h3 className="text-xl font-serif">Contrato</h3>
-                        <Lock className="h-4 w-4 text-[#444]" />
+                        <Lock className="h-4 w-4 text-zinc-600" />
                     </div>
-                    <Button variant="outline" className="w-full h-16 rounded-none border border-[#111] hover:bg-white hover:text-black hover:border-white transition-all group justify-between px-6">
+                    <Button variant="outline" className="w-full h-16 rounded-none border border-zinc-900 hover:bg-white hover:text-black hover:border-white transition-all group justify-between px-6">
                         <span className="uppercase tracking-widest text-xs">Baixar PDF</span>
-                        <Download className="h-4 w-4 text-[#666] group-hover:text-black" />
+                        <Download className="h-4 w-4 text-zinc-500 group-hover:text-black" />
                     </Button>
                 </div>
             </main>

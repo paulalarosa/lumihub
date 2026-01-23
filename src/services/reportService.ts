@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -191,14 +192,22 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
     doc.save(`${client.full_name.replace(/\s+/g, '_')}_Ficha_Tecnica.pdf`);
 };
 
-export const exportFinancialExcel = (data: any[], fileName: string = 'Financeiro') => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dados");
-    XLSX.writeFile(wb, `${fileName}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+export const exportFinancialExcel = async (data: any[], fileName: string = 'Financeiro') => {
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Dados');
+
+    if (data.length > 0) {
+        worksheet.columns = Object.keys(data[0]).map(key => ({ header: key, key: key, width: 20 }));
+    }
+
+    worksheet.addRows(data);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `${fileName}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
 };
 
-export const exportMonthlyClosing = (events: any[]) => {
+export const exportMonthlyClosing = async (events: any[]) => {
     const data = events.map(event => {
         const total = Number(event.total_value) || 0;
         const commission = Number(event.assistant_commission) || 0;
@@ -211,24 +220,27 @@ export const exportMonthlyClosing = (events: any[]) => {
             'Valor Total': total,
             'Comíssão Equipe': commission,
             'Lucro Líquido': netProfit,
-            'Status': event.status || 'N/A' // Assuming event might have status if joined, or we use invoice status if available? defaulting to event type or similar if status missing.
+            'Status': event.status || 'N/A'
         };
     });
 
-    // Create workbook with custom widths
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wscols = [
-        { wch: 15 }, // Data
-        { wch: 30 }, // Cliente
-        { wch: 30 }, // Evento
-        { wch: 15 }, // Valor Total
-        { wch: 15 }, // Comissões
-        { wch: 15 }, // Lucro
-        { wch: 15 }, // Status
-    ];
-    ws['!cols'] = wscols;
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Fechamento Mensal');
 
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Fechamento Mensal");
-    XLSX.writeFile(wb, `Kontrol_Fechamento_${format(new Date(), 'MM-yyyy')}.xlsx`);
+    // Define columns with custom widths
+    worksheet.columns = [
+        { header: 'Data', key: 'Data', width: 15 },
+        { header: 'Cliente', key: 'Cliente', width: 30 },
+        { header: 'Evento', key: 'Evento', width: 30 },
+        { header: 'Valor Total', key: 'Valor Total', width: 15 },
+        { header: 'Comíssão Equipe', key: 'Comíssão Equipe', width: 15 },
+        { header: 'Lucro Líquido', key: 'Lucro Líquido', width: 15 },
+        { header: 'Status', key: 'Status', width: 15 },
+    ];
+
+    worksheet.addRows(data);
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Kontrol_Fechamento_${format(new Date(), 'MM-yyyy')}.xlsx`);
 };

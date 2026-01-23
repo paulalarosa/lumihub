@@ -26,7 +26,7 @@ import Dashboard from "@/features/dashboard/pages/Dashboard";
 import BrideLoginPage from "@/features/portal/pages/BrideLoginPage";
 import BrideDashboardPage from "@/features/portal/pages/BrideDashboardPage";
 import BrideProtectedRoute from "@/features/portal/components/BrideProtectedRoute";
-import FinancialDashboard from "./pages/FinancialDashboard";
+import FinancialPage from "@/features/financial/pages/FinancialPage";
 import Admin from "./pages/Admin";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import Clientes from "@/features/clients/pages/ClientsPage";
@@ -35,13 +35,13 @@ import Projetos from "@/features/projects/pages/ProjectsPage";
 import ProjetoDetalhes from "@/features/projects/pages/ProjectDetailsPage";
 import Configuracoes from "./pages/Configuracoes";
 import PortalCliente from "./pages/PortalCliente";
-import PortalAssistente from "./pages/PortalAssistente";
-import AssistantInvite from "./pages/AssistantInvite";
-import Agenda from "./pages/Agenda";
+import AssistantPortalPage from "@/features/portal/pages/AssistantPortalPage";
+import AssistantInvitePage from "@/features/portal/pages/AssistantInvitePage";
+import AgendaPage from "@/features/calendar/pages/AgendaPage";
 import Contato from "./pages/Contato";
 import Privacidade from "./pages/Privacidade";
 import Termos from "./pages/Termos";
-import Assistentes from "./pages/Assistentes";
+import AssistantsPage from "@/features/assistants/pages/AssistantsPage";
 import Servicos from "./pages/Servicos";
 import Marketing from "./pages/Marketing";
 import Contratos from "./pages/Contratos";
@@ -138,7 +138,7 @@ const App = () => {
                         } />
                         <Route path="/dashboard/financial" element={
                           <ProtectedRoute>
-                            <FinancialDashboard />
+                            <FinancialPage />
                           </ProtectedRoute>
                         } />
 
@@ -155,7 +155,7 @@ const App = () => {
                         } />
                         <Route path="/agenda" element={
                           <ProtectedRoute>
-                            <Agenda />
+                            <AgendaPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/clientes/:id" element={
@@ -191,7 +191,7 @@ const App = () => {
                         } />
                         <Route path="/assistentes" element={
                           <ProtectedRoute>
-                            <Assistentes />
+                            <AssistantsPage />
                           </ProtectedRoute>
                         } />
                         <Route path="/servicos" element={

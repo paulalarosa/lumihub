@@ -223,7 +223,7 @@ export default function InviteLanding() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 selection:bg-white selection:text-black">
             <div className="max-w-lg w-full relative group">
                 {/* Decorative border effect */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-800 to-neutral-900 opacity-50 group-hover:opacity-75 transition duration-1000 blur-sm"></div>

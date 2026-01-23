@@ -36,6 +36,17 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
     const [loadingAI, setLoadingAI] = useState(false);
     const [loadingEdit, setLoadingEdit] = useState(false);
     const [aiCommand, setAiCommand] = useState('');
+    const [contractor, setContractor] = useState<any>(null);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            if (!user) return;
+            const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+            setContractor(data);
+        };
+        fetchProfile();
+    }, [user]);
+
 
     useEffect(() => {
         const fetchContracts = async () => {
@@ -53,7 +64,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
         fetchContracts();
     }, [projectId]);
 
-    const createContract = async (e: React.FormEvent) => {
+    const handleSaveContract = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!projectId || !organizationId) return;
 
@@ -105,7 +116,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
         window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
     };
 
-    const generateFullContract = async () => {
+    const handleArchitectMode = async () => {
         if (!project || !user) return;
 
         // Safety Check:
@@ -119,11 +130,13 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
 
         try {
             // 1. Fetch Contractor (Artist) Data
-            const { data: userProfile } = await supabase
+            const { data: userProfileRaw } = await supabase
                 .from('profiles')
                 .select('full_name, document_id, address, city, state')
                 .eq('id', user.id)
                 .single();
+
+            const userProfile = userProfileRaw as any;
 
             const servicesList = projectServices.map((s: any) => s.service?.name || 'Serviço').join(', ') || 'Serviços Gerais';
             const totalValueFormatted = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -165,7 +178,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
         }
     };
 
-    const handleEditAI = async () => {
+    const handleEditorMode = async () => {
         if (!contractContent) return;
         setLoadingEdit(true);
 
@@ -215,7 +228,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
                         </DialogHeader>
 
                         <div className="flex-1 overflow-y-auto pr-2 space-y-6">
-                            <form onSubmit={createContract} className="space-y-4 border-b border-white/10 pb-6">
+                            <form onSubmit={handleSaveContract} className="space-y-4 border-b border-white/10 pb-6">
                                 <div className="space-y-2">
                                     <Label className="text-white/70 font-mono text-xs uppercase tracking-widest">TÍTULO DO DOCUMENTO</Label>
                                     <Input
@@ -254,13 +267,18 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
                                     </p>
                                     <Button
                                         type="button"
-                                        onClick={generateFullContract}
-                                        disabled={loadingAI}
+                                        onClick={handleArchitectMode}
+                                        disabled={loadingAI || !contractor}
                                         variant="outline"
                                         className="w-full border-white/20 text-white hover:bg-[#D4AF37] hover:text-black hover:border-transparent rounded-none font-mono text-[10px] uppercase tracking-widest h-auto py-3 whitespace-normal text-center"
                                     >
                                         {loadingAI ? 'GERANDO...' : 'GERAR ESTRUTURA COMPLETA (LEGAL ARCHITECT)'}
                                     </Button>
+                                    {!contractor && (
+                                        <p className="text-[9px] text-red-400 font-mono mt-1 text-center">
+                                            ⚠️ Perfil incompleto (CPF/Endereço)
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* SECTION B: REFINAR */}
@@ -288,11 +306,11 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
                                             onChange={(e) => setAiCommand(e.target.value)}
                                             placeholder="Ex: Altere a multa para 20%..."
                                             className="bg-black border-white/20 rounded-none text-white font-mono text-[10px] h-8"
-                                            onKeyDown={(e) => e.key === 'Enter' && handleEditAI()}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleEditorMode()}
                                         />
                                         <Button
                                             type="button"
-                                            onClick={handleEditAI}
+                                            onClick={handleEditorMode}
                                             disabled={loadingEdit || !contractContent || !aiCommand.trim()}
                                             variant="secondary"
                                             className="rounded-none font-mono text-[10px] uppercase tracking-widest h-8"

@@ -80,10 +80,10 @@ export const ProjectService = {
             .eq('project_id', projectId)
             .order('sort_order');
     },
-    async createTask(task: any) {
+    async createTask(task: Database['public']['Tables']['tasks']['Insert']) {
         return await supabase.from('tasks').insert(task).select().single();
     },
-    async updateTask(id: string, updates: any) {
+    async updateTask(id: string, updates: Database['public']['Tables']['tasks']['Update']) {
         return await supabase.from('tasks').update(updates).eq('id', id);
     },
     async deleteTask(id: string) {
@@ -94,7 +94,7 @@ export const ProjectService = {
     async getBriefing(projectId: string) {
         return await supabase.from('briefings').select('*').eq('project_id', projectId).maybeSingle();
     },
-    async createBriefing(briefing: any) {
+    async createBriefing(briefing: Database['public']['Tables']['briefings']['Insert']) {
         return await supabase.from('briefings').insert(briefing).select().single();
     },
 
@@ -102,7 +102,7 @@ export const ProjectService = {
     async getContracts(projectId: string) {
         return await supabase.from('contracts').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
     },
-    async createContract(contract: any) {
+    async createContract(contract: Database['public']['Tables']['contracts']['Insert']) {
         return await supabase.from('contracts').insert(contract).select().single();
     },
 
@@ -119,13 +119,13 @@ export const ProjectService = {
             .eq('project_id', projectId)
             .order('created_at');
     },
-    async addProjectService(data: any) {
+    async addProjectService(data: Database['public']['Tables']['project_services']['Insert']) {
         return await supabase.from('project_services').insert(data).select().single();
     },
     async deleteProjectService(id: string) {
         return await supabase.from('project_services').delete().eq('id', id);
     },
-    async updateProjectService(id: string, updates: any) {
+    async updateProjectService(id: string, updates: Database['public']['Tables']['project_services']['Update']) {
         return await supabase.from('project_services').update(updates).eq('id', id);
     }
 };

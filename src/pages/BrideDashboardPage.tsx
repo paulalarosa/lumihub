@@ -114,7 +114,7 @@ export default function BrideDashboardPage() {
 
     if (loading) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] text-white">
+            <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-8 h-8 border-2 border-white border-t-transparent animate-spin rounded-full"></div>
                     <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">Loading System</p>
@@ -124,10 +124,10 @@ export default function BrideDashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white selection:text-black flex flex-col">
+        <div className="min-h-screen bg-neutral-950 text-white font-sans selection:bg-white selection:text-black flex flex-col">
 
             {/* Header / Navbar */}
-            <header className="border-b border-neutral-800 bg-[#050505]">
+            <header className="border-b border-neutral-800 bg-neutral-950">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                     <div>
                         <span className="font-serif italic text-xl tracking-tight text-white">Lumi Bride</span>
@@ -152,7 +152,7 @@ export default function BrideDashboardPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 border-t border-l border-neutral-800">
 
                     {/* COL 1: Welcome & Countdown (Span 5) */}
-                    <div className="lg:col-span-5 border-r border-b border-neutral-800 p-8 md:p-12 min-h-[400px] flex flex-col justify-between relative bg-[#050505]">
+                    <div className="lg:col-span-5 border-r border-b border-neutral-800 p-8 md:p-12 min-h-[400px] flex flex-col justify-between relative bg-neutral-950">
 
                         {/* Greeting */}
                         <div className="mb-12">
@@ -187,7 +187,7 @@ export default function BrideDashboardPage() {
                     <div className="lg:col-span-7 grid grid-rows-2">
 
                         {/* ROW 1: Timeline */}
-                        <div className="border-r border-b border-neutral-800 p-8 md:p-12 bg-[#050505]">
+                        <div className="border-r border-b border-neutral-800 p-8 md:p-12 bg-neutral-950">
                             <h3 className="text-lg font-serif italic text-white mb-8">Sua Jornada</h3>
 
                             <div className="space-y-6 max-h-[250px] overflow-y-auto scrollbar-thin pr-4">
@@ -216,7 +216,7 @@ export default function BrideDashboardPage() {
                                                     {evt.title}
                                                 </p>
                                                 {isPast && (
-                                                    <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-widest text-[#D4AF37] mt-1">
+                                                    <span className="inline-flex items-center gap-1 text-[9px] uppercase tracking-widest text-gold mt-1">
                                                         <CheckCircle2 className="w-2.5 h-2.5" />
                                                         Concluído
                                                     </span>
@@ -232,11 +232,11 @@ export default function BrideDashboardPage() {
                         </div>
 
                         {/* ROW 2: Financial Stats */}
-                        <div className="border-r border-b border-neutral-800 p-8 md:p-12 bg-[#050505] flex flex-col justify-center">
+                        <div className="border-r border-b border-neutral-800 p-8 md:p-12 bg-neutral-950 flex flex-col justify-center">
                             <div className="flex items-center justify-between mb-8">
                                 <h3 className="text-lg font-serif italic text-white">Financeiro</h3>
                                 {remaining <= 0 && totalContract > 0 && (
-                                    <span className="text-[10px] uppercase tracking-widest border border-[#D4AF37] text-[#D4AF37] px-2 py-1">
+                                    <span className="text-[10px] uppercase tracking-widest border border-gold text-gold px-2 py-1">
                                         Quitado
                                     </span>
                                 )}

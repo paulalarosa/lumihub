@@ -13,11 +13,7 @@ interface Assistant {
   phone: string | null;
 }
 
-interface Event {
-  id: string;
-  event_date: string;
-  color: string | null;
-}
+import { Event } from '@/hooks/useEvents';
 
 export type CalendarSize = 'small' | 'medium' | 'large';
 
