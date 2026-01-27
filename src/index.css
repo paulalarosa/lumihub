@@ -111,6 +111,15 @@
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 0 0% 100%;
   }
+
+  /* Global Focus Ring - Industrial/Brutalist */
+  :focus-visible {
+    outline: 2px solid #ef4444;
+    /* Vermelho Alerta */
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px #09090b;
+    /* Fundo preto para contraste */
+  }
 }
 
 @layer components {

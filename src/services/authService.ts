@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export const AuthService = {
     async getSession() {
@@ -31,7 +32,7 @@ export const AuthService = {
             .single();
     },
 
-    onAuthStateChange(callback: (event: any, session: any) => void) {
+    onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
         return supabase.auth.onAuthStateChange(callback);
     }
 };

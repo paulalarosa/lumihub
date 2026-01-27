@@ -139,7 +139,7 @@ export default function Clientes() {
 
         // 2. Dual-Update: Sync Project Date if Bride
         if (clientData.is_bride && clientData.wedding_date) {
-          console.log('Syncing Project Date:', clientData.wedding_date);
+
           const { error: projectError } = await supabase
             .from('projects')
             .update({ event_date: clientData.wedding_date })

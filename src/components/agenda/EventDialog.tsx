@@ -25,7 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import QuickCreateClientDialog from './QuickCreateClientDialog';
 import QuickCreateProjectDialog from './QuickCreateProjectDialog';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
-import ConfirmationNotification from '@/components/assistant-portal/ConfirmationNotification';
+import ConfirmationNotification from '@/features/portal/components/ConfirmationNotification';
 import { NoirDatePicker } from '@/components/ui/noir-date-picker';
 
 interface Event {

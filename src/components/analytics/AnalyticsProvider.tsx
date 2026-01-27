@@ -31,7 +31,7 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
       // Enviar último evento de tempo na página
       const summary = analytics.getSessionSummary();
       if (import.meta.env.DEV) {
-        // console.log('[Analytics] Session Summary:', summary);
+
       }
     };
 

@@ -3,8 +3,8 @@
 
 declare global {
   interface Window {
-    gtag?: (...args: any[]) => void;
-    dataLayer?: any[];
+    gtag?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
   }
 }
 
@@ -24,7 +24,7 @@ export interface AnalyticsEvent {
   action: string;
   label?: string;
   value?: number;
-  customParameters?: Record<string, any>;
+  customParameters?: Record<string, unknown>;
 }
 
 export interface PageViewEvent {
@@ -107,7 +107,7 @@ class AnalyticsService {
   // Track page view
   trackPageView(pageView: PageViewEvent) {
     if (import.meta.env.DEV) {
-      console.log('[Analytics] Page View:', pageView);
+
     }
 
     if (window.gtag) {
@@ -135,7 +135,7 @@ class AnalyticsService {
     const timeSpent = Math.round((Date.now() - this.pageStartTime) / 1000);
 
     if (import.meta.env.DEV) {
-      console.log('[Analytics] Time on page:', { pagePath, timeSpent });
+
     }
 
     if (window.gtag) {
@@ -161,7 +161,7 @@ class AnalyticsService {
   // Track conversions
   trackConversion(conversion: ConversionEvent) {
     if (import.meta.env.DEV) {
-      console.log('[Analytics] Conversion:', conversion);
+
     }
 
     if (window.gtag) {
@@ -236,7 +236,7 @@ class AnalyticsService {
   }
 
   // Store events locally for analysis
-  private storeLocalEvent(event: Record<string, any>) {
+  private storeLocalEvent(event: Record<string, unknown>) {
     try {
       const events = JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
       events.push(event);
@@ -253,7 +253,7 @@ class AnalyticsService {
   }
 
   // Get stored events
-  getStoredEvents(): Record<string, any>[] {
+  getStoredEvents(): Record<string, unknown>[] {
     try {
       return JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
     } catch {

@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   Sparkles,
   Calendar,
   MapPin,
@@ -56,10 +56,15 @@ interface MoodboardImage {
   caption: string | null;
 }
 
+interface BriefingQuestion {
+  id: string;
+  question: string;
+}
+
 interface Briefing {
   id: string;
-  questions: any[];
-  answers: Record<string, any>;
+  questions: BriefingQuestion[];
+  answers: Record<string, string>;
   is_submitted: boolean;
 }
 
@@ -81,7 +86,7 @@ interface Invoice {
 export default function PortalCliente() {
   const { token } = useParams<{ token: string }>();
   const { toast } = useToast();
-  
+
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -91,7 +96,7 @@ export default function PortalCliente() {
   const [briefing, setBriefing] = useState<Briefing | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  
+
   const [briefingAnswers, setBriefingAnswers] = useState<Record<string, string>>({});
   const [payingInvoiceId, setPayingInvoiceId] = useState<string | null>(null);
 
@@ -103,7 +108,7 @@ export default function PortalCliente() {
 
   const fetchData = async () => {
     setLoading(true);
-    
+
     // Fetch project by public token - this is a public query
     const { data: projectData, error: projectError } = await supabase
       .from('projects')
@@ -116,7 +121,7 @@ export default function PortalCliente() {
       setLoading(false);
       return;
     }
-    
+
     setProject(projectData);
 
     // Fetch professional settings
@@ -125,7 +130,7 @@ export default function PortalCliente() {
       .select('business_name, logo_url, primary_color, phone, instagram')
       .eq('user_id', projectData.user_id)
       .maybeSingle();
-    
+
     setSettings(settingsData);
 
     // Fetch client-visible tasks
@@ -151,12 +156,12 @@ export default function PortalCliente() {
       .select('id, questions, answers, is_submitted')
       .eq('project_id', projectData.id)
       .maybeSingle();
-    
+
     if (briefingData) {
       setBriefing({
         ...briefingData,
-        questions: briefingData.questions as any[],
-        answers: briefingData.answers as Record<string, any>
+        questions: briefingData.questions as unknown as BriefingQuestion[],
+        answers: briefingData.answers as Record<string, string>
       });
       setBriefingAnswers(briefingData.answers as Record<string, string>);
     }
@@ -176,7 +181,7 @@ export default function PortalCliente() {
       .eq('project_id', projectData.id)
       .order('created_at', { ascending: false });
     setInvoices(invoicesData || []);
-    
+
     setLoading(false);
   };
 
@@ -197,7 +202,7 @@ export default function PortalCliente() {
 
     const { error } = await supabase
       .from('briefings')
-      .update({ 
+      .update({
         answers: briefingAnswers,
         is_submitted: true,
         submitted_at: new Date().toISOString()
@@ -214,7 +219,7 @@ export default function PortalCliente() {
 
   const handlePayment = async (invoice: Invoice) => {
     setPayingInvoiceId(invoice.id);
-    
+
     try {
       const response = await supabase.functions.invoke('create-payment', {
         body: {
@@ -227,30 +232,30 @@ export default function PortalCliente() {
 
       if (response.error) {
         console.error('Payment error:', response.error);
-        toast({ 
-          title: "Erro ao iniciar pagamento", 
+        toast({
+          title: "Erro ao iniciar pagamento",
           description: response.error.message,
-          variant: "destructive" 
+          variant: "destructive"
         });
         return;
       }
 
       const { init_point } = response.data;
-      
+
       if (init_point) {
         // Redirect to Mercado Pago checkout
         window.location.href = init_point;
       } else {
-        toast({ 
-          title: "Erro ao gerar link de pagamento", 
-          variant: "destructive" 
+        toast({
+          title: "Erro ao gerar link de pagamento",
+          variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Payment error:', error);
-      toast({ 
-        title: "Erro ao processar pagamento", 
-        variant: "destructive" 
+      toast({
+        title: "Erro ao processar pagamento",
+        variant: "destructive"
       });
     } finally {
       setPayingInvoiceId(null);
@@ -286,7 +291,7 @@ export default function PortalCliente() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header 
+      <header
         className="border-b py-6"
         style={{ backgroundColor: `${primaryColor}10`, borderColor: `${primaryColor}30` }}
       >
@@ -295,7 +300,7 @@ export default function PortalCliente() {
             {settings?.logo_url ? (
               <img src={settings.logo_url} alt={businessName} className="h-10 w-10 rounded-lg object-cover" />
             ) : (
-              <div 
+              <div
                 className="w-10 h-10 rounded-lg flex items-center justify-center"
                 style={{ backgroundColor: primaryColor }}
               >
@@ -373,7 +378,7 @@ export default function PortalCliente() {
                 ) : (
                   <div className="space-y-3">
                     {tasks.map((task) => (
-                      <div 
+                      <div
                         key={task.id}
                         className="flex items-center gap-3 p-4 border rounded-lg"
                       >
@@ -440,8 +445,8 @@ export default function PortalCliente() {
               <CardHeader>
                 <CardTitle>Questionário de Briefing</CardTitle>
                 <CardDescription>
-                  {briefing?.is_submitted 
-                    ? 'Suas respostas foram enviadas' 
+                  {briefing?.is_submitted
+                    ? 'Suas respostas foram enviadas'
                     : 'Responda as perguntas abaixo para personalizarmos seu atendimento'}
                 </CardDescription>
               </CardHeader>
@@ -452,7 +457,7 @@ export default function PortalCliente() {
                   </p>
                 ) : briefing.is_submitted ? (
                   <div className="space-y-4">
-                    {briefing.questions.map((q: any) => (
+                    {briefing.questions.map((q) => (
                       <div key={q.id} className="p-4 bg-muted/50 rounded-lg">
                         <p className="font-medium mb-1">{q.question}</p>
                         <p className="text-muted-foreground">
@@ -467,7 +472,7 @@ export default function PortalCliente() {
                   </div>
                 ) : (
                   <div className="space-y-6">
-                    {briefing.questions.map((q: any) => (
+                    {briefing.questions.map((q) => (
                       <div key={q.id} className="space-y-2">
                         <label className="font-medium">{q.question}</label>
                         <Textarea
@@ -546,7 +551,7 @@ export default function PortalCliente() {
                 ) : (
                   <div className="space-y-4">
                     {invoices.map((invoice) => (
-                      <div 
+                      <div
                         key={invoice.id}
                         className="flex items-center justify-between p-4 border rounded-lg"
                       >
@@ -565,15 +570,15 @@ export default function PortalCliente() {
                         </div>
                         <div className="text-right">
                           <Badge variant={
-                            invoice.status === 'paid' ? 'default' : 
-                            invoice.status === 'overdue' ? 'destructive' : 'secondary'
+                            invoice.status === 'paid' ? 'default' :
+                              invoice.status === 'overdue' ? 'destructive' : 'secondary'
                           }>
-                            {invoice.status === 'paid' ? 'Pago' : 
-                             invoice.status === 'overdue' ? 'Vencido' : 'Pendente'}
+                            {invoice.status === 'paid' ? 'Pago' :
+                              invoice.status === 'overdue' ? 'Vencido' : 'Pendente'}
                           </Badge>
                           {(invoice.status === 'pending' || invoice.status === 'overdue') && (
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               className="mt-2"
                               onClick={() => handlePayment(invoice)}
                               disabled={payingInvoiceId === invoice.id}

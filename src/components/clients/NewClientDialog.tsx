@@ -1,4 +1,4 @@
-npimport { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -95,7 +95,7 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
         access_pin: formData.access_pin || null
       };
 
-      console.log('Payload sent to Supabase:', payload); // Debug requested
+
 
 
       // 2. Create Client

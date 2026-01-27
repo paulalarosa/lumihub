@@ -30,7 +30,7 @@ import { GoogleCalendarEvent } from '@/integrations/google/calendar';
 // Services
 import { ClientService } from '@/services/clientService';
 import { ProjectService } from '@/services/projectService';
-import { RevenueService } from '@/services/revenue.service';
+import { RevenueService } from '@/features/financial/services/revenue.service';
 import { EventService } from '@/services/event.service';
 import { CommissionLogic } from '@/services/commissionLogic';
 import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
@@ -88,7 +88,7 @@ export default function Dashboard() {
 
         // 3. Auto-Upgrade Specific User
         if (user.email === 'nathaliasbrb@gmail.com' && profile.subscription_tier !== 'studio') {
-          console.log("Auto-upgrading administrative user...");
+
           // @ts-ignore
           await supabase.from('profiles').update({ subscription_tier: 'studio' }).eq('id', user.id);
         }

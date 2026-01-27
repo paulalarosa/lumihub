@@ -15,7 +15,16 @@ export default function InviteLanding() {
     const navigate = useNavigate();
 
     const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading');
-    const [inviteData, setInviteData] = useState<any>(null);
+    interface AssistantInvite {
+        id: string;
+        email: string;
+        name: string | null;
+        status: string;
+        is_registered: boolean;
+        invite_token: string | null;
+    }
+
+    const [inviteData, setInviteData] = useState<AssistantInvite | null>(null);
     const [loading, setLoading] = useState(false);
 
     // Form Data
@@ -49,7 +58,7 @@ export default function InviteLanding() {
                 return;
             }
 
-            const safeData = data as any;
+            const safeData = data as unknown as AssistantInvite;
 
             if (safeData.is_registered) {
                 toast.error("Este convite já foi utilizado.");
@@ -65,7 +74,7 @@ export default function InviteLanding() {
                 return;
             }
 
-            setInviteData(data);
+            setInviteData(safeData);
             setStatus('valid');
         } catch (error) {
             console.error(error);
@@ -95,7 +104,7 @@ export default function InviteLanding() {
             const cleanFullName = formData.fullName.trim();
             const cleanPhone = formData.phone.trim();
 
-            console.log("DEBUG AUTH - Sanitized:", `"${sanitizedEmail}"`);
+
 
             let userId = null;
 
@@ -141,7 +150,7 @@ export default function InviteLanding() {
             }
 
             if (userId) {
-                console.log("DEBUG ONBOARDING - Linking to user:", userId);
+
 
                 // 3. Link Assistant Record & Consume Token (PRIORITY action)
                 // This must happen BEFORE profile upsert to satisfy any potential RLS that checks for active contracts
@@ -170,7 +179,7 @@ export default function InviteLanding() {
                     full_name: cleanFullName,
                     role: 'assistant',
                     updated_at: new Date().toISOString()
-                } as any, { onConflict: 'id' });
+                }, { onConflict: 'id' });
 
                 if (profileError) {
                     console.warn("Profile Upsert Warning:", profileError);

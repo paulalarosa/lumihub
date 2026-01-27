@@ -68,12 +68,14 @@ const Onboarding = () => {
           id: userData.user.id,
           email: userData.user.email,
           full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'Profissional',
+          // @ts-ignore - 'role' not in generated types
           role: 'professional',
+          // @ts-ignore - 'subscription_tier' not in generated types
           subscription_tier: 'trial',
           onboarding_completed: true,
           // has_completed_onboarding: true, // Legacy support
           updated_at: new Date().toISOString()
-        } as any, { onConflict: 'id' });
+        }, { onConflict: 'id' });
 
       if (error) {
         console.error('Error completing onboarding:', error);
@@ -83,7 +85,7 @@ const Onboarding = () => {
       }
 
       // 3. FORCE REFRESH TO BREAK LOOP
-      console.log("Refreshing session to apply roles...");
+
       await supabase.auth.refreshSession();
 
       toast.success('Bem-vindo ao KONTROL!');

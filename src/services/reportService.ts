@@ -4,6 +4,7 @@ import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { ReportProject, FinancialExportItem } from '@/types/service-types';
 
 interface Client {
     full_name: string;
@@ -12,18 +13,8 @@ interface Client {
     // Add other relevant fields
 }
 
-interface Project {
-    name: string;
-    event_date: string | null;
-    event_location: string | null;
-    status: string;
-    total_value?: number; // Depending on how you calculate/store this
-    // Mocking services for the report if not directly in project structure yet
-    services?: { name: string; price: number }[];
-}
-
 // Premium Bridal Report Generation
-export const generateClientPDF = (client: Client, projects: any[]) => {
+export const generateClientPDF = (client: Client, projects: ReportProject[]) => {
     const doc = new jsPDF();
 
     // -- CONFIGURATION & STYLES --
@@ -135,7 +126,7 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
             // SERVICES TABLE
             const services = project.project_services || [];
             if (services.length > 0) {
-                const tableData = services.map((s: any) => [
+                const tableData = services.map((s) => [
                     // Handle dynamic structure: 'services' join or direct fields
                     s.services?.name || s.name || 'Serviço Personalizado',
                     s.quantity || 1,
@@ -192,7 +183,7 @@ export const generateClientPDF = (client: Client, projects: any[]) => {
     doc.save(`${client.full_name.replace(/\s+/g, '_')}_Ficha_Tecnica.pdf`);
 };
 
-export const exportFinancialExcel = async (data: any[], fileName: string = 'Financeiro') => {
+export const exportFinancialExcel = async (data: FinancialExportItem[], fileName: string = 'Financeiro') => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Dados');
 
@@ -207,7 +198,18 @@ export const exportFinancialExcel = async (data: any[], fileName: string = 'Fina
     saveAs(blob, `${fileName}_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
 };
 
-export const exportMonthlyClosing = async (events: any[]) => {
+export interface MonthlyClosingEvent {
+    total_value?: number | null;
+    assistant_commission?: number | null;
+    event_date?: string | null;
+    title?: string | null;
+    status?: string | null;
+    wedding_clients?: {
+        name: string | null;
+    } | null;
+}
+
+export const exportMonthlyClosing = async (events: MonthlyClosingEvent[]) => {
     const data = events.map(event => {
         const total = Number(event.total_value) || 0;
         const commission = Number(event.assistant_commission) || 0;
@@ -216,7 +218,7 @@ export const exportMonthlyClosing = async (events: any[]) => {
         return {
             'Data': event.event_date ? format(new Date(event.event_date), 'dd/MM/yyyy', { locale: ptBR }) : 'N/A',
             'Cliente': event.wedding_clients?.name || 'Cliente Removida',
-            'Evento': event.title,
+            'Evento': event.title || 'Sem título',
             'Valor Total': total,
             'Comíssão Equipe': commission,
             'Lucro Líquido': netProfit,

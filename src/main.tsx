@@ -3,17 +3,19 @@ import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n";
 
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
+import { HelmetProvider } from 'react-helmet-async';
+
 createRoot(document.getElementById("root")!).render(
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <LanguageProvider>
-            <ErrorBoundary>
+            <HelmetProvider>
                 <App />
-            </ErrorBoundary>
+            </HelmetProvider>
         </LanguageProvider>
     </ThemeProvider>
 );

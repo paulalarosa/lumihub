@@ -84,10 +84,10 @@ export default function PublicBooking() {
     const fetchProfileAndServices = async () => {
         try {
             setLoading(true);
-            // 1. Fetch Profile by Slug
+            // 1. Fetch Profile by Slug (ID in this case)
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, full_name, avatar_url, bio')
+                .select('id, full_name, avatar_url')
                 .eq('id', slug)
                 .maybeSingle();
 
@@ -95,14 +95,21 @@ export default function PublicBooking() {
                 throw new Error("Perfil não encontrado");
             }
 
+            // Fetch settings for bio
+            const { data: settingsData } = await supabase
+                .from('professional_settings')
+                .select('bio, business_name')
+                .eq('user_id', slug)
+                .maybeSingle();
+
             setProfile({
                 id: profileData.id,
                 name: profileData.full_name || 'Profissional',
                 full_name: profileData.full_name,
                 avatar_url: profileData.avatar_url,
-                bio: profileData.bio,
+                bio: settingsData?.bio || null,
                 slug: slug || '',
-                business_address: null
+                business_address: settingsData?.business_name || null // Fallback to business name as address proxy or null
             });
 
             // 2. Fetch Services for this profile
@@ -145,13 +152,15 @@ export default function PublicBooking() {
             const dateStr = format(selectedDate, 'yyyy-MM-dd');
 
             // Fetch busy slots using Secure RPC
+            // Fetch busy slots using Secure RPC
+            // @ts-ignore - RPC not typed in auto-generated types
             const { data: eventsData, error } = await supabase
-                .rpc('get_day_availability' as any, {
+                .rpc('get_day_availability', {
                     target_slug: slug,
                     query_date: dateStr
                 });
 
-            const events = eventsData as any[] || [];
+            const events = (eventsData as { start_time: string; end_time?: string; duration_minutes?: number }[]) || [];
 
             if (error) throw error;
 
@@ -245,11 +254,11 @@ export default function PublicBooking() {
                 const { data: newClient, error: clientError } = await supabase
                     .from('wedding_clients')
                     .insert({
-                        name: clientName,
+                        full_name: clientName,
+                        name: clientName, // Keep name for compatibility
                         phone: clientPhone,
                         user_id: profile.id, // Assign to the professional
                         tags: tags,
-                        last_contacted_at: new Date().toISOString(),
                         origin: 'site_booking'
                     })
                     .select()

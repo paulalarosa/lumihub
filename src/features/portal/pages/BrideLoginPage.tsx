@@ -16,7 +16,7 @@ export default function BrideLoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('ID extraído da URL:', clientId); // Debug requested
+
         if (!clientId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId)) {
             toast({
                 title: "Login Inválido",

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { OriginStat } from '@/types/service-types';
 
 export interface Client {
     id: string;
@@ -33,10 +34,10 @@ export const ClientService = {
                 .select('id, full_name, name:full_name, email, phone, notes, instagram, origin, created_at, user_id, assistant_commission, parent_user_id, is_bride, access_pin, portal_link')
                 .eq('user_id', organizationId)
                 .order('created_at', { ascending: false });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("ClientService List Error:", error);
             // Return empty array on crash to prevent white screen
-            return { data: [], error };
+            return { data: [], error: error as Error };
         }
     },
 
@@ -87,7 +88,7 @@ export const ClientService = {
     async getTreatmentRecords(clientId: string) { return { data: [], error: null }; },
     async deleteTreatmentRecord(recordId: string) { },
 
-    async getOriginStats(organizationId: string) {
+    async getOriginStats(organizationId: string): Promise<OriginStat[]> {
         const { data, error } = await supabase
             .from('wedding_clients')
             .select('origin')
@@ -95,12 +96,16 @@ export const ClientService = {
 
         if (error) throw error;
 
-        const stats = (data as any[] || []).reduce((acc: Record<string, number>, curr) => {
-            const origin = curr.origin || 'Desconhecido';
-            const key = origin.charAt(0).toUpperCase() + origin.slice(1);
-            acc[key] = (acc[key] || 0) + 1;
-            return acc;
-        }, {});
+        // Count occurrences of each origin
+        const stats: Record<string, number> = {};
+
+        if (data) {
+            data.forEach((client) => {
+                const origin = client.origin || 'Desconhecido';
+                const key = origin.charAt(0).toUpperCase() + origin.slice(1);
+                stats[key] = (stats[key] || 0) + 1;
+            });
+        }
 
         return Object.entries(stats).map(([name, value]) => ({ name, value }));
     }

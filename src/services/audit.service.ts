@@ -6,14 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 export interface AuditLog {
     id: string;
     action: string;
-    details: any;
+    details: Record<string, unknown>;
     admin_email: string;
     checksum: string;
     created_at: string;
 }
 
 export const AuditService = {
-    async logAction(action: string, details: any): Promise<void> {
+    async logAction(action: string, details: Record<string, unknown>): Promise<void> {
         try {
             // Get current user for audit log
             const { data: { user } } = await supabase.auth.getUser();
@@ -21,9 +21,10 @@ export const AuditService = {
             // Calculate simple checksum (mock)
             const checksum = btoa(JSON.stringify(details)).substring(0, 20);
 
+            // @ts-ignore - 'backup_integrity_logs' table is not yet in the generated types
             await supabase.from('backup_integrity_logs').insert({
                 action,
-                details,
+                details: details as any, // Cast to any for Supabase JSONB
                 checksum,
                 user_id: user?.id || 'system' // Use system if no user (e.g. background job), providing constraint allows it or handle error
             });

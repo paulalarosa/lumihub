@@ -66,7 +66,7 @@ export default function Contratos() {
         try {
             // 1. Fetch Contracts First (No Joins)
             const { data: contractsData, error: apiError } = await supabase
-                .from('contracts' as any)
+                .from('contracts')
                 .select(`
                     id, 
                     title, 
@@ -91,7 +91,7 @@ export default function Contratos() {
             if (clientIds.length > 0) {
                 // Trying wedding_clients first as per physical schema
                 const { data: clientsData } = await supabase
-                    .from('wedding_clients' as any)
+                    .from('wedding_clients')
                     .select('id, name:full_name')
                     .in('id', clientIds);
 
@@ -120,7 +120,7 @@ export default function Contratos() {
 
     const fetchClients = async () => {
         const { data } = await supabase
-            .from('wedding_clients' as any)
+            .from('wedding_clients')
             .select('id, name')
             .order('name');
         if (data) setClients(data);
@@ -133,7 +133,7 @@ export default function Contratos() {
         }
 
         setIsSubmitting(true);
-        const { error } = await supabase.from('contracts' as any).insert({
+        const { error } = await supabase.from('contracts').insert({
             user_id: user?.id,
             title: newTitle,
             client_id: newClient,
@@ -176,7 +176,7 @@ export default function Contratos() {
 
         // 2. Update contract
         const { error: updateError } = await supabase
-            .from('contracts' as any)
+            .from('contracts')
             .update({
                 status: 'signed',
                 signature_url: publicUrl,

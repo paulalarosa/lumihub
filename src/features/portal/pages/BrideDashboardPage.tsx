@@ -68,7 +68,7 @@ export default function BrideDashboardPage() {
         setError(null);
 
         try {
-            console.log('--- PORTAL FETCH: PROJECT FIRST STRATEGY ---');
+
 
             // 1. Unified Project Query
             const { data: projectData, error: projectError } = await supabase
@@ -93,7 +93,7 @@ export default function BrideDashboardPage() {
                 return;
             }
 
-            console.log('Project Data:', projectData);
+
             setProject(projectData);
 
             // 2. Financials

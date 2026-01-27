@@ -36,8 +36,9 @@ export const useAuthStore = create<AuthState>()(
                         },
                     });
                     if (error) throw error;
-                } catch (error: any) {
-                    set({ error: error.message });
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown login error';
+                    set({ error: errorMessage });
                 } finally {
                     set({ loading: false });
                 }
@@ -48,8 +49,9 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     await supabase.auth.signOut();
                     set({ user: null, session: null, error: null });
-                } catch (error: any) {
-                    set({ error: error.message });
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Unknown logout error';
+                    set({ error: errorMessage });
                 } finally {
                     set({ loading: false });
                 }
@@ -66,8 +68,9 @@ export const useAuthStore = create<AuthState>()(
                     } else {
                         set({ session: null, user: null });
                     }
-                } catch (error: any) {
-                    set({ error: error.message, session: null, user: null });
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : 'Session check error';
+                    set({ error: errorMessage, session: null, user: null });
                 } finally {
                     set({ loading: false });
                 }
