@@ -9,6 +9,7 @@ import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AssistantsTable } from '@/features/admin/components/AssistantsTable';
 import { SystemLogs } from '@/features/admin/components/SystemLogs';
+import { RevenueChart } from "@/components/ui/RevenueChart";
 
 const ExampleMutationButton = () => {
     const queryClient = useQueryClient();
@@ -80,6 +81,22 @@ export default function AdminDashboard() {
                     value={metrics?.leads || 0}
                     isLoading={dataLoading}
                 />
+            </div>
+
+            {/* FINANCIAL PROJECTION CHART */}
+            <div className="border border-white/10 bg-white/5 mb-12">
+                <div className="bg-black/40 p-3 flex justify-between items-center border-b border-white/10">
+                    <span className="text-white font-mono text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+                        Financial Projection // Q1
+                    </span>
+                    <span className="text-white/40 font-mono text-[10px]">
+                        ESTIMATED REVENUE
+                    </span>
+                </div>
+                <div className="p-6 h-[300px] bg-white">
+                    <RevenueChart className="h-full w-full" />
+                </div>
             </div>
 
             <Tabs defaultValue="clients" className="w-full">
