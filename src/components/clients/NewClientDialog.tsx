@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { ActionButton, OutlineButton } from "@/components/ui/action-buttons";
 import {
   Dialog,
   DialogContent,
@@ -234,11 +235,10 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)} className="border-white/10 text-white hover:bg-white/5 hover:text-white rounded-none uppercase tracking-wider text-xs font-bold">Cancelar</Button>
-          <Button onClick={handleSave} disabled={loading} className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 rounded-none uppercase tracking-wider text-xs font-bold">
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <OutlineButton onClick={() => setOpen(false)}>Cancelar</OutlineButton>
+          <ActionButton onClick={handleSave} loading={loading}>
             Salvar Cliente
-          </Button>
+          </ActionButton>
         </DialogFooter>
       </DialogContent>
     </Dialog>

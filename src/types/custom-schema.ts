@@ -27,6 +27,15 @@ export interface AssistantInvite {
     token?: string; // Legacy?
 }
 
+export interface ProfessionalSettings {
+    user_id: string;
+    bio?: string;
+    business_name?: string;
+    business_address?: string;
+    primary_color?: string;
+    slug?: string;
+}
+
 // Database helper to treat these tables as if they existed
 export type CustomDatabase = Database & {
     public: {
@@ -40,6 +49,17 @@ export type CustomDatabase = Database & {
                 Row: AssistantInvite;
                 Insert: AssistantInvite;
                 Update: Partial<AssistantInvite>;
+            };
+            professional_settings: {
+                Row: ProfessionalSettings;
+                Insert: ProfessionalSettings;
+                Update: Partial<ProfessionalSettings>;
+            };
+        };
+        Functions: {
+            get_day_availability: {
+                Args: { target_slug: string; query_date: string };
+                Returns: { start_time: string; end_time: string; duration_minutes: number }[];
             };
         }
     }

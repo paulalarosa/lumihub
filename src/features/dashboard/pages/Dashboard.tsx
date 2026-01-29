@@ -37,6 +37,8 @@ import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
 import { Gift, AlertCircle, Heart } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
+// Button removed - moved to AdminDashboard
+
 // import { OnboardingWizard } from '@/features/onboarding/pages/OnboardingWizard';
 
 export default function Dashboard() {
@@ -262,6 +264,13 @@ export default function Dashboard() {
             {profileName || user.email?.split('@')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
         </motion.div>
+
+        {/* Status Section */}
+        <div className="mb-12 p-6 border border-white/10 bg-white/5 rounded-none">
+          <span className="font-mono text-xs text-white/50 tracking-widest uppercase">STATUS:</span>
+          <p className="text-xl font-serif text-white mt-1">AGUARDANDO CRONOGRAMA</p>
+        </div>
+        {/* ------------------------------------------- */}
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 auto-rows-[minmax(180px,auto)]">

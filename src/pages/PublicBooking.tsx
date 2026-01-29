@@ -1,14 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { ActionButton } from '@/components/ui/action-buttons';
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { format, addMinutes, isBefore, startOfDay, parse } from 'date-fns';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
     Loader2,
@@ -18,288 +16,38 @@ import {
     CheckCircle2,
     Calendar as CalendarIcon,
     User,
-    Sparkles,
     MessageCircle,
     AlertCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Types
-interface Profile {
-    id: string;
-    name: string;
-    avatar_url: string | null;
-    bio: string | null;
-    slug: string;
-    business_address: string | null;
-    full_name: string | null;
-}
-
-interface Service {
-    id: string;
-    name: string;
-    description: string | null;
-    price: number;
-    duration_minutes: number;
-}
-
-interface TimeSlot {
-    time: string;
-    available: boolean;
-}
+import { usePublicBooking } from '@/features/public-booking/hooks/usePublicBooking';
 
 export default function PublicBooking() {
     const { slug } = useParams<{ slug: string }>();
-    const { toast } = useToast();
     const [searchParams] = useState(new URLSearchParams(window.location.search));
     const refParam = searchParams.get('ref');
 
-    // State
-    const [profile, setProfile] = useState<Profile | null>(null);
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    // Booking State
-    const [step, setStep] = useState<1 | 2 | 3 | 4>(1); // 1: Service, 2: Date/Time, 3: Info, 4: Success
-    const [selectedService, setSelectedService] = useState<Service | null>(null);
-    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-    const [selectedTime, setSelectedTime] = useState<string | null>(null);
-
-    // Form State
-    const [clientName, setClientName] = useState("");
-    const [clientPhone, setClientPhone] = useState("");
-    const [submitting, setSubmitting] = useState(false);
-
-    // Time Slots
-    const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
-    const [loadingSlots, setLoadingSlots] = useState(false);
-
-    // Initial Fetch - Runs once when slug changes
-    useEffect(() => {
-        if (slug) {
-            fetchProfileAndServices();
-        }
-    }, [slug]);
-
-    const fetchProfileAndServices = async () => {
-        try {
-            setLoading(true);
-            // 1. Fetch Profile by Slug (ID in this case)
-            const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('id, full_name, avatar_url')
-                .eq('id', slug)
-                .maybeSingle();
-
-            if (profileError || !profileData) {
-                throw new Error("Perfil não encontrado");
-            }
-
-            // Fetch settings for bio
-            const { data: settingsData } = await supabase
-                .from('professional_settings')
-                .select('bio, business_name')
-                .eq('user_id', slug)
-                .maybeSingle();
-
-            setProfile({
-                id: profileData.id,
-                name: profileData.full_name || 'Profissional',
-                full_name: profileData.full_name,
-                avatar_url: profileData.avatar_url,
-                bio: settingsData?.bio || null,
-                slug: slug || '',
-                business_address: settingsData?.business_name || null // Fallback to business name as address proxy or null
-            });
-
-            // 2. Fetch Services for this profile
-            const { data: servicesData, error: servicesError } = await supabase
-                .from('services')
-                .select('id, name, description, price, duration_minutes')
-                .eq('user_id', profileData.id);
-
-            if (servicesError) throw servicesError;
-
-            // Map to expected Service type
-            setServices((servicesData || []).map(s => ({
-                id: s.id,
-                name: s.name,
-                description: s.description,
-                price: s.price || 0,
-                duration_minutes: s.duration_minutes || 60
-            })));
-
-        } catch (error) {
-            console.error("Error fetching public profile:", error);
-            toast({ title: "Perfil não encontrado", variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Generate Time Slots when Date changes
-    useEffect(() => {
-        if (selectedDate && profile && selectedService) {
-            generateTimeSlots();
-        }
-    }, [selectedDate, profile, selectedService]);
-
-    const generateTimeSlots = async () => {
-        if (!selectedDate || !profile || !selectedService) return;
-
-        setLoadingSlots(true);
-        try {
-            const dateStr = format(selectedDate, 'yyyy-MM-dd');
-
-            // Fetch busy slots using Secure RPC
-            // Fetch busy slots using Secure RPC
-            // @ts-ignore - RPC not typed in auto-generated types
-            const { data: eventsData, error } = await supabase
-                .rpc('get_day_availability', {
-                    target_slug: slug,
-                    query_date: dateStr
-                });
-
-            const events = (eventsData as { start_time: string; end_time?: string; duration_minutes?: number }[]) || [];
-
-            if (error) throw error;
-
-            // Define working hours (Mock: 09:00 to 18:00) - In real app, fetch from settings
-            const startHour = 9;
-            const endHour = 18;
-            const serviceDuration = selectedService.duration_minutes;
-            const slots: TimeSlot[] = [];
-
-            for (let hour = startHour; hour < endHour; hour++) {
-                for (let min = 0; min < 60; min += 30) { // 30 min intervals
-                    const time = `${hour.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
-
-                    // Check collision
-                    const slotStart = parse(time, 'HH:mm', new Date());
-                    const slotEnd = addMinutes(slotStart, serviceDuration);
-
-                    let isBlocked = false;
-
-                    // Check against existing events
-                    if (events) {
-                        for (const event of events) {
-                            const eventStart = parse(event.start_time, 'HH:mm', new Date());
-                            // Handle event end time properly
-                            let eventEnd;
-                            if (event.end_time) {
-                                eventEnd = parse(event.end_time, 'HH:mm', new Date());
-                            } else {
-                                eventEnd = addMinutes(eventStart, event.duration_minutes || 60);
-                            }
-
-                            // Simple collision detection
-                            if (
-                                (slotStart >= eventStart && slotStart < eventEnd) ||
-                                (slotEnd > eventStart && slotEnd <= eventEnd) ||
-                                (slotStart <= eventStart && slotEnd >= eventEnd)
-                            ) {
-                                isBlocked = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Check if it's in the past (today)
-                    if (isBefore(selectedDate, startOfDay(new Date())) && isBefore(slotStart, new Date())) {
-                        isBlocked = true;
-                    }
-
-                    slots.push({ time, available: !isBlocked });
-                }
-            }
-
-            setTimeSlots(slots);
-
-        } catch (error) {
-            console.error("Error generating slots:", error);
-            toast({ title: "Erro ao gerar horários", variant: "destructive" });
-        } finally {
-            setLoadingSlots(false);
-        }
-    };
-
-    const handleBookingSubmit = async () => {
-        if (!clientName || !clientPhone) {
-            toast({ title: "Preencha seus dados", variant: "destructive" });
-            return;
-        }
-
-        setSubmitting(true);
-        try {
-            if (!profile || !selectedService || !selectedDate || !selectedTime) throw new Error("Missing data");
-
-            const dateStr = format(selectedDate, 'yyyy-MM-dd');
-            let clientId = null;
-
-            // 1. Try to find or create client to track the lead source
-            try {
-                // Determine tags
-                const tags: string[] = [];
-                if (refParam) tags.push(`ref:${refParam}`);
-                tags.push('origem:agendamento_online');
-
-                // Try to find existing client by phone (if RLS allows select, often it doesn't for public)
-                // Assuming we might fail here, so we wrap in try/catch.
-                // NOTE: In a real secure app, this should be an RPC 'create_booking_and_client'.
-                // Proceeding with best-effort client creation.
-
-                // We will try to insert. If conflict (phone unique key?), we ideally update. 
-                // But typically client phone is not unique in many simple schemas, OR RLS blocks access.
-                // Let's attempt to insert a new client.
-                const { data: newClient, error: clientError } = await supabase
-                    .from('wedding_clients')
-                    .insert({
-                        full_name: clientName,
-                        name: clientName, // Keep name for compatibility
-                        phone: clientPhone,
-                        user_id: profile.id, // Assign to the professional
-                        tags: tags,
-                        origin: 'site_booking'
-                    })
-                    .select()
-                    .single();
-
-                if (!clientError && newClient) {
-                    clientId = newClient.id;
-                } else {
-                    // console.log('Could not create client record (likely perms):', clientError);
-                }
-            } catch (err) {
-                // console.log('Client creation skipped:', err);
-            }
-
-            const description = `Agendamento Online\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${selectedService.name}`;
-
-            const { error } = await supabase
-                .from('events')
-                .insert({
-                    user_id: profile.id,
-                    title: `${clientName} - ${selectedService.name}`,
-                    description: description,
-                    event_date: dateStr,
-                    start_time: selectedTime,
-                    duration_minutes: selectedService.duration_minutes,
-                    is_active: true,
-                    total_value: selectedService.price, // Populate new column
-                    client_id: clientId // If we managed to create/find it
-                });
-
-            if (error) throw error;
-
-            setStep(4); // Success
-
-        } catch (error) {
-            console.error("Booking error:", error);
-            toast({ title: "Erro ao realizar agendamento", variant: "destructive" });
-        } finally {
-            setSubmitting(false);
-        }
-    };
+    const {
+        profile,
+        services,
+        loading,
+        step,
+        setStep,
+        selectedService,
+        setSelectedService,
+        selectedDate,
+        setSelectedDate,
+        selectedTime,
+        setSelectedTime,
+        clientName,
+        setClientName,
+        clientPhone,
+        setClientPhone,
+        submitting,
+        timeSlots,
+        loadingSlots,
+        handleBookingSubmit
+    } = usePublicBooking(slug, refParam);
 
     if (loading) {
         return (
@@ -461,12 +209,13 @@ export default function PublicBooking() {
                             )}
 
                             {selectedTime && (
-                                <Button
-                                    className="w-full bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black font-semibold h-12 rounded-xl mt-4"
+                                <ActionButton
+                                    fullWidth
+                                    className="h-12 rounded-xl mt-4"
                                     onClick={() => setStep(3)}
                                 >
                                     Continuar
-                                </Button>
+                                </ActionButton>
                             )}
                         </motion.div>
                     )}
@@ -528,13 +277,14 @@ export default function PublicBooking() {
                                     </div>
                                 </div>
 
-                                <Button
-                                    className="w-full bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black font-semibold h-12 rounded-xl mt-2"
+                                <ActionButton
+                                    fullWidth
+                                    className="h-12 rounded-xl mt-2"
                                     onClick={handleBookingSubmit}
-                                    disabled={submitting}
+                                    loading={submitting}
                                 >
-                                    {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Confirmar Agendamento"}
-                                </Button>
+                                    Confirmar Agendamento
+                                </ActionButton>
                             </Card>
                         </motion.div>
                     )}
@@ -574,11 +324,8 @@ export default function PublicBooking() {
                                 </div>
                             </Card>
 
-                            {/* Optional: WhatsApp Button to notify the professional manually if needed, or just close */}
                             <div className="pt-4">
                                 <p className="text-sm text-gray-500 mb-4">Você receberá uma confirmação em breve.</p>
-
-                                {/* If we had the PRO's phone number here, we could add a "Talk to Pro" button */}
                             </div>
 
                         </motion.div>

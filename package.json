@@ -16,6 +16,7 @@
     "preview": "vite preview",
     "deploy": "npm run build && aws s3 sync dist/ s3://khaos-kontrol-site --delete && aws cloudfront create-invalidation --distribution-id E2QFIPXMPI0HCW --paths \"/*\"",
     "test": "vitest",
+    "test:e2e": "playwright test",
     "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage"
   },
@@ -57,7 +58,7 @@
     "@sentry/browser": "^10.34.0",
     "@sentry/react": "^10.34.0",
     "@supabase/supabase-js": "^2.89.0",
-    "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-query": "^5.90.20",
     "@tiptap/extension-underline": "^3.15.3",
     "@tiptap/react": "^3.15.3",
     "@tiptap/starter-kit": "^3.15.3",
@@ -106,6 +107,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

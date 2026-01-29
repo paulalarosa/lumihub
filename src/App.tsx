@@ -42,7 +42,7 @@ const BrideLoginPage = lazy(() => import("@/features/portal/pages/BrideLoginPage
 const BrideDashboardPage = lazy(() => import("@/features/portal/pages/BrideDashboardPage"));
 const BrideProtectedRoute = lazy(() => import("@/features/portal/components/BrideProtectedRoute"));
 const FinancialPage = lazy(() => import("@/features/financial/pages/FinancialPage"));
-const AdminDashboard = lazy(() => import("./features/admin/AdminDashboard"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const Clientes = lazy(() => import("@/features/clients/pages/ClientsPage"));
 const ClienteDetalhes = lazy(() => import("@/features/clients/pages/ClientDetailsPage"));
 const Projetos = lazy(() => import("@/features/projects/pages/ProjectsPage"));

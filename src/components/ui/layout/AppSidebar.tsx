@@ -100,11 +100,12 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="bg-background">
+                {/* WORKSPACE GROUP */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("SIDEBAR_MENU_MAIN")}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("SIDEBAR_MENU_MAIN") || "WORKSPACE"}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
+                            {items.filter(i => i.url !== '/configuracoes').map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
@@ -122,17 +123,18 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Admin Section - Only visible for admins */}
-                {isAdmin && (
-                    <SidebarGroup className="mt-auto">
-                        <SidebarGroupLabel className="text-muted-foreground px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">{t("SIDEBAR_MENU_ADMIN")}</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
+                {/* SYSTEM GROUP */}
+                <SidebarGroup className="mt-auto">
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">SYSTEM</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {/* Admin Link (Protected) */}
+                            {isAdmin && (
                                 <SidebarMenuItem>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive('/admin')}
-                                        className="text-foreground data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all rounded-none"
+                                        className="data-[active=true]:bg-yellow-500 data-[active=true]:text-black hover:bg-white/10 transition-all text-muted-foreground rounded-none"
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
@@ -140,10 +142,24 @@ export function AppSidebar() {
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                )}
+                            )}
+
+                            {/* Settings Link */}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isActive('/configuracoes')}
+                                    className="data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none"
+                                >
+                                    <Link to="/configuracoes">
+                                        <Settings className="h-4 w-4" />
+                                        <span className="font-mono text-xs uppercase tracking-wider">{t("sidebar.settings")}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
 
 
                 <SidebarGroup className="mt-auto pb-4">
