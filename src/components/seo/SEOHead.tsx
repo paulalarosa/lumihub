@@ -41,7 +41,7 @@ interface SEOHeadProps {
 
 const SITE_NAME = 'Khaos Kontrol';
 const DEFAULT_IMAGE = '/og-image.png';
-const BASE_URL = 'https://khaos-kontrol.system';
+const BASE_URL = 'https://khaoskontrol.com.br';
 
 const SEOHead = ({
   title = 'KHAOS KONTROL | System',
