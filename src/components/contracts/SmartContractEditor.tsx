@@ -1,23 +1,23 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import {
     Bold,
     Italic,
     List,
-    ListOrdered,
     Heading2,
     Undo,
     Redo,
     Sparkles,
-    FileText,
     Bot,
     Gavel,
     AlertTriangle,
-    CheckCircle2
+    CheckCircle2,
+    MessageCircle,
+    Loader2
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,7 +31,11 @@ interface SmartContractEditorProps {
 
 export function SmartContractEditor({ content, onChange, projectId }: SmartContractEditorProps) {
     const [isAiGenerating, setIsAiGenerating] = useState(false);
+    const [isRefining, setIsRefining] = useState(false);
+    const [aiCommand, setAiCommand] = useState('');
+
     const [projectData, setProjectData] = useState<any>(null);
+    const [contractor, setContractor] = useState<any>(null);
 
     const editor = useEditor({
         extensions: [
@@ -48,44 +52,59 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
         },
     });
 
-    // Fetch Project Data for "Auto-Fill Intelligence"
+    // Fetch Context Data (Project + Contractor)
     useEffect(() => {
-        const fetchProjectDetails = async () => {
+        const fetchData = async () => {
             if (!projectId) return;
 
-            const { data, error } = await supabase
+            // 1. Fetch Project Details
+            const { data: project, error: projectError } = await supabase
                 .from('projects')
                 .select(`
                     *,
-                    client:clients (
+                    client:wedding_clients (
                         full_name,
                         email,
                         phone,
                         cpf,
                         address
+                    ),
+                    services:project_services (
+                        service:services (name)
                     )
                 `)
                 .eq('id', projectId)
                 .single();
 
-            if (!error && data) {
-                setProjectData(data);
+            if (!projectError && project) {
+                setProjectData(project);
+
+                // Toast hint if empty
                 if (editor && !editor.getText().trim()) {
-                    // Auto-suggest template if empty
-                    toast.info("Projeto detectado! Use 'Lumi IA' para gerar o contrato automaticamente.", {
-                        icon: <Sparkles className="w-4 h-4 text-white" />
+                    toast.info("Projeto conectado. Use 'Khaos IA' para gerar o contrato.", {
+                        icon: <Sparkles className="w-4 h-4 text-[#00e5ff]" />
                     });
                 }
             }
+
+            // 2. Fetch Current User (Contractor) Profile
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name, document_id, address, city, state')
+                    .eq('id', user.id)
+                    .single();
+                setContractor(profile);
+            }
         };
 
-        fetchProjectDetails();
+        fetchData();
     }, [projectId, editor]);
 
-    // Update editor content if prop changes externally (e.g. from parent template)
+    // Externally controlled content update
     useEffect(() => {
         if (editor && content !== editor.getHTML()) {
-            // Basic check to avoid cursor jumps, but for template injection it's fine
             if (editor.getText().length === 0 && content.length > 0) {
                 editor.commands.setContent(content);
             }
@@ -105,61 +124,83 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
         toast.success("Cláusula adicionada!");
     };
 
-    const handleGenerateTemplate = () => {
+    const handleGenerateTemplate = async () => {
         if (!editor || !projectData) return;
         setIsAiGenerating(true);
 
-        // Simulated AI Generation with Real Data and Formal Legal Tone
-        setTimeout(() => {
-            const clientName = projectData.client?.full_name || projectData.client?.name || '<strong style="color: #ff4d4d">[PREENCHER NOME]</strong>';
-            const clientCPF = projectData.client?.cpf || "________________";
-            // Start time placeholder or real data if available (assuming projectData might have it, otherwise placeholder)
-            const startTime = projectData.event_time ? projectData.event_time.slice(0, 5) : '<strong style="color: #ff4d4d">[DEFINIR HORÁRIO]</strong>';
+        try {
+            // Prepare Context
+            const servicesList = projectData.services?.map((s: any) => s.service?.name).join(', ') || 'Serviços Gerais';
 
-            const eventDate = projectData.event_date ? new Date(projectData.event_date).toLocaleDateString('pt-BR') : '<strong style="color: #ff4d4d">[DEFINIR DATA]</strong>';
-            const location = projectData.event_location || '<strong style="color: #ff4d4d">[DEFINIR LOCAL]</strong>';
-            const value = projectData.budget ? `R$ ${projectData.budget.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '<strong style="color: #ff4d4d">[DEFINIR VALOR]</strong>';
+            const payload = {
+                mode: 'ARCHITECT',
+                actors: {
+                    contractor_name: contractor?.full_name || "KHAOS SYSTEMS (Prestador)",
+                    contractor_doc: contractor?.document_id || "000.000.000-00",
+                    client_name: projectData.client?.full_name || "Cliente",
+                    client_doc: projectData.client?.cpf || "000.000.000-00",
+                },
+                terms: {
+                    date: projectData.event_date ? new Date(projectData.event_date).toLocaleDateString('pt-BR') : 'A Definir',
+                    price: projectData.budget ? projectData.budget.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+                    services: servicesList,
+                    location: projectData.event_location || 'Local a Definir'
+                }
+            };
 
-            const template = `
-                <h2 style="text-align: center; text-transform: uppercase; margin-bottom: 32px;">CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE BELEZA E MAQUIAGEM ARTÍSTICA</h2>
-                
-                <p style="margin-bottom: 24px;">
-                    <strong>CONTRATADA:</strong> LUMI STUDIOS, com sede em [Cidade/UF].<br>
-                    <strong>CONTRATANTE:</strong> ${clientName}, portadora do CPF ${clientCPF}.
-                </p>
-
-                <ol style="padding-left: 20px;">
-                    <li style="margin-bottom: 16px;"><strong>OBJETO:</strong> Prestação de serviços de maquiagem profissional para o evento designado em <strong>${eventDate}</strong>, no local <strong>${location}</strong>.</li>
-                    
-                    <li style="margin-bottom: 16px;"><strong>CRONOGRAMA:</strong> O serviço terá início impreterivelmente às <strong>${startTime}</strong>. Atrasos superiores a 15 minutos pela CONTRATANTE implicarão em [AJUSTE DE TAXA].</li>
-                    
-                    <li style="margin-bottom: 16px;"><strong>VALORES:</strong> O valor total do pacote é de <strong>${value}</strong>, com sinal de 30% para reserva de data.</li>
-                    
-                    <li style="margin-bottom: 16px;"><strong>CANCELAMENTO:</strong> Em caso de desistência pela CONTRATANTE, o valor do sinal não será restituído, visando cobrir o custo de oportunidade da data bloqueada.</li>
-                    
-                    <li style="margin-bottom: 16px;"><strong>DIREITO DE IMAGEM:</strong> A CONTRATANTE autoriza o uso de fotografias dos serviços para fins de portfólio profissional em meios digitais.</li>
-                </ol>
-                
-                <p style="text-align: center; margin-top: 60px;">_________________________, _____ de ___________________ de 20____.</p>
-
-                <div style="display: flex; justify-content: space-between; margin-top: 60px;">
-                    <div style="text-align: center; width: 45%; border-top: 1px solid white; padding-top: 8px;">
-                        <p style="text-transform: uppercase;">LUMI STUDIOS</p>
-                        <p style="font-size: 10px; opacity: 0.6;">CONTRATADA</p>
-                    </div>
-                    <div style="text-align: center; width: 45%; border-top: 1px solid white; padding-top: 8px;">
-                        <p style="text-transform: uppercase;">${clientName.replace(/<[^>]*>/g, '')}</p>
-                        <p style="font-size: 10px; opacity: 0.6;">CONTRATANTE</p>
-                    </div>
-                </div>
-            `;
-
-            editor.commands.setContent(template);
-            setIsAiGenerating(false);
-            toast.success("Contrato Formal Gerado com Sucesso", {
-                description: "Lumi IA aplicou os protocolos jurídicos e preencheu os dados disponíveis."
+            const { data, error } = await supabase.functions.invoke('generate-contract-ai', {
+                body: payload
             });
-        }, 1500);
+
+            if (error) throw error;
+
+            if (data?.text) {
+                editor.commands.setContent(data.text);
+                toast.success("Contrato Gerado pela Khaos IA", {
+                    description: "Estrutura jurídica aplicada com sucesso."
+                });
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro na geração", { description: "Verifique sua conexão ou tente novamente." });
+        } finally {
+            setIsAiGenerating(false);
+        }
+    };
+
+    const handleRefine = async () => {
+        if (!editor || !aiCommand.trim()) return;
+        setIsRefining(true);
+
+        try {
+            const currentText = editor.getHTML(); // Getting HTML to preserve structure if AI supports it, or getText if raw needed. Function handles text.
+            // Edge function expects 'current_text' and 'instruction'
+
+            const { data, error } = await supabase.functions.invoke('generate-contract-ai', {
+                body: {
+                    mode: 'EDITOR',
+                    current_text: currentText,
+                    instruction: aiCommand
+                }
+            });
+
+            if (error) throw error;
+
+            if (data?.text) {
+                editor.commands.setContent(data.text);
+                setAiCommand('');
+                toast.success("Contrato Refinado", {
+                    description: "Alterações aplicadas pela Khaos IA."
+                });
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Erro na refinamento");
+        } finally {
+            setIsRefining(false);
+        }
     };
 
     if (!editor) {
@@ -178,10 +219,6 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                     <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleItalic().run()} className={`rounded-none h-8 w-8 ${editor.isActive('italic') ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}>
                         <Italic className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleUnderline().run()} className={`rounded-none h-8 w-8 ${editor.isActive('underline') ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}>
-                        <div className="underline">U</div>
-                    </Button>
-                    <Separator orientation="vertical" className="mx-2 h-4 bg-white/20" />
                     <Button variant="ghost" size="icon" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`rounded-none h-8 w-8 ${editor.isActive('heading', { level: 2 }) ? 'bg-white text-black' : 'text-white hover:bg-white/10'}`}>
                         <Heading2 className="w-4 h-4" />
                     </Button>
@@ -206,9 +243,9 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                 <div className="px-4 py-3 bg-black border-t border-white/10 flex justify-between items-center">
                     <span className="font-mono text-[10px] text-white/30 uppercase tracking-widest">{editor.storage.characterCount?.characters()} CARACTERES</span>
                     <div className="flex items-center gap-3">
-                        <div className={`w-1.5 h-1.5 rounded-none rotate-45 ${projectData ? 'bg-white' : 'bg-white/20'}`} />
+                        <div className={`w-1.5 h-1.5 rounded-none rotate-45 ${projectData ? 'bg-[#00e5ff]' : 'bg-white/20'}`} />
                         <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest">
-                            {projectData ? "DADOS SINCRONIZADOS" : "AGUARDANDO PROJETO"}
+                            {projectData ? "KHAOS SYNC ATIVO" : "AGUARDANDO PROJETO"}
                         </span>
                     </div>
                 </div>
@@ -217,11 +254,11 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
             {/* Sidebar: Smart Clauses & AI */}
             <div className="w-full md:w-72 flex flex-col gap-6">
 
-                {/* Lumi AI Action */}
+                {/* Khaos AI Action */}
                 <div className="p-0 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h3 className="font-mono text-xs text-white/50 uppercase tracking-widest">Lumi Intelligence</h3>
-                        <Bot className="w-4 h-4 text-white" />
+                        <h3 className="font-mono text-xs text-white/50 uppercase tracking-widest">Khaos Intelligence</h3>
+                        <Bot className="w-4 h-4 text-[#00e5ff]" />
                     </div>
 
                     <Button
@@ -229,13 +266,41 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                         onClick={handleGenerateTemplate}
                         disabled={!projectId || isAiGenerating}
                     >
-                        {isAiGenerating ? <Sparkles className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2 group-hover:text-black" />}
+                        {isAiGenerating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Sparkles className="w-4 h-4 mr-2 text-[#00e5ff] group-hover:text-black" />}
                         {isAiGenerating ? "PROCESSANDO..." : "GERAR COM IA"}
                     </Button>
 
                     <p className="text-[10px] text-white/30 font-mono leading-relaxed border-l border-white/10 pl-3">
-                        O sistema irá gerar um contrato baseado nos dados do projeto selecionado e normas jurídicas vigentes.
+                        Khaos IA irá analisar os dados do projeto e gerar uma minuta jurídica completa.
                     </p>
+                </div>
+
+                <Separator className="bg-white/10" />
+
+                {/* Refine Section */}
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                        <h3 className="font-mono text-xs text-white/50 uppercase tracking-widest">Refinar / Editar</h3>
+                        <MessageCircle className="w-3 h-3 text-white/50" />
+                    </div>
+
+                    <div className="flex gap-2">
+                        <Input
+                            value={aiCommand}
+                            onChange={(e) => setAiCommand(e.target.value)}
+                            placeholder="Ex: Altere a multa para 20%..."
+                            className="bg-black border-white/20 rounded-none text-white font-mono text-[10px] h-9 focus:border-white placeholder:text-white/20"
+                            onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+                        />
+                        <Button
+                            onClick={handleRefine}
+                            disabled={isRefining || !aiCommand}
+                            variant="secondary"
+                            className="rounded-none h-9 px-3 bg-white text-black hover:bg-gray-200"
+                        >
+                            {isRefining ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3 text-black" />}
+                        </Button>
+                    </div>
                 </div>
 
                 <Separator className="bg-white/10" />
@@ -244,7 +309,7 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                 <div className="flex-1 flex flex-col overflow-hidden">
                     <div className="flex items-center gap-2 mb-4">
                         <Gavel className="w-4 h-4 text-white" />
-                        <h3 className="font-mono text-xs text-white uppercase tracking-widest">CLÁUSULAS DE ELITE</h3>
+                        <h3 className="font-mono text-xs text-white uppercase tracking-widest">CLÁUSULAS RÁPIDAS</h3>
                     </div>
 
                     <ScrollArea className="flex-1 pr-2 -mr-2">
@@ -265,9 +330,9 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
                                 onClick={() => insertClause("FORÇA MAIOR", "Em caso de impedimento por saúde da CONTRATADA, esta compromete-se a indicar profissional de mesma competência para a execução do serviço.")}
                             />
                             <ClauseButton
-                                title="PROVA DE MAQUIAGEM"
+                                title="DIREITO DE IMAGEM"
                                 icon={<CheckCircle2 className="w-3 h-3" />}
-                                onClick={() => insertClause("PROVA DE MAQUIAGEM", "A prova de maquiagem deverá ser agendada com no mínimo 30 dias de antecedência, conforme disponibilidade da agenda.")}
+                                onClick={() => insertClause("DIREITO DE IMAGEM", "A CONTRATANTE autoriza o uso de sua imagem para fins de divulgação do portfólio da CONTRATADA, em redes sociais e site oficial.")}
                             />
                         </div>
                     </ScrollArea>
@@ -281,7 +346,7 @@ function ClauseButton({ title, icon, onClick }: { title: string, icon: React.Rea
     return (
         <button
             onClick={onClick}
-            className="w-full flex items-center gap-3 p-3 text-left bg-black border border-white hover:bg-white hover:text-black transition-all group rounded-none"
+            className="w-full flex items-center gap-3 p-3 text-left bg-black border border-white/20 hover:bg-white hover:text-black transition-all group rounded-none"
         >
             <div className="text-white group-hover:text-black transition-colors">
                 {icon}

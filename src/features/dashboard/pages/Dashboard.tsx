@@ -72,7 +72,7 @@ export default function Dashboard() {
         .from('profiles')
         .select('onboarding_completed, full_name, subscription_tier')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       const profile = profileData as any;
 

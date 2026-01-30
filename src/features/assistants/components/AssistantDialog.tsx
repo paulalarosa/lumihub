@@ -58,6 +58,9 @@ export function AssistantDialog({ open, onOpenChange, assistant, onSave }: Assis
                     <DialogTitle className="text-xl font-serif tracking-wide">
                         {assistant ? 'Editar Assistente' : 'Nova Assistente'}
                     </DialogTitle>
+                    <p className="text-gray-400 text-xs">
+                        Insira os dados do profissional parceiro.
+                    </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6 mt-4">

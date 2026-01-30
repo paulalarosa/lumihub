@@ -1,4 +1,4 @@
-project_id = "rhvmczcwtfjodrocesaa"
+project_id = "nqufpfpqtycxxqtnkkfh"
 
 [functions.create-payment]
 verify_jwt = false
@@ -7,6 +7,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.ai-assistant]
+verify_jwt = false
+
+[functions.generate-contract-ai]
 verify_jwt = false
 
 [functions.google-calendar-auth]

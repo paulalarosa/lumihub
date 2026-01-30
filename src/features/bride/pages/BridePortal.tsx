@@ -104,7 +104,7 @@ export default function BridePortal() {
                 <div className="flex flex-col items-center text-center mb-24">
                     <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-6">Casamento de</p>
                     <h1 className="text-4xl md:text-7xl font-serif text-white uppercase tracking-wider mb-8 leading-tight">
-                        {data.bride_name}
+                        {data.bride_name.replace('Casamento ', '').replace('casamento ', '')}
                     </h1>
 
                     <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 text-neutral-400 font-mono text-xs uppercase tracking-widest border-t border-b border-neutral-900 py-6 px-12">
@@ -158,7 +158,7 @@ export default function BridePortal() {
 
                 <div className="mt-24 text-center">
                     <p className="text-[10px] uppercase tracking-[0.2em] text-neutral-800">
-                        Powered by LUMI HUB • Professional Organization
+                        Powered by Khaos Kontrol • Professional Organization
                     </p>
                 </div>
             </main>

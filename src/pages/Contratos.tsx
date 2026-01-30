@@ -1,25 +1,14 @@
-import { ActionButton, OutlineButton } from "@/components/ui/action-buttons";
-import { Button } from "@/components/ui/button"; // Keep for some secondary uses if needed
+import { ActionButton } from "@/components/ui/action-buttons";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Search, Plus, Filter, FileText, CheckCircle2, Clock, Calendar, PenTool } from "lucide-react";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"; // Kept for 'Ver Detalhes'
+import { Search, Plus, Filter, FileText, CheckCircle2, Calendar, PenTool } from "lucide-react";
 import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ContractDocument } from "@/features/contracts/components/ContractDocument";
 import { ContractDialog } from "@/components/contracts/ContractDialog";
+import { SignatureModal } from "@/components/contracts/SignatureModal";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import { useContracts } from "@/features/contracts/hooks/useContracts";
 
@@ -33,19 +22,10 @@ export default function Contratos() {
         setStatusFilter,
         isDialogOpen,
         setIsDialogOpen,
-        isSubmitting,
-        newTitle,
-        setNewTitle,
-        newClient,
-        setNewClient,
-        newContent,
-        setNewContent,
-        clients,
         signatureOpen,
         setSignatureOpen,
         selectedContract,
         setSelectedContract,
-        handleCreate,
         handleSignatureSave
     } = useContracts();
 
@@ -56,58 +36,16 @@ export default function Contratos() {
                     <h1 className="font-serif text-3xl text-white">Contratos & Documentos</h1>
                     <p className="text-white/60">Gerencie contratos, orçamentos e assinaturas digitais.</p>
                 </div>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <ActionButton>
-                            <Plus className="mr-2 h-4 w-4" /> Novo Contrato
-                        </ActionButton>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl bg-[#1A1A1A] border-white/10 text-white">
-                        <DialogHeader>
-                            <DialogTitle>Criar Novo Contrato</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
-                                <Label className="text-white">Título do Contrato</Label>
-                                <Input
-                                    placeholder="Ex: Contrato de Casamento - Maria & João"
-                                    className="bg-white/5 border-white/10 text-white"
-                                    value={newTitle}
-                                    onChange={(e) => setNewTitle(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid gap-2">
-                                <Label className="text-white">Cliente</Label>
-                                <Select value={newClient} onValueChange={setNewClient}>
-                                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                                        <SelectValue placeholder="Selecione o cliente" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                                        {clients.map(client => (
-                                            <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="grid gap-2">
-                                <Label className="text-white">Cláusulas e Termos</Label>
-                                <Textarea
-                                    placeholder="Cole aqui o texto do contrato..."
-                                    className="min-h-[200px] bg-white/5 border-white/10 text-white"
-                                    value={newContent}
-                                    onChange={(e) => setNewContent(e.target.value)}
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <OutlineButton onClick={() => setIsDialogOpen(false)}>Cancelar</OutlineButton>
-                            <ActionButton onClick={handleCreate} loading={isSubmitting}>
-                                Criar Contrato
-                            </ActionButton>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+                <ActionButton onClick={() => setIsDialogOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" /> Novo Contrato
+                </ActionButton>
             </div>
+
+            {/* Main Creation Dialog */}
+            <ContractDialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+            />
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row gap-4 bg-black p-4 border border-white/20">
@@ -303,12 +241,10 @@ export default function Contratos() {
             </div>
 
             {/* Signature Dialog */}
-            <ContractDialog
+            <SignatureModal
                 isOpen={signatureOpen}
                 onClose={() => setSignatureOpen(false)}
-                onSave={handleSignatureSave}
-                clientName={selectedContract?.clients?.name || "Cliente"}
-                contractTitle={selectedContract?.title || "Contrato"}
+                onConfirm={handleSignatureSave}
             />
         </div>
     );

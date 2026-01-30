@@ -42,7 +42,7 @@ export const useEvents = (start: Date, end: Date) => {
                 .select(`
           *,
           project:projects(name),
-          client:clients(id, name, phone, email),
+          client:wedding_clients(id, name, phone, email),
           event_assistants(
             assistant:assistants(id, name)
           )

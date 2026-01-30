@@ -20,18 +20,39 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
+import { z } from 'zod';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 // Minimal client type for the dropdown
 interface ClientOption {
   id: string;
   name: string;
+  email?: string | null;
 }
 
 interface NewProjectDialogProps {
   onSuccess: () => void;
   onCreateClient?: () => void;
 }
+
+// 1. Zod Schema Definition (As requested)
+const createProjectSchema = z.object({
+  name: z.string().min(1, "Nome do projeto é obrigatório"),
+  client_id: z.string().min(1, "Selecione um cliente"),
+  // Enforcing that we have a client email for the project
+  client_email: z.string()
+    .min(1, "O e-mail do cliente é obrigatório para envio de notificações")
+    .email("E-mail do cliente inválido"),
+  event_date: z.string().optional(),
+  event_location: z.string().optional(),
+  event_type: z.string().optional(),
+  notes: z.string().optional(),
+  status: z.enum(['active', 'completed', 'archived', 'lead']).default('active'),
+});
+
+type CreateProjectFormData = z.infer<typeof createProjectSchema>;
 
 export function NewProjectDialog({
   onSuccess,
@@ -40,43 +61,60 @@ export function NewProjectDialog({
   const { user } = useAuth();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [loadingClients, setLoadingClients] = useState(false);
   const [clients, setClients] = useState<ClientOption[]>([]);
 
-  const [formData, setFormData] = useState({
-    name: '',
-    client_id: '',
-    event_date: '',
-    event_location: '',
-    event_type: '',
-    notes: '',
-    status: 'active',
+  // 2. React Hook Form Setup
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors, isSubmitting }
+  } = useForm<CreateProjectFormData>({
+    resolver: zodResolver(createProjectSchema),
+    defaultValues: {
+      name: '',
+      client_id: '',
+      client_email: '', // Will be set automatically when client is selected
+      event_date: '',
+      event_location: '',
+      event_type: '',
+      notes: '',
+      status: 'active',
+    },
   });
 
-  // Carregar clientes ao abrir o modal
+  const selectedClientId = watch('client_id');
+
+  // Load clients on open
   useEffect(() => {
     if (open) {
       loadClients();
     }
   }, [open]);
 
+  // Update client_email when client_id changes
+  useEffect(() => {
+    if (selectedClientId && clients.length > 0) {
+      const selectedClient = clients.find(c => c.id === selectedClientId);
+      if (selectedClient?.email) {
+        setValue('client_email', selectedClient.email, { shouldValidate: true });
+      } else {
+        setValue('client_email', '', { shouldValidate: true });
+      }
+    }
+  }, [selectedClientId, clients, setValue]);
+
   const loadClients = async () => {
     setLoadingClients(true);
     try {
-      if (!user) {
-        toast({
-          title: 'Erro',
-          description: 'Você não está autenticado.',
-          variant: 'destructive',
-        });
-        setLoadingClients(false);
-        return;
-      }
+      if (!user) return;
 
       const { data, error } = await supabase
         .from('wedding_clients')
-        .select('id, name')
+        .select('id, name, email')
         .eq('user_id', user.id)
         .order('name', { ascending: true });
 
@@ -86,9 +124,8 @@ export function NewProjectDialog({
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
       toast({
-        title: 'Erro ao Carregar Clientes',
-        description:
-          error instanceof Error ? error.message : 'Tente novamente.',
+        title: 'Erro',
+        description: 'Não foi possível carregar a lista de clientes.',
         variant: 'destructive',
       });
     } finally {
@@ -96,116 +133,70 @@ export function NewProjectDialog({
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleClientChange = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      client_id: value,
-    }));
-  };
-
-  const validateForm = (): boolean => {
-    if (!formData.name.trim()) {
-      toast({
-        title: 'Erro de Validação',
-        description: 'O nome do projeto é obrigatório.',
-        variant: 'destructive',
-      });
-      return false;
-    }
-
-    if (!formData.client_id) {
-      toast({
-        title: 'Erro de Validação',
-        description: 'Selecione um cliente.',
-        variant: 'destructive',
-      });
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    setLoading(true);
+  const onSubmit = async (data: CreateProjectFormData) => {
+    if (!user) return;
 
     try {
-      if (!user) {
-        toast({
-          title: 'Erro de Autenticação',
-          description: 'Usuário não autenticado. Faça login e tente novamente.',
-          variant: 'destructive',
-        });
-        setLoading(false);
-        return;
-      }
-
-      // Preparar dados para insert (matching actual DB columns)
+      // ✅ 1. Create the project first (Secure Code Pattern)
       const newProject = {
-        name: formData.name.trim(),
-        client_id: formData.client_id,
+        name: data.name.trim(),
+        client_id: data.client_id,
         user_id: user.id,
-        event_date: formData.event_date || null,
-        event_location: formData.event_location.trim() || null,
-        event_type: formData.event_type.trim() || null,
-        notes: formData.notes.trim() || null,
-        status: formData.status,
+        event_date: data.event_date || null,
+        event_location: data.event_location?.trim() || null,
+        event_type: data.event_type || null,
+        notes: data.notes?.trim() || null,
+        status: data.status,
       };
 
-      const { error } = await supabase
+      const { data: projectData, error: dbError } = await supabase
         .from('projects')
-        .insert([newProject]);
+        .insert([newProject])
+        .select()
+        .single();
 
-      if (error) {
-        throw error;
+      if (dbError) throw dbError;
+
+      // ✅ 2. Try to send email, but IGNORA failures (Safe for Localhost)
+      try {
+        if (!data.client_email) {
+          console.warn("⚠️ Localhost/Dev: Projeto criado sem e-mail válido (Ignorado).");
+        } else {
+          // Calling the Edge Function to send welcome email
+          const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+            body: {
+              record: {
+                ...projectData,
+                client_email: data.client_email // Explicitly passing email
+              }
+            }
+          });
+
+          if (emailError) throw emailError;
+        }
+      } catch (emailError) {
+        // AQUI É O PULO DO GATO: A gente apenas loga o erro, não trava o app
+        console.error("❌ Falha no envio de e-mail (Não crítico):", emailError);
+        // Optional: toast warning
+        // toast({ title: "Aviso", description: "Projeto criado, mas houve erro no envio do e-mail.", variant: "warning" });
       }
 
-      const clientName = clients.find((c) => c.id === formData.client_id)?.name;
       toast({
         title: 'Projeto Criado',
-        description: `${formData.name} foi adicionado com sucesso para ${clientName}.`,
+        description: `${data.name} foi criado com sucesso.`,
       });
 
-      // Reset form
-      setFormData({
-        name: '',
-        client_id: '',
-        event_date: '',
-        event_location: '',
-        event_type: '',
-        notes: '',
-        status: 'active',
-      });
-
+      reset();
       setOpen(false);
       onSuccess();
-    } catch (error) {
-      console.error('Erro ao criar projeto:', error);
+
+    } catch (error: any) {
+      console.error('Erro crítico ao criar projeto:', error);
       toast({
         title: 'Erro ao Criar Projeto',
-        description:
-          error instanceof Error
-            ? error.message
-            : 'Ocorreu um erro ao salvar o projeto.',
+        description: error.message || 'Ocorreu um erro ao salvar o projeto.',
         variant: 'destructive',
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -217,18 +208,17 @@ export function NewProjectDialog({
           Novo Projeto
         </Button>
       </DialogTrigger>
-      {/* Dark Mode Styling Fix: Improved background and borders */}
       <DialogContent className="max-w-lg bg-[#1a1a1a] border-white/10 text-white shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl">Novo Projeto</DialogTitle>
           <DialogDescription className="text-gray-400">
-            Crie um novo projeto para um cliente.
+            Crie um novo projeto. O e-mail do cliente será validado automaticamente.
           </DialogDescription>
         </DialogHeader>
 
         {loadingClients ? (
           <div className="flex items-center justify-center py-8">
-            <p className="text-gray-400">Carregando clientes...</p>
+            <Loader2 className="w-6 h-6 animate-spin text-[#00e5ff]" />
           </div>
         ) : clients.length === 0 ? (
           <div className="py-8 text-center">
@@ -247,22 +237,18 @@ export function NewProjectDialog({
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Nome */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-gray-300">
                 Nome do Projeto <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="name"
-                name="name"
+                {...control.register("name")}
                 placeholder="Casamento Maria & João"
-                value={formData.name}
-                onChange={handleInputChange}
-                disabled={loading}
-                required
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
               />
+              {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
             </div>
 
             {/* Cliente */}
@@ -270,70 +256,73 @@ export function NewProjectDialog({
               <Label htmlFor="client_id" className="text-gray-300">
                 Cliente <span className="text-red-500">*</span>
               </Label>
-              <Select
-                value={formData.client_id}
-                onValueChange={handleClientChange}
-                disabled={loading}
-              >
-                <SelectTrigger id="client_id" className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Selecione um cliente" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Controller
+                control={control}
+                name="client_id"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Selecione um cliente" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.client_id && <p className="text-xs text-red-400">{errors.client_id.message}</p>}
+
+              {/* Hidden Email Validation Feedback */}
+              <input type="hidden" {...control.register("client_email")} />
+              {errors.client_email && (
+                <p className="text-xs text-amber-400 flex items-center gap-1">
+                  ⚠️ {errors.client_email.message} (Atualize o cadastro do cliente)
+                </p>
+              )}
             </div>
 
-            {/* Tipo de Evento - Unified Dropdown */}
+            {/* Tipo de Evento */}
             <div className="space-y-2">
-              <Label htmlFor="event_type" className="text-gray-300">Tipo de Evento</Label>
-              <Select
-                value={formData.event_type}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, event_type: value }))}
-                disabled={loading}
-              >
-                <SelectTrigger id="event_type" className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Selecione o tipo..." />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
-                  <SelectItem value="noivas">Noivas</SelectItem>
-                  <SelectItem value="pre_wedding">Pré Wedding</SelectItem>
-                  <SelectItem value="producoes_sociais">Produções Sociais</SelectItem>
-                  <SelectItem value="other">Outro</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label className="text-gray-300">Tipo de Evento</Label>
+              <Controller
+                control={control}
+                name="event_type"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                      <SelectValue placeholder="Selecione o tipo..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
+                      <SelectItem value="noivas">Noivas</SelectItem>
+                      <SelectItem value="pre_wedding">Pré Wedding</SelectItem>
+                      <SelectItem value="producoes_sociais">Produções Sociais</SelectItem>
+                      <SelectItem value="other">Outro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
 
             {/* Grid de 2 colunas para Data e Local */}
             <div className="grid grid-cols-2 gap-4">
-              {/* Data do Evento */}
               <div className="space-y-2">
-                <Label htmlFor="event_date" className="text-gray-300">Data do Evento</Label>
+                <Label className="text-gray-300">Data do Evento</Label>
                 <Input
-                  id="event_date"
-                  name="event_date"
                   type="date"
-                  value={formData.event_date}
-                  onChange={handleInputChange}
-                  disabled={loading}
+                  {...control.register("event_date")}
                   className="bg-white/5 border-white/10 text-white focus:border-white/50 focus:ring-white/50"
                 />
               </div>
 
-              {/* Local */}
               <div className="space-y-2">
-                <Label htmlFor="event_location" className="text-gray-300">Local</Label>
+                <Label className="text-gray-300">Local</Label>
                 <Input
-                  id="event_location"
-                  name="event_location"
+                  {...control.register("event_location")}
                   placeholder="Local do evento"
-                  value={formData.event_location}
-                  onChange={handleInputChange}
-                  disabled={loading}
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
                 />
               </div>
@@ -341,14 +330,10 @@ export function NewProjectDialog({
 
             {/* Notas */}
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-gray-300">Notas</Label>
+              <Label className="text-gray-300">Notas</Label>
               <textarea
-                id="notes"
-                name="notes"
+                {...control.register("notes")}
                 placeholder="Observações sobre o projeto..."
-                value={formData.notes}
-                onChange={handleInputChange}
-                disabled={loading}
                 rows={3}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50"
               />
@@ -360,13 +345,14 @@ export function NewProjectDialog({
                 type="button"
                 variant="outline"
                 onClick={() => setOpen(false)}
-                disabled={loading}
+                disabled={isSubmitting}
                 className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={loading} className="bg-white hover:bg-white/90 text-black">
-                {loading ? 'Salvando...' : 'Criar Projeto'}
+              <Button type="submit" disabled={isSubmitting} className="bg-white hover:bg-white/90 text-black">
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                {isSubmitting ? 'Salvando...' : 'Criar Projeto'}
               </Button>
             </div>
           </form>

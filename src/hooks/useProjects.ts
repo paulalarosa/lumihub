@@ -24,7 +24,7 @@ export function useProjects() {
 
             const { data, error } = await supabase
                 .from('projects')
-                .select('*, client:clients(full_name)')
+                .select('*, client:wedding_clients(full_name)')
                 .order('name');
 
             if (!error && data) {

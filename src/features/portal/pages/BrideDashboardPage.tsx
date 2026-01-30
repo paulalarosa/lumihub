@@ -75,7 +75,7 @@ export default function BrideDashboardPage() {
                 .from('projects')
                 .select(`
                     *,
-                    client:clients(full_name, email, phone, wedding_date),
+                    client:wedding_clients(full_name, email, phone, wedding_date),
                     services:project_services(
                         *,
                         service:services(name)

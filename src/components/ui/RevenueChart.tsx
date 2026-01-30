@@ -3,17 +3,25 @@ import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetr
 
 interface RevenueChartProps {
     className?: string;
+    overrideMetrics?: {
+        activeContracts: number;
+        leads: number;
+        subtitle?: string; // e.g. "ESTIMATED SaaS REVENUE"
+    };
 }
 
-export const RevenueChart = ({ className }: RevenueChartProps) => {
+export const RevenueChart = ({ className, overrideMetrics }: RevenueChartProps) => {
     const { data: metrics } = useDashboardMetrics();
-    const { totalClients = 0, activeContracts = 0, leads = 0 } = metrics || {};
+
+    // Use override if provided, otherwise fallback to hook
+    const activeContracts = overrideMetrics ? overrideMetrics.activeContracts : (metrics?.activeContracts || 0);
+    const leads = overrideMetrics ? overrideMetrics.leads : (metrics?.leads || 0);
 
     // Simulation: 
-    // Average Ticket = R$ 1500
-    // Guaranteed = Active * 1500
-    // Potential = Leads * 1500
-    const TICKET = 1500;
+    // Average Ticket = R$ 1500 (CRM) or R$ 59.90 (SaaS)
+    // If override is present, we assume SaaS pricing (approx R$ 89.90 avg)
+    const TICKET = overrideMetrics ? 89.90 : 1500;
+
     const guaranteed = activeContracts * TICKET;
     const potential = leads * TICKET;
 
@@ -21,14 +29,14 @@ export const RevenueChart = ({ className }: RevenueChartProps) => {
         labels: ['Jan', 'Feb', 'Mar'], // Simulating Q1
         datasets: [
             {
-                label: 'GUARANTEED (ACTIVE)',
-                data: [guaranteed, guaranteed * 1.1, guaranteed * 1.2], // Mock trend
+                label: overrideMetrics ? 'RECURRING (MRR)' : 'GUARANTEED (ACTIVE)',
+                data: [guaranteed, guaranteed * 1.05, guaranteed * 1.1], // Mock trend
                 backgroundColor: 'black',
                 barPercentage: 0.6,
             },
             {
-                label: 'POTENTIAL (LEADS)',
-                data: [potential, potential * 0.8, potential * 1.5], // Mock trend
+                label: overrideMetrics ? 'PROJECTED' : 'POTENTIAL (LEADS)',
+                data: [potential, potential * 0.9, potential * 1.2], // Mock trend
                 backgroundColor: '#fbbf24', // Amber-400 / Yellow
                 borderColor: 'black',
                 borderWidth: 2,
@@ -65,7 +73,7 @@ export const RevenueChart = ({ className }: RevenueChartProps) => {
                 cornerRadius: 0, // Brutalist
                 callbacks: {
                     label: function (context: any) {
-                        return ' R$ ' + context.parsed.y.toLocaleString('pt-BR');
+                        return ' R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                     }
                 }
             }
@@ -89,7 +97,8 @@ export const RevenueChart = ({ className }: RevenueChartProps) => {
                 },
                 ticks: {
                     callback: function (value: any) {
-                        return 'k' + (value / 1000);
+                        if (value >= 1000) return 'k' + (value / 1000);
+                        return value;
                     },
                     font: {
                         family: 'JetBrains Mono',

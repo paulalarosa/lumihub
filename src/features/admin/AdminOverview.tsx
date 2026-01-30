@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, DollarSign, TrendingUp, AlertCircle, Activity, Terminal } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, Terminal } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { RevenueChart } from "@/components/ui/RevenueChart";
 
 export default function AdminOverview() {
   const { t } = useLanguage();
@@ -47,6 +49,8 @@ export default function AdminOverview() {
         .select('*', { count: 'exact' });
 
       // Get total revenue from transactions
+      // Note: Assuming 'transactions' table exists or mocking it if not.
+      // If transactions table doesn't exist, we fallback to 0.
       const { data: transactionData } = await supabase
         .from('transactions' as any)
         .select('net_amount')
@@ -76,43 +80,70 @@ export default function AdminOverview() {
     );
   }
 
-  const statCards = [
-    { label: t('admin_menu_users'), value: stats.totalUsers, icon: Users, change: "+12% this week" },
-    { label: "Receita Total", value: `R$ ${stats.totalRevenue.toFixed(2)}`, icon: DollarSign, change: "+5% vs last month" },
-    { label: t('admin_menu_subscriptions'), value: stats.activeSubscriptions, icon: TrendingUp, change: "Stable" },
-    { label: "Churn Rate", value: `${stats.churnRate}%`, icon: AlertCircle, change: "-0.5% improvement" },
-  ];
-
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.label} className="bg-black border border-white/20 rounded-none group hover:border-white transition-colors relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-100 transition-opacity">
-                <Icon className="h-8 w-8 text-white" />
-              </div>
-              <CardContent className="p-6 relative z-10">
-                <p className="text-gray-500 font-mono text-[10px] uppercase tracking-widest mb-1">{stat.label}</p>
-                <p className="text-white font-serif text-3xl font-light">{stat.value}</p>
-                <p className="text-[10px] text-green-500 font-mono mt-2">{stat.change}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+      {/* 1. HUD Grid (Restored from Legacy) */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <MetricCard
+          label="TOTAL USERS"
+          value={stats.totalUsers}
+          isLoading={loading}
+        />
+        <MetricCard
+          label="TOTAL REVENUE"
+          value={`R$ ${stats.totalRevenue.toFixed(0)}`}
+          isLoading={loading}
+          className="border-yellow-500/50"
+        />
+        <MetricCard
+          label="ACTIVE SUBS"
+          value={stats.activeSubscriptions}
+          isLoading={loading}
+        />
+        <MetricCard
+          label="CHURN RATE"
+          value={`${stats.churnRate}%`}
+          isLoading={loading}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <Card className="bg-black border border-white/20 rounded-none h-full">
+
+        {/* 2. Global Revenue Chart (Restored from Legacy) */}
+        <div className="lg:col-span-2 border border-white/10 bg-white/5">
+          <div className="bg-black/40 p-3 flex justify-between items-center border-b border-white/10">
+            <span className="text-white font-mono text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+              <div className="w-2 h-2 bg-yellow-500 rounded-full" />
+              Financial Projection // SaaS
+            </span>
+            <span className="text-white/40 font-mono text-[10px]">
+              ESTIMATED MRR
+            </span>
+          </div>
+          <div className="p-6 h-[340px] bg-white">
+            {/* Inject Global Stats into Revenue Chart */}
+            <RevenueChart
+              className="h-full w-full"
+              overrideMetrics={{
+                activeContracts: stats.activeSubscriptions,
+                leads: stats.totalUsers - stats.activeSubscriptions, // "Leads" mapped to Non-Subscribers
+                subtitle: "SaaS REVENUE"
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 3. Quick Actions & Live Feed (New Features) */}
+        <div className="flex flex-col gap-6">
+          <Card className="bg-black border border-white/20 rounded-none flex-1">
             <CardHeader className="border-b border-white/10 pb-4">
               <div className="flex items-center gap-2">
                 <Terminal className="h-5 w-5 text-white" />
                 <CardTitle className="text-white font-serif text-lg tracking-tight">{t('admin_live_feed')}</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-0 bg-[#0a0a0a] min-h-[300px] font-mono text-xs p-4">
+            <CardContent className="p-0 bg-[#0a0a0a] font-mono text-xs p-4 overflow-y-auto max-h-[220px]">
               <div className="space-y-2">
                 {activities.map((log, i) => (
                   <div key={i} className="text-green-500/80 border-l-2 border-green-900 pl-3 py-1 hover:bg-white/5 transition-colors">
@@ -125,16 +156,12 @@ export default function AdminOverview() {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <div>
-          <Card className="bg-black border border-white/20 rounded-none h-full">
+          <Card className="bg-black border border-white/20 rounded-none">
             <CardHeader className="border-b border-white/10 pb-4">
               <CardTitle className="text-white font-serif text-lg tracking-tight">Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-3">
-              <p className="text-gray-500 text-xs font-mono mb-4">Shortcuts for common tasks</p>
-
               <button className="w-full text-left px-4 py-3 bg-white/5 hover:bg-white hover:text-black border border-white/10 text-white font-mono text-xs uppercase tracking-wider transition-colors">
                 [ VIEW PENDING APPROVALS ]
               </button>

@@ -24,7 +24,7 @@ export function useOrganization() {
                     .from('profiles')
                     .select('id, parent_user_id, role, subscription_tier')
                     .eq('id', user.id)
-                    .single();
+                    .maybeSingle();
 
                 const profileData = profile as any;
 

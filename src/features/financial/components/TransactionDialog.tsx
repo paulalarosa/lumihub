@@ -122,6 +122,9 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                 category: "",
                 date: format(new Date(), "yyyy-MM-dd"),
                 payment_method: "pix",
+                project_id: "",
+                service_id: "",
+                assistant_id: "",
             });
             onSuccess?.();
         } catch (error: any) {
@@ -147,6 +150,9 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                     <DialogTitle className="font-serif text-2xl">
                         {type === "income" ? "Nova Receita" : "Nova Despesa"}
                     </DialogTitle>
+                    <p className="text-gray-400 text-sm">
+                        Preencha os dados da transação financeira.
+                    </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 py-4">

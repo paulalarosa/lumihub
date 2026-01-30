@@ -129,7 +129,7 @@ The Client agrees to disclose any allergies or skin conditions. The Service Prov
 The Client grants permission for the Service Provider to use photographs for portfolio and marketing purposes, unless otherwise specified in writing.
 `;
 
-export const ContractDocument = ({ contract, businessName = "LUMI BEAUTY STUDIO" }: ContractDocumentProps) => (
+export const ContractDocument = ({ contract, businessName = "KHAOS STUDIO" }: ContractDocumentProps) => (
     <Document>
         <Page size="A4" style={styles.page}>
             {/* Header */}

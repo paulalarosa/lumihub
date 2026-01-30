@@ -44,7 +44,7 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
             setLoading(true);
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
-                .select('id, full_name, avatar_url')
+                .select('id, full_name, avatar_url, bio, business_name, address')
                 .eq('id', slug)
                 .maybeSingle();
 
@@ -52,20 +52,14 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
                 throw new Error("Perfil não encontrado");
             }
 
-            const { data: settingsData } = await supabase
-                .from('professional_settings' as any)
-                .select('bio, business_name')
-                .eq('user_id', slug)
-                .maybeSingle();
-
             setProfile({
                 id: profileData.id,
                 name: profileData.full_name || 'Profissional',
                 full_name: profileData.full_name,
                 avatar_url: profileData.avatar_url,
-                bio: settingsData?.bio || null,
+                bio: profileData.bio,
                 slug: slug || '',
-                business_address: settingsData?.business_name || null
+                business_address: profileData.address || profileData.business_name || null
             });
 
             const { data: servicesData, error: servicesError } = await supabase

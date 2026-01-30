@@ -115,7 +115,7 @@ export default function ProjectDetailsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
-  // const [transactions, setTransactions] = useState<any[]>([]); // Derived from details
+  const [transactions, setTransactions] = useState<any[]>([]); // Derived from details
 
   // Sync effect
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function ProjectDetailsPage() {
       setContracts(projectDetails.contracts as Contract[]);
       setProjectServices(projectDetails.projectServices as ProjectServiceItem[]);
       setServices(projectDetails.services as Service[]);
-      // setTransactions(projectDetails.transactions);
+      setTransactions(projectDetails.transactions || []);
     }
   }, [projectDetails]);
 

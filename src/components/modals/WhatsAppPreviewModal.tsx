@@ -76,6 +76,9 @@ export function WhatsAppPreviewModal({ isOpen, onClose, client, event, templates
                     <DialogTitle className="text-white font-serif uppercase tracking-wide">
                         Enviar Mensagem para {client.name}
                     </DialogTitle>
+                    <p className="text-zinc-500 text-xs">
+                        Revise e personalize a mensagem antes de enviar.
+                    </p>
                 </DialogHeader>
 
                 <div className="space-y-4 py-4">

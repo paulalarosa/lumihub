@@ -15,14 +15,23 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
-interface Props {
-    project: any;
-    client: any;
+interface WhatsAppProps {
+    project: {
+        event_date?: string | Date;
+        event_location?: string | null;
+        [key: string]: any;
+    };
+    client: {
+        phone?: string | null;
+        full_name?: string | null;
+        name?: string | null;
+        [key: string]: any;
+    };
     variant?: 'default' | 'outline' | 'ghost';
     className?: string;
 }
 
-export const WhatsAppActionMenu = ({ project, client, variant = 'default', className }: Props) => {
+export const WhatsAppActionMenu = ({ project, client, variant = 'default', className }: WhatsAppProps) => {
     const { organizationId } = useOrganization();
     const { user } = useAuth();
     const { toast } = useToast();
@@ -43,7 +52,7 @@ export const WhatsAppActionMenu = ({ project, client, variant = 'default', class
                 .select('content')
                 .eq('organization_id', organizationId)
                 .eq('type', templateType)
-                .single();
+                .maybeSingle();
 
             // Fallback content
             let rawText = template?.content;
@@ -64,8 +73,8 @@ export const WhatsAppActionMenu = ({ project, client, variant = 'default', class
                     .select('full_name')
                     .eq('id', user.id)
                     .single();
-                const profile = profData as any;
-                if (profile?.full_name) professionalName = profile.full_name;
+
+                if (profData?.full_name) professionalName = profData.full_name;
             }
 
             // 3. Generate Link

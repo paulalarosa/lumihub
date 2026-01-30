@@ -148,6 +148,9 @@ export default function ServiceDialog({
                     <DialogTitle className="font-serif text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
                         {service ? t('service.dialog.title.edit') : t('service.dialog.title.new')}
                     </DialogTitle>
+                    <p className="text-gray-400 text-sm">
+                        {service ? "Edite as informações do serviço abaixo." : "Preencha os dados criar um novo serviço."}
+                    </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6 mt-4">

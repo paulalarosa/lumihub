@@ -18,7 +18,7 @@ export const ProjectService = {
             .from('projects')
             .select(`
                 *,
-                client:clients (
+                client:wedding_clients (
                     id,
                     full_name,
                     email,
@@ -108,7 +108,7 @@ export const ProjectService = {
 
     // Services (Catalog)
     async getCatalogServices() {
-        return await supabase.from('services').select('*').eq('is_active', true).order('sort_order');
+        return await supabase.from('services').select('*').order('sort_order');
     },
 
     // Project Services (Financial)

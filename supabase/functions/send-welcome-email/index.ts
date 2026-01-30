@@ -3,8 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Or specific origins if refined later, but for now * handles localhost:8080 and khaoskontrol.com.br
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
 const welcomeEmailTemplate = (props: { brideName: string; portalLink: string; accessPin: string }) => `

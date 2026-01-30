@@ -132,11 +132,11 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
       try {
         // 1. Fetch Template
         const { data: template } = await supabase
-          .from('message_templates' as any)
+          .from('message_templates')
           .select('content')
           .eq('organization_id', organizationId)
           .eq('type', recommendedAction)
-          .single();
+          .maybeSingle();
 
         // Fallback
         let rawText = template?.content;
@@ -153,7 +153,7 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
         let professionalName = "LumiHub";
         if (user) {
           const { data: profData } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
-          if ((profData as any)?.full_name) professionalName = (profData as any).full_name;
+          if (profData?.full_name) professionalName = profData.full_name;
         }
 
         // 3. Generate Link
