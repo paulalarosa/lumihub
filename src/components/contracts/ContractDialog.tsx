@@ -13,14 +13,15 @@ import { SmartContractEditor } from './SmartContractEditor';
 interface ContractDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    defaultProjectId?: string;
 }
 
-export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
+export function ContractDialog({ open, onOpenChange, defaultProjectId }: ContractDialogProps) {
     const { createContract, uploadContractFile, loading: isSaving } = useContracts();
     const { projects } = useProjects();
 
     const [mode, setMode] = useState<'digital' | 'upload'>('digital');
-    const [projectId, setProjectId] = useState('');
+    const [projectId, setProjectId] = useState(defaultProjectId || '');
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -28,13 +29,13 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
     // Reset form when dialog opens
     useEffect(() => {
         if (open) {
-            setProjectId('');
+            setProjectId(defaultProjectId || '');
             setTitle('');
             setContent('');
             setFile(null);
             setMode('digital');
         }
-    }, [open]);
+    }, [open, defaultProjectId]);
 
     const handleSubmit = async () => {
         if (!projectId || !title) {
@@ -84,7 +85,7 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
                         <DialogTitle className="text-2xl font-serif font-light tracking-wide text-white">NOVO CONTRATO INTELIGENTE</DialogTitle>
                     </div>
                     <DialogDescription className="text-white/40 font-mono text-xs uppercase tracking-widest">
-                        Crie contratos com auxílio da Lumi IA ou faça upload.
+                        Crie contratos com auxílio da Khaos IA ou faça upload.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -99,7 +100,9 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
                             >
                                 <option value="" disabled className="bg-black text-gray-500">SELECIONE UM PROJETO...</option>
                                 {projects?.map((project: any) => (
-                                    <option key={project.id} value={project.id} className="bg-black text-white">{project.name}</option>
+                                    <option key={project.id} value={project.id} className="bg-black text-white">
+                                        {project.name} {project.client?.full_name ? `// ${project.client.full_name}` : ''}
+                                    </option>
                                 ))}
                             </select>
                         </div>
@@ -121,7 +124,7 @@ export function ContractDialog({ open, onOpenChange }: ContractDialogProps) {
                                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-white data-[state=active]:bg-transparent data-[state=active]:text-white text-white/40 font-mono text-xs uppercase tracking-widest py-3 transition-all"
                             >
                                 <Sparkles className="w-3 h-3 mr-2" />
-                                Editor Inteligente (Lumi IA)
+                                Editor Inteligente (Khaos IA)
                             </TabsTrigger>
                             <TabsTrigger
                                 value="upload"

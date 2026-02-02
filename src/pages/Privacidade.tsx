@@ -42,7 +42,12 @@ const Privacidade = () => {
                                     <li>Fornecer e manter os serviços operacionais;</li>
                                     <li>Processar transações financeiras com segurança;</li>
                                     <li>Notificar sobre atualizações do sistema (System Updates);</li>
-                                    <li>Prevenir fraudes e garantir a segurança da rede.</li>
+                                    <li>Prevenir fraudes e garantir a segurança da rede;</li>
+                                    <li>
+                                        <strong>Integração com Google Calendar:</strong> O uso de informações recebidas das APIs do Google aderirá à
+                                        <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes" target="_blank" rel="noopener" className="text-white underline"> Política de Dados do Usuário dos Serviços de API do Google</a>,
+                                        incluindo os requisitos de Uso Limitado. Utilizamos o escopo <em>calendar.events.readonly</em> apenas para exibir seus eventos dentro do painel, sem armazenar dados externamente de forma permanente.
+                                    </li>
                                 </ul>
                             </section>
 

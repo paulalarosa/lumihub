@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Terminal } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/hooks/useLanguage';
 
 export default function Login() {
     const navigate = useNavigate();

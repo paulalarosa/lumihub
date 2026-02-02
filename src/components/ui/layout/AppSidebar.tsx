@@ -9,7 +9,8 @@ import {
     Sparkles,
     FileSignature,
     Megaphone,
-    ShieldCheck
+    ShieldCheck,
+    Scissors
 } from "lucide-react"
 
 import {
@@ -29,7 +30,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export function AppSidebar() {
     const { user, signOut, isAdmin: authIsAdmin } = useAuth();
@@ -41,47 +42,42 @@ export function AppSidebar() {
     // Menu items.
     const items = [
         {
-            title: t("SIDEBAR_DASHBOARD"),
+            title: t("sidebar.dashboard"),
             url: "/dashboard",
             icon: Home,
         },
         {
-            title: t("SIDEBAR_AGENDA"),
+            title: t("sidebar.calendar"),
             url: "/agenda",
             icon: Calendar,
         },
         {
-            title: t("SIDEBAR_CLIENTS"),
+            title: t("sidebar.clients"),
             url: "/clientes",
             icon: Users,
         },
         {
-            title: t("SIDEBAR_PROJECTS"),
+            title: t("sidebar.projects"),
             url: "/projetos",
             icon: Briefcase,
         },
         {
-            title: t("SIDEBAR_MARKETING"),
-            url: "/marketing",
-            icon: Megaphone,
-        },
-        {
-            title: t("SIDEBAR_CONTRACTS"),
-            url: "/contratos",
-            icon: FileSignature,
-        },
-        {
-            title: t("SIDEBAR_FINANCIAL"),
+            title: t("sidebar.finance"),
             url: "/dashboard/financial",
             icon: CreditCard,
         },
         {
-            title: t("SIDEBAR_SERVICES"),
-            url: "/servicos",
-            icon: Sparkles,
+            title: t("sidebar.contracts"),
+            url: "/contratos",
+            icon: FileSignature,
         },
         {
-            title: t("SIDEBAR_SETTINGS"),
+            title: t("sidebar.services"),
+            url: "/servicos",
+            icon: Scissors,
+        },
+        {
+            title: t("sidebar.settings"),
             url: "/configuracoes",
             icon: Settings,
         },
@@ -104,11 +100,12 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="bg-background">
+                {/* WORKSPACE GROUP */}
                 <SidebarGroup>
-                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("SIDEBAR_MENU_MAIN")}</SidebarGroupLabel>
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">{t("SIDEBAR_MENU_MAIN") || "WORKSPACE"}</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
+                            {items.filter(i => i.url !== '/configuracoes').map((item) => (
                                 <SidebarMenuItem key={item.title}>
                                     <SidebarMenuButton
                                         asChild
@@ -126,28 +123,43 @@ export function AppSidebar() {
                     </SidebarGroupContent>
                 </SidebarGroup>
 
-                {/* Admin Section - Only visible for admins */}
-                {isAdmin && (
-                    <SidebarGroup className="mt-auto">
-                        <SidebarGroupLabel className="text-muted-foreground px-2 text-[10px] font-mono font-semibold uppercase tracking-widest mb-2">{t("SIDEBAR_MENU_ADMIN")}</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
+                {/* SYSTEM GROUP */}
+                <SidebarGroup className="mt-auto">
+                    <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">SYSTEM</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                        <SidebarMenu>
+                            {/* Admin Link (Protected) */}
+                            {isAdmin && (
                                 <SidebarMenuItem>
                                     <SidebarMenuButton
                                         asChild
                                         isActive={isActive('/admin')}
-                                        className="text-foreground data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all rounded-none"
+                                        className="data-[active=true]:bg-yellow-500 data-[active=true]:text-black hover:bg-white/10 transition-all text-muted-foreground rounded-none"
                                     >
                                         <Link to="/admin">
                                             <ShieldCheck className="h-4 w-4" />
-                                            <span className="font-mono text-xs uppercase tracking-wider">{t("SIDEBAR_ADMIN")}</span>
+                                            <span className="font-mono text-xs uppercase tracking-wider">ADMIN</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                )}
+                            )}
+
+                            {/* Settings Link */}
+                            <SidebarMenuItem>
+                                <SidebarMenuButton
+                                    asChild
+                                    isActive={isActive('/configuracoes')}
+                                    className="data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none"
+                                >
+                                    <Link to="/configuracoes">
+                                        <Settings className="h-4 w-4" />
+                                        <span className="font-mono text-xs uppercase tracking-wider">{t("sidebar.settings")}</span>
+                                    </Link>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarGroupContent>
+                </SidebarGroup>
 
 
                 <SidebarGroup className="mt-auto pb-4">
@@ -175,7 +187,7 @@ export function AppSidebar() {
                     onClick={signOut}
                 >
                     <LogOut className="h-4 w-4 mr-2" />
-                    {t("SIDEBAR_LOGOUT")}
+                    {t("sidebar.logout") || "SAIR"}
                 </Button>
 
                 {/* Language Switcher */}

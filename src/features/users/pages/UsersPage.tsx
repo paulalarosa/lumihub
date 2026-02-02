@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { OutlineButton } from "@/components/ui/action-buttons";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Search, Shield, User, Crown, Star, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -169,10 +171,9 @@ export default function AdminUsers() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white hover:text-black rounded-none font-mono uppercase text-xs" onClick={fetchUsers}>
-                    <Loader2 className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                <OutlineButton onClick={fetchUsers} loading={loading}>
                     Atualizar
-                </Button>
+                </OutlineButton>
             </div>
 
             {/* Table */}
@@ -210,16 +211,27 @@ export default function AdminUsers() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="outline" className={`rounded-none font-mono text-[10px] uppercase tracking-widest ${user.role === 'admin' ? 'border-white text-white' : 'border-white/20 text-white/60'}`}>
-                                            {user.role === 'admin' ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
-                                            {user.role}
-                                        </Badge>
+                                        <StatusBadge
+                                            label={
+                                                <>
+                                                    {user.role === 'admin' ? <Shield className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
+                                                    {user.role}
+                                                </>
+                                            }
+                                            color={user.role === 'admin' ? 'default' : 'neutral'}
+                                            className={user.role === 'admin' ? 'border-white text-white' : ''}
+                                        />
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant="outline" className={`rounded-none font-mono text-[10px] uppercase tracking-widest ${user.plan === 'empire' ? 'border-white text-white' : user.plan === 'pro' ? 'border-white/60 text-white/80' : 'border-white/20 text-white/60'}`}>
-                                            {user.plan === 'empire' ? <Crown className="w-3 h-3 mr-1" /> : user.plan === 'pro' ? <Star className="w-3 h-3 mr-1" /> : null}
-                                            {user.plan || 'Free'}
-                                        </Badge>
+                                        <StatusBadge
+                                            label={
+                                                <>
+                                                    {user.plan === 'empire' ? <Crown className="w-3 h-3 mr-1" /> : user.plan === 'pro' ? <Star className="w-3 h-3 mr-1" /> : null}
+                                                    {user.plan || 'Free'}
+                                                </>
+                                            }
+                                            color={user.plan === 'empire' ? 'warning' : user.plan === 'pro' ? 'info' : 'neutral'}
+                                        />
                                     </TableCell>
                                     <TableCell className="text-white/60 font-mono text-xs">
                                         {user.created_at ? format(new Date(user.created_at), "dd/MM/yyyy") : '-'}

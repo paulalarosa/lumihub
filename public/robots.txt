@@ -1,5 +1,5 @@
-# Lumi - Robots.txt
-# https://lumihub.lovable.app
+# Khaos Kontrol - Robots.txt
+# https://khaoskontrol.com.br
 
 User-agent: *
 Allow: /
@@ -30,4 +30,4 @@ Allow: /b/
 Crawl-delay: 1
 
 # Sitemap
-Sitemap: https://lumihub.lovable.app/sitemap.xml
+Sitemap: https://khaoskontrol.com.br/sitemap.xml

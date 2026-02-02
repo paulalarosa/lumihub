@@ -151,13 +151,13 @@ export function AddressAutocomplete({
     // Optimize: Check cache for this place_id first
     try {
       const { data: cached } = await supabase
-        .from('geo_cache')
+        .from('geo_cache' as any)
         .select('response')
         .eq('query', place.place_id)
         .maybeSingle();
 
       if (cached?.response) {
-        console.log('Using cached place details');
+
         const location = cached.response.geometry.location;
         if (onCoordinatesChange) onCoordinatesChange(location.lat, location.lng);
         setCoords({ lat: location.lat, lng: location.lng });
@@ -191,7 +191,7 @@ export function AddressAutocomplete({
               const expiresAt = new Date();
               expiresAt.setDate(expiresAt.getDate() + 30); // 30 days cache
 
-              await supabase.from('geo_cache').upsert({
+              await supabase.from('geo_cache' as any).upsert({
                 query: place.place_id,
                 response: cachePayload,
                 expires_at: expiresAt.toISOString()

@@ -110,91 +110,52 @@ export default function Configuracoes() {
   const fetchData = async () => {
     setLoadingData(true);
 
-    // Fetch professional settings
-    const { data: settingsData } = await supabase
-      .from('professional_settings')
-      .select('*')
-      .eq('user_id', user!.id)
+    // Fetch professional settings from profiles
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('business_name, bio, phone, avatar_url')
+      .eq('id', user!.id)
       .maybeSingle();
 
-    if (settingsData) {
-      setSettings(settingsData);
-      setBusinessName(settingsData.business_name || '');
-      setPrimaryColor(settingsData.primary_color || '#ffffff');
-      setPhone(settingsData.phone || '');
-      setInstagram(settingsData.instagram || '');
-      setWebsite(settingsData.website || '');
-      setBio(settingsData.bio || '');
-      setLogoUrl(settingsData.logo_url);
+    if (profileError) {
+      console.warn("Profile fetch error:", profileError);
     }
 
-    // Fetch payment account
-    const { data: paymentData } = await supabase
-      .from('payment_accounts')
-      .select('*')
-      .eq('user_id', user!.id)
-      .maybeSingle();
+    if (profileData) {
+      setBusinessName(profileData.business_name || '');
+      setPhone(profileData.phone || '');
+      setBio(profileData.bio || '');
+      setLogoUrl(profileData.avatar_url);
 
-    if (paymentData) {
-      setPaymentAccount(paymentData);
-      setPixKeyType(paymentData.pix_key_type || '');
-      setPixKey(paymentData.pix_key || '');
-      setBankName(paymentData.bank_name || '');
-      setBankCode(paymentData.bank_code || '');
-      setAccountType(paymentData.account_type || '');
-      setAgency(paymentData.agency || '');
-      setAccountNumber(paymentData.account_number || '');
-      setAccountHolderName(paymentData.account_holder_name || '');
-      setAccountHolderDocument(paymentData.account_holder_document || '');
-      setDigitalWalletType(paymentData.digital_wallet_type || '');
-      setDigitalWalletAccount(paymentData.digital_wallet_account || '');
-      setPreferredMethod(paymentData.preferred_method || 'pix');
+      // Note: primary_color, instagram, website are not in profiles table yet
+      // defaulting to empty/default for now
     }
 
-    setLoadingData(false);
+    // Payment accounts table logic removed due to missing table
+    // TODO: Restore when payment_accounts table is created
   };
 
   const saveSettings = async () => {
     setSaving(true);
     try {
-      // 1. Save Professional Settings
+      // 1. Save Professional Settings to Profiles
       const { error: settingsError } = await supabase
-        .from('professional_settings')
-        .upsert({
-          user_id: user!.id,
+        .from('profiles')
+        .update({
           business_name: businessName.trim() || null,
-          primary_color: primaryColor,
           phone: phone.trim() || null,
-          instagram: instagram.trim() || null,
-          website: website.trim() || null,
           bio: bio.trim() || null,
-          logo_url: logoUrl
-        }, { onConflict: 'user_id' });
+          avatar_url: logoUrl
+          // primary_color, instagram, website not supported in schema yet
+        })
+        .eq('id', user!.id);
 
       if (settingsError) throw settingsError;
 
-      // 2. Save Payment Accounts
-      const { error: paymentError } = await supabase
-        .from('payment_accounts')
-        .upsert({
-          user_id: user!.id,
-          pix_key_type: pixKeyType || null,
-          pix_key: pixKey.trim() || null,
-          bank_name: bankName.trim() || null,
-          bank_code: bankCode.trim() || null,
-          account_type: accountType || null,
-          agency: agency.trim() || null,
-          account_number: accountNumber.trim() || null,
-          account_holder_name: accountHolderName.trim() || null,
-          account_holder_document: accountHolderDocument.trim() || null,
-          digital_wallet_type: digitalWalletType || null,
-          digital_wallet_account: digitalWalletAccount.trim() || null,
-          preferred_method: preferredMethod
-        }, { onConflict: 'user_id' });
+      // 2. Payment Accounts logic removed
+      // TODO: Restore when table exists
 
-      if (paymentError) throw paymentError;
-
-      // 3. Update User Metadata (Name)
+      // 3. Update User Metadata (Name) - matches profiles.full_name usually but kept separate here
       if (fullName !== user?.user_metadata?.full_name) {
         const { error: userError } = await supabase.auth.updateUser({
           data: { full_name: fullName }

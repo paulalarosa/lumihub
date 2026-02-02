@@ -2,7 +2,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 
-export default function ProtectedRoute() {
+import { ReactNode } from "react";
+
+interface ProtectedRouteProps {
+    children?: ReactNode;
+    requireOnboarding?: boolean;
+}
+
+export default function ProtectedRoute({ children, requireOnboarding = true }: ProtectedRouteProps) {
     const { user, loading } = useAuth();
     const location = useLocation();
 
@@ -25,5 +32,5 @@ export default function ProtectedRoute() {
     }
 
     // 3. Authenticated (Render Content)
-    return <Outlet />;
+    return children ? <>{children}</> : <Outlet />;
 }

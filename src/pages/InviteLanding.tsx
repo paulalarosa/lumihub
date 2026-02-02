@@ -15,7 +15,16 @@ export default function InviteLanding() {
     const navigate = useNavigate();
 
     const [status, setStatus] = useState<'loading' | 'valid' | 'invalid'>('loading');
-    const [inviteData, setInviteData] = useState<any>(null);
+    interface AssistantInvite {
+        id: string;
+        email: string;
+        name: string | null;
+        status: string;
+        is_registered: boolean;
+        invite_token: string | null;
+    }
+
+    const [inviteData, setInviteData] = useState<AssistantInvite | null>(null);
     const [loading, setLoading] = useState(false);
 
     // Form Data
@@ -49,21 +58,23 @@ export default function InviteLanding() {
                 return;
             }
 
-            if (data.is_registered) {
+            const safeData = data as unknown as AssistantInvite;
+
+            if (safeData.is_registered) {
                 toast.error("Este convite já foi utilizado.");
                 // Redirect to login if already registered
                 navigate('/auth');
                 return;
             }
 
-            if (data.status !== 'pending') {
+            if (safeData.status !== 'pending') {
                 // If status is accepted but not registered (edge case?), or already active
                 // We treat as invalid for onboarding purposes unless specifically handling re-onboarding
                 setStatus('invalid');
                 return;
             }
 
-            setInviteData(data);
+            setInviteData(safeData);
             setStatus('valid');
         } catch (error) {
             console.error(error);
@@ -87,22 +98,24 @@ export default function InviteLanding() {
         setLoading(true);
 
         try {
-            // 1. Sign Up - EXTREME CLEANING
+            // 1. Sanitize Data
             const originalEmail = inviteData.email;
             const sanitizedEmail = originalEmail.replace(/[^\x20-\x7E]/g, "").trim().toLowerCase();
+            const cleanFullName = formData.fullName.trim();
+            const cleanPhone = formData.phone.trim();
 
-            console.log("DEBUG AUTH - Sanitized:", `"${sanitizedEmail}"`);
+
 
             let userId = null;
 
-            // Attempt Sign Up
+            // 2. Attempt Sign Up
             const { data: authData, error: authError } = await supabase.auth.signUp({
                 email: sanitizedEmail,
                 password: formData.password.trim(),
                 options: {
                     data: {
-                        full_name: formData.fullName.trim(),
-                        phone: formData.phone.trim(),
+                        full_name: cleanFullName,
+                        phone: cleanPhone,
                         role: 'assistant'
                     }
                 }
@@ -110,24 +123,24 @@ export default function InviteLanding() {
 
             if (authError) {
                 // HANDLE EXISTING USER (Multi-Maquiadora Scenario)
-                if (authError.message.includes("already registered") || authError.status === 400) {
-                    console.log("User exists, attempting URL-less login to link account...");
+                if (authError.message.includes("already registered") || authError.message.includes("User already registered") || authError.status === 400) {
+                    toast.info("Conta existente identificada!", { description: "Tentando vincular com a senha informada..." });
 
-                    // Try to LOGIN with provided credentials
+                    // Try to LOGIN with provided credentials to prove ownership
                     const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
                         email: sanitizedEmail,
                         password: formData.password.trim()
                     });
 
                     if (loginError) {
-                        toast.error("Este e-mail já existe. Se for você, use a senha correta para vincular.");
+                        toast.error("Você já possui uma conta, mas a senha está incorreta.", { description: "Use sua senha antiga para aceitar o convite." });
                         setLoading(false);
                         return;
                     }
 
                     if (loginData.user) {
                         userId = loginData.user.id;
-                        toast.success("Conta identificada! Vinculando novo contrato...");
+                        toast.success("Login realizado! Vinculando agenda...");
                     }
                 } else {
                     throw authError;
@@ -137,46 +150,53 @@ export default function InviteLanding() {
             }
 
             if (userId) {
-                console.log("DEBUG ONBOARDING - Linking to user:", userId);
 
-                // 2. Ensure Profile Exists (Upsert)
-                // We keep existing profile data if it exists, only ensuring role/onboarding for safety
-                const { error: profileError } = await supabase.from('profiles').upsert({
-                    id: userId,
-                    // Only update name if it wasn't set? prefer existing profile.
-                    // Actually, if it's a new link, we assume they might want to update, but safer to respect existing.
-                    full_name: formData.fullName.trim(),
-                    role: 'assistant',
-                    updated_at: new Date().toISOString()
-                } as any, { onConflict: 'id', ignoreDuplicates: true }); // Prefer existing profile
 
-                // 3. Link Assistant Record & Consume Token
-                // This is the MAGIC STEP: It links this specific invite (employer) to the user
+                // 3. Link Assistant Record & Consume Token (PRIORITY action)
+                // This must happen BEFORE profile upsert to satisfy any potential RLS that checks for active contracts
                 const { error: updateError } = await supabase
                     .from('assistants')
                     .update({
                         assistant_user_id: userId, // Links to the centralized User
                         is_registered: true,
                         status: 'accepted',
-                        phone: formData.phone.trim(),
-                        name: formData.fullName.trim(),
+                        phone: cleanPhone,
+                        name: cleanFullName,
                         invite_token: null // Consumes token
                     })
                     .eq('id', inviteData.id);
 
                 if (updateError) {
                     console.error("Failed to link account:", updateError);
-                    throw updateError;
+                    throw new Error("Falha ao vincular contrato. Tente novamente.");
+                }
+
+                // 4. Ensure Profile Exists (Upsert)
+                // Fix: Include all required fields to avoid bad request
+                const { error: profileError } = await supabase.from('profiles').upsert({
+                    id: userId,
+                    email: sanitizedEmail,
+                    full_name: cleanFullName,
+                    role: 'assistant',
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'id' });
+
+                if (profileError) {
+                    console.warn("Profile Upsert Warning:", profileError);
+                    // We don't block flow if profile fails (maybe RLS), as link is already done
                 }
 
                 toast.success("Acesso liberado com sucesso!");
 
                 // 5. Redirect to Portal
-                navigate('/portal-assistente');
+                // Small delay to ensure DB propagation
+                setTimeout(() => {
+                    navigate('/portal-assistente');
+                }, 1000);
             }
         } catch (error: any) {
             console.error("Registration error:", error);
-            toast.error(error.message || "Erro ao processar.");
+            toast.error(error.message || "Erro ao processar cadastro.");
         } finally {
             setLoading(false);
         }
@@ -212,7 +232,7 @@ export default function InviteLanding() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4 selection:bg-white selection:text-black">
+        <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 selection:bg-white selection:text-black">
             <div className="max-w-lg w-full relative group">
                 {/* Decorative border effect */}
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-800 to-neutral-900 opacity-50 group-hover:opacity-75 transition duration-1000 blur-sm"></div>

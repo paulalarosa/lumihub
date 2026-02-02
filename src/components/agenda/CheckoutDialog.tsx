@@ -27,10 +27,18 @@ interface Assistant {
     name: string;
 }
 
+interface CheckoutEvent {
+    id: string;
+    total_value?: number;
+    payment_method?: string;
+    // Allow flexible properties to avoid strict type issues with Supabase join results
+    [key: string]: any;
+}
+
 interface CheckoutDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    event: any; // Using any for now to avoid strict type complexities during fast dev, will refine
+    event: CheckoutEvent | null;
     onSuccess: () => void;
 }
 
@@ -47,20 +55,12 @@ export function CheckoutDialog({ open, onOpenChange, event, onSuccess }: Checkou
             fetchAssistants();
             if (event?.total_value) setTotalValue(event.total_value.toString());
             if (event?.payment_method) setPaymentMethod(event.payment_method);
-            // Pre-select assistant if already assigned (logic might need adjustment based on data structure)
         }
     }, [open, event]);
 
     const fetchAssistants = async () => {
         const { data } = await supabase.from('assistants').select('id, name');
         if (data) setAssistants(data);
-    };
-
-    const calculateCommission = (value: number) => {
-        // Simple logic: 10% commission default for example, or we can leave it to the backend/service later.
-        // For now, we just record the assistant. 
-        // If specific logic needed: return value * 0.1;
-        return 0; // Placeholder
     };
 
     const handleFinish = async () => {
@@ -72,27 +72,18 @@ export function CheckoutDialog({ open, onOpenChange, event, onSuccess }: Checkou
                 throw new Error('Valor inválido');
             }
 
-            const updateData: any = {
+            const updateData: Record<string, any> = {
                 total_value: numericValue,
                 payment_method: paymentMethod,
                 payment_status: 'paid', // Mark as paid
-                // If an assistant is selected, we might want to log commission or link them
-                // For now, we update the event itself. 
             };
-
-            // If specific assistant logic is required (e.g., overring the event's assistant list or logging strictly for this payment)
-            // keeping it simple as per prompt "Record Assistant Responsible"
-            // If the db schema has a column for 'responsible_assistant_id' it would go here.
-            // Assuming we just use the event's assistants or this confirms who did it. 
-            // Prompt said: "Record... 'Assistente Responsável' (if any)". 
-            // Since migration didn't add `responsible_assistant_id`, I might need to skip saving this ID permanently 
-            // UNLESS I add it to `notes` or if `assistant_commission` implies a specific person.
-            // I will assume for now we just mark the event as paid and calculate commission value.
 
             if (selectedAssistantId !== 'none') {
                 // Calculate commission based on rule (e.g. 15%)
                 updateData.assistant_commission = numericValue * 0.15; // Example 15% rule
             }
+
+            if (!event?.id) throw new Error('Evento inválido');
 
             const { error } = await supabase
                 .from('events')
@@ -109,11 +100,11 @@ export function CheckoutDialog({ open, onOpenChange, event, onSuccess }: Checkou
             onSuccess();
             onOpenChange(false);
 
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
             toast({
                 title: "Erro ao finalizar",
-                description: error.message,
+                description: error instanceof Error ? error.message : "Erro desconhecido",
                 variant: "destructive"
             });
         } finally {

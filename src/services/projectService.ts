@@ -14,16 +14,30 @@ export const ProjectService = {
     },
 
     async get(id: string) {
-        return await supabase
+        const { data, error } = await supabase
             .from('projects')
             .select(`
-        *,
-        client:wedding_clients(*),
-        invoices(*),
-        contracts(*)
-      `)
+                *,
+                client:wedding_clients (
+                    id,
+                    full_name,
+                    email,
+                    phone,
+                    cpf,
+                    address
+                ),
+                invoices(*),
+                contracts(*)
+            `)
             .eq('id', id)
             .single();
+
+        if (error) {
+            console.error("ProjectService.get error:", error);
+            // Return null data to prevent crash, caller handles error check
+            return { data: null, error };
+        }
+        return { data, error: null };
     },
 
     async create(project: Database['public']['Tables']['projects']['Insert']) {
@@ -66,10 +80,10 @@ export const ProjectService = {
             .eq('project_id', projectId)
             .order('sort_order');
     },
-    async createTask(task: any) {
+    async createTask(task: Database['public']['Tables']['tasks']['Insert']) {
         return await supabase.from('tasks').insert(task).select().single();
     },
-    async updateTask(id: string, updates: any) {
+    async updateTask(id: string, updates: Database['public']['Tables']['tasks']['Update']) {
         return await supabase.from('tasks').update(updates).eq('id', id);
     },
     async deleteTask(id: string) {
@@ -80,7 +94,7 @@ export const ProjectService = {
     async getBriefing(projectId: string) {
         return await supabase.from('briefings').select('*').eq('project_id', projectId).maybeSingle();
     },
-    async createBriefing(briefing: any) {
+    async createBriefing(briefing: Database['public']['Tables']['briefings']['Insert']) {
         return await supabase.from('briefings').insert(briefing).select().single();
     },
 
@@ -88,13 +102,13 @@ export const ProjectService = {
     async getContracts(projectId: string) {
         return await supabase.from('contracts').select('*').eq('project_id', projectId).order('created_at', { ascending: false });
     },
-    async createContract(contract: any) {
+    async createContract(contract: Database['public']['Tables']['contracts']['Insert']) {
         return await supabase.from('contracts').insert(contract).select().single();
     },
 
     // Services (Catalog)
     async getCatalogServices() {
-        return await supabase.from('services').select('*').eq('is_active', true).order('sort_order');
+        return await supabase.from('services').select('*').order('sort_order');
     },
 
     // Project Services (Financial)
@@ -105,13 +119,13 @@ export const ProjectService = {
             .eq('project_id', projectId)
             .order('created_at');
     },
-    async addProjectService(data: any) {
+    async addProjectService(data: Database['public']['Tables']['project_services']['Insert']) {
         return await supabase.from('project_services').insert(data).select().single();
     },
     async deleteProjectService(id: string) {
         return await supabase.from('project_services').delete().eq('id', id);
     },
-    async updateProjectService(id: string, updates: any) {
+    async updateProjectService(id: string, updates: Database['public']['Tables']['project_services']['Update']) {
         return await supabase.from('project_services').update(updates).eq('id', id);
     }
 };

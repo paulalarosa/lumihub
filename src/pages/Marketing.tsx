@@ -14,7 +14,7 @@ import { useWindowSize } from 'react-use';
 import { useMarketing } from "@/hooks/useMarketing";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarketingCampaign } from "@/services/marketing";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage } from "@/hooks/useLanguage";
 
 interface InactiveClient {
     id: string;
@@ -87,15 +87,19 @@ export default function Marketing() {
         try {
             // Enhanced query to check for active projects
             const { data, error: clientError } = await supabase
-                .from('wedding_clients' as any)
+                .from('wedding_clients')
                 .select('id, name:full_name, phone, created_at, projects(status)');
 
             if (clientError) throw clientError;
 
             // Cast to bypass complex join typing
-            const allClients = data as any[];
-
-            if (clientError) throw clientError;
+            const allClients = data as unknown as {
+                id: string;
+                name: string;
+                phone: string | null;
+                created_at: string;
+                projects: { status: string }[]
+            }[];
 
             const now = new Date();
             const processedClients: InactiveClient[] = [];
@@ -105,13 +109,13 @@ export default function Marketing() {
                 const daysDiff = differenceInDays(now, createdDate);
 
                 // Check for ANY active project
-                const hasActiveProject = client.projects?.some((p: any) => p.status === 'active' || p.status === 'ongoing');
+                const hasActiveProject = client.projects?.some(p => p.status === 'active' || p.status === 'ongoing');
 
                 // Logic: Created > 45 days AND NO active project
                 if (daysDiff > 45 && !hasActiveProject) {
                     processedClients.push({
                         id: client.id,
-                        name: client.name,
+                        name: client.name, // mapped from full_name
                         phone: client.phone,
                         created_at: client.created_at,
                         days_since_created: daysDiff

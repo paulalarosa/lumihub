@@ -28,23 +28,23 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 {/* Content Overlay */}
                 <div className="relative z-20 flex flex-col justify-between h-full p-16 text-white">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#00e5ff]/20 to-transparent border border-[#00e5ff]/30 rounded-xl flex items-center justify-center backdrop-blur-md">
-                            <span className="text-xl font-serif font-bold text-white">L</span>
+                        <div className="w-10 h-10 bg-white border border-white rounded-none flex items-center justify-center">
+                            <span className="text-xl font-mono font-bold text-black">K</span>
                         </div>
-                        <span className="font-serif text-xl tracking-wide">Lumi</span>
+                        <span className="font-mono text-xl tracking-widest uppercase">KHAOS</span>
                     </div>
 
                     <div className="space-y-6 max-w-lg">
-                        <blockquote className="font-serif text-4xl leading-tight font-light italic">
-                            "Gerencie seu império de beleza com a inteligência que ele merece."
+                        <blockquote className="font-mono text-2xl leading-tight font-bold uppercase tracking-tight">
+                            "SYSTEM_ONLINE. CONTROL_ESTABLISHED."
                         </blockquote>
-                        <p className="text-white/60 font-light">
-                            Junte-se a milhares de profissionais que elevaram o nível de seus negócios.
+                        <p className="text-white/60 font-mono text-xs uppercase tracking-widest">
+                            Operating System for High-Performance Professionals.
                         </p>
                     </div>
 
-                    <div className="flex gap-4 text-sm text-white/40 font-light">
-                        <span>© 2024 Lumi</span>
+                    <div className="flex gap-4 text-xs text-white/40 font-mono uppercase tracking-widest">
+                        <span>© 2024 KHAOS</span>
                         <span>•</span>
                         <span>Privacidade</span>
                         <span>•</span>

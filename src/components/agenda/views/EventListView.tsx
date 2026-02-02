@@ -5,25 +5,7 @@ import EventCard from '@/components/agenda/EventCard';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { EmptyState } from '@/components/ui/empty-state';
 
-interface Event {
-  id: string;
-  title: string;
-  description: string | null;
-  event_date: string;
-  event_type?: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  arrival_time?: string | null;
-  making_of_time?: string | null;
-  ceremony_time?: string | null;
-  advisory_time?: string | null;
-  location: string | null;
-  address?: string | null;
-  color: string;
-  client?: { name: string } | null;
-  project?: { name: string } | null;
-  assistants?: { id: string; name: string }[];
-}
+import { Event } from '@/hooks/useEvents';
 
 interface EventListViewProps {
   events: Event[];

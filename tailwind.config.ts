@@ -115,6 +115,8 @@ export default {
 				},
 				neon: '#ffffff',
 				metallic: '#C0C0C0',
+				gold: '#D4AF37',
+				whatsapp: '#25D366',
 			},
 			lineHeight: {
 				'relaxed': '1.75',

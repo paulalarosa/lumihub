@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganization } from '@/hooks/useOrganization';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/hooks/useLanguage';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -30,12 +30,14 @@ import { GoogleCalendarEvent } from '@/integrations/google/calendar';
 // Services
 import { ClientService } from '@/services/clientService';
 import { ProjectService } from '@/services/projectService';
-import { RevenueService } from '@/services/revenue.service';
+import { RevenueService } from '@/features/financial/services/revenue.service';
 import { EventService } from '@/services/event.service';
 import { CommissionLogic } from '@/services/commissionLogic';
 import { MarketingLogic, MarketingTrigger } from '@/services/marketingLogic';
 import { Gift, AlertCircle, Heart } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+
+// Button removed - moved to AdminDashboard
 
 // import { OnboardingWizard } from '@/features/onboarding/pages/OnboardingWizard';
 
@@ -70,7 +72,7 @@ export default function Dashboard() {
         .from('profiles')
         .select('onboarding_completed, full_name, subscription_tier')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       const profile = profileData as any;
 
@@ -88,7 +90,7 @@ export default function Dashboard() {
 
         // 3. Auto-Upgrade Specific User
         if (user.email === 'nathaliasbrb@gmail.com' && profile.subscription_tier !== 'studio') {
-          console.log("Auto-upgrading administrative user...");
+
           // @ts-ignore
           await supabase.from('profiles').update({ subscription_tier: 'studio' }).eq('id', user.id);
         }
@@ -262,6 +264,13 @@ export default function Dashboard() {
             {profileName || user.email?.split('@')[0] || user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
         </motion.div>
+
+        {/* Status Section */}
+        <div className="mb-12 p-6 border border-white/10 bg-white/5 rounded-none">
+          <span className="font-mono text-xs text-white/50 tracking-widest uppercase">STATUS:</span>
+          <p className="text-xl font-serif text-white mt-1">AGUARDANDO CRONOGRAMA</p>
+        </div>
+        {/* ------------------------------------------- */}
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 auto-rows-[minmax(180px,auto)]">

@@ -1,0 +1,35 @@
+name: CI Pipeline
+
+# Dispara em todo push na main ou Pull Request
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout do código
+      uses: actions/checkout@v4
+
+    - name: Instalar Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Instalar Dependências
+      run: npm ci
+
+    - name: Rodar Lint (Verificar qualidade)
+      run: npm run lint
+      continue-on-error: true # Não para o processo se for só aviso de estilo
+
+    - name: Rodar Testes (Vitest)
+      run: npm run test -- --run # O flag --run faz ele rodar uma vez e sair (sem modo watch)
+
+    - name: Verificar Build (Produção)
+      run: npm run build

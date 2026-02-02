@@ -40,6 +40,11 @@ export const getCalendarEvents = async (): Promise<GoogleCalendarEvent[]> => {
             if (response.status === 401) {
                 // Token might be expired or invalid
                 console.error("Google Calendar API Unauthorized. Token might be expired.");
+                throw new Error("Sessão expirada. Faça login novamente.");
+            }
+            if (response.status === 403) {
+                console.error("Google Calendar API Forbidden.");
+                throw new Error("Acesso à agenda negado. Por favor, refaça o login com Google e autorize as permissões de calendário.");
             }
             throw new Error(`Google Calendar API Error: ${response.statusText}`);
         }

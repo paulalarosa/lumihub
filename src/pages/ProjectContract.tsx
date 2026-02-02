@@ -244,8 +244,8 @@ export default function ProjectContract() {
       `;
 
       // Google Analytics Tracking
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'contract_signed', {
+      if (typeof window !== 'undefined' && window.gtag) {
+        window.gtag('event', 'contract_signed', {
           'event_category': 'engagement',
           'event_label': projectId
         });
@@ -288,7 +288,7 @@ export default function ProjectContract() {
       // Generate PDF blob
       const pdfBlob = await new Promise<Blob>((resolve, reject) => {
         html2pdf()
-          .set(opt as any)
+          .set(opt as Record<string, unknown>)
           .from(fullHTML)
           .toPdf()
           .output('blob')

@@ -28,29 +28,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { downloadICSFile, getGoogleCalendarUrl, openInMaps } from '@/lib/calendar-utils';
+import { differenceInDays } from 'date-fns';
+import { generateWhatsAppLink } from '@/utils/whatsappGenerator';
+import { supabase } from '@/integrations/supabase/client';
+import { useOrganization } from '@/hooks/useOrganization';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { MessageCircle, Check, Heart } from 'lucide-react';
 
-interface Event {
-  id: string;
-  title: string;
-  description: string | null;
-  event_date: string;
-  event_type?: string | null;
-  start_time: string | null;
-  end_time: string | null;
-  arrival_time?: string | null;
-  making_of_time?: string | null;
-  ceremony_time?: string | null;
-  advisory_time?: string | null;
-  location: string | null;
-  address?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  color: string;
-  client?: { name: string } | null;
-  project?: { name: string } | null;
-  assistants?: { id: string; name: string }[];
-  payment_status?: string | null;
-}
+import { Event } from '@/hooks/useEvents';
 
 interface EventCardProps {
   event: Event;
@@ -66,6 +52,10 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 };
 
 export default function EventCard({ event, onEdit, onDelete, showDate = false }: EventCardProps) {
+  const { organizationId } = useOrganization();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
   const formatTime = (time: string | null | undefined) => {
     if (!time) return null;
     return time.substring(0, 5);
@@ -111,6 +101,93 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
     window.open(url, '_blank');
   };
 
+  const WhatsAppSmartButton = () => {
+    if (!event.client?.phone) return null;
+
+    const daysUntil = differenceInDays(new Date(event.event_date), new Date());
+
+    let recommendedAction = 'custom';
+    let buttonColor = 'bg-zinc-700 hover:bg-zinc-600';
+    let buttonLabel = 'Mensagem';
+    let Icon = MessageCircle;
+
+    if (daysUntil === 1) {
+      recommendedAction = 'reminder_24h';
+      buttonColor = 'bg-amber-600 hover:bg-amber-700';
+      buttonLabel = 'Lembrar (24h)';
+      Icon = Clock;
+    } else if (daysUntil > 1 && daysUntil <= 7) {
+      recommendedAction = 'confirmation';
+      buttonColor = 'bg-blue-600 hover:bg-blue-700';
+      buttonLabel = 'Confirmar';
+      Icon = Check;
+    } else if (daysUntil < 0) {
+      recommendedAction = 'thanks';
+      buttonColor = 'bg-purple-600 hover:bg-purple-700';
+      buttonLabel = 'Feedback';
+      Icon = Heart;
+    }
+
+    const handleSend = async () => {
+      try {
+        // 1. Fetch Template
+        const { data: template } = await supabase
+          .from('message_templates')
+          .select('content')
+          .eq('organization_id', organizationId)
+          .eq('type', recommendedAction)
+          .maybeSingle();
+
+        // Fallback
+        let rawText = template?.content;
+        if (!rawText) {
+          switch (recommendedAction) {
+            case 'confirmation': rawText = "Olá {client_name}, gostaria de confirmar seu agendamento para {date}."; break;
+            case 'reminder_24h': rawText = "Olá {client_name}, lembrete do seu horário amanhã às {time}."; break;
+            case 'thanks': rawText = "Obrigado pela preferência, {client_name}!"; break;
+            default: rawText = "Olá {client_name}!";
+          }
+        }
+
+        // 2. Professional Name
+        let professionalName = "LumiHub";
+        if (user) {
+          const { data: profData } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
+          if (profData?.full_name) professionalName = profData.full_name;
+        }
+
+        // 3. Generate Link
+        const link = generateWhatsAppLink(rawText, {
+          client_name: event.client?.name || "Cliente",
+          professional_name: professionalName,
+          date: format(new Date(event.event_date), 'dd/MM'),
+          time: event.start_time || event.arrival_time || "Horário a definir",
+          location: event.location || "Local a definir",
+          phone: event.client?.phone || ""
+        });
+
+        window.open(link, '_blank');
+      } catch (e) {
+        console.error(e);
+        toast({ title: "Erro ao gerar link", variant: "destructive" });
+      }
+    };
+
+    return (
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSend();
+        }}
+        className={`px-3 py-1 h-6 text-[10px] font-medium text-white rounded-md shadow-sm transition-all flex items-center gap-1.5 uppercase tracking-wider ${buttonColor}`}
+      >
+        <Icon className="h-3 w-3" />
+        {buttonLabel}
+      </button>
+    );
+  };
+
   return (
     <Card className="group border border-white/20 bg-black rounded-none hover:border-white transition-all duration-300">
       <CardContent className="p-4">
@@ -148,7 +225,9 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                 )}
               </div>
 
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <WhatsAppSmartButton />
+
                 {/* Calendar export dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

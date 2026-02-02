@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
 import {
     Dialog,
@@ -59,6 +60,7 @@ export default function ServiceDialog({
 }: ServiceDialogProps) {
     const { user } = useAuth();
     const { toast } = useToast();
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
 
     const [title, setTitle] = useState("");
@@ -88,11 +90,20 @@ export default function ServiceDialog({
         e.preventDefault();
         if (!user) return;
 
+        // Validation: Name is required
+        if (!title.trim()) {
+            toast({
+                title: t('service.error.name_required') || "Nome obrigatório",
+                variant: "destructive"
+            });
+            return;
+        }
+
         setLoading(true);
 
         const serviceData = {
             user_id: user.id,
-            title,
+            name: title.trim(), // Fix: DB col is 'name', state was 'title'
             price: parseFloat(price.replace(",", ".")) || 0,
             duration_minutes: parseInt(duration),
             description: description || null,
@@ -135,21 +146,24 @@ export default function ServiceDialog({
             <DialogContent className="max-w-md bg-[#121212]/95 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl shadow-white/5 text-white">
                 <DialogHeader>
                     <DialogTitle className="font-serif text-2xl font-light text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-gray-400">
-                        {service ? "Editar Serviço" : "Novo Serviço"}
+                        {service ? t('service.dialog.title.edit') : t('service.dialog.title.new')}
                     </DialogTitle>
+                    <p className="text-gray-400 text-sm">
+                        {service ? "Edite as informações do serviço abaixo." : "Preencha os dados criar um novo serviço."}
+                    </p>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6 mt-4">
                     {/* Title */}
                     <div className="space-y-2">
                         <Label htmlFor="title" className="text-gray-300">
-                            Nome do Serviço *
+                            {t('service.name.label')} *
                         </Label>
                         <Input
                             id="title"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Ex: Maquiagem Social"
+                            placeholder={t('service.name.placeholder')}
                             required
                             className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-xl"
                         />
@@ -159,7 +173,7 @@ export default function ServiceDialog({
                         {/* Price */}
                         <div className="space-y-2">
                             <Label htmlFor="price" className="text-gray-300">
-                                Preço (R$) *
+                                {t('service.price.label')} *
                             </Label>
                             <Input
                                 id="price"
@@ -175,7 +189,7 @@ export default function ServiceDialog({
 
                         {/* Duration */}
                         <div className="space-y-2">
-                            <Label className="text-gray-300">Duração *</Label>
+                            <Label className="text-gray-300">{t('service.duration.label')} *</Label>
                             <Select value={duration} onValueChange={setDuration}>
                                 <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl">
                                     <SelectValue />
@@ -194,13 +208,13 @@ export default function ServiceDialog({
                     {/* Description */}
                     <div className="space-y-2">
                         <Label htmlFor="description" className="text-gray-300">
-                            Descrição
+                            {t('service.description.label')}
                         </Label>
                         <Textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="O que está incluso?"
+                            placeholder={t('service.description.placeholder')}
                             className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 rounded-xl resize-none"
                             rows={3}
                         />
@@ -214,14 +228,14 @@ export default function ServiceDialog({
                             onClick={() => onOpenChange(false)}
                             className="text-gray-400 hover:text-white hover:bg-white/5 rounded-xl"
                         >
-                            Cancelar
+                            {t('service.cancel')}
                         </Button>
                         <Button
                             type="submit"
                             disabled={loading}
                             className="bg-white text-black hover:bg-gray-200 rounded-xl px-6 font-semibold shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
                         >
-                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
+                            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : t('service.save')}
                         </Button>
                     </div>
                 </form>

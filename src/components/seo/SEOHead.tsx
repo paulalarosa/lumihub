@@ -39,14 +39,14 @@ interface SEOHeadProps {
   productAvailability?: 'InStock' | 'OutOfStock' | 'PreOrder';
 }
 
-const SITE_NAME = 'Lumi';
-const DEFAULT_IMAGE = 'https://khaoskontrol.com.br/og-image.png';
+const SITE_NAME = 'Khaos Kontrol';
+const DEFAULT_IMAGE = '/og-image.png';
 const BASE_URL = 'https://khaoskontrol.com.br';
 
 const SEOHead = ({
-  title = 'Lumi - Plataforma de Gestão para Profissionais de Beleza',
-  description = 'Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana.',
-  keywords = 'gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza',
+  title = 'KHAOS KONTROL | System',
+  description = 'Industrial Management System for Beauty Professionals.',
+  keywords = 'management, crm, beauty, industrial, system',
   image = DEFAULT_IMAGE,
   url = BASE_URL,
   type = 'website',
@@ -110,7 +110,6 @@ const SEOHead = ({
     updateMetaTag('keywords', keywords);
     updateMetaTag('robots', noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     updateMetaTag('author', author || SITE_NAME);
-    updateMetaTag('generator', 'Lovable');
     updateMetaTag('rating', 'general');
     updateMetaTag('distribution', 'global');
     updateMetaTag('language', 'Portuguese');
@@ -143,8 +142,8 @@ const SEOHead = ({
     updateMetaTag('twitter:description', sanitizedDescription);
     updateMetaTag('twitter:image', image);
     updateMetaTag('twitter:image:alt', title);
-    updateMetaTag('twitter:site', '@lumiapp');
-    updateMetaTag('twitter:creator', '@lumiapp');
+    updateMetaTag('twitter:site', '@khaoskontrol');
+    updateMetaTag('twitter:creator', '@khaoskontrol');
 
     // Canonical link
     updateLinkTag('canonical', url);

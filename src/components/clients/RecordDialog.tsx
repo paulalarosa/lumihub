@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { ActionButton, OutlineButton } from "@/components/ui/action-buttons";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -190,16 +191,16 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                    <Button variant="ghost" onClick={() => setOpen(false)} className="text-gray-400 hover:text-white hover:bg-white/5">
+                    <OutlineButton onClick={() => setOpen(false)}>
                         Cancelar
-                    </Button>
-                    <Button
+                    </OutlineButton>
+                    <ActionButton
                         onClick={handleSave}
-                        disabled={loading}
-                        className="bg-[#00e5ff] hover:bg-[#00e5ff]/80 text-black font-medium min-w-[120px]"
+                        loading={loading}
+                        className="min-w-[120px]"
                     >
-                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Prontuário"}
-                    </Button>
+                        Salvar Prontuário
+                    </ActionButton>
                 </div>
             </DialogContent>
         </Dialog>

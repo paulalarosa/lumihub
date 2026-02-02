@@ -133,9 +133,24 @@ export default function Clientes() {
           clientData.portal_link = `https://lumihub.com/portal/${editingClient.id}`;
         }
 
+        // 1. Update Client
         const { error } = await ClientService.update(editingClient.id, clientData);
-
         if (error) throw error;
+
+        // 2. Dual-Update: Sync Project Date if Bride
+        if (clientData.is_bride && clientData.wedding_date) {
+
+          const { error: projectError } = await supabase
+            .from('projects')
+            .update({ event_date: clientData.wedding_date })
+            .eq('client_id', editingClient.id);
+
+          if (projectError) {
+            console.error("Failed to sync project date:", projectError);
+            toast({ title: "Aviso", description: "Data do cliente salva, mas erro ao sincronizar projeto.", variant: "secondary" });
+          }
+        }
+
         toast({ title: "Cliente atualizado!" });
       } else {
         // Create

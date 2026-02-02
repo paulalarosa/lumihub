@@ -5,6 +5,9 @@ import { useAuth } from './useAuth';
 export interface Project {
     id: string;
     name: string;
+    client?: {
+        full_name: string;
+    };
     client_id: string;
     status: string;
     created_at: string;
@@ -21,7 +24,7 @@ export function useProjects() {
 
             const { data, error } = await supabase
                 .from('projects')
-                .select('*')
+                .select('*, client:wedding_clients(full_name)')
                 .order('name');
 
             if (!error && data) {

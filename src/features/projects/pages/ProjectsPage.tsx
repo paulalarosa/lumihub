@@ -20,7 +20,7 @@ import {
   ExternalLink,
   Terminal
 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
