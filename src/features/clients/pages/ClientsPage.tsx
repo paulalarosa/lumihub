@@ -17,7 +17,8 @@ import {
   Eye,
   Star,
   Link as LinkIcon,
-  Gem // Replacing Ring
+  Gem,
+  Download
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -40,6 +41,11 @@ import { ptBR } from 'date-fns/locale';
 import { ClientService } from '@/services/clientService';
 import { MobileFAB } from '@/components/ui/MobileFAB';
 import { ClientForm, ClientFormData } from '../components/ClientForm';
+import { exportClientsToCSV } from '@/utils/exportCSV';
+import { toast as sonnerToast } from 'sonner';
+import { ClientFilters } from '@/components/filters/ClientFilters';
+import { useClientsQuery } from '@/hooks/useClientsQuery';
+import { useClientFilterStore } from '@/stores/useClientFilterStore';
 
 import { supabase } from '@/integrations/supabase/client';
 
@@ -66,37 +72,18 @@ export default function Clientes() {
   const { organizationId, loading: orgLoading } = useOrganization();
   const { toast } = useToast();
 
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loadingClients, setLoadingClients] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const { clients, isLoading: loadingClients, refetch: fetchClients } = useClientsQuery();
+  const filterStore = useClientFilterStore();
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
-
-  useEffect(() => {
-    if (organizationId) {
-      fetchClients();
-    }
-  }, [organizationId]);
-
-  const fetchClients = async () => {
-    if (!organizationId) return;
-    setLoadingClients(true);
-
-    const { data, error } = await ClientService.list(organizationId);
-
-    if (error) {
-      toast({ title: "Erro ao carregar clientes", variant: "destructive" });
-    } else {
-      setClients((data as any) || []);
-    }
-    setLoadingClients(false);
-  };
 
   const openEditDialog = (client: Client) => {
     setEditingClient(client);
@@ -108,8 +95,6 @@ export default function Clientes() {
       toast({ title: "Erro de organização", variant: "destructive" });
       return;
     }
-
-    setLoadingClients(true);
 
     // Initial payload construction
     const clientData: any = {
@@ -147,7 +132,7 @@ export default function Clientes() {
 
           if (projectError) {
             console.error("Failed to sync project date:", projectError);
-            toast({ title: "Aviso", description: "Data do cliente salva, mas erro ao sincronizar projeto.", variant: "secondary" });
+            toast({ title: "Aviso", description: "Data do cliente salva, mas erro ao sincronizar projeto.", variant: "default" });
           }
         }
 
@@ -192,8 +177,6 @@ export default function Clientes() {
     } catch (error) {
       console.error("Error saving client:", error);
       toast({ title: "Erro ao salvar cliente", variant: "destructive" });
-    } finally {
-      setLoadingClients(false);
     }
   };
 
@@ -246,13 +229,28 @@ export default function Clientes() {
     }
   };
 
-  const filteredClients = clients.filter(client => {
-    return (
-      client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.phone?.includes(searchTerm)
-    );
-  });
+  const filteredClients = clients;
+
+  const handleExportCSV = async () => {
+    if (filteredClients.length === 0) {
+      sonnerToast.error('Nenhum cliente para exportar');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const result = exportClientsToCSV(filteredClients);
+      if (result.success) {
+        sonnerToast.success('Arquivo CSV exportado com sucesso!');
+      } else {
+        sonnerToast.error(result.error || 'Erro ao exportar');
+      }
+    } catch (error) {
+      sonnerToast.error('Erro inesperado na exportação');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "Nunca";
@@ -302,12 +300,23 @@ export default function Clientes() {
               setIsDialogOpen(open);
               if (!open) setEditingClient(null);
             }}>
-              <DialogTrigger asChild>
-                <Button className="rounded-none bg-white text-black hover:bg-gray-300 font-mono text-xs uppercase tracking-widest h-10 px-6">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Novo Cliente
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleExportCSV}
+                  disabled={isExporting || filteredClients.length === 0}
+                  variant="outline"
+                  className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10 px-4"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  {isExporting ? 'Exportando...' : 'Exportar CSV'}
                 </Button>
-              </DialogTrigger>
+                <DialogTrigger asChild>
+                  <Button className="rounded-none bg-white text-black hover:bg-gray-300 font-mono text-xs uppercase tracking-widest h-10 px-6">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Novo Cliente
+                  </Button>
+                </DialogTrigger>
+              </div>
               <DialogContent className="max-w-md bg-black border border-white p-6 rounded-none text-white">
                 <DialogHeader>
                   <DialogTitle className="text-white font-serif text-2xl">
@@ -337,17 +346,9 @@ export default function Clientes() {
       </header>
 
       <main className="container mx-auto px-4 py-8 flex-1">
-        {/* Search */}
+        {/* Advanced Filters */}
         <div className="mb-8">
-          <div className="relative max-w-md">
-            <Search className="absolute left-4 top-4 h-4 w-4 text-white/40" />
-            <Input
-              placeholder="BUSCAR NO SISTEMA..."
-              className="pl-12 bg-black border border-white/20 text-white placeholder:text-white/30 focus:border-white rounded-none h-12 font-mono text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <ClientFilters onFiltersChange={fetchClients} />
         </div>
 
         {/* Client List */}
@@ -363,10 +364,10 @@ export default function Clientes() {
             /* Empty State */
             <EmptyState
               icon={Star}
-              title={searchTerm ? 'REGISTRO NÃO ENCONTRADO' : 'DATABASE VAZIO'}
-              description={searchTerm ? 'Verifique os termos de busca.' : 'Inicie o cadastro de clientes para popular o sistema.'}
-              actionLabel={!searchTerm ? 'INICIAR CADASTRO' : undefined}
-              onAction={!searchTerm ? () => setIsDialogOpen(true) : undefined}
+              title={filterStore.search ? 'REGISTRO NÃO ENCONTRADO' : 'DATABASE VAZIO'}
+              description={filterStore.search ? 'Verifique os termos de busca.' : 'Inicie o cadastro de clientes para popular o sistema.'}
+              actionLabel={!filterStore.search ? 'INICIAR CADASTRO' : undefined}
+              onAction={!filterStore.search ? () => setIsDialogOpen(true) : undefined}
               className="border border-white/10 rounded-none bg-black"
             />
           ) : (

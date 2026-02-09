@@ -71,7 +71,7 @@ export default function AIAssistantChat() {
     }
 
     if (lowerContent.includes('ola') || lowerContent.includes('olá') || lowerContent.includes('oi')) {
-      return 'LUMI_OS_V2.0 ONLINE. AWAITING_COMMAND.';
+      return 'KONTROL_OS_V2.0 ONLINE. AWAITING_COMMAND.';
     }
 
     // Default response
@@ -151,7 +151,7 @@ export default function AIAssistantChat() {
               <div className="flex items-center gap-3">
                 <span className="w-2 h-2 bg-white animate-pulse" />
                 <h3 className="font-mono text-xs text-white uppercase tracking-widest">
-                  LUMI_CORE // V.2.0
+                  KONTROL_CORE // V.2.0
                 </h3>
               </div>
               <Button
@@ -188,7 +188,7 @@ export default function AIAssistantChat() {
                     >
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-[10px] uppercase tracking-widest text-white/40">
-                          {message.role === 'user' ? '[USR]' : '[LUMI]'}
+                          {message.role === 'user' ? '[USR]' : '[KONTROL]'}
                         </span>
                       </div>
                       <div

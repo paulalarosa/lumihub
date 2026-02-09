@@ -150,7 +150,7 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
         }
 
         // 2. Professional Name
-        let professionalName = "LumiHub";
+        let professionalName = "KONTROL";
         if (user) {
           const { data: profData } = await supabase.from('profiles').select('full_name').eq('id', user.id).single();
           if (profData?.full_name) professionalName = profData.full_name;

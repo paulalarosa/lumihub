@@ -66,7 +66,7 @@ export const WhatsAppActionMenu = ({ project, client, variant = 'default', class
             }
 
             // 2. Fetch Professional Name
-            let professionalName = "LumiHub";
+            let professionalName = "KONTROL";
             if (user) {
                 const { data: profData } = await supabase
                     .from('profiles')

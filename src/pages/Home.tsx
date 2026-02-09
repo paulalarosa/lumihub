@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
+import { KontrolProCarousel } from "@/components/marketing/KontrolProCarousel";
 import { TrackedButton } from "@/components/analytics/TrackedButton";
 import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
 import { FloatingGlassShapes } from "@/components/animations/FloatingGlassShapes";
@@ -365,7 +365,7 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Lumi Pro Section */}
+        {/* Kontrol Pro Section */}
         <section className="py-32 bg-black">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 space-y-4">
@@ -376,7 +376,7 @@ const Home = () => {
                 {t("lumipro_subtitle")}
               </p>
             </div>
-            <LumiProCarousel />
+            <KontrolProCarousel />
           </div>
         </section>
 

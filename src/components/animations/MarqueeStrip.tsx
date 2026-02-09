@@ -14,7 +14,7 @@ export const MarqueeStrip = () => {
             >
                 {[...Array(10)].map((_, i) => (
                     <span key={i} className="text-white font-mono text-xs tracking-widest mx-8 select-none">
-                        LUMIHUB SYSTEM /// PROFESSIONAL CRM /// MAKEUP ARTIST OS ///
+                        KONTROL SYSTEM /// PROFESSIONAL CRM /// MAKEUP ARTIST OS ///
                     </span>
                 ))}
             </motion.div>

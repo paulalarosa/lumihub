@@ -38,3 +38,9 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Packages and backups
+*.pkg
+*.backup
+*.bak
+*.old

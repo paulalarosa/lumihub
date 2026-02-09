@@ -130,7 +130,7 @@ export default function BrideDashboardPage() {
             <header className="border-b border-neutral-800 bg-neutral-950">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
                     <div>
-                        <span className="font-serif italic text-xl tracking-tight text-white">Lumi Bride</span>
+                        <span className="font-serif italic text-xl tracking-tight text-white">KONTROL Bride</span>
                     </div>
                     <Button
                         variant="ghost"
@@ -281,7 +281,7 @@ export default function BrideDashboardPage() {
 
                 {/* Footer */}
                 <div className="mt-12 text-center text-[9px] text-neutral-700 uppercase tracking-widest font-mono">
-                    Lumi Bride Portal • Secure Connection
+                    KONTROL Bride Portal • Secure Connection
                 </div>
             </main>
         </div>

@@ -104,9 +104,9 @@ const Planos = () => {
   return (
     <>
       <SEOHead
-        title="Planos e Preços - Lumi"
+        title="Planos e Preços - KONTROL"
         description="Escolha o plano ideal para seu negócio de beleza. Planos a partir de R$39,90/mês com teste gratuito de 14 dias. Sem cartão de crédito."
-        keywords="preços lumi, planos lumi, quanto custa lumi, sistema gestão beleza preço, software maquiadora preço"
+        keywords="preços kontrol, planos khaos kontrol, quanto custa kontrol, sistema gestão beleza preço, software maquiadora preço"
         url="https://khaoskontrol.com.br/planos"
         type="service"
         breadcrumbs={[
@@ -118,9 +118,9 @@ const Planos = () => {
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "Product",
-          "name": "Lumi - Plataforma de Gestão",
+          "name": "KONTROL - Plataforma de Gestão",
           "description": "Software de gestão para profissionais de beleza",
-          "brand": { "@type": "Brand", "name": "Lumi" },
+          "brand": { "@type": "Brand", "name": "Khaos Kontrol" },
           "offers": [
             {
               "@type": "Offer",

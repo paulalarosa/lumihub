@@ -1,4 +1,4 @@
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore";
 import { useDashboardStats } from "@/hooks/useDashboardStats";
 import { SummaryHeader } from "../components/SummaryHeader";
 import { Plus } from "lucide-react";

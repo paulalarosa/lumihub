@@ -31,7 +31,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
     custom: 'Personalizado'
 };
 
-export function WhatsAppPreviewModal({ isOpen, onClose, client, event, templates, professionalName = "LumiHub" }: Props) {
+export function WhatsAppPreviewModal({ isOpen, onClose, client, event, templates, professionalName = "KONTROL" }: Props) {
     const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
     const [messageText, setMessageText] = useState('');
 

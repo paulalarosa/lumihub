@@ -61,6 +61,7 @@ const ProjectContract = lazy(() => import("./pages/ProjectContract"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const InviteLanding = lazy(() => import("./pages/InviteLanding"));
+const Analytics = lazy(() => import("./pages/Analytics"));
 
 
 const queryClient = new QueryClient();
@@ -143,6 +144,11 @@ const App = () => {
                               <Route path="/dashboard/financial" element={
                                 <ProtectedRoute>
                                   <FinancialPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/analytics" element={
+                                <ProtectedRoute>
+                                  <Analytics />
                                 </ProtectedRoute>
                               } />
 

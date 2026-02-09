@@ -107,7 +107,7 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
       // 3. Generate Portal Link if Bride
       if (formData.is_bride && (newClient as any)?.id) {
         const clientId = (newClient as any).id;
-        const portalLink = `https://lumihub.com/portal/${clientId}`;
+        const portalLink = `https://khaoskontrol.com.br/portal/${clientId}`;
 
         await ClientService.update(clientId, {
           portal_link: portalLink

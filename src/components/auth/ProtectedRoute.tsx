@@ -31,6 +31,14 @@ export default function ProtectedRoute({ children, requireOnboarding = true }: P
         return <Navigate to="/login" replace state={{ from: location }} />;
     }
 
-    // 3. Authenticated (Render Content)
+    // 3. Assistant Role Check (Redirect to Portal)
+    const isAssistant = user?.user_metadata?.is_assistant;
+    const isPortalRoute = location.pathname.startsWith('/portal-assistente') || location.pathname.startsWith('/configuracoes');
+
+    if (isAssistant && !isPortalRoute) {
+        return <Navigate to="/portal-assistente" replace />;
+    }
+
+    // 4. Authenticated (Render Content)
     return children ? <>{children}</> : <Outlet />;
 }

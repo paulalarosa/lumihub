@@ -43,7 +43,7 @@ export default function Contato() {
                 description: "ABRINDO CLIENTE DE EMAIL..."
             });
 
-            const subject = encodeURIComponent(`[LUMI CONTATO] ${formData.subject || 'NOVA MENSAGEM'}`);
+            const subject = encodeURIComponent(`[KONTROL CONTATO] ${formData.subject || 'NOVA MENSAGEM'}`);
             const body = encodeURIComponent(`NOME: ${formData.name}\nEMAIL: ${formData.email}\n\nMENSAGEM:\n${formData.message}`);
 
             window.location.href = `mailto:prenata@gmail.com?subject=${subject}&body=${body}`;
@@ -55,9 +55,9 @@ export default function Contato() {
     return (
         <>
             <SEOHead
-                title="CONTATO - LUMI | SUPORTE"
+                title="CONTATO - KONTROL | SUPORTE"
                 description="Entre em contato. Suporte, parcerias e concierge."
-                keywords="contato, lumi, suporte, ajuda"
+                keywords="contato, kontrol, khaos kontrol, suporte, ajuda"
                 url="https://khaoskontrol.com.br/contato"
             />
             <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
@@ -209,7 +209,7 @@ export default function Contato() {
 
                                 <div className="pt-12 border-t border-white/10">
                                     <p className="font-mono text-[10px] text-white/30 uppercase tracking-[0.2em] text-center">
-                                        Lumi Beauty Tech • Operações Globais
+                                        Khaos Kontrol • Operações Globais
                                     </p>
                                 </div>
                             </section>

@@ -211,7 +211,7 @@ export default function MessageTemplatesSettings() {
                                             toast({ title: "Seu perfil não tem telefone cadastrado", variant: "destructive" });
                                             return;
                                         }
-                                        const text = encodeURIComponent("Olá! O sistema da Lumi está conectado com sucesso! 🚀");
+                                        const text = encodeURIComponent("Olá! O sistema do KONTROL está conectado com sucesso! 🚀");
                                         window.open(`https://wa.me/${userPhone.replace(/\D/g, '')}?text=${text}`, '_blank');
                                     }}
                                     disabled={!userPhone}
