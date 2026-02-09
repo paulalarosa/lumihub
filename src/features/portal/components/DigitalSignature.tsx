@@ -10,7 +10,11 @@ import jsPDF from 'jspdf';
 interface DigitalSignatureProps {
     isOpen: boolean;
     onClose: () => void;
-    contract: any;
+    contract: {
+        id: string;
+        project_id: string;
+        content?: string;
+    };
     onSigned: () => void;
 }
 

@@ -99,7 +99,7 @@ export function ContractDialog({ open, onOpenChange, defaultProjectId }: Contrac
                                 onChange={e => setProjectId(e.target.value)}
                             >
                                 <option value="" disabled className="bg-black text-gray-500">SELECIONE UM PROJETO...</option>
-                                {projects?.map((project: any) => (
+                                {projects?.map((project: { id: string; name: string; client?: { full_name: string } }) => (
                                     <option key={project.id} value={project.id} className="bg-black text-white">
                                         {project.name} {project.client?.full_name ? `// ${project.client.full_name}` : ''}
                                     </option>

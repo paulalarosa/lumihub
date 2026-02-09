@@ -7,12 +7,18 @@ const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+interface StripeCheckoutObject {
+    metadata: { user_id?: string };
+    subscription?: string;
+    customer?: string;
+    id?: string;
+}
+
 interface StripeEvent {
     type: string;
     data: {
-        object: Record<string, any>;
+        object: StripeCheckoutObject;
     };
-    [key: string]: any;
 }
 
 export const handleBillingWebhook = async (event: StripeEvent) => {

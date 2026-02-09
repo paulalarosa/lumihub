@@ -26,35 +26,35 @@ export const RevenueChart = ({ className, overrideMetrics }: RevenueChartProps) 
     const potential = leads * TICKET;
 
     const data = {
-        labels: ['Jan', 'Feb', 'Mar'], // Simulating Q1
+        labels: ['Jan', 'Feb', 'Mar'],
         datasets: [
             {
                 label: overrideMetrics ? 'RECURRING (MRR)' : 'GUARANTEED (ACTIVE)',
-                data: [guaranteed, guaranteed * 1.05, guaranteed * 1.1], // Mock trend
+                data: [guaranteed, guaranteed * 1.05, guaranteed * 1.1],
                 backgroundColor: 'black',
                 barPercentage: 0.6,
             },
             {
                 label: overrideMetrics ? 'PROJECTED' : 'POTENTIAL (LEADS)',
-                data: [potential, potential * 0.9, potential * 1.2], // Mock trend
-                backgroundColor: '#fbbf24', // Amber-400 / Yellow
+                data: [potential, potential * 0.9, potential * 1.2],
+                backgroundColor: '#fbbf24',
                 borderColor: 'black',
                 borderWidth: 2,
-                borderSkipped: false, // Full border
+                borderSkipped: false as const,
                 barPercentage: 0.6,
             },
         ],
     };
 
-    const options: any = {
+    const options = {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom',
+                position: 'bottom' as const,
                 labels: {
                     font: {
-                        family: 'JetBrains Mono, monospace', // Industrial font
+                        family: 'JetBrains Mono, monospace',
                         size: 10,
                     },
                     color: 'black',
@@ -70,9 +70,9 @@ export const RevenueChart = ({ className, overrideMetrics }: RevenueChartProps) 
                 titleFont: { family: 'JetBrains Mono' },
                 bodyFont: { family: 'JetBrains Mono' },
                 padding: 12,
-                cornerRadius: 0, // Brutalist
+                cornerRadius: 0,
                 callbacks: {
-                    label: function (context: any) {
+                    label: function (context: { parsed: { y: number } }) {
                         return ' R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
                     }
                 }
@@ -92,12 +92,13 @@ export const RevenueChart = ({ className, overrideMetrics }: RevenueChartProps) 
             },
             y: {
                 grid: {
-                    color: '#e5e7eb', // gray-200
+                    color: '#e5e7eb',
                     borderDash: [4, 4],
                 },
                 ticks: {
-                    callback: function (value: any) {
-                        if (value >= 1000) return 'k' + (value / 1000);
+                    callback: function (value: string | number) {
+                        const numValue = typeof value === 'string' ? parseFloat(value) : value;
+                        if (numValue >= 1000) return 'k' + (numValue / 1000);
                         return value;
                     },
                     font: {
@@ -108,7 +109,7 @@ export const RevenueChart = ({ className, overrideMetrics }: RevenueChartProps) 
             }
         },
         interaction: {
-            mode: 'index',
+            mode: 'index' as const,
             intersect: false,
         },
     };

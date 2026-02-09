@@ -14,9 +14,10 @@ export const useServices = (userId?: string) => {
         try {
             const data = await ServicesService.getAll();
             setServices(data);
-        } catch (err: any) {
-            console.error("Error fetching services:", err);
-            setError(err);
+        } catch (err: unknown) {
+            const error = err instanceof Error ? err : new Error('Unknown error');
+            console.error("Error fetching services:", error);
+            setError(error);
             toast.error("Erro ao carregar serviços.");
         } finally {
             setLoading(false);
@@ -32,7 +33,7 @@ export const useServices = (userId?: string) => {
             await ServicesService.delete(id);
             setServices(prev => prev.filter(s => s.id !== id));
             toast.success("Serviço excluído.");
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Error deleting service:", err);
             toast.error("Não foi possível excluir o serviço.");
             throw err;

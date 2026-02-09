@@ -120,7 +120,7 @@ export default function Dashboard() {
         }
 
         // 2. Prepare Promises
-        const promises: any[] = [
+        const promises: Promise<any>[] = [
           EventService.getUpcomingEvents(organizationId, user.id, isAdmin ? 'admin' : 'assistant'),
           ClientService.count(organizationId),
           ProjectService.count(organizationId),
@@ -337,7 +337,7 @@ export default function Dashboard() {
                   // FIX: Safer Date Parsing
                   let start = new Date().toISOString();
                   if (isGoogle) {
-                    start = event.start.dateTime || event.start.date;
+                    start = event.start?.dateTime || event.start?.date || new Date().toISOString();
                   } else if (event.event_date) {
                     start = event.event_date + (event.start_time ? ('T' + event.start_time) : '');
                   }
@@ -367,7 +367,8 @@ export default function Dashboard() {
                   <Calendar className="w-12 h-12 mb-4 opacity-20" />
                   <p className="text-sm">{t('dashboard.no_events')}</p>
                 </div>
-              )}
+              )
+              }
             </div>
           </div>
 

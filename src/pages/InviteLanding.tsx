@@ -194,9 +194,10 @@ export default function InviteLanding() {
                     navigate('/portal-assistente');
                 }, 1000);
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Registration error:", error);
-            toast.error(error.message || "Erro ao processar cadastro.");
+            const message = error instanceof Error ? error.message : "Erro ao processar cadastro.";
+            toast.error(message);
         } finally {
             setLoading(false);
         }

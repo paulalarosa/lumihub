@@ -56,11 +56,8 @@ export function useDashboardStats() {
 
                 // Calculate Total Budget Managed
                 let totalBudget = 0;
-                projectServices?.forEach((ps: any) => {
-                    const price = ps.service?.price || 0; // Fallback if price is in service
-                    // Note: If project_services has a specific 'price' column (override), use it.
-                    // Checking types: project_services doesn't show 'price' in the partial view I saw.
-                    // Assuming service.price is the source.
+                projectServices?.forEach((ps) => {
+                    const price = parseFloat(ps.service?.price || '0') || 0;
                     totalBudget += price;
                 });
 

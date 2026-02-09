@@ -19,13 +19,15 @@ interface WhatsAppProps {
     project: {
         event_date?: string | Date;
         event_location?: string | null;
-        [key: string]: any;
+        id?: string;
+        name?: string;
     };
     client: {
         phone?: string | null;
         full_name?: string | null;
         name?: string | null;
-        [key: string]: any;
+        id?: string;
+        email?: string | null;
     };
     variant?: 'default' | 'outline' | 'ghost';
     className?: string;

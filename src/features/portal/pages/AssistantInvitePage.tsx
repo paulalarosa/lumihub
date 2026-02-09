@@ -142,7 +142,7 @@ const AssistantInvite = () => {
         toast.success("ACCOUNT CREATED. WELCOME.");
         navigate("/portal-assistente");
       }
-    } catch (err: any) {
+    } catch (err) {
       toast.error(err.message || "CREATION FAILED");
     } finally {
       setSubmitting(false);

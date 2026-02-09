@@ -9,8 +9,18 @@ export const supabase = createClient<Database>(
   supabaseKey || ''
 );
 
-// Função essencial para evitar o erro de importação no useSubscription.ts
-export const handleSupabaseError = (error: any) => {
-  console.error("Erro no Supabase:", error);
-  return error.message || "Ocorreu um erro inesperado no banco de dados.";
+interface SupabaseError {
+  message?: string;
+  code?: string;
+  details?: string;
+}
+
+export const handleSupabaseError = (error: SupabaseError | Error | unknown): string => {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return (error as SupabaseError).message || "Ocorreu um erro inesperado no banco de dados.";
+  }
+  return "Ocorreu um erro inesperado no banco de dados.";
 };

@@ -43,8 +43,8 @@ export function useMFA() {
             });
             if (error) throw error;
             return data;
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Unknown error');
             return null;
         } finally {
             setIsLoading(false);
@@ -58,8 +58,8 @@ export function useMFA() {
             const { data, error } = await supabase.auth.mfa.challenge({ factorId });
             if (error) throw error;
             return data;
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Unknown error');
             return null;
         } finally {
             setIsLoading(false);
@@ -77,8 +77,8 @@ export function useMFA() {
             });
             if (error) throw error;
             return data;
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Unknown error');
             throw e;
         } finally {
             setIsLoading(false);
@@ -92,8 +92,8 @@ export function useMFA() {
             const { error } = await supabase.auth.mfa.unenroll({ factorId });
             if (error) throw error;
             return true;
-        } catch (e: any) {
-            setError(e.message);
+        } catch (e: unknown) {
+            setError(e instanceof Error ? e.message : 'Unknown error');
             throw e;
         } finally {
             setIsLoading(false);

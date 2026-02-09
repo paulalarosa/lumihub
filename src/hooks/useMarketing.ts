@@ -13,9 +13,10 @@ export const useMarketing = () => {
         try {
             const data = await MarketingService.getAll();
             setCampaigns(data);
-        } catch (err: any) {
-            console.error("Error fetching campaigns:", err);
-            setError(err);
+        } catch (err: unknown) {
+            const error = err instanceof Error ? err : new Error('Unknown error');
+            console.error("Error fetching campaigns:", error);
+            setError(error);
             toast.error("Erro ao carregar campanhas de marketing.");
         } finally {
             setLoading(false);

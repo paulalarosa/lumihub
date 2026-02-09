@@ -82,10 +82,11 @@ export default function QuickCreateProjectDialog({
       setClientId('');
       setEventDate('');
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Não foi possível criar o projeto";
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível criar o projeto",
+        description: message,
         variant: "destructive"
       });
     } finally {

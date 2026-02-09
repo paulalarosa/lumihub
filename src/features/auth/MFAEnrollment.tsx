@@ -10,8 +10,22 @@ import { toast } from 'sonner';
 
 export default function MFAEnrollment() {
     const { enroll, verify, challenge, listFactors, unenroll, isLoading } = useMFA();
-    const [factors, setFactors] = useState<any[]>([]);
-    const [enrollmentData, setEnrollmentData] = useState<any>(null);
+    interface MFAFactor {
+        id: string;
+        status: string;
+        created_at: string;
+    }
+
+    interface EnrollmentData {
+        id: string;
+        totp: {
+            qr_code: string;
+            secret: string;
+        };
+    }
+
+    const [factors, setFactors] = useState<MFAFactor[]>([]);
+    const [enrollmentData, setEnrollmentData] = useState<EnrollmentData | null>(null);
     const [verificationCode, setVerificationCode] = useState('');
     const [isVerifying, setIsVerifying] = useState(false);
     const [showRecovery, setShowRecovery] = useState(false); // Supabase doesn't give recovery codes this way usually, but we'll stick to the flow

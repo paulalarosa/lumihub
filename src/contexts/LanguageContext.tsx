@@ -1,16 +1,7 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { translations as externalTranslations } from '@/utils/translations';
-
-export type Language = 'pt' | 'en';
-
-export interface LanguageContextType {
-    language: Language;
-    setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
-}
-
-export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+import { Language, LanguageContext } from './LanguageContextDefinition';
 
 const inlineTranslations: Record<Language, Record<string, string>> = {
     // ... keep translations ...
@@ -164,4 +155,3 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         </LanguageContext.Provider>
     );
 }
-

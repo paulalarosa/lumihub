@@ -59,14 +59,14 @@ const AuthCallbackHandler = () => {
 
       await validateSession(session);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('OAuth callback error:', err);
       setStatus('error');
       setErrorMessage(err.message || 'Erro de conexão.');
     }
   };
 
-  const validateSession = async (session: any) => {
+  const validateSession = async (session: { provider_token?: string; provider_refresh_token?: string; user: { id: string } }) => {
     // 2. Verify Token Exists
     // This ensures we actually got a provider token from the Google flow
     if (!session.provider_token && !session.provider_refresh_token) {

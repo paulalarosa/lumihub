@@ -164,9 +164,10 @@ export default function Configuracoes() {
       }
 
       toast({ title: "Configurações salvas", description: "Todas as alterações foram aplicadas." });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
       console.error('Save error:', error);
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao salvar", description: message, variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -192,8 +193,9 @@ export default function Configuracoes() {
         .getPublicUrl(filePath);
 
       setLogoUrl(publicUrl);
-    } catch (error: any) {
-      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      toast({ title: "Erro no upload", description: message, variant: "destructive" });
     } finally {
       setUploadingLogo(false);
     }

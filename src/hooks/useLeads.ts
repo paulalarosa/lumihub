@@ -54,8 +54,9 @@ export function useLeads(): UseLeadsReturn {
 
             return { success: true };
 
-        } catch (error: any) {
-            return { success: false, error: error.message || "Unknown error" };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            return { success: false, error: message };
         } finally {
             setIsLoading(false);
         }

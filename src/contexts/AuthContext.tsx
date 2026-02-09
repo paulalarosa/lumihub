@@ -32,7 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             // Default to professional to be safe if column is null
-            const safeData = data as any;
+            const safeData = data as { role?: string };
             return safeData?.role || 'professional';
         } catch (err) {
             // console.error("Auth: Crash fetching role", err);
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 }
 
                 // Redirect if on public pages
-                if (window.location.pathname === '/login' || window.location.pathname === '/' || window.location.pathname === '/auth/login') {
+                if (window.location.pathname === '/login' || window.location.pathname === '/auth/login' || window.location.pathname === '/register') {
                     // Check callback logic or default to dashboard
                     navigate('/dashboard');
                 }

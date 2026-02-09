@@ -5,7 +5,11 @@ type Theme = "dark" | "light" | "system";
 
 const ThemeContext = createContext<{ theme: Theme; setTheme: (t: Theme) => void } | undefined>(undefined);
 
-export function ThemeProvider({ children, defaultTheme = "dark", storageKey = "vite-ui-theme" }: any) {
+export function ThemeProvider({ children, defaultTheme = "dark", storageKey = "vite-ui-theme" }: {
+    children: React.ReactNode;
+    defaultTheme?: Theme;
+    storageKey?: string;
+}) {
     const [theme, setTheme] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
     );

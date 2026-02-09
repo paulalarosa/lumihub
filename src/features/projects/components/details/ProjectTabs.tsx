@@ -5,7 +5,7 @@ import { ProjectBriefing } from './ProjectBriefing';
 import { ProjectFinancials } from './ProjectFinancials';
 import { ContratosTab } from '@/features/projects/sections/contratos';
 
-interface Props {
+interface ProjectTabsProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     t: (key: string) => string;
@@ -13,11 +13,9 @@ interface Props {
     // Tasks Props
     tasks: any[];
     newTaskTitle: string;
-    setNewTaskTitle: (val: string) => void;
-    newTaskVisibility: string;
-    setNewTaskVisibility: (val: string) => void;
-    addTask: () => void;
-    toggleTask: (id: string, checked: boolean) => void;
+    setNewTaskTitle: (value: string) => void;
+    addTask: (e: React.FormEvent) => void;
+    toggleTask: (id: string, currentStatus: string | null) => void;
     deleteTask: (id: string) => void;
 
     // Briefing Props
@@ -57,6 +55,7 @@ interface Props {
     registerPayment: (e: React.FormEvent) => void;
 }
 
+// Update component signature and remove visibility props
 export const ProjectTabs = ({
     activeTab,
     setActiveTab,
@@ -65,8 +64,6 @@ export const ProjectTabs = ({
     tasks,
     newTaskTitle,
     setNewTaskTitle,
-    newTaskVisibility,
-    setNewTaskVisibility,
     addTask,
     toggleTask,
     deleteTask,
@@ -103,7 +100,7 @@ export const ProjectTabs = ({
     paymentDescription,
     setPaymentDescription,
     registerPayment
-}: Props) => {
+}: ProjectTabsProps) => {
     return (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <TabsList className="bg-black border border-white/20 p-0 rounded-none h-12 w-full flex justify-start overflow-x-auto">
@@ -129,8 +126,6 @@ export const ProjectTabs = ({
                     tasks={tasks}
                     newTaskTitle={newTaskTitle}
                     setNewTaskTitle={setNewTaskTitle}
-                    newTaskVisibility={newTaskVisibility}
-                    setNewTaskVisibility={setNewTaskVisibility}
                     addTask={addTask}
                     toggleTask={toggleTask}
                     deleteTask={deleteTask}

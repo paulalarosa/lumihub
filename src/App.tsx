@@ -62,6 +62,15 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const InviteLanding = lazy(() => import("./pages/InviteLanding"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+// Assistant Portal
+const AcceptInvitePage = lazy(() => import("@/pages/assistant/AcceptInvitePage"));
+const AssistantDashboard = lazy(() => import("@/pages/assistant/AssistantDashboard"));
+const AssistantLayout = lazy(() => import("@/components/ui/layout/AssistantLayout"));
+// Upgrade Pages
+const UpgradePage = lazy(() => import("@/pages/assistant/UpgradePage"));
+const UpgradeSuccessPage = lazy(() => import("@/pages/assistant/UpgradeSuccessPage"));
+const UpgradeFailurePage = lazy(() => import("@/pages/assistant/UpgradeFailurePage"));
+const UpgradePendingPage = lazy(() => import("@/pages/assistant/UpgradePendingPage"));
 
 
 const queryClient = new QueryClient();
@@ -221,14 +230,27 @@ const App = () => {
                               } />
                             </Route>
 
-                            {/* Assistant Portal - Explicit Route */}
-                            <Route path="/portal-assistente" element={
-                              <ProtectedRoute requireOnboarding={false}>
-                                <AssistantPortalPage />
+                            {/* Assistant Portal - New Routes */}
+                            <Route path="/assistant/accept/:token" element={<AcceptInvitePage />} />
+
+                            <Route path="/assistant" element={
+                              <ProtectedRoute>
+                                <AssistantLayout />
                               </ProtectedRoute>
-                            } />
+                            }>
+                              <Route path="dashboard" element={<AssistantDashboard />} />
+                              <Route index element={<Navigate to="dashboard" replace />} />
+                            </Route>
+
+                            <Route path="/assistente/convite/:token" element={<AcceptInvitePage />} />
 
                             <Route path="/assistente/convite/:token" element={<InviteLanding />} />
+
+                            {/* Upgrade Flow */}
+                            <Route path="/upgrade" element={<UpgradePage />} />
+                            <Route path="/upgrade/success" element={<UpgradeSuccessPage />} />
+                            <Route path="/upgrade/failure" element={<UpgradeFailurePage />} />
+                            <Route path="/upgrade/pending" element={<UpgradePendingPage />} />
 
                             {/* Public Client Booking */}
                             <Route path="/b/:slug" element={<PublicBooking />} />

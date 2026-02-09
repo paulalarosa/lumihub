@@ -1,82 +1,81 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { TrackedButton } from "@/components/analytics/TrackedButton";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowRight,
   Zap,
   Crown,
   Star,
-  Check,
-  X
 } from "lucide-react";
 import SEOHead from "@/components/seo/SEOHead";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const Planos = () => {
+  const { t } = useLanguage();
+
   const plans = [
     {
-      name: "ACESSO ESSENCIAL",
+      name: t("plan_essential_name"),
       price: "39,90",
       period: "MÊS",
-      description: "ACESSO SISTEMA NÍVEL 1",
+      description: t("plan_essential_desc"),
       badge: null,
       icon: Zap,
       features: [
-        { name: "10 CLIENTES ATIVOS", included: true },
-        { name: "PACK TÉCNICO BÁSICO (PDF)", included: true },
-        { name: "AGENDA INTELIGENTE", included: true },
-        { name: "CONTRATOS DIGITAIS", included: true },
-        { name: "PORTAL DA CLIENTE", included: true },
-        { name: "DASHBOARD FINANCEIRO", included: false },
-        { name: "CÁLCULO DE COMISSÃO", included: false },
-        { name: "SUPORTE IA", included: false }
+        { name: t("feat_10_clients"), included: true },
+        { name: t("feat_tech_pack_basic"), included: true },
+        { name: t("feat_smart_agenda"), included: true },
+        { name: t("feat_contracts"), included: true },
+        { name: t("feat_client_portal"), included: true },
+        { name: t("feat_financial_dash"), included: false },
+        { name: t("feat_commission"), included: false },
+        { name: t("feat_ai_support"), included: false }
       ],
-      limitations: "ARTISTA SOLO // INICIANTE",
-      cta: "INICIAR_TESTE",
+      limitations: t("plan_essential_limit"),
+      ctaKey: "cta_bottom_start",
       ctaVariant: "outline" as const,
       highlight: false
     },
     {
-      name: "ACESSO PROFISSIONAL",
+      name: t("plan_professional_name"),
       price: "89,90",
       period: "MÊS",
-      description: "SUÍTE DE GESTÃO AVANÇADA",
-      badge: "MAIS POPULAR",
+      description: t("plan_professional_desc"),
+      badge: t("plan_professional_badge"),
       icon: Star,
       features: [
-        { name: "CLIENTES ILIMITADOS", included: true },
-        { name: "PACK TÉCNICO GOLD", included: true },
-        { name: "ANALYTICS COMPLETO", included: true },
-        { name: "PORTAL DA NOIVA CUSTOM", included: true },
-        { name: "MOODBOARD INTERATIVO", included: true },
-        { name: "FICHAS DE ANAMNESE", included: true },
-        { name: "CÁLCULO DE COMISSÃO", included: false },
-        { name: "SUPORTE IA", included: false }
+        { name: t("feat_unlimited_clients"), included: true },
+        { name: t("feat_tech_pack_gold"), included: true },
+        { name: t("feat_full_analytics"), included: true },
+        { name: t("feat_custom_portal"), included: true },
+        { name: t("feat_moodboard"), included: true },
+        { name: t("feat_anamnesis"), included: true },
+        { name: t("feat_commission"), included: false },
+        { name: t("feat_ai_support"), included: false }
       ],
       limitations: null,
-      cta: "MIGRAR_AGORA",
-      ctaVariant: "default" as const, // We will manually style this
+      ctaKey: "cta_bottom_plans",
+      ctaVariant: "default" as const,
       highlight: true
     },
     {
-      name: "ACESSO STUDIO",
+      name: t("plan_studio_name"),
       price: "149,90",
       period: "MÊS",
-      description: "SOLUÇÕES PARA EQUIPES & IMPÉRIOS",
-      badge: "MELHOR VALOR",
+      description: t("plan_studio_desc"),
+      badge: t("plan_studio_badge"),
       icon: Crown,
       features: [
-        { name: "TUDO DO PRO", included: true },
-        { name: "GESTÃO DE EQUIPE", included: true },
-        { name: "AUTO COMISSÕES", included: true },
-        { name: "IA OPERACIONAL", included: true },
-        { name: "PERFORMANCE DO ARTISTA", included: true },
-        { name: "ACESSO MULTI-USUÁRIO", included: true },
-        { name: "SUPORTE PRIORITÁRIO", included: true },
-        { name: "INTEGRAÇÃO API", included: true }
+        { name: t("feat_all_pro"), included: true },
+        { name: t("feat_team_mgmt"), included: true },
+        { name: t("feat_auto_comm"), included: true },
+        { name: t("feat_ops_ai"), included: true },
+        { name: t("feat_perf_artist"), included: true },
+        { name: t("feat_multi_user"), included: true },
+        { name: t("feat_priority_support"), included: true },
+        { name: t("feat_api"), included: true }
       ],
       limitations: null,
-      cta: "MIGRAR_AGORA",
+      ctaKey: "cta_bottom_plans",
       ctaVariant: "outline" as const,
       highlight: false
     }
@@ -90,14 +89,6 @@ const Planos = () => {
     {
       question: "COMO FUNCIONA O TRIAL?",
       answer: "14 DIAS DE ACESSO TOTAL AO SISTEMA. SEM CARTÃO DE CRÉDITO NECESSÁRIO."
-    },
-    {
-      question: "EXISTE SUPORTE TÉCNICO?",
-      answer: "SIM. SUPORTE DEDICADO VIA CHAT E EMAIL. PRIORIDADE PARA PLANOS STUDIO."
-    },
-    {
-      question: "TAXAS DE PAGAMENTO?",
-      answer: "APENAS SOBRE TRANSAÇÕES PROCESSADAS. REPASSE LÍQUIDO AUTOMÁTICO."
     }
   ];
 
@@ -105,49 +96,15 @@ const Planos = () => {
     <>
       <SEOHead
         title="Planos e Preços - KONTROL"
-        description="Escolha o plano ideal para seu negócio de beleza. Planos a partir de R$39,90/mês com teste gratuito de 14 dias. Sem cartão de crédito."
-        keywords="preços kontrol, planos khaos kontrol, quanto custa kontrol, sistema gestão beleza preço, software maquiadora preço"
+        description="Escolha o plano ideal para seu negócio de beleza."
+        keywords="preços kontrol, planos khaos kontrol"
         url="https://khaoskontrol.com.br/planos"
         type="service"
         breadcrumbs={[
           { name: "Home", url: "https://khaoskontrol.com.br" },
           { name: "Planos", url: "https://khaoskontrol.com.br/planos" }
         ]}
-        faq={faqs.map(f => ({ question: f.question, answer: f.answer }))}
         priceRange="R$39-R$149"
-        jsonLd={{
-          "@context": "https://schema.org",
-          "@type": "Product",
-          "name": "KONTROL - Plataforma de Gestão",
-          "description": "Software de gestão para profissionais de beleza",
-          "brand": { "@type": "Brand", "name": "Khaos Kontrol" },
-          "offers": [
-            {
-              "@type": "Offer",
-              "name": "Essencial",
-              "price": "39.90",
-              "priceCurrency": "BRL",
-              "priceValidUntil": "2027-12-31",
-              "availability": "https://schema.org/InStock"
-            },
-            {
-              "@type": "Offer",
-              "name": "Profissional",
-              "price": "89.90",
-              "priceCurrency": "BRL",
-              "priceValidUntil": "2027-12-31",
-              "availability": "https://schema.org/InStock"
-            },
-            {
-              "@type": "Offer",
-              "name": "Studio",
-              "price": "149.90",
-              "priceCurrency": "BRL",
-              "priceValidUntil": "2027-12-31",
-              "availability": "https://schema.org/InStock"
-            }
-          ]
-        }}
       />
       <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
 
@@ -155,23 +112,23 @@ const Planos = () => {
         <section className="border-b border-white/20 pt-32 pb-16">
           <div className="container mx-auto px-4 text-center">
             <h1 className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-white/60 mb-6">
-              ARQUITETURA DO SISTEMA // MODELOS DE PREÇO
+              {t("plans_badge")}
             </h1>
             <h2 className="font-serif text-5xl md:text-7xl text-white mb-8">
-              BLUEPRINTS DE DADOS
+              {t("plans_title")}
             </h2>
             <div className="flex items-center justify-center gap-4 text-xs font-mono uppercase tracking-widest text-white/80">
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-white" />
-                SEM CARTÃO DE CRÉDITO
+                {t("plans_no_card")}
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-white" />
-                14 DIAS GRÁTIS
+                {t("plans_trial")}
               </span>
               <span className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-white" />
-                CANCELE QUANDO QUISER
+                {t("plans_cancel")}
               </span>
             </div>
           </div>
@@ -240,7 +197,7 @@ const Planos = () => {
                         }
                       `}
                     >
-                      {plan.cta}
+                      {plan.ctaKey ? t(plan.ctaKey) : "MIGRAR AGORA"}
                     </Button>
                   </Link>
                 </div>
@@ -254,10 +211,10 @@ const Planos = () => {
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {[
-                "CRIPTOGRAFIA DE DADOS",
-                "SYNC NA NUVEM",
-                "ACESSO MOBILE",
-                "UPDATES AUTOMÁTICOS"
+                t("plans_security"),
+                t("plans_cloud"),
+                t("plans_mobile"),
+                t("plans_updates")
               ].map((item, i) => (
                 <div key={i} className="flex flex-col items-center text-center p-6 border border-white/10 hover:border-white/50 transition-colors">
                   <div className="w-2 h-2 bg-white mb-4" />
@@ -272,7 +229,7 @@ const Planos = () => {
         <section className="border-t border-white/20 py-24">
           <div className="container mx-auto px-4 max-w-4xl">
             <h2 className="font-mono text-xs uppercase tracking-widest text-white/40 mb-12 text-center">
-              SYSTEM FAQ // DÚVIDAS_COMUNS
+              {t("plans_faq_title")}
             </h2>
             <div className="space-y-0 divide-y divide-white/20 border-t border-b border-white/20">
               {faqs.map((faq, index) => (

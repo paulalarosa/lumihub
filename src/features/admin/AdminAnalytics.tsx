@@ -9,7 +9,14 @@ import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, R
 const COLORS = ['#ffffff', '#a1a1aa', '#52525b', '#27272a', '#18181b'];
 
 interface DashboardStats {
-    events: any[];
+    events: Array<{
+        type?: string;
+        category?: string;
+        action?: string;
+        page_path?: string;
+        timestamp: string;
+        [key: string]: unknown;
+    }>;
     stats: {
         totalEvents: number;
         totalRevenue: number;
@@ -29,7 +36,7 @@ interface DashboardStats {
 }
 
 export default function AdminAnalytics() {
-    const [events, setEvents] = useState<any[]>([]);
+    const [events, setEvents] = useState<DashboardStats['events']>([]);
     const [charts, setCharts] = useState<{ revenue: any[], clients: any[] }>({ revenue: [], clients: [] });
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<DashboardStats['stats']>({
@@ -56,7 +63,7 @@ export default function AdminAnalytics() {
         const data = await fetchDashboardStats();
 
         if (data) {
-            setEvents(data.events);
+            setEvents(data.events as unknown as DashboardStats['events']);
             setStats(data.stats as DashboardStats['stats']);
             setCharts(data.charts || { revenue: [], clients: [] });
         }
@@ -64,7 +71,7 @@ export default function AdminAnalytics() {
     };
 
     // Process data for charts
-    const eventsByCategory = events.reduce((acc: any, e) => {
+    const eventsByCategory = events.reduce((acc: Record<string, number>, e) => {
         const cat = e.category || e.type || 'other';
         acc[cat] = (acc[cat] || 0) + 1;
         return acc;
@@ -74,7 +81,7 @@ export default function AdminAnalytics() {
 
     const pageViewData = events
         .filter(e => e.type === 'page_view')
-        .reduce((acc: any, e) => {
+        .reduce((acc: Record<string, number>, e) => {
             const path = e.page_path || '/';
             acc[path] = (acc[path] || 0) + 1;
             return acc;

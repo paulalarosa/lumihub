@@ -47,14 +47,16 @@ interface Project {
   };
 }
 
+// Update Task Interface to match DB
 interface Task {
   id: string;
   title: string;
   description: string | null;
-  is_completed: boolean;
+  status: string | null;
   due_date: string | null;
-  visibility: string;
-  sort_order: number;
+  sort_order: number | null;
+  created_at: string;
+  priority: string | null;
 }
 
 interface Briefing {
@@ -121,10 +123,39 @@ export default function ProjectDetailsPage() {
   useEffect(() => {
     if (projectDetails) {
       setTasks(projectDetails.tasks as Task[]);
-      setBriefing(projectDetails.briefing as any);
+
+      if (projectDetails.briefing) {
+        // Map content.questions to briefing.questions if needed
+        const rawBriefing = projectDetails.briefing as any;
+        const mappedBriefing = {
+          ...rawBriefing,
+          questions: rawBriefing.questions || rawBriefing.content?.questions || [],
+          answers: rawBriefing.answers || rawBriefing.content?.answers || {}
+        };
+        setBriefing(mappedBriefing);
+      }
+
       setContracts(projectDetails.contracts as Contract[]);
-      setProjectServices(projectDetails.projectServices as ProjectServiceItem[]);
-      setServices(projectDetails.services as Service[]);
+
+      // Fix ProjectServices mapping
+      const mappedProjectServices = (projectDetails.projectServices || []).map((ps: any) => ({
+        ...ps,
+        paid_amount: ps.paid_amount || 0,
+        notes: ps.notes || null,
+        service: ps.service ? {
+          ...ps.service,
+          description: ps.service.description || '' // Ensure description exists
+        } : undefined
+      }));
+      setProjectServices(mappedProjectServices);
+
+      // Fix Services mapping
+      const mappedServices = (projectDetails.services || []).map((s: any) => ({
+        ...s,
+        description: s.description || '' // Ensure description
+      }));
+      setServices(mappedServices);
+
       setTransactions(projectDetails.transactions || []);
     }
   }, [projectDetails]);
@@ -137,7 +168,8 @@ export default function ProjectDetailsPage() {
 
   // Task form
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskVisibility, setNewTaskVisibility] = useState('private');
+  // visibility not supported in DB schema
+  // const [newTaskVisibility, setNewTaskVisibility] = useState('private');
 
   // Service form
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
@@ -184,14 +216,15 @@ export default function ProjectDetailsPage() {
     };
   }, [id, refetch]);
 
-  const addTask = async () => {
+  const addTask = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (!newTaskTitle.trim() || !id || !organizationId) return;
 
     const { error } = await ProjectService.createTask({
       project_id: id,
       user_id: organizationId,
       title: newTaskTitle.trim(),
-      visibility: newTaskVisibility,
+      status: 'pending', // Default status
       sort_order: tasks.length
     });
 
@@ -199,15 +232,16 @@ export default function ProjectDetailsPage() {
       toast({ title: "Erro ao adicionar tarefa", variant: "destructive" });
     } else {
       setNewTaskTitle('');
-      refetch(); // Modern fetch: refetch query
+      refetch();
     }
   };
 
-  const toggleTask = async (taskId: string, completed: boolean) => {
-    const { error } = await ProjectService.updateTask(taskId, { is_completed: completed });
+  const toggleTask = async (taskId: string, currentStatus: string | null) => {
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    const { error } = await ProjectService.updateTask(taskId, { status: newStatus });
 
     if (!error) {
-      setTasks(tasks.map(t => t.id === taskId ? { ...t, is_completed: completed } : t));
+      setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
     }
   };
 
@@ -227,35 +261,42 @@ export default function ProjectDetailsPage() {
     try {
       const clientId = project.clients.id;
 
-      const { data: client, error: clientError } = await supabase
-        .from('clients') // Using 'clients' or 'wedding_clients'? Original code had 'clients' here but service uses 'wedding_clients'. 
-        // Wait, 'clients' table exists in my generated types list (Line 218). 'wedding_clients' also exists (Line 260).
-        // The original code used 'clients' in copyPortalLink? Let me check source...
-        // Original source line 311: .from('clients'). 
-        // Okay, I'll stick to 'clients' but be wary.
-        .select('access_pin')
+      // 1. Try fetching from wedding_clients (preferred, has access_pin)
+      let { data: clientData, error } = await supabase
+        .from('wedding_clients')
+        .select('access_pin, secret_code')
         .eq('id', clientId)
         .single();
 
-      if (clientError) {
-        // Fallback to wedding_clients if not found?
-        console.warn("Client not found in 'clients', trying 'wedding_clients'?");
-        // Actually let's assume original code was correct for now.
-        throw clientError;
-      }
-
-      if (!client.access_pin) {
-        const newPin = Math.floor(1000 + Math.random() * 9000).toString();
-        const { error: updateError } = await supabase
+      // 2. If not found or error, try clients view/table
+      if (error || !clientData) {
+        const { data: genericClient, error: genericError } = await supabase
           .from('clients')
-          .update({ access_pin: newPin })
-          .eq('id', clientId);
+          .select('secret_code') // clients view typically doesn't have access_pin visible?
+          .eq('id', clientId)
+          .single();
 
-        if (updateError) throw updateError;
-        toast({ title: "PIN Gerado", description: `Novo PIN: ${newPin}` });
+        if (genericError || !genericClient) {
+          throw new Error("Cliente não encontrado em nenhuma tabela.");
+        }
+
+        // Ensure secret code exists
+        if (!genericClient.secret_code) {
+          throw new Error("Cliente sem código de acesso gerado.");
+        }
+
+        // Use generic client data
+        const link = `${window.location.origin}/portal/${genericClient.secret_code}`;
+        await navigator.clipboard.writeText(link);
+        setCopied(true);
+        toast({ title: "Link copiado!", description: "Link do portal copiado." });
+        setTimeout(() => setCopied(false), 2000);
+        return;
       }
 
-      const link = `${window.location.origin}/portal/${clientId}/login`;
+      // 3. Use wedding_clients data
+      const { secret_code } = clientData;
+      const link = `${window.location.origin}/portal/${secret_code}`;
       await navigator.clipboard.writeText(link);
       setCopied(true);
       toast({ title: "Link Copiado!", description: `Link enviado para a área de transferência.` });
@@ -329,8 +370,9 @@ export default function ProjectDetailsPage() {
 
     const { error } = await ProjectService.createBriefing({
       project_id: id,
+      status: 'pending',
       user_id: organizationId,
-      questions: defaultQuestions
+      content: { questions: defaultQuestions } // Wrap questions in content JSON
     });
 
     if (!error) {
@@ -353,10 +395,9 @@ export default function ProjectDetailsPage() {
     const { error } = await ProjectService.addProjectService({
       project_id: id,
       service_id: selectedServiceId,
-      user_id: organizationId,
-      quantity: qty,
-      unit_price: price,
-      total_price: total
+      quantity: qty.toString(),
+      unit_price: price, // defined as number
+      total_price: total.toString()
     });
 
     if (error) {
@@ -393,8 +434,8 @@ export default function ProjectDetailsPage() {
       return;
     }
 
-    if (!id || (!project?.client_id && !project?.clients?.id)) {
-      toast({ title: "Erro interno: Identificação do projeto ausente.", variant: "destructive" });
+    if (!id || (!project?.client_id && !project?.clients?.id) || !organizationId) {
+      toast({ title: "Erro interno", description: "Identificação do projeto ou usuário ausente.", variant: "destructive" });
       return;
     }
 
@@ -408,6 +449,7 @@ export default function ProjectDetailsPage() {
       description: finalDescription,
       type: 'income',
       status: 'completed',
+      user_id: organizationId, // Required by DB
       date: new Date().toISOString(),
       category: 'Projeto'
     };
@@ -421,7 +463,8 @@ export default function ProjectDetailsPage() {
 
     if (ps) {
       const newPaidAmount = (ps.paid_amount || 0) + cleanAmount;
-      await ProjectService.updateProjectService(paymentServiceId, { paid_amount: newPaidAmount });
+      // paid_amount not in DB schema
+      // await ProjectService.updateProjectService(paymentServiceId, { paid_amount: newPaidAmount });
     }
 
     toast({ title: "Pagamento registrado!" });
@@ -450,8 +493,8 @@ export default function ProjectDetailsPage() {
 
   if (!project) return null;
 
-  const completedTasks = tasks.filter(t => t.is_completed).length;
-  const totalServiceAmount = projectServices.reduce((sum, ps) => sum + (Number(ps.price || ps.unit_price || ps.total_price) * (Number(ps.quantity) || 1)), 0);
+  const completedTasks = tasks.filter(t => t.status === 'completed').length;
+  const totalServiceAmount = projectServices.reduce((sum, ps) => sum + (Number(ps.unit_price || ps.total_price) * (Number(ps.quantity) || 1)), 0);
   const totalReceived = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
   const totalPaidAmount = totalReceived;
   const remainingAmount = totalServiceAmount - totalReceived;
@@ -533,7 +576,7 @@ export default function ProjectDetailsPage() {
                       </Badge>
                       {briefing.is_submitted && (
                         <div className="space-y-3 mt-4">
-                          {(briefing.questions as any[]).map((q: any) => (
+                          {(briefing.questions as Array<{ id: string; question: string }>).map((q) => (
                             <div key={q.id} className="text-sm font-mono">
                               <p className="text-white/60 mb-1 uppercase tracking-wide text-xs">{q.question}</p>
                               <p className="text-white border-l border-white/20 pl-3">{briefing.answers[q.id] || '-'}</p>
@@ -567,8 +610,9 @@ export default function ProjectDetailsPage() {
               tasks={tasks}
               newTaskTitle={newTaskTitle}
               setNewTaskTitle={setNewTaskTitle}
-              newTaskVisibility={newTaskVisibility}
-              setNewTaskVisibility={setNewTaskVisibility}
+              // Visibility removed
+              // newTaskVisibility={newTaskVisibility}
+              // setNewTaskVisibility={setNewTaskVisibility}
               addTask={addTask}
               toggleTask={toggleTask}
               deleteTask={deleteTask}

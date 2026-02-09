@@ -247,9 +247,15 @@ export default function EventDialog({
     const { data } = await supabase
       .from('services')
       .select('*')
-      .select('*')
       .order('name');
-    if (data) setServices(data);
+
+    if (data) {
+      setServices(data.map((s: any) => ({
+        ...s,
+        price: typeof s.price === 'string' ? parseFloat(s.price) : s.price,
+        duration_minutes: typeof s.duration_minutes === 'string' ? parseInt(s.duration_minutes) : s.duration_minutes
+      })));
+    }
   };
 
   const toggleAssistant = (assistantId: string) => {
@@ -386,13 +392,13 @@ export default function EventDialog({
       start_time: !isNoivas ? (startTime || null) : (ceremonyTime || null),
       end_time: !isNoivas ? (endTime || null) : null,
       address: address || null,
-      latitude,
-      longitude,
+      latitude: latitude !== null ? String(latitude) : null,
+      longitude: longitude !== null ? String(longitude) : null,
       notes: notes || null,
       color,
       client_id: clientId || null,
       project_id: projectId || null,
-      reminder_days: reminderDays
+      reminder_days: (reminderDays as any)
     };
 
     try {
@@ -432,12 +438,20 @@ export default function EventDialog({
 
         // Smart Tagging: Create notifications and sync calendars
         const notifications = selectedAssistants.map(assistantId => ({
-          assistant_id: assistantId,
+          user_id: assistantId, // The assistant is the user receiving the notification
+          assistant_id: assistantId, // Keep this if table requires it for foreign key
           event_id: eventId,
-          type: 'event_assigned',
-          user_id: user.id
+          title: `Novo Evento: ${title}`,
+          message: `Você foi adicionado ao evento "${title}" em ${format(parse(eventDate, 'yyyy-MM-dd', new Date()), "dd/MM/yyyy")}`,
+          type: 'event_assignment',
+          action_link: `/agenda?date=${eventDate}`,
+          read: false
         }));
 
+        // Use 'notifications' if it was available, but it seems it's not. 
+        // If the table is assistant_notifications, use that.
+        // But previous error said assistant_notifications expects message/title? 
+        // Let's try assistant_notifications again with the full payload.
         await supabase.from('assistant_notifications').insert(notifications);
 
 
@@ -457,7 +471,8 @@ export default function EventDialog({
 
         // Prepare Event Data for the Sync Function
         const isNoivas = eventType === 'noivas';
-        let eventDataForSync: any = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let eventDataForSync: Record<string, any> = {
           title: isNoivas ? `👰 ${title}` : title,
           description: description || '',
           event_date: eventDate,

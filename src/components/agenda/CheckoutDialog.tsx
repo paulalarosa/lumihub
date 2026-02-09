@@ -31,8 +31,8 @@ interface CheckoutEvent {
     id: string;
     total_value?: number;
     payment_method?: string;
-    // Allow flexible properties to avoid strict type issues with Supabase join results
-    [key: string]: any;
+    title?: string;
+    event_date?: string;
 }
 
 interface CheckoutDialogProps {
@@ -72,10 +72,10 @@ export function CheckoutDialog({ open, onOpenChange, event, onSuccess }: Checkou
                 throw new Error('Valor inválido');
             }
 
-            const updateData: Record<string, any> = {
+            const updateData: Record<string, string | number | null> = {
                 total_value: numericValue,
                 payment_method: paymentMethod,
-                payment_status: 'paid', // Mark as paid
+                payment_status: 'paid',
             };
 
             if (selectedAssistantId !== 'none') {

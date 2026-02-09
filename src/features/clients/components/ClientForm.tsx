@@ -46,7 +46,7 @@ export function ClientForm({ initialData, onSubmit, isLoading, submitLabel = "Sa
         }
     }, [initialData]);
 
-    const handleChange = (field: keyof ClientFormData, value: any) => {
+    const handleChange = (field: keyof ClientFormData, value: string | boolean | Date) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 

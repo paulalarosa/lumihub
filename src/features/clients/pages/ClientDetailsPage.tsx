@@ -31,7 +31,19 @@ export default function ClientDetailsPage() {
     const [client, setClient] = useState<Client | null>(null);
     const [records, setRecords] = useState<TreatmentRecord[]>([]);
     const [loadingData, setLoadingData] = useState(true);
-    const [events, setEvents] = useState<any[]>([]);
+    interface EventWithServices {
+        id: string;
+        event_date: string;
+        project_services?: Array<{
+            id: string;
+            quantity: number;
+            unit_price: number;
+            total_price: number;
+            services: { name: string };
+        }>;
+    }
+
+    const [events, setEvents] = useState<EventWithServices[]>([]);
 
     useEffect(() => {
         if (id) {

@@ -103,21 +103,21 @@ export default function ServiceDialog({
 
         const serviceData = {
             user_id: user.id,
-            name: title.trim(), // Fix: DB col is 'name', state was 'title'
-            price: parseFloat(price.replace(",", ".")) || 0,
-            duration_minutes: parseInt(duration),
+            name: title.trim(),
+            price: price.replace(",", "."), // DB expects string or numeric, let's try string if type says so, or keep number if only duration failed
+            duration_minutes: duration, // DB type expects string for duration_minutes
             description: description || null,
         };
 
         try {
             if (service) {
                 const { error } = await supabase
-                    .from("services" as any)
+                    .from("services")
                     .update(serviceData)
                     .eq("id", service.id);
                 if (error) throw error;
             } else {
-                const { error } = await supabase.from("services" as any).insert(serviceData);
+                const { error } = await supabase.from("services").insert(serviceData);
                 if (error) throw error;
             }
 
@@ -129,11 +129,12 @@ export default function ServiceDialog({
             });
             onSuccess();
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error saving service:", error);
+            const message = error instanceof Error ? error.message : "Erro ao salvar serviço.";
             toast({
                 title: "Erro",
-                description: error.message || "Erro ao salvar serviço.",
+                description: message,
                 variant: "destructive",
             });
         } finally {

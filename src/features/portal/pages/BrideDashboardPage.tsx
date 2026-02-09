@@ -42,7 +42,7 @@ export default function BrideDashboardPage() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [project, setProject] = useState<any>(null); // Explicit Project State
+    const [project, setProject] = useState<any | null>(null); // Keep as any for now due to complex join structure, or define a detailed ProjectWithRelations interface
     const [totalContract, setTotalContract] = useState(0);
     const [paidAmount, setPaidAmount] = useState(0);
     const [services, setServices] = useState<ServiceItem[]>([]);
@@ -122,7 +122,7 @@ export default function BrideDashboardPage() {
                 price: Number(s.price || s.unit_price || s.total_price) || 0,
                 status: 'pending', // Simplify for now or calculate based on allocation
                 paid_amount: 0
-            })) as any);
+            })));
 
             // 4. Events / Dates
             const targetDate = projectData.event_date || projectData.client?.wedding_date;

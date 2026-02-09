@@ -97,17 +97,28 @@ export default function Clientes() {
     }
 
     // Initial payload construction
-    const clientData: any = {
-      full_name: formData.name.trim(), // Mapping to DB column 'full_name'
-      name: formData.name.trim(), // Keep alias just in case
+    interface ClientPayload {
+      full_name: string;
+      name: string;
+      email: string | null;
+      phone: string | null;
+      notes: string | null;
+      user_id: string;
+      is_bride: boolean;
+      wedding_date: string | null;
+      access_pin: string | null;
+      portal_link?: string;
+    }
+
+    const clientData: ClientPayload = {
+      full_name: formData.name.trim(),
+      name: formData.name.trim(),
       email: formData.email.trim() || null,
       phone: formData.phone.trim() || null,
       notes: formData.notes.trim() || null,
       user_id: organizationId,
       is_bride: Boolean(formData.is_bride),
-      // Force NULL if date is empty, undefined or invalid
       wedding_date: formData.wedding_date ? new Date(formData.wedding_date).toISOString() : null,
-      // Force NULL if access_pin is empty string
       access_pin: formData.access_pin ? String(formData.access_pin).trim() || null : null,
     };
 
@@ -144,9 +155,9 @@ export default function Clientes() {
         if (error) throw error;
 
         // Post-create update for portal link if needed
-        if (clientData.is_bride && (newClient as any)?.id) {
-          const link = `https://lumihub.com/portal/${(newClient as any).id}`;
-          await ClientService.update((newClient as any).id, { portal_link: link });
+        if (clientData.is_bride && newClient && 'id' in newClient) {
+          const link = `https://lumihub.com/portal/${newClient.id}`;
+          await ClientService.update(newClient.id, { portal_link: link });
         }
 
         toast({ title: "Cliente adicionado!" });
@@ -157,7 +168,7 @@ export default function Clientes() {
             toast({ title: "Enviando email de boas-vindas...", duration: 2000 });
             const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
               body: {
-                clientId: (newClient as any).id,
+                clientId: newClient?.id,
                 subject: "Bem-vinda ao KONTROL" // Custom subject as requested
               }
             });
@@ -197,18 +208,18 @@ export default function Clientes() {
     try {
       // 1. Ensure PIN (access_pin) exists in wedding_clients
       const { data: client, error: clientError } = await supabase
-        .from('wedding_clients' as any)
+        .from('wedding_clients')
         .select('access_pin')
         .eq('id', clientId)
         .single();
 
       if (clientError) throw clientError;
 
-      if (!(client as any).access_pin) {
+      if (!client?.access_pin) {
         const newPin = Math.floor(1000 + Math.random() * 9000).toString();
         const { error: updateError } = await supabase
-          .from('wedding_clients' as any)
-          .update({ access_pin: newPin } as any)
+          .from('wedding_clients')
+          .update({ access_pin: newPin })
           .eq('id', clientId);
 
         if (updateError) throw updateError;

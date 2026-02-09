@@ -89,11 +89,12 @@ export default function IntegrationsTab() {
           // Clean URL
           window.history.replaceState({}, document.title, window.location.pathname);
           fetchData();
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('OAuth callback error:', error);
+          const message = error instanceof Error ? error.message : 'Não foi possível conectar ao Google Calendar';
           toast({
             title: "Erro ao conectar",
-            description: error.message || "Não foi possível conectar ao Google Calendar",
+            description: message,
             variant: "destructive"
           });
         } finally {
@@ -155,11 +156,12 @@ export default function IntegrationsTab() {
 
       if (error) throw error;
       // Redirect happens automatically
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error connecting Google Calendar:', error);
+      const message = error instanceof Error ? error.message : 'Não foi possível iniciar a conexão';
       toast({
         title: "Erro",
-        description: error.message || "Não foi possível iniciar a conexão",
+        description: message,
         variant: "destructive"
       });
       setConnecting(false);
@@ -217,11 +219,12 @@ export default function IntegrationsTab() {
       });
 
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sync error:', error);
+      const message = error instanceof Error ? error.message : 'Não foi possível sincronizar';
       toast({
         title: "Erro na sincronização",
-        description: error.message || "Não foi possível sincronizar",
+        description: message,
         variant: "destructive"
       });
     } finally {
@@ -462,7 +465,7 @@ export default function IntegrationsTab() {
                       <span className="text-sm font-mono uppercase">{item.label}</span>
                     </div>
                     <Switch
-                      checked={(notificationSettings as any)[item.key]}
+                      checked={notificationSettings[item.key as keyof NotificationSettings] as boolean}
                       onCheckedChange={(checked) =>
                         setNotificationSettings({ ...notificationSettings, [item.key]: checked })
                       }

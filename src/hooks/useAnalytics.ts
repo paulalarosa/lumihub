@@ -115,7 +115,7 @@ export function useAnalytics() {
       const newLeads = clientsCount || 0;
 
       // Process Revenue Over Time (Last 6 months)
-      const revenueByMonth = eventsData?.reduce((acc: any, curr) => {
+      const revenueByMonth = eventsData?.reduce((acc: Record<string, number>, curr) => {
         const date = new Date(curr.start_time || curr.created_at);
         const key = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
         acc[key] = (acc[key] || 0) + (curr.total_value || 0);
@@ -125,7 +125,7 @@ export function useAnalytics() {
       const revenueChartData = Object.entries(revenueByMonth).map(([name, value]) => ({ name, value }));
 
       // Process Client Growth (Last 6 months)
-      const clientsByMonth = clients?.reduce((acc: any, curr) => {
+      const clientsByMonth = clients?.reduce((acc: Record<string, number>, curr) => {
         const date = new Date(curr.created_at);
         const key = date.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' });
         acc[key] = (acc[key] || 0) + 1;
