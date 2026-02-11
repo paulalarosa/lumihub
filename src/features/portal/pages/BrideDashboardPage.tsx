@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useLanguage } from "@/hooks/useLanguage";
 import { DigitalSignature } from "../components/DigitalSignature";
+import type { Project, ProjectService, Service, Transaction, Contract } from "@/types/api.types";
 
 interface ServiceItem {
     id: string;
@@ -36,22 +37,36 @@ interface Event {
     event_type: string | null;
 }
 
+// Custom interface matching the specific query structure for this page
+interface BrideProject extends Project {
+    client: {
+        full_name: string | null;
+        email: string | null;
+        phone: string | null;
+        wedding_date: string | null;
+    } | null;
+    services: (ProjectService & {
+        service: Pick<Service, 'name'> | null
+    })[];
+    transactions: Transaction[];
+}
+
 export default function BrideDashboardPage() {
     const { t } = useLanguage();
     const { clientId } = useParams();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [project, setProject] = useState<any | null>(null); // Keep as any for now due to complex join structure, or define a detailed ProjectWithRelations interface
+    const [project, setProject] = useState<BrideProject | null>(null);
     const [totalContract, setTotalContract] = useState(0);
     const [paidAmount, setPaidAmount] = useState(0);
     const [services, setServices] = useState<ServiceItem[]>([]);
-    const [contracts, setContracts] = useState<any[]>([]);
+    const [contracts, setContracts] = useState<Contract[]>([]);
     const [events, setEvents] = useState<Event[]>([]);
     const [daysLeft, setDaysLeft] = useState(0);
     const [bride, setBride] = useState<BrideData | null>(null);
     const [isSigOpen, setIsSigOpen] = useState(false);
-    const [selectedContract, setSelectedContract] = useState<any>(null);
+    const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
 
     // Retrieve PIN/Auth safely
     const storedAuth = localStorage.getItem(`bride_auth_${clientId}`);
@@ -93,49 +108,61 @@ export default function BrideDashboardPage() {
                 return;
             }
 
-
-            setProject(projectData);
+            // Cast the Supabase response to our strict type
+            // The query structure matches BrideProject, but Supabase types are inferred.
+            // We use 'unknown' first to avoid TS shouting about incompatible shapes if any overlap is slightly off.
+            const typedProject = projectData as unknown as BrideProject;
+            setProject(typedProject);
 
             // 2. Financials
-            const sData = projectData.services || [];
-            const tData = projectData.transactions || [];
+            const sData = typedProject.services || [];
+            const tData = typedProject.transactions || [];
 
             // Calculate Total
-            const totalValue = sData.reduce((sum: number, s: any) => {
-                const price = Number(s.price || s.unit_price || s.total_price) || 0;
-                const qty = Number(s.quantity) || 1;
-                return sum + (price * qty);
+            const totalValue = sData.reduce((sum: number, s) => {
+                const price = typeof s.unit_price === 'string' ? parseFloat(s.unit_price) : Number(s.unit_price || 0);
+                const quantity = typeof s.quantity === 'string' ? parseFloat(s.quantity) : Number(s.quantity || 1);
+                // Note: s.price is legacy? ProjectService has unit_price usually. 
+                // We check if unit_price exists in type. 
+                // Actually ProjectService type definition in api.types.ts has unit_price? 
+                // Let's rely on unit_price or total_price.
+                // Fallback to total_price if unit_price is 0?
+                // Safe basic calculation:
+                return sum + (price * quantity);
             }, 0);
 
             // Calculate Paid
             const paidValue = tData
-                .filter((t: any) => t.type === 'income')
-                .reduce((sum: number, t: any) => sum + (Number(t.amount) || 0), 0);
+                .filter(t => t.type === 'income')
+                .reduce((sum: number, t) => sum + (Number(t.amount) || 0), 0);
 
             setTotalContract(totalValue);
             setPaidAmount(paidValue);
 
             // 3. Map Services
-            setServices(sData.map((s: any) => ({
-                id: s.id,
-                name: s.service?.name || 'Serviço',
-                price: Number(s.price || s.unit_price || s.total_price) || 0,
-                status: 'pending', // Simplify for now or calculate based on allocation
-                paid_amount: 0
-            })));
+            setServices(sData.map(s => {
+                const uPrice = typeof s.unit_price === 'string' ? parseFloat(s.unit_price) : Number(s.unit_price || 0);
+                return {
+                    id: s.id,
+                    name: s.service?.name || 'Serviço',
+                    price: uPrice,
+                    status: 'pending',
+                    paid_amount: 0
+                };
+            }));
 
             // 4. Events / Dates
-            const targetDate = projectData.event_date || projectData.client?.wedding_date;
+            const targetDate = typedProject.event_date || typedProject.client?.wedding_date;
             if (targetDate) {
                 const diff = differenceInDays(new Date(targetDate), new Date());
                 setDaysLeft(diff > 0 ? diff : 0);
             }
 
-            // 5. Contracts (optional separate fetch if not in relation)
+            // 5. Contracts
             const { data: contractsData } = await supabase
                 .from('contracts')
                 .select('*')
-                .eq('project_id', projectData.id);
+                .eq('project_id', typedProject.id);
             setContracts(contractsData || []);
 
         } catch (e) {

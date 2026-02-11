@@ -59,9 +59,9 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
         assistant_id: "",
     });
 
-    const [projects, setProjects] = useState<any[]>([]);
-    const [services, setServices] = useState<any[]>([]);
-    const [assistants, setAssistants] = useState<any[]>([]);
+    const [projects, setProjects] = useState<{ id: string; name: string }[]>([]);
+    const [services, setServices] = useState<{ id: string; name: string }[]>([]);
+    const [assistants, setAssistants] = useState<{ id: string; full_name: string | null }[]>([]);
 
     useEffect(() => {
         if (open && user) {
@@ -99,7 +99,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
 
             const amountValue = parseFloat(formData.amount.replace("R$ ", "").replace(".", "").replace(",", "."));
 
-            const { error } = await supabase.from("transactions" as any).insert({
+            const { error } = await supabase.from("transactions").insert({
                 user_id: user.id,
                 type: type,
                 description: formData.description,
@@ -127,7 +127,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                 assistant_id: "",
             });
             onSuccess?.();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Erro ao salvar transação:", error);
             toast.error("Erro ao salvar transação. Tente novamente.");
         } finally {

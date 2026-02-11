@@ -74,7 +74,7 @@ export default function Dashboard() {
         .eq('id', user.id)
         .maybeSingle();
 
-      const profile = profileData as any;
+      const profile = profileData;
 
       if (profile) {
         // 1. Name Display
@@ -291,9 +291,9 @@ export default function Dashboard() {
                 <h3 className="font-mono text-3xl md:text-4xl text-white group-hover:text-black font-light tracking-tighter">{stat.value}</h3>
                 <p className="text-xs text-white/40 group-hover:text-black/60 uppercase tracking-widest mt-2">{stat.label}</p>
               </div>
-              {(stat as any).description && (
+              {'description' in stat && stat.description && (
                 <div className="mt-4 pt-4 border-t border-white/10 group-hover:border-black/10">
-                  <p className="font-mono text-xs text-white/60 group-hover:text-black/60">{(stat as any).description}</p>
+                  <p className="font-mono text-xs text-white/60 group-hover:text-black/60">{stat.description}</p>
                 </div>
               )}
               <Link to={stat.ctaLink} className="absolute bottom-6 right-6">
@@ -331,7 +331,7 @@ export default function Dashboard() {
 
             <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
               {upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event: any, i: number) => {
+                upcomingEvents.map((event, i: number) => {
                   const isGoogle = !!event.summary;
                   const title = isGoogle ? event.summary : event.title;
                   // FIX: Safer Date Parsing

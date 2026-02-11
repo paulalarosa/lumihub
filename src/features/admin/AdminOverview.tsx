@@ -49,14 +49,12 @@ export default function AdminOverview() {
         .select('*', { count: 'exact' });
 
       // Get total revenue from transactions
-      // Note: Assuming 'transactions' table exists or mocking it if not.
-      // If transactions table doesn't exist, we fallback to 0.
       const { data: transactionData } = await supabase
-        .from('transactions' as any)
+        .from('transactions')
         .select('net_amount')
         .eq('status', 'completed');
 
-      const totalRev = (transactionData as any)?.reduce((sum: number, t: any) => sum + (t.net_amount || 0), 0) || 0;
+      const totalRev = transactionData?.reduce((sum, t) => sum + (t.net_amount || 0), 0) || 0;
 
       setStats(prev => ({
         ...prev,

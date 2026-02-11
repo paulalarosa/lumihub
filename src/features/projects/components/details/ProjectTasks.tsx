@@ -18,7 +18,7 @@ interface ProjectTasksProps {
     tasks: Task[];
     newTaskTitle: string;
     setNewTaskTitle: (val: string) => void;
-    addTask: (e?: any) => void; // Allow optional event
+    addTask: (e?: React.FormEvent) => void;
     toggleTask: (taskId: string, currentStatus: string | null) => void;
     deleteTask: (taskId: string) => void;
     t: (key: string) => string;

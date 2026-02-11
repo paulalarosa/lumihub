@@ -26,7 +26,7 @@ export function useOrganization() {
                     .eq('id', user.id)
                     .maybeSingle();
 
-                const profileData = profile as any;
+                const profileData = profile;
 
                 if (error) {
                     console.error('Error fetching organization:', error);

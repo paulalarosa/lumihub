@@ -37,7 +37,7 @@ interface DashboardStats {
 
 export default function AdminAnalytics() {
     const [events, setEvents] = useState<DashboardStats['events']>([]);
-    const [charts, setCharts] = useState<{ revenue: any[], clients: any[] }>({ revenue: [], clients: [] });
+    const [charts, setCharts] = useState<{ revenue: { name: string; value: number }[], clients: { name: string; value: number }[] }>({ revenue: [], clients: [] });
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState<DashboardStats['stats']>({
         totalEvents: 0,

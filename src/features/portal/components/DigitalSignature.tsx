@@ -6,15 +6,12 @@ import { Loader2, Eraser, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import type { Contract } from '@/types/api.types';
 
 interface DigitalSignatureProps {
     isOpen: boolean;
     onClose: () => void;
-    contract: {
-        id: string;
-        project_id: string;
-        content?: string;
-    };
+    contract: Contract;
     onSigned: () => void;
 }
 
@@ -34,6 +31,11 @@ export function DigitalSignature({ isOpen, onClose, contract, onSigned }: Digita
                 title: "Assinatura vazia",
                 description: "Por favor, desenhe sua assinatura antes de confirmar."
             });
+            return;
+        }
+
+        if (!contract.project_id) {
+            toast({ title: "Erro", description: "Contrato inválido (sem projeto vinculado).", variant: "destructive" });
             return;
         }
 

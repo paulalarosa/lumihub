@@ -4,38 +4,66 @@
 import { Database } from '@/integrations/supabase/types';
 
 // Supabase Table Types (shortcuts)
+// Supabase Table Types (shortcuts)
 export type Profile = Database['public']['Tables']['profiles']['Row'];
-export type Client = Database['public']['Tables']['clients']['Row'];
+export type Client = Database['public']['Tables']['wedding_clients']['Row']; // Table is wedding_clients
 export type Project = Database['public']['Tables']['projects']['Row'];
 export type Event = Database['public']['Tables']['events']['Row'];
 export type Service = Database['public']['Tables']['services']['Row'];
-export type Payment = Database['public']['Tables']['payments']['Row'];
-export type Subscription = Database['public']['Tables']['subscriptions']['Row'];
+// export type Payment = Database['public']['Tables']['payments']['Row']; // Table missing in types
+// export type Subscription = Database['public']['Tables']['subscriptions']['Row']; // Table missing in types
 export type Assistant = Database['public']['Tables']['assistants']['Row'];
 export type AssistantInvite = Database['public']['Tables']['assistant_invites']['Row'];
 export type NotificationLog = Database['public']['Tables']['notification_logs']['Row'];
+export type Contract = Database['public']['Tables']['contracts']['Row'];
+export type Task = Database['public']['Tables']['tasks']['Row'];
+export type ProjectService = Database['public']['Tables']['project_services']['Row'];
+export type Briefing = Database['public']['Tables']['briefings']['Row'];
+export type Transaction = Database['public']['Tables']['transactions']['Row'];
 
 // Insert Types
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert'];
-export type ClientInsert = Database['public']['Tables']['clients']['Insert'];
+export type ClientInsert = Database['public']['Tables']['wedding_clients']['Insert'];
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert'];
 export type EventInsert = Database['public']['Tables']['events']['Insert'];
 export type ServiceInsert = Database['public']['Tables']['services']['Insert'];
-export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
-export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
+// export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
+// export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
 
 // Update Types
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update'];
-export type ClientUpdate = Database['public']['Tables']['clients']['Update'];
+export type ClientUpdate = Database['public']['Tables']['wedding_clients']['Update'];
 export type ProjectUpdate = Database['public']['Tables']['projects']['Update'];
 export type EventUpdate = Database['public']['Tables']['events']['Update'];
 export type ServiceUpdate = Database['public']['Tables']['services']['Update'];
 
 // Extended Types with Relations
 export interface ProjectWithRelations extends Project {
-    client?: Client;
-    services?: Service[];
+    client?: Client & { full_name?: string; wedding_date?: string; email?: string; phone?: string };
+    // Relations attached to the project object itself (if any)
     events?: Event[];
+}
+
+export interface ProjectDetailsResponse {
+    project: ProjectWithRelations;
+    tasks: Task[];
+    briefing: BriefingUI | null;
+    services: Service[];
+    projectServices: ProjectServiceItem[];
+    contracts: Contract[];
+    transactions: Transaction[];
+    invoices: any[];
+}
+
+export interface BriefingContent {
+    questions?: any[];
+    answers?: Record<string, any>;
+}
+
+export interface BriefingWithContent extends Omit<Briefing, 'content'> {
+    content?: BriefingContent | null;
+    questions?: any[]; // Legacy support
+    answers?: Record<string, any>; // Legacy support
 }
 
 export interface EventWithRelations extends Event {
@@ -43,6 +71,17 @@ export interface EventWithRelations extends Event {
     client?: Client;
     services?: Service[];
 }
+
+export type ProjectServiceItem = Omit<ProjectService, 'quantity'> & {
+    quantity: number; // Cast from string in DB
+    paid_amount?: number; // UI specific / potentially calculated
+    notes?: string | null; // UI specific
+    service?: Service;
+};
+
+export type BriefingUI = BriefingWithContent & {
+    is_submitted: boolean;
+};
 
 export interface ClientWithRelations extends Client {
     projects?: Project[];

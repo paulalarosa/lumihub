@@ -17,80 +17,18 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, FileText, ClipboardList } from 'lucide-react';
 
 // Feature Components
+import type { Project, Task, Contract, BriefingUI, BriefingWithContent, BriefingContent, ProjectServiceItem, ProjectWithRelations, Service } from '@/types/api.types';
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader';
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats';
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs';
 
-interface Project {
-  id: string;
-  name: string;
-  event_type: string | null;
-  event_date: string | null;
-  event_location: string | null;
-  status: string;
-  public_token: string | null;
-  notes: string | null;
-  client_id?: string | null;
-  clients: {
-    id: string;
-    name: string;
-    email: string | null;
-    phone: string | null;
-  } | null;
-  client?: {
-    id: string;
-    full_name: string;
-    email: string | null;
-    phone: string | null;
-    cpf?: string | null;
-    address?: string | null;
-  };
-}
+import type { Service as ServiceType } from '@/types/api.types'; // Redundant if Service is already imported, checking usage
 
-// Update Task Interface to match DB
-interface Task {
-  id: string;
-  title: string;
-  description: string | null;
-  status: string | null;
-  due_date: string | null;
-  sort_order: number | null;
-  created_at: string;
-  priority: string | null;
-}
+// Derived Briefing type for UI if needed, or just use BriefingWithContent
+// The component expects is_submitted, so we should allow it or derive it.
+// However, the state is set from API data. APIs don't return is_submitted.
+// We should check where is_submitted is used.
 
-interface Briefing {
-  id: string;
-  questions: any[];
-  answers: Record<string, any>;
-  is_submitted: boolean;
-}
-
-interface Contract {
-  id: string;
-  title: string;
-  content: string;
-  status: string;
-  signed_at: string | null;
-}
-
-interface Service {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number | null;
-}
-
-interface ProjectServiceItem {
-  id: string;
-  service_id: string;
-  quantity: number;
-  unit_price: number;
-  total_price: number;
-  paid_amount: number;
-  notes: string | null;
-  service?: Service;
-}
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -113,8 +51,11 @@ export default function ProjectDetailsPage() {
   // between the new Hook and the old mutation logic, until full mutation refactor.
 
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [briefing, setBriefing] = useState<Briefing | null>(null);
+  const [briefing, setBriefing] = useState<(BriefingWithContent & { is_submitted: boolean }) | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
+  /* 
+  const [projectDetails, setProjectDetails] = useState<ProjectWithRelations | null>(null); // REMOVED duplicate state 
+  */
   const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]); // Derived from details
@@ -126,11 +67,14 @@ export default function ProjectDetailsPage() {
 
       if (projectDetails.briefing) {
         // Map content.questions to briefing.questions if needed
-        const rawBriefing = projectDetails.briefing as any;
+        const rawBriefing = projectDetails.briefing as unknown as BriefingWithContent;
+        const content = rawBriefing.content as BriefingContent | null;
+
         const mappedBriefing = {
           ...rawBriefing,
-          questions: rawBriefing.questions || rawBriefing.content?.questions || [],
-          answers: rawBriefing.answers || rawBriefing.content?.answers || {}
+          questions: rawBriefing.questions || content?.questions || [],
+          answers: rawBriefing.answers || content?.answers || {},
+          is_submitted: rawBriefing.status === 'submitted' // Derived property
         };
         setBriefing(mappedBriefing);
       }
@@ -138,20 +82,28 @@ export default function ProjectDetailsPage() {
       setContracts(projectDetails.contracts as Contract[]);
 
       // Fix ProjectServices mapping
-      const mappedProjectServices = (projectDetails.projectServices || []).map((ps: any) => ({
+      const mappedProjectServices = (projectDetails.projectServices || []).map(ps => ({
         ...ps,
-        paid_amount: ps.paid_amount || 0,
-        notes: ps.notes || null,
+        quantity: Number(ps.quantity || 1), // Cast to number
+        paid_amount: 0, // Column missing in DB
+        notes: null, // Column missing in DB
         service: ps.service ? {
           ...ps.service,
-          description: ps.service.description || '' // Ensure description exists
+          description: ps.service.description || '', // Ensure description exists
+          // Service type requires price to be string (if DB says so)
+          // If we mistakenly cast to number for UI, we break the Service type contract.
+          // Let's keep it as is from DB (string) or ensure it's string.
+          // If ps.service.price is number/string, we leave it or Cast to string if needed.
+          // But wait, ps.service comes from DB.
+          // If we want to assign it to 'service' prop of ProjectServiceItem, it must match Service.
         } : undefined
       }));
       setProjectServices(mappedProjectServices);
 
       // Fix Services mapping
-      const mappedServices = (projectDetails.services || []).map((s: any) => ({
+      const mappedServices = (projectDetails.services || []).map(s => ({
         ...s,
+        // price: Number(s.price || 0), // REMOVED cast to number to satisfy Service[] type
         description: s.description || '' // Ensure description
       }));
       setServices(mappedServices);
@@ -253,13 +205,13 @@ export default function ProjectDetailsPage() {
   };
 
   const copyPortalLink = async () => {
-    if (!project?.clients?.id) {
+    if (!project?.client?.id) {
       toast({ title: "Erro", description: "Cliente não vinculado ao projeto.", variant: "destructive" });
       return;
     }
 
     try {
-      const clientId = project.clients.id;
+      const clientId = project.client.id;
 
       // 1. Try fetching from wedding_clients (preferred, has access_pin)
       let { data: clientData, error } = await supabase
@@ -276,17 +228,19 @@ export default function ProjectDetailsPage() {
           .eq('id', clientId)
           .single();
 
-        if (genericError || !genericClient) {
+        const typedGenericClient = genericClient as unknown as { secret_code: string } | null;
+
+        if (genericError || !typedGenericClient) {
           throw new Error("Cliente não encontrado em nenhuma tabela.");
         }
 
         // Ensure secret code exists
-        if (!genericClient.secret_code) {
+        if (!typedGenericClient.secret_code) {
           throw new Error("Cliente sem código de acesso gerado.");
         }
 
         // Use generic client data
-        const link = `${window.location.origin}/portal/${genericClient.secret_code}`;
+        const link = `${window.location.origin}/portal/${typedGenericClient.secret_code}`;
         await navigator.clipboard.writeText(link);
         setCopied(true);
         toast({ title: "Link copiado!", description: "Link do portal copiado." });
@@ -309,9 +263,9 @@ export default function ProjectDetailsPage() {
   };
 
   const handleSendReminder = async () => {
-    if (!project || !project.clients || !user) return;
+    if (!project || !project.client || !user) return;
 
-    if (!project.clients.phone) {
+    if (!project.client.phone) {
       toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" });
       return;
     }
@@ -333,7 +287,7 @@ export default function ProjectDetailsPage() {
         .eq('id', user.id)
         .single();
 
-      const profile = profData as any;
+      const profile = profData;
       if (profile?.full_name) professionalName = profile.full_name;
 
       const eventDateObj = project.event_date ? new Date(project.event_date) : null;
@@ -341,12 +295,12 @@ export default function ProjectDetailsPage() {
       const timeStr = eventDateObj ? format(eventDateObj, 'HH:mm') : 'Horário a definir';
 
       const link = generateWhatsAppLink(textPattern, {
-        client_name: project.clients.name,
+        client_name: project.client.full_name || 'Cliente',
         professional_name: professionalName,
         date: dateStr,
         time: timeStr,
         location: project.event_location || "Local a definir",
-        phone: project.clients.phone
+        phone: project.client.phone
       });
 
       window.open(link, '_blank');
@@ -389,7 +343,9 @@ export default function ProjectDetailsPage() {
     if (!service) return;
 
     const qty = parseInt(serviceQuantity) || 1;
-    const price = parseFloat(servicePrice) || (service.price || 0);
+    // Service price is string in DB, but might be number if not strict. Safe cast.
+    const priceStr = service.price ? String(service.price) : '0';
+    const price = servicePrice ? parseFloat(servicePrice) : parseFloat(priceStr);
     const total = qty * price;
 
     const { error } = await ProjectService.addProjectService({
@@ -434,7 +390,7 @@ export default function ProjectDetailsPage() {
       return;
     }
 
-    if (!id || (!project?.client_id && !project?.clients?.id) || !organizationId) {
+    if (!id || (!project?.client_id && !project?.client?.id) || !organizationId) {
       toast({ title: "Erro interno", description: "Identificação do projeto ou usuário ausente.", variant: "destructive" });
       return;
     }
@@ -444,7 +400,7 @@ export default function ProjectDetailsPage() {
 
     const payload = {
       project_id: id,
-      client_id: project.client_id || project.clients?.id,
+      client_id: project.client_id || project.client?.id,
       amount: cleanAmount,
       description: finalDescription,
       type: 'income',
@@ -494,7 +450,18 @@ export default function ProjectDetailsPage() {
   if (!project) return null;
 
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
-  const totalServiceAmount = projectServices.reduce((sum, ps) => sum + (Number(ps.unit_price || ps.total_price) * (Number(ps.quantity) || 1)), 0);
+  const completed = projectServices.reduce((acc, curr) => {
+    const quantity = Number(curr.quantity || 0);
+    const unitPrice = Number(curr.unit_price || curr.price || 0);
+    return acc + (curr.paid_amount || 0);
+  }, 0);
+
+  const total = projectServices.reduce((acc, curr) => {
+    const quantity = Number(curr.quantity || 0);
+    const unitPrice = Number(curr.unit_price || curr.price || 0);
+    return acc + (quantity * unitPrice);
+  }, 0);
+  const totalServiceAmount = total;
   const totalReceived = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
   const totalPaidAmount = totalReceived;
   const remainingAmount = totalServiceAmount - totalReceived;

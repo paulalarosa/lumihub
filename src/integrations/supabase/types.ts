@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       analytics_logs: {
@@ -37,13 +62,6 @@ export type Database = {
           metadata?: Json | null
         }
         Relationships: [
-          {
-            foreignKeyName: "analytics_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "analytics_logs_client_id_fkey"
             columns: ["client_id"]
@@ -102,7 +120,98 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "appointments_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "assistants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_access: {
+        Row: {
+          assistant_id: string
+          granted_at: string | null
+          id: string
+          makeup_artist_id: string
+          revoked_at: string | null
+          status: string | null
+        }
+        Insert: {
+          assistant_id: string
+          granted_at?: string | null
+          id?: string
+          makeup_artist_id: string
+          revoked_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          assistant_id?: string
+          granted_at?: string | null
+          id?: string
+          makeup_artist_id?: string
+          revoked_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_access_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "assistants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistant_access_makeup_artist_id_fkey"
+            columns: ["makeup_artist_id"]
+            isOneToOne: false
+            referencedRelation: "makeup_artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assistant_invites: {
+        Row: {
+          accepted_at: string | null
+          assistant_email: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          invite_token: string
+          makeup_artist_id: string
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          assistant_email: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_token?: string
+          makeup_artist_id: string
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          assistant_email?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_token?: string
+          makeup_artist_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assistant_invites_makeup_artist_id_fkey"
+            columns: ["makeup_artist_id"]
+            isOneToOne: false
+            referencedRelation: "makeup_artists"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       assistant_notifications: {
         Row: {
@@ -137,143 +246,75 @@ export type Database = {
         }
         Relationships: []
       }
-      assistant_access: {
-        Row: {
-          assistant_id: string
-          created_at: string | null
-          id: string
-          makeup_artist_id: string
-          status: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          assistant_id: string
-          created_at?: string | null
-          id?: string
-          makeup_artist_id: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          assistant_id?: string
-          created_at?: string | null
-          id?: string
-          makeup_artist_id?: string
-          status?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assistant_access_assistant_id_fkey"
-            columns: ["assistant_id"]
-            isOneToOne: false
-            referencedRelation: "assistants"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "assistant_access_makeup_artist_id_fkey"
-            columns: ["makeup_artist_id"]
-            isOneToOne: false
-            referencedRelation: "makeup_artists"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      assistant_invites: {
-        Row: {
-          assistant_email: string
-          created_at: string | null
-          expires_at: string | null
-          id: string
-          invite_token: string
-          makeup_artist_id: string
-          status: string | null
-        }
-        Insert: {
-          assistant_email: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          invite_token?: string
-          makeup_artist_id: string
-          status?: string | null
-        }
-        Update: {
-          assistant_email?: string
-          created_at?: string | null
-          expires_at?: string | null
-          id?: string
-          invite_token?: string
-          makeup_artist_id?: string
-          status?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "assistant_invites_makeup_artist_id_fkey"
-            columns: ["makeup_artist_id"]
-            isOneToOne: false
-            referencedRelation: "makeup_artists"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
       assistants: {
         Row: {
           created_at: string | null
-          full_name: string | null
+          full_name: string
           id: string
           is_upgraded: boolean | null
           phone: string | null
           updated_at: string | null
+          upgraded_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
-          full_name?: string | null
+          full_name: string
           id?: string
           is_upgraded?: boolean | null
           phone?: string | null
           updated_at?: string | null
+          upgraded_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
-          full_name?: string | null
+          full_name?: string
           id?: string
           is_upgraded?: boolean | null
           phone?: string | null
           updated_at?: string | null
+          upgraded_at?: string | null
           user_id?: string
         }
         Relationships: []
       }
-      makeup_artists: {
+      assistants_legacy: {
         Row: {
-          business_name: string
+          assistant_user_id: string | null
           created_at: string | null
+          email: string
           id: string
+          invite_token: string | null
+          is_registered: boolean | null
+          name: string | null
           phone: string | null
-          subscription_status: string | null
-          updated_at: string | null
-          user_id: string
+          status: string | null
+          user_id: string | null
         }
         Insert: {
-          business_name: string
+          assistant_user_id?: string | null
           created_at?: string | null
+          email: string
           id?: string
+          invite_token?: string | null
+          is_registered?: boolean | null
+          name?: string | null
           phone?: string | null
-          subscription_status?: string | null
-          updated_at?: string | null
-          user_id: string
+          status?: string | null
+          user_id?: string | null
         }
         Update: {
-          business_name?: string
+          assistant_user_id?: string | null
           created_at?: string | null
+          email?: string
           id?: string
+          invite_token?: string | null
+          is_registered?: boolean | null
+          name?: string | null
           phone?: string | null
-          subscription_status?: string | null
-          updated_at?: string | null
-          user_id?: string
+          status?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -337,6 +378,13 @@ export type Database = {
             foreignKeyName: "bride_access_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bride_access_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -376,123 +424,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      clients_backup_error: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
-      }
-      clients_bugada: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
-      }
-      clients_old_broken: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
       }
       contracts: {
         Row: {
@@ -545,13 +476,6 @@ export type Database = {
             foreignKeyName: "contracts_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
@@ -585,7 +509,21 @@ export type Database = {
             foreignKeyName: "assistants"
             columns: ["assistant_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistants"
+            columns: ["assistant_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -697,14 +635,14 @@ export type Database = {
             foreignKeyName: "event_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "event_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "events_assistant_id_fkey"
+            columns: ["assistant_id"]
             isOneToOne: false
-            referencedRelation: "wedding_clients"
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -827,10 +765,50 @@ export type Database = {
             foreignKeyName: "leads_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
+      }
+      makeup_artists: {
+        Row: {
+          business_name: string
+          created_at: string | null
+          id: string
+          phone: string | null
+          plan_type: string | null
+          subscription_status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          created_at?: string | null
+          id?: string
+          phone?: string | null
+          plan_type?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          created_at?: string | null
+          id?: string
+          phone?: string | null
+          plan_type?: string | null
+          subscription_status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       marketing_campaigns: {
         Row: {
@@ -991,8 +969,10 @@ export type Database = {
           address: string | null
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           business_name: string | null
           city: string | null
+          contract_url: string | null
           created_at: string | null
           document_id: string | null
           email: string | null
@@ -1004,6 +984,7 @@ export type Database = {
           has_completed_onboarding: boolean | null
           id: string
           last_name: string | null
+          logo_url: string | null
           name: string | null
           onboarding_completed: boolean | null
           parent_user_id: string | null
@@ -1017,13 +998,16 @@ export type Database = {
           subscription_tier: string | null
           total_clients: number | null
           "updated_at'": string | null
+          website: string | null
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_name?: string | null
           city?: string | null
+          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
@@ -1035,6 +1019,7 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id: string
           last_name?: string | null
+          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -1048,13 +1033,16 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
+          website?: string | null
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_name?: string | null
           city?: string | null
+          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
@@ -1066,6 +1054,7 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id?: string
           last_name?: string | null
+          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -1079,6 +1068,7 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -1136,8 +1126,8 @@ export type Database = {
       projects: {
         Row: {
           budget: number | null
+          client_cpf: string | null
           client_id: string | null
-          "clients_1.cpf": string | null
           cover_url: string | null
           created_at: string
           deadline: string | null
@@ -1164,8 +1154,8 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1192,8 +1182,8 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1219,13 +1209,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "wedding_clients"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "wedding_clients"
             columns: ["client_id"]
@@ -1441,7 +1424,21 @@ export type Database = {
             foreignKeyName: "team_members_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -1503,6 +1500,13 @@ export type Database = {
           wallet_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_assistant_id_fkey"
             columns: ["assistant_id"]
@@ -1696,83 +1700,54 @@ export type Database = {
     Views: {
       clients: {
         Row: {
-          address: string | null
-          bride_status: boolean | null
-          cpf: string | null
+          birth_date: string | null
+          contract_url: string | null
           created_at: string | null
           email: string | null
-          full_name: string | null
+          first_name: string | null
           id: string | null
-          last_visit: string | null
-          moodboard_url: string | null
+          last_name: string | null
           name: string | null
-          notes: string | null
           phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
         }
         Insert: {
-          address?: string | null
-          bride_status?: boolean | null
-          cpf?: string | null
+          birth_date?: string | null
+          contract_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           id?: string | null
-          last_visit?: string | null
-          moodboard_url?: string | null
-          name?: string | null
-          notes?: string | null
+          last_name?: string | null
+          name?: never
           phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
         }
         Update: {
-          address?: string | null
-          bride_status?: boolean | null
-          cpf?: string | null
+          birth_date?: string | null
+          contract_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           id?: string | null
-          last_visit?: string | null
-          moodboard_url?: string | null
-          name?: string | null
-          notes?: string | null
+          last_name?: string | null
+          name?: never
           phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
         }
         Relationships: []
       }
     }
     Functions: {
       accept_assistant_invite: {
-        Args: {
-          p_invite_token: string
-          p_user_id?: string
-        }
+        Args: { p_invite_token: string; p_user_id?: string }
         Returns: Json
       }
-      check_assistant_exists: {
-        Args: {
-          p_email: string
-        }
-        Returns: Json
-      }
+      check_assistant_exists: { Args: { p_email: string }; Returns: Json }
       create_assistant_invite: {
-        Args: {
-          p_makeup_artist_id: string
-          p_assistant_email: string
-        }
+        Args: { p_assistant_email: string; p_makeup_artist_id: string }
         Returns: Json
       }
       get_bride_dashboard_data:
-      | { Args: { p_client_id: string }; Returns: Json }
-      | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
+        | { Args: { p_client_id: string }; Returns: Json }
+        | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
       is_admin: { Args: never; Returns: boolean }
       validate_bride_pin: {
         Args: { client_id: string; pin_code: string }
@@ -1780,7 +1755,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1794,119 +1769,124 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
-  public: {
+  graphql_public: {
     Enums: {},
+  },
+  public: {
+    Enums: {
+      user_role: ["admin", "editor", "viewer"],
+    },
   },
 } as const

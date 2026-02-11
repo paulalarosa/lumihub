@@ -8,7 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Badge } from '@/components/ui/badge';
 import { Plus, ExternalLink, FileText, Sparkles, MessageCircle, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
-import { ProjectService } from '@/services/projectService';
+import { ProjectService as ProjectServiceAPI } from '@/services/projectService';
+import type { Contract, ProjectWithRelations, ProjectServiceItem, Profile } from '@/types/api.types';
 
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -17,11 +18,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface ContratosTabProps {
     projectId: string;
-    contracts: any[];
-    setContracts: (contracts: any[]) => void;
+    contracts: Contract[];
+    setContracts: (contracts: Contract[]) => void;
     loading?: boolean;
-    project: any;
-    projectServices: any[];
+    project: ProjectWithRelations;
+    projectServices: ProjectServiceItem[];
     totalValue: number;
 }
 
@@ -36,7 +37,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
     const [loadingAI, setLoadingAI] = useState(false);
     const [loadingEdit, setLoadingEdit] = useState(false);
     const [aiCommand, setAiCommand] = useState('');
-    const [contractor, setContractor] = useState<any>(null);
+    const [contractor, setContractor] = useState<Profile | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -68,7 +69,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
         e.preventDefault();
         if (!projectId || !organizationId) return;
 
-        const { error } = await ProjectService.createContract({
+        const { error } = await ProjectServiceAPI.createContract({
             project_id: projectId,
             user_id: organizationId,
             title: contractTitle.trim(),
@@ -83,8 +84,8 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
             setIsContractDialogOpen(false);
             setContractTitle('');
             setContractContent('');
-            const { data } = await ProjectService.getContracts(projectId);
-            setContracts((data as any) || []);
+            const { data } = await ProjectServiceAPI.getContracts(projectId);
+            setContracts(data || []);
         }
     };
 
@@ -107,7 +108,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
     };
 
     const shareOnWhatsApp = () => {
-        const phone = project?.client?.phone || project?.clients?.phone;
+        const phone = project?.client?.phone;
         if (!phone) {
             toast({ title: "Cliente sem telefone cadastrado", variant: "destructive" });
             return;
@@ -136,9 +137,9 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
                 .eq('id', user.id)
                 .single();
 
-            const userProfile = userProfileRaw as any;
+            const userProfile = userProfileRaw;
 
-            const servicesList = projectServices.map((s: any) => s.service?.name || 'Serviço').join(', ') || 'Serviços Gerais';
+            const servicesList = projectServices.map(s => s.service?.name || 'Serviço').join(', ') || 'Serviços Gerais';
             const totalValueFormatted = totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             const context = {
@@ -148,7 +149,7 @@ export function ContratosTab({ projectId, contracts, setContracts, loading, proj
                     address: `${userProfile?.city || 'Cidade'} - ${userProfile?.state || 'UF'}`
                 },
                 client: {
-                    name: project.client.full_name || project.clients?.name || 'Cliente',
+                    name: project.client.full_name || 'Cliente',
                     doc: project.client?.cpf || "_______________",
                     address: project.client?.address || "_______________"
                 },

@@ -51,7 +51,7 @@ export const useAssistants = () => {
             queryClient.invalidateQueries({ queryKey: ['assistants'] });
             toast({ title: "Sucesso", description: "Assistente cadastrada" });
         },
-        onError: (error: any) => {
+        onError: (error) => {
             toast({ title: "Erro", description: error.message, variant: "destructive" });
         }
     });
@@ -69,7 +69,7 @@ export const useAssistants = () => {
             queryClient.invalidateQueries({ queryKey: ['assistants'] });
             toast({ title: "Sucesso", description: "Assistente atualizada" });
         },
-        onError: (error: any) => {
+        onError: (error) => {
             toast({ title: "Erro", description: error.message, variant: "destructive" });
         }
     });
@@ -83,7 +83,7 @@ export const useAssistants = () => {
             queryClient.invalidateQueries({ queryKey: ['assistants'] });
             toast({ title: "Sucesso", description: "Assistente excluída" });
         },
-        onError: (error: any) => {
+        onError: (error) => {
             toast({ title: "Erro", description: error.message, variant: "destructive" });
         }
     });

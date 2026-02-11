@@ -130,7 +130,7 @@ export function SmartContractEditor({ content, onChange, projectId }: SmartContr
 
         try {
             // Prepare Context
-            const servicesList = projectData.services?.map((s: any) => s.service?.name).join(', ') || 'Serviços Gerais';
+            const servicesList = projectData.services?.map(s => s.service?.name).join(', ') || 'Serviços Gerais';
 
             const payload = {
                 mode: 'ARCHITECT',

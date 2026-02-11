@@ -5,13 +5,15 @@ import { ProjectBriefing } from './ProjectBriefing';
 import { ProjectFinancials } from './ProjectFinancials';
 import { ContratosTab } from '@/features/projects/sections/contratos';
 
+import type { Project, Task, Contract, BriefingUI, ProjectServiceItem, ProjectWithRelations, Service } from '@/types/api.types';
+
 interface ProjectTabsProps {
     activeTab: string;
     setActiveTab: (tab: string) => void;
     t: (key: string) => string;
 
     // Tasks Props
-    tasks: any[];
+    tasks: Task[];
     newTaskTitle: string;
     setNewTaskTitle: (value: string) => void;
     addTask: (e: React.FormEvent) => void;
@@ -19,21 +21,21 @@ interface ProjectTabsProps {
     deleteTask: (id: string) => void;
 
     // Briefing Props
-    briefing: any;
+    briefing: (BriefingWithContent & { is_submitted: boolean }) | null;
     createDefaultBriefing: () => void;
     copyPortalLink: () => void;
 
     // Contracts Props
     projectId: string;
-    contracts: any[];
-    setContracts: (val: any[]) => void;
-    project: any;
-    projectServices: any[];
+    contracts: Contract[];
+    setContracts: (val: Contract[]) => void;
+    project: ProjectWithRelations | null;
+    projectServices: ProjectServiceItem[];
 
     // Financials Props
     totalServiceAmount: number;
     totalPaidAmount: number;
-    services: any[];
+    services: Service[];
     isServiceDialogOpen: boolean;
     setIsServiceDialogOpen: (val: boolean) => void;
     selectedServiceId: string;

@@ -48,11 +48,11 @@ export default function AssistantDashboard() {
             if (error) throw error;
 
             // Flatten structure safely
-            return (data || []).map((item: any) => ({
+            return (data || []).map(item => ({
                 id: item.makeup_artist?.id,
                 name: item.makeup_artist?.business_name,
                 phone: item.makeup_artist?.phone
-            })).filter((item: any) => item.id); // Ensure valid
+            })).filter(item => item.id); // Ensure valid
         },
         enabled: !!assistantId
     });
@@ -155,7 +155,7 @@ export default function AssistantDashboard() {
                                     </div>
                                 ) : (
                                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-                                        {appointments?.map((app: any) => (
+                                        {appointments?.map(app => (
                                             <Card key={app.id} className="hover:shadow-md transition-all duration-200 border-border/50 hover:border-border">
                                                 <CardHeader className="pb-3 pt-4 px-4 bg-muted/20 border-b border-border/30">
                                                     <div className="flex justify-between items-start gap-2">

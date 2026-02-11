@@ -58,7 +58,7 @@ export default function UpgradePage() {
             } else {
                 throw new Error(data.error || "Falha ao criar checkout");
             }
-        } catch (error: any) {
+        } catch (error) {
             console.error("Upgrade error:", error);
             toast.error(error.message || "Erro ao processar upgrade");
         } finally {

@@ -6,7 +6,7 @@ import { ClipboardList, Plus, ExternalLink } from 'lucide-react';
 
 interface Briefing {
     id: string;
-    questions: any[];
+    questions: Record<string, unknown>[];
     answers: Record<string, any>;
     is_submitted: boolean;
 }

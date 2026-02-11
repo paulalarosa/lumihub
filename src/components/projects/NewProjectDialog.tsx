@@ -120,7 +120,7 @@ export function NewProjectDialog({
 
       if (error) throw error;
 
-      setClients((data as any) || []);
+      setClients(data || []);
     } catch (error) {
       console.error('Erro ao carregar clientes:', error);
       toast({
@@ -190,7 +190,7 @@ export function NewProjectDialog({
       setOpen(false);
       onSuccess();
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Erro crítico ao criar projeto:', error);
       toast({
         title: 'Erro ao Criar Projeto',

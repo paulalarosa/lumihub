@@ -8,6 +8,6 @@ export const RevenueService = {
             .eq('user_id', organizationId);
 
         const payments = invoices || [];
-        return payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+        return payments.reduce((sum: number, p) => sum + (p.amount || 0), 0);
     }
 };

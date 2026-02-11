@@ -52,16 +52,17 @@ const AssistantPortalPage = () => {
     }, [user, authLoading, navigate]);
 
     // Derived State
-    const activeAssistants = assistantsList.filter((a: any) => a.status === 'accepted' || a.is_registered);
-    const pendingInvites = assistantsList.filter((a: any) => a.status === 'pending' && !a.is_registered);
+    const activeAssistants = assistantsList.filter(a => a.status === 'accepted' || a.is_registered);
+    const pendingInvites = assistantsList.filter(a => a.status === 'pending' && !a.is_registered);
     const currentAssistantName = user?.user_metadata?.full_name?.split(' ')[0] || "Assistente";
 
+    const today = new Date(new Date().setHours(0, 0, 0, 0));
     const upcomingEvents = events
-        .filter((e: any) => {
-            const eventDate = parseISO(e.event_date);
-            return eventDate >= new Date(new Date().setHours(0, 0, 0, 0));
+        .filter(e => {
+            const eventDate = new Date(e.event_date);
+            return eventDate >= today;
         })
-        .sort((a: any, b: any) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime());
+        .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime());
     const nextEvent = upcomingEvents[0];
 
     const handleAcceptInvite = async (id: string) => {
@@ -129,7 +130,7 @@ const AssistantPortalPage = () => {
                                     </SelectTrigger>
                                     <SelectContent className="bg-black border-neutral-800 rounded-none text-white">
                                         <SelectItem value="all" className="text-[10px] uppercase tracking-wider">VISÃO GERAL (TODOS)</SelectItem>
-                                        {activeAssistants.map((a: any) => (
+                                        {activeAssistants.map(a => (
                                             <SelectItem key={a.id} value={a.id} className="text-[10px] uppercase tracking-wider">
                                                 {employersMap[a.user_id] || "Unknown Client"}
                                             </SelectItem>
@@ -180,7 +181,7 @@ const AssistantPortalPage = () => {
                         {/* Status Report */}
                         <div className="flex justify-between items-end">
                             <div>
-                                <p className="text-[10px] text-neutral-600 uppercase tracking-[0.3em] mb-2">/// CONTEXT: {selectedAssistantId === 'all' ? 'GLOBAL' : (activeAssistants.find((a: any) => a.id === selectedAssistantId) ? employersMap[activeAssistants.find((a: any) => a.id === selectedAssistantId).user_id] : 'TARGET')} </p>
+                                <p className="text-[10px] text-neutral-600 uppercase tracking-[0.3em] mb-2">/// CONTEXT: {selectedAssistantId === 'all' ? 'GLOBAL' : (activeAssistants.find(a => a.id === selectedAssistantId) ? employersMap[activeAssistants.find(a => a.id === selectedAssistantId)!.user_id] : 'TARGET')} </p>
                                 <h1 className="text-5xl font-serif text-white tracking-widest uppercase">
                                     {format(new Date(), "HH:mm")}
                                 </h1>
@@ -264,7 +265,7 @@ const AssistantPortalPage = () => {
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {pendingInvites.map((invite: any) => (
+                                {pendingInvites.map(invite => (
                                     <Card key={invite.id} className="bg-neutral-900 border border-neutral-800 rounded-none hover:border-white/30 transition-all">
                                         <CardContent className="p-8 space-y-6">
                                             <div className="flex items-center gap-4">

@@ -59,6 +59,7 @@ interface Event {
     start_time: string | null;
     end_time: string | null;
     location: string | null;
+    address?: string | null;
     notes: string | null;
     client_id: string | null;
     project_id: string | null;
@@ -66,6 +67,7 @@ interface Event {
     assistants?: { id: string; name: string }[];
     event_type?: string | null;
     total_value?: number;
+    updated_at?: string;
 }
 
 interface Assistant {
@@ -154,11 +156,11 @@ export function EventDetailsSidebar({
         // Fetch Assistants
         const { data: assistantsData } = await supabase
             .from('assistants')
-            .select('id, name')
-            .order('name');
+            .select('id, full_name')
+            .order('full_name');
 
         if (assistantsData) {
-            setAvailableAssistants(assistantsData);
+            setAvailableAssistants(assistantsData.map(a => ({ id: a.id, name: a.full_name })));
         }
     };
 
@@ -211,7 +213,7 @@ export function EventDetailsSidebar({
 
         try {
             // 1. Update Event Core Data
-            const updates: any = {
+            const updates: Partial<Event> = {
                 title,
                 client_id: clientId,
                 event_date: eventDate ? format(eventDate, 'yyyy-MM-dd') : null,

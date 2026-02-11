@@ -95,7 +95,7 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
             resetForm();
             onRecordAdded();
 
-        } catch (error: any) {
+        } catch (error) {
             console.error("Erro ao salvar:", error);
             toast({ title: "Erro ao salvar registro", description: error.message, variant: "destructive" });
         } finally {

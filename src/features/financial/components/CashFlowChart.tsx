@@ -10,8 +10,14 @@ import {
     ResponsiveContainer
 } from 'recharts';
 
+interface CashFlowDataPoint {
+    month: string;
+    income: number;
+    expense: number;
+}
+
 interface CashFlowChartProps {
-    data: any[];
+    data: CashFlowDataPoint[];
 }
 
 export function CashFlowChart({ data }: CashFlowChartProps) {

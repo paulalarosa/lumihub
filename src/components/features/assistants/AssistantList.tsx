@@ -87,7 +87,7 @@ export const AssistantList = () => {
             if (error) throw error;
             toast({ title: 'Convite cancelado.' });
             refetch();
-        } catch (e: any) {
+        } catch (e) {
             toast({ title: 'Erro ao cancelar', description: e.message, variant: 'destructive' });
         }
     };

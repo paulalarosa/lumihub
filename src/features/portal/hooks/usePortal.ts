@@ -28,9 +28,9 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
     // 2. Fetch Employers (Profiles)
     const employersQuery = useQuery({
-        queryKey: ['portal-employers', assistantsList.map((a: any) => a.user_id).join(',')],
+        queryKey: ['portal-employers', assistantsList.map(a => a.user_id).join(',')],
         queryFn: async () => {
-            const employerIds = [...new Set(assistantsList.map((r: any) => r.user_id))];
+            const employerIds = [...new Set(assistantsList.map(r => r.user_id))];
             if (employerIds.length === 0) return {};
 
             const { data } = await supabase
@@ -39,24 +39,24 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
                 .in("id", employerIds);
 
             const map: Record<string, string> = {};
-            data?.forEach((p: any) => { map[p.id] = p.full_name; });
+            data?.forEach(p => { map[p.id] = p.full_name; });
             return map;
         },
         enabled: assistantsList.length > 0
     });
 
     // 3. Fetch Events & Tasks
-    const activeRecords = assistantsList.filter((r: any) =>
+    const activeRecords = assistantsList.filter(r =>
         (r.status === 'accepted' || r.is_registered) &&
         (selectedAssistantId === "all" || r.id === selectedAssistantId)
     );
 
     const eventsQuery = useQuery({
-        queryKey: ['portal-events', currentMonth, activeRecords.map((r: any) => r.id).join(',')],
+        queryKey: ['portal-events', currentMonth, activeRecords.map(r => r.id).join(',')],
         queryFn: async () => {
             if (activeRecords.length === 0) return [];
 
-            const assistantIds = activeRecords.map((r: any) => r.id);
+            const assistantIds = activeRecords.map(r => r.id);
             const start = startOfMonth(currentMonth);
             const end = endOfMonth(currentMonth);
 
@@ -67,7 +67,7 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
             if (!eventAssignments || eventAssignments.length === 0) return [];
 
-            const eventIds = eventAssignments.map((ea: any) => ea.event_id);
+            const eventIds = eventAssignments.map(ea => ea.event_id);
 
             const { data } = await supabase
                 .from("events")

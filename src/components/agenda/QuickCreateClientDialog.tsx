@@ -60,7 +60,7 @@ export default function QuickCreateClientDialog({
       setEmail('');
       setPhone('');
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro",
         description: error.message || "Não foi possível criar o cliente",

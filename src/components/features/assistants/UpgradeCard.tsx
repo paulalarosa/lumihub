@@ -8,7 +8,7 @@ export const UpgradeCard = () => {
     const navigate = useNavigate();
 
     return (
-        <Card className="bg-gradient-to-r from-purple-800 to-indigo-900 text-white border-purple-700/50 shadow-lg overflow-hidden relative group cursor-pointer transition-all hover:shadow-xl hover:scale-[1.01]" onClick={() => navigate('/planos')}>
+        <Card className="bg-gradient-to-r from-purple-800 to-indigo-900 text-white border-purple-700/50 shadow-lg overflow-hidden relative group cursor-pointer transition-all hover:shadow-xl hover:scale-[1.01]" onClick={() => navigate('/upgrade')}>
             <div className="absolute inset-0 bg-noise opacity-5 pointer-events-none" />
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 

@@ -14,8 +14,17 @@ import { Terminal, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 
+interface SystemLog {
+  id: string;
+  timestamp: string | null;
+  level: string | null;
+  severity: string | null;
+  message: string | null;
+  user_id: string | null;
+}
+
 export default function AdminLogs() {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<SystemLog[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -28,7 +37,7 @@ export default function AdminLogs() {
       // Fetch system_logs from Supabase
       // Using 'as any' for table name because types might be outdated
       const { data, error } = await supabase
-        .from('system_logs' as any)
+        .from('system_logs')
         .select('*')
         .order('timestamp', { ascending: false })
         .limit(100);
@@ -105,7 +114,7 @@ export default function AdminLogs() {
                         <span className="text-white">{log.message}</span>
                       </TableCell>
                       <TableCell className="text-right text-gray-500">
-                        {log.user_id || log.user || 'SYSTEM'}
+                        {log.user_id || 'SYSTEM'}
                       </TableCell>
                     </TableRow>
                   ))

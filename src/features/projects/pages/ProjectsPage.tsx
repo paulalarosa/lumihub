@@ -31,7 +31,7 @@ interface Project {
   event_date: string | null;
   event_location: string | null;
   status: string;
-  public_token: string;
+  public_token?: string;
   created_at: string;
   client: {
     id: string;
@@ -92,7 +92,12 @@ export default function Projetos() {
       .order('created_at', { ascending: false });
 
     if (!projectsError) {
-      setProjects((projectsData as any) || []);
+      // Cast the response to match the local Project interface
+      // Supabase returns a wide type, but our interface is narrower.
+      setProjects((projectsData as any[])?.map(p => ({
+        ...p,
+        client: p.client // Ensure relationship is mapped if needed (supabase returns array or object depending on relationship)
+      })) || []);
     }
 
     const { data: clientsData } = await supabase

@@ -8,7 +8,7 @@ export interface Contract {
     project_id: string;
     title: string;
     content?: string;
-    status: 'draft' | 'sent' | 'signed';
+    status: string; // Supabase returns string, not enum
     created_at: string;
     signature_url?: string;
     signed_at?: string;
@@ -38,7 +38,7 @@ export function useContracts() {
             console.error('Error fetching contracts:', error);
             toast.error('Erro ao carregar contratos');
         } else {
-            setContracts(data as any);
+            setContracts(data);
         }
         setLoading(false);
     };
@@ -63,7 +63,7 @@ export function useContracts() {
             throw error;
         }
 
-        setContracts([data as any, ...contracts]);
+        setContracts([data, ...contracts]);
         toast.success('Contrato criado com sucesso');
         return data;
     };

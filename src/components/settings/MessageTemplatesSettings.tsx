@@ -54,7 +54,7 @@ export default function MessageTemplatesSettings() {
             .eq('id', user.id)
             .single();
 
-        const profile = data as any;
+        const profile = data;
         if (profile?.phone) {
             setUserPhone(profile.phone);
         }
@@ -64,16 +64,16 @@ export default function MessageTemplatesSettings() {
         setLoading(true);
         try {
             // First load defaults
-            const loaded: any = { ...DEFAULT_TEMPLATES };
+            const loaded: Record<TemplateType, string> = { ...DEFAULT_TEMPLATES };
 
             // Then try to fetch from Supabase
-            const { data, error } = await (supabase
-                .from('message_templates' as any)
+            const { data, error } = await supabase
+                .from('message_templates')
                 .select('*')
-                .eq('organization_id', organizationId));
+                .eq('organization_id', organizationId);
 
             if (data && !error) {
-                data.forEach((t: any) => {
+                data.forEach(t => {
                     if (t.content && t.type) loaded[t.type] = t.content;
                 });
             }
@@ -90,17 +90,18 @@ export default function MessageTemplatesSettings() {
     const handleSaveTemplate = async (type: TemplateType, content: string) => {
         setSaving(type);
         try {
-            const { error } = await (supabase
-                .from('message_templates' as any)
+            const { error } = await supabase
+                .from('message_templates')
                 .upsert(
                     {
                         organization_id: organizationId,
                         type,
                         content,
-                        updated_at: new Date().toISOString()
+                        updated_at: new Date().toISOString(),
+                        user_id: user?.id || ''
                     },
-                    { onConflict: 'organization_id, type' }
-                ));
+                    { onConflict: 'organization_id,type' }
+                );
 
             if (error) throw error;
 

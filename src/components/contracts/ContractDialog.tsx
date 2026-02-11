@@ -66,7 +66,7 @@ export function ContractDialog({ open, onOpenChange, defaultProjectId }: Contrac
                 content: mode === 'digital' ? content : undefined,
                 status: 'draft',
                 attachment_url: attachmentUrl || undefined
-            } as any);
+            });
 
             onOpenChange(false);
             toast.success("Contrato salvo com sucesso!");
@@ -117,7 +117,7 @@ export function ContractDialog({ open, onOpenChange, defaultProjectId }: Contrac
                         </div>
                     </div>
 
-                    <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full flex-1 flex flex-col">
+                    <Tabs value={mode} onValueChange={(v) => setMode(v as 'digital' | 'upload')} className="w-full flex-1 flex flex-col">
                         <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-white/10 p-0 h-auto rounded-none">
                             <TabsTrigger
                                 value="digital"

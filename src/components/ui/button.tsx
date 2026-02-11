@@ -43,12 +43,12 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : motion.button;
-    // @ts-ignore: Radix Slot doesn't accept dragging/motion props easily, so we skip motion if asChild is true for now
     const motionProps = !asChild ? {
       whileTap: { scale: 0.95 },
       transition: { duration: 0.1 }
     } : {};
 
+    // Slot and motion.button have incompatible prop types, so we use 'as any' when spreading motionProps
     return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} {...(motionProps as any)} />;
   },
 );

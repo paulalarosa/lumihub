@@ -250,7 +250,7 @@ export default function EventDialog({
       .order('name');
 
     if (data) {
-      setServices(data.map((s: any) => ({
+      setServices(data.map(s => ({
         ...s,
         price: typeof s.price === 'string' ? parseFloat(s.price) : s.price,
         duration_minutes: typeof s.duration_minutes === 'string' ? parseInt(s.duration_minutes) : s.duration_minutes
@@ -398,7 +398,7 @@ export default function EventDialog({
       color,
       client_id: clientId || null,
       project_id: projectId || null,
-      reminder_days: (reminderDays as any)
+      reminder_days: reminderDays.length > 0 ? JSON.stringify(reminderDays) : null
     };
 
     try {

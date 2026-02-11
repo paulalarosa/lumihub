@@ -55,7 +55,7 @@ export const useContractUpload = ({ clientId: initialClientId }: UseContractUplo
             if (targetId) {
                 const { error: dbError } = await supabase
                     .from('profiles')
-                    .update({ contract_url: publicUrl } as any) // Type might not be generated yet
+                    .update({ contract_url: publicUrl })
                     .eq('id', targetId);
 
                 if (dbError) {

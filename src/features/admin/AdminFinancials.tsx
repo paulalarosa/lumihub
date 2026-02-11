@@ -67,7 +67,7 @@ export default function AdminFinancials({ stats, loading }: AdminFinancialsProps
         fetchMonthlyData();
     }, []);
 
-    const calculateCommissions = (eventsData: any[]) => {
+    const calculateCommissions = (eventsData: unknown[]) => {
         const commissionMap = new Map<string, AssistantCommission>();
 
         eventsData.forEach(event => {
@@ -79,7 +79,7 @@ export default function AdminFinancials({ stats, loading }: AdminFinancialsProps
                 // In a real scenario, we might have individual commission fields per assistant
                 const splitCommission = totalCommission / assistants.length;
 
-                assistants.forEach((ea: any) => {
+                assistants.forEach((ea) => {
                     const assistantName = ea.assistants?.name || 'Desconhecido';
                     const assistantId = ea.assistant_id;
 

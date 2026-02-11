@@ -53,7 +53,7 @@ export const getCalendarEvents = async (): Promise<GoogleCalendarEvent[]> => {
         const items = data.items || [];
 
         // Deduplication Logic
-        const uniqueEvents = [...new Map(items.map((item: any) => [item.id, item])).values()];
+        const uniqueEvents = [...new Map(items.map(item => [item.id, item])).values()];
 
         return uniqueEvents as GoogleCalendarEvent[];
     } catch (error) {

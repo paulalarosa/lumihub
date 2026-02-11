@@ -94,7 +94,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
 
             await fetchImages();
 
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error uploading image:', error);
             toast({
                 title: "Erro no upload",

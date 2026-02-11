@@ -50,7 +50,7 @@ export default function AcceptInvitePage() {
                 setError(errorMessage);
                 toast({ title: 'Erro', description: errorMessage, variant: 'destructive' });
             }
-        } catch (err: any) {
+        } catch (err) {
             setError(err.message);
             toast({ title: 'Erro ao aceitar convite', description: err.message, variant: 'destructive' });
         } finally {

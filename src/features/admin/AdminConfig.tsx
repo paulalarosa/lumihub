@@ -12,9 +12,15 @@ import { useLanguage } from '@/hooks/useLanguage';
 
 type ConfigKey = 'maintenance_mode' | 'allow_registrations' | 'global_alert_message';
 
+interface ConfigValues {
+  maintenance_mode: boolean;
+  allow_registrations: boolean;
+  global_alert_message: string;
+}
+
 export default function AdminConfig() {
   const { t } = useLanguage();
-  const [configs, setConfigs] = useState<Record<string, any>>({
+  const [configs, setConfigs] = useState<ConfigValues>({
     maintenance_mode: false,
     allow_registrations: true,
     global_alert_message: ''
@@ -30,13 +36,17 @@ export default function AdminConfig() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('system_config' as any)
+        .from('system_config')
         .select('*');
 
       if (!error && data) {
-        const newConfigs: Record<string, any> = {};
-        data.forEach((item: any) => {
-          newConfigs[item.key] = item.value === 'true' ? true : item.value === 'false' ? false : item.value;
+        const newConfigs: Partial<ConfigValues> = {};
+        data.forEach(item => {
+          if (item.key === 'maintenance_mode' || item.key === 'allow_registrations') {
+            newConfigs[item.key] = item.value === 'true';
+          } else if (item.key === 'global_alert_message') {
+            newConfigs[item.key] = String(item.value || '');
+          }
         });
         setConfigs(prev => ({ ...prev, ...newConfigs }));
       }
@@ -47,7 +57,7 @@ export default function AdminConfig() {
     }
   };
 
-  const handleSave = async (key: string, value: any) => {
+  const handleSave = async (key: string, value: unknown) => {
     try {
       setSaving(true);
 
@@ -55,7 +65,7 @@ export default function AdminConfig() {
       setConfigs(prev => ({ ...prev, [key]: value }));
 
       const { error } = await supabase
-        .from('system_config' as any)
+        .from('system_config')
         .upsert({ key, value: String(value) });
 
       if (error) throw error;

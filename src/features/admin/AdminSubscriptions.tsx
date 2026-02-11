@@ -7,10 +7,18 @@ import { CheckCircle2, AlertCircle, ArrowUpCircle, ArrowDownCircle } from 'lucid
 import { useToast } from '@/hooks/use-toast';
 import AdminFinancials from '@/features/admin/AdminFinancials';
 
+interface SubscriptionUser {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+    plan: string | null;
+    created_at: string | null;
+}
+
 export default function AdminSubscriptions() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState<any[]>([]);
+    const [users, setUsers] = useState<SubscriptionUser[]>([]);
     const [stats, setStats] = useState({
         mrr: 0,
         activeSubscribers: 0,
@@ -54,7 +62,7 @@ export default function AdminSubscriptions() {
         }
     };
 
-    const calculateStats = (profiles: any[]) => {
+    const calculateStats = (profiles: SubscriptionUser[]) => {
         let mrr = 0;
         let subscribers = 0;
 
@@ -80,7 +88,7 @@ export default function AdminSubscriptions() {
         try {
             const { error } = await supabase
                 .from('profiles')
-                .update({ plan: newPlan } as any)
+                .update({ plan: newPlan })
                 .eq('id', userId);
 
             if (error) throw error;
