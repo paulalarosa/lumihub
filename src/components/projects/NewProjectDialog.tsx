@@ -1,7 +1,3 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 import {
   Dialog,
   DialogContent,
@@ -21,184 +17,30 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Plus, Loader2 } from 'lucide-react';
-import { z } from 'zod';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-
-// Minimal client type for the dropdown
-interface ClientOption {
-  id: string;
-  name: string;
-  email?: string | null;
-}
+import { Controller } from 'react-hook-form';
+import { useNewProjectDialog } from './hooks/useNewProjectDialog';
 
 interface NewProjectDialogProps {
   onSuccess: () => void;
   onCreateClient?: () => void;
 }
 
-// 1. Zod Schema Definition (As requested)
-const createProjectSchema = z.object({
-  name: z.string().min(1, "Nome do projeto é obrigatório"),
-  client_id: z.string().min(1, "Selecione um cliente"),
-  // Enforcing that we have a client email for the project
-  client_email: z.string()
-    .min(1, "O e-mail do cliente é obrigatório para envio de notificações")
-    .email("E-mail do cliente inválido"),
-  event_date: z.string().optional(),
-  event_location: z.string().optional(),
-  event_type: z.string().optional(),
-  notes: z.string().optional(),
-  status: z.enum(['active', 'completed', 'archived', 'lead']).default('active'),
-});
-
-type CreateProjectFormData = z.infer<typeof createProjectSchema>;
-
 export function NewProjectDialog({
   onSuccess,
   onCreateClient,
 }: NewProjectDialogProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [open, setOpen] = useState(false);
-  const [loadingClients, setLoadingClients] = useState(false);
-  const [clients, setClients] = useState<ClientOption[]>([]);
-
-  // 2. React Hook Form Setup
   const {
-    control,
-    handleSubmit,
-    setValue,
-    watch,
-    reset,
-    formState: { errors, isSubmitting }
-  } = useForm<CreateProjectFormData>({
-    resolver: zodResolver(createProjectSchema),
-    defaultValues: {
-      name: '',
-      client_id: '',
-      client_email: '', // Will be set automatically when client is selected
-      event_date: '',
-      event_location: '',
-      event_type: '',
-      notes: '',
-      status: 'active',
+    open,
+    setOpen,
+    loadingClients,
+    clients,
+    form: {
+      control,
+      handleSubmit,
+      formState: { errors, isSubmitting }
     },
-  });
-
-  const selectedClientId = watch('client_id');
-
-  // Load clients on open
-  useEffect(() => {
-    if (open) {
-      loadClients();
-    }
-  }, [open]);
-
-  // Update client_email when client_id changes
-  useEffect(() => {
-    if (selectedClientId && clients.length > 0) {
-      const selectedClient = clients.find(c => c.id === selectedClientId);
-      if (selectedClient?.email) {
-        setValue('client_email', selectedClient.email, { shouldValidate: true });
-      } else {
-        setValue('client_email', '', { shouldValidate: true });
-      }
-    }
-  }, [selectedClientId, clients, setValue]);
-
-  const loadClients = async () => {
-    setLoadingClients(true);
-    try {
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('wedding_clients')
-        .select('id, name, email')
-        .eq('user_id', user.id)
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-
-      setClients(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar clientes:', error);
-      toast({
-        title: 'Erro',
-        description: 'Não foi possível carregar a lista de clientes.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoadingClients(false);
-    }
-  };
-
-  const onSubmit = async (data: CreateProjectFormData) => {
-    if (!user) return;
-
-    try {
-      // ✅ 1. Create the project first (Secure Code Pattern)
-      const newProject = {
-        name: data.name.trim(),
-        client_id: data.client_id,
-        user_id: user.id,
-        event_date: data.event_date || null,
-        event_location: data.event_location?.trim() || null,
-        event_type: data.event_type || null,
-        notes: data.notes?.trim() || null,
-        status: data.status,
-      };
-
-      const { data: projectData, error: dbError } = await supabase
-        .from('projects')
-        .insert([newProject])
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      // ✅ 2. Try to send email, but IGNORA failures (Safe for Localhost)
-      try {
-        if (!data.client_email) {
-          console.warn("⚠️ Localhost/Dev: Projeto criado sem e-mail válido (Ignorado).");
-        } else {
-          // Calling the Edge Function to send welcome email
-          const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
-            body: {
-              record: {
-                ...projectData,
-                client_email: data.client_email // Explicitly passing email
-              }
-            }
-          });
-
-          if (emailError) throw emailError;
-        }
-      } catch (emailError) {
-        // AQUI É O PULO DO GATO: A gente apenas loga o erro, não trava o app
-        console.error("❌ Falha no envio de e-mail (Não crítico):", emailError);
-        // Optional: toast warning
-        // toast({ title: "Aviso", description: "Projeto criado, mas houve erro no envio do e-mail.", variant: "warning" });
-      }
-
-      toast({
-        title: 'Projeto Criado',
-        description: `${data.name} foi criado com sucesso.`,
-      });
-
-      reset();
-      setOpen(false);
-      onSuccess();
-
-    } catch (error) {
-      console.error('Erro crítico ao criar projeto:', error);
-      toast({
-        title: 'Erro ao Criar Projeto',
-        description: error.message || 'Ocorreu um erro ao salvar o projeto.',
-        variant: 'destructive',
-      });
-    }
-  };
+    onSubmit,
+  } = useNewProjectDialog({ onSuccess });
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
