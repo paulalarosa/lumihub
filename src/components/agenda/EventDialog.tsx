@@ -14,12 +14,14 @@ import { QuickCreateProjectDialog } from './QuickCreateProjectDialog';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
 import ConfirmationNotification from '@/features/portal/components/ConfirmationNotification';
 import { NoirDatePicker } from '@/components/ui/noir-date-picker';
+import { EventTypeSelector } from './EventTypeSelector';
+import { EventServiceSelector } from './EventServiceSelector';
 import {
   useEventForm,
   EventFormData,
   EventAssistant,
   COLORS,
-  EVENT_TYPES,
+  // EVENT_TYPES, // No longer needed here if used inside selector or passed down? Wait, selector imports it.
 } from './hooks/useEventForm';
 
 interface EventDialogProps {
@@ -65,51 +67,18 @@ export default function EventDialog({
           <form onSubmit={form.handleSubmit} className="space-y-6 mt-4">
 
             {/* Event Type Pills */}
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2 text-gray-400 text-xs uppercase tracking-wider font-semibold">
-                <Tag className="h-4 w-4 text-white" />
-                Tipo de Evento
-              </Label>
-              <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
-                {EVENT_TYPES.map(type => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => form.setEventType(type.value)}
-                    className={`
-                      px-6 py-2.5 rounded-none text-sm font-medium transition-all duration-300 whitespace-nowrap border
-                      ${form.eventType === type.value
-                        ? 'bg-white/20 text-white border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                        : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10'}
-                    `}
-                  >
-                    {type.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+            <EventTypeSelector
+              currentType={form.eventType}
+              onTypeChange={form.setEventType}
+            />
 
             {/* Service Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-2 text-gray-300">
-                  <Sparkles className="h-4 w-4 text-white" />
-                  Selecionar Serviço
-                </Label>
-                <Select value={form.selectedServiceId} onValueChange={form.handleServiceSelect}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none">
-                    <SelectValue placeholder="Preencher com serviço..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
-                    <SelectItem value="__none__">Nenhum</SelectItem>
-                    {form.services.map(service => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name} ({service.duration_minutes}m) - R$ {service.price}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <EventServiceSelector
+                selectedServiceId={form.selectedServiceId}
+                onServiceSelect={form.handleServiceSelect}
+                services={form.services}
+              />
             </div>
 
             {/* Title */}

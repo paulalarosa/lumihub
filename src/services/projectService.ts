@@ -115,7 +115,7 @@ export const ProjectService = {
     async getProjectServices(projectId: string) {
         return await supabase
             .from('project_services')
-            .select('*, service:services(id, name, description, price)')
+            .select('*, service:services(*)')
             .eq('project_id', projectId)
             .order('created_at');
     },

@@ -14,9 +14,9 @@ export const useAssistant = () => {
         setLoading(true);
         try {
             const { data, error } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .select('*')
-                .eq('owner_id', user.id)
+                .eq('makeup_artist_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -40,9 +40,9 @@ export const useAssistant = () => {
         try {
             // 1. Check if already invited
             const { data: existing } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .select('id')
-                .eq('email', email)
+                .eq('assistant_email', email)
                 .eq('status', 'pending')
                 .maybeSingle();
 
@@ -57,14 +57,14 @@ export const useAssistant = () => {
             const inviteCode = `${namePart}-${randomPart}`;
 
             const payload = {
-                email,
-                owner_id: user.id,
-                invite_code: inviteCode
+                assistant_email: email,
+                makeup_artist_id: user.id,
+                invite_token: inviteCode
             };
 
 
             const { data, error: insertError } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .insert([payload])
                 .select()
                 .single();
@@ -86,7 +86,7 @@ export const useAssistant = () => {
         setLoading(true);
         try {
             const { error } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .update({ status: 'revoked' })
                 .eq('id', id);
 

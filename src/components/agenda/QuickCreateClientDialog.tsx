@@ -19,7 +19,7 @@ interface QuickCreateClientDialogProps {
   onSuccess: (client: { id: string; name: string }) => void;
 }
 
-export default function QuickCreateClientDialog({
+export function QuickCreateClientDialog({
   open,
   onOpenChange,
   onSuccess

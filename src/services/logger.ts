@@ -1,4 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+import { SupabaseClient } from "@supabase/supabase-js";
 
 // Safe console fallback for environments where console might be stripped
 const safeConsole = {
@@ -12,6 +14,29 @@ type LogLevel = 'info' | 'error' | 'warning' | 'fatal';
 interface LogMetadata {
     [key: string]: unknown;
 }
+
+interface SystemLog {
+    id: string;
+    level: string | null;
+    severity: string | null;
+    message: string | null;
+    user_id: string | null;
+    metadata: any;
+    timestamp: string | null;
+}
+
+type LocalDatabase = Database & {
+    public: {
+        Tables: {
+            system_logs: {
+                Row: SystemLog;
+                Insert: Partial<SystemLog>;
+                Update: Partial<SystemLog>;
+                Relationships: [];
+            }
+        }
+    }
+};
 
 export class Logger {
     private static isDev = import.meta.env.DEV;
@@ -76,15 +101,15 @@ export class Logger {
      */
     private static async persistLog(severity: LogLevel, message: string, userId: string, metadata?: LogMetadata) {
         // Don't await this in the main flow to avoid blocking
-        // @ts-ignore - 'system_logs' table is not yet in the generated types
-        supabase.from('system_logs').insert({
+        const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+        typedSupabase.from('system_logs').insert({
             level: severity,
             severity: severity,
             message: message,
             user_id: userId === 'SYSTEM' ? null : userId,
-            metadata: metadata as any, // Supabase expects Json, unknown needs casting or verifying
+            metadata: metadata as any,
             timestamp: new Date().toISOString()
-        }).then(({ error }) => {
+        } as any).then(({ error }) => {
             if (error && this.isDev) {
                 safeConsole.error("Failed to write to system_logs:", error);
             }

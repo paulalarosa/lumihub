@@ -5,7 +5,7 @@ import { ProjectBriefing } from './ProjectBriefing';
 import { ProjectFinancials } from './ProjectFinancials';
 import { ContratosTab } from '@/features/projects/sections/contratos';
 
-import type { Project, Task, Contract, BriefingUI, ProjectServiceItem, ProjectWithRelations, Service } from '@/types/api.types';
+import type { Project, Task, Contract, BriefingUI, BriefingWithContent, ProjectServiceItem, ProjectWithRelations, Service, ServiceUI } from '@/types/api.types';
 
 interface ProjectTabsProps {
     activeTab: string;
@@ -35,7 +35,7 @@ interface ProjectTabsProps {
     // Financials Props
     totalServiceAmount: number;
     totalPaidAmount: number;
-    services: Service[];
+    services: ServiceUI[];
     isServiceDialogOpen: boolean;
     setIsServiceDialogOpen: (val: boolean) => void;
     selectedServiceId: string;

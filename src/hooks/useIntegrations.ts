@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface UserIntegration {
     id: string;
@@ -9,21 +11,45 @@ interface UserIntegration {
     is_active: boolean;
     sync_enabled: boolean;
     last_sync_at: string | null;
+    user_id: string; // Add user_id to match DB
+    created_at: string; // Add timestamps
+    updated_at: string;
+    access_token: string | null;
+    refresh_token: string | null;
+    expires_at: string | null;
+    metadata: any;
 }
 
 interface NotificationSettings {
-    id?: string;
+    id: string; // id is likely required in Row
+    user_id: string;
     email_enabled: boolean;
     reminder_days: number[];
     notify_new_event: boolean;
     notify_event_update: boolean;
     notify_event_cancel: boolean;
     notify_assistant_assigned: boolean;
+    created_at?: string;
+    updated_at?: string;
 }
+
+// Local Database override to include missing tables if any
+type LocalDatabase = Database & {
+    public: {
+        Tables: {
+            notification_settings: {
+                Row: NotificationSettings;
+                Insert: Omit<NotificationSettings, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<NotificationSettings, 'id' | 'created_at' | 'updated_at'>>;
+                Relationships: [];
+            }
+        }
+    }
+};
 
 export type { UserIntegration, NotificationSettings };
 
-const DEFAULT_NOTIFICATION_SETTINGS: NotificationSettings = {
+const DEFAULT_NOTIFICATION_SETTINGS: Omit<NotificationSettings, 'id' | 'user_id'> = {
     email_enabled: true,
     reminder_days: [1, 3, 7],
     notify_new_event: true,
@@ -36,8 +62,14 @@ export function useIntegrations() {
     const { user } = useAuth();
     const { toast } = useToast();
 
+    // Use typed client
+    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+
     const [integrations, setIntegrations] = useState<UserIntegration[]>([]);
-    const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(DEFAULT_NOTIFICATION_SETTINGS);
+    const [notificationSettings, setNotificationSettings] = useState<Omit<NotificationSettings, 'user_id'>>({
+        id: '',
+        ...DEFAULT_NOTIFICATION_SETTINGS
+    });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [connecting, setConnecting] = useState(false);
@@ -49,6 +81,7 @@ export function useIntegrations() {
 
     useEffect(() => {
         const handleCallback = async () => {
+            // ... existing callback logic ...
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
             const state = urlParams.get('state');
@@ -75,21 +108,42 @@ export function useIntegrations() {
     }, []);
 
     const fetchData = async () => {
+        if (!user) return;
         setLoading(true);
-        const { data: integrationsData } = await (supabase as any)
+
+        // user_integrations is in Database but we use typedSupabase to be consistent
+        // We need to cast the result because standard definitions might differ from local interface slightly
+        const { data: integrationsData } = await typedSupabase
             .from('user_integrations')
             .select('*')
-            .eq('user_id', user!.id);
-        setIntegrations((integrationsData as UserIntegration[]) || []);
+            .eq('user_id', user.id);
 
-        const { data: notifData } = await (supabase as any)
+        // Map to UserIntegration to be safe
+        const mappedIntegrations: UserIntegration[] = (integrationsData || []).map((i: any) => ({
+            id: i.id,
+            provider: i.provider,
+            is_active: true, // Assuming active if present? Or use i.metadata field?
+            sync_enabled: true,
+            last_sync_at: i.updated_at,
+            user_id: i.user_id,
+            created_at: i.created_at,
+            updated_at: i.updated_at,
+            access_token: i.access_token,
+            refresh_token: i.refresh_token,
+            expires_at: i.expires_at,
+            metadata: i.metadata
+        }));
+
+        setIntegrations(mappedIntegrations);
+
+        const { data: notifData } = await typedSupabase
             .from('notification_settings')
             .select('*')
-            .eq('user_id', user!.id)
+            .eq('user_id', user.id)
             .maybeSingle();
 
-        const nd = notifData as NotificationSettings | null;
-        if (nd) {
+        if (notifData) {
+            const nd = notifData as unknown as NotificationSettings;
             setNotificationSettings({
                 id: nd.id,
                 email_enabled: nd.email_enabled,
@@ -97,7 +151,9 @@ export function useIntegrations() {
                 notify_new_event: nd.notify_new_event,
                 notify_event_update: nd.notify_event_update,
                 notify_event_cancel: nd.notify_event_cancel,
-                notify_assistant_assigned: nd.notify_assistant_assigned
+                notify_assistant_assigned: nd.notify_assistant_assigned,
+                created_at: nd.created_at,
+                updated_at: nd.updated_at
             });
         }
         setLoading(false);
@@ -124,7 +180,7 @@ export function useIntegrations() {
 
     const disconnectCalendar = async (integrationId: string, _provider: string) => {
         try {
-            const { error } = await (supabase as any).from('user_integrations').delete().eq('id', integrationId);
+            const { error } = await typedSupabase.from('user_integrations').delete().eq('id', integrationId);
             if (error) {
                 toast({ title: 'Erro ao desconectar', variant: 'destructive' });
             } else {
@@ -160,7 +216,7 @@ export function useIntegrations() {
     };
 
     const toggleReminderDay = (day: number) => {
-        const currentDays = notificationSettings.reminder_days;
+        const currentDays = notificationSettings.reminder_days || [];
         setNotificationSettings({
             ...notificationSettings,
             reminder_days: currentDays.includes(day)
@@ -171,10 +227,20 @@ export function useIntegrations() {
 
     const saveNotificationSettings = async () => {
         setSaving(true);
-        const { error } = await (supabase as any).from('notification_settings').upsert({
+        // Exclude id if it's empty (for new insertion)
+        const { id, ...settingsWithoutId } = notificationSettings;
+        const payload = id ? notificationSettings : settingsWithoutId;
+
+        // Upsert requires all fields for match? No, match on user_id.
+        const { error } = await typedSupabase.from('notification_settings').upsert({
             user_id: user!.id,
-            ...notificationSettings
-        }, { onConflict: 'user_id' });
+            email_enabled: notificationSettings.email_enabled,
+            reminder_days: notificationSettings.reminder_days,
+            notify_new_event: notificationSettings.notify_new_event,
+            notify_event_update: notificationSettings.notify_event_update,
+            notify_event_cancel: notificationSettings.notify_event_cancel,
+            notify_assistant_assigned: notificationSettings.notify_assistant_assigned
+        } as any, { onConflict: 'user_id' }); // Cast payload due to strict checking of Insert type vs Omit return
 
         if (error) {
             toast({ title: 'Erro ao salvar configurações', variant: 'destructive' });

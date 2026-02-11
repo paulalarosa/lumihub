@@ -33,7 +33,7 @@ interface QuickCreateProjectDialogProps {
   clients: Client[];
 }
 
-export default function QuickCreateProjectDialog({
+export function QuickCreateProjectDialog({
   open,
   onOpenChange,
   onSuccess,

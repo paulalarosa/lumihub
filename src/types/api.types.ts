@@ -48,7 +48,7 @@ export interface ProjectDetailsResponse {
     project: ProjectWithRelations;
     tasks: Task[];
     briefing: BriefingUI | null;
-    services: Service[];
+    services: ServiceUI[];
     projectServices: ProjectServiceItem[];
     contracts: Contract[];
     transactions: Transaction[];
@@ -72,11 +72,19 @@ export interface EventWithRelations extends Event {
     services?: Service[];
 }
 
-export type ProjectServiceItem = Omit<ProjectService, 'quantity'> & {
+export interface ServiceUI extends Omit<Service, 'price' | 'duration_minutes' | 'base_price'> {
+    price: number;
+    duration_minutes: number;
+    base_price: number;
+}
+
+export type ProjectServiceItem = Omit<ProjectService, 'quantity' | 'total_price' | 'unit_price'> & {
     quantity: number; // Cast from string in DB
+    total_price: number;
+    unit_price: number;
     paid_amount?: number; // UI specific / potentially calculated
     notes?: string | null; // UI specific
-    service?: Service;
+    service?: ServiceUI;
 };
 
 export type BriefingUI = BriefingWithContent & {

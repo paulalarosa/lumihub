@@ -1,106 +1,18 @@
-import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Calendar, Loader2, CheckCircle2, ArrowRight, Sparkles, Terminal } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useAuth } from "@/hooks/useAuth";
+import { useOnboarding } from "@/hooks/useOnboarding";
 
 const Onboarding = () => {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { user } = useAuth();
-  const [step, setStep] = useState(1);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isCompleting, setIsCompleting] = useState(false);
-
-  // Check if we returned from Google Auth
-  useEffect(() => {
-    if (searchParams.get('google_connected') === 'true') {
-      setStep(3);
-      toast.success("Google Calendar conectado!");
-    }
-  }, [searchParams]);
-
-  const handleConnectGoogleCalendar = async () => {
-    setIsConnecting(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          scopes: 'https://www.googleapis.com/auth/calendar',
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent'
-          }
-        }
-      });
-
-      if (error) {
-        console.error('Error connecting Google Calendar:', error);
-        toast.error('Erro ao conectar com Google Calendar');
-        setIsConnecting(false);
-        return;
-      }
-      // Redirect is automatic
-    } catch (err) {
-      console.error('Connection error:', err);
-      toast.error('Erro de conexão');
-      setIsConnecting(false);
-    }
-  };
-
-  const handleComplete = async () => {
-    // 1. Get freshet user data
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return;
-
-    setIsCompleting(true);
-
-    try {
-      // 2. UPSERT Profile (Critical Fix)
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: userData.user.id,
-          email: userData.user.email,
-          full_name: userData.user.user_metadata?.full_name || userData.user.email?.split('@')[0] || 'Profissional',
-          // @ts-ignore - 'role' not in generated types
-          role: 'professional',
-          // @ts-ignore - 'subscription_tier' not in generated types
-          subscription_tier: 'trial',
-          onboarding_completed: true,
-          // has_completed_onboarding: true, // Legacy support
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
-
-      if (error) {
-        console.error('Error completing onboarding:', error);
-        toast.error('Erro ao finalizar onboarding');
-        setIsCompleting(false);
-        return;
-      }
-
-      // 3. FORCE REFRESH TO BREAK LOOP
-
-      await supabase.auth.refreshSession();
-
-      toast.success('Bem-vindo ao KONTROL!');
-      window.location.href = '/dashboard';
-
-    } catch (err) {
-      console.error('Complete error:', err);
-      toast.error('Erro ao finalizar');
-      setIsCompleting(false);
-    }
-  };
-
-  const handleSkipCalendar = () => {
-    setStep(3);
-  };
+  const {
+    step,
+    setStep,
+    isConnecting,
+    isCompleting,
+    handleConnectGoogleCalendar,
+    handleComplete,
+    handleSkipCalendar
+  } = useOnboarding();
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },

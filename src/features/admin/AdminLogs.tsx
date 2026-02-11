@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Terminal, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { Database } from '@/integrations/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 interface SystemLog {
   id: string;
@@ -22,6 +24,20 @@ interface SystemLog {
   message: string | null;
   user_id: string | null;
 }
+
+// Local Database override
+type LocalDatabase = Database & {
+  public: {
+    Tables: {
+      system_logs: {
+        Row: SystemLog;
+        Insert: Omit<SystemLog, 'id'>;
+        Update: Partial<Omit<SystemLog, 'id'>>;
+        Relationships: [];
+      }
+    }
+  }
+};
 
 export default function AdminLogs() {
   const [logs, setLogs] = useState<SystemLog[]>([]);
@@ -34,9 +50,8 @@ export default function AdminLogs() {
   const fetchLogs = async () => {
     setLoading(true);
     try {
-      // Fetch system_logs from Supabase
-      // Using 'as any' for table name because types might be outdated
-      const { data, error } = await supabase
+      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+      const { data, error } = await typedSupabase
         .from('system_logs')
         .select('*')
         .order('timestamp', { ascending: false })

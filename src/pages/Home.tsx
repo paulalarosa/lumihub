@@ -21,6 +21,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 // New Imports
 import Header from "@/components/ui/layout/Header";
 import Footer from "@/components/ui/layout/Footer";
+import SplitText from "@/components/reactbits/SplitText";
+import DecryptedText from "@/components/reactbits/DecryptedText";
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 
 const Home = () => {
   const { scrollY } = useScroll();
@@ -146,9 +149,13 @@ const Home = () => {
 
               {/* Headline */}
               {/* Headline */}
-              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line">
-                {t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
-              </h1>
+              <SplitText
+                text={t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
+                className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line"
+                delay={40}
+                duration={1.5}
+                tag="h1"
+              />
 
               {/* CTA & Subtext */}
               <div className="flex flex-col md:flex-row items-start md:items-center gap-12 border-t border-white/20 pt-12">
@@ -178,8 +185,22 @@ const Home = () => {
           {/* Decorative Technical Elements */}
           <div className="absolute top-0 right-0 p-8 hidden md:block">
             <div className="font-mono text-[10px] text-white/40 text-right space-y-2">
-              <p>{t("hero_status_online")}</p>
-              <p>{t("hero_loc")}</p>
+              <DecryptedText
+                text={t("hero_status_online")}
+                animateOn="view"
+                revealDirection="end"
+                speed={100}
+                maxIterations={20}
+                characters="XY01"
+                className="text-emerald-500"
+              />
+              <DecryptedText
+                text={t("hero_loc")}
+                animateOn="view"
+                revealDirection="end"
+                delay={500}
+                characters="LOC_LAT_LNG"
+              />
               <p>TIME: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
@@ -204,33 +225,40 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-white/20 border border-white/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature, index) => (
-                <motion.div
+                <SpotlightCard
                   key={index}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group bg-black p-8 aspect-square flex flex-col justify-between hover:bg-white transition-colors duration-0"
+                  className="bg-black hover:bg-neutral-900/50 transition-colors duration-300 border-white/10"
+                  spotlightColor="rgba(255, 255, 255, 0.15)"
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="font-mono text-[10px] text-gray-600 group-hover:text-black">
-                      [MOD.0{index + 1}]
-                    </span>
-                    <feature.icon className="h-8 w-8 text-white group-hover:text-black stroke-[1.5]" />
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <div className="flex justify-between items-start">
+                      <DecryptedText
+                        text={`[MOD.0${index + 1}]`}
+                        animateOn="view"
+                        speed={50}
+                        className="font-mono text-[10px] text-gray-600"
+                      />
+                      <feature.icon className="h-8 w-8 text-white stroke-[1.5]" />
+                    </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-mono text-lg uppercase tracking-wider text-white group-hover:text-black">
-                      {feature.title}
-                    </h3>
-                    <p className="font-mono text-xs text-gray-500 leading-relaxed group-hover:text-black/70">
-                      {feature.description}
-                      <span className="opacity-0 group-hover:opacity-100 ml-2 inline-block w-2 H-4 bg-black animate-pulse">_</span>
-                    </p>
-                  </div>
-                </motion.div>
+                    <div className="space-y-4 pt-8">
+                      <h3 className="font-mono text-lg uppercase tracking-wider text-white">
+                        {feature.title}
+                      </h3>
+                      <p className="font-mono text-xs text-gray-500 leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                </SpotlightCard>
               ))}
             </div>
           </div>

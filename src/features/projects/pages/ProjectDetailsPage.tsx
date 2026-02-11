@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Eye, FileText, ClipboardList } from 'lucide-react';
 
-import type { Task, Contract, BriefingWithContent, BriefingContent, ProjectServiceItem, Service } from '@/types/api.types';
+import type { Task, Contract, BriefingWithContent, BriefingContent, ProjectServiceItem, Service, ServiceUI } from '@/types/api.types';
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader';
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats';
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs';
@@ -31,7 +31,7 @@ export default function ProjectDetailsPage() {
   const [briefing, setBriefing] = useState<(BriefingWithContent & { is_submitted: boolean }) | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+  const [services, setServices] = useState<ServiceUI[]>([]);
   const [transactions, setTransactions] = useState<{ type: string; amount: number }[]>([]);
 
   const [activeTab, setActiveTab] = useState('tarefas');

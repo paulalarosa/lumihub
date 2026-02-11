@@ -150,8 +150,7 @@ export const generateClientPDF = (client: Client, projects: ReportProject[]) => 
                     margin: { left: 20, right: 20 },
                 });
 
-                // @ts-ignore
-                yPos = doc.lastAutoTable.finalY + 15;
+                yPos = (doc as any).lastAutoTable.finalY + 15;
 
             } else {
                 doc.setFontSize(9);

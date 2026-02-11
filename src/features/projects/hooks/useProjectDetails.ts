@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { ProjectService as ProjectServiceClass } from "@/services/projectService";
 import { supabase } from "@/integrations/supabase/client";
-import type { ProjectDetailsResponse, ProjectWithRelations, BriefingUI, BriefingContent } from '@/types/api.types';
+import type { ProjectDetailsResponse, ProjectWithRelations, BriefingUI, BriefingContent, ServiceUI } from '@/types/api.types';
 
 export const useProjectDetails = (projectId: string | undefined) => {
     return useQuery<ProjectDetailsResponse>({
@@ -71,7 +71,8 @@ export const useProjectDetails = (projectId: string | undefined) => {
             const services = (servicesRes.data || []).map(s => ({
                 ...s,
                 price: Number(s.price),
-                duration_minutes: Number(s.duration_minutes)
+                duration_minutes: Number(s.duration_minutes || 0),
+                base_price: s.base_price || 0
             }));
 
             const projectServices = (linkedServicesRes.data || []).map(s => ({
@@ -83,7 +84,7 @@ export const useProjectDetails = (projectId: string | undefined) => {
                     ...s.service,
                     price: Number(s.service.price),
                     base_price: Number(s.service.price), // Map price to base_price if needed or ensure type match
-                    duration_minutes: Number((s.service as any).duration_minutes || 0)
+                    duration_minutes: Number(s.service.duration_minutes || 0)
                 } : undefined
             }));
 
@@ -93,8 +94,8 @@ export const useProjectDetails = (projectId: string | undefined) => {
                 tasks: tasksRes.data || [],
                 briefing,
                 contracts: contractsData || [],
-                services: services as any[], // Service type might need strict definition matching DB
-                projectServices: projectServices as any[], // ProjectServiceItem
+                services: services as ServiceUI[], // Now matches explicit ServiceUI
+                projectServices: projectServices, // Now matches ProjectServiceItem
                 transactions: transactionsRes.data || [],
                 invoices: []
             };

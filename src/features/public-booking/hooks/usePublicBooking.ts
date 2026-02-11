@@ -3,6 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format, addMinutes, isBefore, startOfDay, parse } from 'date-fns';
 import { Profile, Service, TimeSlot } from '../types';
+import { Database } from '@/integrations/supabase/types';
+import { SupabaseClient } from '@supabase/supabase-js';
+
+type LocalDatabase = Database & {
+    public: {
+        Functions: {
+            get_day_availability: {
+                Args: {
+                    target_slug: string;
+                    query_date: string;
+                };
+                Returns: {
+                    start_time: string;
+                    end_time?: string;
+                    duration_minutes?: number;
+                }[];
+            };
+        };
+    };
+};
 
 export const usePublicBooking = (slug: string | undefined, refParam: string | null) => {
     const { toast } = useToast();
@@ -91,15 +111,15 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
         setLoadingSlots(true);
         try {
             const dateStr = format(selectedDate, 'yyyy-MM-dd');
+            const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
 
-            // @ts-ignore - RPC not typed in auto-generated types
-            const { data: eventsData, error } = await supabase
-                .rpc('get_day_availability' as any, {
+            const { data: eventsData, error } = await typedSupabase
+                .rpc('get_day_availability', {
                     target_slug: slug,
                     query_date: dateStr
                 });
 
-            const events = (eventsData as { start_time: string; end_time?: string; duration_minutes?: number }[]) || [];
+            const events = eventsData || [];
 
             if (error) throw error;
 

@@ -1,6 +1,8 @@
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+import { SupabaseClient } from "@supabase/supabase-js";
 import { useAuth } from "@/hooks/useAuth";
 import { startOfMonth, endOfMonth, format } from "date-fns";
 
@@ -19,6 +21,19 @@ export interface Assistant {
     created_at: string;
     updated_at: string;
 }
+
+type LocalDatabase = Database & {
+    public: {
+        Tables: {
+            assistants: {
+                Row: Assistant;
+                Insert: Partial<Assistant>;
+                Update: Partial<Assistant>;
+                Relationships: [];
+            };
+        }
+    }
+};
 
 export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
     const { user } = useAuth();
@@ -101,8 +116,10 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
     // Actions
     const acceptInvite = async (assistantRecordId: string) => {
-        // @ts-ignore - Supabase type mismatch for assistants table
-        const { error } = await supabase
+        // Use typed client with LocalDatabase
+        const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+
+        const { error } = await typedSupabase
             .from("assistants")
             .update({
                 status: 'accepted',

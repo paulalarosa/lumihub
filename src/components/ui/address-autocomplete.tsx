@@ -18,10 +18,40 @@ interface AddressAutocompleteProps {
   longitude?: number | null;
 }
 
+import { SupabaseClient } from "@supabase/supabase-js";
+import { Database } from "@/integrations/supabase/types";
+
 interface PlaceSuggestion {
   description: string;
   place_id: string;
 }
+
+interface GeoCacheTable {
+  Row: {
+    query: string;
+    response: any;
+    expires_at: string;
+  };
+  Insert: {
+    query: string;
+    response: any;
+    expires_at: string;
+  };
+  Update: {
+    query?: string;
+    response?: any;
+    expires_at?: string;
+  };
+  Relationships: [];
+}
+
+type LocalDatabase = Database & {
+  public: {
+    Tables: {
+      geo_cache: GeoCacheTable;
+    };
+  };
+};
 
 // Simple debounce utility
 function useDebounce<T>(value: T, delay: number): T {
@@ -150,8 +180,9 @@ export function AddressAutocomplete({
 
     // Optimize: Check cache for this place_id first
     try {
-      const { data: cached } = await supabase
-        .from('geo_cache' as any)
+      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+      const { data: cached } = await typedSupabase
+        .from('geo_cache')
         .select('response')
         .eq('query', place.place_id)
         .maybeSingle();
@@ -191,7 +222,8 @@ export function AddressAutocomplete({
               const expiresAt = new Date();
               expiresAt.setDate(expiresAt.getDate() + 30); // 30 days cache
 
-              await supabase.from('geo_cache' as any).upsert({
+              const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+              await typedSupabase.from('geo_cache').upsert({
                 query: place.place_id,
                 response: cachePayload,
                 expires_at: expiresAt.toISOString()

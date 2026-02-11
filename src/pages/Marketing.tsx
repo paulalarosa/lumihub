@@ -1,29 +1,18 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Megaphone, MessageCircle, Clock, CheckCircle2, AlertCircle, RefreshCw, Send, Terminal } from "lucide-react";
-import { differenceInDays } from "date-fns";
+import { MessageCircle, Clock, CheckCircle2, AlertCircle, RefreshCw, Send, Terminal } from "lucide-react";
 import { toast } from "sonner";
 import { EmptyState } from "@/components/ui/empty-state";
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
-import { useMarketing } from "@/hooks/useMarketing";
+import { useMarketing, useInactiveClients, InactiveClient } from "@/hooks/useMarketing";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MarketingCampaign } from "@/services/marketing";
 import { useLanguage } from "@/hooks/useLanguage";
-
-interface InactiveClient {
-    id: string;
-    name: string;
-    phone: string | null;
-    created_at: string;
-    last_visit?: string | null; // Added field
-    days_since_created: number;
-}
 
 const DEFAULT_SCRIPTS: MarketingCampaign[] = [
     {
@@ -59,14 +48,13 @@ export default function Marketing() {
     const { user } = useAuth();
     const { t } = useLanguage();
     const { width, height } = useWindowSize();
-    const [clients, setClients] = useState<InactiveClient[]>([]);
-    const [clientLoading, setClientLoading] = useState(true);
     const [selectedClient, setSelectedClient] = useState<InactiveClient | null>(null);
     const [selectedScriptId, setSelectedScriptId] = useState<string>('');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
 
     const { campaigns, loading: campaignsLoading } = useMarketing();
+    const { clients, loading: clientLoading, fetchInactiveClients } = useInactiveClients();
 
     const displayCampaigns = campaigns.length > 0 ? campaigns : DEFAULT_SCRIPTS;
 
@@ -80,58 +68,7 @@ export default function Marketing() {
         if (user) {
             fetchInactiveClients();
         }
-    }, [user]);
-
-    const fetchInactiveClients = async () => {
-        setClientLoading(true);
-        try {
-            // Enhanced query to check for active projects
-            const { data, error: clientError } = await supabase
-                .from('wedding_clients')
-                .select('id, name:full_name, phone, created_at, projects(status)');
-
-            if (clientError) throw clientError;
-
-            // Cast to bypass complex join typing
-            const allClients = data as unknown as {
-                id: string;
-                name: string;
-                phone: string | null;
-                created_at: string;
-                projects: { status: string }[]
-            }[];
-
-            const now = new Date();
-            const processedClients: InactiveClient[] = [];
-
-            for (const client of allClients || []) {
-                const createdDate = new Date(client.created_at);
-                const daysDiff = differenceInDays(now, createdDate);
-
-                // Check for ANY active project
-                const hasActiveProject = client.projects?.some(p => p.status === 'active' || p.status === 'ongoing');
-
-                // Logic: Created > 45 days AND NO active project
-                if (daysDiff > 45 && !hasActiveProject) {
-                    processedClients.push({
-                        id: client.id,
-                        name: client.name, // mapped from full_name
-                        phone: client.phone,
-                        created_at: client.created_at,
-                        days_since_created: daysDiff
-                    });
-                }
-            }
-
-            setClients(processedClients.sort((a, b) => b.days_since_created - a.days_since_created));
-
-        } catch (error) {
-            console.error("Error fetching inactive clients:", error);
-            toast.error("Erro ao carregar lista de marketing");
-        } finally {
-            setClientLoading(false);
-        }
-    };
+    }, [user, fetchInactiveClients]);
 
     const handleOpenDialog = (client: InactiveClient) => {
         setSelectedClient(client);

@@ -1,4 +1,4 @@
-import { format, isToday, isTomorrow, parseISO } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, CheckSquare, Clock, MapPin, Users, DollarSign, BarChart3, TrendingUp, Award, Target } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,24 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import FeatureLockedCard from "./FeatureLockedCard";
 import { motion } from "framer-motion";
-
-interface Event {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  location: string | null;
-  event_type: string | null;
-  clients?: { name: string } | null;
-}
-
-interface Task {
-  id: string;
-  title: string;
-  due_date: string | null;
-  is_completed: boolean;
-  projects?: { name: string } | null;
-}
+import { useAssistantDashboard, Event, Task } from "../hooks/useAssistantDashboard";
 
 interface AssistantDashboardProps {
   events: Event[];
@@ -32,31 +15,16 @@ interface AssistantDashboardProps {
 }
 
 const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboardProps) => {
-  const today = new Date();
-
-  const upcomingEvents = events
-    .filter((e) => {
-      const eventDate = parseISO(e.event_date);
-      return isToday(eventDate) || isTomorrow(eventDate);
-    })
-    .slice(0, 3);
-
-  const pendingTasks = tasks.filter((t) => !t.is_completed).slice(0, 5);
-  const monthEvents = events.length;
-
-  // Mock earnings data - in production this would come from the backend
-  const earningsData = {
-    thisMonth: 2850.00,
-    lastMonth: 2200.00,
-    totalEarned: 15250.00,
-    commissionRate: 15,
-    eventsCompleted: 8,
-    targetThisMonth: 4000.00,
-    nextMilestone: 18000.00
-  };
-
-  const progressToTarget = (earningsData.thisMonth / earningsData.targetThisMonth) * 100;
-  const progressToMilestone = (earningsData.totalEarned / earningsData.nextMilestone) * 100;
+  const {
+    upcomingEvents,
+    pendingTasks,
+    monthEvents,
+    earningsData,
+    progressToTarget,
+    progressToMilestone,
+    missingToMilestone,
+    monthGrowth
+  } = useAssistantDashboard(events, tasks);
 
   return (
     <div className="space-y-6">
@@ -137,7 +105,7 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                 </div>
                 <div className="text-center p-4 bg-white/50 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">
-                    +{((earningsData.thisMonth - earningsData.lastMonth) / earningsData.lastMonth * 100).toFixed(1)}%
+                    +{monthGrowth.toFixed(1)}%
                   </div>
                   <div className="text-sm text-muted-foreground">vs mês passado</div>
                 </div>
@@ -164,7 +132,7 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                 </div>
                 <Progress value={progressToMilestone} className="h-2" />
                 <div className="text-xs text-muted-foreground text-center">
-                  Faltam R$ {(earningsData.nextMilestone - earningsData.totalEarned).toLocaleString('pt-BR')}
+                  Faltam R$ {missingToMilestone.toLocaleString('pt-BR')}
                 </div>
               </div>
 
@@ -317,5 +285,4 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
     </div>
   );
 };
-
 export default AssistantDashboard;

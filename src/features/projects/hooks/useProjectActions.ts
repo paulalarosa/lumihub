@@ -6,14 +6,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { ProjectService } from '@/services/projectService';
 import { generateWhatsAppLink } from '@/utils/whatsappGenerator';
 import { format } from 'date-fns';
-import type { Task, ProjectServiceItem, Service, ProjectWithRelations } from '@/types/api.types';
+import type { Task, ProjectServiceItem, Service, ProjectWithRelations, ServiceUI } from '@/types/api.types';
 
 interface UseProjectActionsProps {
     projectId: string | undefined;
     project: ProjectWithRelations | null;
     tasks: Task[];
     setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-    services: Service[];
+    services: ServiceUI[];
     projectServices: ProjectServiceItem[];
     refetch: () => void;
 }
