@@ -429,9 +429,11 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const AI_API_KEY = Deno.env.get("AI_API_KEY") || Deno.env.get("LOVABLE_API_KEY");
+    const AI_GATEWAY_URL = Deno.env.get("AI_GATEWAY_URL") || "https://ai.gateway.lovable.dev/v1/chat/completions";
+
+    if (!AI_API_KEY) {
+      throw new Error("AI_API_KEY is not configured");
     }
 
     const authHeader = req.headers.get("authorization");
@@ -450,7 +452,7 @@ serve(async (req) => {
     // Get user from auth header
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    
+
     if (authError || !user) {
       return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
@@ -480,23 +482,23 @@ serve(async (req) => {
     // Validate and sanitize each message
     const sanitizedMessages = messages.slice(-50).map(msg => {
       // Ensure proper role
-      const role = msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system' 
-        ? msg.role 
+      const role = msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system'
+        ? msg.role
         : 'user';
-      
+
       // Limit content length (max 2000 chars per message)
-      const content = typeof msg.content === 'string' 
-        ? msg.content.slice(0, 2000) 
+      const content = typeof msg.content === 'string'
+        ? msg.content.slice(0, 2000)
         : '';
-      
+
       return { role, content };
     });
 
     // First API call with tools
-    let response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    let response = await fetch(AI_GATEWAY_URL, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${AI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -522,7 +524,7 @@ serve(async (req) => {
     // Check if the model wants to use tools
     if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
       console.log("Tool calls requested:", assistantMessage.tool_calls.length);
-      
+
       const toolResults: { role: string; tool_call_id: string; content: string }[] = [];
 
       for (const toolCall of assistantMessage.tool_calls as ToolCall[]) {
@@ -542,10 +544,10 @@ serve(async (req) => {
       }
 
       // Second API call with tool results
-      response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      response = await fetch(AI_GATEWAY_URL, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          Authorization: `Bearer ${AI_API_KEY}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -578,12 +580,12 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error in AI assistant:", error);
     return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : "Erro interno do servidor" 
+      JSON.stringify({
+        error: error instanceof Error ? error.message : "Erro interno do servidor"
       }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
   }

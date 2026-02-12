@@ -10,7 +10,7 @@ import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/features/auth/AdminRoute";
 import AIController from "./components/ai-assistant/AIController";
-import DebugConnection from "./pages/DebugConnection";
+
 import AuthCallbackHandler from "@/features/auth/AuthCallbackHandler";
 import MFAVerifyPage from "@/features/auth/pages/MFAVerifyPage";
 import AppLayout from "./components/ui/layout/AppLayout";
@@ -123,7 +123,7 @@ const App = () => {
                               <Route path="/privacidade" element={<Privacidade />} />
                               <Route path="/termos" element={<Termos />} />
                             </Route>
-                            <Route path="/debug" element={<DebugConnection />} />
+
 
                             {/* Auth */}
                             <Route path="/login" element={<Login />} />

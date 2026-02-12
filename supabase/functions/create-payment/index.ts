@@ -157,9 +157,9 @@ serve(async (req) => {
       payer: payer_email ? { email: payer_email } : undefined,
       external_reference: invoice.id,
       back_urls: {
-        success: `${req.headers.get('origin') || 'https://lovable.dev'}/pagamento/sucesso`,
-        failure: `${req.headers.get('origin') || 'https://lovable.dev'}/pagamento/erro`,
-        pending: `${req.headers.get('origin') || 'https://lovable.dev'}/pagamento/pendente`,
+        success: `${req.headers.get('origin') || 'https://khaoskontrol.com.br'}/pagamento/sucesso`,
+        failure: `${req.headers.get('origin') || 'https://khaoskontrol.com.br'}/pagamento/erro`,
+        pending: `${req.headers.get('origin') || 'https://khaoskontrol.com.br'}/pagamento/pendente`,
       },
       auto_return: 'approved',
       notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercadopago-webhook`,

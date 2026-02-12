@@ -96,6 +96,26 @@ export class Logger {
     private static isDev = import.meta.env.DEV;
 
     /**
+     * Set the audit source for the current session at the database level.
+     * Use this when performing specific operations like 'API_SYNC' or 'MIGRATION'.
+     */
+    static async setSessionSource(source: string) {
+        if (this.isDev) {
+            safeConsole.log(`[LOGGER] Setting session audit source: ${source}`);
+        }
+
+        // Use the custom RPC helper from Phase 20
+        // We cast to any to bypass generated type limitations for new functions
+        const { error } = await (supabase.rpc as any)('set_audit_source', {
+            source_text: source
+        });
+
+        if (error && this.isDev) {
+            safeConsole.error("Failed to set session source:", error);
+        }
+    }
+
+    /**
      * Log informational messages.
      * In prod, sends to Supabase 'system_logs' with severity 'info'.
      */

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { Logger } from '@/services/logger';
 
 import { AuthContextType } from '@/types/auth';
 import { AuthContext } from '@/contexts/AuthContextDefinition';
@@ -61,6 +62,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             lastUserId.current = currentId;
 
             if (currentSession?.user) {
+                // Audit Sign In
+                Logger.action("USER_SIGN_IN", currentSession.user.id, "auth.users", currentSession.user.id);
+
                 // 1. Update basic auth
                 setSession(currentSession);
                 setUser(currentSession.user);
@@ -140,6 +144,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const signIn = (email: string, pass: string) => supabase.auth.signInWithPassword({ email, password: pass });
 
     const signOut = async () => {
+        if (user) {
+            Logger.action("USER_SIGN_OUT", user.id, "auth.users", user.id);
+        }
         setLoading(true);
         await supabase.auth.signOut();
 

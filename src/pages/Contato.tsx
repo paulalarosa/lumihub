@@ -48,7 +48,7 @@ export default function Contato() {
             const subject = encodeURIComponent(`[KONTROL CONTATO] ${formData.subject || 'NOVA MENSAGEM'}`);
             const body = encodeURIComponent(`NOME: ${formData.name}\nEMAIL: ${formData.email}\n\nMENSAGEM:\n${formData.message}`);
 
-            window.location.href = `mailto:prenata@gmail.com?subject=${subject}&body=${body}`;
+            window.location.href = `mailto:khaoskontrol07@gmail.com?subject=${subject}&body=${body}`;
             setLoading(false);
             setFormData({ name: '', email: '', subject: '', message: '' });
         }, 1000);
@@ -194,7 +194,7 @@ export default function Contato() {
 
                                     {/* Email Button */}
                                     <a
-                                        href="mailto:prenata@gmail.com"
+                                        href="mailto:khaoskontrol07@gmail.com"
                                         className="block group"
                                     >
                                         <div className="p-8 border border-white/20 flex items-center gap-6 hover:bg-white text-white hover:text-black transition-all duration-300">

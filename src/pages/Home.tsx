@@ -398,10 +398,10 @@ const Home = () => {
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 space-y-4">
               <h2 className="font-serif font-light text-4xl lg:text-5xl text-white">
-                {t("lumipro_title")}
+                {t("kontrolpro_title")}
               </h2>
               <p className="text-sm font-mono text-white/40 max-w-2xl mx-auto uppercase tracking-widest">
-                {t("lumipro_subtitle")}
+                {t("kontrolpro_subtitle")}
               </p>
             </div>
             <KontrolProCarousel />

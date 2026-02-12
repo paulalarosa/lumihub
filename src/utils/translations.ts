@@ -49,9 +49,9 @@ export const translations = {
         testimonials_title: "BASE DE DADOS: CLIENTES",
         testimonials_subtitle: "/// REGISTROS_VERIFICADOS",
 
-        // Home - Lumi Pro
-        lumipro_title: "KONTROL PRO",
-        lumipro_subtitle: "/// AREA_ASSISTENTES",
+        // Home - Kontrol Pro
+        kontrolpro_title: "KONTROL PRO",
+        kontrolpro_subtitle: "/// AREA_ASSISTENTES",
 
         // Home - CTA
         cta_bottom_title: "PRONTA PARA INICIAR?",
@@ -282,9 +282,9 @@ export const translations = {
         testimonials_title: "DATABASE: CLIENTS",
         testimonials_subtitle: "/// VERIFIED_RECORDS",
 
-        // Home - Lumi Pro
-        lumipro_title: "KONTROL PRO",
-        lumipro_subtitle: "/// ASSISTANT_AREA",
+        // Home - Kontrol Pro
+        kontrolpro_title: "KONTROL PRO",
+        kontrolpro_subtitle: "/// ASSISTANT_AREA",
 
         // Home - CTA
         cta_bottom_title: "READY TO START?",

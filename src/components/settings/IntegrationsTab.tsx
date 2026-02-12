@@ -166,6 +166,44 @@ export default function IntegrationsTab() {
           </div>
         </CardContent>
       </Card>
+      <Card className="border-border bg-card rounded-none shadow-none">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 font-serif text-lg">Status de Entrega</CardTitle>
+          <CardDescription className="font-mono text-[10px] uppercase tracking-widest">Saúde do Sistema de E-mail</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="p-4 border border-border bg-muted/20">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase mb-1">Bounces</p>
+              <p className="text-2xl font-serif text-foreground">{ig.deliverabilityStatus.bounces}</p>
+            </div>
+            <div className="p-4 border border-border bg-muted/20">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase mb-1">Reclamações</p>
+              <p className="text-2xl font-serif text-foreground">{ig.deliverabilityStatus.complaints}</p>
+            </div>
+            <div className="p-4 border border-border bg-muted/20">
+              <p className="text-[10px] font-mono text-muted-foreground uppercase mb-1">Contatos Inválidos</p>
+              <p className="text-2xl font-serif text-foreground">
+                {ig.deliverabilityStatus.invalid_profiles +
+                  ig.deliverabilityStatus.invalid_clients +
+                  ig.deliverabilityStatus.invalid_leads +
+                  ig.deliverabilityStatus.invalid_invites}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 border border-yellow-500/20 bg-yellow-500/5">
+            <p className="text-[10px] font-mono text-yellow-500 uppercase flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+              Monitoramento Ativo
+            </p>
+            <p className="text-xs text-muted-foreground mt-2 font-mono uppercase leading-relaxed">
+              O sistema monitora automaticamente bounces e reclamações via AWS SNS.
+              Recetores que falham são removidos das próximas transmissões para proteger a reputação do seu domínio.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

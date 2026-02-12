@@ -19,7 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Terminal, History, RefreshCw, Eye, Binary, Search, Filter, Copy, Check } from 'lucide-react';
+import { Terminal, History, RefreshCw, Eye, Binary, Search, Filter, Copy, Check, FileDown, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { Database, Json } from '@/integrations/supabase/types';
@@ -197,6 +197,32 @@ export default function AdminLogs() {
     }
   };
 
+  const handleExportCSV = () => {
+    const dataToExport = activeTab === 'system' ? systemLogs : activeTab === 'audit' ? auditLogs : emailLogs;
+    if (dataToExport.length === 0) return;
+
+    const headers = Object.keys(dataToExport[0]).join(',');
+    const csvRows = dataToExport.map(row => {
+      return Object.values(row)
+        .map(value => {
+          const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+          return `"${stringValue.replace(/"/g, '""')}"`;
+        })
+        .join(',');
+    });
+
+    const csvContent = [headers, ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `kontrol_${activeTab}_logs_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const getActionBadge = (action: string) => {
     const norm = action?.toUpperCase();
     if (norm?.startsWith('SECURITY_')) {
@@ -251,6 +277,10 @@ export default function AdminLogs() {
             <CardTitle className="text-white font-serif tracking-tight text-xl uppercase">KONTROL.AUDIT_TERMINAL</CardTitle>
           </div>
           <div className="flex items-center gap-4">
+            <Button variant="outline" size="sm" onClick={handleExportCSV} className="rounded-none border-white/20 hover:bg-white hover:text-black font-mono text-[10px] uppercase">
+              <FileDown className="h-3 w-3 mr-2" />
+              EXPORT_CSV
+            </Button>
             <Button variant="outline" size="sm" onClick={fetchData} className="rounded-none border-white/20 hover:bg-white hover:text-black font-mono text-[10px] uppercase">
               <RefreshCw className={`h-3 w-3 mr-2 ${loading ? 'animate-spin' : ''}`} />
               RELOAD_BUFFER

@@ -81,7 +81,7 @@ const Footer = () => {
             <h3 className="font-serif font-light text-lg text-white">Fale Conosco</h3>
             <div className="space-y-3">
               <a
-                href="mailto:prenata@gmail.com"
+                href="mailto:khaoskontrol07@gmail.com"
                 className="flex items-center space-x-3 group"
               >
                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">

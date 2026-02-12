@@ -1,9 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { SESClient, SendTemplatedEmailCommand } from "https://esm.sh/@aws-sdk/client-ses@3";
 
 const MP_ACCESS_TOKEN = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const AWS_ACCESS_KEY_ID = Deno.env.get("AWS_ACCESS_KEY_ID");
+const AWS_SECRET_ACCESS_KEY = Deno.env.get("AWS_SECRET_ACCESS_KEY");
+const AWS_REGION = Deno.env.get("AWS_REGION") || "us-east-1";
+const SES_SOURCE_EMAIL = Deno.env.get("SES_SOURCE_EMAIL") || "noreply@khaoskontrol.com.br";
 
 serve(async (req) => {
     // CORS
@@ -134,6 +139,77 @@ serve(async (req) => {
                 });
 
                 console.log("Payment processed successfully");
+
+                // 6. Send Order Confirmation Email via AWS SES
+                if (AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY && payment.payer.email) {
+                    try {
+                        const sesClient = new SESClient({
+                            region: AWS_REGION,
+                            credentials: {
+                                accessKeyId: AWS_ACCESS_KEY_ID,
+                                secretAccessKey: AWS_SECRET_ACCESS_KEY,
+                            },
+                        });
+
+                        // Check if email is valid/subscribed
+                        const { data: profile } = await supabase
+                            .from("profiles")
+                            .select("email_status")
+                            .eq("email", payment.payer.email)
+                            .maybeSingle();
+
+                        if (profile?.email_status === 'invalid' || profile?.email_status === 'unsubscribed') {
+                            console.log(`Skipping email to ${payment.payer.email} due to status: ${profile.email_status}`);
+                        } else {
+                            const command = new SendTemplatedEmailCommand({
+                                Source: SES_SOURCE_EMAIL,
+                                Destination: {
+                                    ToAddresses: [payment.payer.email],
+                                },
+                                Template: "Khaos_OrderConfirmed",
+                                TemplateData: JSON.stringify({
+                                    name: payment.card?.cardholder?.name || "Cliente",
+                                    order_id: payment.id,
+                                    plan_name: planType.toUpperCase(),
+                                    amount: payment.transaction_amount,
+                                    date: new Date().toLocaleDateString('pt-BR')
+                                }),
+                            });
+
+                            const sesResponse = await sesClient.send(command);
+                            console.log("Order confirmation email sent:", sesResponse.MessageId);
+
+                            // Log notification
+                            await supabase.from("notification_logs").insert({
+                                user_id: userId,
+                                type: "email",
+                                recipient: payment.payer.email,
+                                status: "sent",
+                                provider_id: sesResponse.MessageId,
+                                metadata: {
+                                    template: "Khaos_OrderConfirmed",
+                                    provider: "aws-ses"
+                                }
+                            });
+                        }
+
+                    } catch (sesError) {
+                        console.error("Failed to send SES email:", sesError);
+                        // Don't fail the webhook if email fails, just log it
+                        await supabase.from("notification_logs").insert({
+                            user_id: userId,
+                            type: "email",
+                            recipient: payment.payer.email,
+                            status: "failed",
+                            error_message: sesError.message,
+                            metadata: {
+                                template: "Khaos_OrderConfirmed",
+                                provider: "aws-ses"
+                            }
+                        });
+                    }
+                }
+
             } else if (payment.status === "rejected" || payment.status === "cancelled") {
                 // Handle failed payments
                 const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!);
