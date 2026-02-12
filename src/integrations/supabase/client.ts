@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
+// Fallback to placeholder to prevent build errors when env vars are missing.
+// This is critical for the build process to succeed even if secrets aren't available.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder';
 

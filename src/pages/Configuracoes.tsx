@@ -185,7 +185,7 @@ export default function Configuracoes() {
                     <select className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
                       value={cfg.digitalWalletType} onChange={e => cfg.setDigitalWalletType(e.target.value)}>
                       <option value="">SELECIONE...</option>
-                      <option value="mercado_pago">MERCADO PAGO</option>
+                      <option value="banco">BANCO TRADICIONAL</option>
                       <option value="pagbank">PAGBANK</option>
                       <option value="nubank">NUBANK</option>
                     </select>

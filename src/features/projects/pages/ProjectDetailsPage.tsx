@@ -10,7 +10,8 @@ import { useProjectActions } from '@/features/projects/hooks/useProjectActions';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, FileText, ClipboardList } from 'lucide-react';
+import { Eye, FileText, ClipboardList, MessageCircle } from 'lucide-react';
+import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons';
 
 import type { Task, Contract, BriefingWithContent, BriefingContent, ProjectServiceItem, Service, ServiceUI } from '@/types/api.types';
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader';
@@ -207,6 +208,26 @@ export default function ProjectDetailsPage() {
           </div>
         ) : (
           <>
+            {/* Client Communication Card */}
+            <Card className="mb-6 bg-black border border-white/20 rounded-none">
+              <CardHeader className="border-b border-white/10 pb-3">
+                <CardTitle className="flex items-center gap-2 text-white font-serif uppercase tracking-wide text-lg">
+                  <MessageCircle className="h-4 w-4" />
+                  Comunicação com Cliente
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <WhatsAppButtons
+                  phone={project.client?.phone || ''}
+                  clientName={project.client?.full_name || project.client?.name || 'Cliente'}
+                  eventDate={new Date(project.event_date || new Date())}
+                  eventTime={project.event_time || undefined}
+                  eventLocation={project.event_location || undefined}
+                  serviceType={project.event_type || 'social'}
+                />
+              </CardContent>
+            </Card>
+
             <ProjectStats
               completedTasks={completedTasks}
               totalTasks={tasks.length}

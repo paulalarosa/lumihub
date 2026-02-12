@@ -3,6 +3,19 @@ import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n";
 import "./lib/chart-setup";
+import { registerSW } from 'virtual:pwa-register';
+
+// Registrar service worker
+const updateSW = registerSW({
+    onNeedRefresh() {
+        if (confirm('Nova versão disponível! Atualizar agora?')) {
+            updateSW(true);
+        }
+    },
+    onOfflineReady() {
+        console.log('App pronto para funcionar offline!');
+    },
+});
 
 
 import { LanguageProvider } from "@/contexts/LanguageContext";

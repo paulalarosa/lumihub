@@ -129,27 +129,29 @@ export default function Dashboard() {
           <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-medium text-white tracking-wide">{t('dashboard.sections.agenda')}</h3>
-              <Link to="/agenda" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">{t('dashboard.view_all')}</Link>
+              <Link to="/calendar" className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all">{t('dashboard.view_all')}</Link>
             </div>
             <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
               {d.upcomingEvents.length > 0 ? (
                 d.upcomingEvents.map((event, i: number) => {
-                  const isGoogle = !!(event as Record<string, unknown>).summary;
-                  const title = isGoogle ? (event as Record<string, unknown>).summary as string : (event as Record<string, unknown>).title as string;
-                  let start = new Date().toISOString();
-                  if (isGoogle) {
-                    const gEvent = event as Record<string, unknown>;
-                    const startObj = gEvent.start as Record<string, string> | undefined;
-                    start = startObj?.dateTime || startObj?.date || new Date().toISOString();
+                  const isGoogle = event.type === 'google';
+                  const title = event.title;
+                  const dateStr = event.date; // ISO or YYYY-MM-DD
+
+                  let dateObj: Date;
+                  if (event.date.includes('T')) {
+                    dateObj = new Date(event.date);
                   } else {
-                    const dbEvent = event as Record<string, unknown>;
-                    start = (dbEvent.event_date as string) + ((dbEvent.start_time as string) ? ('T' + dbEvent.start_time) : '');
+                    // Append time if exists or use midnight local? 
+                    // safest is creating date from YYYY-MM-DD + T00:00
+                    const timePart = event.time ? event.time : '00:00';
+                    dateObj = new Date(`${event.date}T${timePart}`);
                   }
-                  const dateObj = new Date(start);
+
                   const isValidDate = !isNaN(dateObj.getTime());
                   const day = isValidDate ? dateObj.getDate() : '--';
                   const month = isValidDate ? format(dateObj, 'MMM', { locale: ptBR }) : '';
-                  const time = isValidDate ? format(dateObj, 'HH:mm') : '';
+                  const time = event.time || '';
 
                   return (
                     <div key={i} className="flex items-center gap-4 p-4 border border-white/10 hover:border-white transition-colors group">

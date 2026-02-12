@@ -5,24 +5,52 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, Loader2, CreditCard, Smartphone } from "lucide-react";
 import { toast } from "sonner";
+import { StripeService } from "@/services/stripe";
 
 const PLANS = [
     {
+        id: "basic",
+        name: "Plano ESSENCIAL",
+        price: 49.90,
+        popular: false,
+        stripePriceId: "price_1T06IGPuhubKL3n8c8sTgvsu",
+        features: [
+            "Agenda básica de eventos",
+            "Até 50 clientes",
+            "Contratos padrão (sem personalização)",
+            "Gestão financeira simples",
+            "Suporte por e-mail",
+        ],
+    },
+    {
         id: "pro",
-        name: "Plano PRO",
+        name: "Plano PROFISSIONAL",
         price: 99.90,
         popular: true,
+        stripePriceId: "price_1T06JHPuhubKL3n88FuAacvY",
         features: [
-            "Agenda ilimitada de eventos",
+            "Agenda ilimitada",
             "Clientes ilimitados",
             "Contratos digitais com assinatura",
             "Gestão financeira completa",
-            "IA para sugestões e automação",
             "Portal da Noiva personalizado",
             "Convite de assistentes",
-            "Analytics e relatórios",
             "Suporte prioritário 24/7",
-            "Backup automático na nuvem",
+        ],
+    },
+    {
+        id: "enterprise",
+        name: "Plano STUDIO",
+        price: 199.90,
+        popular: false,
+        stripePriceId: "price_1T06JePuhubKL3n8AEQBTYtV",
+        features: [
+            "Tudo do Plano Profissional",
+            "Múltiplos usuários (Equipe)",
+            "Relatórios avançados de BI",
+            "API de integração",
+            "Gerente de conta dedicado",
+            "Treinamento de equipe",
         ],
     },
 ];
@@ -31,7 +59,7 @@ export default function UpgradePage() {
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    const handleUpgrade = async (planType: string) => {
+    const handleUpgrade = async (plan: typeof PLANS[0]) => {
         setIsLoading(true);
 
         try {
@@ -42,25 +70,15 @@ export default function UpgradePage() {
                 return;
             }
 
-            // Call Edge Function to create checkout
-            const { data, error } = await supabase.functions.invoke("create-checkout", {
-                body: {
-                    plan_type: planType,
-                    user_id: user.id,
-                },
+            // Call Stripe Service directly
+            await StripeService.checkout({
+                priceId: plan.stripePriceId,
+                projectId: user.id // We use User ID as reference for subscriptions
             });
 
-            if (error) throw error;
-
-            if (data.success) {
-                // Redirect to Mercado Pago checkout
-                window.location.href = data.checkout_url;
-            } else {
-                throw new Error(data.error || "Falha ao criar checkout");
-            }
         } catch (error) {
             console.error("Upgrade error:", error);
-            toast.error(error.message || "Erro ao processar upgrade");
+            // Toast is already handled in StripeService
         } finally {
             setIsLoading(false);
         }
@@ -113,7 +131,7 @@ export default function UpgradePage() {
 
                                 <Button
                                     size="lg"
-                                    onClick={() => handleUpgrade(plan.id)}
+                                    onClick={() => handleUpgrade(plan)}
                                     disabled={isLoading}
                                     className="bg-white text-black hover:bg-neutral-200 font-bold uppercase tracking-wider px-8 py-6 text-base w-full lg:w-auto"
                                 >
@@ -125,7 +143,7 @@ export default function UpgradePage() {
                                     ) : (
                                         <>
                                             <CreditCard className="w-5 h-5 mr-2" />
-                                            Assinar Agora
+                                            Assinar via Stripe
                                         </>
                                     )}
                                 </Button>
@@ -154,23 +172,20 @@ export default function UpgradePage() {
                             <span className="text-sm">Cartão de Crédito</span>
                         </div>
                         <div className="flex items-center gap-2 text-neutral-400">
-                            <Smartphone className="w-5 h-5" />
-                            <span className="text-sm">PIX</span>
+                            <span className="text-xl"></span>
+                            <span className="text-sm">Apple Pay</span>
                         </div>
                         <div className="flex items-center gap-2 text-neutral-400">
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" fill="none" strokeWidth="2" />
-                                <path d="M2 10h20" stroke="currentColor" strokeWidth="2" />
-                            </svg>
-                            <span className="text-sm">Boleto</span>
+                            <span className="text-xl">G</span>
+                            <span className="text-sm">Google Pay</span>
                         </div>
                     </div>
 
                     <p className="text-neutral-500 text-xs uppercase tracking-wider">
-                        💳 Pagamento seguro via Mercado Pago
+                        💳 Pagamento seguro via Stripe
                     </p>
                     <p className="text-neutral-600 text-xs">
-                        Seus dados estão protegidos com criptografia de ponta a ponta
+                        Dados criptografados de ponta a ponta (PCI Compliance)
                     </p>
                 </div>
 
@@ -198,10 +213,10 @@ export default function UpgradePage() {
                         </div>
                         <div>
                             <h3 className="text-white font-semibold mb-2">
-                                Posso parcelar o pagamento?
+                                É seguro?
                             </h3>
                             <p className="text-neutral-400 text-sm">
-                                Sim! Aceitamos parcelamento em até 12x no cartão de crédito via Mercado Pago.
+                                Sim! Utilizamos a Stripe, líder mundial em pagamentos online, garantindo a proteção total dos seus dados.
                             </p>
                         </div>
                     </div>

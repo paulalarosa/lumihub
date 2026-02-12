@@ -228,6 +228,9 @@ export default function AdminLogs() {
     if (norm?.startsWith('SECURITY_')) {
       return <Badge variant="outline" className="border-red-500 text-red-500 rounded-none uppercase text-[10px] bg-red-500/10 border-double">{action.replace('SECURITY_', '')}</Badge>;
     }
+    if (norm?.startsWith('SEND_WHATSAPP_')) {
+      return <Badge variant="outline" className="border-emerald-500 text-emerald-500 rounded-none uppercase text-[10px] bg-emerald-500/10 font-bold">{action.replace('SEND_WHATSAPP_', '')}</Badge>;
+    }
     switch (norm) {
       case 'DELETE': return <Badge variant="destructive" className="rounded-none uppercase text-[10px]">Delete</Badge>;
       case 'UPDATE': return <Badge variant="outline" className="border-blue-500 text-blue-500 rounded-none uppercase text-[10px] bg-blue-500/10">Update</Badge>;
@@ -304,6 +307,9 @@ export default function AdminLogs() {
                 <SelectItem value="UPDATE">UPDATE</SelectItem>
                 <SelectItem value="DELETE">DELETE</SelectItem>
                 <SelectItem value="USER_SIGN_IN">SIGN_IN</SelectItem>
+                <SelectItem value="SEND_WHATSAPP_CONFIRMATION">WA_CONFIRM</SelectItem>
+                <SelectItem value="SEND_WHATSAPP_REMINDER">WA_REMIND</SelectItem>
+                <SelectItem value="SEND_WHATSAPP_FEEDBACK">WA_FEEDBACK</SelectItem>
               </SelectContent>
             </Select>
 

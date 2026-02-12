@@ -1,34 +1,12 @@
 /// <reference types="vite/client" />
-
-declare module 'html2pdf.js' {
-  interface Html2PdfOptions {
-    margin?: number | number[];
-    filename?: string;
-    image?: {
-      type?: string;
-      quality?: number;
-    };
-    html2canvas?: {
-      scale?: number;
-      useCORS?: boolean;
-      allowTaint?: boolean;
-    };
-    jsPDF?: {
-      unit?: string;
-      format?: string;
-      orientation?: 'portrait' | 'landscape';
-    };
+declare module 'virtual:pwa-register' {
+  export interface RegisterSWOptions {
+    immediate?: boolean
+    onNeedRefresh?: () => void
+    onOfflineReady?: () => void
+    onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void
+    onRegisterError?: (error: any) => void
   }
 
-  interface Html2PdfInstance {
-    set(options: Html2PdfOptions): Html2PdfInstance;
-    from(element: string | HTMLElement): Html2PdfInstance;
-    toPdf(): Html2PdfInstance;
-    output(type: 'blob' | 'arraybuffer'): Promise<Blob | ArrayBuffer>;
-    save(): Html2PdfInstance;
-  }
-
-  function html2pdf(): Html2PdfInstance;
-
-  export default html2pdf;
+  export function registerSW(options?: RegisterSWOptions): (reloadPage?: boolean) => Promise<void>
 }

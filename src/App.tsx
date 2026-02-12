@@ -23,6 +23,7 @@ import { PageLoader } from "./components/ui/PageLoader";
 import { ErrorBoundary } from "react-error-boundary";
 import { SystemFailure } from "./components/ui/SystemFailure";
 import { SkipToContent } from "@/components/a11y/SkipToContent";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 // Static Imports (Instant Load)
 import Home from "./pages/Home";
@@ -49,7 +50,6 @@ const Projetos = lazy(() => import("@/features/projects/pages/ProjectsPage"));
 const ProjetoDetalhes = lazy(() => import("@/features/projects/pages/ProjectDetailsPage"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
 const AssistantPortalPage = lazy(() => import("@/features/portal/pages/AssistantPortalPage"));
-const AgendaPage = lazy(() => import("@/features/calendar/pages/AgendaPage"));
 const Contato = lazy(() => import("./pages/Contato"));
 const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Termos = lazy(() => import("./pages/Termos"));
@@ -71,7 +71,11 @@ const UpgradePage = lazy(() => import("@/pages/assistant/UpgradePage"));
 const UpgradeSuccessPage = lazy(() => import("@/pages/assistant/UpgradeSuccessPage"));
 const UpgradeFailurePage = lazy(() => import("@/pages/assistant/UpgradeFailurePage"));
 const UpgradePendingPage = lazy(() => import("@/pages/assistant/UpgradePendingPage"));
+const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
+const GoogleCalendarCallback = lazy(() => import("@/pages/GoogleCalendarCallback"));
 
+// Custom styles
+import "@/styles/calendar.css";
 
 const queryClient = new QueryClient();
 
@@ -99,6 +103,7 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <Sonner />
+            <InstallPrompt />
             <BrowserRouter>
               <ScrollToTop />
               <GoogleAnalytics />
@@ -167,14 +172,16 @@ const App = () => {
                                 <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
                               </Route>
 
+                              <Route path="/calendar" element={
+                                <ProtectedRoute>
+                                  <CalendarPage />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/calendar/callback" element={<GoogleCalendarCallback />} />
+
                               <Route path="/clientes" element={
                                 <ProtectedRoute>
                                   <Clientes />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/agenda" element={
-                                <ProtectedRoute>
-                                  <AgendaPage />
                                 </ProtectedRoute>
                               } />
                               <Route path="/clientes/:id" element={

@@ -1,0 +1,122 @@
+/* Dark theme para react-big-calendar */
+.calendar-dark .rbc-calendar {
+    background: transparent;
+    color: #a3a3a3;
+    /* neutral-400 */
+    font-family: 'Inter', sans-serif;
+}
+
+.calendar-dark .rbc-header {
+    background: #171717;
+    /* neutral-900 */
+    border-bottom: 1px solid #262626;
+    /* neutral-800 */
+    color: #e5e5e5;
+    /* neutral-200 */
+    padding: 16px 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    /* text-xs */
+    letter-spacing: 0.05em;
+}
+
+.calendar-dark .rbc-today {
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.calendar-dark .rbc-off-range-bg {
+    background: #0a0a0a;
+    /* neutral-950 */
+    opacity: 0.5;
+}
+
+.calendar-dark .rbc-month-view,
+.calendar-dark .rbc-time-view,
+.calendar-dark .rbc-agenda-view {
+    background: #171717;
+    /* neutral-900 */
+    border: 1px solid #262626;
+    /* neutral-800 */
+    border-radius: 0.75rem;
+    /* rounded-xl */
+    overflow: hidden;
+}
+
+.calendar-dark .rbc-day-bg+.rbc-day-bg,
+.calendar-dark .rbc-month-row+.rbc-month-row {
+    border-color: #262626;
+}
+
+.calendar-dark .rbc-event {
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-dark .rbc-event:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+}
+
+/* Toolbar Styling */
+.calendar-dark .rbc-toolbar {
+    padding: 16px;
+    background: #171717;
+    border: 1px solid #262626;
+    border-radius: 0.75rem;
+    margin-bottom: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.calendar-dark .rbc-toolbar-label {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    font-family: 'Bodoni Moda', serif;
+}
+
+.calendar-dark .rbc-toolbar button {
+    background: transparent;
+    border: 1px solid #404040;
+    color: #a3a3a3;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.calendar-dark .rbc-toolbar button:hover {
+    background: #262626;
+    color: white;
+    border-color: #525252;
+}
+
+.calendar-dark .rbc-toolbar button.rbc-active {
+    background: #ffffff;
+    color: #000000;
+    border-color: #ffffff;
+}
+
+/* Agenda View */
+.calendar-dark .rbc-agenda-view table {
+    background: transparent;
+    color: #e5e5e5;
+}
+
+.calendar-dark .rbc-agenda-view tbody tr {
+    border-color: #262626;
+}
+
+.calendar-dark .rbc-agenda-date-cell,
+.calendar-dark .rbc-agenda-time-cell {
+    border-color: #262626;
+}
+
+/* Current Time Indicator */
+.rbc-current-time-indicator {
+    background-color: #FFD700;
+}

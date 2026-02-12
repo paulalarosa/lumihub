@@ -159,28 +159,9 @@ export interface ClientFilters {
     created_after?: string;
 }
 
-// Mercado Pago Types
-export interface MercadoPagoPreference {
-    id: string;
-    init_point: string;
-    sandbox_init_point: string;
-}
-
-export interface MercadoPagoPayment {
-    id: string;
-    status: 'pending' | 'approved' | 'rejected' | 'cancelled' | 'refunded';
-    status_detail: string;
-    transaction_amount: number;
-    currency_id: string;
-    payer: {
-        id: string;
-        email: string;
-    };
-    payment_method_id: string;
-    payment_type_id: string;
-    external_reference: string;
-    metadata?: Record<string, unknown>;
-}
+// Mercado Pago Types - REMOVED
+// export interface MercadoPagoPreference { ... }
+// export interface MercadoPagoPayment { ... }
 
 // Resend Types
 export interface ResendEmailRequest {

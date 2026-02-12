@@ -48,7 +48,7 @@ export function AppSidebar() {
         },
         {
             title: t("sidebar.calendar"),
-            url: "/agenda",
+            url: "/calendar",
             icon: Calendar,
         },
         {

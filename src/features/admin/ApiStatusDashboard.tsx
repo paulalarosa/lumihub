@@ -41,7 +41,7 @@ export const ApiStatusDashboard = () => {
     // Mock status checks for integrations (In real app, we'd have an edge function to ping them)
     const integrations = [
         { name: "Google Calendar", status: "operational", endpoint: "google-calendar-sync" },
-        { name: "Mercado Pago", status: "operational", endpoint: "create-payment" },
+        { name: "Stripe", status: "operational", endpoint: "create-checkout" },
         { name: "Google Maps", status: "operational", endpoint: "places-proxy" },
         { name: "Resend Email", status: "operational", endpoint: "send-application" },
     ];

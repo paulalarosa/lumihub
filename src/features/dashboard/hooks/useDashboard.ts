@@ -5,8 +5,7 @@ import { useOrganization } from '@/hooks/useOrganization';
 import { supabase } from '@/integrations/supabase/client';
 import { ClientService } from '@/services/clientService';
 import { ProjectService } from '@/services/projectService';
-import { EventService } from '@/services/event.service';
-import { GoogleCalendarEvent } from '@/integrations/google/calendar';
+import { EventService, DashboardEvent } from '@/services/event.service';
 import { CommissionLogic } from '@/services/commissionLogic';
 import { MarketingLogic, type MarketingTrigger } from '@/services/marketingLogic';
 
@@ -21,7 +20,7 @@ export function useDashboard() {
     const [projectsCount, setProjectsCount] = useState<number>(0);
     const [totalRevenue, setTotalRevenue] = useState<number>(0);
     const [totalCommissions, setTotalCommissions] = useState<number>(0);
-    const [upcomingEvents, setUpcomingEvents] = useState<GoogleCalendarEvent[]>([]);
+    const [upcomingEvents, setUpcomingEvents] = useState<DashboardEvent[]>([]);
     const [marketingTriggers, setMarketingTriggers] = useState<MarketingTrigger[]>([]);
     const [isGoogleConnected, setIsGoogleConnected] = useState(false);
     const [dataLoading, setDataLoading] = useState(true);
@@ -94,7 +93,7 @@ export function useDashboard() {
 
                 const [eventData, clientCountVal, projectCountVal, financialStats, marketingData, originData] = await Promise.all(promises);
 
-                const evtResult = eventData as { events: GoogleCalendarEvent[]; isGoogleConnected: boolean };
+                const evtResult = eventData as { events: DashboardEvent[]; isGoogleConnected: boolean };
                 setUpcomingEvents(evtResult.events);
                 setIsGoogleConnected(evtResult.isGoogleConnected);
                 setClientsCount(clientCountVal as number);
