@@ -47,7 +47,16 @@ type LocalDatabase = Database & {
     }
 };
 
-export type { UserIntegration, NotificationSettings };
+interface DeliverabilityStatus {
+    bounces: number;
+    complaints: number;
+    invalid_profiles: number;
+    invalid_clients: number;
+    invalid_leads: number;
+    invalid_invites: number;
+}
+
+export type { UserIntegration, NotificationSettings, DeliverabilityStatus };
 
 const DEFAULT_NOTIFICATION_SETTINGS: Omit<NotificationSettings, 'id' | 'user_id'> = {
     email_enabled: true,
@@ -69,6 +78,14 @@ export function useIntegrations() {
     const [notificationSettings, setNotificationSettings] = useState<Omit<NotificationSettings, 'user_id'>>({
         id: '',
         ...DEFAULT_NOTIFICATION_SETTINGS
+    });
+    const [deliverabilityStatus, setDeliverabilityStatus] = useState<DeliverabilityStatus>({
+        bounces: 0,
+        complaints: 0,
+        invalid_profiles: 0,
+        invalid_clients: 0,
+        invalid_leads: 0,
+        invalid_invites: 0
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -156,6 +173,33 @@ export function useIntegrations() {
                 updated_at: nd.updated_at
             });
         }
+
+        // Fetch Deliverability Metrics
+        const [
+            { count: bounceCount },
+            { count: complaintCount },
+            { count: invProfiles },
+            { count: invClients },
+            { count: invLeads },
+            { count: invInvites }
+        ] = await Promise.all([
+            supabase.from('notification_logs').select('*', { count: 'exact', head: true }).like('error_message', '%SES Bounce%'),
+            supabase.from('notification_logs').select('*', { count: 'exact', head: true }).like('error_message', '%SES Complaint%'),
+            supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('email_status', 'invalid'),
+            supabase.from('wedding_clients').select('*', { count: 'exact', head: true }).eq('email_status', 'invalid'),
+            supabase.from('leads').select('*', { count: 'exact', head: true }).eq('email_status', 'invalid'),
+            supabase.from('assistant_invites').select('*', { count: 'exact', head: true }).eq('email_status', 'invalid')
+        ]);
+
+        setDeliverabilityStatus({
+            bounces: bounceCount || 0,
+            complaints: complaintCount || 0,
+            invalid_profiles: invProfiles || 0,
+            invalid_clients: invClients || 0,
+            invalid_leads: invLeads || 0,
+            invalid_invites: invInvites || 0
+        });
+
         setLoading(false);
     };
 
@@ -266,5 +310,6 @@ export function useIntegrations() {
         toggleReminderDay,
         saveNotificationSettings,
         getIntegrationByProvider,
+        deliverabilityStatus
     };
 }
