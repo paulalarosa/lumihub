@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -55,24 +55,7 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
 
     const selectedClientId = form.watch('client_id');
 
-    useEffect(() => {
-        if (open) {
-            loadClients();
-        }
-    }, [open]);
-
-    useEffect(() => {
-        if (selectedClientId && clients.length > 0) {
-            const selectedClient = clients.find(c => c.id === selectedClientId);
-            if (selectedClient?.email) {
-                form.setValue('client_email', selectedClient.email, { shouldValidate: true });
-            } else {
-                form.setValue('client_email', '', { shouldValidate: true });
-            }
-        }
-    }, [selectedClientId, clients, form.setValue]);
-
-    const loadClients = async () => {
+    const loadClients = useCallback(async () => {
         setLoadingClients(true);
         try {
             if (!user) return;
@@ -96,7 +79,13 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
         } finally {
             setLoadingClients(false);
         }
-    };
+    }, [user, toast]);
+
+    useEffect(() => {
+        if (open) {
+            loadClients();
+        }
+    }, [open, loadClients]);
 
     const onSubmit = async (data: CreateProjectFormData) => {
         if (!user) return;

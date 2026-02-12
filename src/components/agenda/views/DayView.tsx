@@ -150,9 +150,18 @@ export function DayView({
             {hours.map((hour) => (
               <div
                 key={hour}
-                className="border-b hover:bg-muted/30 cursor-pointer transition-colors"
+                className="border-b hover:bg-muted/30 cursor-pointer transition-colors outline-none focus:bg-muted/50"
                 style={{ height: HOUR_HEIGHT }}
                 onClick={() => handleTimeSlotClick(hour)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleTimeSlotClick(hour);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                aria-label={`Select time slot ${hour}:00`}
               >
                 {/* Half-hour line */}
                 <div className="h-1/2 border-b border-dashed border-muted/50" />

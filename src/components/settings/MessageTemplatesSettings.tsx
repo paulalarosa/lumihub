@@ -38,13 +38,9 @@ export default function MessageTemplatesSettings() {
     });
 
     useEffect(() => {
-        if (organizationId) {
-            loadTemplates();
-        }
-        if (user) {
-            fetchUserPhone();
-        }
-    }, [organizationId, user]);
+        fetchUserPhone();
+        loadTemplates();
+    }, [fetchUserPhone, loadTemplates]);
 
     const fetchUserPhone = async () => {
         if (!user) return;

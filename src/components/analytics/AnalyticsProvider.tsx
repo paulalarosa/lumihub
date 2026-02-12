@@ -30,9 +30,7 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
     const handleBeforeUnload = () => {
       // Enviar último evento de tempo na página
       const summary = analytics.getSessionSummary();
-      if (import.meta.env.DEV) {
-
-      }
+      // No-op for now
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);

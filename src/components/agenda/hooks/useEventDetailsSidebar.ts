@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useOrganization } from '@/hooks/useOrganization';
@@ -64,41 +64,7 @@ export function useEventDetailsSidebar({
     const [fetchingDetail, setFetchingDetail] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    useEffect(() => {
-        if (open) {
-            fetchLists();
-            if (initialEvent?.id) fetchEventDetails(initialEvent.id);
-        } else {
-            resetForm();
-        }
-    }, [open, initialEvent]);
-
-    const resetForm = () => {
-        setTitle('');
-        setClientId(null);
-        setEventDate(undefined);
-        setStartTime('');
-        setEndTime('');
-        setLocation('');
-        setNotes('');
-        setSelectedAssistants([]);
-    };
-
-    const fetchLists = async () => {
-        const { data: clientsData } = await supabase
-            .from('wedding_clients')
-            .select('id, name:full_name')
-            .order('full_name');
-        if (clientsData) setClients(clientsData.map(c => ({ id: c.id, name: c.name })));
-
-        const { data: assistantsData } = await supabase
-            .from('assistants')
-            .select('id, full_name')
-            .order('full_name');
-        if (assistantsData) setAvailableAssistants(assistantsData.map(a => ({ id: a.id, name: a.full_name })));
-    };
-
-    const fetchEventDetails = async (id: string) => {
+    const fetchEventDetails = useCallback(async (id: string) => {
         setFetchingDetail(true);
         try {
             const { data: eventData, error } = await supabase
@@ -128,7 +94,16 @@ export function useEventDetailsSidebar({
         } finally {
             setFetchingDetail(false);
         }
-    };
+    }, [toast]);
+
+    useEffect(() => {
+        if (open) {
+            fetchLists();
+            if (initialEvent?.id) fetchEventDetails(initialEvent.id);
+        } else {
+            resetForm();
+        }
+    }, [open, initialEvent, fetchEventDetails]);
 
     const handleSave = async () => {
         if (!initialEvent?.id) return;

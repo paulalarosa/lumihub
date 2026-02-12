@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { format, addMinutes, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
@@ -140,6 +140,29 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
         }
     }, [user]);
 
+    const resetForm = useCallback(() => {
+        setTitle('');
+        setDescription('');
+        setEventDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
+        setEventType('noivas');
+        setArrivalTime('');
+        setMakingOfTime('');
+        setCeremonyTime('');
+        setAdvisoryTime('');
+        setStartTime('');
+        setEndTime('');
+        setAddress('');
+        setLatitude(null);
+        setLongitude(null);
+        setNotes('');
+        setColor(COLORS[0]);
+        setClientId('');
+        setProjectId('');
+        setSelectedAssistants([]);
+        setReminderDays([1, 7]);
+        setSelectedServiceId('');
+    }, [selectedDate]);
+
     useEffect(() => {
         if (event) {
             setTitle(event.title);
@@ -167,43 +190,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
                 setEventDate(format(selectedDate, 'yyyy-MM-dd'));
             }
         }
-    }, [event, selectedDate]);
-
-    useEffect(() => {
-        if (eventType !== 'noivas' && startTime && selectedServiceId && selectedServiceId !== '__none__') {
-            const service = services.find(s => s.id === selectedServiceId);
-            if (service) {
-                const [hours, minutes] = startTime.split(':').map(Number);
-                const date = new Date();
-                date.setHours(hours, minutes, 0, 0);
-                const endDate = addMinutes(date, service.duration_minutes);
-                setEndTime(`${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}`);
-            }
-        }
-    }, [startTime, selectedServiceId, eventType, services]);
-
-    const resetForm = () => {
-        setTitle('');
-        setDescription('');
-        setEventDate(selectedDate ? format(selectedDate, 'yyyy-MM-dd') : '');
-        setEventType('noivas');
-        setArrivalTime('');
-        setMakingOfTime('');
-        setCeremonyTime('');
-        setAdvisoryTime('');
-        setStartTime('');
-        setEndTime('');
-        setAddress('');
-        setLatitude(null);
-        setLongitude(null);
-        setNotes('');
-        setColor(COLORS[0]);
-        setClientId('');
-        setProjectId('');
-        setSelectedAssistants([]);
-        setReminderDays([1, 7]);
-        setSelectedServiceId('');
-    };
+    }, [event, selectedDate, resetForm]);
 
     const fetchClients = async () => {
         const { data } = await supabase

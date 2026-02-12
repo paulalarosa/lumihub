@@ -21,11 +21,11 @@ interface CalendarEventCellProps {
   onDoubleClick?: (e?: React.MouseEvent) => void;
 }
 
-export function CalendarEventCell({ 
-  event, 
+export function CalendarEventCell({
+  event,
   variant = 'compact',
   onClick,
-  onDoubleClick 
+  onDoubleClick
 }: CalendarEventCellProps) {
   const eventColor = event.color || '#5A7D7C';
 
@@ -35,6 +35,13 @@ export function CalendarEventCell({
         className="w-2 h-2 rounded-full cursor-pointer hover:scale-125 transition-transform"
         style={{ backgroundColor: eventColor }}
         onClick={onClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClick?.(e);
+          }
+        }}
+        role="button"
+        tabIndex={0}
         title={event.title}
       />
     );
@@ -43,10 +50,19 @@ export function CalendarEventCell({
   if (variant === 'compact') {
     return (
       <div
-        className="group flex items-center gap-1.5 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity truncate"
+        className="group flex items-center gap-1.5 px-1.5 py-0.5 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity truncate outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         style={{ backgroundColor: `${eventColor}20`, borderLeft: `3px solid ${eventColor}` }}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onClick?.(e);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Event: ${event.title}`}
       >
         {event.start_time && (
           <span className="text-muted-foreground font-medium shrink-0">
@@ -62,10 +78,19 @@ export function CalendarEventCell({
 
   return (
     <div
-      className="group flex flex-col gap-0.5 px-2 py-1.5 rounded-md cursor-pointer hover:shadow-md transition-all"
+      className="group flex flex-col gap-0.5 px-2 py-1.5 rounded-md cursor-pointer hover:shadow-md transition-all outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       style={{ backgroundColor: `${eventColor}15`, borderLeft: `4px solid ${eventColor}` }}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.(e);
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Event: ${event.title}`}
     >
       <div className="flex items-center justify-between gap-2">
         <span className="font-medium text-sm truncate" style={{ color: eventColor }}>

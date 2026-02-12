@@ -200,7 +200,14 @@ export default function EventDialog({
                 <MapPin className="h-4 w-4 text-white" />
                 Localização
               </Label>
-              <div onClick={(e) => e.stopPropagation()}>
+              <div
+                onClick={(e) => e.stopPropagation()}
+                onKeyDown={(e) => {
+                  // Allow typing in input but stop propagation for div wrapper
+                  e.stopPropagation();
+                }}
+                role="none"
+              >
                 <AddressAutocomplete
                   value={form.address}
                   onChange={form.setAddress}

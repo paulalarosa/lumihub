@@ -42,6 +42,7 @@ export default function DecryptedText({
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
         let currentIteration = 0;
+        let observer: IntersectionObserver | null = null;
 
         const getNextIndex = (revealedSet: Set<number>): number => {
             const textLength = text.length;
@@ -152,39 +153,34 @@ export default function DecryptedText({
             setIsScrambling(false);
         }
 
-        return () => {
-            if (interval) clearInterval(interval);
-        };
-    }, [isHovering, text, speed, maxIterations, sequential, revealDirection, characters, useOriginalCharsOnly]);
+        if (animateOn === 'view' || animateOn === 'both') {
+            const observerCallback = (entries: IntersectionObserverEntry[]) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !hasAnimated) {
+                        setIsHovering(true);
+                        setHasAnimated(true);
+                    }
+                });
+            };
 
-    useEffect(() => {
-        if (animateOn !== 'view' && animateOn !== 'both') return;
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
 
-        const observerCallback = (entries: IntersectionObserverEntry[]) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !hasAnimated) {
-                    setIsHovering(true);
-                    setHasAnimated(true);
-                }
-            });
-        };
-
-        const observerOptions = {
-            root: null,
-            rootMargin: '0px',
-            threshold: 0.1
-        };
-
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-        const currentRef = containerRef.current;
-        if (currentRef) {
-            observer.observe(currentRef);
+            observer = new IntersectionObserver(observerCallback, observerOptions);
+            const currentRef = containerRef.current;
+            if (currentRef) {
+                observer.observe(currentRef);
+            }
         }
 
         return () => {
-            if (currentRef) observer.unobserve(currentRef);
+            if (observer) observer.disconnect();
+            if (interval) clearInterval(interval);
         };
-    }, [animateOn, hasAnimated]);
+    }, [animateOn, hasAnimated, delay, speed, maxIterations, sequential, revealDirection, characters, useOriginalCharsOnly, text, isHovering]);
 
     const hoverProps =
         animateOn === 'hover' || animateOn === 'both'

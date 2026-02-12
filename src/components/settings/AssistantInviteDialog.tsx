@@ -18,7 +18,7 @@ export function AssistantInviteDialog() {
         if (isOpen) {
             fetchInvites();
         }
-    }, [isOpen]);
+    }, [isOpen, fetchInvites]);
 
     const handleInvite = async (e: React.FormEvent) => {
         e.preventDefault();
