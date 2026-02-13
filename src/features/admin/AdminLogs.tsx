@@ -231,6 +231,15 @@ export default function AdminLogs() {
     if (norm?.startsWith('SEND_WHATSAPP_')) {
       return <Badge variant="outline" className="border-emerald-500 text-emerald-500 rounded-none uppercase text-[10px] bg-emerald-500/10 font-bold">{action.replace('SEND_WHATSAPP_', '')}</Badge>;
     }
+    if (norm === 'SUBSCRIPTION_UPDATE') {
+      return <Badge variant="outline" className="border-purple-500 text-purple-500 rounded-none uppercase text-[10px] bg-purple-500/10">Subscription</Badge>;
+    }
+    if (norm === 'PAYMENT_SUCCESS') {
+      return <Badge variant="outline" className="border-green-500 text-green-500 rounded-none uppercase text-[10px] bg-green-500/10 font-bold">$ Paid</Badge>;
+    }
+    if (norm === 'SYNC_CONFLICT') {
+      return <Badge variant="outline" className="border-orange-500 text-orange-500 rounded-none uppercase text-[10px] bg-orange-500/10 font-bold">Conflict</Badge>;
+    }
     switch (norm) {
       case 'DELETE': return <Badge variant="destructive" className="rounded-none uppercase text-[10px]">Delete</Badge>;
       case 'UPDATE': return <Badge variant="outline" className="border-blue-500 text-blue-500 rounded-none uppercase text-[10px] bg-blue-500/10">Update</Badge>;
@@ -310,6 +319,9 @@ export default function AdminLogs() {
                 <SelectItem value="SEND_WHATSAPP_CONFIRMATION">WA_CONFIRM</SelectItem>
                 <SelectItem value="SEND_WHATSAPP_REMINDER">WA_REMIND</SelectItem>
                 <SelectItem value="SEND_WHATSAPP_FEEDBACK">WA_FEEDBACK</SelectItem>
+                <SelectItem value="SUBSCRIPTION_UPDATE">SUB_UPDATE</SelectItem>
+                <SelectItem value="PAYMENT_SUCCESS">PAYMENT_OK</SelectItem>
+                <SelectItem value="SYNC_CONFLICT">SYNC_CONFLICT</SelectItem>
               </SelectContent>
             </Select>
 

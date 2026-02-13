@@ -49,22 +49,34 @@ serve(async (req) => {
                     // Determine Plan Type from Price ID logic or metadata
                     // Better approach: fetch subscription items, but for now we map known IDs or default to 'pro'
                     // In a real scenario, we should fetch the subscription to get the price ID.
-                    let planType = 'pro';
+                    // Determine Plan Type from Price ID
+                    let planType = 'profissional'; // Default fallback
                     try {
                         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
                         const priceId = subscription.items.data[0]?.price.id;
 
-                        if (priceId === 'price_1T06IGPuhubKL3n8c8sTgvsu') planType = 'basic';
-                        else if (priceId === 'price_1T06JHPuhubKL3n88FuAacvY') planType = 'pro';
-                        else if (priceId === 'price_1T06JePuhubKL3n8AEQBTYtV') planType = 'enterprise';
+                        if (priceId === 'price_1T06IGPuhubKL3n8c8sTgvsu') planType = 'essencial';
+                        else if (priceId === 'price_1T06JHPuhubKL3n88FuAacvY') planType = 'profissional';
+                        else if (priceId === 'price_1T06JePuhubKL3n8AEQBTYtV') planType = 'studio';
                     } catch (e) {
-                        console.error("Failed to fetch subscription details, defaulting to pro:", e);
+                        console.error("Failed to fetch subscription details, defaulting to profissional:", e);
                     }
 
-                    // Update user profile with Stripe Customer ID
+                    // 1. Update user profile with Stripe Customer ID
                     await supabase.from("profiles")
                         .update({ stripe_customer_id: customerId })
                         .eq("id", projectId);
+
+                    // 2. IMPORTANT: Update makeup_artists table to unlock features IMMEDIATELY
+                    const { error: artistError } = await supabase
+                        .from('makeup_artists')
+                        .update({
+                            plan_type: planType,
+                            plan_status: 'active'
+                        })
+                        .eq('user_id', projectId);
+
+                    if (artistError) console.error('Failed to update makeup_artist plan:', artistError);
 
                     // Create/Update Subscription in our DB
                     const { error: subError } = await supabase.from("subscriptions").upsert({
@@ -113,6 +125,11 @@ serve(async (req) => {
                             })
                             .eq("stripe_subscription_id", subscriptionId);
 
+                        // Also re-activate makeup_artists if needed (e.g. if they were past due)
+                        await supabase.from("makeup_artists")
+                            .update({ plan_status: 'active' })
+                            .eq("user_id", subData.user_id);
+
                         console.log(`Subscription ${subscriptionId} renewed until ${new Date(nextPayment * 1000).toISOString()}`);
                     } else {
                         console.warn(`Subscription ${subscriptionId} not found in DB`);
@@ -123,9 +140,29 @@ serve(async (req) => {
 
             case "customer.subscription.deleted": {
                 const subscription = event.data.object as Stripe.Subscription;
+
+                // Find user first to update makeup_artists
+                const { data: subData } = await supabase
+                    .from("subscriptions")
+                    .select("user_id")
+                    .eq("stripe_subscription_id", subscription.id)
+                    .single();
+
                 await supabase.from("subscriptions")
                     .update({ status: 'cancelled' })
                     .eq("stripe_subscription_id", subscription.id);
+
+                if (subData) {
+                    // Downgrade to essential or mark as cancelled/expired
+                    // For now, let's keep them as 'essencial' but 'inactive' or just 'essencial'
+                    await supabase.from("makeup_artists")
+                        .update({
+                            plan_type: 'essencial', // Downgrade to free/basic
+                            plan_status: 'active' // Active on the free plan
+                        })
+                        .eq("user_id", subData.user_id);
+                }
+
                 console.log(`Subscription ${subscription.id} cancelled`);
                 break;
             }

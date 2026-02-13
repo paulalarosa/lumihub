@@ -1,24 +1,22 @@
 
+import { useState, useEffect, useMemo } from 'react';
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
+import { Calendar as CalendarIcon, RefreshCw, Settings } from 'lucide-react';
 import { EventDetailsModal } from '@/components/calendar/EventDetailsModal';
+import { CreateEventModal } from '@/components/calendar/CreateEventModal';
+import { GoogleCalendarSettings } from '@/components/calendar/GoogleCalendarSettings';
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar';
-import { RefreshCw, Check, AlertCircle } from 'lucide-react';
+import { ConflictResolver } from '@/components/calendar/ConflictResolver';
 import { toast } from 'sonner';
 
-// Custom styles must be imported in App.tsx or here if supported by bundler
-// import '@/styles/calendar.css'; 
-
-const locales = {
-    'pt-BR': ptBR,
-};
+const locales = { 'pt-BR': ptBR };
 
 const localizer = dateFnsLocalizer({
     format,
@@ -34,258 +32,285 @@ interface CalendarEvent {
     start: Date;
     end: Date;
     resource: {
-        projectId?: string;
-        googleEventId?: string;
-        description?: string;
-        location?: string;
-        serviceType: string; // 'wedding', 'social', 'test', 'personal', etc
-        clientName?: string;
-        clientPhone?: string;
+        eventId: string;
+        eventType: 'wedding' | 'social' | 'test' | 'personal' | 'blocked';
         status: string;
+        projectId?: string;
+        isSynced: boolean;
+        googleEventId?: string;
     };
 }
 
 export const CalendarPage = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
-    const { isConnected, connectGoogleCalendar, disconnectGoogleCalendar, checkConnection } = useGoogleCalendar();
+    const { isConnected, isLoading: isGoogleLoading } = useGoogleCalendar();
+    const queryClient = useQueryClient();
 
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [view, setView] = useState<View>('month');
     const [date, setDate] = useState(new Date());
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [createEventDate, setCreateEventDate] = useState<Date | null>(null);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    // Fetch events from Supabase (consolidated table)
-    useEffect(() => {
-        fetchEvents();
-    }, [user]);
+    // Fetch events from Supabase
+    const { data: events, isLoading, refetch } = useQuery({
+        queryKey: ['calendar-events', user?.id],
+        queryFn: async () => {
+            if (!user) return [];
 
-    const fetchEvents = async () => {
-        if (!user) return;
-        setIsLoading(true);
-
-        try {
-            // 1. Fetch Internal Projects
-            // Casting to any because we are joining and types might be incomplete
-            const { data: projectsData, error: projectsError } = await (supabase
-                .from('projects')
-                .select('*, client:wedding_clients(name, phone)')
-                .eq('makeup_artist_id', user.id) as any);
-
-            if (projectsError) throw projectsError;
-            const projects = projectsData as any[];
-
-            // 2. Fetch Google Events
-            // Casting query to any to bypass strict check on new table
-            const { data: googleEventsData, error: googleError } = await (supabase
-                .from('calendar_events' as any)
+            const { data, error } = await supabase
+                .from('calendar_events')
                 .select('*')
                 .eq('user_id', user.id)
-                .eq('event_type', 'personal') as any);
+                .order('start_time', { ascending: true });
 
-            if (googleError) throw googleError;
-            const googleEvents = googleEventsData as any[];
+            if (error) throw error;
 
-            const internalEvents: CalendarEvent[] = (projects || []).map((project) => {
-                const dateStr = project.event_date; // YYYY-MM-DD
-                let startDate = new Date(dateStr);
+            return data.map((event) => ({
+                id: event.id,
+                title: event.title,
+                start: new Date(event.start_time),
+                end: new Date(event.end_time),
+                resource: {
+                    eventId: event.id,
+                    eventType: event.event_type,
+                    status: event.status,
+                    projectId: event.project_id,
+                    isSynced: event.is_synced || false,
+                    googleEventId: event.google_event_id,
+                },
+            })) as CalendarEvent[];
+        },
+        enabled: !!user,
+    });
 
-                // Adjust for time if available
-                if (project.event_time) {
-                    // Combine date and time
-                    const dateTimeStr = `${dateStr}T${project.event_time}`;
-                    startDate = new Date(dateTimeStr);
-                } else {
-                    // Default to 12:00 if no time
-                    startDate.setHours(12, 0, 0, 0);
-                }
-
-                const endDate = new Date(startDate);
-                endDate.setHours(endDate.getHours() + 4); // Default duration 4h for events
-
-                return {
-                    id: project.id,
-                    title: project.client?.name || 'Projeto Sem Cliente',
-                    start: startDate,
-                    end: endDate,
-                    resource: {
-                        projectId: project.id,
-                        serviceType: 'social', // Defaulting to social as project type might be missing
-                        clientName: project.client?.name,
-                        clientPhone: project.client?.phone,
-                        status: project.status,
-                    },
-                };
+    // Force sync with Google Calendar
+    const syncMutation = useMutation({
+        mutationFn: async () => {
+            const { data, error } = await supabase.functions.invoke('force-calendar-sync', {
+                body: { user_id: user?.id },
             });
 
-            const externalEvents: CalendarEvent[] = (googleEvents || []).map((evt) => ({
-                id: evt.id,
-                title: evt.title,
-                start: new Date(evt.start_time),
-                end: new Date(evt.end_time),
-                resource: {
-                    googleEventId: evt.google_event_id,
-                    description: evt.description,
-                    location: evt.location,
-                    serviceType: 'personal',
-                    status: evt.status || 'confirmed',
-                }
-            }));
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
+            toast.success('Sincronização concluída!');
+        },
+        onError: (error: any) => {
+            console.error('Sync error:', error);
+            toast.error('Erro na sincronização: ' + error.message);
+        },
+    });
 
-            setEvents([...internalEvents, ...externalEvents]);
-
-        } catch (error) {
-            console.error('Error fetching events:', error);
-            toast.error('Erro ao carregar eventos');
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Event style (cores por tipo)
+    // Event style based on type and sync status
     const eventStyleGetter = (event: CalendarEvent) => {
-        const colors: Record<string, { backgroundColor: string, color: string }> = {
-            wedding: { backgroundColor: '#FFD700', color: '#000' },
-            social: { backgroundColor: '#FF69B4', color: '#fff' },
-            test: { backgroundColor: '#6B7280', color: '#fff' },
-            personal: { backgroundColor: '#3b82f6', color: '#fff' }, // Blue for Google
+        const colors: Record<string, { bg: string, text: string }> = {
+            wedding: { bg: '#FFD700', text: '#000' },
+            social: { bg: '#FF69B4', text: '#fff' },
+            test: { bg: '#6B7280', text: '#fff' },
+            personal: { bg: '#8B5CF6', text: '#fff' },
+            blocked: { bg: '#EF4444', text: '#fff' },
         };
 
+        const color = colors[event.resource.eventType] || colors.personal;
         const isPast = event.end < new Date();
-        const style = colors[event.resource.serviceType] || colors.social;
+        const isToday = format(event.start, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
         return {
             style: {
-                ...style,
-                opacity: isPast ? 0.6 : 1,
-                border: format(event.start, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-                    ? '2px solid #fff'
-                    : 'none',
+                backgroundColor: color.bg,
+                color: color.text,
+                opacity: isPast ? 0.5 : 1,
+                border: isToday ? '2px solid #00ff00' : 'none',
                 borderRadius: '4px',
-                padding: '2px 6px',
-                fontSize: '12px',
-                fontWeight: 600,
-                color: style.color
+                padding: '4px 8px',
+                fontSize: '13px',
+                fontWeight: 500,
+                position: 'relative' as const,
+                // Indicador de sync - handled via css classes better but simple object works
             },
+            // Adding sync indicator via title modification if needed or custom component
         };
     };
 
     const handleSelectEvent = (event: CalendarEvent) => {
         setSelectedEvent(event);
-        setIsModalOpen(true);
+        setIsDetailsModalOpen(true);
     };
 
     const handleSelectSlot = ({ start }: { start: Date }) => {
-        // Basic navigation to create new project
-        navigate(`/projects/new?date=${format(start, 'yyyy-MM-dd')}`);
+        setCreateEventDate(start);
+        setIsCreateModalOpen(true);
     };
 
     return (
-        <div className="min-h-screen bg-neutral-950 p-4 md:p-8 animate-fade-in">
+        <div className="min-h-screen bg-neutral-950 p-4 md:p-8">
             <div className="max-w-7xl mx-auto">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-3xl font-bold text-white tracking-tight">Agenda</h1>
-                        <p className="text-neutral-400 mt-1">Gerencie seus projetos e eventos sincronizados</p>
+                        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+                            <CalendarIcon className="w-8 h-8" />
+                            Agenda
+                        </h1>
+                        <p className="text-neutral-400 mt-1">
+                            Visualização de eventos
+                            {isConnected && (
+                                <span className="ml-2 text-green-500 text-sm">
+                                    ☁ Sincronizado com Google Calendar
+                                </span>
+                            )}
+                        </p>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap gap-2">
-                        {!isConnected ? (
-                            <Button variant="outline" onClick={connectGoogleCalendar} className="gap-2">
-                                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-4 h-4" alt="Google" />
-                                Conectar Google
-                            </Button>
-                        ) : (
-                            <Button variant="outline" onClick={disconnectGoogleCalendar} className="gap-2 border-green-900 bg-green-900/10 text-green-400 hover:bg-green-900/20">
-                                <Check className="w-4 h-4" />
-                                Sincronizado
+                    <div className="flex gap-2">
+                        {isConnected && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => syncMutation.mutate()}
+                                disabled={syncMutation.isPending}
+                                className="hover:bg-neutral-800"
+                            >
+                                <RefreshCw className={`w-4 h-4 mr-2 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+                                Sincronizar
                             </Button>
                         )}
 
                         <Button
-                            variant="secondary"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsSettingsOpen(true)}
+                            className="hover:bg-neutral-800"
+                        >
+                            <Settings className="w-4 h-4 mr-2" />
+                            Configurações
+                        </Button>
+
+                        <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => setDate(new Date())}
+                            className="hover:bg-neutral-800"
                         >
                             Hoje
                         </Button>
 
-                        <Button onClick={() => fetchEvents()} disabled={isLoading} variant="ghost" size="icon">
-                            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                        </Button>
-
-                        <Button onClick={() => navigate('/projects/new')} className="bg-white text-black hover:bg-neutral-200">
-                            + Novo Projeto
+                        <Button onClick={() => setIsCreateModalOpen(true)} className="bg-white text-black hover:bg-neutral-200">
+                            + Novo Evento
                         </Button>
                     </div>
                 </div>
 
+                {/* Conflict Resolver */}
+                <ConflictResolver />
+
+                {/* Google Calendar Connection Warning */}
+                {!isConnected && !isGoogleLoading && (
+                    <div className="mb-4 p-4 bg-yellow-900/20 border border-yellow-500 rounded-lg">
+                        <p className="text-yellow-400 text-sm">
+                            ⚠️ Google Calendar não conectado.
+                            <button
+                                onClick={() => setIsSettingsOpen(true)}
+                                className="ml-2 underline hover:text-yellow-300"
+                            >
+                                Clique aqui para conectar
+                            </button>
+                        </p>
+                    </div>
+                )}
+
                 {/* Legend */}
-                <div className="flex flex-wrap gap-4 mb-6 p-4 bg-neutral-900/50 rounded-lg border border-neutral-800">
+                <div className="flex flex-wrap gap-4 mb-4 p-4 bg-neutral-900 rounded-lg border border-neutral-800">
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#FFD700]" />
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FFD700' }} />
                         <span className="text-sm text-neutral-300">Noiva</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#FF69B4]" />
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: '#FF69B4' }} />
                         <span className="text-sm text-neutral-300">Social</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#6B7280]" />
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: '#6B7280' }} />
                         <span className="text-sm text-neutral-300">Teste</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
-                        <span className="text-sm text-neutral-300">Google Calendar</span>
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: '#8B5CF6' }} />
+                        <span className="text-sm text-neutral-300">Pessoal (Google)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded" style={{ backgroundColor: '#EF4444' }} />
+                        <span className="text-sm text-neutral-300">Bloqueado</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-neutral-300 text-sm">☁ = Sincronizado</span>
                     </div>
                 </div>
 
-                {/* Calendar Component */}
-                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-1 md:p-6 calendar-dark shadow-2xl">
-                    <Calendar
-                        localizer={localizer}
-                        events={events}
-                        startAccessor="start"
-                        endAccessor="end"
-                        style={{ height: 750 }}
-                        view={view}
-                        onView={setView}
-                        date={date}
-                        onNavigate={setDate}
-                        eventPropGetter={eventStyleGetter}
-                        onSelectEvent={handleSelectEvent}
-                        onSelectSlot={handleSelectSlot}
-                        selectable
-                        popup
-                        messages={{
-                            today: 'Hoje',
-                            previous: 'Anterior',
-                            next: 'Próximo',
-                            month: 'Mês',
-                            week: 'Semana',
-                            day: 'Dia',
-                            agenda: 'Agenda',
-                            date: 'Data',
-                            time: 'Hora',
-                            event: 'Evento',
-                            noEventsInRange: 'Sem eventos neste período',
-                            showMore: (total) => `+${total} mais`,
-                        }}
-                        culture='pt-BR'
-                    />
+                {/* Calendar */}
+                <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 calendar-dark">
+                    {isLoading ? (
+                        <div className="h-[700px] flex items-center justify-center">
+                            <RefreshCw className="w-8 h-8 animate-spin text-neutral-400" />
+                        </div>
+                    ) : (
+                        <Calendar
+                            localizer={localizer}
+                            events={events || []}
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: 700 }}
+                            view={view}
+                            onView={setView}
+                            date={date}
+                            onNavigate={setDate}
+                            eventPropGetter={eventStyleGetter}
+                            onSelectEvent={handleSelectEvent}
+                            onSelectSlot={handleSelectSlot}
+                            selectable
+                            culture='pt-BR'
+                            messages={{
+                                today: 'Hoje',
+                                previous: 'Anterior',
+                                next: 'Próximo',
+                                month: 'Mês',
+                                week: 'Semana',
+                                day: 'Dia',
+                                agenda: 'Agenda',
+                                date: 'Data',
+                                time: 'Hora',
+                                event: 'Evento',
+                                noEventsInRange: 'Nenhum evento neste período',
+                            }}
+                        />
+                    )}
                 </div>
 
-                {/* Details Modal */}
-                {selectedEvent && (
-                    <EventDetailsModal
-                        event={selectedEvent}
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                    />
-                )}
+                {/* Modals */}
+                <EventDetailsModal
+                    event={selectedEvent}
+                    isOpen={isDetailsModalOpen}
+                    onClose={() => setIsDetailsModalOpen(false)}
+                />
+
+                <CreateEventModal
+                    isOpen={isCreateModalOpen}
+                    onClose={() => setIsCreateModalOpen(false)}
+                    initialDate={createEventDate}
+                    onSuccess={() => {
+                        queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
+                        setIsCreateModalOpen(false);
+                    }}
+                />
+
+                <GoogleCalendarSettings
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                />
             </div>
         </div>
     );

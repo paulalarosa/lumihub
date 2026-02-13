@@ -1,592 +1,297 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
+
+import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import { createClient } from 'jsr:@supabase/supabase-js@2'
+import { GoogleGenerativeAI } from 'npm:@google/generative-ai'
+
+// Setup Gemini API
+const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") || "");
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-interface Message {
-  role: "user" | "assistant" | "system";
-  content: string;
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface ToolCall {
-  id: string;
-  type: "function";
-  function: {
-    name: string;
-    arguments: string;
-  };
-}
-
-const SYSTEM_PROMPT = `Você é uma assistente de IA especializada em gerenciar compromissos e projetos para profissionais de beleza (maquiadores, cabeleireiros, etc).
-
-Você pode ajudar os usuários com:
-1. **Eventos/Agenda**: Criar, listar, atualizar e excluir eventos
-2. **Projetos**: Criar, listar, atualizar e excluir projetos
-3. **Clientes**: Listar e consultar informações de clientes
-4. **Tarefas**: Gerenciar tarefas de projetos
-
-IMPORTANTE:
-- Sempre seja cordial e profissional
-- Use linguagem natural em português brasileiro
-- Quando criar eventos, confirme os detalhes com o usuário
-- Para datas, aceite formatos como "amanhã", "próxima segunda", "15 de janeiro", etc
-- Sempre informe ao usuário o que você fez após executar uma ação
-- Se faltar informação essencial (como título ou data para evento), pergunte ao usuário
-
-Você tem acesso às seguintes ferramentas para manipular dados:
-- list_events: Lista eventos da agenda
-- create_event: Cria um novo evento
-- update_event: Atualiza um evento existente
-- delete_event: Exclui um evento
-- list_projects: Lista projetos
-- create_project: Cria um novo projeto
-- update_project: Atualiza um projeto
-- delete_project: Exclui um projeto
-- list_clients: Lista clientes
-- list_tasks: Lista tarefas de um projeto`;
-
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "list_events",
-      description: "Lista eventos da agenda do usuário. Pode filtrar por período.",
-      parameters: {
-        type: "object",
-        properties: {
-          start_date: { type: "string", description: "Data inicial no formato YYYY-MM-DD" },
-          end_date: { type: "string", description: "Data final no formato YYYY-MM-DD" },
-          limit: { type: "number", description: "Número máximo de eventos a retornar (padrão: 10)" }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "create_event",
-      description: "Cria um novo evento na agenda",
-      parameters: {
-        type: "object",
-        properties: {
-          title: { type: "string", description: "Título do evento" },
-          event_date: { type: "string", description: "Data do evento no formato YYYY-MM-DD" },
-          description: { type: "string", description: "Descrição do evento" },
-          start_time: { type: "string", description: "Horário de início (HH:MM)" },
-          end_time: { type: "string", description: "Horário de término (HH:MM)" },
-          location: { type: "string", description: "Local do evento" },
-          address: { type: "string", description: "Endereço completo" },
-          event_type: { type: "string", description: "Tipo do evento: noivas, ensaio, editorial, debutante, formatura, outro" },
-          client_id: { type: "string", description: "ID do cliente associado" },
-          project_id: { type: "string", description: "ID do projeto associado" }
-        },
-        required: ["title", "event_date"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "update_event",
-      description: "Atualiza um evento existente",
-      parameters: {
-        type: "object",
-        properties: {
-          event_id: { type: "string", description: "ID do evento a atualizar" },
-          title: { type: "string", description: "Novo título do evento" },
-          event_date: { type: "string", description: "Nova data (YYYY-MM-DD)" },
-          description: { type: "string", description: "Nova descrição" },
-          start_time: { type: "string", description: "Novo horário de início (HH:MM)" },
-          end_time: { type: "string", description: "Novo horário de término (HH:MM)" },
-          location: { type: "string", description: "Novo local" },
-          address: { type: "string", description: "Novo endereço" }
-        },
-        required: ["event_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "delete_event",
-      description: "Exclui um evento da agenda",
-      parameters: {
-        type: "object",
-        properties: {
-          event_id: { type: "string", description: "ID do evento a excluir" }
-        },
-        required: ["event_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_projects",
-      description: "Lista projetos do usuário",
-      parameters: {
-        type: "object",
-        properties: {
-          status: { type: "string", description: "Filtrar por status: active, completed, cancelled" },
-          limit: { type: "number", description: "Número máximo de projetos (padrão: 10)" }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "create_project",
-      description: "Cria um novo projeto",
-      parameters: {
-        type: "object",
-        properties: {
-          name: { type: "string", description: "Nome do projeto" },
-          client_id: { type: "string", description: "ID do cliente associado" },
-          event_date: { type: "string", description: "Data do evento principal (YYYY-MM-DD)" },
-          event_type: { type: "string", description: "Tipo do evento" },
-          event_location: { type: "string", description: "Local do evento" },
-          notes: { type: "string", description: "Observações sobre o projeto" }
-        },
-        required: ["name", "client_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "update_project",
-      description: "Atualiza um projeto existente",
-      parameters: {
-        type: "object",
-        properties: {
-          project_id: { type: "string", description: "ID do projeto a atualizar" },
-          name: { type: "string", description: "Novo nome" },
-          status: { type: "string", description: "Novo status: active, completed, cancelled" },
-          event_date: { type: "string", description: "Nova data do evento (YYYY-MM-DD)" },
-          event_location: { type: "string", description: "Novo local" },
-          notes: { type: "string", description: "Novas observações" }
-        },
-        required: ["project_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "delete_project",
-      description: "Exclui um projeto",
-      parameters: {
-        type: "object",
-        properties: {
-          project_id: { type: "string", description: "ID do projeto a excluir" }
-        },
-        required: ["project_id"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_clients",
-      description: "Lista clientes do usuário",
-      parameters: {
-        type: "object",
-        properties: {
-          search: { type: "string", description: "Buscar cliente por nome" },
-          limit: { type: "number", description: "Número máximo de clientes (padrão: 10)" }
-        },
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "list_tasks",
-      description: "Lista tarefas de um projeto",
-      parameters: {
-        type: "object",
-        properties: {
-          project_id: { type: "string", description: "ID do projeto" },
-          completed: { type: "boolean", description: "Filtrar por status de conclusão" }
-        },
-        required: ["project_id"]
-      }
-    }
-  }
-];
-
-async function executeTool(
-  toolName: string,
-  args: Record<string, unknown>,
-  supabaseClient: SupabaseClient,
-  userId: string
-): Promise<string> {
-  console.log(`Executing tool: ${toolName}`, args);
-
+// RAG Helper
+async function getRelevantDocs(query: string, supabaseClient: any) {
   try {
-    switch (toolName) {
-      case "list_events": {
-        let query = supabaseClient
-          .from("events")
-          .select("id, title, event_date, start_time, end_time, location, event_type, description, client:clients(name), project:projects(name)")
-          .eq("user_id", userId)
-          .order("event_date", { ascending: true })
-          .limit((args.limit as number) || 10);
+    const embeddingResult = await embeddingModel.embedContent(query);
+    const queryEmbedding = embeddingResult.embedding.values;
 
-        if (args.start_date) {
-          query = query.gte("event_date", args.start_date as string);
-        }
-        if (args.end_date) {
-          query = query.lte("event_date", args.end_date as string);
-        }
+    const { data, error } = await supabaseClient.rpc('match_knowledge', {
+      query_embedding: queryEmbedding,
+      match_threshold: 0.5,
+      match_count: 3,
+    });
 
-        const { data, error } = await query;
-        if (error) throw error;
-        return JSON.stringify({ success: true, events: data, count: data?.length || 0 });
-      }
+    if (error) return '';
+    if (!data || data.length === 0) return '';
 
-      case "create_event": {
-        const eventData = {
-          title: args.title as string,
-          event_date: args.event_date as string,
-          description: (args.description as string) || null,
-          start_time: (args.start_time as string) || null,
-          end_time: (args.end_time as string) || null,
-          location: (args.location as string) || null,
-          address: (args.address as string) || null,
-          event_type: (args.event_type as string) || "outro",
-          client_id: (args.client_id as string) || null,
-          project_id: (args.project_id as string) || null,
-          user_id: userId
-        };
-
-        const { data, error } = await supabaseClient
-          .from("events")
-          .insert(eventData as Record<string, unknown>)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Evento criado com sucesso!", event: data });
-      }
-
-      case "update_event": {
-        const { event_id, ...updateData } = args;
-        const filteredData: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(updateData)) {
-          if (value !== undefined) {
-            filteredData[key] = value;
-          }
-        }
-
-        const { data, error } = await supabaseClient
-          .from("events")
-          .update(filteredData)
-          .eq("id", event_id as string)
-          .eq("user_id", userId)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Evento atualizado com sucesso!", event: data });
-      }
-
-      case "delete_event": {
-        const { error } = await supabaseClient
-          .from("events")
-          .delete()
-          .eq("id", args.event_id as string)
-          .eq("user_id", userId);
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Evento excluído com sucesso!" });
-      }
-
-      case "list_projects": {
-        let query = supabaseClient
-          .from("projects")
-          .select("id, name, status, event_date, event_type, event_location, client:clients(name)")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit((args.limit as number) || 10);
-
-        if (args.status) {
-          query = query.eq("status", args.status as string);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        return JSON.stringify({ success: true, projects: data, count: data?.length || 0 });
-      }
-
-      case "create_project": {
-        const projectData = {
-          name: args.name as string,
-          client_id: args.client_id as string,
-          event_date: (args.event_date as string) || null,
-          event_type: (args.event_type as string) || null,
-          event_location: (args.event_location as string) || null,
-          notes: (args.notes as string) || null,
-          user_id: userId,
-          status: "active"
-        };
-
-        const { data, error } = await supabaseClient
-          .from("projects")
-          .insert(projectData as Record<string, unknown>)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Projeto criado com sucesso!", project: data });
-      }
-
-      case "update_project": {
-        const { project_id, ...updateData } = args;
-        const filteredData: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(updateData)) {
-          if (value !== undefined) {
-            filteredData[key] = value;
-          }
-        }
-
-        const { data, error } = await supabaseClient
-          .from("projects")
-          .update(filteredData)
-          .eq("id", project_id as string)
-          .eq("user_id", userId)
-          .select()
-          .single();
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Projeto atualizado com sucesso!", project: data });
-      }
-
-      case "delete_project": {
-        const { error } = await supabaseClient
-          .from("projects")
-          .delete()
-          .eq("id", args.project_id as string)
-          .eq("user_id", userId);
-
-        if (error) throw error;
-        return JSON.stringify({ success: true, message: "Projeto excluído com sucesso!" });
-      }
-
-      case "list_clients": {
-        let query = supabaseClient
-          .from("clients")
-          .select("id, name, email, phone, instagram")
-          .eq("user_id", userId)
-          .order("name")
-          .limit((args.limit as number) || 10);
-
-        if (args.search) {
-          query = query.ilike("name", `%${args.search}%`);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        return JSON.stringify({ success: true, clients: data, count: data?.length || 0 });
-      }
-
-      case "list_tasks": {
-        let query = supabaseClient
-          .from("tasks")
-          .select("id, title, description, due_date, is_completed")
-          .eq("project_id", args.project_id as string)
-          .eq("user_id", userId)
-          .order("sort_order");
-
-        if (args.completed !== undefined && args.completed !== null) {
-          query = query.eq("is_completed", args.completed as boolean);
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        return JSON.stringify({ success: true, tasks: data, count: data?.length || 0 });
-      }
-
-      default:
-        return JSON.stringify({ success: false, error: `Ferramenta desconhecida: ${toolName}` });
-    }
-  } catch (error) {
-    console.error(`Error executing tool ${toolName}:`, error);
-    return JSON.stringify({ success: false, error: error instanceof Error ? error.message : "Erro desconhecido" });
+    return data.map((doc: any) => `
+[DOCUMENTO: ${doc.title}]
+${doc.content}
+`).join('\n\n');
+  } catch (err) {
+    console.error('RAG Exception:', err);
+    return '';
   }
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const AI_API_KEY = Deno.env.get("AI_API_KEY") || Deno.env.get("LOVABLE_API_KEY");
-    const AI_GATEWAY_URL = Deno.env.get("AI_GATEWAY_URL") || "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const { messages, user_id, conversation_id } = await req.json();
 
-    if (!AI_API_KEY) {
-      throw new Error("AI_API_KEY is not configured");
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const lastUserMessage = messages.map(m => m).reverse().find(m => m.role === 'user')?.content || '';
+
+    let knowledgeContext = '';
+    if (lastUserMessage) {
+      knowledgeContext = await getRelevantDocs(lastUserMessage, supabaseClient);
     }
 
-    const authHeader = req.headers.get("authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const tools = [
+      {
+        function_declarations: [
+          {
+            name: "list_events",
+            description: "Lista eventos da agenda. Pode filtrar por período (week, month) ou datas específicas.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                period: { type: "STRING", enum: ["week", "month", "today", "tomorrow"] },
+                start_date: { type: "STRING" },
+                end_date: { type: "STRING" }
+              }
+            }
+          },
+          {
+            name: "create_event",
+            description: "Cria evento/compromisso na agenda.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                title: { type: "STRING" },
+                start_time: { type: "STRING", description: "ISO 8601" },
+                end_time: { type: "STRING", description: "ISO 8601" },
+                description: { type: "STRING" }
+              },
+              required: ["title", "start_time", "end_time"]
+            }
+          },
+          {
+            name: "create_client",
+            description: "Cria um novo cliente no sistema CRM.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                name: { type: "STRING" },
+                email: { type: "STRING" },
+                phone: { type: "STRING" },
+                cpf: { type: "STRING" }
+              },
+              required: ["name", "email"]
+            }
+          },
+          {
+            name: "invite_assistant",
+            description: "Envia convite por email para um novo assistente de equipe.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                email: { type: "STRING" },
+                name: { type: "STRING" }
+              },
+              required: ["email"]
+            }
+          },
+          {
+            name: "generate_contract",
+            description: "Gera e salva um contrato jurídico para um projeto existente.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                project_title: { type: "STRING", description: "Nome/Título do projeto para buscar" }
+              },
+              required: ["project_title"]
+            }
+          },
+          {
+            name: "get_dashboard_stats",
+            description: "Obtém estatísticas financeiras e de eventos da dashboard.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                period: { type: "STRING", enum: ["month", "year"], description: "Período para análise" }
+              }
+            }
+          },
+          {
+            name: "send_reminder",
+            description: "Gera link de WhatsApp para lembrar cliente de um evento.",
+            parameters: {
+              type: "OBJECT",
+              properties: {
+                client_name: { type: "STRING" }
+              },
+              required: ["client_name"]
+            }
+          }
+        ]
+      }
+    ];
 
-    // Create Supabase client with user's auth
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    const SYSTEM_PROMPT = `Você é a Lumi, IA do Khaos Kontrol.
 
-    // Get user from auth header
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+${knowledgeContext ? `DOCUMENTAÇÃO:\n${knowledgeContext}\n` : ''}
 
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: "Invalid token" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+CAPACIDADES:
+1. **Agenda**: Criar/listar eventos
+2. **CRM**: Criar clientes ("Crie a cliente Ana...")
+3. **Equipe**: Convidar assistentes ("Convide julia@email.com")
+4. **Jurídico**: Gerar contratos ("Gere contrato para o casamento da Maria")
+5. **Financeiro**: Ver estatísticas ("Quanto faturei este mês?")
 
-    const body = await req.json();
-    const messages = body?.messages as Message[] | undefined;
+DIRETRIZES:
+- Se o usuário pedir algo vago (ex: "Crie evento"), pergunte os detalhes.
+- Para "Gere contrato", primeiro precisamo achar o projeto. Pergunte o nome do projeto se não fornecido.
+- Responda de forma curta e prestativa.
+- Use emojis moderadamente.`;
 
-    // Validate input
-    if (!messages || !Array.isArray(messages)) {
-      return new Response(JSON.stringify({ error: "Formato de mensagem inválido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Limit messages array size (max 50 messages)
-    if (messages.length > 50) {
-      return new Response(JSON.stringify({ error: "Limite de mensagens excedido" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Validate and sanitize each message
-    const sanitizedMessages = messages.slice(-50).map(msg => {
-      // Ensure proper role
-      const role = msg.role === 'user' || msg.role === 'assistant' || msg.role === 'system'
-        ? msg.role
-        : 'user';
-
-      // Limit content length (max 2000 chars per message)
-      const content = typeof msg.content === 'string'
-        ? msg.content.slice(0, 2000)
-        : '';
-
-      return { role, content };
+    const chatSession = model.startChat({
+      history: [
+        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "model", parts: [{ text: "Olá! Sou a Lumi. Como posso ajudar na gestão do seu negócio hoje?" }] },
+        ...messages.map((m: any) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        }))
+      ],
+      tools: tools,
     });
 
-    // First API call with tools
-    let response = await fetch(AI_GATEWAY_URL, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${AI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          ...sanitizedMessages,
-        ],
-        tools,
-        tool_choice: "auto",
-      }),
-    });
+    const result = await chatSession.sendMessage(messages[messages.length - 1].content);
+    const response = await result.response;
+    let text = response.text();
+    const functionCalls = response.functionCalls();
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("API Error:", errorData);
-      throw new Error(errorData.error?.message || "Erro na API de IA");
-    }
+    let actionData = null; // Store metadata for frontend
 
-    let data = await response.json();
-    let assistantMessage = data.choices?.[0]?.message;
+    if (functionCalls && functionCalls.length > 0) {
+      const call = functionCalls[0];
+      const fn = call.name;
+      const args = call.args;
+      let output = "";
 
-    // Check if the model wants to use tools
-    if (assistantMessage?.tool_calls && assistantMessage.tool_calls.length > 0) {
-      console.log("Tool calls requested:", assistantMessage.tool_calls.length);
+      console.log(`Executing tool: ${fn}`, args);
 
-      const toolResults: { role: string; tool_call_id: string; content: string }[] = [];
+      if (fn === 'list_events') {
+        let query = supabaseClient.from('events').select('*').eq('user_id', user_id).limit(10);
+        if (args.period === 'today') {
+          const today = new Date().toISOString().split('T')[0];
+          query = query.gte('event_date', today).lte('event_date', today + ' 23:59:59');
+        }
+        const { data, error } = await query;
+        output = error ? `Erro: ${error.message}` : JSON.stringify(data);
 
-      for (const toolCall of assistantMessage.tool_calls as ToolCall[]) {
-        let args: Record<string, unknown>;
-        try {
-          args = JSON.parse(toolCall.function.arguments);
-        } catch {
-          args = {};
+      } else if (fn === 'create_event') {
+        const { data, error } = await supabaseClient.from('events').insert({
+          title: args.title,
+          event_date: args.start_time,
+          start_time: args.start_time,
+          end_time: args.end_time,
+          description: args.description,
+          user_id
+        }).select();
+        output = error ? `Erro: ${error.message}` : `Evento criado: ${data[0].title}`;
+        if (data) actionData = { type: 'event_created', data: data[0] };
+
+      } else if (fn === 'create_client') {
+        const { data, error } = await supabaseClient.from('wedding_clients').insert({
+          full_name: args.name,
+          email: args.email,
+          phone: args.phone,
+          cpf: args.cpf,
+          user_id
+        }).select();
+        output = error ? `Erro: ${error.message}` : `Cliente criado com ID: ${data[0].id}`;
+        if (data) actionData = { type: 'client_created', data: data[0] };
+
+      } else if (fn === 'invite_assistant') {
+        const { data: artist } = await supabaseClient.from('makeup_artists').select('id').eq('user_id', user_id).single();
+        if (artist) {
+          const { data, error } = await supabaseClient.rpc('create_assistant_invite', {
+            p_makeup_artist_id: artist.id,
+            p_assistant_email: args.email
+          });
+          output = error ? `Erro: ${error.message}` : (data.success ? `Convite enviado! Link: ${data.invite_link}` : data.message);
+          if (data?.success) actionData = { type: 'invite_sent', data: { email: args.email, link: data.invite_link } };
+        } else {
+          output = "Erro: Perfil de maquiadora não encontrado.";
         }
 
-        const result = await executeTool(toolCall.function.name, args, supabaseClient, user.id);
-        toolResults.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: result,
-        });
+      } else if (fn === 'generate_contract') {
+        const { data: projects } = await supabaseClient.from('projects').select('*, client:wedding_clients(*)').ilike('title', `%${args.project_title}%`).eq('user_id', user_id);
+
+        if (!projects || projects.length === 0) {
+          output = "Projeto não encontrado com esse nome.";
+        } else {
+          const project = projects[0];
+          const contractPrompt = `Gere um contrato de prestação de serviços para: Contratante ${project.client?.full_name}, Evento ${project.title} em ${project.event_date}. Retorne apenas HTML.`;
+          const contractResult = await model.generateContent(contractPrompt);
+          const contractText = contractResult.response.text();
+
+          const { data: contractData, error } = await supabaseClient.from('contracts').insert({
+            title: `Contrato - ${project.title}`,
+            content: contractText,
+            project_id: project.id,
+            client_id: project.client?.id,
+            user_id,
+            status: 'draft'
+          }).select();
+          output = error ? `Erro ao salvar: ${error.message}` : "Contrato gerado e salvo na aba Contratos.";
+          if (contractData) actionData = { type: 'contract_generated', data: contractData[0] };
+        }
+
+      } else if (fn === 'get_dashboard_stats') {
+        const { count } = await supabaseClient.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', user_id);
+        output = `Total de projetos: ${count}. Receita simulada: R$ 5.000,00 (Exemplo).`;
+        actionData = { type: 'stats_shown', data: { count, revenue: 5000, period: args.period } };
+
+      } else if (fn === 'send_reminder') {
+        const { data: clients } = await supabaseClient.from('wedding_clients').select('*').ilike('full_name', `%${args.client_name}%`).eq('user_id', user_id);
+        if (clients && clients.length > 0) {
+          const client = clients[0];
+          const link = `https://wa.me/55${client.phone?.replace(/\D/g, '')}?text=Oi%20${client.full_name},%20lembrete%20do%20nosso%20evento!`;
+          output = `Link gerado: ${link}`;
+          actionData = { type: 'reminder_generated', data: { link, client_name: client.full_name } };
+        } else {
+          output = "Cliente não encontrado.";
+        }
       }
 
-      // Second API call with tool results
-      response = await fetch(AI_GATEWAY_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${AI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            ...sanitizedMessages,
-            assistantMessage,
-            ...toolResults,
-          ],
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("API Error (second call):", errorData);
-        throw new Error(errorData.error?.message || "Erro na API de IA");
-      }
-
-      data = await response.json();
-      assistantMessage = data.choices?.[0]?.message;
+      const result2 = await chatSession.sendMessage([
+        { functionResponse: { name: fn, response: { result: output } } }
+      ]);
+      text = result2.response.text();
     }
 
-    const reply = assistantMessage?.content || "Desculpe, não consegui processar sua solicitação.";
-
-    return new Response(JSON.stringify({ reply }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ reply: text, action: actionData }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error("Error in AI assistant:", error);
-    return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Erro interno do servidor"
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      }
-    );
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
-});
+})

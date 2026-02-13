@@ -7,13 +7,22 @@ import {
   Send,
   Loader2,
   Terminal,
-  ChevronRight
+  ChevronRight,
+  Sparkles,
+  Calendar,
+  Users,
+  Plus,
+  FileText,
+  CheckCircle2,
+  ExternalLink,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
+import { toast } from 'sonner';
 
 // Input validation schema
 const messageSchema = z.object({
@@ -26,16 +35,32 @@ const messageSchema = z.object({
     .transform(val => val.replace(/on\w+\s*=/gi, ''))
 });
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+interface ActionData {
+  type: 'event_created' | 'client_created' | 'invite_sent' | 'contract_generated' | 'stats_shown' | 'reminder_generated';
+  data: any;
 }
+
+interface Message {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp?: Date;
+  action?: ActionData;
+}
+
+const quickActions = [
+  { label: 'Listar próximos eventos', action: 'Liste meus próximos eventos', icon: <Calendar className="w-3 h-3" /> },
+  { label: 'Criar novo projeto', action: 'Quero criar um novo projeto', icon: <Plus className="w-3 h-3" /> },
+  { label: 'Ver meus clientes', action: 'Mostre meus clientes', icon: <Users className="w-3 h-3" /> },
+  { label: 'Resumo da semana', action: 'Me dê um resumo dos eventos desta semana', icon: <Sparkles className="w-3 h-3" /> },
+];
 
 export default function AIAssistantChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [conversationId] = useState(() => crypto.randomUUID());
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
@@ -50,36 +75,152 @@ export default function AIAssistantChat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isTyping]);
 
-  const processMessage = async (content: string) => {
-    const lowerContent = content.toLowerCase();
+  const persistMessage = async (role: 'user' | 'assistant', content: string, action?: any) => {
+    if (!user) return;
 
-    // Mock RAG / Context Awareness Logic
-    if (lowerContent.includes('clientes') && (lowerContent.includes('quantos') || lowerContent.includes('total') || lowerContent.includes('tenho'))) {
-      try {
-        const { count, error } = await supabase
-          .from('wedding_clients')
-          .select('*', { count: 'exact', head: true });
-
-        if (error) throw error;
-        return `SYSTEM_QUERY_RESULT: ${count || 0} CLIENT_RECORDS_FOUND.`;
-      } catch (err) {
-        console.error('Error counting clients:', err);
-        return 'ERROR: UNABLE_TO_ACCESS_DATABASE.';
-      }
+    try {
+      await supabase.from('chat_history').insert({
+        user_id: user.id,
+        role,
+        content,
+        conversation_id: conversationId,
+        metadata: action ? { action } : null
+      });
+    } catch (error) {
+      console.error('Failed to persist message:', error);
     }
-
-    if (lowerContent.includes('ola') || lowerContent.includes('olá') || lowerContent.includes('oi')) {
-      return 'KONTROL_OS_V2.0 ONLINE. AWAITING_COMMAND.';
-    }
-
-    // Default response
-    return "COMMAND_RECEIVED. PROCESSING... [DEMO_MODE]. TRY: 'QUANTOS CLIENTES EU TENHO?'";
   };
 
-  const sendMessage = async () => {
-    const validationResult = messageSchema.safeParse({ content: input });
+  const handleError = (error: any) => {
+    let errorMessage = 'Desculpe, tive um problema. Pode tentar novamente?';
+
+    if (error.message?.includes('auth') || error.status === 401) {
+      errorMessage = '🔒 Você precisa estar logado para usar o assistente.';
+    } else if (error.message?.includes('timeout')) {
+      errorMessage = '⏱️ A resposta demorou muito. Tente uma pergunta mais simples.';
+    } else if (error.message?.includes('rate limit') || error.status === 429) {
+      errorMessage = '🚦 Muitas perguntas seguidas! Aguarde alguns segundos.';
+    }
+
+    setMessages(prev => [...prev, {
+      role: 'assistant',
+      content: errorMessage,
+      timestamp: new Date()
+    }]);
+
+    toast.error('Erro na comunicação com a IA', { description: errorMessage });
+  };
+
+  const renderActionCard = (action: ActionData) => {
+    if (action.type === 'event_created') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-[#00e5ff]">
+            <Calendar className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Novo Evento</span>
+          </div>
+          <div className="text-xs text-white/80 space-y-1 font-mono">
+            <p><span className="text-white/40">Título:</span> {action.data.title}</p>
+            <p><span className="text-white/40">Data:</span> {new Date(action.data.start_time).toLocaleDateString()}</p>
+            <p><span className="text-white/40">Hora:</span> {new Date(action.data.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (action.type === 'client_created') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-green-400">
+            <CheckCircle2 className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Cliente Criado</span>
+          </div>
+          <div className="text-xs text-white/80 space-y-1 font-mono">
+            <p><span className="text-white/40">Nome:</span> {action.data.full_name}</p>
+            <p><span className="text-white/40">Email:</span> {action.data.email}</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (action.type === 'invite_sent') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-purple-400">
+            <Send className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Convite Enviado</span>
+          </div>
+          <div className="text-xs text-white/80 space-y-1 font-mono">
+            <p><span className="text-white/40">Para:</span> {action.data.email}</p>
+            <a href={action.data.link} target="_blank" rel="noopener noreferrer" className="text-[#00e5ff] hover:underline flex items-center gap-1 mt-1">
+              Link de acesso <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        </div>
+      )
+    }
+
+    if (action.type === 'contract_generated') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-yellow-400">
+            <FileText className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Contrato Gerado</span>
+          </div>
+          <div className="text-xs text-white/80 space-y-1 font-mono">
+            <p><span className="text-white/40">Projeto:</span> {action.data.title}</p>
+            <p className="text-white/40 italic">Salvo em Rascunhos</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (action.type === 'stats_shown') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-blue-400">
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Estatísticas</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div className="bg-black/40 p-2 border border-white/5">
+              <span className="text-white/40 block text-[9px] uppercase">Projetos</span>
+              <span className="text-white text-lg">{action.data.count}</span>
+            </div>
+            <div className="bg-black/40 p-2 border border-white/5">
+              <span className="text-white/40 block text-[9px] uppercase">Faturamento</span>
+              <span className="text-[#00e5ff] text-lg">R$ {action.data.revenue}</span>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (action.type === 'reminder_generated') {
+      return (
+        <div className="mt-2 p-3 bg-white/5 border border-white/10 rounded-sm">
+          <div className="flex items-center gap-2 mb-2 text-green-400">
+            <Send className="w-4 h-4" />
+            <span className="text-[10px] font-bold uppercase tracking-wider">WhatsApp Link</span>
+          </div>
+          <div className="text-xs text-white/80 space-y-1 font-mono">
+            <p className="mb-2">Lembrete para {action.data.client_name} criado.</p>
+            <Button size="sm" variant="outline" className="w-full text-xs h-8 border-green-500/50 text-green-400 hover:text-green-300 hover:bg-green-950" asChild>
+              <a href={action.data.link} target="_blank" rel="noopener noreferrer">
+                Enviar no WhatsApp <ExternalLink className="w-3 h-3 ml-2" />
+              </a>
+            </Button>
+          </div>
+        </div>
+      )
+    }
+  };
+
+  const sendMessage = async (customMessage?: string) => {
+    const messageContent = customMessage || input;
+    const validationResult = messageSchema.safeParse({ content: messageContent });
 
     if (!validationResult.success) {
       setMessages(prev => [...prev, {
@@ -93,19 +234,58 @@ export default function AIAssistantChat() {
 
     const sanitizedContent = validationResult.data.content;
 
-    const userMessage: Message = { role: 'user', content: sanitizedContent };
-    setMessages(prev => [...prev, userMessage]);
+    // Create optimistic user message
+    const userMessage: Message = { role: 'user', content: sanitizedContent, timestamp: new Date() };
+    const newMessages = [...messages, userMessage];
+
+    setMessages(newMessages);
     setInput('');
     setIsLoading(true);
+    setIsTyping(true);
 
-    setTimeout(async () => {
-      const reply = await processMessage(sanitizedContent);
+    // Persist user message asynchronously
+    persistMessage('user', sanitizedContent);
+
+    try {
+      // Call Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('ai-assistant', {
+        body: {
+          messages: newMessages.map(m => ({
+            role: m.role,
+            content: m.content
+          })),
+          user_id: user.id,
+          conversation_id: conversationId
+        }
+      });
+
+      if (error) throw error;
+
+      if (!data?.reply) {
+        throw new Error('Resposta vazia da IA');
+      }
+
+      const aiContent = data.reply;
+      const actionData = data.action;
+
+      // Add AI response
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: reply
+        content: aiContent,
+        timestamp: new Date(),
+        action: actionData
       }]);
+
+      // Persist assistant message asynchronously
+      persistMessage('assistant', aiContent, actionData);
+
+    } catch (error) {
+      console.error('Lumi IA Error:', error);
+      handleError(error);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+      setIsTyping(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -167,14 +347,27 @@ export default function AIAssistantChat() {
             {/* Messages */}
             <ScrollArea className="flex-1 p-4 bg-black" ref={scrollRef}>
               {messages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center px-4 opacity-50">
-                  <Terminal className="h-12 w-12 text-white mb-6 stroke-[1]" />
-                  <p className="font-mono text-xs text-white uppercase tracking-widest mb-2">
+                <div className="h-full flex flex-col items-center justify-center text-center px-4">
+                  <Terminal className="h-12 w-12 text-white mb-6 stroke-[1] opacity-50" />
+                  <p className="font-mono text-xs text-white uppercase tracking-widest mb-1">
                     SYSTEM_READY
                   </p>
-                  <p className="font-mono text-[10px] text-white/50 uppercase tracking-widest">
+                  <p className="font-mono text-[10px] text-white/50 uppercase tracking-widest mb-8">
                     INITIALIZE_INPUT...
                   </p>
+
+                  <div className="grid grid-cols-1 w-full gap-2">
+                    {quickActions.map((action, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => sendMessage(action.action)}
+                        className="flex items-center gap-3 p-3 bg-white/5 hover:bg-white/10 active:bg-white/20 border border-white/10 hover:border-white/30 transition-all text-left group w-full"
+                      >
+                        <div className="text-white/70 group-hover:text-[#00e5ff] transition-colors">{action.icon}</div>
+                        <span className="text-[10px] text-white/70 group-hover:text-white uppercase tracking-wider font-mono">{action.label}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-6">
@@ -200,14 +393,22 @@ export default function AIAssistantChat() {
                         )}
                       >
                         <p className="whitespace-pre-wrap uppercase">{message.content}</p>
+                        {message.action && renderActionCard(message.action)}
                       </div>
                     </div>
                   ))}
-                  {isLoading && (
-                    <div className="flex flex-col items-start gap-1 p-2">
-                      <span className="font-mono text-[10px] text-white/50 bg-black uppercase tracking-widest animate-pulse">
-                         /// PROCESSING_DATA...
-                      </span>
+
+                  {isTyping && (
+                    <div className="flex flex-col items-start gap-1">
+                      <span className="text-[10px] uppercase tracking-widest text-white/40 mb-1">[KONTROL]</span>
+                      <div className="bg-black border border-white/20 px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-3 h-3 text-[#00e5ff] animate-spin" />
+                          <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest animate-pulse">
+                            PROCESSING_DATA...
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -229,7 +430,7 @@ export default function AIAssistantChat() {
                   className="flex-1 bg-transparent border-none text-white placeholder:text-white/30 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none font-mono text-xs h-12 pl-8 uppercase"
                 />
                 <Button
-                  onClick={sendMessage}
+                  onClick={() => sendMessage()}
                   disabled={!input.trim() || isLoading}
                   className="h-12 w-16 shrink-0 bg-transparent text-white hover:bg-white hover:text-black rounded-none border-l border-white/20 transition-colors duration-0"
                 >

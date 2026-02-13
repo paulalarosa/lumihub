@@ -66,6 +66,9 @@ async function syncFromGoogleToKhaos(tokenData: any, supabase: any) {
     url.searchParams.set("timeMin", timeMin.toISOString());
   }
 
+  // IMPORTANTE: Expandir eventos recorrentes em instâncias individuais
+  url.searchParams.set("singleEvents", "true");
+
   const response = await fetch(url.toString(), {
     headers: {
       Authorization: `Bearer ${validToken}`,
@@ -108,8 +111,10 @@ async function syncFromGoogleToKhaos(tokenData: any, supabase: any) {
 }
 
 async function upsertEventFromGoogle(googleEvent: any, userId: string, calendarId: string, supabase: any) {
-  // Se evento foi deletado
+  // Se evento foi deletado no Google
   if (googleEvent.status === "cancelled") {
+    // Check if we should delete or if it was already deleted/modified in Khaos
+    // For now, simpler: Google deletion propagates to Khaos
     await supabase
       .from("calendar_events")
       .delete()
@@ -120,23 +125,71 @@ async function upsertEventFromGoogle(googleEvent: any, userId: string, calendarI
     return;
   }
 
+  // Buscar evento existente para verificar conflitos
+  const { data: existingEvent } = await supabase
+    .from('calendar_events')
+    .select('*')
+    .eq('google_event_id', googleEvent.id)
+    .eq('user_id', userId)
+    .single();
+
   // Parse dados do Google Event
   const eventData = {
     user_id: userId,
     title: googleEvent.summary || "(Sem título)",
     description: googleEvent.description || null,
+    // Google sends dateTime for timed events, date for all-day
     start_time: googleEvent.start.dateTime || googleEvent.start.date,
     end_time: googleEvent.end.dateTime || googleEvent.end.date,
     location: googleEvent.location || null,
-    event_type: "personal", // Eventos do Google são marcados como 'personal'
+    event_type: existingEvent?.event_type || "personal", // Manter tipo existente se houver
     status: googleEvent.status === "confirmed" ? "confirmed" : "tentative",
     google_event_id: googleEvent.id,
     google_calendar_id: calendarId,
     is_synced: true,
     last_synced_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   };
 
-  // Upsert (inserir ou atualizar)
+  if (existingEvent) {
+    // Verificar conflito: Ambos modificados após último sync?
+    const googleUpdated = new Date(googleEvent.updated);
+    const khaosUpdated = new Date(existingEvent.updated_at);
+    const lastSynced = existingEvent.last_synced_at ? new Date(existingEvent.last_synced_at) : new Date(0);
+
+    // Margem de segurança de 2 segundos para evitar loops de sync
+    const safetyMargin = 2000;
+
+    // Se Khaos foi atualizado DEPOIS do último sync E Google também (conflito real)
+    const khaosChangedRecently = khaosUpdated.getTime() > (lastSynced.getTime() + safetyMargin);
+
+    // Note: Google's 'updated' field changes on every edit.
+    // If we just pushed to Google, googleUpdated will be new.
+    // We need to assume if we are receiving a webhook, Google definitely changed.
+
+    if (khaosChangedRecently) {
+      console.log("Conflict detected for event:", googleEvent.id);
+
+      // Registrar conflito
+      await supabase.from('sync_conflicts').insert({
+        event_id: existingEvent.id,
+        conflict_type: 'update_conflict',
+        khaos_version: existingEvent,
+        google_version: googleEvent,
+        resolved: true, // Auto-resolving via LWW
+        resolution: googleUpdated > khaosUpdated ? 'google_wins' : 'khaos_wins',
+        resolved_at: new Date().toISOString()
+      });
+
+      // LWW: Se Google é mais recente, atualiza. Se Khaos é mais recente, ignora este webhook.
+      if (khaosUpdated > googleUpdated) {
+        console.log("Khaos version wins. Ignoring Google update.");
+        return;
+      }
+    }
+  }
+
+  // Upsert (inserir ou atualizar) - Google Wins ou Sem Conflito
   const { error } = await supabase
     .from("calendar_events")
     .upsert(eventData, {
@@ -146,9 +199,8 @@ async function upsertEventFromGoogle(googleEvent: any, userId: string, calendarI
 
   if (error) {
     console.error("Error upserting event:", error);
-    // Don't throw, just log. We want best effort.
   } else {
-    console.log("Upserted event:", googleEvent.id);
+    console.log("Upserted event (Google Wins):", googleEvent.id);
   }
 }
 

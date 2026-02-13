@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+      includeAssets: ['favicon-khaoskontrol.webp', 'android-chrome-192x192.png', 'android-chrome-512x512.png'],
       manifest: {
         name: 'Khaos Kontrol - CRM para Maquiadoras',
         short_name: 'Khaos Kontrol',
@@ -27,17 +27,17 @@ export default defineConfig(({ mode }) => ({
         start_url: '/',
         icons: [
           {
-            src: '/pwa-192x192.png',
+            src: '/android-chrome-192x192.png',
             sizes: '192x192',
             type: 'image/png',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/android-chrome-512x512.png',
             sizes: '512x512',
             type: 'image/png',
           },
           {
-            src: '/pwa-512x512.png',
+            src: '/android-chrome-512x512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable',
@@ -50,14 +50,14 @@ export default defineConfig(({ mode }) => ({
             short_name: 'Agendar',
             description: 'Criar novo agendamento',
             url: '/projects/new',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }],
           },
           {
             name: 'Calendário',
             short_name: 'Agenda',
             description: 'Ver calendário',
             url: '/calendar',
-            icons: [{ src: '/pwa-192x192.png', sizes: '192x192' }],
+            icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }],
           },
         ],
       },

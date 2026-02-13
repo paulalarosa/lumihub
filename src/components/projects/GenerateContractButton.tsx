@@ -45,8 +45,8 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
                 contractNumber: `KHAOS-${project.id.substring(0, 8).toUpperCase()}`,
                 makeupArtist: {
                     name: makeupArtist?.business_name || 'Nome da Maquiadora',
-                    cpf: '000.000.000-00', // TODO: Add CPF to makeup_artists table if available
-                    address: 'Endereço da Maquiadora', // TODO: Add address to makeup_artists
+                    cpf: makeupArtist?.cpf || '000.000.000-00',
+                    address: makeupArtist?.address || 'Endereço da Maquiadora',
                     phone: makeupArtist?.phone || '(00) 00000-0000',
                     email: user?.email || 'email@exemplo.com',
                 },

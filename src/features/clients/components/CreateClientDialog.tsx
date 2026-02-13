@@ -58,7 +58,7 @@ export function CreateClientDialog() {
                     phone: values.phone,
                     status: 'lead',
                     wedding_date: new Date().toISOString(), // Temporary default
-                    // contract_url: contractUrl // TODO: Add column to DB
+                    contract_url: contractUrl
                 })
                 .select()
                 .single();
