@@ -25,9 +25,11 @@ CREATE TABLE IF NOT EXISTS public.plan_limits (
 -- RLS
 ALTER TABLE public.plan_limits ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public read access to plan limits"
-ON public.plan_limits FOR SELECT
-TO authenticated, anon
+DROP DROP POLICY IF EXISTS "Public read access to plan limits" ON public.plan_limits;
+
+CREATE POLICY "Public read access to plan limits" 
+ON public.plan_limits FOR SELECT 
+TO authenticated, anon 
 USING (true);
 
 -- Inserir configuração dos planos
