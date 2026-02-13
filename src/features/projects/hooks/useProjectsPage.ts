@@ -15,13 +15,13 @@ interface Project {
     created_at: string;
     client: {
         id: string;
-        name: string;
+        full_name: string;
     } | null;
 }
 
 interface Client {
     id: string;
-    name: string;
+    full_name: string;
 }
 
 export type { Project, Client };
@@ -64,7 +64,7 @@ export function useProjectsPage() {
 
         const { data: projectsData, error: projectsError } = await supabase
             .from('projects')
-            .select('*, client:wedding_clients(id, name)')
+            .select('*, client:wedding_clients(id, full_name)')
             .order('created_at', { ascending: false });
 
         if (!projectsError) {
@@ -73,8 +73,8 @@ export function useProjectsPage() {
 
         const { data: clientsData } = await supabase
             .from('wedding_clients')
-            .select('id, name')
-            .order('name');
+            .select('id, full_name')
+            .order('full_name');
 
         setClients(clientsData || []);
         setLoadingData(false);
@@ -132,7 +132,7 @@ export function useProjectsPage() {
 
     const filteredProjects = projects.filter(project =>
         project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        project.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
+        (project.client as any)?.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return {

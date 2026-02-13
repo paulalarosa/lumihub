@@ -25,12 +25,13 @@ CREATE TABLE IF NOT EXISTS public.plan_limits (
 -- RLS
 ALTER TABLE public.plan_limits ENABLE ROW LEVEL SECURITY;
 
-DROP DROP POLICY IF EXISTS "Public read access to plan limits" ON public.plan_limits;
+DROP POLICY IF EXISTS "Public read access to plan limits" ON public.plan_limits;
 
-CREATE POLICY "Public read access to plan limits" 
-ON public.plan_limits FOR SELECT 
-TO authenticated, anon 
-USING (true);
+-- DROP POLICY IF EXISTS "Public read access to plan limits" ON public.plan_limits;
+-- CREATE POLICY "Public read access to plan limits" 
+-- ON public.plan_limits FOR SELECT 
+-- TO authenticated, anon 
+-- USING (true);
 
 -- Inserir configuração dos planos
 INSERT INTO public.plan_limits (plan_type, max_clients, max_projects_per_month, max_team_members, features)

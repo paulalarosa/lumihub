@@ -3,14 +3,14 @@ import { useEffect, useState, lazy, Suspense } from "react";
 import { SplashScreen } from "./components/ui/layout/SplashScreen";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminRoute from "@/features/auth/AdminRoute";
 import AIController from "./components/ai-assistant/AIController";
-
+import { AIProvider } from "@/contexts/AIProvider";
 import AuthCallbackHandler from "@/features/auth/AuthCallbackHandler";
 import MFAVerifyPage from "@/features/auth/pages/MFAVerifyPage";
 import AppLayout from "./components/ui/layout/AppLayout";
@@ -24,13 +24,16 @@ import { ErrorBoundary } from "react-error-boundary";
 import { SystemFailure } from "./components/ui/SystemFailure";
 import { SkipToContent } from "@/components/a11y/SkipToContent";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { queryClient } from "@/lib/queryClient";
 
-// Static Imports (Instant Load)
-import Home from "./pages/Home";
-import Login from "@/features/auth/pages/Login";
-import Register from "@/features/auth/pages/Register";
+// Lazy AI Components
+const ModernAIChat = lazy(() => import("./components/ai/ModernAIChat").then(m => ({ default: m.ModernAIChat })));
+const CanvasPanel = lazy(() => import("./components/ai/canvas/CanvasPanel").then(m => ({ default: m.CanvasPanel })));
 
 // Lazy Imports (Code Splitting)
+const Home = lazy(() => import("./pages/Home"));
+const Login = lazy(() => import("@/features/auth/pages/Login"));
+const Register = lazy(() => import("@/features/auth/pages/Register"));
 const Recursos = lazy(() => import("./pages/Recursos"));
 const Planos = lazy(() => import("./pages/Planos"));
 const Blog = lazy(() => import("./pages/Blog"));
@@ -62,11 +65,10 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
 const InviteLanding = lazy(() => import("./pages/InviteLanding"));
 const Analytics = lazy(() => import("./pages/Analytics"));
-// Assistant Portal
+const PricingPage = lazy(() => import("./pages/PricingPage"));
 const AcceptInvitePage = lazy(() => import("@/pages/assistant/AcceptInvitePage"));
 const AssistantDashboard = lazy(() => import("@/pages/assistant/AssistantDashboard"));
 const AssistantLayout = lazy(() => import("@/components/ui/layout/AssistantLayout"));
-// Upgrade Pages
 const UpgradePage = lazy(() => import("@/pages/assistant/UpgradePage"));
 const UpgradeSuccessPage = lazy(() => import("@/pages/assistant/UpgradeSuccessPage"));
 const UpgradeFailurePage = lazy(() => import("@/pages/assistant/UpgradeFailurePage"));
@@ -77,17 +79,13 @@ const GoogleCalendarCallback = lazy(() => import("@/pages/GoogleCalendarCallback
 // Custom styles
 import "@/styles/calendar.css";
 
-const queryClient = new QueryClient();
-
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
 
-  // Test Sentry Connection (Removed)
   useEffect(() => {
-    // Simulate loading time (or wait for resources)
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, window.innerWidth >= 768 ? 0 : 2500); // Instant on desktop, 2.5s on mobile
+    }, window.innerWidth >= 768 ? 0 : 2500);
 
     return () => clearTimeout(timer);
   }, []);
@@ -97,194 +95,180 @@ const App = () => {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-        <LanguageProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <InstallPrompt />
-            <BrowserRouter>
-              <ScrollToTop />
-              <GoogleAnalytics />
-              <AuthProvider>
-                <AnalyticsProvider>
+    <BrowserRouter>
+      <Toaster />
+      <Sonner />
+      <InstallPrompt />
+      <ScrollToTop />
+      <GoogleAnalytics />
+      <AuthProvider>
+        <AnalyticsProvider>
+          <Suspense fallback={null}>
+            <ModernAIChat />
+            <CanvasPanel />
+          </Suspense>
+          <AIProvider>
+            <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
+              <SkipToContent />
+              <main id="main-content">
+                <ErrorBoundary FallbackComponent={SystemFailure}>
+                  <Suspense fallback={<PageLoader />}>
+                    <Routes>
+                      {/* Public Marketing Pages */}
+                      <Route path="/" element={<Home />} />
+                      <Route element={<MarketingLayout />}>
+                        <Route path="/recursos" element={<Recursos />} />
+                        <Route path="/planos" element={<Planos />} />
+                        <Route path="/blog" element={<Blog />} />
+                        <Route path="/blog/:slug" element={<BlogArticle />} />
+                        <Route path="/contato" element={<Contato />} />
+                        <Route path="/privacidade" element={<Privacidade />} />
+                        <Route path="/termos" element={<Termos />} />
+                      </Route>
 
-                  {/* Public Marketing Pages */}
-                  <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
-                    <SkipToContent />
-                    <main id="main-content">
-                      <ErrorBoundary FallbackComponent={SystemFailure}>
-                        <Suspense fallback={<PageLoader />}>
-                          <Routes>
-                            {/* Public Marketing Pages */}
-                            <Route path="/" element={<Home />} />
-                            <Route element={<MarketingLayout />}>
-                              <Route path="/recursos" element={<Recursos />} />
-                              <Route path="/planos" element={<Planos />} />
-                              <Route path="/blog" element={<Blog />} />
-                              <Route path="/blog/:slug" element={<BlogArticle />} />
-                              <Route path="/contato" element={<Contato />} />
-                              <Route path="/privacidade" element={<Privacidade />} />
-                              <Route path="/termos" element={<Termos />} />
-                            </Route>
+                      {/* Auth */}
+                      <Route path="/login" element={<Login />} />
+                      <Route path="/register" element={<Register />} />
+                      <Route path="/auth">
+                        <Route index element={<Navigate to="/login" replace />} />
+                        <Route path="login" element={<Navigate to="/login" replace />} />
+                        <Route path="register" element={<Navigate to="/register" replace />} />
+                        <Route path="mfa-verify" element={<MFAVerifyPage />} />
+                      </Route>
+                      <Route path="/auth/callback" element={<AuthCallbackHandler />} />
+                      <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                      <Route path="/auth/update-password" element={<UpdatePassword />} />
+                      <Route path="/onboarding" element={
+                        <ProtectedRoute requireOnboarding={false}>
+                          <Onboarding />
+                        </ProtectedRoute>
+                      } />
 
+                      {/* Protected App Pages with Layout */}
+                      <Route element={<AppLayout />}>
+                        <Route path="/dashboard" element={
+                          <ProtectedRoute>
+                            <Dashboard />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/dashboard/financial" element={
+                          <ProtectedRoute>
+                            <FinancialPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/analytics" element={
+                          <ProtectedRoute>
+                            <Analytics />
+                          </ProtectedRoute>
+                        } />
 
-                            {/* Auth */}
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/register" element={<Register />} />
-                            <Route path="/auth">
-                              <Route index element={<Navigate to="/login" replace />} />
-                              <Route path="login" element={<Navigate to="/login" replace />} />
-                              <Route path="register" element={<Navigate to="/register" replace />} />
-                              <Route path="mfa-verify" element={<MFAVerifyPage />} />
-                            </Route>
-                            <Route path="/auth/callback" element={<AuthCallbackHandler />} />
-                            <Route path="/auth/forgot-password" element={<ForgotPassword />} />
-                            <Route path="/auth/update-password" element={<UpdatePassword />} />
-                            <Route path="/onboarding" element={
-                              <ProtectedRoute requireOnboarding={false}>
-                                <Onboarding />
-                              </ProtectedRoute>
-                            } />
+                        <Route element={<AdminRoute />}>
+                          <Route path="/admin" element={<AdminDashboard />} />
+                          <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
+                          <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
+                        </Route>
 
-                            {/* Protected App Pages with Layout */}
-                            <Route element={<AppLayout />}>
-                              <Route path="/dashboard" element={
-                                <ProtectedRoute>
-                                  <Dashboard />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/financial" element={
-                                <ProtectedRoute>
-                                  <FinancialPage />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/analytics" element={
-                                <ProtectedRoute>
-                                  <Analytics />
-                                </ProtectedRoute>
-                              } />
+                        <Route path="/calendar" element={
+                          <ProtectedRoute>
+                            <CalendarPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/calendar/callback" element={<GoogleCalendarCallback />} />
 
-                              <Route element={<AdminRoute />}>
-                                <Route path="/admin" element={<AdminDashboard />} />
-                                <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
-                                <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
-                              </Route>
+                        <Route path="/clientes" element={
+                          <ProtectedRoute>
+                            <Clientes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/clientes/:id" element={
+                          <ProtectedRoute>
+                            <ClienteDetalhes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos" element={
+                          <ProtectedRoute>
+                            <Projetos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos/novo" element={
+                          <ProtectedRoute>
+                            <Projetos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projetos/:id" element={
+                          <ProtectedRoute>
+                            <ProjetoDetalhes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/projects/:projectId/contract" element={
+                          <ProtectedRoute>
+                            <ProjectContract />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/pricing" element={
+                          <ProtectedRoute>
+                            <PricingPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/configuracoes" element={
+                          <ProtectedRoute>
+                            <Configuracoes />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/assistentes" element={
+                          <ProtectedRoute>
+                            <AssistantsPage />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/servicos" element={
+                          <ProtectedRoute>
+                            <Servicos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/contratos" element={
+                          <ProtectedRoute>
+                            <Contratos />
+                          </ProtectedRoute>
+                        } />
+                        <Route path="/marketing" element={
+                          <ProtectedRoute>
+                            <Marketing />
+                          </ProtectedRoute>
+                        } />
+                      </Route>
 
-                              <Route path="/calendar" element={
-                                <ProtectedRoute>
-                                  <CalendarPage />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/calendar/callback" element={<GoogleCalendarCallback />} />
-
-                              <Route path="/clientes" element={
-                                <ProtectedRoute>
-                                  <Clientes />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/clientes/:id" element={
-                                <ProtectedRoute>
-                                  <ClienteDetalhes />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/projetos" element={
-                                <ProtectedRoute>
-                                  <Projetos />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/projetos/novo" element={
-                                <ProtectedRoute>
-                                  <Projetos />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/projetos/:id" element={
-                                <ProtectedRoute>
-                                  <ProjetoDetalhes />
-                                </ProtectedRoute>
-                              } />
-
-                              <Route path="/projects/:projectId/contract" element={
-                                <ProtectedRoute>
-                                  <ProjectContract />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/configuracoes" element={
-                                <ProtectedRoute>
-                                  <Configuracoes />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/assistentes" element={
-                                <ProtectedRoute>
-                                  <AssistantsPage />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/servicos" element={
-                                <ProtectedRoute>
-                                  <Servicos />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/contratos" element={
-                                <ProtectedRoute>
-                                  <Contratos />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/marketing" element={
-                                <ProtectedRoute>
-                                  <Marketing />
-                                </ProtectedRoute>
-                              } />
-                            </Route>
-
-                            {/* Assistant Portal - New Routes */}
-                            <Route path="/assistant/accept/:token" element={<AcceptInvitePage />} />
-
-                            <Route path="/assistant" element={
-                              <ProtectedRoute>
-                                <AssistantLayout />
-                              </ProtectedRoute>
-                            }>
-                              <Route path="dashboard" element={<AssistantDashboard />} />
-                              <Route index element={<Navigate to="dashboard" replace />} />
-                            </Route>
-
-                            <Route path="/assistente/convite/:token" element={<AcceptInvitePage />} />
-
-                            <Route path="/assistente/convite/:token" element={<InviteLanding />} />
-
-                            {/* Upgrade Flow */}
-                            <Route path="/upgrade" element={<UpgradePage />} />
-                            <Route path="/upgrade/success" element={<UpgradeSuccessPage />} />
-                            <Route path="/upgrade/failure" element={<UpgradeFailurePage />} />
-                            <Route path="/upgrade/pending" element={<UpgradePendingPage />} />
-
-                            {/* Public Client Booking */}
-                            <Route path="/b/:slug" element={<PublicBooking />} />
-
-                            {/* Password-less Portal (Restored) - Outside AppLayout */}
-                            <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
-                            {/* Password-less Portal Check */}
-                            <Route element={<BrideProtectedRoute />}>
-                              <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
-                            </Route>
-
-                            {/* Catch-all */}
-                            <Route path="*" element={<Dashboard />} /> {/* Redirect * to Dashboard instead of NotFound to catch all */}
-                            <Route path="/404" element={<NotFound />} />
-                          </Routes>
-                        </Suspense>
-                      </ErrorBoundary>
-                    </main>
-                  </div>
-                  <AIController />
-                </AnalyticsProvider>
-              </AuthProvider>
-            </BrowserRouter>
-          </TooltipProvider>
-        </LanguageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+                      <Route path="/assistant/accept/:token" element={<AcceptInvitePage />} />
+                      <Route path="/assistant" element={
+                        <ProtectedRoute>
+                          <AssistantLayout />
+                        </ProtectedRoute>
+                      }>
+                        <Route path="dashboard" element={<AssistantDashboard />} />
+                        <Route index element={<Navigate to="dashboard" replace />} />
+                      </Route>
+                      <Route path="/assistente/convite/:token" element={<AcceptInvitePage />} />
+                      <Route path="/assistente/convite/:token" element={<InviteLanding />} />
+                      <Route path="/upgrade" element={<UpgradePage />} />
+                      <Route path="/upgrade/success" element={<UpgradeSuccessPage />} />
+                      <Route path="/upgrade/failure" element={<UpgradeFailurePage />} />
+                      <Route path="/upgrade/pending" element={<UpgradePendingPage />} />
+                      <Route path="/b/:slug" element={<PublicBooking />} />
+                      <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
+                      <Route element={<BrideProtectedRoute />}>
+                        <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
+                      </Route>
+                      <Route path="*" element={<Dashboard />} />
+                      <Route path="/404" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </ErrorBoundary>
+              </main>
+            </div>
+            <AIController />
+          </AIProvider>
+        </AnalyticsProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 

@@ -11,7 +11,7 @@ export interface Assistant {
     id: string;
     assistant_user_id: string | null;
     user_id: string;
-    name: string;
+    full_name: string;
     email: string | null;
     phone: string | null;
     role: 'assistant' | 'admin' | 'viewer';
@@ -103,7 +103,7 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
             const { data } = await supabase
                 .from("events")
-                .select("*, client:wedding_clients(name), projects(name)")
+                .select("*, client:wedding_clients(full_name), projects(name)")
                 .in("id", eventIds)
                 .gte("event_date", format(start, "yyyy-MM-dd"))
                 .lte("event_date", format(end, "yyyy-MM-dd"))
@@ -119,8 +119,8 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
         // Use typed client with LocalDatabase
         const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
 
-        const { error } = await typedSupabase
-            .from("assistants")
+        const { error } = await (typedSupabase
+            .from("assistants") as any)
             .update({
                 status: 'accepted',
                 is_registered: true,

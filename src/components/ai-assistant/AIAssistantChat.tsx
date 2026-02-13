@@ -247,6 +247,22 @@ export default function AIAssistantChat() {
     persistMessage('user', sanitizedContent);
 
     try {
+      // Fetch User AI Settings for BYOK
+      const { data: aiSettings } = await supabase
+        .from('user_ai_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const headers: Record<string, string> = {};
+      if (aiSettings?.api_key) {
+        headers['x-ai-provider'] = aiSettings.provider;
+        headers['x-ai-key'] = aiSettings.api_key;
+        if (aiSettings.model_name) {
+          headers['x-ai-model'] = aiSettings.model_name;
+        }
+      }
+
       // Call Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('ai-assistant', {
         body: {
@@ -256,7 +272,8 @@ export default function AIAssistantChat() {
           })),
           user_id: user.id,
           conversation_id: conversationId
-        }
+        },
+        headers
       });
 
       if (error) throw error;

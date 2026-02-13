@@ -33,6 +33,8 @@ interface EventDetailsModalProps {
 export const EventDetailsModal = ({ event, isOpen, onClose }: EventDetailsModalProps) => {
     const navigate = useNavigate();
 
+    if (!event || !event.resource) return null;
+
     const handleViewDetails = () => {
         if (event.resource.projectId) {
             navigate(`/projects/${event.resource.projectId}`);

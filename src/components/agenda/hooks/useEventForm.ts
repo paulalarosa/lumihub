@@ -363,8 +363,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
             }
 
             try {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const eventDataForSync: Record<string, any> = {
+                const eventDataForSync: Record<string, string | number | null> = {
                     title: isNoivas ? `👰 ${title}` : title,
                     description: description || '',
                     event_date: eventDate,
@@ -394,6 +393,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
                 }
             } catch (calendarError) {
                 // Calendar sync is non-blocking
+                console.error("Calendar sync failed:", calendarError);
             }
 
             toast({
@@ -403,6 +403,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
 
             onSuccess();
         } catch (error: unknown) {
+            console.error("Error saving event:", error);
             toast({
                 title: 'Erro',
                 description: (error instanceof Error ? error.message : 'Não foi possível salvar o evento'),

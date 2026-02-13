@@ -17,7 +17,7 @@ interface CheckoutOptions {
 }
 
 export const StripeService = {
-    async checkout({ priceId, projectId }: CheckoutOptions) {
+    async checkout({ priceId, projectId, successUrl, cancelUrl }: CheckoutOptions) {
         try {
             const stripe = await stripePromise;
             if (!stripe) {
@@ -27,8 +27,8 @@ export const StripeService = {
             const { error } = await stripe.redirectToCheckout({
                 lineItems: [{ price: priceId, quantity: 1 }],
                 mode: 'subscription',
-                successUrl: 'https://khaoskontrol.com.br/dashboard?payment=success',
-                cancelUrl: 'https://khaoskontrol.com.br/dashboard?payment=cancelled',
+                successUrl: successUrl || 'https://khaoskontrol.com.br/dashboard?payment=success',
+                cancelUrl: cancelUrl || 'https://khaoskontrol.com.br/dashboard?payment=cancelled',
                 clientReferenceId: projectId, // This ties the checkout to our internal project/user
             });
 

@@ -88,6 +88,12 @@ type LocalDatabase = Database & {
                 };
                 Relationships: [];
             }
+        },
+        Functions: {
+            set_audit_source: {
+                Args: { source_text: string };
+                Returns: void;
+            }
         }
     }
 };
@@ -105,8 +111,8 @@ export class Logger {
         }
 
         // Use the custom RPC helper from Phase 20
-        // We cast to any to bypass generated type limitations for new functions
-        const { error } = await (supabase.rpc as any)('set_audit_source', {
+        const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+        const { error } = await typedSupabase.rpc('set_audit_source', {
             source_text: source
         });
 

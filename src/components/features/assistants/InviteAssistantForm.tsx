@@ -27,7 +27,7 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
 
     useEffect(() => {
         if (user) {
-            supabase.from('makeup_artists').select('id').eq('user_id', user.id).single()
+            supabase.from('makeup_artists').select('id').eq('user_id', user.id).maybeSingle()
                 .then(({ data }) => {
                     if (data) setMakeupArtistId(data.id);
                 });
@@ -67,14 +67,16 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
 
             if (checkError) throw checkError;
 
-            const { data, error } = await supabase.rpc('create_assistant_invite', {
+            const { data: rawData, error } = await (supabase.rpc('create_assistant_invite', {
                 p_makeup_artist_id: makeupArtistId,
                 p_assistant_email: email
-            });
+            }) as any);
+
+            const data = rawData;
 
             if (error) throw error;
 
-            if (data.success) {
+            if (data?.success) {
                 setInviteLink(data.invite_link);
 
                 // 2. Send notification
@@ -168,7 +170,12 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
     };
 
     if (!makeupArtistId) {
-        return null;
+        return (
+            <div className="flex flex-col items-center justify-center p-8 space-y-4">
+                <LoadingSpinner className="w-8 h-8" />
+                <p className="text-sm text-muted-foreground">Carregando informações...</p>
+            </div>
+        );
     }
 
     return (

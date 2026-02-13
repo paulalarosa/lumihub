@@ -1,134 +1,120 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-
-interface PlanLimits {
-    plan_type: 'essencial' | 'profissional' | 'studio';
-    max_clients: number | null;
-    max_projects_per_month: number | null;
-    max_team_members: number | null;
-    features: {
-        agenda: boolean;
-        contratos_digitais: boolean;
-        portal_cliente: boolean;
-        calendario: boolean;
-        galeria: boolean;
-        pack_tecnico: 'basico' | 'gold' | 'premium';
-        analytics: boolean;
-        portal_noiva_custom: boolean;
-        microsite: boolean;
-        ficha_anamnese: boolean;
-        gestao_equipe: boolean;
-        ia_operacional: boolean;
-        performance_artista: boolean;
-        multi_usuario: boolean;
-        integracao_api: boolean;
-        suporte: 'whatsapp' | 'email' | 'prioritario';
-    };
-}
+import { toast } from 'sonner';
 
 export const usePlanAccess = () => {
     const { user } = useAuth();
+    const queryClient = useQueryClient();
 
     const { data: planData, isLoading } = useQuery({
         queryKey: ['plan-access', user?.id],
         queryFn: async () => {
             if (!user) return null;
 
-            // Buscar dados do plano
-            const { data: artist, error } = await supabase
+            const { data, error } = await supabase
                 .from('makeup_artists')
-                .select('plan_type, plan_status')
+                .select(`
+          *,
+          plan_config:plan_configs(*)
+        `)
                 .eq('user_id', user.id)
-                .single();
+                .maybeSingle();
 
-            if (error) {
-                console.error('Error fetching artist plan:', error);
-                // Fallback to essential if error (e.g. no profile yet)
-                return { plan_type: 'essencial', plan_status: 'active', features: {}, max_clients: 50 } as any;
-            }
-
-            // Buscar limites do plano
-            const { data: limits, error: limitsError } = await supabase
-                .from('plan_limits')
-                .select('*')
-                .eq('plan_type', artist.plan_type)
-                .single();
-
-            if (limitsError) {
-                console.error('Error fetching plan limits:', limitsError);
-                return { ...artist } as any;
-            }
+            if (error) throw error;
 
             return {
-                ...artist,
-                ...limits,
-            } as PlanLimits & { plan_status: string };
+                ...data,
+                features: data?.plan_config?.features || {},
+                limits: {
+                    maxClients: data?.plan_config?.max_clients,
+                    maxTeamMembers: data?.plan_config?.max_team_members,
+                },
+            };
         },
         enabled: !!user,
     });
 
-    const hasFeature = (feature: keyof PlanLimits['features']): boolean => {
-        if (!planData) return false;
-        // @ts-ignore
-        return !!planData.features?.[feature];
-    };
+    const checkFeatureAccess = async (feature: string) => {
+        if (!user) return { allowed: false, reason: 'not_authenticated' };
 
-    const getRequiredPlan = async (feature: string) => {
-        const { data } = await supabase.rpc('get_required_plan', { p_feature: feature });
-        return data;
-    }
-
-    const canCreateClient = async (): Promise<{ allowed: boolean; message?: string }> => {
-        if (!user) return { allowed: false, message: 'Usuário não autenticado' };
-
-        const { data, error } = await supabase.rpc('check_plan_limit', {
+        const { data, error } = await supabase.rpc('check_feature_access', {
             p_user_id: user.id,
-            p_feature: 'max_clients',
+            p_feature: feature,
         });
 
         if (error) {
-            console.error('Plan check error:', error);
-            return { allowed: false, message: 'Erro ao verificar plano' };
+            console.error('Feature check error:', error);
+            return { allowed: false, reason: 'error' };
         }
 
-        if (!data.allowed) {
-            if (data.reason === 'limit_reached') {
-                return {
-                    allowed: false,
-                    message: `Limite de ${data.limit} clientes atingido. Faça upgrade para o plano Profissional!`,
-                };
+        return data;
+    };
+
+    const checkUsageLimit = async (resource: 'clients' | 'team_members') => {
+        if (!user) return { allowed: false, reason: 'not_authenticated' };
+
+        const { data, error } = await supabase.rpc('check_usage_limit', {
+            p_user_id: user.id,
+            p_resource: resource,
+        });
+
+        if (error) {
+            console.error('Limit check error:', error);
+            return { allowed: false, reason: 'error' };
+        }
+
+        return data;
+    };
+
+    const createCheckoutSession = useMutation({
+        mutationFn: async (planType: string) => {
+            const { data, error } = await supabase.functions.invoke('stripe-checkout', {
+                body: {
+                    plan_type: planType,
+                    user_id: user?.id,
+                },
+            });
+
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: (data) => {
+            if (data?.url) {
+                window.location.href = data.url;
             }
-            return { allowed: false, message: 'Acesso negado' };
-        }
+        },
+        onError: (error: any) => {
+            toast.error('Erro ao criar sessão de pagamento: ' + error.message);
+        },
+    });
 
-        return { allowed: true };
-    };
-
-    const getPlanBadge = () => {
-        const badges = {
-            essencial: { label: 'Essencial', color: 'bg-gray-500' },
-            profissional: { label: 'Profissional', color: 'bg-blue-500' },
-            studio: { label: 'Studio', color: 'bg-purple-500' },
-        };
-
+    const hasFeature = (feature: string): boolean => {
+        if (!planData?.features) return false;
         // @ts-ignore
-        return badges[planData?.plan_type || 'essencial'];
+        return !!planData.features[feature];
     };
+
+    const isTrialing = planData?.plan_status === 'trialing' &&
+        planData?.trial_ends_at &&
+        new Date(planData.trial_ends_at) > new Date();
+
+    const isActive = planData?.plan_status === 'active' || isTrialing;
 
     return {
         planType: planData?.plan_type || 'essencial',
-        planStatus: planData?.plan_status || 'active',
+        planStatus: planData?.plan_status,
         features: planData?.features || {},
-        limits: {
-            maxClients: planData?.max_clients,
-            maxProjects: planData?.max_projects_per_month,
-            maxTeamMembers: planData?.max_team_members,
-        },
+        limits: planData?.limits || {},
+        isTrialing,
+        isActive,
+        trialDaysRemaining: isTrialing && planData?.trial_ends_at
+            ? Math.ceil((new Date(planData.trial_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+            : 0,
         hasFeature,
-        canCreateClient,
-        getPlanBadge,
-        getRequiredPlan,
+        checkFeatureAccess,
+        checkUsageLimit,
+        createCheckoutSession,
         isLoading,
     };
 };

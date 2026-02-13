@@ -71,9 +71,12 @@ export default function UpgradePage() {
             }
 
             // Call Stripe Service directly
+            const successUrl = `${window.location.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`;
+
             await StripeService.checkout({
                 priceId: plan.stripePriceId,
-                projectId: user.id // We use User ID as reference for subscriptions
+                projectId: user.id, // Used as client_reference_id
+                successUrl
             });
 
         } catch (error) {

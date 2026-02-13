@@ -22,7 +22,7 @@ export default function AssistantDashboard() {
         queryKey: ['assistant-profile', user?.id],
         queryFn: async () => {
             if (!user) return null;
-            const { data } = await supabase.from('assistants').select('id, full_name').eq('user_id', user.id).single();
+            const { data } = await supabase.from('assistants').select('id, full_name').eq('user_id', user.id).maybeSingle();
             return data;
         },
         enabled: !!user
@@ -75,7 +75,7 @@ export default function AssistantDashboard() {
                 .from('makeup_artists')
                 .select('user_id')
                 .eq('id', selectedArtistId)
-                .single();
+                .maybeSingle();
 
             if (artistError || !artistData) throw new Error('Artist not found');
 

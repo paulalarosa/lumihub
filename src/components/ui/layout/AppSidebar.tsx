@@ -90,8 +90,8 @@ export function AppSidebar() {
         <Sidebar className="border-r border-border bg-background">
             <SidebarHeader className="border-b border-border p-4 bg-background">
                 <div className="flex items-center gap-2 px-2">
-                    <div className="w-8 h-8 flex items-center justify-center border border-foreground bg-background">
-                        <span className="text-foreground font-serif font-bold text-lg">K</span>
+                    <div className="w-8 h-8 flex items-center justify-center border border-foreground bg-background overflow-hidden relative">
+                        <img src="/favicon-khaoskontrol.webp" alt="Khaos Kontrol" className="w-full h-full object-cover" />
                     </div>
                     <span className="font-serif text-xl font-bold text-foreground tracking-tight">
                         KONTROL

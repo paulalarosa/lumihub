@@ -1,179 +1,198 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "@supabase/supabase-js";
-import Stripe from "stripe";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import Stripe from "https://esm.sh/stripe@14.11.0";
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
     apiVersion: "2023-10-16",
-    httpClient: Stripe.createFetchHttpClient(),
 });
 
-const cryptoProvider = Stripe.createSubtleCryptoProvider();
+const supabase = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+);
+
+const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
 
 serve(async (req) => {
-    const signature = req.headers.get("Stripe-Signature");
+    const signature = req.headers.get("stripe-signature")!;
     const body = await req.text();
 
-    if (!signature) {
-        return new Response("No signature header", { status: 400 });
-    }
+    let event: Stripe.Event;
 
-    let event;
     try {
-        event = await stripe.webhooks.constructEventAsync(
-            body,
-            signature,
-            Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? "",
-            undefined,
-            cryptoProvider
-        );
-    } catch (err) {
-        console.error(`Webhook signature verification failed: ${err.message}`);
-        return new Response(err.message, { status: 400 });
+        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    } catch (err: any) {
+        console.error("Webhook signature verification failed:", err.message);
+        return new Response(JSON.stringify({ error: err.message }), { status: 400 });
     }
 
-    const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    console.log("Event type:", event.type);
 
     try {
         switch (event.type) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session;
-                const projectId = session.client_reference_id; // This is User ID for subscriptions
-
-                if (session.mode === 'subscription' && projectId) {
-                    const subscriptionId = session.subscription as string;
-                    const customerId = session.customer as string;
-
-                    // Determine Plan Type from Price ID logic or metadata
-                    // Better approach: fetch subscription items, but for now we map known IDs or default to 'pro'
-                    // In a real scenario, we should fetch the subscription to get the price ID.
-                    // Determine Plan Type from Price ID
-                    let planType = 'profissional'; // Default fallback
-                    try {
-                        const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-                        const priceId = subscription.items.data[0]?.price.id;
-
-                        if (priceId === 'price_1T06IGPuhubKL3n8c8sTgvsu') planType = 'essencial';
-                        else if (priceId === 'price_1T06JHPuhubKL3n88FuAacvY') planType = 'profissional';
-                        else if (priceId === 'price_1T06JePuhubKL3n8AEQBTYtV') planType = 'studio';
-                    } catch (e) {
-                        console.error("Failed to fetch subscription details, defaulting to profissional:", e);
-                    }
-
-                    // 1. Update user profile with Stripe Customer ID
-                    await supabase.from("profiles")
-                        .update({ stripe_customer_id: customerId })
-                        .eq("id", projectId);
-
-                    // 2. IMPORTANT: Update makeup_artists table to unlock features IMMEDIATELY
-                    const { error: artistError } = await supabase
-                        .from('makeup_artists')
-                        .update({
-                            plan_type: planType,
-                            plan_status: 'active'
-                        })
-                        .eq('user_id', projectId);
-
-                    if (artistError) console.error('Failed to update makeup_artist plan:', artistError);
-
-                    // Create/Update Subscription in our DB
-                    const { error: subError } = await supabase.from("subscriptions").upsert({
-                        user_id: projectId,
-                        stripe_subscription_id: subscriptionId,
-                        stripe_customer_id: customerId,
-                        status: 'active',
-                        plan_type: planType,
-                        current_period_end: new Date(session.expires_at ? session.expires_at * 1000 : Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-                    }, { onConflict: 'user_id' });
-
-                    if (subError) console.error('Subscription upsert failed:', subError);
-                    else console.log(`Subscription created for user ${projectId} with plan ${planType}`);
-
-                } else if (projectId) {
-                    // One-time payment logic (legacy or unrelated)
-                    const { error } = await supabase.from("projects")
-                        .update({ status: "confirmed", payment_status: "paid" })
-                        .eq("id", projectId);
-                    if (error) console.error('Project update failed', error);
-                }
+                await handleCheckoutCompleted(session);
                 break;
             }
 
-            case "invoice.paid": {
-                const invoice = event.data.object as Stripe.Invoice;
-                const subscriptionId = invoice.subscription as string;
-
-                if (subscriptionId) {
-                    // Find user by stripe_customer_id or subscription_id
-                    const { data: subData } = await supabase
-                        .from("subscriptions")
-                        .select("user_id")
-                        .eq("stripe_subscription_id", subscriptionId)
-                        .single();
-
-                    if (subData) {
-                        // Update next billing date
-                        const nextPayment = invoice.lines.data[0].period.end;
-
-                        await supabase.from("subscriptions")
-                            .update({
-                                status: 'active',
-                                current_period_end: new Date(nextPayment * 1000).toISOString(),
-                                updated_at: new Date().toISOString()
-                            })
-                            .eq("stripe_subscription_id", subscriptionId);
-
-                        // Also re-activate makeup_artists if needed (e.g. if they were past due)
-                        await supabase.from("makeup_artists")
-                            .update({ plan_status: 'active' })
-                            .eq("user_id", subData.user_id);
-
-                        console.log(`Subscription ${subscriptionId} renewed until ${new Date(nextPayment * 1000).toISOString()}`);
-                    } else {
-                        console.warn(`Subscription ${subscriptionId} not found in DB`);
-                    }
-                }
+            case "customer.subscription.created":
+            case "customer.subscription.updated": {
+                const subscription = event.data.object as Stripe.Subscription;
+                await handleSubscriptionUpdate(subscription);
                 break;
             }
 
             case "customer.subscription.deleted": {
                 const subscription = event.data.object as Stripe.Subscription;
+                await handleSubscriptionCancelled(subscription);
+                break;
+            }
 
-                // Find user first to update makeup_artists
-                const { data: subData } = await supabase
-                    .from("subscriptions")
-                    .select("user_id")
-                    .eq("stripe_subscription_id", subscription.id)
-                    .single();
+            case "invoice.payment_succeeded": {
+                const invoice = event.data.object as Stripe.Invoice;
+                await handlePaymentSucceeded(invoice);
+                break;
+            }
 
-                await supabase.from("subscriptions")
-                    .update({ status: 'cancelled' })
-                    .eq("stripe_subscription_id", subscription.id);
-
-                if (subData) {
-                    // Downgrade to essential or mark as cancelled/expired
-                    // For now, let's keep them as 'essencial' but 'inactive' or just 'essencial'
-                    await supabase.from("makeup_artists")
-                        .update({
-                            plan_type: 'essencial', // Downgrade to free/basic
-                            plan_status: 'active' // Active on the free plan
-                        })
-                        .eq("user_id", subData.user_id);
-                }
-
-                console.log(`Subscription ${subscription.id} cancelled`);
+            case "invoice.payment_failed": {
+                const invoice = event.data.object as Stripe.Invoice;
+                await handlePaymentFailed(invoice);
                 break;
             }
         }
-    } catch (err) {
-        console.error(`Error processing event ${event.type}:`, err);
-        return new Response("Internal Server Error", { status: 500 });
-    }
 
-    return new Response(JSON.stringify({ received: true }), {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-    });
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+    } catch (error: any) {
+        console.error("Webhook handler error:", error);
+        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    }
 });
+
+async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+    const userId = session.metadata?.user_id;
+    const planType = session.metadata?.plan_type;
+
+    if (!userId) return;
+
+    await supabase
+        .from("makeup_artists")
+        .update({
+            stripe_subscription_id: session.subscription as string,
+            plan_type: planType,
+            plan_status: "active",
+            plan_started_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId);
+
+    console.log(`Subscription activated for user ${userId}`);
+}
+
+async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
+    const userId = subscription.metadata?.user_id;
+
+    if (!userId) {
+        // Buscar pelo subscription_id
+        const { data: artist } = await supabase
+            .from("makeup_artists")
+            .select("user_id")
+            .eq("stripe_subscription_id", subscription.id)
+            .single();
+
+        if (!artist) return;
+
+        // update status
+        const status = mapStripeStatus(subscription.status);
+
+        await supabase
+            .from("makeup_artists")
+            .update({
+                plan_status: status,
+                plan_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+            })
+            .eq("user_id", artist.user_id);
+    } else {
+        const status = mapStripeStatus(subscription.status);
+
+        await supabase
+            .from("makeup_artists")
+            .update({
+                plan_status: status,
+                plan_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
+            })
+            .eq("user_id", userId);
+    }
+}
+
+function mapStripeStatus(stripeStatus: string): string {
+    switch (stripeStatus) {
+        case 'active': return 'active';
+        case 'trialing': return 'trialing';
+        case 'past_due': return 'past_due';
+        case 'canceled': return 'cancelled';
+        case 'paused': return 'paused';
+        default: return 'paused';
+    }
+}
+
+async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
+    await supabase
+        .from("makeup_artists")
+        .update({
+            plan_status: "cancelled",
+        })
+        .eq("stripe_subscription_id", subscription.id);
+}
+
+async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+    const customerId = invoice.customer as string;
+
+    // Buscar user_id pelo customer_id
+    const { data: artist } = await supabase
+        .from("makeup_artists")
+        .select("user_id")
+        .eq("stripe_customer_id", customerId)
+        .single();
+
+    if (!artist) return;
+
+    // Registrar pagamento
+    await supabase.from("payment_history").insert({
+        user_id: artist.user_id,
+        stripe_payment_intent_id: invoice.payment_intent as string,
+        stripe_invoice_id: invoice.id,
+        amount: invoice.amount_paid / 100,
+        currency: invoice.currency.toUpperCase(),
+        status: "succeeded",
+        description: `Pagamento ${invoice.billing_reason}`,
+        paid_at: new Date(invoice.created * 1000).toISOString(),
+    });
+}
+
+async function handlePaymentFailed(invoice: Stripe.Invoice) {
+    const customerId = invoice.customer as string;
+
+    const { data: artist } = await supabase
+        .from("makeup_artists")
+        .select("user_id")
+        .eq("stripe_customer_id", customerId)
+        .single();
+
+    if (!artist) return;
+
+    // Registrar falha
+    await supabase.from("payment_history").insert({
+        user_id: artist.user_id,
+        stripe_invoice_id: invoice.id,
+        amount: invoice.amount_due / 100,
+        currency: invoice.currency.toUpperCase(),
+        status: "failed",
+        description: `Falha no pagamento: ${invoice.billing_reason}`,
+    });
+
+    // Atualizar status do plano
+    await supabase
+        .from("makeup_artists")
+        .update({ plan_status: "past_due" })
+        .eq("user_id", artist.user_id);
+}

@@ -19,8 +19,8 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
 
         try {
             // 1. Buscar dados do projeto
-            const { data: project, error } = await supabase
-                .from('projects')
+            const { data: project, error } = await (supabase
+                .from('projects') as any)
                 .select(`
           *,
           client:wedding_clients(*),
@@ -51,7 +51,7 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
                     email: user?.email || 'email@exemplo.com',
                 },
                 client: {
-                    name: project.client.name,
+                    name: (project.client as any).full_name,
                     cpf: project.client.cpf || '000.000.000-00',
                     address: project.client.address || 'Endereço do Cliente',
                     phone: project.client.phone || '(00) 00000-0000',
@@ -87,19 +87,21 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `contrato-${project.client.name.toLowerCase().replace(/\s/g, '-')}.pdf`;
+            link.download = `contrato-${(project.client as any).full_name.toLowerCase().replace(/\s/g, '-')}.pdf`;
             link.click();
 
             // 6. Log e Update
-            await supabase
-                .from('projects')
+            await (supabase
+                .from('projects') as any)
                 .update({ contract_generated_at: new Date().toISOString() })
                 .eq('id', projectId);
 
             await Logger.action(
                 'CONTRACT_GENERATION',
-                { projectId, contractNumber: contractData.contractNumber },
-                'Contrato PDF gerado manualmente',
+                user?.id || 'SYSTEM',
+                'projects',
+                projectId,
+                { contractNumber: contractData.contractNumber },
                 'GenerateContractButton'
             );
 
@@ -110,6 +112,7 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
             await Logger.error(
                 'CONTRACT_GENERATION_FAILED',
                 error,
+                user?.id || 'SYSTEM',
                 { projectId }
             );
         } finally {

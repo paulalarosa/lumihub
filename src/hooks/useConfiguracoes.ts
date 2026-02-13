@@ -35,6 +35,11 @@ export function useConfiguracoes() {
     const [digitalWalletAccount, setDigitalWalletAccount] = useState('');
     const [preferredMethod, setPreferredMethod] = useState('pix');
 
+    // AI BYOK Settings
+    const [aiProvider, setAiProvider] = useState<string>('google');
+    const [aiKey, setAiKey] = useState<string>('');
+    const [aiModel, setAiModel] = useState<string>('gemini-1.5-pro');
+
     useEffect(() => {
         if (!loading && !user) {
             navigate('/auth');
@@ -64,6 +69,18 @@ export function useConfiguracoes() {
             setLogoUrl(profileData.avatar_url);
         }
 
+        const { data: aiSettings } = await supabase
+            .from('user_ai_settings')
+            .select('*')
+            .eq('user_id', user!.id)
+            .maybeSingle();
+
+        if (aiSettings) {
+            setAiProvider(aiSettings.provider || 'google');
+            setAiKey(aiSettings.api_key || '');
+            setAiModel(aiSettings.model_name || 'gemini-1.5-pro');
+        }
+
         setLoadingData(false);
     };
 
@@ -88,6 +105,17 @@ export function useConfiguracoes() {
                 });
                 if (userError) throw userError;
             }
+
+            const { error: aiError } = await supabase
+                .from('user_ai_settings')
+                .upsert({
+                    user_id: user!.id,
+                    provider: aiProvider,
+                    api_key: aiKey.trim() || null,
+                    model_name: aiModel.trim() || null,
+                });
+
+            if (aiError) throw aiError;
 
             toast({ title: 'Configurações salvas', description: 'Todas as alterações foram aplicadas.' });
         } catch (error: unknown) {
@@ -151,6 +179,9 @@ export function useConfiguracoes() {
         digitalWalletType, setDigitalWalletType,
         digitalWalletAccount, setDigitalWalletAccount,
         preferredMethod, setPreferredMethod,
+        aiProvider, setAiProvider,
+        aiKey, setAiKey,
+        aiModel, setAiModel,
         saveSettings,
         handleLogoUpload,
     };

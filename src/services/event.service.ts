@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { CalendarEventDB, ProjectDB } from '@/types/calendar';
+import { CalendarDatabase, CalendarEventDB, ProjectDB } from '@/types/calendar';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export interface DashboardEvent {
     id: string;
@@ -12,9 +13,12 @@ export interface DashboardEvent {
 
 export const EventService = {
     async getUpcomingEvents(organizationId: string, userId: string, role?: string) {
+        // Cast supabase client to use our extended database types
+        const typedSupabase = supabase as unknown as SupabaseClient<CalendarDatabase>;
+
         // 1. Check Google Connection (using new table)
-        const { data: tokenData } = await supabase
-            .from('google_calendar_tokens' as any)
+        const { data: tokenData } = await typedSupabase
+            .from('google_calendar_tokens')
             .select('id')
             .eq('user_id', userId)
             .maybeSingle();
@@ -28,27 +32,33 @@ export const EventService = {
         try {
             // 2. Fetch Projects (Internal)
             // Fetch projects where the user is the makeup artist
-            const { data: projects } = await supabase
-                .from('projects')
-                .select('*, clients(name)')
-                .eq('makeup_artist_id', userId)
+            const { data: projectsData } = await (supabase
+                .from('projects') as any)
+                .select('*, client:wedding_clients(full_name)')
+                .eq('user_id', userId)
                 .gte('event_date', today.toISOString().split('T')[0])
                 .order('event_date', { ascending: true })
                 .limit(5);
 
-            const projectEvents: DashboardEvent[] = (projects || []).map((p: any) => ({
-                id: p.id,
-                title: p.clients?.name || 'Projeto',
-                date: p.event_date,
-                time: p.event_time?.slice(0, 5),
-                type: 'project',
-                clientName: p.clients?.name
-            }));
+            // Cast to unknown first to avoid "excessively deep" error, then to our shape
+            const projects = projectsData as unknown as (ProjectDB & { client: { full_name: string } | { full_name: string }[] | null })[];
+
+            const projectEvents: DashboardEvent[] = (projects || []).map((p) => {
+                const clientName = Array.isArray(p.client) ? p.client[0]?.full_name : p.client?.full_name;
+                return {
+                    id: p.id,
+                    title: clientName || 'Projeto',
+                    date: p.event_date,
+                    time: p.event_time?.slice(0, 5),
+                    type: 'project',
+                    clientName: clientName
+                };
+            });
 
             // 3. Fetch Google Events (from local sync table)
             // We rely on the sync mechanism to have populated this
-            const { data: googleEvents } = await supabase
-                .from('calendar_events' as any)
+            const { data: googleEventsData } = await typedSupabase
+                .from('calendar_events')
                 .select('*')
                 .eq('user_id', userId)
                 .eq('event_type', 'personal')
@@ -56,7 +66,9 @@ export const EventService = {
                 .order('start_time', { ascending: true })
                 .limit(5);
 
-            const externalEvents: DashboardEvent[] = (googleEvents || []).map((e: any) => ({
+            const googleEvents = googleEventsData as unknown as CalendarEventDB[];
+
+            const externalEvents: DashboardEvent[] = (googleEvents || []).map((e) => ({
                 id: e.id,
                 title: e.title,
                 date: e.start_time, // ISO

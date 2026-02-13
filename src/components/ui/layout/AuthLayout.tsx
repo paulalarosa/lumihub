@@ -28,8 +28,8 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 {/* Content Overlay */}
                 <div className="relative z-20 flex flex-col justify-between h-full p-16 text-white">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-white border border-white rounded-none flex items-center justify-center">
-                            <span className="text-xl font-mono font-bold text-black">K</span>
+                        <div className="w-10 h-10 bg-white border border-white rounded-none flex items-center justify-center overflow-hidden relative">
+                            <img src="/favicon-khaoskontrol.webp" alt="K" className="w-full h-full object-cover" />
                         </div>
                         <span className="font-mono text-xl tracking-widest uppercase">KHAOS</span>
                     </div>

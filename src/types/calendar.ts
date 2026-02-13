@@ -1,3 +1,4 @@
+import { Database } from '@/integrations/supabase/types';
 
 export interface CalendarEventDB {
     id: string;
@@ -17,16 +18,46 @@ export interface CalendarEventDB {
     updated_at?: string;
 }
 
+export interface GoogleCalendarTokenDB {
+    id: string;
+    user_id: string;
+    access_token: string;
+    refresh_token: string;
+    expiry_date: number | null;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export interface ProjectDB {
     id: string;
     event_date: string;
     event_time?: string | null;
     status: string;
-    client_id?: string;
+    user_id?: string;
     // Relations
-    clients?: {
-        name: string;
+    client?: {
+        full_name: string;
     } | null;
     // Add other known fields if needed
-    service_type?: string; // We might need to handle this if it's missing
+    service_type?: string;
 }
+
+// Extended Database type to include tables that might be missing from codegen
+export type CalendarDatabase = Database & {
+    public: {
+        Tables: {
+            calendar_events: {
+                Row: CalendarEventDB;
+                Insert: Omit<CalendarEventDB, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<CalendarEventDB, 'id'>>;
+                Relationships: [];
+            };
+            google_calendar_tokens: {
+                Row: GoogleCalendarTokenDB;
+                Insert: Omit<GoogleCalendarTokenDB, 'id' | 'created_at' | 'updated_at'>;
+                Update: Partial<Omit<GoogleCalendarTokenDB, 'id'>>;
+                Relationships: [];
+            };
+        }
+    }
+};

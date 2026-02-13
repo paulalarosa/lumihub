@@ -1,4 +1,5 @@
 import MessageTemplatesSettings from '@/components/settings/MessageTemplatesSettings';
+import AISettings from '@/components/settings/AISettings';
 import IntegrationsTab from '@/components/settings/IntegrationsTab';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,11 +45,13 @@ export default function Configuracoes() {
 
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         <Tabs defaultValue="perfil" className="w-full space-y-8">
-          <TabsList className="w-full flex justify-start border-b border-border bg-transparent p-0 h-auto rounded-none gap-8 overflow-x-auto">
-            {['perfil', 'negocio', 'banco', 'automacao', 'integracoes', 'assinatura'].map(tab => (
-              <TabsTrigger key={tab} value={tab}
+          <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-white/10 h-auto p-0 mb-8 overflow-x-auto">
+            {['Perfil', 'Negócio', 'Bancário', 'Automação', 'IA', 'Integrações', 'Assinatura'].map((tab) => (
+              <TabsTrigger
+                key={tab}
+                value={tab.toLowerCase().replace('ó', 'o').replace('á', 'a')}
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-2 py-4 font-mono text-xs uppercase tracking-widest">
-                {tab === 'negocio' ? 'NEGÓCIO' : tab === 'banco' ? 'DADOS BANCÁRIOS' : tab === 'automacao' ? 'AUTOMAÇÃO' : tab === 'integracoes' ? 'INTEGRAÇÕES' : tab.toUpperCase()}
+                {tab === 'Negócio' ? 'NEGÓCIO' : tab === 'Bancário' ? 'DADOS BANCÁRIOS' : tab === 'Automação' ? 'AUTOMAÇÃO' : tab === 'Integrações' ? 'INTEGRAÇÕES' : tab.toUpperCase()}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -229,6 +232,19 @@ export default function Configuracoes() {
 
           <TabsContent value="automacao" className="space-y-6 focus-visible:outline-none">
             <MessageTemplatesSettings />
+          </TabsContent>
+
+          <TabsContent value="ia" className="space-y-6 focus-visible:outline-none">
+            <AISettings
+              provider={cfg.aiProvider}
+              setProvider={cfg.setAiProvider}
+              apiKey={cfg.aiKey}
+              setApiKey={cfg.setAiKey}
+              model={cfg.aiModel}
+              setModel={cfg.setAiModel}
+              saving={cfg.saving}
+              onSave={cfg.saveSettings}
+            />
           </TabsContent>
 
           <TabsContent value="integracoes" className="space-y-6 focus-visible:outline-none">

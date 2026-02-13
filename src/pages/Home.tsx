@@ -66,30 +66,30 @@ const Home = () => {
   const testimonials = [
     { name: "Maria Silva", role: "Maquiadora Especialista em Noivas", content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!", rating: 5 },
     { name: "Ana Costa", role: "Maquiadora & Beauty Artist", content: "O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicação.", rating: 5 },
-    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que o KONTROL trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
+    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que o KHAOS KONTROL trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
     { name: "Camila Santos", role: "Nail Designer", content: "Finalmente tenho controle total das minhas finanças e agenda em um só lugar.", rating: 5 },
   ];
 
   return (
     <>
       <SEOHead
-        title="KONTROL // Control Center"
+        title="KHAOS KONTROL // Control Center"
         description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%. Teste grátis por 14 dias."
-        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas, kontrol system"
+        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas, khaos kontrol system"
         url="https://khaoskontrol.com.br"
         breadcrumbs={[
           { name: "Home", url: "https://khaoskontrol.com.br" }
         ]}
         faq={[
-          { question: "O que é o KONTROL?", answer: "KONTROL é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
-          { question: "Quanto custa o KONTROL?", answer: "O KONTROL oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
+          { question: "O que é o KHAOS KONTROL?", answer: "KHAOS KONTROL é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
+          { question: "Quanto custa o KHAOS KONTROL?", answer: "O KHAOS KONTROL oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
           { question: "Posso cancelar a qualquer momento?", answer: "Sim! Não há contratos de fidelidade. Você pode cancelar sua assinatura quando quiser." },
-          { question: "O KONTROL funciona para salões de beleza?", answer: "Sim! O KONTROL é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
+          { question: "O KHAOS KONTROL funciona para salões de beleza?", answer: "Sim! O KHAOS KONTROL é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
         ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "KONTROL",
+          "name": "KHAOS KONTROL",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
           "description": "Plataforma de gestão completa para profissionais de beleza",

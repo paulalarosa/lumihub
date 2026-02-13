@@ -25,7 +25,7 @@ export const useRole = () => {
                     .from('makeup_artists')
                     .select('id')
                     .eq('user_id', user.id)
-                    .single();
+                    .maybeSingle();
 
                 if (makeup) {
                     setRole('makeup_artist');
@@ -37,7 +37,7 @@ export const useRole = () => {
                     .from('assistants')
                     .select('id')
                     .eq('user_id', user.id)
-                    .single();
+                    .maybeSingle();
 
                 if (assistant) {
                     setRole('assistant');

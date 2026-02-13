@@ -3,6 +3,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { VitePWA } from 'vite-plugin-pwa';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { compression } from 'vite-plugin-compression2';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -62,7 +64,11 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        maximumFileSizeToCacheInBytes: 6000000,
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
@@ -87,39 +93,91 @@ export default defineConfig(({ mode }) => ({
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365, // 1 ano
               },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 ano
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
             },
           },
         ],
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
       },
     }),
-  ],
+
+    // Gzip compression
+    compression({
+      algorithm: 'gzip',
+      exclude: [/\.(br)$/, /\.(gz)$/],
+    }),
+
+    // Brotli compression 
+    compression({
+      algorithm: 'brotliCompress',
+      exclude: [/\.(br)$/, /\.(gz)$/],
+    }),
+
+    // Bundle analyzer (only in build mode if ANALYZE is set)
+    ...(process.env.ANALYZE ? [visualizer({
+      open: true,
+      filename: 'dist/stats.html',
+    })] : []),
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
-
   esbuild: {
-
     drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
   build: {
     sourcemap: mode !== 'production',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'],
+          // Vendor chunks
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'vendor-supabase': ['@supabase/supabase-js'],
 
-          ui: ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          // AI chunks (lazy)
+          'ai-core': ['@mlc-ai/web-llm', '@google/generative-ai', 'zustand'],
+          'ai-ui': ['react-markdown', 'remark-gfm'],
 
-        }
-      }
-    }
+          // Calendar chunk
+          'calendar': ['date-fns'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
-
+  optimizeDeps: {
+    exclude: [
+      '@mlc-ai/web-llm', // Don't pre-bundle large local AI engine
+    ],
+  },
   test: {
     globals: true,
     environment: 'jsdom',

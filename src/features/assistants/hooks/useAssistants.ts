@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export interface Assistant {
     id: string;
-    name: string;
+    full_name: string;
     email: string | null;
     phone: string | null;
     is_registered: boolean;
@@ -21,10 +21,10 @@ export const useAssistants = () => {
         const { data, error } = await supabase
             .from('assistants')
             .select('*')
-            .order('name');
+            .order('full_name');
 
         if (error) throw error;
-        return data as Assistant[];
+        return data as unknown as Assistant[];
     };
 
     const query = useQuery({
@@ -33,14 +33,14 @@ export const useAssistants = () => {
     });
 
     const createMutation = useMutation({
-        mutationFn: async (vars: { name: string, email: string | null, phone: string | null }) => {
+        mutationFn: async (vars: { fullName: string, email: string | null, phone: string | null }) => {
             const { data: userData, error: userError } = await supabase.auth.getUser();
             if (userError || !userData.user) throw new Error("User not authenticated");
 
             const token = crypto.randomUUID();
             const { error } = await supabase.from('assistants').insert({
                 user_id: userData.user.id,
-                name: vars.name,
+                full_name: vars.fullName,
                 email: vars.email,
                 phone: vars.phone,
                 invite_token: token
@@ -57,9 +57,9 @@ export const useAssistants = () => {
     });
 
     const updateMutation = useMutation({
-        mutationFn: async (vars: { id: string, name: string, email: string | null, phone: string | null }) => {
+        mutationFn: async (vars: { id: string, fullName: string, email: string | null, phone: string | null }) => {
             const { error } = await supabase.from('assistants').update({
-                name: vars.name,
+                full_name: vars.fullName,
                 email: vars.email,
                 phone: vars.phone
             }).eq('id', vars.id);

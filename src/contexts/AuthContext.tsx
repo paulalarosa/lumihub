@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
@@ -40,6 +40,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return 'professional';
         }
     };
+
+
+
+    // Standard Functions exposed - Memoized to prevent effect loops
+    const signIn = useCallback((email: string, pass: string) => supabase.auth.signInWithPassword({ email, password: pass }), []);
+
+    const signOut = useCallback(async () => {
+        if (user) {
+            Logger.action("USER_SIGN_OUT", user.id, "auth.users", user.id);
+        }
+        setLoading(true);
+        await supabase.auth.signOut();
+
+        setRole(null);
+        setUser(null);
+        setSession(null);
+        lastUserId.current = null;
+        setLoading(false);
+    }, [user]);
+
+    const getRedirectUrl = () => {
+        // Handle localhost development
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return `${window.location.origin}/auth/callback`;
+        }
+
+        // Handle specific production domain or fallback to current origin for staging/previews
+        const domain = window.location.hostname.endsWith('khaoskontrol.com.br')
+            ? 'https://khaoskontrol.com.br'
+            : window.location.origin;
+
+        return `${domain}/auth/callback`;
+    };
+
+    const signInWithGoogle = useCallback(() => supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: getRedirectUrl(),
+            scopes: 'https://www.googleapis.com/auth/calendar.events.readonly',
+            queryParams: {
+                access_type: 'offline',
+                prompt: 'consent',
+            },
+        }
+    }), []);
+
+    const signUp = useCallback((email: string, pass: string) => supabase.auth.signUp({ email, password: pass }), []);
+
+    const isAdmin = role === 'studio' || role === 'admin';
 
     useEffect(() => {
         let mounted = true;
@@ -137,47 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             mounted = false;
             subscription.unsubscribe();
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Standard Functions exposed
-    const signIn = (email: string, pass: string) => supabase.auth.signInWithPassword({ email, password: pass });
-
-    const signOut = async () => {
-        if (user) {
-            Logger.action("USER_SIGN_OUT", user.id, "auth.users", user.id);
-        }
-        setLoading(true);
-        await supabase.auth.signOut();
-
-        setRole(null);
-        setUser(null);
-        setSession(null);
-        lastUserId.current = null;
-        setLoading(false);
-    };
-
-    const getRedirectUrl = () => {
-        if (window.location.hostname === 'localhost') {
-            return `${window.location.origin}/auth/callback`;
-        }
-        return 'https://khaoskontrol.com.br/auth/callback';
-    };
-
-    const signInWithGoogle = () => supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            redirectTo: getRedirectUrl(),
-            scopes: 'https://www.googleapis.com/auth/calendar.events.readonly',
-            queryParams: {
-                access_type: 'offline',
-                prompt: 'consent',
-            },
-        }
-    });
-    const signUp = (email: string, pass: string) => supabase.auth.signUp({ email, password: pass });
-
-    const isAdmin = role === 'studio' || role === 'admin';
+    }, [navigate, signOut]);
 
     return (
         <AuthContext.Provider value={{ user, session, loading, role, signIn, signOut, signInWithGoogle, signUp, isAdmin }}>

@@ -17,7 +17,7 @@ export const AssistantList = () => {
         queryKey: ['makeup-artist-profile', user?.id],
         queryFn: async () => {
             if (!user) return null;
-            const { data } = await supabase.from('makeup_artists').select('id').eq('user_id', user.id).single();
+            const { data } = await supabase.from('makeup_artists').select('id').eq('user_id', user.id).maybeSingle();
             return data;
         },
         enabled: !!user
@@ -31,10 +31,10 @@ export const AssistantList = () => {
             // Fetch ACTIVE connections
             // Using simple join syntax if relationships are set up correctly in Supabase.
             // assistant_access has FK to assistants.
-            const { data: accessData, error } = await supabase
-                .from('assistant_access')
+            const { data: accessData, error } = await (supabase
+                .from('assistant_access') as any)
                 .select(`
-                    id, status, created_at,
+                    id, status, granted_at,
                     assistant:assistants (id, full_name, phone)
                 `)
                 .eq('makeup_artist_id', makeupArtistId)

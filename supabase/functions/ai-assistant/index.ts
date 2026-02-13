@@ -1,41 +1,13 @@
-
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-import { createClient } from 'jsr:@supabase/supabase-js@2'
-import { GoogleGenerativeAI } from 'npm:@google/generative-ai'
-
-// Setup Gemini API
-const genAI = new GoogleGenerativeAI(Deno.env.get("GOOGLE_API_KEY") || "");
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-const embeddingModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { generateText, tool } from "npm:ai"
+import { createGoogleGenerativeAI } from "npm:@ai-sdk/google"
+import { createOpenAI } from "npm:@ai-sdk/openai"
+import { z } from "npm:zod"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
-// RAG Helper
-async function getRelevantDocs(query: string, supabaseClient: any) {
-  try {
-    const embeddingResult = await embeddingModel.embedContent(query);
-    const queryEmbedding = embeddingResult.embedding.values;
-
-    const { data, error } = await supabaseClient.rpc('match_knowledge', {
-      query_embedding: queryEmbedding,
-      match_threshold: 0.5,
-      match_count: 3,
-    });
-
-    if (error) return '';
-    if (!data || data.length === 0) return '';
-
-    return data.map((doc: any) => `
-[DOCUMENTO: ${doc.title}]
-${doc.content}
-`).join('\n\n');
-  } catch (err) {
-    console.error('RAG Exception:', err);
-    return '';
-  }
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-ai-provider, x-ai-key, x-ai-model',
 }
 
 serve(async (req) => {
@@ -46,208 +18,143 @@ serve(async (req) => {
   try {
     const { messages, user_id, conversation_id } = await req.json();
 
+    // 1. Resolve Provider and Key (BYOK or System Fallback)
+    const clientProvider = req.headers.get('x-ai-provider');
+    const clientKey = req.headers.get('x-ai-key');
+    const clientModel = req.headers.get('x-ai-model');
+
+    const providerType = clientProvider || 'google';
+    const apiKey = clientKey || Deno.env.get("GOOGLE_API_KEY") || "";
+    const modelId = clientModel || (providerType === 'google' ? "gemini-2.0-flash-exp" : "gpt-4o");
+
+    // 2. Initialize Model
+    let model;
+    if (providerType === 'google') {
+      const google = createGoogleGenerativeAI({ apiKey });
+      model = google(modelId);
+    } else if (providerType === 'openai') {
+      const openai = createOpenAI({ apiKey });
+      model = openai(modelId);
+    } else {
+      throw new Error(`Unsupported provider: ${providerType}`);
+    }
+
+    // 3. Setup Supabase Client
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const lastUserMessage = messages.map(m => m).reverse().find(m => m.role === 'user')?.content || '';
+    // 4. Persistence for Action Metadata (compatibility with UI cards)
+    let actionData = null;
 
-    let knowledgeContext = '';
-    if (lastUserMessage) {
-      knowledgeContext = await getRelevantDocs(lastUserMessage, supabaseClient);
-    }
-
-    const tools = [
-      {
-        function_declarations: [
-          {
-            name: "list_events",
-            description: "Lista eventos da agenda. Pode filtrar por período (week, month) ou datas específicas.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                period: { type: "STRING", enum: ["week", "month", "today", "tomorrow"] },
-                start_date: { type: "STRING" },
-                end_date: { type: "STRING" }
-              }
-            }
-          },
-          {
-            name: "create_event",
-            description: "Cria evento/compromisso na agenda.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                title: { type: "STRING" },
-                start_time: { type: "STRING", description: "ISO 8601" },
-                end_time: { type: "STRING", description: "ISO 8601" },
-                description: { type: "STRING" }
-              },
-              required: ["title", "start_time", "end_time"]
-            }
-          },
-          {
-            name: "create_client",
-            description: "Cria um novo cliente no sistema CRM.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                name: { type: "STRING" },
-                email: { type: "STRING" },
-                phone: { type: "STRING" },
-                cpf: { type: "STRING" }
-              },
-              required: ["name", "email"]
-            }
-          },
-          {
-            name: "invite_assistant",
-            description: "Envia convite por email para um novo assistente de equipe.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                email: { type: "STRING" },
-                name: { type: "STRING" }
-              },
-              required: ["email"]
-            }
-          },
-          {
-            name: "generate_contract",
-            description: "Gera e salva um contrato jurídico para um projeto existente.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                project_title: { type: "STRING", description: "Nome/Título do projeto para buscar" }
-              },
-              required: ["project_title"]
-            }
-          },
-          {
-            name: "get_dashboard_stats",
-            description: "Obtém estatísticas financeiras e de eventos da dashboard.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                period: { type: "STRING", enum: ["month", "year"], description: "Período para análise" }
-              }
-            }
-          },
-          {
-            name: "send_reminder",
-            description: "Gera link de WhatsApp para lembrar cliente de um evento.",
-            parameters: {
-              type: "OBJECT",
-              properties: {
-                client_name: { type: "STRING" }
-              },
-              required: ["client_name"]
-            }
+    // 5. Define Tools
+    const tools = {
+      list_events: tool({
+        description: "Lista eventos da agenda. Pode filtrar por período (week, month) ou datas específicas.",
+        parameters: z.object({
+          period: z.enum(["week", "month", "today", "tomorrow"]).optional(),
+          start_date: z.string().optional(),
+          end_date: z.string().optional(),
+        }),
+        execute: async (args) => {
+          let query = supabaseClient.from('events').select('*').eq('user_id', user_id).limit(10);
+          if (args.period === 'today') {
+            const today = new Date().toISOString().split('T')[0];
+            query = query.gte('event_date', today).lte('event_date', today + ' 23:59:59');
           }
-        ]
-      }
-    ];
+          const { data, error } = await query;
+          return error ? `Erro: ${error.message}` : JSON.stringify(data);
+        },
+      }),
+      create_event: tool({
+        description: "Cria evento/compromisso na agenda.",
+        parameters: z.object({
+          title: z.string(),
+          start_time: z.string().describe("ISO 8601"),
+          end_time: z.string().describe("ISO 8601"),
+          description: z.string().optional(),
+        }),
+        execute: async (args) => {
+          const { data, error } = await supabaseClient.from('events').insert({
+            title: args.title,
+            event_date: args.start_time,
+            start_time: args.start_time,
+            end_time: args.end_time,
+            description: args.description,
+            user_id
+          }).select();
 
-    const SYSTEM_PROMPT = `Você é a Lumi, IA do Khaos Kontrol.
+          if (!error && data) {
+            actionData = { type: 'event_created', data: data[0] };
+            return `Evento criado: ${data[0].title}`;
+          }
+          return error ? `Erro: ${error.message}` : "Erro desconhecido ao criar evento.";
+        },
+      }),
+      create_client: tool({
+        description: "Cria um novo cliente no sistema CRM.",
+        parameters: z.object({
+          name: z.string(),
+          email: z.string().email(),
+          phone: z.string().optional(),
+          cpf: z.string().optional(),
+        }),
+        execute: async (args) => {
+          const { data, error } = await supabaseClient.from('wedding_clients').insert({
+            full_name: args.name,
+            email: args.email,
+            phone: args.phone,
+            cpf: args.cpf,
+            user_id
+          }).select();
 
-${knowledgeContext ? `DOCUMENTAÇÃO:\n${knowledgeContext}\n` : ''}
+          if (!error && data) {
+            actionData = { type: 'client_created', data: data[0] };
+            return `Cliente criado com ID: ${data[0].id}`;
+          }
+          return error ? `Erro: ${error.message}` : "Erro ao criar cliente.";
+        },
+      }),
+      invite_assistant: tool({
+        description: "Envia convite por email para um novo assistente de equipe.",
+        parameters: z.object({
+          email: z.string().email(),
+          name: z.string().optional(),
+        }),
+        execute: async (args) => {
+          const { data: artist } = await supabaseClient.from('makeup_artists').select('id').eq('user_id', user_id).single();
+          if (artist) {
+            const { data, error } = await supabaseClient.rpc('create_assistant_invite', {
+              p_makeup_artist_id: artist.id,
+              p_assistant_email: args.email
+            });
+            if (!error && data?.success) {
+              actionData = { type: 'invite_sent', data: { email: args.email, link: data.invite_link } };
+              return `Convite enviado! Link: ${data.invite_link}`;
+            }
+            return error ? `Erro: ${error.message}` : data.message;
+          }
+          return "Erro: Perfil de maquiadora não encontrado.";
+        },
+      }),
+      generate_contract: tool({
+        description: "Gera e salva um contrato jurídico para um projeto existente.",
+        parameters: z.object({
+          project_title: z.string().describe("Nome/Título do projeto para buscar"),
+        }),
+        execute: async (args) => {
+          const { data: projects } = await supabaseClient.from('projects').select('*, client:wedding_clients(*)').ilike('title', `%${args.project_title}%`).eq('user_id', user_id);
 
-CAPACIDADES:
-1. **Agenda**: Criar/listar eventos
-2. **CRM**: Criar clientes ("Crie a cliente Ana...")
-3. **Equipe**: Convidar assistentes ("Convide julia@email.com")
-4. **Jurídico**: Gerar contratos ("Gere contrato para o casamento da Maria")
-5. **Financeiro**: Ver estatísticas ("Quanto faturei este mês?")
+          if (!projects || projects.length === 0) return "Projeto não encontrado com esse nome.";
 
-DIRETRIZES:
-- Se o usuário pedir algo vago (ex: "Crie evento"), pergunte os detalhes.
-- Para "Gere contrato", primeiro precisamo achar o projeto. Pergunte o nome do projeto se não fornecido.
-- Responda de forma curta e prestativa.
-- Use emojis moderadamente.`;
-
-    const chatSession = model.startChat({
-      history: [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
-        { role: "model", parts: [{ text: "Olá! Sou a Lumi. Como posso ajudar na gestão do seu negócio hoje?" }] },
-        ...messages.map((m: any) => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.content }],
-        }))
-      ],
-      tools: tools,
-    });
-
-    const result = await chatSession.sendMessage(messages[messages.length - 1].content);
-    const response = await result.response;
-    let text = response.text();
-    const functionCalls = response.functionCalls();
-
-    let actionData = null; // Store metadata for frontend
-
-    if (functionCalls && functionCalls.length > 0) {
-      const call = functionCalls[0];
-      const fn = call.name;
-      const args = call.args;
-      let output = "";
-
-      console.log(`Executing tool: ${fn}`, args);
-
-      if (fn === 'list_events') {
-        let query = supabaseClient.from('events').select('*').eq('user_id', user_id).limit(10);
-        if (args.period === 'today') {
-          const today = new Date().toISOString().split('T')[0];
-          query = query.gte('event_date', today).lte('event_date', today + ' 23:59:59');
-        }
-        const { data, error } = await query;
-        output = error ? `Erro: ${error.message}` : JSON.stringify(data);
-
-      } else if (fn === 'create_event') {
-        const { data, error } = await supabaseClient.from('events').insert({
-          title: args.title,
-          event_date: args.start_time,
-          start_time: args.start_time,
-          end_time: args.end_time,
-          description: args.description,
-          user_id
-        }).select();
-        output = error ? `Erro: ${error.message}` : `Evento criado: ${data[0].title}`;
-        if (data) actionData = { type: 'event_created', data: data[0] };
-
-      } else if (fn === 'create_client') {
-        const { data, error } = await supabaseClient.from('wedding_clients').insert({
-          full_name: args.name,
-          email: args.email,
-          phone: args.phone,
-          cpf: args.cpf,
-          user_id
-        }).select();
-        output = error ? `Erro: ${error.message}` : `Cliente criado com ID: ${data[0].id}`;
-        if (data) actionData = { type: 'client_created', data: data[0] };
-
-      } else if (fn === 'invite_assistant') {
-        const { data: artist } = await supabaseClient.from('makeup_artists').select('id').eq('user_id', user_id).single();
-        if (artist) {
-          const { data, error } = await supabaseClient.rpc('create_assistant_invite', {
-            p_makeup_artist_id: artist.id,
-            p_assistant_email: args.email
-          });
-          output = error ? `Erro: ${error.message}` : (data.success ? `Convite enviado! Link: ${data.invite_link}` : data.message);
-          if (data?.success) actionData = { type: 'invite_sent', data: { email: args.email, link: data.invite_link } };
-        } else {
-          output = "Erro: Perfil de maquiadora não encontrado.";
-        }
-
-      } else if (fn === 'generate_contract') {
-        const { data: projects } = await supabaseClient.from('projects').select('*, client:wedding_clients(*)').ilike('title', `%${args.project_title}%`).eq('user_id', user_id);
-
-        if (!projects || projects.length === 0) {
-          output = "Projeto não encontrado com esse nome.";
-        } else {
           const project = projects[0];
           const contractPrompt = `Gere um contrato de prestação de serviços para: Contratante ${project.client?.full_name}, Evento ${project.title} em ${project.event_date}. Retorne apenas HTML.`;
-          const contractResult = await model.generateContent(contractPrompt);
-          const contractText = contractResult.response.text();
+
+          const { text: contractText } = await generateText({
+            model,
+            prompt: contractPrompt,
+          });
 
           const { data: contractData, error } = await supabaseClient.from('contracts').insert({
             title: `Contrato - ${project.title}`,
@@ -257,32 +164,66 @@ DIRETRIZES:
             user_id,
             status: 'draft'
           }).select();
-          output = error ? `Erro ao salvar: ${error.message}` : "Contrato gerado e salvo na aba Contratos.";
-          if (contractData) actionData = { type: 'contract_generated', data: contractData[0] };
-        }
 
-      } else if (fn === 'get_dashboard_stats') {
-        const { count } = await supabaseClient.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', user_id);
-        output = `Total de projetos: ${count}. Receita simulada: R$ 5.000,00 (Exemplo).`;
-        actionData = { type: 'stats_shown', data: { count, revenue: 5000, period: args.period } };
+          if (!error && contractData) {
+            actionData = { type: 'contract_generated', data: contractData[0] };
+            return "Contrato gerado e salvo na aba Contratos.";
+          }
+          return error ? `Erro ao salvar: ${error.message}` : "Erro ao gerar contrato.";
+        },
+      }),
+      get_dashboard_stats: tool({
+        description: "Obtém estatísticas financeiras e de eventos da dashboard.",
+        parameters: z.object({
+          period: z.enum(["month", "year"]).optional().describe("Período para análise"),
+        }),
+        execute: async (args) => {
+          const { count } = await supabaseClient.from('projects').select('*', { count: 'exact', head: true }).eq('user_id', user_id);
+          actionData = { type: 'stats_shown', data: { count, revenue: 5000, period: args.period } };
+          return `Total de projetos: ${count}. Receita simulada: R$ 5.000,00 (Exemplo).`;
+        },
+      }),
+      send_reminder: tool({
+        description: "Gera link de WhatsApp para lembrar cliente de um evento.",
+        parameters: z.object({
+          client_name: z.string(),
+        }),
+        execute: async (args) => {
+          const { data: clients } = await supabaseClient.from('wedding_clients').select('*').ilike('full_name', `%${args.client_name}%`).eq('user_id', user_id);
+          if (clients && clients.length > 0) {
+            const client = clients[0];
+            const link = `https://wa.me/55${client.phone?.replace(/\D/g, '')}?text=Oi%20${client.full_name},%20lembrete%20do%20nosso%20evento!`;
+            actionData = { type: 'reminder_generated', data: { link, client_name: client.full_name } };
+            return `Link gerado: ${link}`;
+          }
+          return "Cliente não encontrado.";
+        },
+      }),
+    };
 
-      } else if (fn === 'send_reminder') {
-        const { data: clients } = await supabaseClient.from('wedding_clients').select('*').ilike('full_name', `%${args.client_name}%`).eq('user_id', user_id);
-        if (clients && clients.length > 0) {
-          const client = clients[0];
-          const link = `https://wa.me/55${client.phone?.replace(/\D/g, '')}?text=Oi%20${client.full_name},%20lembrete%20do%20nosso%20evento!`;
-          output = `Link gerado: ${link}`;
-          actionData = { type: 'reminder_generated', data: { link, client_name: client.full_name } };
-        } else {
-          output = "Cliente não encontrado.";
-        }
-      }
+    const SYSTEM_PROMPT = `Você é a Lumi, IA do Khaos Kontrol.
+CAPACIDADES:
+1. **Agenda**: Criar/listar eventos
+2. **CRM**: Criar clientes ("Crie a cliente Ana...")
+3. **Equipe**: Convidar assistentes ("Convide julia@email.com")
+4. **Jurídico**: Gerar contratos ("Gere contrato para o casamento da Maria")
+5. **Financeiro**: Ver estatísticas ("Quanto faturei este mês?")
 
-      const result2 = await chatSession.sendMessage([
-        { functionResponse: { name: fn, response: { result: output } } }
-      ]);
-      text = result2.response.text();
-    }
+DIRETRIZES:
+- Se o usuário pedir algo vago (ex: "Crie evento"), pergunte os detalhes.
+- Responda de forma curta e prestativa. Use emojis moderadamente.`;
+
+    // 6. Execute AI Request
+    const { text } = await generateText({
+      model,
+      system: SYSTEM_PROMPT,
+      messages: messages.map((m: any) => ({
+        role: m.role,
+        content: m.content
+      })),
+      tools,
+      maxSteps: 5, // Allow tool-calling loops
+    });
 
     return new Response(JSON.stringify({ reply: text, action: actionData }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
