@@ -10,18 +10,16 @@ import { Plus, Trash2 } from 'lucide-react';
 interface Task {
     id: string;
     title: string;
-    is_completed: boolean;
-    visibility: string;
+    status: string | null;
+    sort_order: number | null;
 }
 
 interface ProjectTasksProps {
     tasks: Task[];
     newTaskTitle: string;
     setNewTaskTitle: (val: string) => void;
-    newTaskVisibility: string;
-    setNewTaskVisibility: (val: string) => void;
-    addTask: () => void;
-    toggleTask: (taskId: string, completed: boolean) => void;
+    addTask: (e?: React.FormEvent) => void;
+    toggleTask: (taskId: string, currentStatus: string | null) => void;
     deleteTask: (taskId: string) => void;
     t: (key: string) => string;
 }
@@ -30,8 +28,6 @@ export const ProjectTasks = ({
     tasks,
     newTaskTitle,
     setNewTaskTitle,
-    newTaskVisibility,
-    setNewTaskVisibility,
     addTask,
     toggleTask,
     deleteTask,
@@ -49,19 +45,9 @@ export const ProjectTasks = ({
                         placeholder="INPUT_NEW_TASK..."
                         value={newTaskTitle}
                         onChange={(e) => setNewTaskTitle(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addTask()}
+                        onKeyDown={(e) => e.key === 'Enter' && addTask(e)}
                         className="flex-1 bg-black border-white/20 rounded-none text-white font-mono uppercase focus:border-white placeholder:text-white/30"
                     />
-                    <Select value={newTaskVisibility} onValueChange={setNewTaskVisibility}>
-                        <SelectTrigger className="w-40 bg-black border-white/20 rounded-none text-white font-mono uppercase text-xs">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-black border border-white/20 rounded-none text-white">
-                            <SelectItem value="private" className="font-mono uppercase text-xs focus:bg-white focus:text-black">PRIVATE</SelectItem>
-                            <SelectItem value="shared" className="font-mono uppercase text-xs focus:bg-white focus:text-black">SHARED</SelectItem>
-                            <SelectItem value="client" className="font-mono uppercase text-xs focus:bg-white focus:text-black">CLIENT_VISIBLE</SelectItem>
-                        </SelectContent>
-                    </Select>
                     <Button onClick={addTask} className="bg-white text-black hover:bg-white/80 rounded-none aspect-square p-0 w-10">
                         <Plus className="h-4 w-4" />
                     </Button>
@@ -80,16 +66,13 @@ export const ProjectTasks = ({
                             >
                                 <div className="flex items-center gap-3">
                                     <Checkbox
-                                        checked={task.is_completed}
-                                        onCheckedChange={(checked) => toggleTask(task.id, checked as boolean)}
+                                        checked={task.status === 'completed'}
+                                        onCheckedChange={() => toggleTask(task.id, task.status)}
                                         className="border-white/50 data-[state=checked]:bg-white data-[state=checked]:text-black rounded-none"
                                     />
-                                    <span className={`font-mono text-sm uppercase ${task.is_completed ? 'line-through text-white/30' : 'text-white'}`}>
+                                    <span className={`font-mono text-sm uppercase ${task.status === 'completed' ? 'line-through text-white/30' : 'text-white'}`}>
                                         {task.title}
                                     </span>
-                                    <Badge variant="outline" className="text-[9px] rounded-none border-white/20 text-white/50 font-mono uppercase tracking-widest">
-                                        {task.visibility}
-                                    </Badge>
                                 </div>
                                 <Button
                                     variant="ghost"

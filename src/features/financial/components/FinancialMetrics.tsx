@@ -39,7 +39,7 @@ export function FinancialMetrics({ income, expense, profit, loading }: Financial
     );
 }
 
-function MetricCard({ label, value, icon: Icon, delay }: { label: string, value: string, icon: any, delay: number }) {
+function MetricCard({ label, value, icon: Icon, delay }: { label: string, value: string, icon: React.ElementType, delay: number }) {
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay }}>
             <Card className="bg-black border border-white/20 rounded-none group hover:border-white transition-all duration-300">

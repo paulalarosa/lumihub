@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export type Json =
   | string
   | number
@@ -1693,3 +1694,6 @@ export const Constants = {
     },
   },
 } as const
+=======
+export * from "@/integrations/supabase/types";
+>>>>>>> 8758fab092d565a170d01d782ac7cced1e35034c

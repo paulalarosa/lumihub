@@ -13,10 +13,21 @@ export const useAssistant = () => {
         if (!user) return;
         setLoading(true);
         try {
+            // 1. Get the Makeup Artist Profile ID for this user
+            const { data: maData } = await supabase
+                .from('makeup_artists')
+                .select('id')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            const makeupArtistId = maData?.id;
+
+            if (!makeupArtistId) return;
+
             const { data, error } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .select('*')
-                .eq('owner_id', user.id)
+                .eq('makeup_artist_id', makeupArtistId)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
@@ -40,9 +51,9 @@ export const useAssistant = () => {
         try {
             // 1. Check if already invited
             const { data: existing } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .select('id')
-                .eq('email', email)
+                .eq('assistant_email', email)
                 .eq('status', 'pending')
                 .maybeSingle();
 
@@ -56,15 +67,29 @@ export const useAssistant = () => {
             const randomPart = Math.random().toString(36).substring(2, 6);
             const inviteCode = `${namePart}-${randomPart}`;
 
+            // 1. Get the Makeup Artist Profile ID
+            const { data: maData } = await supabase
+                .from('makeup_artists')
+                .select('id')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            const makeupArtistId = maData?.id;
+            if (!makeupArtistId) {
+                toast.error('Perfil de maquiadora não encontrado');
+                setLoading(false);
+                return;
+            }
+
             const payload = {
-                email,
-                owner_id: user.id,
-                invite_code: inviteCode
+                assistant_email: email,
+                makeup_artist_id: makeupArtistId,
+                invite_token: inviteCode
             };
 
 
             const { data, error: insertError } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .insert([payload])
                 .select()
                 .single();
@@ -86,7 +111,7 @@ export const useAssistant = () => {
         setLoading(true);
         try {
             const { error } = await supabase
-                .from('assistant_invites' as any)
+                .from('assistant_invites')
                 .update({ status: 'revoked' })
                 .eq('id', id);
 

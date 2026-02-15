@@ -41,7 +41,7 @@ export default function AppLayout() {
 
     const handleOnboardingComplete = () => {
         // Optimistically update profile to hide wizard immediately
-        setProfile((prev: any) => ({ ...prev, onboarding_completed: true }));
+        setProfile(prev => ({ ...prev, onboarding_completed: true }));
         // Reload to ensure fresh state everywhere
         window.location.reload();
     };

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-import { LumiProCarousel } from "@/components/marketing/LumiProCarousel";
+import { KontrolProCarousel } from "@/components/marketing/KontrolProCarousel";
 import { TrackedButton } from "@/components/analytics/TrackedButton";
 import AIAssistantFAB from "@/components/ai-assistant/AIAssistantFAB";
 import { FloatingGlassShapes } from "@/components/animations/FloatingGlassShapes";
@@ -21,6 +21,9 @@ import { useLanguage } from "@/hooks/useLanguage";
 // New Imports
 import Header from "@/components/ui/layout/Header";
 import Footer from "@/components/ui/layout/Footer";
+import SplitText from "@/components/reactbits/SplitText";
+import DecryptedText from "@/components/reactbits/DecryptedText";
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 
 const Home = () => {
   const { scrollY } = useScroll();
@@ -63,30 +66,30 @@ const Home = () => {
   const testimonials = [
     { name: "Maria Silva", role: "Maquiadora Especialista em Noivas", content: "Consegui profissionalizar completamente meu negócio. Minhas clientes adoram o portal exclusivo!", rating: 5 },
     { name: "Ana Costa", role: "Maquiadora & Beauty Artist", content: "O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicação.", rating: 5 },
-    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que o KONTROL trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
+    { name: "Juliana Mendes", role: "Hair Stylist", content: "A organização que o KHAOS KONTROL trouxe para minha rotina é indescritível. Recomendo!", rating: 5 },
     { name: "Camila Santos", role: "Nail Designer", content: "Finalmente tenho controle total das minhas finanças e agenda em um só lugar.", rating: 5 },
   ];
 
   return (
     <>
       <SEOHead
-        title="KONTROL // Control Center"
+        title="KHAOS KONTROL // Control Center"
         description="Gerencie clientes, agenda, contratos e finanças em uma plataforma elegante. Economize 10+ horas por semana e aumente sua receita em até 40%. Teste grátis por 14 dias."
-        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas, kontrol system"
+        keywords="gestão para maquiadores, agenda de beleza, sistema para profissionais de beleza, contratos digitais, gestão de clientes, maquiadora profissional, software para salão, sistema para noivas, khaos kontrol system"
         url="https://khaoskontrol.com.br"
         breadcrumbs={[
           { name: "Home", url: "https://khaoskontrol.com.br" }
         ]}
         faq={[
-          { question: "O que é o KONTROL?", answer: "KONTROL é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
-          { question: "Quanto custa o KONTROL?", answer: "O KONTROL oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
+          { question: "O que é o KHAOS KONTROL?", answer: "KHAOS KONTROL é uma plataforma completa de gestão para profissionais de beleza, incluindo agenda, contratos digitais, gestão financeira e portal do cliente." },
+          { question: "Quanto custa o KHAOS KONTROL?", answer: "O KHAOS KONTROL oferece planos a partir de R$39,90/mês com teste gratuito de 14 dias sem necessidade de cartão de crédito." },
           { question: "Posso cancelar a qualquer momento?", answer: "Sim! Não há contratos de fidelidade. Você pode cancelar sua assinatura quando quiser." },
-          { question: "O KONTROL funciona para salões de beleza?", answer: "Sim! O KONTROL é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
+          { question: "O KHAOS KONTROL funciona para salões de beleza?", answer: "Sim! O KHAOS KONTROL é ideal para maquiadoras, cabeleireiras, nail designers e qualquer profissional de beleza." }
         ]}
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "SoftwareApplication",
-          "name": "KONTROL",
+          "name": "KHAOS KONTROL",
           "applicationCategory": "BusinessApplication",
           "operatingSystem": "Web",
           "description": "Plataforma de gestão completa para profissionais de beleza",
@@ -146,9 +149,13 @@ const Home = () => {
 
               {/* Headline */}
               {/* Headline */}
-              <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line">
-                {t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
-              </h1>
+              <SplitText
+                text={t("hero_title").replace("BACKSTAGE", "BACKSTAGE\n").replace("IMPÉRIO", "IMPÉRIO")}
+                className="font-serif text-6xl md:text-8xl lg:text-9xl text-white leading-[0.9] tracking-tighter mb-12 whitespace-pre-line"
+                delay={40}
+                duration={1.5}
+                tag="h1"
+              />
 
               {/* CTA & Subtext */}
               <div className="flex flex-col md:flex-row items-start md:items-center gap-12 border-t border-white/20 pt-12">
@@ -178,8 +185,22 @@ const Home = () => {
           {/* Decorative Technical Elements */}
           <div className="absolute top-0 right-0 p-8 hidden md:block">
             <div className="font-mono text-[10px] text-white/40 text-right space-y-2">
-              <p>{t("hero_status_online")}</p>
-              <p>{t("hero_loc")}</p>
+              <DecryptedText
+                text={t("hero_status_online")}
+                animateOn="view"
+                revealDirection="end"
+                speed={100}
+                maxIterations={20}
+                characters="XY01"
+                className="text-emerald-500"
+              />
+              <DecryptedText
+                text={t("hero_loc")}
+                animateOn="view"
+                revealDirection="end"
+                delay={500}
+                characters="LOC_LAT_LNG"
+              />
               <p>TIME: {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</p>
             </div>
           </div>
@@ -204,33 +225,40 @@ const Home = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[1px] bg-white/20 border border-white/20">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {features.map((feature, index) => (
-                <motion.div
+                <SpotlightCard
                   key={index}
-                  initial={{ opacity: 0 }}
-                  whileInView={{ opacity: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group bg-black p-8 aspect-square flex flex-col justify-between hover:bg-white transition-colors duration-0"
+                  className="bg-black hover:bg-neutral-900/50 transition-colors duration-300 border-white/10"
+                  spotlightColor="rgba(255, 255, 255, 0.15)"
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="font-mono text-[10px] text-gray-600 group-hover:text-black">
-                      [MOD.0{index + 1}]
-                    </span>
-                    <feature.icon className="h-8 w-8 text-white group-hover:text-black stroke-[1.5]" />
-                  </div>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    viewport={{ once: true }}
+                    className="h-full flex flex-col justify-between"
+                  >
+                    <div className="flex justify-between items-start">
+                      <DecryptedText
+                        text={`[MOD.0${index + 1}]`}
+                        animateOn="view"
+                        speed={50}
+                        className="font-mono text-[10px] text-gray-600"
+                      />
+                      <feature.icon className="h-8 w-8 text-white stroke-[1.5]" />
+                    </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-mono text-lg uppercase tracking-wider text-white group-hover:text-black">
-                      {feature.title}
-                    </h3>
-                    <p className="font-mono text-xs text-gray-500 leading-relaxed group-hover:text-black/70">
-                      {feature.description}
-                      <span className="opacity-0 group-hover:opacity-100 ml-2 inline-block w-2 H-4 bg-black animate-pulse">_</span>
-                    </p>
-                  </div>
-                </motion.div>
+                    <div className="space-y-4 pt-8">
+                      <h3 className="font-mono text-lg uppercase tracking-wider text-white">
+                        {feature.title}
+                      </h3>
+                      <p className="font-mono text-xs text-gray-500 leading-relaxed">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                </SpotlightCard>
               ))}
             </div>
           </div>
@@ -365,18 +393,18 @@ const Home = () => {
           </div>
         </section>
 
-        {/* Lumi Pro Section */}
+        {/* Kontrol Pro Section */}
         <section className="py-32 bg-black">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16 space-y-4">
               <h2 className="font-serif font-light text-4xl lg:text-5xl text-white">
-                {t("lumipro_title")}
+                {t("kontrolpro_title")}
               </h2>
               <p className="text-sm font-mono text-white/40 max-w-2xl mx-auto uppercase tracking-widest">
-                {t("lumipro_subtitle")}
+                {t("kontrolpro_subtitle")}
               </p>
             </div>
-            <LumiProCarousel />
+            <KontrolProCarousel />
           </div>
         </section>
 

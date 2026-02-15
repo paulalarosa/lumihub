@@ -72,7 +72,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
                         <div className="mt-4 flex items-center justify-center gap-2 text-[10px] text-gray-600 uppercase">
                             <Terminal className="w-3 h-3" />
-                            <span>LumiHub Secure Error Handler v2.0</span>
+                            <span>KONTROL Secure Error Handler v2.0</span>
                         </div>
                     </div>
                 </div>

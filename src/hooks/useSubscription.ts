@@ -50,7 +50,7 @@ export const useSubscription = () => {
                     return;
                 }
 
-                const p = profile as any;
+                const p = profile;
                 let plan = (p.subscription_tier as PlanType) || 'free'; // Use subscription_tier if available
                 const createdAt = p.created_at ? parseISO(p.created_at) : new Date();
                 const daysActive = differenceInDays(new Date(), createdAt);

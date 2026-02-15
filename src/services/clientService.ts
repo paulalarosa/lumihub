@@ -6,6 +6,7 @@ export interface Client {
     id: string;
     user_id: string | null;
     name: string;
+    full_name: string; // Added to match query
     email: string | null;
     phone: string | null;
     instagram: string | null;

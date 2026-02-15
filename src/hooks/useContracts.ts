@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { Logger } from '@/services/logger';
 
 export interface Contract {
     id: string;
     project_id: string;
     title: string;
     content?: string;
-    status: 'draft' | 'sent' | 'signed';
+    status: string; // Supabase returns string, not enum
     created_at: string;
     signature_url?: string;
     signed_at?: string;
@@ -38,7 +39,7 @@ export function useContracts() {
             console.error('Error fetching contracts:', error);
             toast.error('Erro ao carregar contratos');
         } else {
-            setContracts(data as any);
+            setContracts(data);
         }
         setLoading(false);
     };
@@ -63,7 +64,13 @@ export function useContracts() {
             throw error;
         }
 
-        setContracts([data as any, ...contracts]);
+        // Audit the action
+        Logger.action("CONTRACT_CREATE", user.id, "contracts", data.id, {
+            title: data.title,
+            project_id: data.project_id
+        });
+
+        setContracts([data, ...contracts]);
         toast.success('Contrato criado com sucesso');
         return data;
     };
@@ -83,27 +90,11 @@ export function useContracts() {
             throw uploadError;
         }
 
-        const { data: { publicUrl } } = supabase.storage
-            .from('contracts')
-            .getPublicUrl(filePath);
+        // Audit the action
+        Logger.action("CONTRACT_UPLOAD", user.id, "storage.contracts", filePath, {
+            fileName: file.name
+        });
 
-        // Since bucket is private, we might need a signed URL instead
-        // But for simplicity in this "MVP" flow, if we want persistent access, 
-        // we usually make it public OR generate signed URLs on the fly.
-        // Given the requirement "Users need to upload... (PDFs)", and usually contracts are sensitive, 
-        // a private bucket + signed URL is best. 
-        // However, `getPublicUrl` returns a URL that works if the bucket is public.
-        // If bucket is private, we need `createSignedUrl`. 
-
-        // Let's use createSignedUrl for 1 hour for preview, or store the path and sign on retrieval.
-        // Ideally we store the PATH in db, not the signed URL (which expires).
-        // But the prompt asks to save "URL". 
-        // Let's stick to storing the Path or Public URL if we switch bucket to public. 
-        // The migration set it to `false` (private).
-        // So we should return the path.
-
-        return filePath;
-        // Return the path so we can generate signed URLs on demand (Security Best Practice)
         return filePath;
     };
 

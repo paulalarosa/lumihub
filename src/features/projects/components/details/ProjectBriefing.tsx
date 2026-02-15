@@ -4,15 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ClipboardList, Plus, ExternalLink } from 'lucide-react';
 
-interface Briefing {
-    id: string;
-    questions: any[];
-    answers: Record<string, any>;
-    is_submitted: boolean;
-}
+import type { BriefingUI } from '@/types/api.types';
 
 interface ProjectBriefingProps {
-    briefing: Briefing | null;
+    briefing: BriefingUI | null;
     createDefaultBriefing: () => void;
     copyPortalLink: () => void;
 }
@@ -54,7 +49,7 @@ export const ProjectBriefing = ({
                         </div>
 
                         <div className="space-y-4 mt-6">
-                            {(briefing.questions as any[]).map((q: any) => (
+                            {((briefing.questions || []) as Array<{ id: string; question: string }>).map((q) => (
                                 <div key={q.id} className="p-4 border border-white/10 bg-white/5">
                                     <p className="font-mono text-xs text-white/60 mb-2 uppercase tracking-wide">Q. {q.question}</p>
                                     <p className="font-serif text-white pl-4 border-l border-white/20">

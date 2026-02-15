@@ -8,7 +8,7 @@ export const translations = {
         header_start: "ACESSO KONTROL",
 
         // Home - Hero
-        hero_badge: "KONTROL System v.2.0",
+        hero_badge: "KHAOS KONTROL System v.2.0",
         hero_title: "O BACKSTAGE DO SEU IMPÉRIO.",
         hero_subtitle: "Gestão minimalista para profissionais que não aceitam o básico. Controle total da sua carreira em preto e branco.",
         cta_start: "INICIAR_SISTEMA",
@@ -22,7 +22,7 @@ export const translations = {
         feature_1_desc: "Gerencie clientes, histórico e anotações com a maestria de quem constrói um legado.",
         feature_2_title: "LINHA DO TEMPO VISUAL",
         feature_2_desc: "Visualize sua agenda como uma obra de arte, com cronogramas precisos.",
-        feature_3_title: "KONTROL AI & AUTOMAÇÃO",
+        feature_3_title: "KHAOS KONTROL AI & AUTOMAÇÃO",
         feature_3_desc: "Sua assistente virtual que trabalha enquanto você dorme. Confirmações, lembretes e preenchimento inteligente.",
         feature_4_title: "CONTRATOS INTELIGENTES",
         feature_4_desc: "Segurança jurídica com contratos gerados automaticamente. Assinatura digital integrada na hora.",
@@ -49,9 +49,9 @@ export const translations = {
         testimonials_title: "BASE DE DADOS: CLIENTES",
         testimonials_subtitle: "/// REGISTROS_VERIFICADOS",
 
-        // Home - Lumi Pro
-        lumipro_title: "KONTROL PRO",
-        lumipro_subtitle: "/// AREA_ASSISTENTES",
+        // Home - Kontrol Pro
+        kontrolpro_title: "KHAOS KONTROL PRO",
+        kontrolpro_subtitle: "/// AREA_ASSISTENTES",
 
         // Home - CTA
         cta_bottom_title: "PRONTA PARA INICIAR?",
@@ -120,6 +120,117 @@ export const translations = {
         admin_block_user: "BLOQUEAR",
         admin_global_alert: "MENSAGEM GLOBAL DE ALERTA",
         admin_live_feed: "ATIVIDADE DO SISTEMA",
+
+        // Contact Page
+        contact_title: "ENVIAR MENSAGEM",
+        contact_subtitle: "NOSSA EQUIPE ESTÁ PRONTA PARA AJUDAR.",
+        contact_name: "NOME *",
+        contact_name_placeholder: "NOME COMPLETO",
+        contact_email: "EMAIL *",
+        contact_email_placeholder: "ENDEREÇO DE EMAIL",
+        contact_subject: "ASSUNTO",
+        contact_subject_placeholder: "TÓPICO",
+        contact_message: "MENSAGEM *",
+        contact_message_placeholder: "COMO PODEMOS AJUDAR?",
+        contact_submit: "ENVIAR TRANSMISSÃO",
+        contact_submitting: "TRANSMITINDO...",
+        contact_channels_title: "CANAIS DE COMUNICAÇÃO",
+        contact_channels_desc: "PREFERE UMA LINHA DIRETA? NOSSO TIME DE CONCIERGE ESTÁ DISPONÍVEL.",
+        contact_whatsapp: "SUPORTE WHATSAPP",
+        contact_whatsapp_desc: "CONCIERGE EM TEMPO REAL",
+        contact_email_btn: "SUPORTE EMAIL",
+        contact_email_desc: "RESPOSTA EM 24H",
+        contact_hero_title: "AMPLIFIQUE SEU",
+        contact_hero_subtitle: "ALCANCE DE NEGÓCIO",
+        contact_hero_desc: "DESCUBRA COMO NOSSA TECNOLOGIA TRANSFORMA A GESTÃO.",
+        contact_hero_cta: "VER PLANOS DE ACESSO",
+
+        // Features Page (Recursos)
+        features_page_badge: "CAPACIDADES DO SISTEMA // MÓDULOS",
+        features_page_title: "PROJETADO PARA",
+        features_page_subtitle: "ALTA PERFORMANCE",
+        features_cta_setup: "INICIALIZAR SETUP",
+        features_cta_blueprints: "VER BLUEPRINTS",
+        features_status: "STATUS DO SISTEMA: PRONTO",
+
+        // Plans Page
+        plans_badge: "ARQUITETURA DO SISTEMA // MODELOS DE PREÇO",
+        plans_title: "BLUEPRINTS DE DADOS",
+        plans_no_card: "SEM CARTÃO DE CRÉDITO",
+        plans_trial: "14 DIAS GRÁTIS",
+        plans_cancel: "CANCELE QUANDO QUISER",
+        plans_security: "CRIPTOGRAFIA DE DADOS",
+        plans_cloud: "SYNC NA NUVEM",
+        plans_mobile: "ACESSO MOBILE",
+        plans_updates: "UPDATES AUTOMÁTICOS",
+        plans_faq_title: "SYSTEM FAQ // DÚVIDAS_COMUNS",
+
+        // Plan Details
+        plan_essential_name: "ACESSO ESSENCIAL",
+        plan_essential_desc: "ACESSO SISTEMA NÍVEL 1",
+        plan_essential_limit: "ARTISTA SOLO // INICIANTE",
+        plan_professional_name: "ACESSO PROFISSIONAL",
+        plan_professional_desc: "SUÍTE DE GESTÃO AVANÇADA",
+        plan_professional_badge: "MAIS POPULAR",
+        plan_studio_name: "ACESSO STUDIO",
+        plan_studio_desc: "SOLUÇÕES PARA EQUIPES & IMPÉRIOS",
+        plan_studio_badge: "MELHOR VALOR",
+
+        // Plan Features
+        feat_10_clients: "10 CLIENTES ATIVOS",
+        feat_unlimited_clients: "CLIENTES ILIMITADOS",
+        feat_tech_pack_basic: "PACK TÉCNICO BÁSICO (PDF)",
+        feat_tech_pack_gold: "PACK TÉCNICO GOLD",
+        feat_smart_agenda: "AGENDA INTELIGENTE",
+        feat_contracts: "CONTRATOS DIGITAIS",
+        feat_client_portal: "PORTAL DA CLIENTE",
+        feat_financial_dash: "DASHBOARD FINANCEIRO",
+        feat_commission: "CÁLCULO DE COMISSÃO",
+        feat_ai_support: "SUPORTE IA",
+        feat_full_analytics: "ANALYTICS COMPLETO",
+        feat_custom_portal: "PORTAL DA NOIVA CUSTOM",
+        feat_moodboard: "MOODBOARD INTERATIVO",
+        feat_anamnesis: "FICHAS DE ANAMNESE",
+        feat_all_pro: "TUDO DO PRO",
+        feat_team_mgmt: "GESTÃO DE EQUIPE",
+        feat_auto_comm: "AUTO COMISSÕES",
+        feat_ops_ai: "IA OPERACIONAL",
+        feat_perf_artist: "PERFORMANCE DO ARTISTA",
+        feat_multi_user: "ACESSO MULTI-USUÁRIO",
+        feat_priority_support: "SUPORTE PRIORITÁRIO",
+        feat_api: "INTEGRAÇÃO API",
+
+        // Blog Posts
+        post_1_title: "Gestão de Carreira: Desenhando um Caminho Artístico Sustentável",
+        post_1_excerpt: "Um guia prático para planejar sua carreira, diversificar fontes de renda e se posicionar para clientes premium.",
+        post_1_cat: "NEGÓCIOS",
+        post_1_read: "6 MIN LEITURA",
+
+        post_2_title: "Tendências Noivas 2026: Luxo Minimalista & Glow Atemporal",
+        post_2_excerpt: "Principais tendências moldando a beleza das noivas este ano, do sculpting suave a acentos metálicos para looks editoriais.",
+        post_2_cat: "TENDÊNCIAS",
+        post_2_read: "7 MIN LEITURA",
+
+        post_3_title: "Independência Financeira: Precificação, Poupança & Investimento",
+        post_3_excerpt: "Estratégias para construir fluxo de caixa confiável, definir preços premium e planejar liberdade financeira de longo prazo.",
+        post_3_cat: "FINANÇAS",
+        post_3_read: "8 MIN LEITURA",
+
+        post_4_title: "A Arte do Networking: De Colaborações a Parcerias de Marca",
+        post_4_excerpt: "Como criar conexões profissionais significativas e escalar seu negócio criativo através de parcerias estratégicas.",
+        post_4_cat: "CRESCIMENTO",
+        post_4_read: "5 MIN LEITURA",
+
+        // Blog Page
+        blog_badge: "DEPARTAMENTO EDITORIAL KONTROL",
+        blog_subtitle: "PERSPECTIVAS SOBRE BELEZA, NEGÓCIOS E ARTE.",
+        blog_subscribe_title: "ASSINE O EDITORIAL",
+        blog_subscribe_desc: "RECEBA NOTIFICAÇÕES QUANDO PUBLICARMOS NOVOS EDITORIAIS.",
+        blog_subscribe_placeholder: "ENDEREÇO DE EMAIL",
+        blog_subscribe_btn: "INSCREVER",
+        blog_read_article: "LER ARTIGO",
+
+        header_contact: "CONTATO",
     },
     en: {
         // Header
@@ -130,7 +241,7 @@ export const translations = {
         header_start: "SYSTEM ACCESS",
 
         // Home - Hero
-        hero_badge: "KONTROL System v.2.0",
+        hero_badge: "KHAOS KONTROL System v.2.0",
         hero_title: "YOUR EMPIRE'S BACKSTAGE.",
         hero_subtitle: "Minimalist management for professionals who refuse basic. Total control of your career in black and white.",
         cta_start: "INITIALIZE_SYSTEM",
@@ -144,7 +255,7 @@ export const translations = {
         feature_1_desc: "Manage clients, history, and notes with the mastery of one building a legacy.",
         feature_2_title: "VISUAL TIMELINE",
         feature_2_desc: "Visualize your schedule as a work of art, with precise timelines.",
-        feature_3_title: "KONTROL AI & AUTOMATION",
+        feature_3_title: "KHAOS KONTROL AI & AUTOMATION",
         feature_3_desc: "Your virtual assistant working while you sleep. Confirmations, reminders, and smart filling.",
         feature_4_title: "SMART CONTRACTS",
         feature_4_desc: "Legal security with automatically generated contracts. Integrated digital signature on the spot.",
@@ -171,9 +282,9 @@ export const translations = {
         testimonials_title: "DATABASE: CLIENTS",
         testimonials_subtitle: "/// VERIFIED_RECORDS",
 
-        // Home - Lumi Pro
-        lumipro_title: "KONTROL PRO",
-        lumipro_subtitle: "/// ASSISTANT_AREA",
+        // Home - Kontrol Pro
+        kontrolpro_title: "KHAOS KONTROL PRO",
+        kontrolpro_subtitle: "/// ASSISTANT_AREA",
 
         // Home - CTA
         cta_bottom_title: "READY TO START?",
@@ -184,7 +295,7 @@ export const translations = {
 
         // Login
         login_title: "ACCESS_TERMINAL",
-        login_subtitle: "AUTHENTICATION//KONTROL_SYSTEM",
+        login_subtitle: "AUTHENTICATION//KHAOS_KONTROL_SYSTEM",
         login_google: "LOGIN_WITH_GOOGLE",
         login_or: "OR_USE_CREDENTIALS",
         login_email: "EMAIL_ADDRESS",
@@ -242,5 +353,116 @@ export const translations = {
         admin_block_user: "BLOCK",
         admin_global_alert: "GLOBAL ALERT MESSAGE",
         admin_live_feed: "SYSTEM ACTIVITY",
+
+        // Contact Page
+        contact_title: "SEND MESSAGE",
+        contact_subtitle: "OUR TEAM IS READY TO HELP.",
+        contact_name: "NAME *",
+        contact_name_placeholder: "FULL NAME",
+        contact_email: "EMAIL *",
+        contact_email_placeholder: "EMAIL ADDRESS",
+        contact_subject: "SUBJECT",
+        contact_subject_placeholder: "TOPIC",
+        contact_message: "MESSAGE *",
+        contact_message_placeholder: "HOW CAN WE HELP?",
+        contact_submit: "SEND TRANSMISSION",
+        contact_submitting: "TRANSMITTING...",
+        contact_channels_title: "COMMUNICATION CHANNELS",
+        contact_channels_desc: "PREFER A DIRECT LINE? OUR CONCIERGE TEAM IS AVAILABLE.",
+        contact_whatsapp: "WHATSAPP SUPPORT",
+        contact_whatsapp_desc: "REAL-TIME CONCIERGE",
+        contact_email_btn: "EMAIL SUPPORT",
+        contact_email_desc: "RESPONSE IN 24H",
+        contact_hero_title: "AMPLIFY YOUR",
+        contact_hero_subtitle: "BUSINESS REACH",
+        contact_hero_desc: "DISCOVER HOW OUR TECHNOLOGY TRANSFORMS MANAGEMENT.",
+        contact_hero_cta: "VIEW ACCESS PLANS",
+
+        // Features Page
+        features_page_badge: "SYSTEM CAPABILITIES // MODULES",
+        features_page_title: "DESIGNED FOR",
+        features_page_subtitle: "HIGH PERFORMANCE",
+        features_cta_setup: "INITIALIZE SETUP",
+        features_cta_blueprints: "VIEW BLUEPRINTS",
+        features_status: "SYSTEM STATUS: READY",
+
+        // Plans Page
+        plans_badge: "SYSTEM ARCHITECTURE // PRICING MODELS",
+        plans_title: "DATA BLUEPRINTS",
+        plans_no_card: "NO CREDIT CARD",
+        plans_trial: "14 DAYS FREE",
+        plans_cancel: "CANCEL ANYTIME",
+        plans_security: "DATA ENCRYPTION",
+        plans_cloud: "CLOUD SYNC",
+        plans_mobile: "MOBILE ACCESS",
+        plans_updates: "AUTOMATIC UPDATES",
+        plans_faq_title: "SYSTEM FAQ // COMMON_QUESTIONS",
+
+        // Plan Details
+        plan_essential_name: "ESSENTIAL ACCESS",
+        plan_essential_desc: "SYSTEM ACCESS LEVEL 1",
+        plan_essential_limit: "SOLO ARTIST // BEGINNER",
+        plan_professional_name: "PROFESSIONAL ACCESS",
+        plan_professional_desc: "ADVANCED MANAGEMENT SUITE",
+        plan_professional_badge: "MOST POPULAR",
+        plan_studio_name: "STUDIO ACCESS",
+        plan_studio_desc: "SOLUTIONS FOR TEAMS & EMPIRES",
+        plan_studio_badge: "BEST VALUE",
+
+        // Plan Features
+        feat_10_clients: "10 ACTIVE CLIENTS",
+        feat_unlimited_clients: "UNLIMITED CLIENTS",
+        feat_tech_pack_basic: "BASIC TECH PACK (PDF)",
+        feat_tech_pack_gold: "GOLD TECH PACK",
+        feat_smart_agenda: "SMART CALENDAR",
+        feat_contracts: "DIGITAL CONTRACTS",
+        feat_client_portal: "CLIENT PORTAL",
+        feat_financial_dash: "FINANCIAL DASHBOARD",
+        feat_commission: "COMMISSION CALCULATION",
+        feat_ai_support: "AI SUPPORT",
+        feat_full_analytics: "FULL ANALYTICS",
+        feat_custom_portal: "CUSTOM BRIDE PORTAL",
+        feat_moodboard: "INTERACTIVE MOODBOARD",
+        feat_anamnesis: "ANAMNESIS FORMS",
+        feat_all_pro: "EVERYTHING IN PRO",
+        feat_team_mgmt: "TEAM MANAGEMENT",
+        feat_auto_comm: "AUTO COMMISSIONS",
+        feat_ops_ai: "OPERATIONAL AI",
+        feat_perf_artist: "ARTIST PERFORMANCE",
+        feat_multi_user: "MULTI-USER ACCESS",
+        feat_priority_support: "PRIORITY SUPPORT",
+        feat_api: "API INTEGRATION",
+
+        // Blog Posts
+        post_1_title: "Career Management: Designing a Sustainable Artistic Path",
+        post_1_excerpt: "A practical guide to planning your career, diversifying income sources, and positioning yourself for premium clients.",
+        post_1_cat: "BUSINESS",
+        post_1_read: "6 MIN READ",
+
+        post_2_title: "Bridal Trends 2026: Minimalist Luxury & Timeless Glow",
+        post_2_excerpt: "Key trends shaping bridal beauty this year, from soft sculpting to metallic accents for editorial looks.",
+        post_2_cat: "TRENDS",
+        post_2_read: "7 MIN READ",
+
+        post_3_title: "Financial Independence: Pricing, Savings & Investment",
+        post_3_excerpt: "Strategies to build reliable cash flow, set premium prices, and plan long-term financial freedom.",
+        post_3_cat: "FINANCE",
+        post_3_read: "8 MIN READ",
+
+        post_4_title: "The Art of Networking: From Collaborations to Brand Partnerships",
+        post_4_excerpt: "How to create meaningful professional connections and scale your creative business through strategic partnerships.",
+        post_4_cat: "GROWTH",
+        post_4_read: "5 MIN READ",
+
+        // Blog Page
+        blog_badge: "KHAOS KONTROL EDITORIAL DEPARTMENT",
+        blog_subtitle: "PERSPECTIVES ON BEAUTY, BUSINESS, AND ART.",
+        blog_subscribe_title: "SUBSCRIBE TO EDITORIAL",
+        blog_subscribe_desc: "RECEIVE NOTIFICATIONS WHEN WE PUBLISH NEW EDITORIALS.",
+        blog_subscribe_placeholder: "EMAIL ADDRESS",
+        blog_subscribe_btn: "SUBSCRIBE",
+        blog_read_article: "READ ARTICLE",
+
+        header_contact: "CONTACT",
     }
 };

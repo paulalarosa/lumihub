@@ -9,11 +9,11 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl flex items-center justify-center">
-                <span className="text-xl font-serif font-bold text-white">K</span>
+              <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl flex items-center justify-center overflow-hidden relative">
+                <img src="/favicon-khaoskontrol.webp" alt="K" className="w-full h-full object-cover" />
               </div>
               <span className="font-serif font-light text-2xl text-white">
-                KONTROL
+                KHAOS KONTROL
               </span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed font-light">
@@ -81,7 +81,7 @@ const Footer = () => {
             <h3 className="font-serif font-light text-lg text-white">Fale Conosco</h3>
             <div className="space-y-3">
               <a
-                href="mailto:prenata@gmail.com"
+                href="mailto:khaoskontrol07@gmail.com"
                 className="flex items-center space-x-3 group"
               >
                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">
@@ -111,7 +111,7 @@ const Footer = () => {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-white/30 text-sm font-light">
-            © 2026 KONTROL. Todos os direitos reservados.
+            © 2026 KHAOS KONTROL. Todos os direitos reservados.
           </p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <Link

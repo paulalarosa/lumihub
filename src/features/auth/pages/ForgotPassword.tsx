@@ -18,24 +18,33 @@ export default function ForgotPassword() {
         e.preventDefault();
         setIsSubmitting(true);
 
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/auth/update-password`,
-        });
-
-        if (error) {
-            toast({
-                title: "FALHA_TRANSMISSÃO",
-                description: error.message,
-                variant: "destructive"
+        try {
+            // Use Edge Function to send templated SES email
+            const { data, error } = await supabase.functions.invoke('request-password-reset', {
+                body: { email }
             });
-        } else {
+
+            if (error) throw error;
+
             setEmailSent(true);
             toast({
                 title: "RECUPERAÇÃO_INICIADA",
-                description: "VERIFICAR_CANAIS_SEGUROS"
+                description: "VERIFICAR_CANAIS_SEGUROS",
+                className: "bg-black border border-white/20 text-white"
             });
+        } catch (error: any) {
+            console.error('Reset error:', error);
+
+            // Fallback to native Supabase reset if Edge Function fails (redundancy)
+            // or just show error. For now, showing error to enforce SES usage.
+            toast({
+                title: "FALHA_TRANSMISSÃO",
+                description: error.message || "Erro ao processar solicitação",
+                variant: "destructive"
+            });
+        } finally {
+            setIsSubmitting(false);
         }
-        setIsSubmitting(false);
     };
 
     return (

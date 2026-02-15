@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 interface Assistant {
   id: string;
-  name: string;
+  full_name: string;
   email: string | null;
   is_registered: boolean;
   invite_token: string | null;
@@ -30,15 +30,20 @@ export function AssistantsPanelCard() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data, error } = await supabase
-        .from("assistants")
-        .select("id, name, email, is_registered, invite_token")
+      const { data, error } = await (supabase
+        .from("assistants") as any)
+        .select("id, full_name, phone, created_at")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(5);
 
       if (error) throw error;
-      setAssistants(data || []);
+      setAssistants(((data as any[]) || []).map((a: any) => ({
+        ...a,
+        email: null,
+        is_registered: true,
+        invite_token: null
+      })));
     } catch (error) {
       console.error("Erro ao buscar assistentes:", error);
     } finally {
@@ -48,12 +53,12 @@ export function AssistantsPanelCard() {
 
   const copyInviteLink = async (assistant: Assistant) => {
     if (!assistant.invite_token) return;
-    
+
     const link = `${window.location.origin}/assistente/convite/${assistant.invite_token}`;
     await navigator.clipboard.writeText(link);
     setCopiedId(assistant.id);
     toast.success("Link copiado!");
-    
+
     setTimeout(() => setCopiedId(null), 2000);
   };
 
@@ -117,7 +122,7 @@ export function AssistantsPanelCard() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                     <AvatarFallback className="text-xs">
-                      {assistant.name
+                      {assistant.full_name
                         .split(" ")
                         .map((n) => n[0])
                         .join("")
@@ -126,7 +131,7 @@ export function AssistantsPanelCard() {
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-sm font-medium">{assistant.name}</p>
+                    <p className="text-sm font-medium">{assistant.full_name}</p>
                     <p className="text-xs text-muted-foreground">
                       {assistant.email || "Sem email"}
                     </p>
@@ -159,7 +164,7 @@ export function AssistantsPanelCard() {
                 </div>
               </div>
             ))}
-            
+
             {assistants.length >= 5 && (
               <Button asChild variant="ghost" className="w-full mt-2">
                 <Link to="/assistentes">

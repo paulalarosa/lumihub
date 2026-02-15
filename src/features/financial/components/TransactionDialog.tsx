@@ -1,14 +1,10 @@
-import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
-import { format } from "date-fns";
-import { toast } from "sonner";
+import { useTransactionForm } from "@/hooks/useTransactionForm";
 
 interface TransactionDialogProps {
     open: boolean;
@@ -46,102 +42,14 @@ const PAYMENT_METHODS = [
 ];
 
 export default function TransactionDialog({ open, onOpenChange, type, onSuccess }: TransactionDialogProps) {
-    const { user } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [formData, setFormData] = useState({
-        description: "",
-        amount: "",
-        category: "",
-        date: format(new Date(), "yyyy-MM-dd"),
-        payment_method: "pix",
-        project_id: "",
-        service_id: "",
-        assistant_id: "",
-    });
-
-    const [projects, setProjects] = useState<any[]>([]);
-    const [services, setServices] = useState<any[]>([]);
-    const [assistants, setAssistants] = useState<any[]>([]);
-
-    useEffect(() => {
-        if (open && user) {
-            fetchOptions();
-        }
-    }, [open, user]);
-
-    const fetchOptions = async () => {
-        // Fetch Projects
-        const { data: p } = await supabase.from('projects').select('id, name');
-        if (p) setProjects(p);
-
-        // Fetch Services
-        const { data: s } = await supabase.from('services').select('id, name');
-        if (s) setServices(s);
-
-        // Fetch Assistants (Profiles with role 'assistant' or similar)
-        // Assume 'profiles' has role. Or use proper table. User mentioned assistant_id.
-        // Let's try fetching profiles where role is assistant.
-        const { data: a } = await supabase.from('profiles').select('id, full_name').eq('role', 'assistant');
-        if (a) setAssistants(a);
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!user) return;
-
-        if (!formData.description || !formData.amount || !formData.category || !formData.date) {
-            toast.error("Preencha todos os campos obrigatórios");
-            return;
-        }
-
-        try {
-            setLoading(true);
-
-            const amountValue = parseFloat(formData.amount.replace("R$ ", "").replace(".", "").replace(",", "."));
-
-            const { error } = await supabase.from("transactions" as any).insert({
-                user_id: user.id,
-                type: type,
-                description: formData.description,
-                amount: amountValue,
-                category: formData.category,
-                date: formData.date,
-                payment_method: formData.payment_method,
-                project_id: formData.project_id || null, // Link to project
-                service_id: formData.service_id || null, // Link to service
-                assistant_id: formData.assistant_id || null, // Link to assistant
-            });
-
-            if (error) throw error;
-
-            toast.success(`${type === 'income' ? 'Receita' : 'Despesa'} registrada com sucesso!`);
-            onOpenChange(false);
-            setFormData({
-                description: "",
-                amount: "",
-                category: "",
-                date: format(new Date(), "yyyy-MM-dd"),
-                payment_method: "pix",
-                project_id: "",
-                service_id: "",
-                assistant_id: "",
-            });
-            onSuccess?.();
-        } catch (error: any) {
-            console.error("Erro ao salvar transação:", error);
-            toast.error("Erro ao salvar transação. Tente novamente.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value.replace(/\D/g, "");
-        value = (Number(value) / 100).toFixed(2) + "";
-        value = value.replace(".", ",");
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1.");
-        setFormData({ ...formData, amount: `R$ ${value}` });
-    };
+    const {
+        formData,
+        loading,
+        options,
+        handleAmountChange,
+        handleChange,
+        handleSubmit
+    } = useTransactionForm({ open, type, onOpenChange, onSuccess });
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,7 +68,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                         <Label>Descrição</Label>
                         <Input
                             value={formData.description}
-                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                            onChange={(e) => handleChange("description", e.target.value)}
                             placeholder="Ex: Corte de Cabelo"
                             className="bg-white/5 border-white/10 focus:border-white/50"
                         />
@@ -181,7 +89,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                             <Input
                                 type="date"
                                 value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                onChange={(e) => handleChange("date", e.target.value)}
                                 className="bg-white/5 border-white/10 focus:border-white/50"
                             />
                         </div>
@@ -194,13 +102,13 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 <Label>Vincular a Projeto (Noiva)</Label>
                                 <Select
                                     value={formData.project_id}
-                                    onValueChange={(value) => setFormData({ ...formData, project_id: value })}
+                                    onValueChange={(value) => handleChange("project_id", value)}
                                 >
                                     <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                         <SelectValue placeholder="Selecione o Projeto" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                                        {projects.map(p => (
+                                        {options.projects.map(p => (
                                             <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -211,13 +119,13 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 <Label>Serviço Dedicado</Label>
                                 <Select
                                     value={formData.service_id}
-                                    onValueChange={(value) => setFormData({ ...formData, service_id: value })}
+                                    onValueChange={(value) => handleChange("service_id", value)}
                                 >
                                     <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                         <SelectValue placeholder="Selecione o Serviço" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                                        {services.map(s => (
+                                        {options.services.map(s => (
                                             <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -228,13 +136,13 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                                 <Label>Assistente Responsável (Opcional)</Label>
                                 <Select
                                     value={formData.assistant_id}
-                                    onValueChange={(value) => setFormData({ ...formData, assistant_id: value })}
+                                    onValueChange={(value) => handleChange("assistant_id", value)}
                                 >
                                     <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                         <SelectValue placeholder="Selecione" />
                                     </SelectTrigger>
                                     <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                                        {assistants.map(a => (
+                                        {options.assistants.map(a => (
                                             <SelectItem key={a.id} value={a.id}>{a.full_name || 'Sem nome'}</SelectItem>
                                         ))}
                                     </SelectContent>
@@ -248,7 +156,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                             <Label>Categoria</Label>
                             <Select
                                 value={formData.category}
-                                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                                onValueChange={(value) => handleChange("category", value)}
                             >
                                 <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                     <SelectValue placeholder="Selecione" />
@@ -267,7 +175,7 @@ export default function TransactionDialog({ open, onOpenChange, type, onSuccess 
                             <Label>Método de Pagamento</Label>
                             <Select
                                 value={formData.payment_method}
-                                onValueChange={(value) => setFormData({ ...formData, payment_method: value })}
+                                onValueChange={(value) => handleChange("payment_method", value)}
                             >
                                 <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
                                     <SelectValue placeholder="Selecione" />

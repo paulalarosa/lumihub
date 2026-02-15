@@ -1,16 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { supabase } from "@/integrations/supabase/client";
-import { generateClientPDF } from '@/services/reportService';
+import { useParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import { ClientService, Client, TreatmentRecord } from '@/services/clientService';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { RecordDialog } from '@/components/client/RecordDialog';
+import { RecordDialog } from '@/components/clients/RecordDialogLegacy';
+import { useClientDetails } from '../hooks/useClientDetails';
 import {
     ArrowLeft,
     User,
@@ -23,96 +19,19 @@ import {
     Sparkles,
     Trash2
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ClientDetailsPage() {
     const { id } = useParams();
-    const navigate = useNavigate();
-    const { toast } = useToast();
-    const [client, setClient] = useState<Client | null>(null);
-    const [records, setRecords] = useState<TreatmentRecord[]>([]);
-    const [loadingData, setLoadingData] = useState(true);
-    const [events, setEvents] = useState<any[]>([]);
+    const {
+        client,
+        records,
+        loadingData,
+        handleExportPDF,
+        deleteRecord,
+        fetchData
+    } = useClientDetails(id);
 
-    useEffect(() => {
-        if (id) {
-            fetchData();
-        }
-    }, [id]);
-
-    const fetchData = async () => {
-        if (!id) return;
-        setLoadingData(true);
-
-        // Fetch client
-        const { data: clientData, error: clientError } = await ClientService.get(id);
-
-        if (clientError || !clientData) {
-            toast({ title: "Cliente não encontrado", variant: "destructive" });
-            navigate('/clientes');
-            return;
-        }
-
-        setClient(clientData as Client);
-
-        // Fetch records
-        const { data: recordsData } = await ClientService.getTreatmentRecords(id);
-        setRecords(recordsData || []);
-
-        // Fetch events for PDF
-        const { data: eventsData, error: eventsError } = await supabase
-            .from('events')
-            .select(`
-                *,
-                project_services (
-                    id,
-                    quantity,
-                    unit_price,
-                    total_price,
-                    services (name)
-                )
-            `)
-            .eq('client_id', id)
-            .order('event_date', { ascending: false });
-
-        if (eventsData) {
-            setEvents(eventsData);
-        }
-
-        setLoadingData(false);
-    };
-
-    const handleExportPDF = () => {
-        if (!client) return;
-        generateClientPDF(client, events);
-        toast({
-            title: "Relatório gerado",
-            description: "O download do PDF foi iniciado.",
-        });
-    };
-
-    const deleteRecord = async (recordId: string) => {
-        try {
-            const { error } = await supabase
-                .from('treatment_records')
-                .delete()
-                .eq('id', recordId);
-
-            if (error) throw error;
-
-            toast({
-                title: "Registro excluído",
-                description: "O registro foi removido com sucesso."
-            });
-            fetchData();
-        } catch (error) {
-            console.error("Error deleting record:", error);
-            toast({
-                title: "Erro",
-                description: "Não foi possível excluir o registro.",
-                variant: "destructive"
-            });
-        }
-    };
 
     if (loadingData) {
         return (

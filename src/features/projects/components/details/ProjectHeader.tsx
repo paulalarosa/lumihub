@@ -1,11 +1,13 @@
 
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Calendar, Settings, Eye, Copy, Check, MessageCircle } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Settings, Eye, Copy, Check, MessageCircle, FileText } from 'lucide-react';
+import { GenerateContractButton } from '@/components/projects/GenerateContractButton';
 import { format } from 'date-fns';
 
 interface ProjectHeaderProps {
     project: {
+        id: string;
         name: string;
         clients?: { name: string; phone?: string } | null;
         event_date: string | null;
@@ -60,6 +62,9 @@ export const ProjectHeader = ({
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {viewMode === 'internal' && (
+                            <GenerateContractButton projectId={project.id} />
+                        )}
                         {/* View mode toggle */}
                         <div className="flex items-center border border-white/20 bg-black">
                             <Button

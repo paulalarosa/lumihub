@@ -14,6 +14,11 @@ interface Client {
 }
 
 // Premium Bridal Report Generation
+// Premium Bridal Report Generation
+interface AutoTableDoc extends jsPDF {
+    lastAutoTable: { finalY: number };
+}
+
 export const generateClientPDF = (client: Client, projects: ReportProject[]) => {
     const doc = new jsPDF();
 
@@ -150,8 +155,12 @@ export const generateClientPDF = (client: Client, projects: ReportProject[]) => 
                     margin: { left: 20, right: 20 },
                 });
 
-                // @ts-ignore
-                yPos = doc.lastAutoTable.finalY + 15;
+                interface AutoTableJsPDF extends jsPDF {
+                    lastAutoTable: { finalY: number };
+                }
+
+                // ... inside function
+                yPos = (doc as unknown as AutoTableJsPDF).lastAutoTable.finalY + 15;
 
             } else {
                 doc.setFontSize(9);

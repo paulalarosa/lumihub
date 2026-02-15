@@ -10,11 +10,13 @@ import { ptBR } from "date-fns/locale";
 
 interface SystemLog {
     id: string;
-    created_at: string;
-    level: 'info' | 'warn' | 'error';
-    message: string;
-    source: string;
-    metadata: any;
+    created_at: string | null;
+    level: string | null;
+    message: string | null;
+    metadata: string | null;
+    severity: string | null;
+    timestamp: string | null;
+    user_id: string | null;
 }
 
 export const ApiStatusDashboard = () => {
@@ -31,7 +33,7 @@ export const ApiStatusDashboard = () => {
                 .limit(50);
 
             if (error) throw error;
-            return data as SystemLog[];
+            return data;
         },
         refetchInterval: 30000, // Refresh every 30s
     });
@@ -39,7 +41,7 @@ export const ApiStatusDashboard = () => {
     // Mock status checks for integrations (In real app, we'd have an edge function to ping them)
     const integrations = [
         { name: "Google Calendar", status: "operational", endpoint: "google-calendar-sync" },
-        { name: "Mercado Pago", status: "operational", endpoint: "create-payment" },
+        { name: "Stripe", status: "operational", endpoint: "create-checkout" },
         { name: "Google Maps", status: "operational", endpoint: "places-proxy" },
         { name: "Resend Email", status: "operational", endpoint: "send-application" },
     ];
@@ -111,17 +113,17 @@ export const ApiStatusDashboard = () => {
                                     <div key={log.id} className="flex flex-col space-y-1 border-b border-white/10 pb-3 last:border-0 last:pb-0">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2">
-                                                {getLevelBadge(log.level)}
-                                                <span className="text-sm font-medium text-white">{log.source}</span>
+                                                {getLevelBadge(log.level || 'info')}
+                                                <span className="text-sm font-medium text-white">{log.severity || 'System'}</span>
                                             </div>
                                             <span className="text-xs text-muted-foreground">
-                                                {format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR })}
+                                                {log.created_at ? format(new Date(log.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR }) : '-'}
                                             </span>
                                         </div>
                                         <p className="text-sm text-gray-300 pl-1">{log.message}</p>
-                                        {log.metadata && Object.keys(log.metadata).length > 0 && (
+                                        {log.metadata && (
                                             <pre className="mt-1 w-full rounded bg-black/50 p-2 text-xs text-muted-foreground overflow-x-auto">
-                                                {JSON.stringify(log.metadata, null, 2)}
+                                                {log.metadata}
                                             </pre>
                                         )}
                                     </div>

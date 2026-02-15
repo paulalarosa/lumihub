@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Logger } from "@/services/logger";
 
 interface LeadData {
     name: string;
@@ -21,8 +22,9 @@ export function useLeads(): UseLeadsReturn {
     const submitLead = async (data: LeadData): Promise<{ success: boolean; error?: string }> => {
         setIsLoading(true);
         try {
-            // 1. Persist to Database (Assuming 'wedding_clients' or 'leads' table)
-            // Using 'wedding_clients' based on previous context
+            const { data: { user } } = await supabase.auth.getUser();
+
+            // 1. Persist to Database
             const { data: client, error: dbError } = await supabase
                 .from('wedding_clients')
                 .insert({
@@ -31,16 +33,23 @@ export function useLeads(): UseLeadsReturn {
                     phone: data.phone,
                     wedding_date: data.weddingDate?.toISOString(),
                     is_bride: data.isBride,
-                    // Default fields
                     status: 'lead',
-                    user_id: (await supabase.auth.getUser()).data.user?.id
+                    user_id: user?.id
                 })
                 .select()
                 .single();
 
             if (dbError) throw new Error(dbError.message);
 
-            // 2. Send Welcome Email (Resend) via Edge Function
+            // Audit the action
+            if (user && client) {
+                Logger.action("LEAD_SUBMISSION", user.id, "wedding_clients", client.id, {
+                    email: data.email,
+                    is_bride: data.isBride
+                });
+            }
+
+            // 2. Send Welcome Email
             if (data.isBride && client) {
                 const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
                     body: {
@@ -54,8 +63,9 @@ export function useLeads(): UseLeadsReturn {
 
             return { success: true };
 
-        } catch (error: any) {
-            return { success: false, error: error.message || "Unknown error" };
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "Unknown error";
+            return { success: false, error: message };
         } finally {
             setIsLoading(false);
         }

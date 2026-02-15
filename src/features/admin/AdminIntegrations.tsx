@@ -19,7 +19,7 @@ export default function AdminIntegrations() {
         { service: 'Supabase Database', status: 'unknown', message: 'Checking connection...' },
         { service: 'Supabase Auth', status: 'unknown', message: 'Checking connection...' },
         { service: 'Google Calendar Sync', status: 'unknown', message: 'Checking Edge Function...' },
-        { service: 'Mercado Pago', status: 'unknown', message: 'Checking Edge Function...' },
+        { service: 'Stripe', status: 'unknown', message: 'Checking Configuration...' },
         { service: 'Google Maps', status: 'unknown', message: 'Checking API Key...' },
         { service: 'Resend Email', status: 'unknown', message: 'Checking Client Configuration...' },
     ]);
@@ -28,7 +28,7 @@ export default function AdminIntegrations() {
         setLoading(true);
         const newStatuses = [...statuses];
 
-        // 1. Check Supabase DB & Auth (Implicitly check by making a call)
+        // 1. Check Supabase DB & Auth
         try {
             const { error } = await supabase.from('profiles').select('count').limit(1).single();
             updateStatus(newStatuses, 'Supabase Database', error ? 'degraded' : 'operational', error?.message || 'Connected');
@@ -37,19 +37,17 @@ export default function AdminIntegrations() {
             updateStatus(newStatuses, 'Supabase Database', 'down', 'Connection Failed');
         }
 
-        // 2. Check Google Calendar (Call Edge Function)
+        // 2. Check Google Calendar
         try {
             const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
-                body: { action: 'check_config' } // This action doesn't exist but will trigger the config check first!
+                body: { action: 'check_config' }
             });
 
             if (error) throw error;
 
-            // If function returns our custom checking error, it means variables are missing
             if (data?.error === 'Service configuration error') {
                 updateStatus(newStatuses, 'Google Calendar Sync', 'not_configured', `Missing: ${data.missing_keys?.join(', ')}`);
             } else if (data?.error === 'Invalid action') {
-                // If it returns Invalid action, it PASSED the config check!
                 updateStatus(newStatuses, 'Google Calendar Sync', 'operational', 'Edge Function Configured');
             } else {
                 updateStatus(newStatuses, 'Google Calendar Sync', 'operational', 'Responding');
@@ -58,28 +56,19 @@ export default function AdminIntegrations() {
             updateStatus(newStatuses, 'Google Calendar Sync', 'down', 'Unreachable');
         }
 
-        // 3. Check Mercado Pago
+        // 3. Check Stripe
         try {
-            const { data, error } = await supabase.functions.invoke('mercadopago-webhook', {
-                method: 'POST',
-                body: { type: 'test_config' }
-            });
-            // Note: Webhook might expect signature and fail 401, but if it returns 503 it's config error
-            if (error && error.message.includes('503')) {
-                updateStatus(newStatuses, 'Mercado Pago', 'not_configured', 'Missing Access Token');
-            } else if (data?.error === 'Service configuration error') {
-                updateStatus(newStatuses, 'Mercado Pago', 'not_configured', 'Missing Access Token');
+            const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+            if (stripeKey && stripeKey.startsWith('pk_')) {
+                updateStatus(newStatuses, 'Stripe', 'operational', 'Publishable Key Present');
             } else {
-                // If 401 (signature) or 200, it means the function is running and variables likely exist (or at least check passed)
-                // Actually MP webhook check returns 503 if token missing.
-                updateStatus(newStatuses, 'Mercado Pago', 'operational', 'Service Reachable');
+                updateStatus(newStatuses, 'Stripe', 'not_configured', 'Missing Publishable Key');
             }
         } catch (e) {
-            // It usually throws if 503
-            updateStatus(newStatuses, 'Mercado Pago', 'down', 'Check Failed');
+            updateStatus(newStatuses, 'Stripe', 'down', 'Check Failed');
         }
 
-        // 4. Check Google Maps (Client side check of env)
+        // 4. Check Google Maps
         const mapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (mapsKey) {
             updateStatus(newStatuses, 'Google Maps', 'operational', 'Key Present in Client');
@@ -87,9 +76,7 @@ export default function AdminIntegrations() {
             updateStatus(newStatuses, 'Google Maps', 'not_configured', 'VITE_GOOGLE_MAPS_API_KEY Missing');
         }
 
-        // 5. Check Resend (Client side check isn't secure but we can check if variable is set in build)
-        // Actually we can't check server-side keys from here easily without a proxy.
-        // We'll assume if others are set, this might be too.
+        // 5. Check Resend
         updateStatus(newStatuses, 'Resend Email', 'operational', 'Assumed Configured');
 
         setStatuses(newStatuses);
@@ -112,7 +99,7 @@ export default function AdminIntegrations() {
         switch (service) {
             case 'Supabase Database': return Database;
             case 'Google Calendar Sync': return Calendar;
-            case 'Mercado Pago': return CreditCard;
+            case 'Stripe': return CreditCard;
             case 'Google Maps': return Map;
             case 'Resend Email': return Mail;
             default: return ShieldCheck;

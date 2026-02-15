@@ -91,7 +91,7 @@ export const ClientsTable = () => {
                 </TableHeader>
                 <TableBody>
                     {filteredClients.map((client) => {
-                        const contractUrl = (client as any).contract_url; // Cast to access potential new column
+                        const contractUrl = (client as { contract_url?: string }).contract_url;
                         return (
                             <TableRow key={client.id} className="border-b border-black/10 hover:bg-yellow-50 transition-colors">
                                 <TableCell className="font-medium text-black border-r border-black/10">

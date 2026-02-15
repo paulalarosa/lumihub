@@ -3,8 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Download, CheckCircle, Database, FileKey, RefreshCw, AlertTriangle } from 'lucide-react';
-import { AuditService } from '@/services/audit.service';
 import { BackupService } from '@/services/backup.service';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -21,7 +21,15 @@ export default function AdminSecurity() {
     const fetchLogs = async () => {
         setLoadingLogs(true);
         try {
-            const { data } = await AuditService.getLogs(0, 10); // Fetch detailed recent logs
+            // Fetch security events from the new audit_logs table
+            const { data, error } = await supabase
+                .from('audit_logs')
+                .select('*')
+                .in('action', ['USER_SIGN_IN', 'USER_SIGN_OUT', 'DATABASE_BACKUP_GENERATED', 'DELETE'])
+                .order('created_at', { ascending: false })
+                .limit(10);
+
+            if (error) throw error;
             setLogs(data || []);
         } catch (error) {
             console.error(error);
@@ -98,7 +106,6 @@ export default function AdminSecurity() {
                             </Button>
                         </CardHeader>
                         <CardContent className="p-0">
-                            {/* Simplified table for security events */}
                             <div className="divide-y divide-white/10">
                                 {logs.length === 0 ? (
                                     <div className="p-8 text-center text-gray-500 font-mono text-xs">No recent security events detected.</div>
@@ -111,7 +118,7 @@ export default function AdminSecurity() {
                                                 </div>
                                                 <div>
                                                     <p className="text-white text-sm font-medium">{log.action}</p>
-                                                    <p className="text-gray-500 text-[10px] font-mono">{log.admin_email}</p>
+                                                    <p className="text-gray-500 text-[10px] font-mono">{log.user_id ? log.user_id.substring(0, 8) : 'SYSTEM'}</p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
@@ -119,7 +126,7 @@ export default function AdminSecurity() {
                                                     {log.created_at ? format(new Date(log.created_at), "HH:mm", { locale: ptBR }) : '-'}
                                                 </span>
                                                 <Badge variant="outline" className="text-[10px] font-mono border-green-900 text-green-500 bg-green-900/10 rounded-none h-4 px-1">
-                                                    LOGGED
+                                                    AUDITED
                                                 </Badge>
                                             </div>
                                         </div>

@@ -1,17 +1,9 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { translations as externalTranslations } from '@/utils/translations';
+import { Language, LanguageContext } from './LanguageContextDefinition';
 
-export type Language = 'pt' | 'en';
-
-export interface LanguageContextType {
-    language: Language;
-    setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
-}
-
-export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-const translations = {
+const inlineTranslations: Record<Language, Record<string, string>> = {
     // ... keep translations ...
     pt: {
         'sidebar.dashboard': 'PAINEL',
@@ -138,11 +130,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         i18n.changeLanguage(lang);
     };
 
-    // Custom translator that checks our local dictionary first, then falls back to i18next or key
+    // Custom translator that checks external translations, then inline, then i18next
     const t = (key: string): string => {
         const lang = (i18n.language as Language) || 'pt';
-        // @ts-ignore
-        return translations[lang]?.[key] || i18nextT(key) || key;
+        // First check external translations (Home page keys)
+        const externalValue = externalTranslations[lang]?.[key as keyof typeof externalTranslations.pt];
+        if (externalValue) return externalValue;
+        // Then check inline translations (sidebar/dashboard keys)
+        const inlineValue = inlineTranslations[lang]?.[key];
+        if (inlineValue) return inlineValue;
+        // Finally fall back to i18next or key
+        return i18nextT(key) || key;
     };
 
     return (
@@ -157,4 +155,3 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         </LanguageContext.Provider>
     );
 }
-

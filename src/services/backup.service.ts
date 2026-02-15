@@ -1,10 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
-import { AuditService } from "./audit.service";
+import { Logger } from "./logger";
 
 export const BackupService = {
     async generateEncryptedBackup(): Promise<void> {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error("No authenticated user");
+
         // 1. Fetch critical data
-        // We use Promise.all to fetch concurrently
         const [profiles, contracts] = await Promise.all([
             supabase.from('profiles').select('*'),
             supabase.from('contracts').select('*')
@@ -53,7 +56,6 @@ export const BackupService = {
         );
 
         // 3. Prepare Download
-        // We combine IV and Content for portability
         const combinedBuffer = new Uint8Array(iv.length + encryptedContent.byteLength);
         combinedBuffer.set(iv);
         combinedBuffer.set(new Uint8Array(encryptedContent), iv.length);
@@ -69,9 +71,9 @@ export const BackupService = {
         document.body.removeChild(a);
 
         // 4. Log Action
-        await AuditService.logAction('BACKUP_GENERATED', {
+        Logger.action('DATABASE_BACKUP_GENERATED', user.id, 'backup', 'system', {
             size_bytes: blob.size,
-            includes: ['profiles', 'contracts', 'marketing']
+            includes: ['profiles', 'contracts']
         });
     }
 };

@@ -174,9 +174,9 @@ export default function Contratos() {
 
                                                         <div className="text-center">
                                                             <div className="h-16 mb-2 flex items-end justify-center">
-                                                                <div className="font-script text-2xl">Lumia Agency</div>
+                                                                <div className="font-script text-2xl text-black">Khaos Kontrol</div>
                                                             </div>
-                                                            <div className="border-t border-black pt-2 font-bold uppercase text-xs">
+                                                            <div className="border-t border-black pt-2 font-bold uppercase text-xs text-black">
                                                                 CONTRATADA
                                                             </div>
                                                         </div>

@@ -8,28 +8,13 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, DollarSign, Trash2 } from 'lucide-react';
 
-interface Service {
-    id: string;
-    name: string;
-    price: number | null;
-}
-
-interface ProjectServiceItem {
-    id: string;
-    service_id: string;
-    quantity: number;
-    unit_price: number;
-    total_price: number;
-    paid_amount: number;
-    notes: string | null;
-    service?: Service;
-}
+import type { ServiceUI, ProjectServiceItem } from '@/types/api.types';
 
 interface ProjectFinancialsProps {
     totalServiceAmount: number;
     totalPaidAmount: number;
     projectServices: ProjectServiceItem[];
-    services: Service[];
+    services: ServiceUI[];
     t: (key: string) => string;
 
     // Add Service Form
@@ -252,7 +237,7 @@ export const ProjectFinancials = ({
                                             <p className="font-mono text-xs text-white uppercase">
                                                 PAGO: {Number(ps.paid_amount || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                             </p>
-                                            {ps.paid_amount < ps.total_price && (
+                                            {(ps.paid_amount || 0) < ps.total_price && (
                                                 <p className="text-[10px] text-white/40 uppercase tracking-widest">
                                                     PENDENTE: {Number((ps.total_price - ps.paid_amount) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                                 </p>

@@ -82,15 +82,13 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
 
     try {
       // 1. Prepare Payload
-      const payload: any = {
-        full_name: formData.name, // Mapping to correct column
-        name: formData.name, // Keep for check
+      const payload: Record<string, string | boolean | null> = {
+        full_name: formData.name,
+        name: formData.name,
         email: formData.email || null,
         phone: formData.phone || null,
-        // company_name removed/mapped if needed, but not in schema shown
         notes: formData.notes || null,
         origin: formData.origin || null,
-        // referred_by not in schema, ignoring
         user_id: user.id,
         is_bride: formData.is_bride,
         access_pin: formData.access_pin || null
@@ -105,23 +103,23 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
       if (error) throw error;
 
       // 3. Generate Portal Link if Bride
-      if (formData.is_bride && (newClient as any)?.id) {
-        const clientId = (newClient as any).id;
-        const portalLink = `https://lumihub.com/portal/${clientId}`;
+      if (formData.is_bride && newClient && 'id' in newClient) {
+        const clientId = newClient.id as string;
+        const portalLink = `https://khaoskontrol.com.br/portal/${clientId}`;
 
         await ClientService.update(clientId, {
           portal_link: portalLink
-        } as any);
+        });
       }
 
       toast.success(formData.is_bride ? "Noiva cadastrada com sucesso!" : "Cliente criado com sucesso!");
       setOpen(false);
-      setFormData({ name: "", email: "", phone: "", company_name: "", notes: "", origin: "", referred_by: "" });
+      setFormData({ name: "", email: "", phone: "", company_name: "", notes: "", origin: "", referred_by: "", is_bride: false, access_pin: "" });
 
       // Atualiza a lista na tela de trás
       if (onSuccess) onSuccess();
 
-    } catch (error: any) {
+    } catch (error) {
       toast.error(`Erro ao salvar: ${error.message || "Verifique o console"}`);
     } finally {
       setLoading(false);

@@ -1,14 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useContracts } from '@/hooks/useContracts';
-import { useProjects } from '@/hooks/useProjects';
 import { Loader2, Upload, FileText, Sparkles, Bot } from 'lucide-react';
-import { toast } from 'sonner';
 import { SmartContractEditor } from './SmartContractEditor';
+import { useContractForm } from '@/hooks/useContractForm';
 
 interface ContractDialogProps {
     open: boolean;
@@ -17,64 +14,21 @@ interface ContractDialogProps {
 }
 
 export function ContractDialog({ open, onOpenChange, defaultProjectId }: ContractDialogProps) {
-    const { createContract, uploadContractFile, loading: isSaving } = useContracts();
-    const { projects } = useProjects();
-
-    const [mode, setMode] = useState<'digital' | 'upload'>('digital');
-    const [projectId, setProjectId] = useState(defaultProjectId || '');
-    const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-
-    // Reset form when dialog opens
-    useEffect(() => {
-        if (open) {
-            setProjectId(defaultProjectId || '');
-            setTitle('');
-            setContent('');
-            setFile(null);
-            setMode('digital');
-        }
-    }, [open, defaultProjectId]);
-
-    const handleSubmit = async () => {
-        if (!projectId || !title) {
-            toast.error('Preencha os campos obrigatórios');
-            return;
-        }
-
-        try {
-            let attachmentUrl = null;
-
-            if (mode === 'upload') {
-                if (!file) {
-                    toast.error('Selecione um arquivo PDF');
-                    return;
-                }
-                const path = await uploadContractFile(file);
-                attachmentUrl = path;
-            } else {
-                if (!content || content === '<p></p>') {
-                    toast.error('Adicione o conteúdo do contrato');
-                    return;
-                }
-            }
-
-            await createContract({
-                project_id: projectId,
-                title,
-                content: mode === 'digital' ? content : undefined,
-                status: 'draft',
-                attachment_url: attachmentUrl || undefined
-            } as any);
-
-            onOpenChange(false);
-            toast.success("Contrato salvo com sucesso!");
-        } catch (error) {
-            console.error(error);
-            toast.error("Erro ao salvar contrato");
-        }
-    };
+    const {
+        mode,
+        setMode,
+        projectId,
+        setProjectId,
+        title,
+        setTitle,
+        content,
+        setContent,
+        file,
+        setFile,
+        projects,
+        isSaving,
+        handleSubmit
+    } = useContractForm({ open, onOpenChange, defaultProjectId });
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -99,7 +53,7 @@ export function ContractDialog({ open, onOpenChange, defaultProjectId }: Contrac
                                 onChange={e => setProjectId(e.target.value)}
                             >
                                 <option value="" disabled className="bg-black text-gray-500">SELECIONE UM PROJETO...</option>
-                                {projects?.map((project: any) => (
+                                {projects?.map((project: { id: string; name: string; client?: { full_name: string } }) => (
                                     <option key={project.id} value={project.id} className="bg-black text-white">
                                         {project.name} {project.client?.full_name ? `// ${project.client.full_name}` : ''}
                                     </option>
@@ -117,7 +71,7 @@ export function ContractDialog({ open, onOpenChange, defaultProjectId }: Contrac
                         </div>
                     </div>
 
-                    <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full flex-1 flex flex-col">
+                    <Tabs value={mode} onValueChange={(v) => setMode(v as 'digital' | 'upload')} className="w-full flex-1 flex flex-col">
                         <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-white/10 p-0 h-auto rounded-none">
                             <TabsTrigger
                                 value="digital"

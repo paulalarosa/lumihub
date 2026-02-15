@@ -67,9 +67,16 @@ export default function AdminUsers() {
 
             // Sort by created_at desc
             const sorted = (profilesData || []).sort((a, b) =>
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
             );
-            setUsers(sorted as any);
+            setUsers(sorted.map(p => ({
+                id: p.id,
+                email: p.email || '',
+                full_name: p.full_name || '',
+                role: (p.role as 'admin' | 'user') || 'user',
+                plan: (p.plan as 'free' | 'pro' | 'empire') || 'free',
+                created_at: p.created_at || ''
+            })));
         } catch (error) {
             console.error("Error fetching users:", error);
             toast.error("Erro ao carregar usuários");
@@ -83,12 +90,12 @@ export default function AdminUsers() {
             // Cast to any to bypass strict type checking if columns are missing in generated types
             const { error } = await supabase
                 .from('profiles')
-                .update({ role: newRole } as any)
+                .update({ role: newRole })
                 .eq('id', userId);
 
             if (error) throw error;
 
-            setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as any } : u));
+            setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as 'admin' | 'user' } : u));
             toast.success(`Função atualizada para ${newRole}`);
         } catch (error) {
             console.error("Error updating role:", error);
@@ -100,12 +107,12 @@ export default function AdminUsers() {
         try {
             const { error } = await supabase
                 .from('profiles')
-                .update({ plan: newPlan } as any)
+                .update({ plan: newPlan })
                 .eq('id', userId);
 
             if (error) throw error;
 
-            setUsers(users.map(u => u.id === userId ? { ...u, plan: newPlan as any } : u));
+            setUsers(users.map(u => u.id === userId ? { ...u, plan: newPlan as 'free' | 'pro' | 'empire' } : u));
             toast.success(`Plano atualizado para ${newPlan}`);
         } catch (error) {
             console.error("Error updating plan:", error);

@@ -64,7 +64,7 @@ export const useContracts = () => {
                     .in('id', clientIds);
 
                 if (clientsData) {
-                    clientsData.forEach((c: any) => {
+                    clientsData.forEach((c) => {
                         clientsMap[c.id] = c.name;
                     });
                 }

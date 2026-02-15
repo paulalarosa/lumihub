@@ -58,14 +58,25 @@ export const useNotifications = (userId: string | undefined) => {
             projects (
               id,
               name,
-              clients (name)
+              client:wedding_clients (name:full_name)
             )
           `)
                     .eq('status', 'pending');
 
                 if (pendingInvoices) {
-                    pendingInvoices.forEach((inv: any) => {
-                        const clientName = inv.projects?.clients?.name || 'Cliente';
+                    interface InvoiceWithProject {
+                        id: string;
+                        amount: number;
+                        due_date: string;
+                        status: string;
+                        projects?: {
+                            id: string;
+                            name: string;
+                            client?: { name: string }
+                        };
+                    }
+                    (pendingInvoices as any).forEach((inv: any) => {
+                        const clientName = inv.projects?.client?.name || 'Cliente';
                         newNotifications.push({
                             id: `pay-${inv.id}`,
                             type: 'payment',

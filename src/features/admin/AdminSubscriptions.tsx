@@ -1,103 +1,12 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, AlertCircle, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { CheckCircle2, AlertCircle, ArrowUpCircle, ArrowDownCircle, Loader2 } from 'lucide-react';
 import AdminFinancials from '@/features/admin/AdminFinancials';
+import { useAdminSubscriptions } from '@/hooks/useAdminSubscriptions';
 
 export default function AdminSubscriptions() {
-    const { toast } = useToast();
-    const [loading, setLoading] = useState(true);
-    const [users, setUsers] = useState<any[]>([]);
-    const [stats, setStats] = useState({
-        mrr: 0,
-        activeSubscribers: 0,
-        churnRate: '0%',
-        growth: '+0%'
-    });
-
-    const PLAN_PRICES = {
-        free: 0,
-        starter: 29.90,
-        pro: 59.90,
-        empire: 99.90
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const { data: profiles, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) throw error;
-
-            if (profiles) {
-                setUsers(profiles);
-                calculateStats(profiles);
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            toast({
-                title: "Erro ao carregar dados",
-                variant: "destructive"
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const calculateStats = (profiles: any[]) => {
-        let mrr = 0;
-        let subscribers = 0;
-
-        profiles.forEach(user => {
-            const plan = (user.plan || 'free').toLowerCase();
-            // Match against known plans to calculate MRR
-            const price = PLAN_PRICES[plan as keyof typeof PLAN_PRICES] || 0;
-            if (price > 0) {
-                mrr += price;
-                subscribers++;
-            }
-        });
-
-        setStats({
-            mrr,
-            activeSubscribers: subscribers,
-            churnRate: '2.4%', // Placeholder until we have cancellation data logs
-            growth: '+12.5%' // Placeholder
-        });
-    };
-
-    const handleUpdatePlan = async (userId: string, newPlan: string) => {
-        try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ plan: newPlan } as any)
-                .eq('id', userId);
-
-            if (error) throw error;
-
-            toast({
-                title: "Plano atualizado",
-                description: `Usuário alterado para ${newPlan}`
-            });
-
-            fetchData();
-        } catch (error) {
-            toast({
-                title: "Erro ao atualizar plano",
-                variant: "destructive"
-            });
-        }
-    };
+    const { users, stats, loading, handleUpdatePlan } = useAdminSubscriptions();
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -124,7 +33,12 @@ export default function AdminSubscriptions() {
                             <tbody>
                                 {loading ? (
                                     <tr>
-                                        <td colSpan={4} className="py-8 text-center text-gray-500">Carregando usuários...</td>
+                                        <td colSpan={4} className="py-8 text-center text-gray-500">
+                                            <div className="flex justify-center items-center gap-2">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                Carregando usuários...
+                                            </div>
+                                        </td>
                                     </tr>
                                 ) : users.map((user) => (
                                     <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition">

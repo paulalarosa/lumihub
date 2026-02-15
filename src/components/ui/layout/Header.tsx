@@ -27,7 +27,7 @@ const Header = () => {
     { name: t("header_features"), href: "/recursos" },
     { name: t("header_plans"), href: "/planos" },
     { name: t("header_blog"), href: "/blog" },
-    { name: "Contato", href: "/contato" }, // Keeping generic for now or add to dictionary
+    { name: t("header_contact"), href: "/contato" },
   ];
 
   return (
@@ -41,11 +41,11 @@ const Header = () => {
         <div className="flex items-center justify-between h-18 py-4">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-foreground/20 to-foreground/5 border border-foreground/20 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-metallic/40">
-              <span className="text-xl font-serif font-bold text-foreground">K</span>
+            <div className="w-10 h-10 bg-gradient-to-br from-foreground/20 to-foreground/5 border border-foreground/20 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-metallic/40 overflow-hidden">
+              <img src="/favicon-khaoskontrol.webp" alt="K" className="w-6 h-6 object-contain" />
             </div>
             <span className="font-serif font-light text-2xl text-foreground tracking-tight">
-              KONTROL
+              KHAOS KONTROL
             </span>
           </Link>
 
@@ -55,7 +55,7 @@ const Header = () => {
               <Link
                 key={item.href} // Changed key to href to be unique regardless of lang
                 to={item.href}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light text-sm tracking-wide"
+                className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light text-sm tracking-wide uppercase"
               >
                 {item.name}
               </Link>
@@ -109,7 +109,7 @@ const Header = () => {
                 <Link
                   key={item.href}
                   to={item.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light py-2"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light py-2 uppercase"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -117,13 +117,13 @@ const Header = () => {
               ))}
               <div className="flex justify-center space-x-6 py-4 border-y border-border">
                 <span
-                  className={`cursor-pointer font-mono text-xs ${language === 'pt' ? 'text-foreground underline' : 'text-muted-foreground'}`}
+                  className={`cursor-pointer font-mono text-xs uppercase ${language === 'pt' ? 'text-foreground underline' : 'text-muted-foreground'}`}
                   onClick={() => { setLanguage('pt'); setIsMenuOpen(false); }}
                 >
                   PORTUGUÊS
                 </span>
                 <span
-                  className={`cursor-pointer font-mono text-xs ${language === 'en' ? 'text-foreground underline' : 'text-muted-foreground'}`}
+                  className={`cursor-pointer font-mono text-xs uppercase ${language === 'en' ? 'text-foreground underline' : 'text-muted-foreground'}`}
                   onClick={() => { setLanguage('en'); setIsMenuOpen(false); }}
                 >
                   ENGLISH

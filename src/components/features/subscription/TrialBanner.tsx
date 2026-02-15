@@ -25,7 +25,7 @@ export function TrialBanner() {
                 <div className="flex items-center gap-2 text-sm text-[#00e5ff]">
                     <Clock className="h-4 w-4 animate-pulse" />
                     <span>
-                        <strong className="font-semibold">Período Gratuito:</strong> Restam {daysRemaining} dias para testar o Lumia Hub.
+                        <strong className="font-semibold">Período Gratuito:</strong> Restam {daysRemaining} dias para testar o KONTROL.
                     </span>
                 </div>
                 <Button

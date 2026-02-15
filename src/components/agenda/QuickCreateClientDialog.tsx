@@ -19,7 +19,7 @@ interface QuickCreateClientDialogProps {
   onSuccess: (client: { id: string; name: string }) => void;
 }
 
-export default function QuickCreateClientDialog({
+export function QuickCreateClientDialog({
   open,
   onOpenChange,
   onSuccess
@@ -60,7 +60,7 @@ export default function QuickCreateClientDialog({
       setEmail('');
       setPhone('');
       onOpenChange(false);
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Erro",
         description: error.message || "Não foi possível criar o cliente",

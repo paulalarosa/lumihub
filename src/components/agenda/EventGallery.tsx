@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -25,11 +25,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
 
     const bucketName = 'event-gallery'; // Using a dedicated bucket
 
-    useEffect(() => {
-        fetchImages();
-    }, [eventId]);
-
-    const fetchImages = async () => {
+    const fetchImages = useCallback(async () => {
         try {
             setLoading(true);
             const { data, error } = await supabase
@@ -64,7 +60,11 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
         } finally {
             setLoading(false);
         }
-    };
+    }, [eventId]);
+
+    useEffect(() => {
+        fetchImages();
+    }, [fetchImages]);
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -94,7 +94,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
 
             await fetchImages();
 
-        } catch (error: any) {
+        } catch (error) {
             console.error('Error uploading image:', error);
             toast({
                 title: "Erro no upload",

@@ -44,7 +44,7 @@ export const useEvents = (start: Date, end: Date) => {
           project:projects(name),
           client:wedding_clients(id, name, phone, email),
           event_assistants(
-            assistant:assistants(id, name)
+            assistant_id
           )
         `)
                 .gte('event_date', format(start, 'yyyy-MM-dd'))
@@ -55,15 +55,16 @@ export const useEvents = (start: Date, end: Date) => {
                 throw error;
             }
 
-            // Transform to match local Event interface
             return (data || []).map((event) => ({
                 ...event,
                 client: Array.isArray(event.client) ? event.client[0] : event.client,
                 project: Array.isArray(event.project) ? event.project[0] : event.project,
-                assistants: event.event_assistants?.map((ea: any) => ea.assistant) || [],
+                assistants: (event.event_assistants as unknown as { assistant_id: string }[])?.map((ea) => ({ id: ea.assistant_id, name: '' })) || [],
                 reminder_days: typeof event.reminder_days === 'string'
                     ? JSON.parse(event.reminder_days)
-                    : (event.reminder_days || [])
+                    : (event.reminder_days || []),
+                latitude: event.latitude ? parseFloat(event.latitude) : null,
+                longitude: event.longitude ? parseFloat(event.longitude) : null,
             })) as Event[];
         },
         staleTime: 1000 * 60 * 5, // 5 minutes

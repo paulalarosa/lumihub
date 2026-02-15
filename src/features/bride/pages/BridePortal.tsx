@@ -39,12 +39,30 @@ export default function BridePortal() {
             // Simulating API call
             await new Promise(r => setTimeout(r, 1000));
 
-            // Temporary Mock Data for specific Demo
+            // 1. Fetch Client (The Person)
+            const { data: client, error: clientError } = await supabase
+                .from('wedding_clients')
+                .select('name')
+                .eq('id', accessToken) // 'token' IS the client_id here
+                .single();
+
+            if (clientError || !client) throw new Error("Cliente não encontrado");
+
+            // 2. Fetch Project (The Event)
+            const { data: projects } = await supabase
+                .from('projects')
+                .select('event_date, event_location')
+                .eq('client_id', accessToken)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            const project = projects?.[0];
+
             setData({
-                client_id: "demo-client",
-                bride_name: "Isabella & Marcos",
-                wedding_date: "2024-12-14T16:00:00",
-                wedding_location: "Villa Giardini",
+                client_id: accessToken,
+                bride_name: client.name, // ✅ Uses Real Name "Ana"
+                wedding_date: project?.event_date || new Date().toISOString(),
+                wedding_location: project?.event_location || "Local a definir",
             });
 
         } catch (e) {
@@ -52,7 +70,7 @@ export default function BridePortal() {
         } finally {
             setLoading(false);
         }
-    };
+    }
 
     if (loading) {
         return (
@@ -92,7 +110,7 @@ export default function BridePortal() {
             {/* Simple Noir Header */}
             <header className="border-b border-neutral-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
                 <div className="container mx-auto px-6 h-20 flex items-center justify-between">
-                    <span className="font-serif italic text-xl">Lumi Bride</span>
+                    <span className="font-serif italic text-xl">KONTROL Bride</span>
                     <span className="text-[10px] uppercase tracking-widest text-neutral-500 border border-neutral-800 px-3 py-1 bg-black">
                         Portal Exclusivo
                     </span>
@@ -104,7 +122,7 @@ export default function BridePortal() {
                 <div className="flex flex-col items-center text-center mb-24">
                     <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-6">Casamento de</p>
                     <h1 className="text-4xl md:text-7xl font-serif text-white uppercase tracking-wider mb-8 leading-tight">
-                        {data.bride_name.replace('Casamento ', '').replace('casamento ', '')}
+                        {data.bride_name}
                     </h1>
 
                     <div className="flex flex-col md:flex-row items-center gap-6 md:gap-12 text-neutral-400 font-mono text-xs uppercase tracking-widest border-t border-b border-neutral-900 py-6 px-12">
