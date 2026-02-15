@@ -41,13 +41,6 @@ export type Database = {
             foreignKeyName: "analytics_logs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "analytics_logs_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
@@ -233,6 +226,13 @@ export type Database = {
             foreignKeyName: "bride_access_professional_id_fkey"
             columns: ["professional_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bride_access_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -272,123 +272,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      clients_backup_error: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
-      }
-      clients_bugada: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
-      }
-      clients_old_broken: {
-        Row: {
-          bride_status: boolean | null
-          created_at: string | null
-          email: string | null
-          id: string
-          moodboard_url: string | null
-          name: string | null
-          phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
-        }
-        Insert: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Update: {
-          bride_status?: boolean | null
-          created_at?: string | null
-          email?: string | null
-          id?: string
-          moodboard_url?: string | null
-          name?: string | null
-          phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
-        }
-        Relationships: []
       }
       contracts: {
         Row: {
@@ -441,13 +324,6 @@ export type Database = {
             foreignKeyName: "contracts_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "contracts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
             referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
@@ -481,7 +357,21 @@ export type Database = {
             foreignKeyName: "assistants"
             columns: ["assistant_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistants"
+            columns: ["assistant_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -593,14 +483,14 @@ export type Database = {
             foreignKeyName: "event_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
-            referencedRelation: "clients"
+            referencedRelation: "wedding_clients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "event_client_id_fkey"
-            columns: ["client_id"]
+            foreignKeyName: "events_assistant_id_fkey"
+            columns: ["assistant_id"]
             isOneToOne: false
-            referencedRelation: "wedding_clients"
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -719,6 +609,13 @@ export type Database = {
           value?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_user_id_fkey"
             columns: ["user_id"]
@@ -887,8 +784,10 @@ export type Database = {
           address: string | null
           avatar_url: string | null
           bio: string | null
+          birth_date: string | null
           business_name: string | null
           city: string | null
+          contract_url: string | null
           created_at: string | null
           document_id: string | null
           email: string | null
@@ -900,6 +799,7 @@ export type Database = {
           has_completed_onboarding: boolean | null
           id: string
           last_name: string | null
+          logo_url: string | null
           name: string | null
           onboarding_completed: boolean | null
           parent_user_id: string | null
@@ -913,13 +813,16 @@ export type Database = {
           subscription_tier: string | null
           total_clients: number | null
           "updated_at'": string | null
+          website: string | null
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_name?: string | null
           city?: string | null
+          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
@@ -931,6 +834,7 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id: string
           last_name?: string | null
+          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -944,13 +848,16 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
+          website?: string | null
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
           bio?: string | null
+          birth_date?: string | null
           business_name?: string | null
           city?: string | null
+          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
@@ -962,6 +869,7 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id?: string
           last_name?: string | null
+          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -975,6 +883,7 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -1032,8 +941,8 @@ export type Database = {
       projects: {
         Row: {
           budget: number | null
+          client_cpf: string | null
           client_id: string | null
-          "clients_1.cpf": string | null
           cover_url: string | null
           created_at: string
           deadline: string | null
@@ -1060,8 +969,8 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1088,8 +997,8 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1115,13 +1024,6 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "wedding_clients"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "wedding_clients"
             columns: ["client_id"]
@@ -1337,7 +1239,21 @@ export type Database = {
             foreignKeyName: "team_members_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
@@ -1399,6 +1315,13 @@ export type Database = {
           wallet_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "transactions_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "transactions_assistant_id_fkey"
             columns: ["assistant_id"]
@@ -1592,55 +1515,37 @@ export type Database = {
     Views: {
       clients: {
         Row: {
-          address: string | null
-          bride_status: boolean | null
-          cpf: string | null
+          birth_date: string | null
+          contract_url: string | null
           created_at: string | null
           email: string | null
-          full_name: string | null
+          first_name: string | null
           id: string | null
-          last_visit: string | null
-          moodboard_url: string | null
+          last_name: string | null
           name: string | null
-          notes: string | null
           phone: string | null
-          secret_code: string | null
-          user_id: string | null
-          wedding_date: string | null
         }
         Insert: {
-          address?: string | null
-          bride_status?: boolean | null
-          cpf?: string | null
+          birth_date?: string | null
+          contract_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           id?: string | null
-          last_visit?: string | null
-          moodboard_url?: string | null
-          name?: string | null
-          notes?: string | null
+          last_name?: string | null
+          name?: never
           phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
         }
         Update: {
-          address?: string | null
-          bride_status?: boolean | null
-          cpf?: string | null
+          birth_date?: string | null
+          contract_url?: string | null
           created_at?: string | null
           email?: string | null
-          full_name?: string | null
+          first_name?: string | null
           id?: string | null
-          last_visit?: string | null
-          moodboard_url?: string | null
-          name?: string | null
-          notes?: string | null
+          last_name?: string | null
+          name?: never
           phone?: string | null
-          secret_code?: string | null
-          user_id?: string | null
-          wedding_date?: string | null
         }
         Relationships: []
       }
@@ -1656,7 +1561,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "admin" | "editor" | "viewer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1783,6 +1688,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["admin", "editor", "viewer"],
+    },
   },
 } as const
