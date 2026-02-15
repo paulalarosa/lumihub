@@ -26,6 +26,8 @@ export function useDashboard() {
     const [dataLoading, setDataLoading] = useState(true);
     const [originStats, setOriginStats] = useState<{ name: string; value: number }[]>([]);
     const [profileName, setProfileName] = useState<string>('');
+    const [chargesEnabled, setChargesEnabled] = useState<boolean>(false);
+    const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user) return;
@@ -47,6 +49,19 @@ export function useDashboard() {
                     await supabase.from('profiles').update({ subscription_tier: 'studio' } as Record<string, unknown>).eq('id', user.id);
                 }
             }
+
+            // Fetch Stripe Connect Status
+            const { data: artist } = await supabase
+                .from('makeup_artists')
+                .select('charges_enabled, stripe_account_id')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (artist) {
+                setChargesEnabled(artist.charges_enabled || false);
+                setStripeAccountId(artist.stripe_account_id || null);
+            }
+
             setCheckingOnboarding(false);
         };
         checkUserStatus();
@@ -145,6 +160,8 @@ export function useDashboard() {
         isGoogleConnected,
         originStats,
         profileName,
+        chargesEnabled,
+        stripeAccountId,
         handleSignOut,
         navigate,
     };

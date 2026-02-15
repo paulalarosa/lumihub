@@ -70,8 +70,9 @@ async function ingestKnowledgeBase() {
                 console.log(`✅ Ingested: ${frontmatter.title}`);
                 successCount++;
             }
-        } catch (err: any) {
-            console.error(`❌ Fatal error processing ${file}:`, err.message);
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : String(err);
+            console.error(`❌ Fatal error processing ${file}:`, errorMessage);
             failCount++;
         }
     }

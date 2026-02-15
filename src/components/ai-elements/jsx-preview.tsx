@@ -17,27 +17,12 @@ import {
 } from "react";
 import JsxParser from "react-jsx-parser";
 
-interface JSXPreviewContextValue {
-  jsx: string;
-  processedJsx: string;
-  error: Error | null;
-  setError: (error: Error | null) => void;
-  components: JsxParserProps["components"];
-  bindings: JsxParserProps["bindings"];
-  onErrorProp?: (error: Error) => void;
-}
-
-const JSXPreviewContext = createContext<JSXPreviewContextValue | null>(null);
-
 const TAG_REGEX = /<\/?([a-zA-Z][a-zA-Z0-9]*)\s*([^>]*?)(\/)?>/;
 
-export const useJSXPreview = () => {
-  const context = useContext(JSXPreviewContext);
-  if (!context) {
-    throw new Error("JSXPreview components must be used within JSXPreview");
-  }
-  return context;
-};
+import {
+  JSXPreviewContext,
+  useJSXPreview,
+} from "./jsx-preview-context";
 
 const matchJsxTag = (code: string) => {
   if (code.trim() === "") {

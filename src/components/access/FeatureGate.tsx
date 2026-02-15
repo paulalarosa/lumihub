@@ -21,7 +21,7 @@ export const FeatureGate = ({
     const { hasFeature, planType } = usePlanAccess();
     const navigate = useNavigate();
 
-    // @ts-ignore
+    // @ts-expect-error
     const hasAccess = hasFeature(feature);
 
     // If already has access, render children

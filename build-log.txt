@@ -1,0 +1,19 @@
+
+> khaos-kontrol-system@0.0.0 build
+> tsc && vite build && cp dist/index.html dist/404.html
+
+[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 3439 modules transformed.
+[2mdist/[22m[32mmanifest.json.gz       [39m[1m[2m0.20 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.gz     [39m[1m[2m0.92 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.gz         [39m[1m[2m0.34 kB[1m[22m
+[2mdist/[22m[32mmanifest.json.br       [39m[1m[2m0.16 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.br     [39m[1m[2m0.84 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.br         [39m[1m[2m0.28 kB[1m[22m
+[2mdist/[22m[32mmanifest.json.gz       [39m[1m[2m0.20 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.gz     [39m[1m[2m0.92 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.gz         [39m[1m[2m0.34 kB[1m[22m
+[2mdist/[22m[32mmanifest.json.br       [39m[1m[2m0.16 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.br     [39m[1m[2m0.84 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.br         [39m[1m[2m0.28 kB[1m[22m

@@ -1,3 +1,4 @@
+import Return from "@/pages/checkout/Return";
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { SplashScreen } from "./components/ui/layout/SplashScreen";
@@ -57,6 +58,9 @@ const Contato = lazy(() => import("./pages/Contato"));
 const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Termos = lazy(() => import("./pages/Termos"));
 const AssistantsPage = lazy(() => import("@/features/assistants/pages/AssistantsPage"));
+const FollowUpManager = lazy(() => import("@/pages/FollowUpManager").then(m => ({ default: m.FollowUpManager })));
+const MicrositeEditor = lazy(() => import("@/pages/MicrositeEditor").then(m => ({ default: m.MicrositeEditor })));
+const Microsite = lazy(() => import("@/pages/Microsite").then(m => ({ default: m.Microsite })));
 const Servicos = lazy(() => import("./pages/Servicos"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const Contratos = lazy(() => import("./pages/Contratos"));
@@ -138,6 +142,7 @@ const App = () => {
                       <Route path="/auth/callback" element={<AuthCallbackHandler />} />
                       <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                       <Route path="/auth/update-password" element={<UpdatePassword />} />
+                      <Route path="/checkout/return" element={<Return />} />
                       <Route path="/onboarding" element={
                         <ProtectedRoute requireOnboarding={false}>
                           <Onboarding />
@@ -166,6 +171,8 @@ const App = () => {
                           <Route path="/admin" element={<AdminDashboard />} />
                           <Route path="/admin/users" element={<Navigate to="/admin?tab=users" replace />} />
                           <Route path="/admin/dashboard" element={<Navigate to="/admin?tab=overview" replace />} />
+                          <Route path="/admin/follow-ups" element={<FollowUpManager />} />
+                          <Route path="/admin/microsite" element={<MicrositeEditor />} />
                         </Route>
 
                         <Route path="/calendar" element={
@@ -257,6 +264,7 @@ const App = () => {
                       <Route element={<BrideProtectedRoute />}>
                         <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
                       </Route>
+                      <Route path="/:slug" element={<Microsite />} />
                       <Route path="*" element={<Dashboard />} />
                       <Route path="/404" element={<NotFound />} />
                     </Routes>

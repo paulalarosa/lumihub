@@ -17,16 +17,21 @@ serve(async (req) => {
     }
 
     try {
-        const { priceId, userId, userEmail, destination, amount } = await req.json();
+        const { priceId, userId, planName } = await req.json();
 
         if (!priceId) {
             throw new Error("Price ID is required");
         }
 
-        console.log(`Creating embedded checkout for user ${userId} (${userEmail})`);
+        console.log(`Creating checkout session for user ${userId} with plan ${planName}`);
 
+        // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
             ui_mode: 'embedded',
+            client_reference_id: userId, // CRITICAL: Link session to user
+            metadata: {
+                plan_name: planName || 'unknown', // Store plan name for verification
+            },
             line_items: [
                 {
                     price: priceId,
@@ -34,26 +39,7 @@ serve(async (req) => {
                 },
             ],
             mode: 'subscription',
-            return_url: `https://khaoskontrol.com.br/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-            client_reference_id: userId, // CRITICAL: Used by webhook to identify user
-            customer_email: userEmail, // Pre-fill email if available
-            payment_intent_data: destination ? {
-                application_fee_amount: Math.round(amount * 0.10), // 10% fee example
-                transfer_data: {
-                    destination: destination,
-                },
-            } : undefined,
-            subscription_data: destination ? {
-                application_fee_percent: 10,
-                transfer_data: {
-                    destination: destination,
-                },
-                metadata: { user_id: userId }
-            } : {
-                metadata: {
-                    user_id: userId // Redundant but good for backup
-                }
-            }
+            return_url: `${req.headers.get("origin")}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
         });
 
         return new Response(
@@ -64,7 +50,6 @@ serve(async (req) => {
             }
         );
     } catch (error) {
-        console.error("Error creating checkout session:", error);
         return new Response(
             JSON.stringify({ error: error.message }),
             {

@@ -5,17 +5,23 @@ import {
   Zap,
   Crown,
   Star,
+  Check
 } from "lucide-react";
 import SEOHead from "@/components/seo/SEOHead";
 import { useLanguage } from "@/hooks/useLanguage";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { StripeEmbeddedCheckout } from "@/components/billing/StripeEmbeddedCheckout";
+import { useState } from "react";
 
 const Planos = () => {
   const { t } = useLanguage();
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
 
   const plans = [
     {
       name: t("plan_essential_name"),
       price: "39,90",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_ESSENTIAL || "price_1QueE5J7Hw...placeholder",
       period: "MÊS",
       description: t("plan_essential_desc"),
       badge: null,
@@ -38,6 +44,7 @@ const Planos = () => {
     {
       name: t("plan_professional_name"),
       price: "89,90",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_PROFESSIONAL || "price_1QueFKJ7Hw...placeholder",
       period: "MÊS",
       description: t("plan_professional_desc"),
       badge: t("plan_professional_badge"),
@@ -60,6 +67,7 @@ const Planos = () => {
     {
       name: t("plan_studio_name"),
       price: "149,90",
+      priceId: import.meta.env.VITE_STRIPE_PRICE_STUDIO || "price_1QueGcJ7Hw...placeholder",
       period: "MÊS",
       description: t("plan_studio_desc"),
       badge: t("plan_studio_badge"),
@@ -187,19 +195,31 @@ const Planos = () => {
                 </div>
 
                 <div className="mt-auto">
-                  <Link to="/cadastro" className="block w-full">
-                    <Button
-                      className={`
-                        w-full h-12 rounded-none font-mono text-xs uppercase tracking-[0.2em] transition-all
-                        ${plan.highlight
-                          ? 'bg-black text-white hover:bg-black/80 hover:scale-[1.02]'
-                          : 'bg-white text-black hover:bg-white/90 hover:scale-[1.02]'
-                        }
-                      `}
-                    >
-                      {plan.ctaKey ? t(plan.ctaKey) : "MIGRAR AGORA"}
-                    </Button>
-                  </Link>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        onClick={() => setSelectedPriceId(plan.priceId)}
+                        className={`
+                                w-full h-12 rounded-none font-mono text-xs uppercase tracking-[0.2em] transition-all
+                                ${plan.highlight
+                            ? 'bg-black text-white hover:bg-black/80 hover:scale-[1.02]'
+                            : 'bg-white text-black hover:bg-white/90 hover:scale-[1.02]'
+                          }
+                                `}
+                      >
+                        {plan.ctaKey ? t(plan.ctaKey) : "MIGRAR AGORA"}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-3xl bg-neutral-950 border-neutral-800 p-0 overflow-hidden text-white">
+                      <div className="p-6">
+                        <h2 className="text-2xl font-bold mb-4 font-serif">
+                          Assinar Plano {plan.name}
+                        </h2>
+                        {/* Here we render the Checkout */}
+                        <StripeEmbeddedCheckout priceId={plan.priceId} />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
             ))}
