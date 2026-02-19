@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { ActionButton, OutlineButton } from "@/components/ui/action-buttons";
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { ActionButton, OutlineButton } from '@/components/ui/action-buttons'
 import {
   Dialog,
   DialogContent,
@@ -9,76 +9,86 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
-import { Loader2, Plus } from "lucide-react";
-import { ClientService } from "@/services/clientService";
+} from '@/components/ui/select'
+import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
+import { Plus } from 'lucide-react'
+import { ClientService } from '@/services/clientService'
 
-export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void }) {
-  const { user } = useAuth();
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [clients, setClients] = useState<{ id: string, name: string }[]>([]);
+export default function NewClientDialog({
+  onSuccess,
+}: {
+  onSuccess?: () => void
+}) {
+  const { user } = useAuth()
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [clients, setClients] = useState<{ id: string; name: string }[]>([])
 
   // Estados do Formulário
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company_name: "",
-    notes: "",
-    origin: "",
-    referred_by: "",
+    name: '',
+    email: '',
+    phone: '',
+    company_name: '',
+    notes: '',
+    origin: '',
+    referred_by: '',
     is_bride: false,
-    access_pin: ""
-  });
+    access_pin: '',
+  })
 
   useEffect(() => {
     if (open && user?.id) {
-      loadClients();
+      loadClients()
     }
-  }, [open, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, user])
 
   const loadClients = async () => {
-    if (!user) return;
-    const { data } = await ClientService.list(user.id);
+    if (!user) return
+    const { data } = await ClientService.list(user.id)
     if (data) {
-      setClients(data);
+      setClients(data)
     }
-  };
+  }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const value = e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
-    setFormData({ ...formData, [e.target.name]: value });
-  };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const value =
+      e.target.type === 'checkbox'
+        ? (e.target as HTMLInputElement).checked
+        : e.target.value
+    setFormData({ ...formData, [e.target.name]: value })
+  }
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [name]: value })
   }
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      toast.error("O nome é obrigatório.");
-      return;
+      toast.error('O nome é obrigatório.')
+      return
     }
 
     if (!user) {
-      toast.error("Erro de sessão: Faça login novamente.");
-      return;
+      toast.error('Erro de sessão: Faça login novamente.')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
 
     try {
       // 1. Prepare Payload
@@ -91,40 +101,50 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
         origin: formData.origin || null,
         user_id: user.id,
         is_bride: formData.is_bride,
-        access_pin: formData.access_pin || null
-      };
-
-
-
+        access_pin: formData.access_pin || null,
+      }
 
       // 2. Create Client
-      const { data: newClient, error } = await ClientService.create(payload);
+      const { data: newClient, error } = await ClientService.create(payload)
 
-      if (error) throw error;
+      if (error) throw error
 
       // 3. Generate Portal Link if Bride
       if (formData.is_bride && newClient && 'id' in newClient) {
-        const clientId = newClient.id as string;
-        const portalLink = `https://khaoskontrol.com.br/portal/${clientId}`;
+        const clientId = newClient.id as string
+        const portalLink = `https://khaoskontrol.com.br/portal/${clientId}`
 
         await ClientService.update(clientId, {
-          portal_link: portalLink
-        });
+          portal_link: portalLink,
+        })
       }
 
-      toast.success(formData.is_bride ? "Noiva cadastrada com sucesso!" : "Cliente criado com sucesso!");
-      setOpen(false);
-      setFormData({ name: "", email: "", phone: "", company_name: "", notes: "", origin: "", referred_by: "", is_bride: false, access_pin: "" });
+      toast.success(
+        formData.is_bride
+          ? 'Noiva cadastrada com sucesso!'
+          : 'Cliente criado com sucesso!',
+      )
+      setOpen(false)
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company_name: '',
+        notes: '',
+        origin: '',
+        referred_by: '',
+        is_bride: false,
+        access_pin: '',
+      })
 
       // Atualiza a lista na tela de trás
-      if (onSuccess) onSuccess();
-
+      if (onSuccess) onSuccess()
     } catch (error) {
-      toast.error(`Erro ao salvar: ${error.message || "Verifique o console"}`);
+      toast.error(`Erro ao salvar: ${error.message || 'Verifique o console'}`)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -135,21 +155,37 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px] bg-[#1A1A1A] border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle className="text-white">Adicionar Novo Cliente</DialogTitle>
+          <DialogTitle className="text-white">
+            Adicionar Novo Cliente
+          </DialogTitle>
           <DialogDescription className="text-white/60">
             Preencha os dados abaixo. O cliente será vinculado à sua conta.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="name" className="text-white">Nome Completo *</Label>
-            <Input id="name" name="name" value={formData.name} onChange={handleChange} placeholder="Ex: Maria Silva" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
+            <Label htmlFor="name" className="text-white">
+              Nome Completo *
+            </Label>
+            <Input
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Ex: Maria Silva"
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="origin" className="text-white">Origem</Label>
-              <Select onValueChange={(v) => handleSelectChange('origin', v)} value={formData.origin}>
+              <Label htmlFor="origin" className="text-white">
+                Origem
+              </Label>
+              <Select
+                onValueChange={(v) => handleSelectChange('origin', v)}
+                value={formData.origin}
+              >
                 <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none focus:ring-0 focus:border-white/40">
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
@@ -164,14 +200,21 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
 
             {formData.origin === 'indicacao' && (
               <div className="grid gap-2">
-                <Label htmlFor="referred_by" className="text-white">Indicado por</Label>
-                <Select onValueChange={(v) => handleSelectChange('referred_by', v)} value={formData.referred_by}>
+                <Label htmlFor="referred_by" className="text-white">
+                  Indicado por
+                </Label>
+                <Select
+                  onValueChange={(v) => handleSelectChange('referred_by', v)}
+                  value={formData.referred_by}
+                >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none focus:ring-0 focus:border-white/40">
                     <SelectValue placeholder="Selecione Cliente" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1A1A1A] border-white/10 text-white max-h-60 overflow-y-auto rounded-none">
-                    {clients.map(c => (
-                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    {clients.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -180,20 +223,47 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
 
             {formData.origin !== 'indicacao' && (
               <div className="grid gap-2">
-                <Label htmlFor="company_name" className="text-white">Empresa (Opcional)</Label>
-                <Input id="company_name" name="company_name" value={formData.company_name} onChange={handleChange} placeholder="Ex: Lumi Inc." className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
+                <Label htmlFor="company_name" className="text-white">
+                  Empresa (Opcional)
+                </Label>
+                <Input
+                  id="company_name"
+                  name="company_name"
+                  value={formData.company_name}
+                  onChange={handleChange}
+                  placeholder="Ex: Lumi Inc."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
+                />
               </div>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-white">Email</Label>
-              <Input id="email" name="email" value={formData.email} onChange={handleChange} placeholder="maria@email.com" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
+              <Label htmlFor="email" className="text-white">
+                Email
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="maria@email.com"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="phone" className="text-white">Telefone</Label>
-              <Input id="phone" name="phone" value={formData.phone} onChange={handleChange} placeholder="(11) 99999-9999" className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
+              <Label htmlFor="phone" className="text-white">
+                Telefone
+              </Label>
+              <Input
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="(11) 99999-9999"
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
+              />
             </div>
           </div>
 
@@ -206,14 +276,19 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
               onChange={handleChange}
               className="h-4 w-4 rounded border-gray-300 bg-white/10 text-[#00e5ff] focus:ring-[#00e5ff]"
             />
-            <Label htmlFor="is_bride" className="text-white font-medium cursor-pointer">
+            <Label
+              htmlFor="is_bride"
+              className="text-white font-medium cursor-pointer"
+            >
               É Noiva? (Gerar Portal)
             </Label>
           </div>
 
           {formData.is_bride && (
             <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
-              <Label htmlFor="access_pin" className="text-white">PIN de Acesso (4 dígitos)</Label>
+              <Label htmlFor="access_pin" className="text-white">
+                PIN de Acesso (4 dígitos)
+              </Label>
               <Input
                 id="access_pin"
                 name="access_pin"
@@ -223,13 +298,24 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
                 placeholder="1234"
                 className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40 tracking-[0.5em] font-mono"
               />
-              <p className="text-xs text-white/50">Este PIN será usado para acessar o Portal da Noiva.</p>
+              <p className="text-xs text-white/50">
+                Este PIN será usado para acessar o Portal da Noiva.
+              </p>
             </div>
           )}
 
           <div className="grid gap-2">
-            <Label htmlFor="notes" className="text-white">Observações</Label>
-            <Textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} placeholder="Detalhes extras..." className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40" />
+            <Label htmlFor="notes" className="text-white">
+              Observações
+            </Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              placeholder="Detalhes extras..."
+              className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
+            />
           </div>
         </div>
         <DialogFooter>
@@ -240,5 +326,5 @@ export default function NewClientDialog({ onSuccess }: { onSuccess?: () => void 
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

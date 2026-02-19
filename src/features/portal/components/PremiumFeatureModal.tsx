@@ -1,20 +1,20 @@
-import { Check, Lock, MessageCircle, X } from "lucide-react";
+import { Check, Lock, MessageCircle } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 interface PremiumFeatureModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  featureName: string;
-  professionalName: string;
-  professionalPhone?: string;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  featureName: string
+  professionalName: string
+  professionalPhone?: string
 }
 
 const PremiumFeatureModal = ({
@@ -25,22 +25,28 @@ const PremiumFeatureModal = ({
   professionalPhone,
 }: PremiumFeatureModalProps) => {
   const features = [
-    { name: "Acesso a dados de clientes", included: featureName === "Clientes" },
-    { name: "Visualização de valores", included: featureName === "Financeiro" },
-    { name: "Relatórios de performance", included: featureName === "Relatórios" },
-    { name: "Chat integrado", included: false },
-    { name: "Notificações push", included: false },
-  ];
+    {
+      name: 'Acesso a dados de clientes',
+      included: featureName === 'Clientes',
+    },
+    { name: 'Visualização de valores', included: featureName === 'Financeiro' },
+    {
+      name: 'Relatórios de performance',
+      included: featureName === 'Relatórios',
+    },
+    { name: 'Chat integrado', included: false },
+    { name: 'Notificações push', included: false },
+  ]
 
   const handleWhatsAppContact = () => {
     if (professionalPhone) {
-      const phone = professionalPhone.replace(/\D/g, "");
+      const phone = professionalPhone.replace(/\D/g, '')
       const message = encodeURIComponent(
-        `Olá ${professionalName}! Gostaria de saber mais sobre os recursos premium do portal de assistentes.`
-      );
-      window.open(`https://wa.me/55${phone}?text=${message}`, "_blank");
+        `Olá ${professionalName}! Gostaria de saber mais sobre os recursos premium do portal de assistentes.`,
+      )
+      window.open(`https://wa.me/55${phone}?text=${message}`, '_blank')
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -50,11 +56,11 @@ const PremiumFeatureModal = ({
             <Lock className="h-6 w-6 text-primary" />
           </div>
           <DialogTitle className="text-center">
-            {featureName === "premium" ? "Recursos Premium" : `${featureName}`}
+            {featureName === 'premium' ? 'Recursos Premium' : `${featureName}`}
           </DialogTitle>
           <DialogDescription className="text-center">
-            Este recurso está disponível apenas para contas premium.
-            Entre em contato com {professionalName} para fazer upgrade.
+            Este recurso está disponível apenas para contas premium. Entre em
+            contato com {professionalName} para fazer upgrade.
           </DialogDescription>
         </DialogHeader>
 
@@ -68,7 +74,7 @@ const PremiumFeatureModal = ({
               {features.map((feature, index) => (
                 <li key={index} className="flex items-center gap-2 text-sm">
                   <Check className="h-4 w-4 text-primary" />
-                  <span className={feature.included ? "font-medium" : ""}>
+                  <span className={feature.included ? 'font-medium' : ''}>
                     {feature.name}
                   </span>
                 </li>
@@ -80,7 +86,7 @@ const PremiumFeatureModal = ({
             {professionalPhone && (
               <Button onClick={handleWhatsAppContact} className="w-full">
                 <MessageCircle className="mr-2 h-4 w-4" />
-                Falar com {professionalName.split(" ")[0]} no WhatsApp
+                Falar com {professionalName.split(' ')[0]} no WhatsApp
               </Button>
             )}
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -90,7 +96,7 @@ const PremiumFeatureModal = ({
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
+  )
+}
 
-export default PremiumFeatureModal;
+export default PremiumFeatureModal

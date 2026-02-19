@@ -1,58 +1,51 @@
-"use client";
+'use client'
 
-import type { DynamicToolUIPart, ToolUIPart } from "ai";
-import type { ComponentProps, ReactNode } from "react";
+import type { DynamicToolUIPart, ToolUIPart } from 'ai'
+import type { ComponentProps, ReactNode } from 'react'
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
-import {
-  CheckCircleIcon,
-  ChevronDownIcon,
-  CircleIcon,
-  ClockIcon,
-  WrenchIcon,
-  XCircleIcon,
-} from "lucide-react";
-import { isValidElement } from "react";
+} from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
+import { ChevronDownIcon, WrenchIcon } from 'lucide-react'
+import { isValidElement } from 'react'
 
-import { CodeBlock } from "./code-block";
+import { CodeBlock } from './code-block'
 
-export type ToolProps = ComponentProps<typeof Collapsible>;
+export type ToolProps = ComponentProps<typeof Collapsible>
 
 export const Tool = ({ className, ...props }: ToolProps) => (
   <Collapsible
-    className={cn("group not-prose mb-4 w-full rounded-md border", className)}
+    className={cn('group not-prose mb-4 w-full rounded-md border', className)}
     {...props}
   />
-);
+)
 
-export type ToolPart = ToolUIPart | DynamicToolUIPart;
+export type ToolPart = ToolUIPart | DynamicToolUIPart
 
 export type ToolHeaderProps = {
-  title?: string;
-  className?: string;
+  title?: string
+  className?: string
 } & (
-    | { type: ToolUIPart["type"]; state: ToolUIPart["state"]; toolName?: never }
-    | {
-      type: DynamicToolUIPart["type"];
-      state: DynamicToolUIPart["state"];
-      toolName: string;
+  | { type: ToolUIPart['type']; state: ToolUIPart['state']; toolName?: never }
+  | {
+      type: DynamicToolUIPart['type']
+      state: DynamicToolUIPart['state']
+      toolName: string
     }
-  );
+)
 
-import { TOOL_STATUS_ICONS, TOOL_STATUS_LABELS } from "@/constants";
+import { TOOL_STATUS_ICONS, TOOL_STATUS_LABELS } from '@/constants'
 
-export const StatusBadge = ({ status }: { status: ToolPart["state"] }) => (
+export const StatusBadge = ({ status }: { status: ToolPart['state'] }) => (
   <Badge className="gap-1.5 rounded-full text-xs" variant="secondary">
     {TOOL_STATUS_ICONS[status]}
     {TOOL_STATUS_LABELS[status]}
   </Badge>
-);
+)
 
 export const ToolHeader = ({
   className,
@@ -63,13 +56,13 @@ export const ToolHeader = ({
   ...props
 }: ToolHeaderProps) => {
   const derivedName =
-    type === "dynamic-tool" ? toolName : type.split("-").slice(1).join("-");
+    type === 'dynamic-tool' ? toolName : type.split('-').slice(1).join('-')
 
   return (
     <CollapsibleTrigger
       className={cn(
-        "flex w-full items-center justify-between gap-4 p-3",
-        className
+        'flex w-full items-center justify-between gap-4 p-3',
+        className,
       )}
       {...props}
     >
@@ -80,27 +73,27 @@ export const ToolHeader = ({
       </div>
       <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
     </CollapsibleTrigger>
-  );
-};
+  )
+}
 
-export type ToolContentProps = ComponentProps<typeof CollapsibleContent>;
+export type ToolContentProps = ComponentProps<typeof CollapsibleContent>
 
 export const ToolContent = ({ className, ...props }: ToolContentProps) => (
   <CollapsibleContent
     className={cn(
-      "data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 space-y-4 p-4 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in",
-      className
+      'data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-top-2 data-[state=open]:slide-in-from-top-2 space-y-4 p-4 text-popover-foreground outline-none data-[state=closed]:animate-out data-[state=open]:animate-in',
+      className,
     )}
     {...props}
   />
-);
+)
 
-export type ToolInputProps = ComponentProps<"div"> & {
-  input: ToolPart["input"];
-};
+export type ToolInputProps = ComponentProps<'div'> & {
+  input: ToolPart['input']
+}
 
 export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
-  <div className={cn("space-y-2 overflow-hidden", className)} {...props}>
+  <div className={cn('space-y-2 overflow-hidden', className)} {...props}>
     <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
       Parameters
     </h4>
@@ -108,12 +101,12 @@ export const ToolInput = ({ className, input, ...props }: ToolInputProps) => (
       <CodeBlock code={JSON.stringify(input, null, 2)} language="json" />
     </div>
   </div>
-);
+)
 
-export type ToolOutputProps = ComponentProps<"div"> & {
-  output: ToolPart["output"];
-  errorText: ToolPart["errorText"];
-};
+export type ToolOutputProps = ComponentProps<'div'> & {
+  output: ToolPart['output']
+  errorText: ToolPart['errorText']
+}
 
 export const ToolOutput = ({
   className,
@@ -122,35 +115,35 @@ export const ToolOutput = ({
   ...props
 }: ToolOutputProps) => {
   if (!(output || errorText)) {
-    return null;
+    return null
   }
 
-  let Output = <div>{output as ReactNode}</div>;
+  let Output = <div>{output as ReactNode}</div>
 
-  if (typeof output === "object" && !isValidElement(output)) {
+  if (typeof output === 'object' && !isValidElement(output)) {
     Output = (
       <CodeBlock code={JSON.stringify(output, null, 2)} language="json" />
-    );
-  } else if (typeof output === "string") {
-    Output = <CodeBlock code={output} language="json" />;
+    )
+  } else if (typeof output === 'string') {
+    Output = <CodeBlock code={output} language="json" />
   }
 
   return (
-    <div className={cn("space-y-2", className)} {...props}>
+    <div className={cn('space-y-2', className)} {...props}>
       <h4 className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-        {errorText ? "Error" : "Result"}
+        {errorText ? 'Error' : 'Result'}
       </h4>
       <div
         className={cn(
-          "overflow-x-auto rounded-md text-xs [&_table]:w-full",
+          'overflow-x-auto rounded-md text-xs [&_table]:w-full',
           errorText
-            ? "bg-destructive/10 text-destructive"
-            : "bg-muted/50 text-foreground"
+            ? 'bg-destructive/10 text-destructive'
+            : 'bg-muted/50 text-foreground',
         )}
       >
         {errorText && <div>{errorText}</div>}
         {Output}
       </div>
     </div>
-  );
-};
+  )
+}

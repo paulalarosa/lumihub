@@ -1,32 +1,46 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Logger } from './logger';
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { Logger } from './logger'
 
 describe('Logger', () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-    });
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
 
-    it('should call persistLog with info level', async () => {
-        const persistSpy = vi.spyOn(Logger as any, 'persistLog').mockImplementation(async () => { });
+  it('should call persistLog with info level', async () => {
+    const persistSpy = vi
+      .spyOn(Logger as any, 'persistLog')
+      .mockImplementation(async () => {})
 
-        await Logger.info('Test Info Message', 'user-123', { meta: 'data' });
+    await Logger.info('Test Info Message', 'user-123', { meta: 'data' })
 
-        expect(persistSpy).toHaveBeenCalledWith('info', 'Test Info Message', 'user-123', { meta: 'data' });
-    });
+    expect(persistSpy).toHaveBeenCalledWith(
+      'info',
+      'Test Info Message',
+      'user-123',
+      { meta: 'data' },
+    )
+  })
 
-    it('should call persistLog with error level and stack trace', async () => {
-        const persistSpy = vi.spyOn(Logger as any, 'persistLog').mockImplementation(async () => { });
-        const error = new Error('Something went wrong');
+  it('should call persistLog with error level and stack trace', async () => {
+    const persistSpy = vi
+      .spyOn(Logger as any, 'persistLog')
+      .mockImplementation(async () => {})
+    const error = new Error('Something went wrong')
 
-        await Logger.error('Test Error', error, 'user-123');
+    await Logger.error('Test Error', error, 'user-123')
 
-        expect(persistSpy).toHaveBeenCalledWith('error', 'Test Error', 'user-123', expect.objectContaining({
-            originalError: 'Something went wrong',
-            stack: expect.stringContaining('Error: Something went wrong')
-        }));
-    });
+    expect(persistSpy).toHaveBeenCalledWith(
+      'error',
+      'Test Error',
+      'user-123',
+      expect.objectContaining({
+        originalError: 'Something went wrong',
+        stack: expect.stringContaining('Error: Something went wrong'),
+      }),
+    )
+  })
 
-    it('should call console logs in environment', () => {
-        // Manual verification logic if needed
-    });
-});
+  it('should call console logs in environment', () => {
+    // Manual verification logic if needed
+  })
+})

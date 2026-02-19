@@ -1,327 +1,391 @@
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { useOrganization } from '@/hooks/useOrganization';
-import { useAuth } from '@/hooks/useAuth';
-import { ProjectService } from '@/services/projectService';
-import { generateWhatsAppLink } from '@/utils/whatsappGenerator';
-import { format } from 'date-fns';
-import type { Task, ProjectServiceItem, Service, ProjectWithRelations, ServiceUI } from '@/types/api.types';
+import { useState } from 'react'
+import { supabase } from '@/integrations/supabase/client'
+import { useToast } from '@/hooks/use-toast'
+import { useOrganization } from '@/hooks/useOrganization'
+import { useAuth } from '@/hooks/useAuth'
+import { ProjectService } from '@/services/projectService'
+import { generateWhatsAppLink } from '@/utils/whatsappGenerator'
+import { format } from 'date-fns'
+import type {
+  Task,
+  ProjectServiceItem,
+  ProjectWithRelations,
+  ServiceUI,
+} from '@/types/api.types'
 
 interface UseProjectActionsProps {
-    projectId: string | undefined;
-    project: ProjectWithRelations | null;
-    tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
-    services: ServiceUI[];
-    projectServices: ProjectServiceItem[];
-    refetch: () => void;
+  projectId: string | undefined
+  project: ProjectWithRelations | null
+  tasks: Task[]
+  setTasks: React.Dispatch<React.SetStateAction<Task[]>>
+  services: ServiceUI[]
+  projectServices: ProjectServiceItem[]
+  refetch: () => void
 }
 
 export function useProjectActions({
-    projectId,
-    project,
-    tasks,
-    setTasks,
-    services,
-    projectServices,
-    refetch,
+  projectId,
+  project,
+  tasks,
+  setTasks,
+  services,
+  projectServices,
+  refetch,
 }: UseProjectActionsProps) {
-    const { user } = useAuth();
-    const { organizationId } = useOrganization();
-    const { toast } = useToast();
+  const { user } = useAuth()
+  const { organizationId } = useOrganization()
+  const { toast } = useToast()
 
-    const [newTaskTitle, setNewTaskTitle] = useState('');
-    const [copied, setCopied] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [copied, setCopied] = useState(false)
 
-    const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false);
-    const [selectedServiceId, setSelectedServiceId] = useState('');
-    const [serviceQuantity, setServiceQuantity] = useState('1');
-    const [servicePrice, setServicePrice] = useState('');
+  const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false)
+  const [selectedServiceId, setSelectedServiceId] = useState('')
+  const [serviceQuantity, setServiceQuantity] = useState('1')
+  const [servicePrice, setServicePrice] = useState('')
 
-    const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
-    const [paymentServiceId, setPaymentServiceId] = useState('');
-    const [paymentAmount, setPaymentAmount] = useState('');
-    const [paymentDescription, setPaymentDescription] = useState('');
+  const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false)
+  const [paymentServiceId, setPaymentServiceId] = useState('')
+  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentDescription, setPaymentDescription] = useState('')
 
-    const addTask = async (e?: React.FormEvent) => {
-        if (e) e.preventDefault();
-        if (!newTaskTitle.trim() || !projectId || !organizationId) return;
+  const addTask = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    if (!newTaskTitle.trim() || !projectId || !organizationId) return
 
-        const { error } = await ProjectService.createTask({
-            project_id: projectId,
-            user_id: organizationId,
-            title: newTaskTitle.trim(),
-            status: 'pending',
-            sort_order: tasks.length
-        });
+    const { error } = await ProjectService.createTask({
+      project_id: projectId,
+      user_id: organizationId,
+      title: newTaskTitle.trim(),
+      status: 'pending',
+      sort_order: tasks.length,
+    })
 
-        if (error) {
-            toast({ title: 'Erro ao adicionar tarefa', variant: 'destructive' });
-        } else {
-            setNewTaskTitle('');
-            refetch();
+    if (error) {
+      toast({ title: 'Erro ao adicionar tarefa', variant: 'destructive' })
+    } else {
+      setNewTaskTitle('')
+      refetch()
+    }
+  }
+
+  const toggleTask = async (taskId: string, currentStatus: string | null) => {
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed'
+    const success = await ProjectService.updateTask(taskId, {
+      status: newStatus,
+    })
+    if (success) {
+      setTasks(
+        tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+      )
+    }
+  }
+
+  const deleteTask = async (taskId: string) => {
+    const success = await ProjectService.deleteTask(taskId)
+    if (success) {
+      setTasks(tasks.filter((t) => t.id !== taskId))
+    }
+  }
+
+  const copyPortalLink = async () => {
+    if (!project?.client?.id) {
+      toast({
+        title: 'Erro',
+        description: 'Cliente não vinculado ao projeto.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    try {
+      const clientId = project.client.id
+      const { data: clientData, error } = await supabase
+        .from('wedding_clients')
+        .select('access_pin, secret_code')
+        .eq('id', clientId)
+        .single()
+
+      if (error || !clientData) {
+        const { data: genericClient, error: genericError } = await supabase
+          .from('clients')
+          .select('secret_code')
+          .eq('id', clientId)
+          .single()
+
+        const typedGenericClient = genericClient as unknown as {
+          secret_code: string
+        } | null
+
+        if (genericError || !typedGenericClient) {
+          throw new Error('Cliente não encontrado em nenhuma tabela.')
         }
-    };
-
-    const toggleTask = async (taskId: string, currentStatus: string | null) => {
-        const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-        const success = await ProjectService.updateTask(taskId, { status: newStatus });
-        if (success) {
-            setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
-        }
-    };
-
-    const deleteTask = async (taskId: string) => {
-        const success = await ProjectService.deleteTask(taskId);
-        if (success) {
-            setTasks(tasks.filter(t => t.id !== taskId));
-        }
-    };
-
-    const copyPortalLink = async () => {
-        if (!project?.client?.id) {
-            toast({ title: 'Erro', description: 'Cliente não vinculado ao projeto.', variant: 'destructive' });
-            return;
-        }
-
-        try {
-            const clientId = project.client.id;
-            const { data: clientData, error } = await supabase
-                .from('wedding_clients')
-                .select('access_pin, secret_code')
-                .eq('id', clientId)
-                .single();
-
-            if (error || !clientData) {
-                const { data: genericClient, error: genericError } = await supabase
-                    .from('clients')
-                    .select('secret_code')
-                    .eq('id', clientId)
-                    .single();
-
-                const typedGenericClient = genericClient as unknown as { secret_code: string } | null;
-
-                if (genericError || !typedGenericClient) {
-                    throw new Error('Cliente não encontrado em nenhuma tabela.');
-                }
-                if (!typedGenericClient.secret_code) {
-                    throw new Error('Cliente sem código de acesso gerado.');
-                }
-
-                const link = `${window.location.origin}/portal/${typedGenericClient.secret_code}`;
-                await navigator.clipboard.writeText(link);
-                setCopied(true);
-                toast({ title: 'Link copiado!', description: 'Link do portal copiado.' });
-                setTimeout(() => setCopied(false), 2000);
-                return;
-            }
-
-            const { secret_code } = clientData;
-            const link = `${window.location.origin}/portal/${secret_code}`;
-            await navigator.clipboard.writeText(link);
-            setCopied(true);
-            toast({ title: 'Link Copiado!', description: 'Link enviado para a área de transferência.' });
-            setTimeout(() => setCopied(false), 2000);
-        } catch (e) {
-            toast({ title: 'Erro ao gerar link', variant: 'destructive' });
-        }
-    };
-
-    const handleSendReminder = async () => {
-        if (!project || !project.client || !user) return;
-
-        if (!project.client.phone) {
-            toast({ title: 'Cliente sem telefone cadastrado', variant: 'destructive' });
-            return;
+        if (!typedGenericClient.secret_code) {
+          throw new Error('Cliente sem código de acesso gerado.')
         }
 
-        try {
-            const { data: templateData } = await supabase
-                .from('message_templates')
-                .select('content')
-                .eq('organization_id', organizationId)
-                .eq('type', 'reminder_24h')
-                .single();
+        const link = `${window.location.origin}/portal/${typedGenericClient.secret_code}`
+        await navigator.clipboard.writeText(link)
+        setCopied(true)
+        toast({
+          title: 'Link copiado!',
+          description: 'Link do portal copiado.',
+        })
+        setTimeout(() => setCopied(false), 2000)
+        return
+      }
 
-            const textPattern = templateData?.content || 'Olá {client_name}, passando para lembrar do seu agendamento dia {date} às {time}.';
+      const { secret_code } = clientData
+      const link = `${window.location.origin}/portal/${secret_code}`
+      await navigator.clipboard.writeText(link)
+      setCopied(true)
+      toast({
+        title: 'Link Copiado!',
+        description: 'Link enviado para a área de transferência.',
+      })
+      setTimeout(() => setCopied(false), 2000)
+    } catch (_e) {
+      toast({ title: 'Erro ao gerar link', variant: 'destructive' })
+    }
+  }
 
-            let professionalName = 'LumiHub';
-            const { data: profData } = await supabase
-                .from('profiles')
-                .select('full_name')
-                .eq('id', user.id)
-                .single();
+  const handleSendReminder = async () => {
+    if (!project || !project.client || !user) return
 
-            if (profData?.full_name) professionalName = profData.full_name;
+    if (!project.client.phone) {
+      toast({
+        title: 'Cliente sem telefone cadastrado',
+        variant: 'destructive',
+      })
+      return
+    }
 
-            const eventDateObj = project.event_date ? new Date(project.event_date) : null;
-            const dateStr = eventDateObj ? format(eventDateObj, 'dd/MM') : 'Data a definir';
-            const timeStr = eventDateObj ? format(eventDateObj, 'HH:mm') : 'Horário a definir';
+    try {
+      const { data: templateData } = await supabase
+        .from('message_templates')
+        .select('content')
+        .eq('organization_id', organizationId)
+        .eq('type', 'reminder_24h')
+        .single()
 
-            const link = generateWhatsAppLink(textPattern, {
-                client_name: project.client.full_name || 'Cliente',
-                professional_name: professionalName,
-                date: dateStr,
-                time: timeStr,
-                location: project.event_location || 'Local a definir',
-                phone: project.client.phone
-            });
+      const textPattern =
+        templateData?.content ||
+        'Olá {client_name}, passando para lembrar do seu agendamento dia {date} às {time}.'
 
-            window.open(link, '_blank');
-        } catch (error) {
-            toast({ title: 'Erro ao gerar link', variant: 'destructive' });
-        }
-    };
+      let professionalName = 'LumiHub'
+      const { data: profData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
 
-    const createDefaultBriefing = async () => {
-        if (!projectId || !organizationId) return;
+      if (profData?.full_name) professionalName = profData.full_name
 
-        const defaultQuestions = [
-            { id: '1', question: 'Qual é o seu tipo de pele? (oleosa, seca, mista, normal)', type: 'text' },
-            { id: '2', question: 'Você tem alguma alergia a cosméticos?', type: 'text' },
-            { id: '3', question: 'Qual estilo de maquiagem você prefere?', type: 'text' },
-            { id: '4', question: 'Quais cores você gostaria de usar?', type: 'text' },
-            { id: '5', question: 'Você usará cílios postiços?', type: 'text' },
-            { id: '6', question: 'Alguma observação adicional?', type: 'text' }
-        ];
+      const eventDateObj = project.event_date
+        ? new Date(project.event_date)
+        : null
+      const dateStr = eventDateObj
+        ? format(eventDateObj, 'dd/MM')
+        : 'Data a definir'
+      const timeStr = eventDateObj
+        ? format(eventDateObj, 'HH:mm')
+        : 'Horário a definir'
 
-        const { error } = await ProjectService.createBriefing({
-            project_id: projectId,
-            status: 'pending',
-            user_id: organizationId,
-            content: { questions: defaultQuestions }
-        });
+      const link = generateWhatsAppLink(textPattern, {
+        client_name: project.client.full_name || 'Cliente',
+        professional_name: professionalName,
+        date: dateStr,
+        time: timeStr,
+        location: project.event_location || 'Local a definir',
+        phone: project.client.phone,
+      })
 
-        if (!error) {
-            toast({ title: 'Questionário criado!' });
-            refetch();
-        }
-    };
+      window.open(link, '_blank')
+    } catch (_error) {
+      toast({ title: 'Erro ao gerar link', variant: 'destructive' })
+    }
+  }
 
-    const addServiceToProject = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!selectedServiceId || !projectId || !organizationId) return;
+  const createDefaultBriefing = async () => {
+    if (!projectId || !organizationId) return
 
-        const service = services.find(s => s.id === selectedServiceId);
-        if (!service) return;
+    const defaultQuestions = [
+      {
+        id: '1',
+        question: 'Qual é o seu tipo de pele? (oleosa, seca, mista, normal)',
+        type: 'text',
+      },
+      {
+        id: '2',
+        question: 'Você tem alguma alergia a cosméticos?',
+        type: 'text',
+      },
+      {
+        id: '3',
+        question: 'Qual estilo de maquiagem você prefere?',
+        type: 'text',
+      },
+      { id: '4', question: 'Quais cores você gostaria de usar?', type: 'text' },
+      { id: '5', question: 'Você usará cílios postiços?', type: 'text' },
+      { id: '6', question: 'Alguma observação adicional?', type: 'text' },
+    ]
 
-        const qty = parseInt(serviceQuantity) || 1;
-        const priceStr = service.price ? String(service.price) : '0';
-        const price = servicePrice ? parseFloat(servicePrice) : parseFloat(priceStr);
-        const total = qty * price;
+    const { error } = await ProjectService.createBriefing({
+      project_id: projectId,
+      status: 'pending',
+      user_id: organizationId,
+      content: { questions: defaultQuestions },
+    })
 
-        const { error } = await ProjectService.addProjectService({
-            project_id: projectId,
-            service_id: selectedServiceId,
-            quantity: qty.toString(),
-            unit_price: price,
-            total_price: total.toString()
-        });
+    if (!error) {
+      toast({ title: 'Questionário criado!' })
+      refetch()
+    }
+  }
 
-        if (error) {
-            toast({ title: 'Erro ao adicionar serviço', variant: 'destructive' });
-        } else {
-            toast({ title: 'Serviço adicionado!' });
-            setIsServiceDialogOpen(false);
-            setSelectedServiceId('');
-            setServiceQuantity('1');
-            setServicePrice('');
-            refetch();
-        }
-    };
+  const addServiceToProject = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedServiceId || !projectId || !organizationId) return
 
-    const removeServiceFromProject = async (projectServiceId: string) => {
-        const { error } = await ProjectService.deleteProjectService(projectServiceId);
-        if (!error) {
-            toast({ title: 'Serviço removido!' });
-            refetch();
-        }
-    };
+    const service = services.find((s) => s.id === selectedServiceId)
+    if (!service) return
 
-    const registerPayment = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const qty = parseInt(serviceQuantity) || 1
+    const priceStr = service.price ? String(service.price) : '0'
+    const price = servicePrice ? parseFloat(servicePrice) : parseFloat(priceStr)
+    const total = qty * price
 
-        const cleanAmount = typeof paymentAmount === 'string'
-            ? parseFloat(paymentAmount.replace('R$', '').replace('.', '').replace(',', '.'))
-            : parseFloat(paymentAmount);
+    const { error } = await ProjectService.addProjectService({
+      project_id: projectId,
+      service_id: selectedServiceId,
+      quantity: qty.toString(),
+      unit_price: price,
+      total_price: total.toString(),
+    })
 
-        if (isNaN(cleanAmount)) {
-            toast({ title: 'Valor inválido', variant: 'destructive' });
-            return;
-        }
+    if (error) {
+      toast({ title: 'Erro ao adicionar serviço', variant: 'destructive' })
+    } else {
+      toast({ title: 'Serviço adicionado!' })
+      setIsServiceDialogOpen(false)
+      setSelectedServiceId('')
+      setServiceQuantity('1')
+      setServicePrice('')
+      refetch()
+    }
+  }
 
-        if (!projectId || (!project?.client_id && !project?.client?.id) || !organizationId) {
-            toast({ title: 'Erro interno', description: 'Identificação do projeto ou usuário ausente.', variant: 'destructive' });
-            return;
-        }
+  const removeServiceFromProject = async (projectServiceId: string) => {
+    const { error } =
+      await ProjectService.deleteProjectService(projectServiceId)
+    if (!error) {
+      toast({ title: 'Serviço removido!' })
+      refetch()
+    }
+  }
 
-        const ps = projectServices.find(s => s.id === paymentServiceId);
-        const finalDescription = paymentDescription.trim() || (ps ? `Pagamento: ${ps.service?.name}` : 'Pagamento Geral');
+  const registerPayment = async (e: React.FormEvent) => {
+    e.preventDefault()
 
-        const payload = {
-            project_id: projectId,
-            client_id: project.client_id || project.client?.id,
-            amount: cleanAmount,
-            description: finalDescription,
-            type: 'income',
-            status: 'completed',
-            user_id: organizationId,
-            date: new Date().toISOString(),
-            category: 'Projeto'
-        };
+    const cleanAmount =
+      typeof paymentAmount === 'string'
+        ? parseFloat(
+            paymentAmount.replace('R$', '').replace('.', '').replace(',', '.'),
+          )
+        : parseFloat(paymentAmount)
 
-        const { error: transError } = await supabase.from('transactions').insert([payload]);
+    if (isNaN(cleanAmount)) {
+      toast({ title: 'Valor inválido', variant: 'destructive' })
+      return
+    }
 
-        if (transError) {
-            toast({ title: 'Erro ao registrar transação', description: transError.message, variant: 'destructive' });
-            return;
-        }
+    if (
+      !projectId ||
+      (!project?.client_id && !project?.client?.id) ||
+      !organizationId
+    ) {
+      toast({
+        title: 'Erro interno',
+        description: 'Identificação do projeto ou usuário ausente.',
+        variant: 'destructive',
+      })
+      return
+    }
 
-        toast({ title: 'Pagamento registrado!' });
-        setIsPaymentDialogOpen(false);
-        setPaymentServiceId('');
-        setPaymentAmount('');
-        setPaymentDescription('');
-        refetch();
-    };
+    const ps = projectServices.find((s) => s.id === paymentServiceId)
+    const finalDescription =
+      paymentDescription.trim() ||
+      (ps ? `Pagamento: ${ps.service?.name}` : 'Pagamento Geral')
 
-    const handleSelectService = (serviceId: string) => {
-        setSelectedServiceId(serviceId);
-        const service = services.find(s => s.id === serviceId);
-        if (service?.price) {
-            setServicePrice(service.price.toString());
-        }
-    };
+    const payload = {
+      project_id: projectId,
+      client_id: project.client_id || project.client?.id,
+      amount: cleanAmount,
+      description: finalDescription,
+      type: 'income',
+      status: 'completed',
+      user_id: organizationId,
+      date: new Date().toISOString(),
+      category: 'Projeto',
+    }
 
-    return {
-        newTaskTitle,
-        setNewTaskTitle,
-        copied,
-        isServiceDialogOpen,
-        setIsServiceDialogOpen,
-        selectedServiceId,
-        serviceQuantity,
-        setServiceQuantity,
-        servicePrice,
-        setServicePrice,
-        isPaymentDialogOpen,
-        setIsPaymentDialogOpen,
-        paymentServiceId,
-        setPaymentServiceId,
-        paymentAmount,
-        setPaymentAmount,
-        paymentDescription,
-        setPaymentDescription,
-        addTask,
-        toggleTask,
-        deleteTask,
-        copyPortalLink,
-        handleSendReminder,
-        createDefaultBriefing,
-        addServiceToProject,
-        removeServiceFromProject,
-        registerPayment,
-        handleSelectService,
-    };
+    const { error: transError } = await supabase
+      .from('transactions')
+      .insert([payload])
+
+    if (transError) {
+      toast({
+        title: 'Erro ao registrar transação',
+        description: transError.message,
+        variant: 'destructive',
+      })
+      return
+    }
+
+    toast({ title: 'Pagamento registrado!' })
+    setIsPaymentDialogOpen(false)
+    setPaymentServiceId('')
+    setPaymentAmount('')
+    setPaymentDescription('')
+    refetch()
+  }
+
+  const handleSelectService = (serviceId: string) => {
+    setSelectedServiceId(serviceId)
+    const service = services.find((s) => s.id === serviceId)
+    if (service?.price) {
+      setServicePrice(service.price.toString())
+    }
+  }
+
+  return {
+    newTaskTitle,
+    setNewTaskTitle,
+    copied,
+    isServiceDialogOpen,
+    setIsServiceDialogOpen,
+    selectedServiceId,
+    serviceQuantity,
+    setServiceQuantity,
+    servicePrice,
+    setServicePrice,
+    isPaymentDialogOpen,
+    setIsPaymentDialogOpen,
+    paymentServiceId,
+    setPaymentServiceId,
+    paymentAmount,
+    setPaymentAmount,
+    paymentDescription,
+    setPaymentDescription,
+    addTask,
+    toggleTask,
+    deleteTask,
+    copyPortalLink,
+    handleSendReminder,
+    createDefaultBriefing,
+    addServiceToProject,
+    removeServiceFromProject,
+    registerPayment,
+    handleSelectService,
+  }
 }

@@ -1,13 +1,12 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
-  CarouselPrevious
-} from "@/components/ui/carousel";
+  CarouselPrevious,
+} from '@/components/ui/carousel'
 import {
   Sparkles,
   TrendingUp,
@@ -15,60 +14,64 @@ import {
   Users,
   Crown,
   ArrowRight,
-  Play
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+} from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 interface Slide {
-  icon: React.ComponentType<{ className?: string }>;
-  title: string;
-  description: string;
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  description: string
 }
 
 const slides: Slide[] = [
   {
     icon: Sparkles,
-    title: "KONTROL: A Sua Nova Fase Profissional",
-    description: "Eleve seu posicionamento no mercado com o KONTROL. Saia do suporte e assuma o controle da sua carreira com as ferramentas de gestão mais modernas do mundo da beleza."
+    title: 'KONTROL: A Sua Nova Fase Profissional',
+    description:
+      'Eleve seu posicionamento no mercado com o KONTROL. Saia do suporte e assuma o controle da sua carreira com as ferramentas de gestão mais modernas do mundo da beleza.',
   },
   {
     icon: TrendingUp,
-    title: "Gestão de Ganhos em Tempo Real",
-    description: "Tenha um painel financeiro completo para acompanhar suas comissões, recebimentos e histórico. Segurança e clareza para você focar no que importa: sua arte."
+    title: 'Gestão de Ganhos em Tempo Real',
+    description:
+      'Tenha um painel financeiro completo para acompanhar suas comissões, recebimentos e histórico. Segurança e clareza para você focar no que importa: sua arte.',
   },
   {
     icon: MapPin,
-    title: "Agendamento Inteligente e GPS",
-    description: "Libere sua própria agenda KONTROL. Seus clientes agendam, o endereço é validado via Google Maps e você recebe a rota direta para o seu app de GPS favorito."
+    title: 'Agendamento Inteligente e GPS',
+    description:
+      'Libere sua própria agenda KONTROL. Seus clientes agendam, o endereço é validado via Google Maps e você recebe a rota direta para o seu app de GPS favorito.',
   },
   {
     icon: Users,
-    title: "Networking de Elite",
-    description: "Mantenha suas conexões com as melhores maquiadoras, mas agora com um perfil Pro. Mais autoridade para ser tagueada nos maiores eventos do mercado."
+    title: 'Networking de Elite',
+    description:
+      'Mantenha suas conexões com as melhores maquiadoras, mas agora com um perfil Pro. Mais autoridade para ser tagueada nos maiores eventos do mercado.',
   },
   {
     icon: Crown,
-    title: "Desbloqueie o KONTROL PRO",
-    description: "Transforme sua rotina com acesso ilimitado a todas as funções premium. Clique abaixo e faça seu upgrade para o Plano Pro hoje mesmo!"
-  }
-];
+    title: 'Desbloqueie o KONTROL PRO',
+    description:
+      'Transforme sua rotina com acesso ilimitado a todas as funções premium. Clique abaixo e faça seu upgrade para o Plano Pro hoje mesmo!',
+  },
+]
 
 export function KontrolProCarousel() {
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0)
 
   return (
     <div className="w-full max-w-5xl mx-auto">
       <Carousel
         opts={{
-          align: "center",
+          align: 'center',
           loop: true,
         }}
         className="w-full"
         setApi={(api) => {
-          api?.on("select", () => {
-            setCurrentSlide(api.selectedScrollSnap());
-          });
+          api?.on('select', () => {
+            setCurrentSlide(api.selectedScrollSnap())
+          })
         }}
       >
         <CarouselContent>
@@ -81,7 +84,6 @@ export function KontrolProCarousel() {
                 className="p-4"
               >
                 <div className="relative bg-black border border-white/20 p-12 aspect-[16/9] flex flex-col justify-center items-center text-center group">
-
                   {/* Corner Markers - Viewfinder Effect */}
                   <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-white" />
                   <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-white" />
@@ -136,10 +138,9 @@ export function KontrolProCarousel() {
             {slides.map((_, index) => (
               <div
                 key={index}
-                className={`h-1 transition-all duration-300 ${currentSlide === index
-                  ? "w-8 bg-white"
-                  : "w-4 bg-white/20"
-                  }`}
+                className={`h-1 transition-all duration-300 ${
+                  currentSlide === index ? 'w-8 bg-white' : 'w-4 bg-white/20'
+                }`}
               />
             ))}
           </div>
@@ -148,5 +149,5 @@ export function KontrolProCarousel() {
         </div>
       </Carousel>
     </div>
-  );
+  )
 }

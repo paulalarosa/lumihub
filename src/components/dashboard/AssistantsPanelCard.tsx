@@ -1,70 +1,78 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Users, Plus, Copy, Check, ArrowRight } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Users, Plus, Copy, Check, ArrowRight } from 'lucide-react'
+import { supabase } from '@/integrations/supabase/client'
+import { toast } from 'sonner'
 
 interface Assistant {
-  id: string;
-  full_name: string;
-  email: string | null;
-  is_registered: boolean;
-  invite_token: string | null;
+  id: string
+  full_name: string
+  email: string | null
+  is_registered: boolean
+  invite_token: string | null
 }
 
 export function AssistantsPanelCard() {
-  const [assistants, setAssistants] = useState<Assistant[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [assistants, setAssistants] = useState<Assistant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchAssistants();
-  }, []);
+    fetchAssistants()
+  }, [])
 
   const fetchAssistants = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
 
-      const { data, error } = await (supabase
-        .from("assistants") as any)
-        .select("id, full_name, phone, created_at")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5);
+      const { data, error } = await (supabase.from('assistants') as any)
+        .select('id, full_name, phone, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(5)
 
-      if (error) throw error;
-      setAssistants(((data as unknown as Record<string, unknown>[]) || []).map((a) => ({
-        id: String(a.id),
-        full_name: String(a.full_name),
-        email: null,
-        is_registered: true,
-        invite_token: null
-      })));
+      if (error) throw error
+      setAssistants(
+        ((data as unknown as Record<string, unknown>[]) || []).map((a) => ({
+          id: String(a.id),
+          full_name: String(a.full_name),
+          email: null,
+          is_registered: true,
+          invite_token: null,
+        })),
+      )
     } catch (error) {
-      void error;
+      void error
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const copyInviteLink = async (assistant: Assistant) => {
-    if (!assistant.invite_token) return;
+    if (!assistant.invite_token) return
 
-    const link = `${window.location.origin}/assistente/convite/${assistant.invite_token}`;
-    await navigator.clipboard.writeText(link);
-    setCopiedId(assistant.id);
-    toast.success("Link copiado!");
+    const link = `${window.location.origin}/assistente/convite/${assistant.invite_token}`
+    await navigator.clipboard.writeText(link)
+    setCopiedId(assistant.id)
+    toast.success('Link copiado!')
 
-    setTimeout(() => setCopiedId(null), 2000);
-  };
+    setTimeout(() => setCopiedId(null), 2000)
+  }
 
-  const registeredCount = assistants.filter((a) => a.is_registered).length;
-  const pendingCount = assistants.filter((a) => !a.is_registered).length;
+  const registeredCount = assistants.filter((a) => a.is_registered).length
+  const pendingCount = assistants.filter((a) => !a.is_registered).length
 
   if (loading) {
     return (
@@ -83,7 +91,7 @@ export function AssistantsPanelCard() {
           </div>
         </CardContent>
       </Card>
-    );
+    )
   }
 
   return (
@@ -96,8 +104,8 @@ export function AssistantsPanelCard() {
           </CardTitle>
           <CardDescription>
             {assistants.length === 0
-              ? "Nenhuma assistente cadastrada"
-              : `${registeredCount} registrada${registeredCount !== 1 ? "s" : ""} • ${pendingCount} pendente${pendingCount !== 1 ? "s" : ""}`}
+              ? 'Nenhuma assistente cadastrada'
+              : `${registeredCount} registrada${registeredCount !== 1 ? 's' : ''} • ${pendingCount} pendente${pendingCount !== 1 ? 's' : ''}`}
           </CardDescription>
         </div>
         <Button asChild size="sm">
@@ -111,7 +119,9 @@ export function AssistantsPanelCard() {
         {assistants.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">Cadastre assistentes para vincular a eventos</p>
+            <p className="text-sm">
+              Cadastre assistentes para vincular a eventos
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -124,9 +134,9 @@ export function AssistantsPanelCard() {
                   <Avatar className="h-9 w-9">
                     <AvatarFallback className="text-xs">
                       {assistant.full_name
-                        .split(" ")
+                        .split(' ')
                         .map((n) => n[0])
-                        .join("")
+                        .join('')
                         .slice(0, 2)
                         .toUpperCase()}
                     </AvatarFallback>
@@ -134,20 +144,16 @@ export function AssistantsPanelCard() {
                   <div>
                     <p className="text-sm font-medium">{assistant.full_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {assistant.email || "Sem email"}
+                      {assistant.email || 'Sem email'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {assistant.is_registered ? (
-                    <span className="lumi-badge-active">
-                      Ativa
-                    </span>
+                    <span className="lumi-badge-active">Ativa</span>
                   ) : (
                     <>
-                      <span className="lumi-badge-pending">
-                        Pendente
-                      </span>
+                      <span className="lumi-badge-pending">Pendente</span>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -178,5 +184,5 @@ export function AssistantsPanelCard() {
         )}
       </CardContent>
     </Card>
-  );
+  )
 }

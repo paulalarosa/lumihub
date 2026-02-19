@@ -1,83 +1,86 @@
-import { useEffect, useState, useRef } from "react";
-import { Loader2, Navigation, MapPin } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
-import { logger } from "@/utils/logger";
+import { useEffect, useState, useRef } from 'react'
+import { Loader2, Navigation, MapPin } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { supabase } from '@/integrations/supabase/client'
+import { Input } from '@/components/ui/input'
+import { logger } from '@/utils/logger'
 
 interface AddressAutocompleteProps {
-  value: string;
-  onChange: (value: string) => void;
-  onCoordinatesChange?: (lat: number | null, lng: number | null) => void;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  placeholder?: string;
-  className?: string;
-  showMiniMap?: boolean; // Kept for API compatibility, though map might be removed if we don't have SDK
-  latitude?: number | null;
-  longitude?: number | null;
+  value: string
+  onChange: (value: string) => void
+  onCoordinatesChange?: (lat: number | null, lng: number | null) => void
+  onFocus?: () => void
+  onBlur?: () => void
+  placeholder?: string
+  className?: string
+  showMiniMap?: boolean // Kept for API compatibility, though map might be removed if we don't have SDK
+  latitude?: number | null
+  longitude?: number | null
 }
 
-import { SupabaseClient } from "@supabase/supabase-js";
-import { Database } from "@/integrations/supabase/types";
+import { SupabaseClient } from '@supabase/supabase-js'
+import { Database } from '@/integrations/supabase/types'
 
 interface PlaceSuggestion {
-  description: string;
-  place_id: string;
+  description: string
+  place_id: string
 }
 
 interface GeoCacheTable {
   Row: {
-    query: string;
-    response: any;
-    expires_at: string;
-  };
+    query: string
+    response: any
+    expires_at: string
+  }
   Insert: {
-    query: string;
-    response: any;
-    expires_at: string;
-  };
+    query: string
+    response: any
+    expires_at: string
+  }
   Update: {
-    query?: string;
-    response?: any;
-    expires_at?: string;
-  };
-  Relationships: [];
+    query?: string
+    response?: any
+    expires_at?: string
+  }
+  Relationships: []
 }
 
 type LocalDatabase = Database & {
   public: {
     Tables: {
-      geo_cache: GeoCacheTable;
-    };
-  };
-};
+      geo_cache: GeoCacheTable
+    }
+  }
+}
 
 // Simple debounce utility
 function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+  const [debouncedValue, setDebouncedValue] = useState<T>(value)
   useEffect(() => {
-    const handler = setTimeout(() => setDebouncedValue(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-  return debouncedValue;
+    const handler = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(handler)
+  }, [value, delay])
+  return debouncedValue
 }
 
 // Deep link helper
-function getGPSDeepLink(address: string, lat?: number | null, lng?: number | null): string {
-  const userAgent = navigator.userAgent.toLowerCase();
-  const isIOS = /iphone|ipad|ipod/.test(userAgent);
-  const isAndroid = /android/.test(userAgent);
+function getGPSDeepLink(
+  address: string,
+  lat?: number | null,
+  lng?: number | null,
+): string {
+  const userAgent = navigator.userAgent.toLowerCase()
+  const isIOS = /iphone|ipad|ipod/.test(userAgent)
+  const isAndroid = /android/.test(userAgent)
   if (lat && lng) {
-    if (isIOS) return `maps:///?daddr=${lat},${lng}&dirflg=d`;
-    if (isAndroid) return `geo:${lat},${lng}?q=${lat},${lng}`;
-    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+    if (isIOS) return `maps:///?daddr=${lat},${lng}&dirflg=d`
+    if (isAndroid) return `geo:${lat},${lng}?q=${lat},${lng}`
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
   }
-  const encoded = encodeURIComponent(address);
-  if (isIOS) return `maps:///?daddr=${encoded}&dirflg=d`;
-  if (isAndroid) return `geo:0,0?q=${encoded}`;
-  return `https://www.google.com/maps/dir/?api=1&destination=${encoded}`;
+  const encoded = encodeURIComponent(address)
+  if (isIOS) return `maps:///?daddr=${encoded}&dirflg=d`
+  if (isAndroid) return `geo:0,0?q=${encoded}`
+  return `https://www.google.com/maps/dir/?api=1&destination=${encoded}`
 }
 
 export function AddressAutocomplete({
@@ -86,189 +89,215 @@ export function AddressAutocomplete({
   onCoordinatesChange,
   onFocus,
   onBlur,
-  placeholder = "Digite o endereço...",
+  placeholder = 'Digite o endereço...',
   className,
   latitude,
   longitude,
 }: AddressAutocompleteProps) {
-  const [inputValue, setInputValue] = useState(value);
-  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [inputValue, setInputValue] = useState(value)
+  const [suggestions, setSuggestions] = useState<PlaceSuggestion[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    latitude && longitude ? { lat: latitude, lng: longitude } : null
-  );
+    latitude && longitude ? { lat: latitude, lng: longitude } : null,
+  )
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const debouncedSearch = useDebounce(inputValue, 500);
+  const containerRef = useRef<HTMLDivElement>(null)
+  const debouncedSearch = useDebounce(inputValue, 500)
 
   // Sync internal state if external value changes (and it's different from what we typed)
   useEffect(() => {
     if (value !== inputValue) {
-      setInputValue(value);
+      setInputValue(value)
     }
-  }, [value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
 
   useEffect(() => {
-    if (latitude && longitude) setCoords({ lat: latitude, lng: longitude });
-  }, [latitude, longitude]);
+    if (latitude && longitude) setCoords({ lat: latitude, lng: longitude })
+  }, [latitude, longitude])
 
   // Load Google Maps Script if not loaded
   useEffect(() => {
-    if (!window.google && !document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')) {
-      const script = document.createElement("script");
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    if (
+      !window.google &&
+      !document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')
+    ) {
+      const script = document.createElement('script')
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
 
       if (!apiKey) {
-        logger.error('VITE_GOOGLE_MAPS_API_KEY missing', 'AddressAutocomplete.loadScript', { showToast: false });
-        return;
+        logger.error(
+          'VITE_GOOGLE_MAPS_API_KEY missing',
+          'AddressAutocomplete.loadScript',
+          { showToast: false },
+        )
+        return
       }
 
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      document.body.appendChild(script);
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+      script.async = true
+      script.defer = true
+      document.body.appendChild(script)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     const searchPlaces = async () => {
       // If empty or just selected (matched value), don't search
       if (!debouncedSearch || debouncedSearch === value) {
-        setSuggestions([]);
-        return;
+        setSuggestions([])
+        return
       }
 
       // Check if Google Maps is loaded
       if (!window.google || !window.google.maps || !window.google.maps.places) {
-        // Wait retry? Or just let the script load... 
+        // Wait retry? Or just let the script load...
         // Ideally we wait for load event, but for debounce simple check is ok for now.
-        return;
+        return
       }
 
-      setLoading(true);
+      setLoading(true)
       try {
-        const autocompleteService = new window.google.maps.places.AutocompleteService();
+        const autocompleteService =
+          new window.google.maps.places.AutocompleteService()
 
         autocompleteService.getPlacePredictions(
-          { input: debouncedSearch, language: 'pt-BR', componentRestrictions: { country: 'br' } },
+          {
+            input: debouncedSearch,
+            language: 'pt-BR',
+            componentRestrictions: { country: 'br' },
+          },
           (predictions, status) => {
-            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-              setSuggestions(predictions);
-              setShowSuggestions(true);
+            if (
+              status === google.maps.places.PlacesServiceStatus.OK &&
+              predictions
+            ) {
+              setSuggestions(predictions)
+              setShowSuggestions(true)
             } else {
-              setSuggestions([]);
+              setSuggestions([])
             }
-            setLoading(false);
-          }
-        );
-
+            setLoading(false)
+          },
+        )
       } catch (err) {
-        logger.error(err, 'AddressAutocomplete.searchPlaces', { showToast: false });
-        setLoading(false);
+        logger.error(err, 'AddressAutocomplete.searchPlaces', {
+          showToast: false,
+        })
+        setLoading(false)
       }
-    };
+    }
 
-    searchPlaces();
-  }, [debouncedSearch, value]);
-
+    searchPlaces()
+  }, [debouncedSearch, value])
 
   // Handle selection
   const handleSelect = async (place: PlaceSuggestion) => {
-    setInputValue(place.description);
-    onChange(place.description);
-    setShowSuggestions(false);
+    setInputValue(place.description)
+    onChange(place.description)
+    setShowSuggestions(false)
 
     // Optimize: Check cache for this place_id first
     try {
-      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
       const { data: cached } = await typedSupabase
         .from('geo_cache')
         .select('response')
         .eq('query', place.place_id)
-        .maybeSingle();
+        .maybeSingle()
 
       if (cached?.response) {
-
-        const location = cached.response.geometry.location;
-        if (onCoordinatesChange) onCoordinatesChange(location.lat, location.lng);
-        setCoords({ lat: location.lat, lng: location.lng });
-        return;
+        const location = cached.response.geometry.location
+        if (onCoordinatesChange) onCoordinatesChange(location.lat, location.lng)
+        setCoords({ lat: location.lat, lng: location.lng })
+        return
       }
 
       // Not in cache, fetch from Google
       if (window.google && window.google.maps && window.google.maps.places) {
-        setLoading(true);
-        const placesService = new window.google.maps.places.PlacesService(document.createElement('div'));
+        setLoading(true)
+        const placesService = new window.google.maps.places.PlacesService(
+          document.createElement('div'),
+        )
 
         placesService.getDetails(
           { placeId: place.place_id, fields: ['geometry'] },
           async (result, status) => {
-            setLoading(false);
-            if (status === window.google.maps.places.PlacesServiceStatus.OK && result?.geometry?.location) {
-              const lat = result.geometry.location.lat();
-              const lng = result.geometry.location.lng();
+            setLoading(false)
+            if (
+              status === window.google.maps.places.PlacesServiceStatus.OK &&
+              result?.geometry?.location
+            ) {
+              const lat = result.geometry.location.lat()
+              const lng = result.geometry.location.lng()
 
-              if (onCoordinatesChange) onCoordinatesChange(lat, lng);
-              setCoords({ lat, lng });
+              if (onCoordinatesChange) onCoordinatesChange(lat, lng)
+              setCoords({ lat, lng })
 
               // Save to cache (valid for 30 days per ToS for lat/lng)
               // Ensure we store simple JSON, not Google objects
               const cachePayload = {
                 geometry: {
-                  location: { lat, lng }
-                }
-              };
+                  location: { lat, lng },
+                },
+              }
 
-              const expiresAt = new Date();
-              expiresAt.setDate(expiresAt.getDate() + 30); // 30 days cache
+              const expiresAt = new Date()
+              expiresAt.setDate(expiresAt.getDate() + 30) // 30 days cache
 
-              const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>;
+              const typedSupabase =
+                supabase as unknown as SupabaseClient<LocalDatabase>
               await typedSupabase.from('geo_cache').upsert({
                 query: place.place_id,
                 response: cachePayload,
-                expires_at: expiresAt.toISOString()
-              });
+                expires_at: expiresAt.toISOString(),
+              })
             }
-          }
-        );
+          },
+        )
       }
     } catch (err) {
-      logger.error(err, 'AddressAutocomplete.handleSelect', { showToast: false });
+      logger.error(err, 'AddressAutocomplete.handleSelect', {
+        showToast: false,
+      })
       // Fallback or just ignore cache error
     }
-  };
+  }
 
   const handleOpenGPS = (e: React.MouseEvent) => {
-    e.stopPropagation();
+    e.stopPropagation()
     if (value) {
-      window.open(getGPSDeepLink(value, coords?.lat, coords?.lng), '_blank');
+      window.open(getGPSDeepLink(value, coords?.lat, coords?.lng), '_blank')
     }
-  };
+  }
 
   // Click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false)
       }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
-    <div ref={containerRef} className={cn("relative space-y-2", className)}>
+    <div ref={containerRef} className={cn('relative space-y-2', className)}>
       <div className="relative">
         <Input
           value={inputValue}
           onChange={(e) => {
-            setInputValue(e.target.value);
-            setShowSuggestions(true);
+            setInputValue(e.target.value)
+            setShowSuggestions(true)
           }}
           onFocus={() => {
-            onFocus?.();
-            if (suggestions.length > 0) setShowSuggestions(true);
+            onFocus?.()
+            if (suggestions.length > 0) setShowSuggestions(true)
           }}
           onBlur={onBlur}
           placeholder={placeholder}
@@ -309,5 +338,5 @@ export function AddressAutocomplete({
         </div>
       )}
     </div>
-  );
+  )
 }

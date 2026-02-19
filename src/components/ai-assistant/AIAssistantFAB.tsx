@@ -1,16 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, Send, Terminal, MessageSquare } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react'
+import { Send, Terminal, MessageSquare } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
+  id: string
+  text: string
+  sender: 'user' | 'assistant'
+  timestamp: Date
 }
 
 export default function AIAssistantFAB() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -18,19 +18,19 @@ export default function AIAssistantFAB() {
       sender: 'assistant',
       timestamp: new Date(),
     },
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  ])
+  const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Auto-scroll to latest message
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
 
   const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+    e.preventDefault()
+    if (!input.trim()) return
 
     // Add user message
     const userMessage: Message = {
@@ -38,10 +38,10 @@ export default function AIAssistantFAB() {
       text: input,
       sender: 'user',
       timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+    }
+    setMessages((prev) => [...prev, userMessage])
+    setInput('')
+    setIsLoading(true)
 
     // Simulate AI response delay
     setTimeout(() => {
@@ -50,22 +50,22 @@ export default function AIAssistantFAB() {
         'ACCESSING_KNOWLEDGE_BASE... REDIRECTING_TO_CONCIERGE.',
         'COMMAND_NOT_RECOGNIZED. HUM_INTERVENTION_REQUIRED.',
         'PROTOCOL_INITIATED. CONNECTING_TO_AGENT.',
-      ];
+      ]
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         text: responses[Math.floor(Math.random() * responses.length)],
         sender: 'assistant',
         timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 800);
-  };
+      }
+      setMessages((prev) => [...prev, assistantMessage])
+      setIsLoading(false)
+    }, 800)
+  }
 
   const handleWhatsAppFallback = () => {
-    window.open('https://wa.me/5521983604870', '_blank');
-  };
+    window.open('https://wa.me/5521983604870', '_blank')
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50 font-mono">
@@ -82,7 +82,9 @@ export default function AIAssistantFAB() {
             <div className="bg-black border-b border-white p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-white animate-pulse" />
-                <h3 className="text-xs text-white uppercase tracking-widest">KONTROL_PUBLIC_TERMINAL</h3>
+                <h3 className="text-xs text-white uppercase tracking-widest">
+                  KONTROL_PUBLIC_TERMINAL
+                </h3>
               </div>
               <button
                 onClick={() => setIsOpen(false)}
@@ -103,10 +105,11 @@ export default function AIAssistantFAB() {
                     {message.sender === 'user' ? '[GUEST]' : '[SYSTEM]'}
                   </span>
                   <div
-                    className={`max-w-[85%] px-3 py-2 rounded-none text-xs border ${message.sender === 'user'
-                      ? 'bg-white text-black border-white'
-                      : 'bg-black text-white border-white/20'
-                      }`}
+                    className={`max-w-[85%] px-3 py-2 rounded-none text-xs border ${
+                      message.sender === 'user'
+                        ? 'bg-white text-black border-white'
+                        : 'bg-black text-white border-white/20'
+                    }`}
                   >
                     <p className="uppercase leading-relaxed">{message.text}</p>
                   </div>
@@ -116,7 +119,7 @@ export default function AIAssistantFAB() {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="text-[10px] text-white/50 uppercase tracking-widest animate-pulse">
-                     /// ANALYZING_INPUT...
+                    /// ANALYZING_INPUT...
                   </div>
                 </div>
               )}
@@ -138,7 +141,9 @@ export default function AIAssistantFAB() {
             {/* Input */}
             <form onSubmit={handleSendMessage} className="bg-black">
               <div className="flex gap-0 border-t border-white/20">
-                <span className="flex items-center pl-3 text-white font-mono text-xs select-none">{">"}</span>
+                <span className="flex items-center pl-3 text-white font-mono text-xs select-none">
+                  {'>'}
+                </span>
                 <input
                   type="text"
                   value={input}
@@ -168,16 +173,26 @@ export default function AIAssistantFAB() {
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
-            <motion.div key="close" initial={{ rotate: -90 }} animate={{ rotate: 0 }} exit={{ rotate: 90 }}>
+            <motion.div
+              key="close"
+              initial={{ rotate: -90 }}
+              animate={{ rotate: 0 }}
+              exit={{ rotate: 90 }}
+            >
               <span className="font-mono text-xl font-bold">X</span>
             </motion.div>
           ) : (
-            <motion.div key="open" initial={{ rotate: 90 }} animate={{ rotate: 0 }} exit={{ rotate: -90 }}>
+            <motion.div
+              key="open"
+              initial={{ rotate: 90 }}
+              animate={{ rotate: 0 }}
+              exit={{ rotate: -90 }}
+            >
               <Terminal className="h-6 w-6" />
             </motion.div>
           )}
         </AnimatePresence>
       </motion.button>
     </div>
-  );
+  )
 }
