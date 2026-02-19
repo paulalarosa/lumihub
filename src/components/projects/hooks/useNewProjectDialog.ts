@@ -70,7 +70,6 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
 
             setClients(data || []);
         } catch (error) {
-            console.error('Erro ao carregar clientes:', error);
             toast({
                 title: 'Erro',
                 description: 'Não foi possível carregar a lista de clientes.',
@@ -112,7 +111,6 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
 
             try {
                 if (!data.client_email) {
-                    console.warn("⚠️ Localhost/Dev: Projeto criado sem e-mail válido (Ignorado).");
                 } else {
                     const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
                         body: {
@@ -126,7 +124,7 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
                     if (emailError) throw emailError;
                 }
             } catch (emailError) {
-                console.error("❌ Falha no envio de e-mail (Não crítico):", emailError);
+                void emailError;
             }
 
             toast({
@@ -138,11 +136,11 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
             setOpen(false);
             onSuccess();
 
-        } catch (error: any) {
-            console.error('Erro crítico ao criar projeto:', error);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o projeto.';
             toast({
                 title: 'Erro ao Criar Projeto',
-                description: error.message || 'Ocorreu um erro ao salvar o projeto.',
+                description: message,
                 variant: 'destructive',
             });
         }

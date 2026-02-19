@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { analyticsService, AnalyticsEvent, ConversionEvent } from '@/services/analytics.service';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 // Hook para tracking automático de page views e tempo na página
 export function usePageTracking() {
@@ -148,7 +149,10 @@ export function useAnalytics() {
         }
       };
     } catch (error) {
-      console.error('Error fetching dashboard stats:', error);
+      logger.error(error, {
+        message: 'Erro ao carregar estatísticas do dashboard.',
+        showToast: false
+      });
       return null;
     }
   }, []);

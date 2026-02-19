@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -15,26 +15,22 @@ export interface Project {
 
 export function useProjects() {
     const { user } = useAuth();
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchProjects = async () => {
-            if (!user) return;
-
+    const { data: projects = [], isLoading: loading } = useQuery({
+        queryKey: ['projects', user?.id],
+        queryFn: async () => {
+            if (!user) return [];
             const { data, error } = await supabase
                 .from('projects')
                 .select('*, client:wedding_clients(full_name)')
                 .order('name');
 
-            if (!error && data) {
-                setProjects(data);
-            }
-            setLoading(false);
-        };
-
-        fetchProjects();
-    }, [user]);
+            if (error) throw error;
+            return data as unknown as Project[];
+        },
+        enabled: !!user,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    });
 
     return { projects, loading };
 }

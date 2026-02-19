@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Download, CheckCircle, Database, FileKey, RefreshCw, AlertTriangle } from 'lucide-react';
@@ -32,7 +33,7 @@ export default function AdminSecurity() {
             if (error) throw error;
             setLogs(data || []);
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'AdminSecurity.fetchLogs', { showToast: false });
         } finally {
             setLoadingLogs(false);
         }
@@ -49,7 +50,7 @@ export default function AdminSecurity() {
             toast.success("Backup criptografado gerado com sucesso.");
             fetchLogs();
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'AdminSecurity.handleBackup', { showToast: false });
             toast.error("Erro ao gerar backup.");
         } finally {
             setBackupLoading(false);

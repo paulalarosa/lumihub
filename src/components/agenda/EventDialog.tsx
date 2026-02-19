@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import {
-  X, Calendar as CalendarIcon, Clock, Tag, Sparkles, MapPin, Bell, Users, Palette, MessageCircle
+  Calendar as CalendarIcon, Clock, MapPin, Bell, Users, Palette, MessageCircle
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';

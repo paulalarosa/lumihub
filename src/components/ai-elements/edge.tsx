@@ -138,7 +138,8 @@ const Animated = ({ id, source, target, markerEnd, style }: EdgeProps) => {
   );
 };
 
-export const Edge = {
-  Animated,
-  Temporary,
-};
+export const AnimatedEdge = Animated;
+export const TemporaryEdge = Temporary;
+
+// Edge object export removed to fix Fast Refresh issues.
+// Use AnimatedEdge and TemporaryEdge instead.

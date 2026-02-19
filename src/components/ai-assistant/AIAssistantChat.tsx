@@ -3,11 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
-  X,
   Send,
   Loader2,
   Terminal,
-  ChevronRight,
   Sparkles,
   Calendar,
   Users,
@@ -23,6 +21,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 // Input validation schema
 const messageSchema = z.object({
@@ -89,7 +88,7 @@ export default function AIAssistantChat() {
         metadata: action ? { action } : null
       });
     } catch (error) {
-      console.error('Failed to persist message:', error);
+      logger.error(error, { message: 'Falha ao persistir mensagem.', showToast: false });
     }
   };
 
@@ -297,7 +296,7 @@ export default function AIAssistantChat() {
       persistMessage('assistant', aiContent, actionData);
 
     } catch (error) {
-      console.error('Lumi IA Error:', error);
+      logger.error(error, { message: 'Erro na comunicação com a IA.', showToast: false });
       handleError(error);
     } finally {
       setIsLoading(false);

@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Logger } from "@/services/logger";
+import { logger } from '@/utils/logger';
 
 export interface TransactionFormData {
     description: string;
@@ -58,7 +59,10 @@ export function useTransactionForm({ open, type, onSuccess, onOpenChange }: UseT
             const { data: a } = await supabase.from('profiles').select('id, full_name').eq('role', 'assistant');
             if (a) setAssistants(a);
         } catch (error) {
-            console.error("Error fetching options:", error);
+            logger.error(error, {
+                message: 'Erro ao carregar opções de formulário.',
+                showToast: false
+            });
         }
     };
 
@@ -126,8 +130,9 @@ export function useTransactionForm({ open, type, onSuccess, onOpenChange }: UseT
             });
             onSuccess?.();
         } catch (error) {
-            console.error("Erro ao salvar transação:", error);
-            toast.error("Erro ao salvar transação. Tente novamente.");
+            logger.error(error, {
+                message: 'Erro ao salvar transação. Tente novamente.',
+            });
         } finally {
             setLoading(false);
         }

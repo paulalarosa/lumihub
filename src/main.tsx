@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import App from "./App.tsx";
 import "./index.css";
 import "./lib/i18n";
+import "./lib/sentry"; // Sentry Init
 import "./lib/chart-setup";
 import { registerSW } from 'virtual:pwa-register';
 
@@ -13,9 +14,7 @@ const updateSW = registerSW({
             updateSW(true);
         }
     },
-    onOfflineReady() {
-        console.log('Protocol_Ready: System_Available_Offline');
-    },
+    onOfflineReady() { },
 });
 
 import { LanguageProvider } from "@/contexts/LanguageContext";

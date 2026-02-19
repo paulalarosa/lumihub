@@ -37,9 +37,9 @@ export function StripeCheckout({ planType }: StripeCheckoutProps) {
                 if (data.error) throw new Error(data.error);
 
                 setClientSecret(data.clientSecret);
-            } catch (err: any) {
-                console.error("Error fetching client secret:", err);
-                setError(err.message || "Failed to initialize checkout.");
+            } catch (err: unknown) {
+                const message = err instanceof Error ? err.message : 'Failed to initialize checkout.';
+                setError(message);
             } finally {
                 setLoading(false);
             }

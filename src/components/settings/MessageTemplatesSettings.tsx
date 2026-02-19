@@ -10,6 +10,7 @@ import { MessageTemplateService, TemplateType } from '@/services/messageTemplate
 import { MessageSquare, Save, RefreshCw, Phone, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/logger';
 
 const DEFAULT_TEMPLATES: Record<TemplateType, string> = {
     confirmation: "Olá {client_name}! Sou da equipe da {professional_name}. Gostaria de confirmar seu agendamento para {date} às {time} em {location}. Podemos confirmar?",
@@ -76,7 +77,7 @@ export default function MessageTemplatesSettings() {
 
             setTemplates(loaded);
         } catch (error) {
-            console.error('Error loading templates:', error);
+            logger.error(error, 'MessageTemplatesSettings.loadTemplates', { showToast: false });
             toast({ title: 'Erro ao carregar modelos', variant: 'destructive' });
         } finally {
             setLoading(false);
@@ -103,7 +104,7 @@ export default function MessageTemplatesSettings() {
 
             toast({ title: 'Modelo salvo com sucesso!' });
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'MessageTemplatesSettings.handleSaveTemplate', { showToast: false });
             toast({ title: 'Erro ao salvar modelo', variant: 'destructive' });
         } finally {
             setSaving(null);

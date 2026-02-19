@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export function useOrganization() {
     const { user } = useAuth();
@@ -29,7 +30,10 @@ export function useOrganization() {
                 const profileData = profile;
 
                 if (error) {
-                    console.error('Error fetching organization:', error);
+                    logger.error(error, {
+                        message: 'Erro ao carregar organização.',
+                        showToast: false
+                    });
                     // Fallback to user.id as organization if profile fetch fails (safe default)
                     setOrganizationId(user.id);
                     setIsOwner(true);
@@ -43,7 +47,10 @@ export function useOrganization() {
                     setIsOwner(true);
                 }
             } catch (err) {
-                console.error('Unexpected error in useOrganization:', err);
+                logger.error(err, {
+                    message: 'Erro inesperado ao carregar organização.',
+                    showToast: false
+                });
                 setOrganizationId(user.id);
             } finally {
                 setLoading(false);

@@ -472,7 +472,6 @@ const NodeRenderer = React.memo(({ node }: { node: WidgetNode }) => {
       )
 
     default:
-      console.warn(`Unknown widget node type: ${node.type}`)
       return null
   }
 })

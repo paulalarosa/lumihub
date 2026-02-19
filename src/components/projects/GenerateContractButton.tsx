@@ -106,13 +106,13 @@ export const GenerateContractButton = ({ projectId }: GenerateContractButtonProp
             );
 
             toast.success('Contrato gerado com sucesso!');
-        } catch (error: any) {
-            console.error('Erro ao gerar contrato:', error);
-            toast.error('Erro ao gerar contrato: ' + error.message);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Erro desconhecido';
+            toast.error('Erro ao gerar contrato: ' + message);
             await Logger.error(
                 'CONTRACT_GENERATION_FAILED',
                 error,
-                user?.id || 'SYSTEM',
+                undefined,
                 { projectId }
             );
         } finally {

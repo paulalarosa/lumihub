@@ -9,6 +9,7 @@ import { ModeToggle } from "@/components/ui/mode-toggle";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from "@/utils/logger";
 
 export default function AppLayout() {
     const { user } = useAuth();
@@ -30,7 +31,7 @@ export default function AppLayout() {
                     setProfile(data);
                 }
             } catch (error) {
-                console.error("Error fetching profile for layout:", error);
+                logger.error(error, 'AppLayout.fetchProfile', { showToast: false });
             } finally {
                 setLoadingProfile(false);
             }

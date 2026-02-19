@@ -35,7 +35,6 @@ export const useGoogleCalendar = () => {
         const scope = 'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events';
 
         if (!clientId) {
-            console.error('Missing Google Client ID');
             return;
         }
 

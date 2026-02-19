@@ -70,20 +70,46 @@ serve(async (req) => {
 });
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-    const userId = session.metadata?.user_id;
-    const planType = session.metadata?.plan_type;
+    const clientReferenceId = session.client_reference_id;
+    const userId = clientReferenceId || session.metadata?.user_id;
 
-    if (!userId) return;
+    if (!userId) {
+        console.error("No user ID found in session", session.id);
+        return;
+    }
 
-    await supabase
+    const planType = session.metadata?.plan_type || 'profissional';
+
+    console.log(`Processing checkout for user ${userId}, plan: ${planType}`);
+
+    // Update profiles table (Primary Request)
+    const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+            plan_type: planType,
+            stripe_customer_id: session.customer as string
+        })
+        .eq("id", userId);
+
+    if (profileError) {
+        console.error("Error updating profile:", profileError);
+    }
+
+    // Update makeup_artists table (Legacy/Backward Compatibility)
+    const { error: artistError } = await supabase
         .from("makeup_artists")
         .update({
             stripe_subscription_id: session.subscription as string,
             plan_type: planType,
             plan_status: "active",
             plan_started_at: new Date().toISOString(),
+            stripe_customer_id: session.customer as string
         })
         .eq("user_id", userId);
+
+    if (artistError) {
+        console.warn("Error updating makeup_artists:", artistError);
+    }
 
     console.log(`Subscription activated for user ${userId}`);
 }

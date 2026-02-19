@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { addDays, isAfter, isBefore, startOfDay } from 'date-fns';
+import { logger } from '@/utils/logger';
 
 export interface DashboardStats {
     totalBudgets: number;       // "Total de orçamentos geridos" (Sum of project values)
@@ -86,7 +87,10 @@ export function useDashboardStats() {
                 });
 
             } catch (error) {
-                console.error("Dashboard Stats Error:", error);
+                logger.error(error, {
+                    message: 'Erro ao carregar estatísticas do painel.',
+                    showToast: false
+                });
                 setStats(prev => ({ ...prev, loading: false }));
             }
         };

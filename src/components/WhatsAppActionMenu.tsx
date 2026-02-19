@@ -14,6 +14,7 @@ import {
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface WhatsAppProps {
     project: {
@@ -93,7 +94,7 @@ export const WhatsAppActionMenu = ({ project, client, variant = 'default', class
             window.open(link, '_blank');
 
         } catch (error) {
-            console.error(error);
+            logger.error(error, { message: 'Erro ao gerar link.', showToast: false });
             toast({ title: "Erro ao gerar link", variant: "destructive" });
         } finally {
             setLoading(false);

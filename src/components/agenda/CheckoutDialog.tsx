@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 interface Assistant {
     id: string;
@@ -101,7 +102,7 @@ export function CheckoutDialog({ open, onOpenChange, event, onSuccess }: Checkou
             onOpenChange(false);
 
         } catch (error) {
-            console.error(error);
+            logger.error(error, { message: 'Erro ao finalizar atendimento.', showToast: false });
             toast({
                 title: "Erro ao finalizar",
                 description: error instanceof Error ? error.message : "Erro desconhecido",

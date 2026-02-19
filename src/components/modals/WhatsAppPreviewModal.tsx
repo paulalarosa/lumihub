@@ -47,7 +47,7 @@ export function WhatsAppPreviewModal({ isOpen, onClose, client, event, templates
         if (selectedTemplateId && templates) {
             const template = templates.find(t => t.id === selectedTemplateId);
             if (template) {
-                let text = template.content
+                const text = template.content
                     .replace(/{client_name}/g, client.name)
                     .replace(/{date}/g, new Date(event.date).toLocaleDateString('pt-BR'))
                     .replace(/{time}/g, event.time)

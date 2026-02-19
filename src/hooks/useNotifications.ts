@@ -75,7 +75,7 @@ export const useNotifications = (userId: string | undefined) => {
                             client?: { name: string }
                         };
                     }
-                    (pendingInvoices as any).forEach((inv: any) => {
+                    (pendingInvoices as unknown as InvoiceWithProject[]).forEach((inv) => {
                         const clientName = inv.projects?.client?.name || 'Cliente';
                         newNotifications.push({
                             id: `pay-${inv.id}`,
@@ -120,7 +120,7 @@ export const useNotifications = (userId: string | undefined) => {
                 setUnreadCount(filtered.length);
 
             } catch (error) {
-                console.error("Error fetching notifications", error);
+                void error;
             } finally {
                 setLoading(false);
             }

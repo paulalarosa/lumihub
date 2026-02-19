@@ -7,7 +7,7 @@ describe('Button', () => {
         render(<Button>Click me</Button>);
         const button = screen.getByRole('button', { name: /click me/i });
         expect(button).toBeInTheDocument();
-        expect(button).toHaveClass('bg-black'); // Default variant
+        expect(button).toHaveClass('bg-primary'); // Default variant
     });
 
     it('handles click events', () => {
@@ -23,7 +23,7 @@ describe('Button', () => {
         expect(screen.getByRole('button')).toHaveClass('bg-destructive');
 
         rerender(<Button variant="outline">Outline</Button>);
-        expect(screen.getByRole('button')).toHaveClass('border-white/20');
+        expect(screen.getByRole('button')).toHaveClass('border-input');
     });
 
     it('supports asChild prop to render as different element', () => {

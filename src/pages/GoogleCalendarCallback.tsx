@@ -42,10 +42,10 @@ export const GoogleCalendarCallback = () => {
                 navigate('/calendar');
             }, 2000);
 
-        } catch (error: any) {
-            console.error('OAuth error:', error);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
             setStatus('error');
-            toast.error(`Connection failed: ${error.message}`);
+            toast.error(`Connection failed: ${message}`);
         }
     };
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useLanguage } from "@/hooks/useLanguage";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 import {
     Dialog,
     DialogContent,
@@ -130,7 +131,7 @@ export default function ServiceDialog({
             onSuccess();
             onOpenChange(false);
         } catch (error: unknown) {
-            console.error("Error saving service:", error);
+            logger.error(error, { message: 'Erro ao salvar serviço.', showToast: false });
             const message = error instanceof Error ? error.message : "Erro ao salvar serviço.";
             toast({
                 title: "Erro",

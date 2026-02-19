@@ -4,7 +4,7 @@ import { Logger } from "./logger";
 export interface MailerRequest {
     to: string[];
     template: string;
-    templateData: Record<string, any>;
+    templateData: Record<string, unknown>;
     userId?: string;
 }
 
@@ -28,11 +28,12 @@ export class Mailer {
             });
 
             return { success: true };
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Unknown error';
             await Logger.error(`Failed to dispatch email template: ${request.template}`, error, request.userId, {
                 request
             });
-            return { success: false, error: error.message };
+            return { success: false, error: message };
         }
     }
 

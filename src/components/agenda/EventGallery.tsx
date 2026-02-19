@@ -6,6 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Image as ImageIcon, Upload, X, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { logger } from '@/utils/logger';
 
 interface EventGalleryProps {
     eventId: string;
@@ -39,7 +40,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
 
             if (error) {
                 // If bucket doesn't exist or other error
-                console.error('Error fetching images:', error);
+                logger.error(error, { message: 'Erro ao buscar imagens.', showToast: false });
                 return;
             }
 
@@ -56,7 +57,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
                 setImages(imageList);
             }
         } catch (error) {
-            console.error('Error loading gallery:', error);
+            logger.error(error, { message: 'Erro ao carregar galeria.', showToast: false });
         } finally {
             setLoading(false);
         }
@@ -95,7 +96,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
             await fetchImages();
 
         } catch (error) {
-            console.error('Error uploading image:', error);
+            logger.error(error, { message: 'Erro no upload de imagem.', showToast: false });
             toast({
                 title: "Erro no upload",
                 description: error.message || "Não foi possível enviar a imagem.",
@@ -120,7 +121,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
             });
 
         } catch (error) {
-            console.error('Error deleting image:', error);
+            logger.error(error, { message: 'Erro ao excluir imagem.', showToast: false });
             toast({
                 title: "Erro ao excluir",
                 description: "Não foi possível excluir a imagem.",

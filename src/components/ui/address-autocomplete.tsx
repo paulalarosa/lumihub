@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { logger } from "@/utils/logger";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -119,7 +120,7 @@ export function AddressAutocomplete({
       const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
       if (!apiKey) {
-        console.error("VITE_GOOGLE_MAPS_API_KEY missing");
+        logger.error('VITE_GOOGLE_MAPS_API_KEY missing', 'AddressAutocomplete.loadScript', { showToast: false });
         return;
       }
 
@@ -163,7 +164,7 @@ export function AddressAutocomplete({
         );
 
       } catch (err) {
-        console.error("Error fetching places (client-side):", err);
+        logger.error(err, 'AddressAutocomplete.searchPlaces', { showToast: false });
         setLoading(false);
       }
     };
@@ -233,7 +234,7 @@ export function AddressAutocomplete({
         );
       }
     } catch (err) {
-      console.error("Error getting place details:", err);
+      logger.error(err, 'AddressAutocomplete.handleSelect', { showToast: false });
       // Fallback or just ignore cache error
     }
   };

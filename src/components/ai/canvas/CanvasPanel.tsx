@@ -70,9 +70,9 @@ export const CanvasPanel = () => {
 
                 if (error) throw error;
             }
-        } catch (error: any) {
-            console.error('Save error:', error);
-            toast.error('Erro ao sincronizar com nuvem: ' + error.message);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Erro desconhecido';
+            toast.error('Erro ao sincronizar com nuvem: ' + message);
         } finally {
             setIsSaving(false);
             toast.success('Documento salvo!');

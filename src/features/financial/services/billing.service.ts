@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 
 export interface BillingHistoryItem {
     id: string;
@@ -33,7 +34,7 @@ export const BillingService = {
         const { data, error } = await supabase.functions.invoke('get-invoices');
 
         if (error) {
-            console.error("Failed to fetch billing history:", error);
+            logger.error(error, 'BillingService.getBillingHistory', { showToast: false });
             return [];
         }
 

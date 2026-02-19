@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { logger } from '@/utils/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -34,7 +35,7 @@ const ExampleMutationButton = () => {
             queryClient.invalidateQueries({ queryKey: ['admin-metrics'] });
 
         } catch (error) {
-            console.error("Failed to add test client", error);
+            logger.error(error, 'AdminDashboard.handleAddTestClient', { showToast: false });
         }
     };
 

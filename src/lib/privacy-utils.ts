@@ -27,7 +27,7 @@ export async function generateEncryptedUUID(): Promise<string> {
     // Combine UUID with hash for maximum entropy
     return `${uuid}-${hashHex.substring(0, 8)}`;
   } catch (error) {
-    console.warn('Web Crypto API not available, falling back to standard UUID:', error);
+
     return generateSecureUUID();
   }
 }
@@ -70,7 +70,7 @@ export async function encryptContractData(data: string): Promise<string> {
 
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
-    console.warn('Encryption failed, returning plain data:', error);
+
     return data;
   }
 }
@@ -107,7 +107,7 @@ export async function decryptContractData(encryptedData: string): Promise<string
     const decoder = new TextDecoder();
     return decoder.decode(decrypted);
   } catch (error) {
-    console.warn('Decryption failed, returning encrypted data:', error);
+
     return encryptedData;
   }
 }
@@ -116,7 +116,7 @@ export async function decryptContractData(encryptedData: string): Promise<string
 export class ContractPrivacyManager {
   private static instance: ContractPrivacyManager;
 
-  private constructor() {}
+  private constructor() { }
 
   static getInstance(): ContractPrivacyManager {
     if (!ContractPrivacyManager.instance) {

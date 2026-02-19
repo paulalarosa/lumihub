@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Plus, Upload, X } from "lucide-react";
+import { logger } from "@/utils/logger";
 
 interface RecordDialogProps {
     clientId: string;
@@ -96,7 +97,7 @@ export function RecordDialog({ clientId, onRecordAdded }: RecordDialogProps) {
             onRecordAdded();
 
         } catch (error) {
-            console.error("Erro ao salvar:", error);
+            logger.error(error, 'RecordDialog.handleSave', { showToast: false });
             toast({ title: "Erro ao salvar registro", description: error.message, variant: "destructive" });
         } finally {
             setLoading(false);

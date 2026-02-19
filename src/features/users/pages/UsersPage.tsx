@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,7 @@ export default function AdminUsers() {
                 created_at: p.created_at || ''
             })));
         } catch (error) {
-            console.error("Error fetching users:", error);
+            logger.error(error, 'UsersPage.fetchUsers', { showToast: false });
             toast.error("Erro ao carregar usuários");
         } finally {
             setLoading(false);
@@ -98,7 +99,7 @@ export default function AdminUsers() {
             setUsers(users.map(u => u.id === userId ? { ...u, role: newRole as 'admin' | 'user' } : u));
             toast.success(`Função atualizada para ${newRole}`);
         } catch (error) {
-            console.error("Error updating role:", error);
+            logger.error(error, 'UsersPage.handleUpdateRole', { showToast: false });
             toast.error("Erro ao atualizar função");
         }
     };
@@ -115,7 +116,7 @@ export default function AdminUsers() {
             setUsers(users.map(u => u.id === userId ? { ...u, plan: newPlan as 'free' | 'pro' | 'empire' } : u));
             toast.success(`Plano atualizado para ${newPlan}`);
         } catch (error) {
-            console.error("Error updating plan:", error);
+            logger.error(error, 'UsersPage.handleUpdatePlan', { showToast: false });
             toast.error("Erro ao atualizar plano");
         }
     };

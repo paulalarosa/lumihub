@@ -45,13 +45,13 @@ export const useSubscription = () => {
 
                 // If no profile found (e.g. very early auth state), return safe defaults without crashing
                 if (!profile) {
-                    console.warn("useSubscription: No profile found for user, using defaults.");
+
                     setState(prev => ({ ...prev, isLoading: false }));
                     return;
                 }
 
                 const p = profile;
-                let plan = (p.subscription_tier as PlanType) || 'free'; // Use subscription_tier if available
+                const plan = (p.subscription_tier as PlanType) || 'free'; // Use subscription_tier if available
                 const createdAt = p.created_at ? parseISO(p.created_at) : new Date();
                 const daysActive = differenceInDays(new Date(), createdAt);
                 const TRIAL_DAYS = 7;
@@ -81,7 +81,7 @@ export const useSubscription = () => {
                 });
 
             } catch (error) {
-                console.error('Error checking subscription:', error);
+
                 // Default to safe state or retry? 
                 // For now, let's assume trial to avoid blocking valid users on error
                 setState(prev => ({ ...prev, isLoading: false }));

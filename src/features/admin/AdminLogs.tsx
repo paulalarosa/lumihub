@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { logger } from '@/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Terminal, RefreshCw, FileDown } from 'lucide-react';
@@ -49,7 +50,7 @@ export default function AdminLogs() {
         }
       }
     } catch (e) {
-      console.error("Error fetching tables:", e);
+      logger.error(e, 'AdminLogs.fetchAvailableTables', { showToast: false });
     }
   };
 
@@ -95,7 +96,7 @@ export default function AdminLogs() {
         setEmailLogs(data || []);
       }
     } catch (error) {
-      console.error(`Error fetching ${activeTab} logs:`, error);
+      logger.error(error, 'AdminLogs.fetchData', { showToast: false });
     } finally {
       setLoading(false);
     }

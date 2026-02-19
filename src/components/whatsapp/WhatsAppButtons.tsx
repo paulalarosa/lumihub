@@ -4,6 +4,7 @@ import { whatsappUtils } from '@/utils/whatsapp';
 import { toast } from 'sonner';
 import { Logger } from '@/services/logger';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/logger';
 
 interface WhatsAppButtonsProps {
     phone: string;
@@ -76,7 +77,7 @@ export const WhatsAppButtons = ({
                 'WEB_UI'
             );
         } catch (error) {
-            console.error('Audit log failed', error);
+            logger.error(error, { message: 'Falha no log de auditoria.', showToast: false });
         }
 
         window.open(link, '_blank');

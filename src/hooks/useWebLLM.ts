@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CreateMLCEngine, type MLCEngineInterface } from '@mlc-ai/web-llm';
 import { usePlanAccess } from '@/hooks/usePlanAccess';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 // Modelos disponíveis (otimizados para navegador)
 const AVAILABLE_MODELS = [
@@ -48,9 +49,9 @@ export const useWebLLM = () => {
             setEngine(engineInstance);
             setIsInitialized(true);
             toast.success('IA Local inicializada!');
-        } catch (error: any) {
-            console.error('WebLLM init error:', error);
-            toast.error('Erro ao inicializar IA Local: ' + error.message);
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Erro desconhecido';
+            toast.error('Erro ao inicializar IA Local: ' + message);
         } finally {
             setIsLoading(false);
         }
@@ -63,7 +64,7 @@ export const useWebLLM = () => {
             }
 
             const completion = await engine.chat.completions.create({
-                messages: messages as any,
+                messages: messages as Array<{ role: 'user' | 'assistant' | 'system'; content: string }>,
                 temperature: 0.7,
                 max_tokens: 1024,
             });
@@ -87,7 +88,7 @@ export const useWebLLM = () => {
     useEffect(() => {
         return () => {
             if (engine) {
-                engine.unload().catch(console.error);
+                engine.unload().catch((err: unknown) => logger.error(err, { message: 'Erro ao descarregar IA local.', showToast: false }));
             }
         };
     }, [engine]);

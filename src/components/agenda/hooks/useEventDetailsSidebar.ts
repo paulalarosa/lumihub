@@ -48,7 +48,7 @@ export function useEventDetailsSidebar({
 }: UseEventDetailsSidebarProps) {
     const { toast } = useToast();
     const isLeader = userRole === 'admin';
-    const { organizationId } = useOrganization();
+
 
     const [title, setTitle] = useState('');
     const [clientId, setClientId] = useState<string | null>(null);
@@ -59,8 +59,8 @@ export function useEventDetailsSidebar({
     const [notes, setNotes] = useState('');
     const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
     const [openAssistantCombobox, setOpenAssistantCombobox] = useState(false);
-    const [clients, setClients] = useState<Client[]>([]);
-    const [availableAssistants, setAvailableAssistants] = useState<Assistant[]>([]);
+    const [clients] = useState<Client[]>([]);
+    const [availableAssistants] = useState<Assistant[]>([]);
     const [fetchingDetail, setFetchingDetail] = useState(false);
     const [saving, setSaving] = useState(false);
 

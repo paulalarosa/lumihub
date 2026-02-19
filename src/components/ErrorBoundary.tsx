@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCcw, Home } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface Props {
     children: ReactNode;
@@ -22,12 +23,11 @@ export class ErrorBoundary extends Component<Props, State> {
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error('System_Failure_Protocol: Uncaught_Exception', error, errorInfo);
-
-        // In production, we would send this to Sentry
-        if (import.meta.env.PROD) {
-            // Sentry.captureException(error, { extra: errorInfo });
-        }
+        logger.error(error, {
+            message: 'Erro crítico não capturado.',
+            context: { componentStack: errorInfo.componentStack },
+            showToast: false
+        });
     }
 
     private handleReset = () => {

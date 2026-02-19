@@ -4,6 +4,7 @@ import { ptBR } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface EventFormData {
     id?: string;
@@ -392,8 +393,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
                     toast({ title: 'Sincronizado', description: 'Evento sincronizado com Google Calendar.' });
                 }
             } catch (calendarError) {
-                // Calendar sync is non-blocking
-                console.error("Calendar sync failed:", calendarError);
+                logger.error(calendarError, 'useEventForm.calendarSync', { showToast: false });
             }
 
             toast({
@@ -403,7 +403,7 @@ export function useEventForm({ event, assistants, selectedDate, onSuccess }: Use
 
             onSuccess();
         } catch (error: unknown) {
-            console.error("Error saving event:", error);
+            logger.error(error, 'useEventForm.handleSubmit', { showToast: false });
             toast({
                 title: 'Erro',
                 description: (error instanceof Error ? error.message : 'Não foi possível salvar o evento'),

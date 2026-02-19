@@ -100,8 +100,7 @@ export const CalendarPage = () => {
             queryClient.invalidateQueries({ queryKey: ['calendar-events'] });
             toast.success('Sincronização concluída!');
         },
-        onError: (error: any) => {
-            console.error('Sync error:', error);
+        onError: (error: Error) => {
             toast.error('Erro na sincronização: ' + error.message);
         },
     });

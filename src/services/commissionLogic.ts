@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 // Commission logic - simplified without non-existent columns
 
@@ -25,7 +26,11 @@ export class CommissionLogic {
             // We can check 'events' if they have commission data
             return { totalRevenue, totalCommissions: 0 };
         } catch (e) {
-            console.error("Financial Report Error:", e);
+            logger.error(e, {
+                message: "Erro ao gerar relatório financeiro.",
+                context: { organizationId },
+                showToast: false
+            });
             return { totalRevenue: 0, totalCommissions: 0 };
         }
     }

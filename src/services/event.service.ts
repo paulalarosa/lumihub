@@ -84,7 +84,7 @@ export const EventService = {
             }).slice(0, 5);
 
         } catch (e) {
-            console.error("Failed to fetch dashboard events", e);
+            void e;
         }
 
         return { events: dashboardEvents, isGoogleConnected };

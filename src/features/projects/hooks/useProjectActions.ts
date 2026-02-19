@@ -66,15 +66,15 @@ export function useProjectActions({
 
     const toggleTask = async (taskId: string, currentStatus: string | null) => {
         const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-        const { error } = await ProjectService.updateTask(taskId, { status: newStatus });
-        if (!error) {
+        const success = await ProjectService.updateTask(taskId, { status: newStatus });
+        if (success) {
             setTasks(tasks.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
         }
     };
 
     const deleteTask = async (taskId: string) => {
-        const { error } = await ProjectService.deleteTask(taskId);
-        if (!error) {
+        const success = await ProjectService.deleteTask(taskId);
+        if (success) {
             setTasks(tasks.filter(t => t.id !== taskId));
         }
     };

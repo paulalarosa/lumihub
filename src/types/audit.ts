@@ -1,4 +1,4 @@
-import { Database, Json } from '@/integrations/supabase/types';
+import { Database, Json } from '@/types/supabase';
 
 export interface SystemLog {
     id: string;

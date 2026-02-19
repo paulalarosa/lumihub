@@ -32,14 +32,11 @@ export default function ForgotPassword() {
                 description: "VERIFICAR_CANAIS_SEGUROS",
                 className: "bg-black border border-white/20 text-white"
             });
-        } catch (error: any) {
-            console.error('Reset error:', error);
-
-            // Fallback to native Supabase reset if Edge Function fails (redundancy)
-            // or just show error. For now, showing error to enforce SES usage.
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : 'Erro ao processar solicitação';
             toast({
                 title: "FALHA_TRANSMISSÃO",
-                description: error.message || "Erro ao processar solicitação",
+                description: message,
                 variant: "destructive"
             });
         } finally {

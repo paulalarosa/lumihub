@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 import { useOrganization } from '@/hooks/useOrganization';
 import { useAuth } from '@/hooks/useAuth';
 import { ProjectService as ProjectServiceAPI } from '@/services/projectService';
@@ -156,7 +157,7 @@ export function useContratos({ projectId, project, projectServices, totalValue, 
                 toast({ title: "Contrato Completo Gerado!", description: "Estrutura criada com sucesso." });
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'useContratos.handleArchitectMode', { showToast: false });
             toast({ variant: "destructive", title: "Erro na IA", description: "Falha ao gerar o contrato." });
         } finally {
             setLoadingAI(false);
@@ -183,7 +184,7 @@ export function useContratos({ projectId, project, projectServices, totalValue, 
                 toast({ title: "Contrato Refinado!", description: "Alterações aplicadas com sucesso." });
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'useContratos.handleEditorMode', { showToast: false });
             toast({ variant: "destructive", title: "Erro na IA", description: "Falha ao editar o contrato." });
         } finally {
             setLoadingEdit(false);

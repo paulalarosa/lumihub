@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { AssistantInvite } from '@/types/custom-schema';
+import { logger } from '@/utils/logger';
 
 export const useAssistant = () => {
     const { user } = useAuth();
@@ -33,8 +34,9 @@ export const useAssistant = () => {
             if (error) throw error;
             setInvites((data as unknown as AssistantInvite[]) || []);
         } catch (error) {
-            console.error('Error fetching invites:', error);
-            toast.error('Erro ao carregar convites');
+            logger.error(error, {
+                message: 'Erro ao carregar convites.',
+            });
         } finally {
             setLoading(false);
         }
@@ -42,8 +44,9 @@ export const useAssistant = () => {
 
     const sendInvite = async (email: string) => {
         if (!user) {
-            console.error("Assistant Hook: No user logged in.");
-            toast.error("Você precisa estar logado.");
+            logger.error(new Error('No user logged in'), {
+                message: 'Você precisa estar logado.',
+            });
             return;
         }
 
@@ -100,8 +103,10 @@ export const useAssistant = () => {
             fetchInvites();
             return data;
         } catch (error) {
-            console.error('Error sending invite:', error);
-            toast.error('Erro ao enviar convite');
+            logger.error(error, {
+                message: 'Erro ao enviar convite.',
+                context: { email }
+            });
         } finally {
             setLoading(false);
         }
@@ -119,8 +124,10 @@ export const useAssistant = () => {
             toast.success('Convite revogado');
             fetchInvites();
         } catch (error) {
-            console.error('Error revoking invite:', error);
-            toast.error('Erro ao revogar convite');
+            logger.error(error, {
+                message: 'Erro ao revogar convite.',
+                context: { inviteId: id }
+            });
         } finally {
             setLoading(false);
         }

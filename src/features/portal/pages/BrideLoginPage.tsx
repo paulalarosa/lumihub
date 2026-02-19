@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +64,7 @@ export default function BrideLoginPage() {
                 });
             }
         } catch (error) {
-            console.error("Login Error:", error);
+            logger.error(error, 'BrideLoginPage.handleLogin', { showToast: false });
             toast({
                 title: "Erro no sistema",
                 description: "Tente novamente mais tarde.",
@@ -96,7 +97,7 @@ export default function BrideLoginPage() {
 
                 <form onSubmit={handleLogin} className="space-y-12">
                     <div className="space-y-6">
-                        <label className="block text-center text-[10px] text-neutral-400 uppercase tracking-[0.2em]">
+                        <label htmlFor="bride-pin" className="block text-center text-[10px] text-neutral-400 uppercase tracking-[0.2em]">
                             Código de Acesso
                         </label>
 
@@ -107,6 +108,7 @@ export default function BrideLoginPage() {
                                 ${focused ? 'border-white' : 'border-neutral-800 group-hover:border-neutral-700'}
                             `}>
                                 <Input
+                                    id="bride-pin"
                                     type="text"
                                     inputMode="numeric" // Ensure numeric keyboard on mobile
                                     pattern="[0-9]*"

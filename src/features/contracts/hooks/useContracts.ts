@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from "sonner";
+import { logger } from '@/utils/logger';
 import { Contract, Client } from '../types';
 
 export const useContracts = () => {
@@ -55,7 +56,7 @@ export const useContracts = () => {
                 .map(c => c.client_id)
                 .filter((id): id is string => !!id && id.length > 0);
 
-            let clientsMap: Record<string, string> = {};
+            const clientsMap: Record<string, string> = {};
 
             if (clientIds.length > 0) {
                 const { data: clientsData } = await supabase
@@ -84,7 +85,7 @@ export const useContracts = () => {
 
             setContracts(formattedContracts);
         } catch (error) {
-            console.error("Error fetching contracts:", error);
+            logger.error(error, 'useContracts.fetchContracts', { showToast: false });
             toast.error("Erro ao carregar contratos");
         } finally {
             setLoading(false);
@@ -117,7 +118,7 @@ export const useContracts = () => {
         setIsSubmitting(false);
 
         if (error) {
-            console.error(error);
+            logger.error(error, 'useContracts.handleCreate', { showToast: false });
             toast.error("Erro ao criar contrato");
         } else {
             toast.success("Contrato criado com sucesso");
@@ -164,7 +165,7 @@ export const useContracts = () => {
             fetchContracts();
 
         } catch (error) {
-            console.error("Signature error:", error);
+            logger.error(error, 'useContracts.handleSignatureSave', { showToast: false });
             toast.error("Erro ao salvar assinatura");
         }
     };

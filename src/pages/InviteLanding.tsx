@@ -83,8 +83,9 @@ export default function InviteLanding() {
 
                         <div className="space-y-4">
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Nome Completo</label>
+                                <label htmlFor="invite-name" className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Nome Completo</label>
                                 <Input
+                                    id="invite-name"
                                     required
                                     value={formData.fullName}
                                     onChange={(e) => setFormData(prev => ({ ...prev, fullName: e.target.value }))}
@@ -94,8 +95,9 @@ export default function InviteLanding() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">WhatsApp</label>
+                                <label htmlFor="invite-phone" className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">WhatsApp</label>
                                 <Input
+                                    id="invite-phone"
                                     required
                                     type="tel"
                                     value={formData.phone}
@@ -106,8 +108,9 @@ export default function InviteLanding() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Definir Senha</label>
+                                <label htmlFor="invite-password" className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Definir Senha</label>
                                 <Input
+                                    id="invite-password"
                                     required
                                     type="password"
                                     value={formData.password}
@@ -119,8 +122,9 @@ export default function InviteLanding() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Confirmar Senha</label>
+                                <label htmlFor="invite-confirm-password" className="text-[10px] uppercase tracking-widest text-neutral-400 font-bold">Confirmar Senha</label>
                                 <Input
+                                    id="invite-confirm-password"
                                     required
                                     type="password"
                                     value={formData.confirmPassword}

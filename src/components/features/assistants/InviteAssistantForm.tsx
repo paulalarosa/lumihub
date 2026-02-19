@@ -95,9 +95,10 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
                     setExistingAssistant(true);
                 }
             }
-        } catch (err: any) {
-            setError(err.message);
-            toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'Erro desconhecido';
+            setError(message);
+            toast({ title: 'Erro', description: message, variant: 'destructive' });
         } finally {
             setLoading(false);
         }
@@ -121,7 +122,6 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
 
             if (error) throw error;
         } catch (err) {
-            console.error('Email sending failed:', err);
             toast({
                 title: 'Aviso',
                 description: 'Convite criado, mas o email falhou. Copie o link abaixo.',
@@ -153,7 +153,6 @@ export const InviteAssistantForm = ({ onSuccess }: InviteAssistantFormProps) => 
             if (error || (data && data.success === false)) throw error || new Error(data?.error || "Unknown error");
 
         } catch (err) {
-            console.error('WhatsApp sending failed:', err);
             toast({
                 title: 'Aviso',
                 description: 'Falha ao enviar WhatsApp. Copie o link manualmente.',

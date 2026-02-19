@@ -1,16 +1,19 @@
 import {
     Calendar,
+    LayoutDashboard,
     Home,
-    Settings,
-    LogOut,
     Users,
     Briefcase,
+    Settings,
     CreditCard,
-    Sparkles,
+    LogOut,
+    UserPlus,
     FileSignature,
     Megaphone,
     ShieldCheck,
-    Scissors
+    Scissors,
+    Filter,
+    Link2
 } from "lucide-react"
 
 import {
@@ -60,6 +63,11 @@ export function AppSidebar() {
             title: t("sidebar.projects"),
             url: "/projetos",
             icon: Briefcase,
+        },
+        {
+            title: "FUNIL", // t("sidebar.pipeline")
+            url: "/funil",
+            icon: Filter,
         },
         {
             title: t("sidebar.finance"),

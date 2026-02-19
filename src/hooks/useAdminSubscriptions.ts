@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 
 export interface SubscriptionUser {
     id: string;
@@ -75,7 +76,10 @@ export function useAdminSubscriptions() {
                 calculateStats(profiles);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            logger.error(error, {
+                message: 'Erro ao carregar dados de assinaturas.',
+                showToast: false
+            });
             toast({
                 title: "Erro ao carregar dados",
                 variant: "destructive"

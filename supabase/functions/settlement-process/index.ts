@@ -53,7 +53,7 @@ serve(async (req: Request) => {
     const isServiceRole = authHeader.includes(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || 'NEVER_MATCH')
 
     // Fetch user role if not service key
-    let isAdmin = false
+    const isAdmin = false
     if (!isServiceRole && user) {
       // Check public.profiles or similar if needed, or claims
       // For now, let's restrict to Service Role to be safe as per "Settlement Edge Function" usually implies background job.

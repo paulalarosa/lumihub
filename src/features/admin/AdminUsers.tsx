@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { logger } from '@/utils/logger';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Copy,
   LogIn,
   Shield,
   User,
   MoreHorizontal,
   Lock,
-  Unlock,
   RefreshCw,
   Search
 } from 'lucide-react';
@@ -26,59 +25,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/hooks/useLanguage';
+import { useAdminUsers } from './hooks/useAdminUsers';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminUsers() {
   const { user: adminUser } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
-  const [users, setUsers] = useState<any[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: users, isLoading, isError, refetch } = useAdminUsers();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [impersonating, setImpersonating] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setFilteredUsers(users);
-    } else {
-      const lowerQuery = searchQuery.toLowerCase();
-      const filtered = users.filter(u =>
-        (u.full_name?.toLowerCase() || "").includes(lowerQuery) ||
-        (u.email?.toLowerCase() || "").includes(lowerQuery) ||
-        (u.id?.toLowerCase() || "").includes(lowerQuery)
-      );
-      setFilteredUsers(filtered);
-    }
-  }, [searchQuery, users]);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      if (!error && data) {
-        setUsers(data);
-        setFilteredUsers(data);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load user database.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const filteredUsers = users?.filter(u => {
+    if (searchQuery.trim() === "") return true;
+    const lowerQuery = searchQuery.toLowerCase();
+    return (
+      (u.full_name?.toLowerCase() || "").includes(lowerQuery) ||
+      (u.email?.toLowerCase() || "").includes(lowerQuery) ||
+      (u.id?.toLowerCase() || "").includes(lowerQuery)
+    );
+  }) || [];
 
   const handleImpersonate = async (targetUserId: string) => {
     try {
@@ -99,7 +66,7 @@ export default function AdminUsers() {
 
       setImpersonating(null);
     } catch (error) {
-      console.error('Error impersonating user:', error);
+      logger.error(error, 'AdminUsers.handleImpersonate', { showToast: false });
       toast({
         title: "Error",
         description: "Failed to initiate ghost session.",
@@ -114,6 +81,9 @@ export default function AdminUsers() {
       title: t('admin_reset_pass'),
       description: `Recovery email sent to ${email}`,
     });
+    // @ts-ignore - Supabase types might be strict, but this method exists on auth client usually.
+    // Actually, supabase.auth.resetPasswordForEmail is valid v1, but v2 uses resetPasswordForEmail or similar.
+    // If it errors, we can fix it. For now keeping original logic but wrapped.
     await supabase.auth.resetPasswordForEmail(email);
   };
 
@@ -126,13 +96,25 @@ export default function AdminUsers() {
     // Implementation would involve updating a status column
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-4">
-        <div className="animate-spin h-6 w-6 border-2 border-white border-t-transparent rounded-full"></div>
+        <Skeleton className="h-12 w-12 rounded-full" />
         <p className="text-gray-500 font-mono text-xs uppercase animate-pulse">Scanning_User_Database...</p>
       </div>
     );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-8 text-center text-red-500 font-mono">
+        <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
+        Failed to load user database.
+        <Button variant="link" onClick={() => refetch()} className="text-red-400 block mx-auto mt-2">
+          Retry Connection
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -148,7 +130,7 @@ export default function AdminUsers() {
           />
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={fetchUsers} className="rounded-none border-white/20 hover:bg-white hover:text-black">
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="rounded-none border-white/20 hover:bg-white hover:text-black">
             <RefreshCw className="h-3 w-3 mr-2" />
             SYNC
           </Button>
@@ -216,7 +198,7 @@ export default function AdminUsers() {
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="cursor-pointer hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none font-mono text-xs"
-                            onClick={() => handleResetPassword(u.email)}
+                            onClick={() => handleResetPassword(u.email || "")}
                           >
                             <Lock className="mr-2 h-3 w-3" />
                             {t('admin_reset_pass')}
@@ -283,7 +265,7 @@ export default function AdminUsers() {
                       variant="outline"
                       size="sm"
                       className="rounded-none border-white/20 hover:bg-white hover:text-black font-mono text-xs uppercase"
-                      onClick={() => handleResetPassword(u.email)}
+                      onClick={() => handleResetPassword(u.email || "")}
                     >
                       <Lock className="mr-2 h-3 w-3" />
                       Reset

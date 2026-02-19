@@ -18,10 +18,9 @@ export const FeatureGate = ({
     fallback,
     requiredPlan,
 }: FeatureGateProps) => {
-    const { hasFeature, planType } = usePlanAccess();
+    const { hasFeature } = usePlanAccess();
     const navigate = useNavigate();
 
-    // @ts-ignore
     const hasAccess = hasFeature(feature);
 
     // If already has access, render children

@@ -2,12 +2,16 @@
 // for handling Stripe Webhooks.
 
 import { createClient } from '@supabase/supabase-js';
+import { logger } from '@/utils/logger';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('CRITICAL: Missing Supabase credentials in billing webhook');
+    logger.error(new Error('Missing Supabase credentials in billing webhook'), {
+        message: 'Erro crítico de configuração do webhook de pagamento.',
+        showToast: false
+    });
     // We don't throw here to avoid crashing the module load, but handleBillingWebhook will fail or we create a dummy client
 }
 
@@ -32,7 +36,10 @@ export const handleBillingWebhook = async (event: StripeEvent) => {
     const object = data.object;
 
     if (!supabaseUrl || !supabaseServiceKey) {
-        console.error('Audit Log Failed: Missing credentials');
+        logger.error(new Error('Audit Log Failed: Missing credentials'), {
+            message: 'Falha no log de auditoria: credenciais ausentes.',
+            showToast: false
+        });
         return { received: false, error: 'Configuration Error' };
     }
 
@@ -68,7 +75,11 @@ export const handleBillingWebhook = async (event: StripeEvent) => {
             });
 
             if (auditError) {
-                console.error('AUDIT LOG FAILED:', auditError);
+                logger.error(auditError, {
+                    message: 'Falha ao registrar log de auditoria.',
+                    context: { event: 'checkout.session.completed' },
+                    showToast: false
+                });
             }
             break;
         }
@@ -106,7 +117,11 @@ export const handleBillingWebhook = async (event: StripeEvent) => {
                     },
                     created_at: new Date().toISOString()
                 });
-                if (auditError) console.error('AUDIT LOG FAILED:', auditError);
+                if (auditError) logger.error(auditError, {
+                    message: 'Falha ao registrar log de auditoria.',
+                    context: { event: 'customer.subscription.deleted' },
+                    showToast: false
+                });
             }
             break;
         }
@@ -130,7 +145,11 @@ export const handleBillingWebhook = async (event: StripeEvent) => {
                     },
                     created_at: new Date().toISOString()
                 });
-                if (auditError) console.error('AUDIT LOG FAILED:', auditError);
+                if (auditError) logger.error(auditError, {
+                    message: 'Falha ao registrar log de auditoria.',
+                    context: { event: 'invoice.payment_succeeded' },
+                    showToast: false
+                });
             }
             break;
         }

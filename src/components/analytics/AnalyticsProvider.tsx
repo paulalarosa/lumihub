@@ -1,18 +1,6 @@
-import { useEffect, createContext, useContext, ReactNode } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { usePageTracking, useScrollTracking, useAnalytics } from '@/hooks/useAnalytics';
-
-interface AnalyticsContextType {
-  trackEvent: ReturnType<typeof useAnalytics>['trackEvent'];
-  trackCTAClick: ReturnType<typeof useAnalytics>['trackCTAClick'];
-  trackConversion: ReturnType<typeof useAnalytics>['trackConversion'];
-  trackFormSubmit: ReturnType<typeof useAnalytics>['trackFormSubmit'];
-  trackAuth: ReturnType<typeof useAnalytics>['trackAuth'];
-  trackBooking: ReturnType<typeof useAnalytics>['trackBooking'];
-  trackSubscription: ReturnType<typeof useAnalytics>['trackSubscription'];
-  getSessionSummary: ReturnType<typeof useAnalytics>['getSessionSummary'];
-}
-
-const AnalyticsContext = createContext<AnalyticsContextType | null>(null);
+import { AnalyticsContext } from '@/contexts/AnalyticsContext';
 
 interface AnalyticsProviderProps {
   children: ReactNode;
@@ -42,12 +30,4 @@ export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
       {children}
     </AnalyticsContext.Provider>
   );
-}
-
-export function useAnalyticsContext() {
-  const context = useContext(AnalyticsContext);
-  if (!context) {
-    throw new Error('useAnalyticsContext must be used within AnalyticsProvider');
-  }
-  return context;
 }

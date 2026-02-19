@@ -3,6 +3,7 @@ import { MarketingService, MarketingCampaign } from "@/services/marketing";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { differenceInDays } from "date-fns";
+import { logger } from '@/utils/logger';
 
 export interface InactiveClient {
     id: string;
@@ -26,9 +27,10 @@ export const useMarketing = () => {
             setCampaigns(data);
         } catch (err: unknown) {
             const error = err instanceof Error ? err : new Error('Unknown error');
-            console.error("Error fetching campaigns:", error);
+            logger.error(error, {
+                message: 'Erro ao carregar campanhas de marketing.',
+            });
             setError(error);
-            toast.error("Erro ao carregar campanhas de marketing.");
         } finally {
             setLoading(false);
         }
@@ -94,8 +96,9 @@ export const useInactiveClients = () => {
             setClients(processedClients.sort((a, b) => b.days_since_created - a.days_since_created));
 
         } catch (error) {
-            console.error("Error fetching inactive clients:", error);
-            toast.error("Erro ao carregar lista de marketing");
+            logger.error(error, {
+                message: 'Erro ao carregar lista de marketing.',
+            });
         } finally {
             setLoading(false);
         }

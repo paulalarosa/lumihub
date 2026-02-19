@@ -39,14 +39,16 @@ export function useInviteLanding() {
 
     const checkInvite = async () => {
         try {
-            const { data, error } = await supabase
+            const query = supabase
                 .from('assistants')
-                .select('id, email, name, status, is_registered, invite_token')
+                .select('id, email, name, status, is_registered, invite_token');
+
+            const { data, error } = await query
                 .eq('invite_token', token)
                 .maybeSingle();
 
             if (error || !data) {
-                console.error("Assistant token check error:", error);
+
                 setStatus('invalid');
                 return;
             }
@@ -67,7 +69,7 @@ export function useInviteLanding() {
             setInviteData(safeData);
             setStatus('valid');
         } catch (error) {
-            console.error(error);
+
             setStatus('invalid');
         }
     };
@@ -149,7 +151,7 @@ export function useInviteLanding() {
                     .eq('id', inviteData.id);
 
                 if (updateError) {
-                    console.error("Failed to link account:", updateError);
+
                     throw new Error("Falha ao vincular contrato. Tente novamente.");
                 }
 
@@ -162,7 +164,7 @@ export function useInviteLanding() {
                 }, { onConflict: 'id' });
 
                 if (profileError) {
-                    console.warn("Profile Upsert Warning:", profileError);
+                    toast.error("Erro ao criar perfil de usuário.");
                 }
 
                 toast.success("Acesso liberado com sucesso!");
@@ -172,7 +174,7 @@ export function useInviteLanding() {
                 }, 1000);
             }
         } catch (error: unknown) {
-            console.error("Registration error:", error);
+
             const message = error instanceof Error ? error.message : "Erro ao processar cadastro.";
             toast.error(message);
         } finally {

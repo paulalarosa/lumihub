@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export const AuthService = {

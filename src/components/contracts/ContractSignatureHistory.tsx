@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Download, FileText } from 'lucide-react';
+import { logger } from '@/utils/logger';
 
 interface ContractSignatureData {
   id: string;
@@ -33,7 +34,7 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
         if (error) throw error;
         setSignatures(data || []);
       } catch (error) {
-        console.error('Erro ao buscar assinaturas:', error);
+        logger.error(error, 'ContractSignatureHistory.fetchSignatures', { showToast: false });
         setSignatures([]);
       } finally {
         setLoading(false);

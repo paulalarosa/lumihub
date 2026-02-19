@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 export const ConflictResolver = () => {
     const { data: conflicts, refetch } = useQuery({
@@ -16,7 +17,7 @@ export const ConflictResolver = () => {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('Error fetching conflicts:', error);
+                logger.error(error, 'ConflictResolver.fetchConflicts', { showToast: false });
                 return [];
             }
             return data;

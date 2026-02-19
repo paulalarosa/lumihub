@@ -8,6 +8,8 @@ declare global {
   }
 }
 
+import { logger } from '@/utils/logger';
+
 export type EventCategory =
   | 'cta_click'
   | 'page_view'
@@ -64,9 +66,7 @@ class AnalyticsService {
   trackEvent(event: AnalyticsEvent) {
     const { category, action, label, value, customParameters } = event;
 
-    // Console log para debug em desenvolvimento
-    if (import.meta.env.DEV) {
-    }
+
 
     // Enviar para Google Analytics
     if (window.gtag) {
@@ -106,9 +106,7 @@ class AnalyticsService {
 
   // Track page view
   trackPageView(pageView: PageViewEvent) {
-    if (import.meta.env.DEV) {
 
-    }
 
     if (window.gtag) {
       window.gtag('event', 'page_view', {
@@ -134,9 +132,7 @@ class AnalyticsService {
   trackTimeOnPage(pagePath: string) {
     const timeSpent = Math.round((Date.now() - this.pageStartTime) / 1000);
 
-    if (import.meta.env.DEV) {
 
-    }
 
     if (window.gtag) {
       window.gtag('event', 'time_on_page', {
@@ -160,9 +156,7 @@ class AnalyticsService {
 
   // Track conversions
   trackConversion(conversion: ConversionEvent) {
-    if (import.meta.env.DEV) {
 
-    }
 
     if (window.gtag) {
       window.gtag('event', 'conversion', {
@@ -248,7 +242,10 @@ class AnalyticsService {
 
       localStorage.setItem('kontrol_analytics', JSON.stringify(events));
     } catch (error) {
-      console.error('[Analytics] Error storing event:', error);
+      logger.error(error, {
+        message: "Erro ao registrar evento analítico.",
+        showToast: false
+      });
     }
   }
 

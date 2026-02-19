@@ -1,17 +1,17 @@
 /**
  * Database Types - Re-exports and helpers based on Supabase auto-generated types
- * The source of truth is src/integrations/supabase/types.ts
+ * The source of truth is src/types/supabase.ts
  */
 
-import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/types/supabase';
 
 // ============================================
 // Type Aliases from Supabase Tables
 // ============================================
 
-export type Client = Tables<'clients'>;
-export type ClientInsert = TablesInsert<'clients'>;
-export type ClientUpdate = TablesUpdate<'clients'>;
+export type Client = Tables<'wedding_clients'>;
+export type ClientInsert = TablesInsert<'wedding_clients'>;
+export type ClientUpdate = TablesUpdate<'wedding_clients'>;
 
 export type Project = Tables<'projects'>;
 export type ProjectInsert = TablesInsert<'projects'>;

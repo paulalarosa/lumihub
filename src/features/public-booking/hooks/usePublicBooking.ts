@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { logger } from '@/utils/logger';
 import { format, addMinutes, isBefore, startOfDay, parse } from 'date-fns';
 import { Profile, Service, TimeSlot } from '../types';
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 import { SupabaseClient } from '@supabase/supabase-js';
 
 type LocalDatabase = Database & {
@@ -98,7 +99,7 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
             })));
 
         } catch (error) {
-            console.error("Error fetching public profile:", error);
+            logger.error(error, 'usePublicBooking.fetchProfile', { showToast: false });
             toast({ title: "Perfil não encontrado", variant: "destructive" });
         } finally {
             setLoading(false);
@@ -167,7 +168,7 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
             setTimeSlots(slots);
 
         } catch (error) {
-            console.error("Error generating slots:", error);
+            logger.error(error, 'usePublicBooking.generateTimeSlots', { showToast: false });
             toast({ title: "Erro ao gerar horários", variant: "destructive" });
         } finally {
             setLoadingSlots(false);
@@ -233,7 +234,7 @@ export const usePublicBooking = (slug: string | undefined, refParam: string | nu
             setStep(4);
 
         } catch (error) {
-            console.error("Booking error:", error);
+            logger.error(error, 'usePublicBooking.handleBookingSubmit', { showToast: false });
             toast({ title: "Erro ao realizar agendamento", variant: "destructive" });
         } finally {
             setSubmitting(false);

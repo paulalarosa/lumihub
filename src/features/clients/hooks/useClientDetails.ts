@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
+import { logger } from '@/utils/logger';
 import { generateClientPDF } from '@/services/reportService';
 import { useToast } from "@/hooks/use-toast";
 import { ClientService, Client, TreatmentRecord } from '@/services/clientService';
@@ -124,7 +125,7 @@ export function useClientDetails(id: string | undefined) {
                 setEvents(eventsData as unknown as EventWithServices[]);
             }
         } catch (error) {
-            console.error("Error fetching client details:", error);
+            logger.error(error, 'useClientDetails.fetchData', { showToast: false });
             toast({
                 title: "Erro ao carregar dados",
                 description: "Não foi possível carregar as informações do cliente.",
@@ -176,7 +177,7 @@ export function useClientDetails(id: string | undefined) {
             });
             fetchData();
         } catch (error) {
-            console.error("Error deleting record:", error);
+            logger.error(error, 'useClientDetails.deleteRecord', { showToast: false });
             toast({
                 title: "Erro",
                 description: "Não foi possível excluir o registro.",

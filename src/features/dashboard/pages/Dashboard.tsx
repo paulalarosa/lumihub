@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useDashboard } from '../hooks/useDashboard';
+import { SetupChecklist } from '@/components/onboarding/SetupChecklist';
 
 export default function Dashboard() {
   const { t } = useLanguage();
@@ -79,6 +80,8 @@ export default function Dashboard() {
             {d.profileName || d.user.email?.split('@')[0] || d.user.user_metadata?.full_name?.split(' ')[0] || 'Maquiadora'}
           </h1>
         </motion.div>
+
+        <SetupChecklist />
 
         <div className="mb-12 p-6 border border-white/10 bg-white/5 rounded-none">
           <span className="font-mono text-xs text-white/50 tracking-widest uppercase">STATUS:</span>

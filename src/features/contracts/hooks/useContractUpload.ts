@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface UseContractUploadProps {
@@ -15,7 +16,7 @@ export const useContractUpload = ({ clientId: initialClientId }: UseContractUplo
     const uploadFile = async (file: File, clientId?: string) => {
         const targetId = clientId || initialClientId;
         if (!targetId) {
-            console.error("No Client ID provided for upload.");
+            logger.error(new Error('No Client ID provided for upload.'), 'useContractUpload.uploadFile', { showToast: false });
             // Allow upload without ID? User said "Rename: clientId + ..."
             // If no ID, we can't construct the requested filename correctly or update DB.
             // But let's proceed with a fallback for filename, and skip DB update if no ID.
@@ -42,7 +43,7 @@ export const useContractUpload = ({ clientId: initialClientId }: UseContractUplo
                 .upload(filePath, file);
 
             if (error) {
-                console.error('Supabase Storage Error:', error);
+                logger.error(error, 'useContractUpload.storageUpload', { showToast: false });
                 throw new Error('UPLOAD_FAILED: ' + error.message);
             }
 
@@ -59,7 +60,7 @@ export const useContractUpload = ({ clientId: initialClientId }: UseContractUplo
                     .eq('id', targetId);
 
                 if (dbError) {
-                    console.error('DB Update Error:', dbError);
+                    logger.error(dbError, 'useContractUpload.dbUpdate', { showToast: false });
                     // We don't throw here to avoid failing the whole process if just the DB update fails,
                     // but usually we should. Let's log and warn.
                     toast.warning('File uploaded but failed to link to client record.');

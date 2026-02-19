@@ -142,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Initialize
         supabase.auth.getSession().then(({ data: { session }, error }) => {
             if (error) {
-                console.warn("Auth: Session init error", error);
+
                 if (error.message.includes("Invalid Refresh Token")) {
                     signOut();
                     navigate('/login');
@@ -151,7 +151,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
             handleSession(session);
         }).catch(err => {
-            console.error("Auth: Critical session init error", err);
+
             signOut();
         });
 
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // CRITICAL: Handle invalid refresh token automatically
             if ((event as string) === 'TOKEN_REFRESH_ERROR') {
-                console.warn('Auth: Token refresh error detected. Clearing session.');
+
                 await signOut();
                 navigate('/login');
                 return;

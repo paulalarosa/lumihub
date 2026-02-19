@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import {
     Table,
     TableBody,
@@ -86,7 +87,7 @@ export default function AdminAssistants() {
 
             setAssistants(enriched);
         } catch (error) {
-            console.error("Error fetching assistants:", error);
+            logger.error(error, 'AdminAssistants.fetchAssistants', { showToast: false });
             toast({
                 title: "Erro ao carregar assistentes",
                 variant: "destructive"
@@ -124,7 +125,7 @@ export default function AdminAssistants() {
             });
 
         } catch (error) {
-            console.error("Error deleting assistant:", error);
+            logger.error(error, 'AdminAssistants.handleDelete', { showToast: false });
             toast({
                 title: "Erro ao excluir",
                 description: "Não foi possível remover, verifique se existem outros registros dependentes.",

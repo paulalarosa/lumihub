@@ -190,6 +190,11 @@ export const JSXPreviewContent = memo(
 
     return (
       <div className={cn("jsx-preview-content", className)} {...props}>
+        {/* 
+          SECURITY WARNING: Renders dynamic JSX. 
+          The 'jsx' prop comes from AI output and is trusted in this context (internal usage). 
+          Do not expose to user input.
+        */}
         <JsxParser
           bindings={bindings}
           components={components}

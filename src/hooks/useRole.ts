@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 
 export const useRole = () => {
     const { user } = useAuth();
@@ -46,7 +47,10 @@ export const useRole = () => {
 
                 setRole(null);
             } catch (error) {
-                console.error('Error checking role:', error);
+                logger.error(error, {
+                    message: 'Erro ao verificar perfil de acesso.',
+                    showToast: false
+                });
                 setRole(null);
             } finally {
                 setLoading(false);

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useInView } from 'framer-motion';
+import { logger } from '@/utils/logger';
 
 interface CountUpProps {
   from?: number;
@@ -47,7 +48,7 @@ export const CountUp = ({
         const current = validFrom + (validTo - validFrom) * easeProgress;
 
         let formatted: string | number = current;
-        
+
         if (format && typeof format === 'function') {
           try {
             formatted = format(current);
@@ -73,7 +74,7 @@ export const CountUp = ({
         if (animationId) clearTimeout(animationId);
       };
     } catch (error) {
-      console.error('CountUp animation error:', error);
+      logger.error(error, { message: 'Erro na animação.', showToast: false });
       // Fallback: show final value
       setDisplayValue(to ?? 0);
     }

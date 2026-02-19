@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
+import { logger } from '@/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Loader2, Eraser, Check } from 'lucide-react';
@@ -118,7 +119,7 @@ export function DigitalSignature({ isOpen, onClose, contract, onSigned }: Digita
             onClose();
 
         } catch (error) {
-            console.error("Signature Save Error:", error);
+            logger.error(error, 'DigitalSignature.save', { showToast: false });
             toast({
                 variant: "destructive",
                 title: "Erro ao salvar",

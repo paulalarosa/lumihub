@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, DollarSign, TrendingUp, AlertCircle, Terminal } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -63,7 +64,7 @@ export default function AdminOverview() {
         activeSubscriptions: Math.floor((userCount || 0) * 0.4), // Mock 40% conversion
       }));
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      logger.error(error, 'AdminOverview.fetchStats', { showToast: false });
     } finally {
       setLoading(false);
     }

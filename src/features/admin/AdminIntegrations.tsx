@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { logger } from '@/utils/logger';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +36,7 @@ export default function AdminIntegrations() {
             updateStatus(newStatuses, 'Supabase Auth', 'operational', 'Session Active');
         } catch (e) {
             updateStatus(newStatuses, 'Supabase Database', 'down', 'Connection Failed');
+            logger.error(e, 'Health Check Failed', { context: { service: 'Supabase Database' } });
         }
 
         // 2. Check Google Calendar
@@ -54,18 +56,26 @@ export default function AdminIntegrations() {
             }
         } catch (e) {
             updateStatus(newStatuses, 'Google Calendar Sync', 'down', 'Unreachable');
+            // Google Calendar might be optional, but logging it as warning
+            // logger.error(e, 'Health Check Failed', { context: { service: 'Google Calendar Sync' } });
         }
 
         // 3. Check Stripe
         try {
-            const stripeKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-            if (stripeKey && stripeKey.startsWith('pk_')) {
-                updateStatus(newStatuses, 'Stripe', 'operational', 'Publishable Key Present');
+            const { data, error } = await supabase.functions.invoke('check-stripe-status');
+
+            if (error || data?.status === 'down') {
+                const msg = error?.message || data?.error || 'Unknown Error';
+                updateStatus(newStatuses, 'Stripe', 'down', msg);
+                logger.error(new Error(`Stripe Health Check Failed: ${msg}`), {
+                    context: { service: 'Stripe', data, error }
+                });
             } else {
-                updateStatus(newStatuses, 'Stripe', 'not_configured', 'Missing Publishable Key');
+                updateStatus(newStatuses, 'Stripe', 'operational', `Latency: ${data?.latency || 'OK'}`);
             }
         } catch (e) {
-            updateStatus(newStatuses, 'Stripe', 'down', 'Check Failed');
+            updateStatus(newStatuses, 'Stripe', 'down', 'Invocation Failed');
+            logger.error(e, 'Health Check Failed', { context: { service: 'Stripe' } });
         }
 
         // 4. Check Google Maps
@@ -76,8 +86,23 @@ export default function AdminIntegrations() {
             updateStatus(newStatuses, 'Google Maps', 'not_configured', 'VITE_GOOGLE_MAPS_API_KEY Missing');
         }
 
-        // 5. Check Resend
-        updateStatus(newStatuses, 'Resend Email', 'operational', 'Assumed Configured');
+        // 5. Check Resend (SES)
+        try {
+            const { data, error } = await supabase.functions.invoke('check-ses-status');
+
+            if (error || data?.status === 'down') {
+                const msg = error?.message || data?.error || 'Unknown Error';
+                updateStatus(newStatuses, 'Resend Email', 'down', msg);
+                logger.error(new Error(`SES Health Check Failed: ${msg}`), {
+                    context: { service: 'Resend Email', data, error }
+                });
+            } else {
+                updateStatus(newStatuses, 'Resend Email', 'operational', `Operational`);
+            }
+        } catch (e) {
+            updateStatus(newStatuses, 'Resend Email', 'down', 'Invocation Failed');
+            logger.error(e, 'Health Check Failed', { context: { service: 'Resend Email' } });
+        }
 
         setStatuses(newStatuses);
         setLoading(false);

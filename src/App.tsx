@@ -2,8 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useEffect, useState, lazy, Suspense } from "react";
 import { SplashScreen } from "./components/ui/layout/SplashScreen";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClientProvider } from "@tanstack/react-query";
+
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
@@ -15,8 +14,6 @@ import AuthCallbackHandler from "@/features/auth/AuthCallbackHandler";
 import MFAVerifyPage from "@/features/auth/pages/MFAVerifyPage";
 import AppLayout from "./components/ui/layout/AppLayout";
 import MarketingLayout from "./components/ui/layout/MarketingLayout";
-import { ThemeProvider } from "@/contexts/ThemeContext";
-import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ScrollToTop } from "./components/utils/ScrollToTop";
 import { GoogleAnalytics } from "./components/analytics/GoogleAnalytics";
 import { PageLoader } from "./components/ui/PageLoader";
@@ -24,7 +21,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { SystemFailure } from "./components/ui/SystemFailure";
 import { SkipToContent } from "@/components/a11y/SkipToContent";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
-import { queryClient } from "@/lib/queryClient";
+import { CustomErrorBoundary } from "@/components/ui/CustomErrorBoundary";
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
+import { AchievementNotifications } from '@/components/onboarding/AchievementToast';
 
 // Lazy AI Components
 const ModernAIChat = lazy(() => import("./components/ai/ModernAIChat").then(m => ({ default: m.ModernAIChat })));
@@ -52,7 +51,6 @@ const ClienteDetalhes = lazy(() => import("@/features/clients/pages/ClientDetail
 const Projetos = lazy(() => import("@/features/projects/pages/ProjectsPage"));
 const ProjetoDetalhes = lazy(() => import("@/features/projects/pages/ProjectDetailsPage"));
 const Configuracoes = lazy(() => import("./pages/Configuracoes"));
-const AssistantPortalPage = lazy(() => import("@/features/portal/pages/AssistantPortalPage"));
 const Contato = lazy(() => import("./pages/Contato"));
 const Privacidade = lazy(() => import("./pages/Privacidade"));
 const Termos = lazy(() => import("./pages/Termos"));
@@ -63,7 +61,6 @@ const Contratos = lazy(() => import("./pages/Contratos"));
 const ProjectContract = lazy(() => import("./pages/ProjectContract"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicBooking = lazy(() => import("./pages/PublicBooking"));
-const InviteLanding = lazy(() => import("./pages/InviteLanding"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const AcceptInvitePage = lazy(() => import("@/pages/assistant/AcceptInvitePage"));
@@ -75,6 +72,12 @@ const UpgradeFailurePage = lazy(() => import("@/pages/assistant/UpgradeFailurePa
 const UpgradePendingPage = lazy(() => import("@/pages/assistant/UpgradePendingPage"));
 const CalendarPage = lazy(() => import("@/pages/CalendarPage"));
 const GoogleCalendarCallback = lazy(() => import("@/pages/GoogleCalendarCallback"));
+const SignContract = lazy(() => import("@/pages/SignContract"));
+const LeaveReview = lazy(() => import("@/pages/LeaveReview"));
+const Microsite = lazy(() => import("@/pages/Microsite"));
+const MicrositeEditor = lazy(() => import("@/pages/MicrositeEditor"));
+const SalesPipeline = lazy(() => import("./pages/SalesPipeline"));
+const IntegrationsPage = lazy(() => import("./pages/Integrations"));
 
 // Custom styles
 import "@/styles/calendar.css";
@@ -148,7 +151,9 @@ const App = () => {
                       <Route element={<AppLayout />}>
                         <Route path="/dashboard" element={
                           <ProtectedRoute>
-                            <Dashboard />
+                            <CustomErrorBoundary>
+                              <Dashboard />
+                            </CustomErrorBoundary>
                           </ProtectedRoute>
                         } />
                         <Route path="/dashboard/financial" element={
@@ -187,7 +192,9 @@ const App = () => {
                         } />
                         <Route path="/projetos" element={
                           <ProtectedRoute>
-                            <Projetos />
+                            <CustomErrorBoundary>
+                              <Projetos />
+                            </CustomErrorBoundary>
                           </ProtectedRoute>
                         } />
                         <Route path="/projetos/novo" element={
@@ -225,6 +232,11 @@ const App = () => {
                             <Servicos />
                           </ProtectedRoute>
                         } />
+                        <Route path="/funil" element={
+                          <ProtectedRoute>
+                            <SalesPipeline />
+                          </ProtectedRoute>
+                        } />
                         <Route path="/contratos" element={
                           <ProtectedRoute>
                             <Contratos />
@@ -247,12 +259,19 @@ const App = () => {
                         <Route index element={<Navigate to="dashboard" replace />} />
                       </Route>
                       <Route path="/assistente/convite/:token" element={<AcceptInvitePage />} />
-                      <Route path="/assistente/convite/:token" element={<InviteLanding />} />
                       <Route path="/upgrade" element={<UpgradePage />} />
                       <Route path="/upgrade/success" element={<UpgradeSuccessPage />} />
                       <Route path="/upgrade/failure" element={<UpgradeFailurePage />} />
                       <Route path="/upgrade/pending" element={<UpgradePendingPage />} />
                       <Route path="/b/:slug" element={<PublicBooking />} />
+                      <Route path="/assinar/:requestId" element={<SignContract />} />
+                      <Route path="/avaliar/:token" element={<LeaveReview />} />
+                      <Route path="/site/:slug" element={<Microsite />} />
+                      <Route path="/meu-site/editor" element={
+                        <ProtectedRoute>
+                          <MicrositeEditor />
+                        </ProtectedRoute>
+                      } />
                       <Route path="/portal/:clientId/login" element={<BrideLoginPage />} />
                       <Route element={<BrideProtectedRoute />}>
                         <Route path="/portal/:clientId/dashboard" element={<BrideDashboardPage />} />
@@ -265,6 +284,8 @@ const App = () => {
               </main>
             </div>
             <AIController />
+            <OnboardingWizard />
+            <AchievementNotifications />
           </AIProvider>
         </AnalyticsProvider>
       </AuthProvider>

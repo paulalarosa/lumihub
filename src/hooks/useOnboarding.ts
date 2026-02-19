@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Database } from "@/integrations/supabase/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { logger } from '@/utils/logger';
 
 type LocalDatabase = Database & {
     public: {
@@ -76,15 +77,17 @@ export function useOnboarding() {
             });
 
             if (error) {
-                console.error('Error connecting Google Calendar:', error);
-                toast.error('Erro ao conectar com Google Calendar');
+                logger.error(error, {
+                    message: 'Erro ao conectar com Google Calendar.',
+                });
                 setIsConnecting(false);
                 return;
             }
             // Redirect is automatic
         } catch (err) {
-            console.error('Connection error:', err);
-            toast.error('Erro de conexão');
+            logger.error(err, {
+                message: 'Erro de conexão.',
+            });
             setIsConnecting(false);
         }
     };
@@ -113,8 +116,9 @@ export function useOnboarding() {
                 }, { onConflict: 'id' });
 
             if (error) {
-                console.error('Error completing onboarding:', error);
-                toast.error('Erro ao finalizar onboarding');
+                logger.error(error, {
+                    message: 'Erro ao finalizar onboarding.',
+                });
                 setIsCompleting(false);
                 return;
             }
@@ -127,8 +131,9 @@ export function useOnboarding() {
             window.location.href = '/dashboard';
 
         } catch (err) {
-            console.error('Complete error:', err);
-            toast.error('Erro ao finalizar');
+            logger.error(err, {
+                message: 'Erro ao finalizar.',
+            });
             setIsCompleting(false);
         }
     };

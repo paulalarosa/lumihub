@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { logger } from "@/utils/logger";
 
 interface ExportColumn<T> {
     key: keyof T;
@@ -94,7 +95,7 @@ export function exportToCSV<T extends Record<string, unknown>>(
 
         return { success: true };
     } catch (error) {
-        console.error("CSV Export Error:", error);
+        logger.error(error, 'exportCSV.exportToCSV', { showToast: false });
         return {
             success: false,
             error: error instanceof Error ? error.message : "Erro desconhecido na exportação"

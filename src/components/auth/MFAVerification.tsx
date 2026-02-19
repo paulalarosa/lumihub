@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { logger } from "@/utils/logger";
 
 export default function MFAVerification({ onSuccess }: { onSuccess?: () => void }) {
     const { listFactors, challenge, verify, isLoading } = useMFA();
@@ -47,7 +48,7 @@ export default function MFAVerification({ onSuccess }: { onSuccess?: () => void 
                 }
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error, 'MFAVerification.handleVerify', { showToast: false });
             toast.error("Código inválido. Tente novamente.");
         } finally {
             setIsVerifying(false);

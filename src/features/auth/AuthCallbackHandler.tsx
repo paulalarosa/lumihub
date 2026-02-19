@@ -60,9 +60,8 @@ const AuthCallbackHandler = () => {
       await validateSession(session);
 
     } catch (err) {
-      console.error('OAuth callback error:', err);
       setStatus('error');
-      setErrorMessage(err.message || 'Erro de conexão.');
+      setErrorMessage(err instanceof Error ? err.message : 'Erro de conexão.');
     }
   };
 
@@ -70,7 +69,7 @@ const AuthCallbackHandler = () => {
     // 2. Verify Token Exists
     // This ensures we actually got a provider token from the Google flow
     if (!session.provider_token && !session.provider_refresh_token) {
-      console.warn('Missing provider token in session');
+
       setStatus('error');
       setErrorMessage('Falha na conexão: Token do Google não identificado. Tente novamente.');
       return;
@@ -84,7 +83,7 @@ const AuthCallbackHandler = () => {
       .eq('id', session.user.id);
 
     if (updateError) {
-      console.error('Error updating profile:', updateError);
+
       // We don't block login on profile update error, but we log it.
     }
 

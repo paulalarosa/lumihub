@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { logger } from '@/utils/logger';
 import { supabase } from '@/integrations/supabase/client';
 import { Save, AlertOctagon, UserPlus, Megaphone, Terminal } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -51,7 +52,7 @@ export default function AdminConfig() {
         setConfigs(prev => ({ ...prev, ...newConfigs }));
       }
     } catch (error) {
-      console.error('Error fetching config:', error);
+      logger.error(error, 'AdminConfig.fetchConfigs', { showToast: false });
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ export default function AdminConfig() {
 
       toast.success(`Configuração [${key}] atualizada com sucesso.`);
     } catch (error) {
-      console.error('Error saving config:', error);
+      logger.error(error, 'AdminConfig.handleSave', { showToast: false });
       toast.error('Falha ao atualizar parâmetros do sistema.');
       fetchConfigs(); // Revert
     } finally {

@@ -8,6 +8,7 @@ import { generateWhatsAppLink } from '@/utils/whatsappGenerator';
 import { differenceInDays, format } from 'date-fns';
 import { MessageCircle, Clock, Check, Heart } from 'lucide-react';
 import { Event } from '@/hooks/useEvents';
+import { logger } from '@/utils/logger';
 
 export function useEventCard(event: Event) {
     const { organizationId } = useOrganization();
@@ -123,7 +124,7 @@ export function useEventCard(event: Event) {
 
             window.open(link, '_blank');
         } catch (e) {
-            console.error(e);
+            logger.error(e, { message: 'Erro ao gerar link WhatsApp.', showToast: false });
             toast({ title: "Erro ao gerar link", variant: "destructive" });
         }
     };

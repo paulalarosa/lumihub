@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 import { Logger } from '@/services/logger';
+import { logger } from '@/utils/logger';
 
 export interface Contract {
     id: string;
@@ -36,8 +37,9 @@ export function useContracts() {
             .order('created_at', { ascending: false });
 
         if (error) {
-            console.error('Error fetching contracts:', error);
-            toast.error('Erro ao carregar contratos');
+            logger.error(error, {
+                message: 'Erro ao carregar contratos.',
+            });
         } else {
             setContracts(data);
         }
@@ -59,8 +61,9 @@ export function useContracts() {
             .single();
 
         if (error) {
-            console.error('Error creating contract:', error);
-            toast.error('Erro ao criar contrato');
+            logger.error(error, {
+                message: 'Erro ao criar contrato.',
+            });
             throw error;
         }
 

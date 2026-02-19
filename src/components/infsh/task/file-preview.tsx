@@ -106,7 +106,7 @@ function getFriendlyType(mime: string | undefined): string | null {
   // Fallback: extract subtype
   const parts = mime.split('/');
   if (parts.length === 2) {
-    let subtype = parts[1].replace(/^x-/, '').replace(/^vnd\./, '').split('.')[0];
+    const subtype = parts[1].replace(/^x-/, '').replace(/^vnd\./, '').split('.')[0];
     return subtype.charAt(0).toUpperCase() + subtype.slice(1);
   }
   return null;

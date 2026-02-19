@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { logger } from '@/utils/logger';
 import { Button } from "@/components/ui/button";
 import { CreditCard, Users, TrendingUp, Download, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -53,7 +54,7 @@ export default function AdminFinancials({ stats, loading }: AdminFinancialsProps
                 setEvents(eventsData || []);
                 calculateCommissions(eventsData || []);
             } catch (error) {
-                console.error('Error fetching financial data:', error);
+                logger.error(error, 'AdminFinancials.fetchMonthlyData', { showToast: false });
                 toast({
                     title: "Erro ao carregar dados",
                     description: "Não foi possível carregar o fechamento financeiro.",

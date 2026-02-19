@@ -1,10 +1,14 @@
 import { loadStripe } from "@stripe/stripe-js";
 import { toast } from "sonner";
+import { logger } from '@/utils/logger';
 
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
 
 if (!STRIPE_PUBLISHABLE_KEY) {
-    console.error("Missing VITE_STRIPE_PUBLISHABLE_KEY. Stripe will not work.");
+    logger.error(new Error("Missing VITE_STRIPE_PUBLISHABLE_KEY"), {
+        message: "Erro de configuração do sistema de pagamento.",
+        showToast: false
+    });
 }
 
 const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY);
@@ -37,8 +41,10 @@ export const StripeService = {
             }
 
         } catch (error) {
-            console.error("Stripe Checkout Error:", error);
-            toast.error("Erro ao iniciar pagamento. Tente novamente.");
+            logger.error(error, {
+                message: "Não foi possível iniciar o pagamento. Tente novamente.",
+                context: { priceId, projectId }
+            });
             throw error;
         }
     }

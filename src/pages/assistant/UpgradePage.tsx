@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Check, Loader2, CreditCard, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 import { StripeService } from "@/services/stripe";
+import { logger } from "@/utils/logger";
 
 const PLANS = [
     {
@@ -80,8 +81,7 @@ export default function UpgradePage() {
             });
 
         } catch (error) {
-            console.error("Upgrade error:", error);
-            // Toast is already handled in StripeService
+            logger.error(error, 'UpgradePage.handleUpgrade', { showToast: false });
         } finally {
             setIsLoading(false);
         }

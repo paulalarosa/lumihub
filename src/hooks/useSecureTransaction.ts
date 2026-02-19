@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useMFA } from './useMFA';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 interface SecureTransactionOptions {
     onSuccess: () => void | Promise<void>;
@@ -58,8 +59,9 @@ export function useSecureTransaction() {
                 await action();
             }
         } catch (error) {
-            console.error("Security check failed", error);
-            toast.error("Falha na verificação de segurança.");
+            logger.error(error, {
+                message: 'Falha na verificação de segurança.',
+            });
         } finally {
             setIsVerifying(false);
         }

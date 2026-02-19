@@ -38,14 +38,15 @@ export function AssistantsPanelCard() {
         .limit(5);
 
       if (error) throw error;
-      setAssistants(((data as any[]) || []).map((a: any) => ({
-        ...a,
+      setAssistants(((data as unknown as Record<string, unknown>[]) || []).map((a) => ({
+        id: String(a.id),
+        full_name: String(a.full_name),
         email: null,
         is_registered: true,
         invite_token: null
       })));
     } catch (error) {
-      console.error("Erro ao buscar assistentes:", error);
+      void error;
     } finally {
       setLoading(false);
     }

@@ -2,6 +2,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { addDays, subMonths, format } from "date-fns";
+import { logger } from '@/utils/logger';
 
 export interface MarketingTrigger {
     type: 'birthday' | 'reengagement' | 'anniversary';
@@ -41,7 +42,11 @@ export class MarketingLogic {
             }
 
         } catch (error) {
-            console.error("Marketing triggers error:", error);
+            logger.error(error, {
+                message: "Erro ao carregar gatilhos de marketing.",
+                context: { organizationId },
+                showToast: false
+            });
         }
 
         return triggers;

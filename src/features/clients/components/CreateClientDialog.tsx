@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { logger } from '@/utils/logger';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Button } from '@/components/ui/button';
@@ -80,7 +81,7 @@ export function CreateClientDialog() {
             queryClient.invalidateQueries({ queryKey: ['clients'] });
 
         } catch (error) {
-            console.error("Error creating client:", error);
+            logger.error(error, 'CreateClientDialog.onSubmit', { showToast: false });
             toast.error("Failed to create client record.");
         }
     };

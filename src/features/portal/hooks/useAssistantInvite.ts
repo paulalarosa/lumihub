@@ -134,8 +134,9 @@ export function useAssistantInvite() {
                 toast.success("ACCOUNT CREATED. WELCOME.");
                 navigate("/portal-assistente");
             }
-        } catch (err: any) {
-            toast.error(err.message || "CREATION FAILED");
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'CREATION FAILED';
+            toast.error(message);
         } finally {
             setSubmitting(false);
         }

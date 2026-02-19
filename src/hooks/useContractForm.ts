@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useContracts } from "@/hooks/useContracts";
 import { useProjects } from "@/hooks/useProjects";
+import { logger } from '@/utils/logger';
 
 interface UseContractFormProps {
     open: boolean;
@@ -64,8 +65,10 @@ export function useContractForm({ open, onOpenChange, defaultProjectId }: UseCon
             onOpenChange(false);
             toast.success("Contrato salvo com sucesso!");
         } catch (error) {
-            console.error(error);
-            toast.error("Erro ao salvar contrato");
+            logger.error(error, {
+                message: 'Erro ao salvar contrato.',
+                context: { projectId }
+            });
         }
     };
 

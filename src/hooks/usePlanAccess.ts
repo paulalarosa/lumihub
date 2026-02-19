@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { logger } from '@/utils/logger';
 
 export const usePlanAccess = () => {
     const { user } = useAuth();
@@ -44,7 +45,11 @@ export const usePlanAccess = () => {
         });
 
         if (error) {
-            console.error('Feature check error:', error);
+            logger.error(error, {
+                message: 'Erro ao verificar acesso ao recurso.',
+                context: { feature },
+                showToast: false
+            });
             return { allowed: false, reason: 'error' };
         }
 
@@ -60,7 +65,11 @@ export const usePlanAccess = () => {
         });
 
         if (error) {
-            console.error('Limit check error:', error);
+            logger.error(error, {
+                message: 'Erro ao verificar limite de uso.',
+                context: { resource },
+                showToast: false
+            });
             return { allowed: false, reason: 'error' };
         }
 
@@ -84,7 +93,7 @@ export const usePlanAccess = () => {
                 window.location.href = data.url;
             }
         },
-        onError: (error: any) => {
+        onError: (error: Error) => {
             toast.error('Erro ao criar sessão de pagamento: ' + error.message);
         },
     });

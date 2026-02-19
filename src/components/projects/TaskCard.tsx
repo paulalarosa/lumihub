@@ -1,13 +1,21 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { Task } from '@/types/database';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface TaskCardProps {
   task: Task;
   priorityColor: string;
   priorityLabel: string;
   isActive: boolean;
+  onEdit: (task: Task) => void;
+  onDelete: (taskId: string) => void;
 }
 
 export function TaskCard({
@@ -15,6 +23,8 @@ export function TaskCard({
   priorityColor,
   priorityLabel,
   isActive,
+  onEdit,
+  onDelete,
 }: TaskCardProps) {
   const {
     attributes,
@@ -35,11 +45,10 @@ export function TaskCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all ${
-        isDragging
-          ? 'shadow-lg ring-2 ring-blue-400'
-          : 'shadow-sm hover:shadow-md border-gray-200'
-      } ${isActive ? 'ring-2 ring-blue-300' : ''}`}
+      className={`bg-white border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-all ${isDragging
+        ? 'shadow-lg ring-2 ring-blue-400'
+        : 'shadow-sm hover:shadow-md border-gray-200'
+        } ${isActive ? 'ring-2 ring-blue-300' : ''}`}
     >
       <div className="flex gap-2">
         {/* Drag Handle */}
@@ -66,6 +75,28 @@ export function TaskCard({
             </span>
           </div>
         </div>
+
+        {/* Actions Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 transition-colors">
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(task)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Editar
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDelete(task.id)}
+              className="text-red-600 focus:text-red-700 focus:bg-red-50"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
