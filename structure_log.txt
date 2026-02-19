@@ -1,0 +1,410 @@
+lumihub
+├── ASSISTANT_PORTAL.md
+├── README.md
+├── amplify.yml
+├── components.json
+├── docs
+│   ├── EMAIL_NOTIFICATIONS.md
+│   ├── MERCADOPAGO_SETUP.md
+│   ├── PROJECT_STATUS.md
+│   ├── TYPESCRIPT_REFACTORING.md
+│   └── kb
+│       ├── platform
+│       ├── troubleshooting
+│       └── workflows
+├── e2e
+│   ├── assistant-portal.spec.ts
+│   └── sanity.spec.ts
+├── eslint.config.js
+├── estrutura.txt
+├── index.html
+├── install-components.sh
+├── lambda-email
+│   ├── package-lock.json
+│   └── package.json
+├── netlify.toml
+├── package-lock.json
+├── package.json
+├── playwright-report
+│   └── index.html
+├── playwright.config.ts
+├── postcss.config.js
+├── public
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── debug_connection.html
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── favicon-khaoskontrol.webp
+│   ├── lovable-uploads
+│   │   └── 734febb0-c2fc-4623-98e2-bbe5a386408f.png
+│   ├── manifest.json
+│   ├── offline.html
+│   ├── og-image.png
+│   ├── placeholder.svg
+│   ├── robots.txt
+│   ├── site.webmanifest
+│   └── sitemap.xml
+├── scripts
+│   ├── ingest-kb.ts
+│   ├── test-billing.ts
+│   ├── test-checkout.cjs
+│   └── test-notifications.cjs
+├── src
+│   ├── App.css
+│   ├── App.tsx
+│   ├── api
+│   │   └── webhooks
+│   ├── assets
+│   │   ├── hero-beauty.jpg
+│   │   └── hero-image.png
+│   ├── components
+│   │   ├── ErrorBoundary.tsx
+│   │   ├── SEO.tsx
+│   │   ├── WhatsAppActionMenu.tsx
+│   │   ├── a11y
+│   │   ├── access
+│   │   ├── agenda
+│   │   ├── ai
+│   │   ├── ai-assistant
+│   │   ├── ai-elements
+│   │   ├── analytics
+│   │   ├── animations
+│   │   ├── auth
+│   │   ├── calendar
+│   │   ├── clients
+│   │   ├── contracts
+│   │   ├── dashboard
+│   │   ├── features
+│   │   ├── filters
+│   │   ├── infsh
+│   │   ├── markdown-renderer.tsx
+│   │   ├── marketing
+│   │   ├── modals
+│   │   ├── projects
+│   │   ├── pwa
+│   │   ├── reactbits
+│   │   ├── seo
+│   │   ├── services
+│   │   ├── settings
+│   │   ├── skeletons
+│   │   ├── ui
+│   │   ├── utils
+│   │   ├── whatsapp
+│   │   ├── youtube-embed.tsx
+│   │   ├── zoomable-image.css
+│   │   └── zoomable-image.tsx
+│   ├── config
+│   │   ├── env.service.ts
+│   │   └── production.ts
+│   ├── contexts
+│   │   ├── AIProvider.tsx
+│   │   ├── AuthContext.tsx
+│   │   ├── AuthContextDefinition.ts
+│   │   ├── LanguageContext.tsx
+│   │   ├── LanguageContextDefinition.ts
+│   │   └── ThemeContext.tsx
+│   ├── features
+│   │   ├── admin
+│   │   ├── ai
+│   │   ├── assistants
+│   │   ├── auth
+│   │   ├── bride
+│   │   ├── clients
+│   │   ├── contracts
+│   │   ├── dashboard
+│   │   ├── financial
+│   │   ├── portal
+│   │   ├── projects
+│   │   ├── public-booking
+│   │   ├── team
+│   │   └── users
+│   ├── hooks
+│   │   ├── use-auto-scroll.ts
+│   │   ├── use-mobile.tsx
+│   │   ├── use-task.ts
+│   │   ├── use-toast.ts
+│   │   ├── useAIChat.ts
+│   │   ├── useAIContract.ts
+│   │   ├── useAdminSubscriptions.ts
+│   │   ├── useAnalytics.ts
+│   │   ├── useAssistant.ts
+│   │   ├── useAuth.tsx
+│   │   ├── useClientStats.ts
+│   │   ├── useClients.ts
+│   │   ├── useClientsQuery.ts
+│   │   ├── useConfiguracoes.ts
+│   │   ├── useContractForm.ts
+│   │   ├── useContracts.ts
+│   │   ├── useDashboardStats.ts
+│   │   ├── useEvents.ts
+│   │   ├── useGoogleCalendar.ts
+│   │   ├── useIntegrations.ts
+│   │   ├── useInviteLanding.ts
+│   │   ├── useIsPWA.ts
+│   │   ├── useLanguage.tsx
+│   │   ├── useLeads.ts
+│   │   ├── useMFA.tsx
+│   │   ├── useMarketing.ts
+│   │   ├── useNotifications.ts
+│   │   ├── useOnboarding.ts
+│   │   ├── useOrganization.ts
+│   │   ├── usePlanAccess.ts
+│   │   ├── useProjectContract.ts
+│   │   ├── useProjects.ts
+│   │   ├── useRole.ts
+│   │   ├── useScroll.ts
+│   │   ├── useSecureTransaction.ts
+│   │   ├── useServices.ts
+│   │   ├── useSubscription.ts
+│   │   ├── useTransactionForm.ts
+│   │   └── useWebLLM.ts
+│   ├── index.css
+│   ├── integrations
+│   │   ├── google
+│   │   └── supabase
+│   ├── lib
+│   │   ├── analytics.ts
+│   │   ├── calendar-utils.ts
+│   │   ├── chart-setup.ts
+│   │   ├── i18n.ts
+│   │   ├── markdown-helpers.ts
+│   │   ├── privacy-utils.ts
+│   │   ├── queryClient.ts
+│   │   ├── react-query.ts
+│   │   ├── utils.test.ts
+│   │   └── utils.ts
+│   ├── locales
+│   │   ├── en.json
+│   │   └── pt.json
+│   ├── main.tsx
+│   ├── pages
+│   │   ├── Analytics.tsx
+│   │   ├── Blog.tsx
+│   │   ├── BlogArticle.tsx
+│   │   ├── CalendarPage.tsx
+│   │   ├── Configuracoes.tsx
+│   │   ├── Contato.tsx
+│   │   ├── Contratos.tsx
+│   │   ├── GoogleCalendarCallback.tsx
+│   │   ├── Home.tsx
+│   │   ├── InviteLanding.tsx
+│   │   ├── Marketing.tsx
+│   │   ├── NotFound.tsx
+│   │   ├── Onboarding.tsx
+│   │   ├── Planos.tsx
+│   │   ├── PricingPage.tsx
+│   │   ├── Privacidade.tsx
+│   │   ├── ProjectContract.tsx
+│   │   ├── PublicBooking.tsx
+│   │   ├── Recursos.tsx
+│   │   ├── Servicos.tsx
+│   │   ├── Termos.tsx
+│   │   ├── admin
+│   │   └── assistant
+│   ├── services
+│   │   ├── analytics.service.ts
+│   │   ├── authService.ts
+│   │   ├── backup.service.ts
+│   │   ├── clientService.ts
+│   │   ├── commissionLogic.ts
+│   │   ├── contractService.ts
+│   │   ├── event.service.ts
+│   │   ├── index.ts
+│   │   ├── logger.test.ts
+│   │   ├── logger.ts
+│   │   ├── mailer.service.ts
+│   │   ├── marketing.ts
+│   │   ├── marketingLogic.ts
+│   │   ├── messageTemplateService.ts
+│   │   ├── projectService.ts
+│   │   ├── reportService.ts
+│   │   ├── services.service.ts
+│   │   └── stripe.ts
+│   ├── stores
+│   │   ├── index.ts
+│   │   ├── useAIStore.ts
+│   │   ├── useAuthStore.ts
+│   │   ├── useClientFilterStore.ts
+│   │   └── useUIStore.ts
+│   ├── stories
+│   │   ├── Button.stories.ts
+│   │   ├── Button.tsx
+│   │   ├── Configure.mdx
+│   │   ├── Header.stories.ts
+│   │   ├── Header.tsx
+│   │   ├── Page.stories.ts
+│   │   ├── Page.tsx
+│   │   ├── assets
+│   │   ├── button.css
+│   │   ├── header.css
+│   │   └── page.css
+│   ├── styles
+│   │   └── calendar.css
+│   ├── test
+│   │   └── setup.ts
+│   ├── types
+│   │   ├── api.types.ts
+│   │   ├── app.ts
+│   │   ├── audit.ts
+│   │   ├── auth.ts
+│   │   ├── calendar.ts
+│   │   ├── components.types.ts
+│   │   ├── custom-schema.ts
+│   │   ├── database.ts
+│   │   ├── database.types.ts
+│   │   ├── db.d.ts
+│   │   ├── global.d.ts
+│   │   ├── index.ts
+│   │   ├── service-types.ts
+│   │   └── supabase.ts
+│   ├── utils
+│   │   ├── exportCSV.ts
+│   │   ├── exportExcel.ts
+│   │   ├── format.test.ts
+│   │   ├── translations.ts
+│   │   ├── whatsapp.ts
+│   │   └── whatsappGenerator.ts
+│   └── vite-env.d.ts
+├── storybook-static
+│   ├── addon-visual-tests-assets
+│   │   └── visual-test-illustration.mp4
+│   ├── android-chrome-192x192.png
+│   ├── android-chrome-512x512.png
+│   ├── apple-touch-icon.png
+│   ├── assets
+│   │   ├── Button-B2efaGtC.css
+│   │   ├── Button-BnybzrVt.js
+│   │   ├── Button.stories-BL-2qTZD.js
+│   │   ├── Color-6BZIO3FS-Cq0V1qAM.js
+│   │   ├── Configure-DEesCS5L.js
+│   │   ├── DocsRenderer-LL677BLK-CG1yE5gO.js
+│   │   ├── Header-Ck-SSN7O.css
+│   │   ├── Header-DOdTRQhN.js
+│   │   ├── Header.stories-DfYZPnoC.js
+│   │   ├── Page-CeeQJVdd.css
+│   │   ├── Page.stories-BPdrcyKC.js
+│   │   ├── WithTooltip-65CFNBJE-Bo6Y_nC2.js
+│   │   ├── accessibility-W_h2acOZ.png
+│   │   ├── addon-library-BWUCAmyN.png
+│   │   ├── axe-CCvw_7UY.js
+│   │   ├── blocks-C_wcQgA6.js
+│   │   ├── context-C0qIqeS4.png
+│   │   ├── docs---vsFbMi.png
+│   │   ├── figma-plugin-CH2hELiO.png
+│   │   ├── formatter-EIJCOSYU-CGwk4fTL.js
+│   │   ├── iframe-BTCtClol.js
+│   │   ├── iframe-g_jQsbsG.css
+│   │   ├── index-BCUM0tN4.js
+│   │   ├── index-BlR98_u4.js
+│   │   ├── input.stories-BCMAShY9.js
+│   │   ├── jsx-runtime-DmNER30v.js
+│   │   ├── matchers-5TDFFDYO-HJu_DfWo.js
+│   │   ├── preload-helper-PPVm8Dsz.js
+│   │   ├── react-18-BzII1IXB.js
+│   │   ├── share-DGA-UcQf.png
+│   │   ├── styling-Bk6zjRzU.png
+│   │   ├── syntaxhighlighter-ED5Y7EFY-WVPmA7bW.js
+│   │   ├── testing-cbzR9l9r.png
+│   │   └── theming-D6WJLNoW.png
+│   ├── favicon-16x16.png
+│   ├── favicon-32x32.png
+│   ├── favicon-wrapper.svg
+│   ├── favicon.ico
+│   ├── favicon.svg
+│   ├── iframe.html
+│   ├── index.html
+│   ├── index.json
+│   ├── lovable-uploads
+│   │   └── 734febb0-c2fc-4623-98e2-bbe5a386408f.png
+│   ├── manifest.json
+│   ├── nunito-sans-bold-italic.woff2
+│   ├── nunito-sans-bold.woff2
+│   ├── nunito-sans-italic.woff2
+│   ├── nunito-sans-regular.woff2
+│   ├── og-image.png
+│   ├── placeholder.svg
+│   ├── project.json
+│   ├── pwa-icon.png
+│   ├── robots.txt
+│   ├── sb-addons
+│   │   ├── a11y-2
+│   │   ├── chromatic-com-storybook-1
+│   │   ├── docs-3
+│   │   ├── links-4
+│   │   └── storybook-core-server-presets-0
+│   ├── sb-common-assets
+│   │   ├── favicon-wrapper.svg
+│   │   ├── favicon.svg
+│   │   ├── nunito-sans-bold-italic.woff2
+│   │   ├── nunito-sans-bold.woff2
+│   │   ├── nunito-sans-italic.woff2
+│   │   └── nunito-sans-regular.woff2
+│   ├── sb-manager
+│   │   ├── globals-runtime.js
+│   │   ├── globals.js
+│   │   ├── manager-stores.js
+│   │   └── runtime.js
+│   ├── site.webmanifest
+│   ├── sitemap.xml
+│   └── vite-inject-mocker-entry.js
+├── structure_log.txt
+├── supabase
+│   ├── README.md
+│   ├── config.toml
+│   ├── functions
+│   │   ├── _shared
+│   │   ├── admin-ghost-login
+│   │   ├── ai-assistant
+│   │   ├── ai-chat-advanced
+│   │   ├── aws-sns-webhook
+│   │   ├── create-checkout
+│   │   ├── exchange-google-code
+│   │   ├── generate-contract-ai
+│   │   ├── google-calendar-assistant-sync
+│   │   ├── google-calendar-auth
+│   │   ├── google-calendar-sync
+│   │   ├── google-calendar-webhook
+│   │   ├── import_map.json
+│   │   ├── places-proxy
+│   │   ├── process-abandoned-carts
+│   │   ├── request-password-reset
+│   │   ├── send-application
+│   │   ├── send-invite-email
+│   │   ├── send-invite-whatsapp
+│   │   ├── send-ses-email
+│   │   ├── send-welcome-email
+│   │   ├── settlement-process
+│   │   ├── stripe-checkout
+│   │   ├── stripe-webhook
+│   │   ├── sync-event-to-google
+│   │   └── system-backup
+│   ├── migrations
+│   │   ├── 20240114000000_init.sql
+│   │   ├── 20260212280000_fix.sql
+│   │   ├── 20260213120000_ai_tools.sql
+│   │   ├── 20260213123302_sync.sql
+│   │   ├── 20260213130000_plan_limits.sql
+│   │   ├── 20260213140000_sync_conflicts.sql
+│   │   ├── 20260213150000_audit_calendar.sql
+│   │   ├── 20260213160000_audit_storage.sql
+│   │   ├── 20260213170000_fix_audit_rls.sql
+│   │   ├── 20260213180000_fix_audit_constraint.sql
+│   │   ├── 20260213190000_fix_assistant_recursion.sql
+│   │   ├── 20260213200000_ai_byok_settings.sql
+│   │   ├── 20260215000000_plans_system.sql
+│   │   ├── 20260215100000_ai_documents.sql
+│   │   └── 20260215110000_system_backups.sql
+│   ├── scripts
+│   │   └── check_bride_data.sql
+│   ├── seed_assistant_portal.sql
+│   ├── snippets
+│   └── verify_assistant_portal.sql
+├── tailwind.config.ts
+├── test-results
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vercel.json
+├── vite.config.ts
+└── vitest.shims.d.ts
