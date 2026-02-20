@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Tables } from '@/integrations/supabase/types'
 import { logger } from '@/services/logger'
+import { useEffect } from 'react'
 
 export const useAdminUsers = () => {
   const queryClient = useQueryClient()
@@ -15,16 +16,36 @@ export const useAdminUsers = () => {
         .select('*')
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        logger.error('useAdminUsers.fetch', error)
+        throw error
+      }
       return data as Tables<'profiles'>[]
     },
   })
 
+  // Real-time Subscription para atualizar a tabela "ao vivo"
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-users-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        (payload: any) => {
+          logger.info('Real-time event on profiles:', payload)
+          queryClient.invalidateQueries({ queryKey: ['admin-users'] })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [queryClient])
+
   // Mutação para deletar (Exemplo)
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
-      // Assuming we can delete users, but typically we might soft-delete or block
-      // But adhering to the user's example.
       const { error } = await supabase
         .from('profiles')
         .delete()

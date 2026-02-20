@@ -45,6 +45,36 @@ export default function AdminAssistants() {
 
   useEffect(() => {
     fetchAssistants()
+
+    // Real-time listener for both profiles and assistants connections
+    const channel = supabase
+      .channel('admin-assistants-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: 'role=eq.assistant',
+        },
+        () => {
+          logger.info('Real-time event on assistant profiles')
+          fetchAssistants()
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'assistant_access' },
+        () => {
+          logger.info('Real-time event on assistant connections')
+          fetchAssistants()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -63,14 +93,14 @@ export default function AdminAssistants() {
       const enriched = await Promise.all(
         profiles.map(async (p) => {
           const { data: connections } = await supabase
-            .from('assistants')
-            .select('professional_id') // We assume this column exists, checking schema next
-            .eq('assistant_user_id', p.id)
+            .from('assistant_access')
+            .select('makeup_artist_id')
+            .eq('assistant_id', p.id)
 
           // Fetch professional details if connection exists
           const connectedPros = []
           if (connections && connections.length > 0) {
-            const proIds = connections.map((c) => c.professional_id)
+            const proIds = connections.map((c) => c.makeup_artist_id)
             const { data: pros } = await supabase
               .from('profiles')
               .select('full_name, email')
@@ -78,8 +108,8 @@ export default function AdminAssistants() {
             if (pros)
               connectedPros.push(
                 ...pros.map((pro) => ({
-                  professional_name: pro.full_name,
-                  professional_email: pro.email,
+                  professional_name: pro.full_name || 'Desconhecido',
+                  professional_email: pro.email || '',
                 })),
               )
           }
@@ -109,11 +139,11 @@ export default function AdminAssistants() {
     if (!deleteId) return
 
     try {
-      // 1. Delete all connections in 'assistants' table
+      // 1. Delete all connections in 'assistant_access' table
       const { error: connError } = await supabase
-        .from('assistants')
+        .from('assistant_access')
         .delete()
-        .eq('assistant_user_id', deleteId)
+        .eq('assistant_id', deleteId)
 
       if (connError) throw connError
 

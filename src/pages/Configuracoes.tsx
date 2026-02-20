@@ -1,4 +1,4 @@
-import MessageTemplatesSettings from '@/components/settings/MessageTemplatesSettings'
+import { AutomationTabNoir } from '@/components/settings/AutomationTabNoir'
 import AISettings from '@/components/settings/AISettings'
 import IntegrationsTab from '@/components/settings/IntegrationsTab'
 import { Button } from '@/components/ui/button'
@@ -425,7 +425,7 @@ export default function Configuracoes() {
             value="automacao"
             className="space-y-6 focus-visible:outline-none"
           >
-            <MessageTemplatesSettings />
+            <AutomationTabNoir />
           </TabsContent>
 
           <TabsContent
