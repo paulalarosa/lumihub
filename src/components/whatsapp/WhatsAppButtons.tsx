@@ -4,7 +4,7 @@ import { whatsappUtils } from '@/utils/whatsapp'
 import { toast } from 'sonner'
 import { Logger } from '@/services/logger'
 import { useAuth } from '@/hooks/useAuth'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 interface WhatsAppButtonsProps {
   phone: string

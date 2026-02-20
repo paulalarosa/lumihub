@@ -1,6 +1,7 @@
+// Admin Users Management Component
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { supabase } from '@/integrations/supabase/client'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -67,7 +68,9 @@ export default function AdminUsers() {
 
       setImpersonating(null)
     } catch (error) {
-      logger.error(error, 'AdminUsers.handleImpersonate', { showToast: false })
+      logger.error('AdminUsers.handleImpersonate', error, 'SYSTEM', {
+        showToast: false,
+      })
       toast({
         title: 'Error',
         description: 'Failed to initiate ghost session.',
@@ -82,7 +85,7 @@ export default function AdminUsers() {
       title: t('admin_reset_pass'),
       description: `Recovery email sent to ${email}`,
     })
-    // @ts-expect-error - Supabase types might be strict, but this method exists on auth client usually.
+
     // Actually, supabase.auth.resetPasswordForEmail is valid v1, but v2 uses resetPasswordForEmail or similar.
     // If it errors, we can fix it. For now keeping original logic but wrapped.
     await supabase.auth.resetPasswordForEmail(email)

@@ -84,14 +84,10 @@ export function useClientActions({
     try {
       if (editingClient) {
         if (clientData.is_bride) {
-          clientData.portal_link = `https://lumihub.com/portal/${editingClient.id}`
+          clientData.portal_link = `https://khaoskontrol.com.br/portal/${editingClient.id}`
         }
 
-        const { error } = await ClientService.update(
-          editingClient.id,
-          clientData,
-        )
-        if (error) throw error
+        await ClientService.update(editingClient.id, clientData)
 
         if (clientData.is_bride && clientData.wedding_date) {
           const { error: projectError } = await supabase
@@ -111,12 +107,10 @@ export function useClientActions({
 
         toast({ title: 'Cliente atualizado!' })
       } else {
-        const { data: newClient, error } =
-          await ClientService.create(clientData)
-        if (error) throw error
+        const newClient = await ClientService.create(clientData)
 
         if (clientData.is_bride && newClient && 'id' in newClient) {
-          const link = `https://lumihub.com/portal/${newClient.id}`
+          const link = `https://khaoskontrol.com.br/portal/${newClient.id}`
           await ClientService.update(newClient.id, { portal_link: link })
         }
 
@@ -157,12 +151,12 @@ export function useClientActions({
   const handleDelete = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir este cliente?')) return
 
-    const { error } = await ClientService.delete(id)
-    if (error) {
-      toast({ title: 'Erro ao excluir cliente', variant: 'destructive' })
-    } else {
+    try {
+      await ClientService.delete(id)
       toast({ title: 'Cliente excluído!' })
       fetchClients()
+    } catch (_error) {
+      toast({ title: 'Erro ao excluir cliente', variant: 'destructive' })
     }
   }
 

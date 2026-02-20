@@ -54,7 +54,7 @@ export const PostScheduler = () => {
         .from('instagram_connections')
         .select('id')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
 
       if (!connection) throw new Error('Instagram não conectado')
 

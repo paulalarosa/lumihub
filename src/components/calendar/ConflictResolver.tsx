@@ -4,7 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 export const ConflictResolver = () => {
   const { data: conflicts, refetch } = useQuery({

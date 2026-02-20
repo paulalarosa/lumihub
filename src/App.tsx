@@ -8,7 +8,7 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import AdminRoute from '@/features/auth/AdminRoute'
-import AIController from './components/ai-assistant/AIController'
+import AIController from './features/ai/components/AIController'
 import { AIProvider } from '@/contexts/AIProvider'
 import AuthCallbackHandler from '@/features/auth/AuthCallbackHandler'
 import MFAVerifyPage from '@/features/auth/pages/MFAVerifyPage'
@@ -51,7 +51,6 @@ const ForgotPassword = lazy(
 const UpdatePassword = lazy(
   () => import('@/features/auth/pages/UpdatePassword'),
 )
-const Onboarding = lazy(() => import('./pages/Onboarding'))
 const Dashboard = lazy(() => import('@/features/dashboard/pages/Dashboard'))
 const BrideLoginPage = lazy(
   () => import('@/features/portal/pages/BrideLoginPage'),
@@ -201,14 +200,6 @@ const App = () => {
                       <Route
                         path="/auth/update-password"
                         element={<UpdatePassword />}
-                      />
-                      <Route
-                        path="/onboarding"
-                        element={
-                          <ProtectedRoute requireOnboarding={false}>
-                            <Onboarding />
-                          </ProtectedRoute>
-                        }
                       />
 
                       {/* Protected App Pages with Layout */}

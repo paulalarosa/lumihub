@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import {
   Card,
   CardContent,
@@ -76,7 +76,7 @@ export default function AdminIntegrations() {
         .from('profiles')
         .select('count')
         .limit(1)
-        .single()
+        .maybeSingle()
       updateStatus(
         newStatuses,
         'Supabase Database',

@@ -29,12 +29,14 @@ import type {
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader'
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats'
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
-  const { _organizationId, loading: orgLoading } = useOrganization()
+  const { organizationId: _organizationId, loading: orgLoading } =
+    useOrganization()
   const { t } = useLanguage()
 
   const { data: projectDetails, isLoading, refetch } = useProjectDetails(id)
@@ -149,7 +151,7 @@ export default function ProjectDetailsPage() {
   if (authLoading || orgLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
+        <LoadingSpinner size={32} label="CARREGANDO MISSÃO..." />
       </div>
     )
   }

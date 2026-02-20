@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Scissors,
   Filter,
-  Link2,
 } from 'lucide-react'
 
 import {
@@ -79,11 +78,6 @@ export function AppSidebar() {
       title: t('sidebar.services'),
       url: '/servicos',
       icon: Scissors,
-    },
-    {
-      title: 'Integrações',
-      url: '/integracoes',
-      icon: Link2,
     },
     {
       title: t('sidebar.settings'),

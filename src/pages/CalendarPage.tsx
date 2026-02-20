@@ -14,6 +14,8 @@ import { GoogleCalendarSettings } from '@/components/calendar/GoogleCalendarSett
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar'
 import { ConflictResolver } from '@/components/calendar/ConflictResolver'
 import { toast } from 'sonner'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const locales = { 'pt-BR': ptBR }
 
@@ -37,6 +39,7 @@ interface CalendarEvent {
     projectId?: string
     isSynced: boolean
     googleEventId?: string
+    serviceType: string
   }
 }
 
@@ -57,7 +60,7 @@ export const CalendarPage = () => {
   const {
     data: events,
     isLoading,
-    _refetch,
+    isError,
   } = useQuery({
     queryKey: ['calendar-events', user?.id],
     queryFn: async () => {
@@ -83,6 +86,7 @@ export const CalendarPage = () => {
           projectId: event.project_id,
           isSynced: event.is_synced || false,
           googleEventId: event.google_event_id,
+          serviceType: '',
         },
       })) as CalendarEvent[]
     },
@@ -200,15 +204,6 @@ export const CalendarPage = () => {
             </Button>
 
             <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDate(new Date())}
-              className="hover:bg-neutral-800"
-            >
-              Hoje
-            </Button>
-
-            <Button
               onClick={() => setIsCreateModalOpen(true)}
               className="bg-white text-black hover:bg-neutral-200"
             >
@@ -281,7 +276,15 @@ export const CalendarPage = () => {
         <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 calendar-dark">
           {isLoading ? (
             <div className="h-[700px] flex items-center justify-center">
-              <RefreshCw className="w-8 h-8 animate-spin text-neutral-400" />
+              <LoadingSpinner size={32} label="CARREGANDO AGENDA..." />
+            </div>
+          ) : isError ? (
+            <div className="h-[700px] flex items-center justify-center">
+              <EmptyState
+                icon={RefreshCw}
+                title="Erro ao Carregar"
+                description="Não foi possível carregar sua agenda no momento. Tente novamente mais tarde."
+              />
             </div>
           ) : (
             <Calendar

@@ -13,7 +13,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 export default function AppLayout() {
   const { user } = useAuth()
@@ -29,7 +29,7 @@ export default function AppLayout() {
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         if (!error && data) {
           setProfile(data)

@@ -2,7 +2,7 @@
 
 import { supabase } from '@/integrations/supabase/client'
 import { subMonths, format } from 'date-fns'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 export interface MarketingTrigger {
   type: 'birthday' | 'reengagement' | 'anniversary'

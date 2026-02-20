@@ -5,7 +5,7 @@ import {
   ChatMessageStatusReady,
   type ChatMessageDTO,
 } from '@inferencesh/sdk'
-import { useAI } from '@/contexts/AIProvider'
+import { useAI } from '@/hooks/useAI'
 import { createWebLLM } from '../services/web-llm-provider'
 
 /**

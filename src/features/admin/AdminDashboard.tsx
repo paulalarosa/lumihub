@@ -128,7 +128,7 @@ export default function AdminDashboard() {
       >
         <div className="p-6 border-b border-border">
           <h1 className="text-foreground font-serif text-2xl font-bold">
-            {sidebarOpen ? 'LUMI_CORE' : 'LC'}
+            {sidebarOpen ? 'KHAOS_CORE' : 'KC'}
           </h1>
           <p className="text-muted-foreground text-[10px] font-mono uppercase tracking-widest">
             {sidebarOpen ? 'System_Admin' : 'SA'}

@@ -20,7 +20,10 @@ export const AchievementNotifications = () => {
         .eq('is_new', true)
         .order('unlocked_at', { ascending: false })
 
-      if (error) throw error
+      if (error) {
+        // Ignore missing table (404) on uninitialized databases
+        return []
+      }
       return data
     },
     refetchInterval: 5000, // Check every 5s

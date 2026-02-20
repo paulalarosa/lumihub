@@ -29,7 +29,7 @@ interface UseProjectContractProps {
 
 export function useProjectContract({
   projectId,
-  _isClientView,
+  isClientView: _isClientView,
   editor,
 }: UseProjectContractProps) {
   const { toast } = useToast()
@@ -134,30 +134,25 @@ export function useProjectContract({
   ) => `
     <div style="margin-top: 60px; page-break-inside: avoid; background-color: #000; color: #fff; padding: 30px; border: 1px solid #333;">
         <div style="display: flex; justify-content: space-between; gap: 20px;">
-            <div style="flex: 1; border-right: 1px solid #333; padding-right: 20px;">
-                <p style="font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; color: #888;">Prestadora</p>
-                <div style="height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; margin-bottom: 10px;">
-                    <span style="font-family: 'Playfair Display', serif; font-style: italic; font-size: 18px; color: #fff;">Khaos Studio</span>
-                </div>
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666;">AUTENTICADO POR KHAOS STUDIO<br/>Paula Larosa</p>
+                <p style="font-family: 'Inter', sans-serif; font-size: 8px; text-transform: uppercase; color: #666;">AUTENTICADO POR KHAOS STUDIO<br/>Paula Larosa</p>
             </div>
             <div style="flex: 1; border-right: 1px solid #333; padding-right: 20px; padding-left: 20px;">
                 <p style="font-family: 'Playfair Display', serif; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; color: #888;">Contratante</p>
                 <div style="height: 60px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #333; margin-bottom: 10px;">
                     <img src="${signatureDataUrl}" style="max-height: 50px; filter: invert(1);" />
                 </div>
-                <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666;">ASSINATURA DIGITAL DA CLIENTE<br/>IP: ${getClientIP()} | ${signedAt}</p>
+                <p style="font-family: 'Inter', sans-serif; font-size: 8px; text-transform: uppercase; color: #666;">ASSINATURA DIGITAL DA CLIENTE<br/>IP: ${getClientIP()} | ${signedAt}</p>
             </div>
             <div style="flex: 1; padding-left: 20px; display: flex; flex-col; justify-content: flex-end; align-items: flex-start;">
                 <div style="border: 1px solid #fff; padding: 10px; width: 100%;">
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #888; margin-bottom: 5px;">System ID</p>
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #fff; word-break: break-all;">${contractHash}</p>
-                    <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #666; margin-top: 10px;">CERTIFICADO POR<br/>KONTROL SYSTEM</p>
+                    <p style="font-family: 'Inter', sans-serif; font-size: 8px; text-transform: uppercase; color: #888; margin-bottom: 5px;">System ID</p>
+                    <p style="font-family: 'Inter', sans-serif; font-size: 10px; color: #fff; word-break: break-all;">${contractHash}</p>
+                    <p style="font-family: 'Inter', sans-serif; font-size: 8px; text-transform: uppercase; color: #666; margin-top: 10px;">CERTIFICADO POR<br/>KONTROL SYSTEM</p>
                 </div>
             </div>
         </div>
         <div style="margin-top: 20px; border-top: 1px solid #333; padding-top: 10px; text-align: center;">
-             <p style="font-family: 'JetBrains Mono', monospace; font-size: 8px; text-transform: uppercase; color: #444; letter-spacing: 3px;">SECURE DIGITAL TRANSACTION • KHAOSKONTROL.COM.BR</p>
+             <p style="font-family: 'Inter', sans-serif; font-size: 8px; text-transform: uppercase; color: #444; letter-spacing: 3px;">SECURE DIGITAL TRANSACTION • KHAOSKONTROL.COM.BR</p>
         </div>
     </div>
   `

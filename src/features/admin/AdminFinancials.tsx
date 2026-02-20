@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
 import { CreditCard, Users, TrendingUp, Download, Loader2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
@@ -62,7 +62,7 @@ export default function AdminFinancials({
         setEvents(eventsData || [])
         calculateCommissions(eventsData || [])
       } catch (error) {
-        logger.error(error, 'AdminFinancials.fetchMonthlyData', {
+        logger.error('AdminFinancials.fetchMonthlyData', error, 'SYSTEM', {
           showToast: false,
         })
         toast({

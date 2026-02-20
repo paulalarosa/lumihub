@@ -3,7 +3,7 @@ import { Loader2, Navigation, MapPin } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/integrations/supabase/client'
 import { Input } from '@/components/ui/input'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 interface AddressAutocompleteProps {
   value: string

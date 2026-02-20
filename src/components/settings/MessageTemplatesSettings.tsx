@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,7 +15,7 @@ import { TemplateType } from '@/services/messageTemplateService'
 import { MessageSquare, RefreshCw, Phone, ExternalLink } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 const DEFAULT_TEMPLATES: Record<TemplateType, string> = {
   confirmation:
@@ -46,28 +46,25 @@ export default function MessageTemplatesSettings() {
     thanks: '',
   })
 
-  useEffect(() => {
-    fetchUserPhone()
-    loadTemplates()
-  }, [fetchUserPhone, loadTemplates])
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchUserPhone = async () => {
+  const fetchUserPhone = useCallback(async () => {
     if (!user) return
     const { data } = await supabase
       .from('profiles')
       .select('phone')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
     const profile = data
     if (profile?.phone) {
       setUserPhone(profile.phone)
     }
-  }
+  }, [user])
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
+    if (!organizationId) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     try {
       // First load defaults
@@ -81,7 +78,7 @@ export default function MessageTemplatesSettings() {
 
       if (data && !error) {
         data.forEach((t) => {
-          if (t.content && t.type) loaded[t.type] = t.content
+          if (t.content && t.type) loaded[t.type as TemplateType] = t.content
         })
       }
 
@@ -94,7 +91,12 @@ export default function MessageTemplatesSettings() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [organizationId, toast])
+
+  useEffect(() => {
+    fetchUserPhone()
+    loadTemplates()
+  }, [fetchUserPhone, loadTemplates])
 
   const handleSaveTemplate = async (type: TemplateType, content: string) => {
     setSaving(type)

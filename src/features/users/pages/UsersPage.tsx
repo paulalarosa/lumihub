@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'

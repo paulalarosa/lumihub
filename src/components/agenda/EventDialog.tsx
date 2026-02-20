@@ -1,36 +1,50 @@
-import { format } from 'date-fns';
+import { format } from 'date-fns'
 import {
-  Calendar as CalendarIcon, Clock, MapPin, Bell, Users, Palette, MessageCircle
-} from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { QuickCreateClientDialog } from './QuickCreateClientDialog';
-import { QuickCreateProjectDialog } from './QuickCreateProjectDialog';
-import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
-import ConfirmationNotification from '@/features/portal/components/ConfirmationNotification';
-import { NoirDatePicker } from '@/components/ui/noir-date-picker';
-import { EventTypeSelector } from './EventTypeSelector';
-import { EventServiceSelector } from './EventServiceSelector';
+  Calendar as CalendarIcon,
+  Clock,
+  MapPin,
+  Bell,
+  Users,
+  Palette,
+  MessageCircle,
+} from 'lucide-react'
 import {
-  useEventForm,
-  EventFormData,
-  EventAssistant,
-  COLORS,
-  // EVENT_TYPES, // No longer needed here if used inside selector or passed down? Wait, selector imports it.
-} from './hooks/useEventForm';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { QuickCreateClientDialog } from './QuickCreateClientDialog'
+import { QuickCreateProjectDialog } from './QuickCreateProjectDialog'
+import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
+import ConfirmationNotification from '@/features/portal/components/ConfirmationNotification'
+import { NoirDatePicker } from '@/components/ui/noir-date-picker'
+import { EventTypeSelector } from './EventTypeSelector'
+import { EventServiceSelector } from './EventServiceSelector'
+import { useEventForm } from './hooks/useEventForm'
+import { EventFormData, EventAssistant } from './hooks/event-form.types'
+import { COLORS } from './hooks/event-form.constants'
 
 interface EventDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  event: EventFormData | null;
-  assistants: EventAssistant[];
-  selectedDate?: Date;
-  onSuccess: () => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  event: EventFormData | null
+  assistants: EventAssistant[]
+  selectedDate?: Date
+  onSuccess: () => void
 }
 
 export default function EventDialog({
@@ -39,19 +53,25 @@ export default function EventDialog({
   event,
   assistants,
   selectedDate,
-  onSuccess
+  onSuccess,
 }: EventDialogProps) {
-  const form = useEventForm({ event, assistants, selectedDate, onSuccess });
+  const form = useEventForm({ event, assistants, selectedDate, onSuccess })
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(open) => { if (!open && form.isAutocompleteOpen) return; onOpenChange(open); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(open) => {
+          if (!open && form.isAutocompleteOpen) return
+          onOpenChange(open)
+        }}
+      >
         <DialogContent
           className="max-w-2xl max-h-[90vh] overflow-y-auto bg-black/40 backdrop-blur-xl border border-white/10 rounded-none shadow-2xl shadow-white/5 sm:max-w-[700px]"
           onInteractOutside={(e) => {
-            const target = e.target as HTMLElement;
+            const target = e.target as HTMLElement
             if (target.closest('.pac-container')) {
-              e.preventDefault();
+              e.preventDefault()
             }
           }}
         >
@@ -60,12 +80,12 @@ export default function EventDialog({
               {event ? 'Editar Evento' : 'Novo Evento'}
             </DialogTitle>
             <DialogDescription className="text-gray-400 font-mono text-xs uppercase tracking-wider">
-              Preencha os dados abaixo para {event ? 'atualizar o' : 'agendar um novo'} compromisso.
+              Preencha os dados abaixo para{' '}
+              {event ? 'atualizar o' : 'agendar um novo'} compromisso.
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={form.handleSubmit} className="space-y-6 mt-4">
-
             {/* Event Type Pills */}
             <EventTypeSelector
               currentType={form.eventType}
@@ -83,12 +103,18 @@ export default function EventDialog({
 
             {/* Title */}
             <div className="space-y-2">
-              <Label htmlFor="title" className="text-gray-300">Título do Evento *</Label>
+              <Label htmlFor="title" className="text-gray-300">
+                Título do Evento *
+              </Label>
               <Input
                 id="title"
                 value={form.title}
                 onChange={(e) => form.setTitle(e.target.value)}
-                placeholder={form.isNoivas ? "Ex: Casamento Ana Silva" : "Ex: Ensaio Pré Wedding"}
+                placeholder={
+                  form.isNoivas
+                    ? 'Ex: Casamento Ana Silva'
+                    : 'Ex: Ensaio Pré Wedding'
+                }
                 required
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-1 focus:ring-white/50 rounded-none py-6"
               />
@@ -97,17 +123,24 @@ export default function EventDialog({
             {/* Date & Client Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="eventDate" className="flex items-center gap-2 text-gray-300">
+                <Label
+                  htmlFor="eventDate"
+                  className="flex items-center gap-2 text-gray-300"
+                >
                   <CalendarIcon className="h-4 w-4 text-white" />
                   Data *
                 </Label>
                 <NoirDatePicker
-                  date={form.eventDate ? new Date(form.eventDate + 'T12:00:00') : undefined}
+                  date={
+                    form.eventDate
+                      ? new Date(form.eventDate + 'T12:00:00')
+                      : undefined
+                  }
                   setDate={(date) => {
                     if (date) {
-                      form.setEventDate(format(date, 'yyyy-MM-dd'));
+                      form.setEventDate(format(date, 'yyyy-MM-dd'))
                     } else {
-                      form.setEventDate('');
+                      form.setEventDate('')
                     }
                   }}
                   placeholder="Selecione a data"
@@ -128,14 +161,21 @@ export default function EventDialog({
                     + NOVO
                   </Button>
                 </div>
-                <Select value={form.clientId || "__none__"} onValueChange={(v) => form.setClientId(v === "__none__" ? "" : v)}>
+                <Select
+                  value={form.clientId || '__none__'}
+                  onValueChange={(v) =>
+                    form.setClientId(v === '__none__' ? '' : v)
+                  }
+                >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    {form.clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                    {form.clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -144,7 +184,9 @@ export default function EventDialog({
 
             {/* Description */}
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-gray-300">Descrição</Label>
+              <Label htmlFor="description" className="text-gray-300">
+                Descrição
+              </Label>
               <Textarea
                 id="description"
                 value={form.description}
@@ -164,31 +206,94 @@ export default function EventDialog({
               {form.isNoivas ? (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="arrivalTime" className="text-xs text-gray-400 block mb-1">Chegada</Label>
-                    <Input id="arrivalTime" type="time" value={form.arrivalTime} onChange={(e) => form.setArrivalTime(e.target.value)} className="bg-black/20 border-white/5 text-white text-sm h-9" />
+                    <Label
+                      htmlFor="arrivalTime"
+                      className="text-xs text-gray-400 block mb-1"
+                    >
+                      Chegada
+                    </Label>
+                    <Input
+                      id="arrivalTime"
+                      type="time"
+                      value={form.arrivalTime}
+                      onChange={(e) => form.setArrivalTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white text-sm h-9"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="makingOfTime" className="text-xs text-gray-400 block mb-1">Making Of</Label>
-                    <Input id="makingOfTime" type="time" value={form.makingOfTime} onChange={(e) => form.setMakingOfTime(e.target.value)} className="bg-black/20 border-white/5 text-white text-sm h-9" />
+                    <Label
+                      htmlFor="makingOfTime"
+                      className="text-xs text-gray-400 block mb-1"
+                    >
+                      Making Of
+                    </Label>
+                    <Input
+                      id="makingOfTime"
+                      type="time"
+                      value={form.makingOfTime}
+                      onChange={(e) => form.setMakingOfTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white text-sm h-9"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ceremonyTime" className="text-xs text-gray-400 block mb-1">Cerimônia</Label>
-                    <Input id="ceremonyTime" type="time" value={form.ceremonyTime} onChange={(e) => form.setCeremonyTime(e.target.value)} className="bg-black/20 border-white/5 text-white text-sm h-9" />
+                    <Label
+                      htmlFor="ceremonyTime"
+                      className="text-xs text-gray-400 block mb-1"
+                    >
+                      Cerimônia
+                    </Label>
+                    <Input
+                      id="ceremonyTime"
+                      type="time"
+                      value={form.ceremonyTime}
+                      onChange={(e) => form.setCeremonyTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white text-sm h-9"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="advisoryTime" className="text-xs text-gray-400 block mb-1">Assessoria</Label>
-                    <Input id="advisoryTime" type="time" value={form.advisoryTime} onChange={(e) => form.setAdvisoryTime(e.target.value)} className="bg-black/20 border-white/5 text-white text-sm h-9" />
+                    <Label
+                      htmlFor="advisoryTime"
+                      className="text-xs text-gray-400 block mb-1"
+                    >
+                      Assessoria
+                    </Label>
+                    <Input
+                      id="advisoryTime"
+                      type="time"
+                      value={form.advisoryTime}
+                      onChange={(e) => form.setAdvisoryTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white text-sm h-9"
+                    />
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="startTime" className="text-xs text-gray-400">Início</Label>
-                    <Input id="startTime" type="time" value={form.startTime} onChange={(e) => form.setStartTime(e.target.value)} className="bg-black/20 border-white/5 text-white" />
+                    <Label
+                      htmlFor="startTime"
+                      className="text-xs text-gray-400"
+                    >
+                      Início
+                    </Label>
+                    <Input
+                      id="startTime"
+                      type="time"
+                      value={form.startTime}
+                      onChange={(e) => form.setStartTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="endTime" className="text-xs text-gray-400">Término</Label>
-                    <Input id="endTime" type="time" value={form.endTime} onChange={(e) => form.setEndTime(e.target.value)} className="bg-black/20 border-white/5 text-white" />
+                    <Label htmlFor="endTime" className="text-xs text-gray-400">
+                      Término
+                    </Label>
+                    <Input
+                      id="endTime"
+                      type="time"
+                      value={form.endTime}
+                      onChange={(e) => form.setEndTime(e.target.value)}
+                      className="bg-black/20 border-white/5 text-white"
+                    />
                   </div>
                 </div>
               )}
@@ -204,7 +309,7 @@ export default function EventDialog({
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
                   // Allow typing in input but stop propagation for div wrapper
-                  e.stopPropagation();
+                  e.stopPropagation()
                 }}
                 role="none"
               >
@@ -212,8 +317,8 @@ export default function EventDialog({
                   value={form.address}
                   onChange={form.setAddress}
                   onCoordinatesChange={(lat, lng) => {
-                    form.setLatitude(lat);
-                    form.setLongitude(lng);
+                    form.setLatitude(lat)
+                    form.setLongitude(lng)
                   }}
                   onFocus={() => form.setIsAutocompleteOpen(true)}
                   onBlur={() => form.setIsAutocompleteOpen(false)}
@@ -241,14 +346,21 @@ export default function EventDialog({
                     + NOVO
                   </Button>
                 </div>
-                <Select value={form.projectId || "__none__"} onValueChange={(v) => form.setProjectId(v === "__none__" ? "" : v)}>
+                <Select
+                  value={form.projectId || '__none__'}
+                  onValueChange={(v) =>
+                    form.setProjectId(v === '__none__' ? '' : v)
+                  }
+                >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-xl">
                     <SelectValue placeholder="Selecione..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                     <SelectItem value="__none__">Nenhum</SelectItem>
-                    {form.filteredProjects.map(project => (
-                      <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                    {form.filteredProjects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -267,7 +379,12 @@ export default function EventDialog({
                       onCheckedChange={() => form.toggleReminder(1)}
                       className="border-zinc-600 data-[state=checked]:bg-zinc-100 data-[state=checked]:text-black"
                     />
-                    <Label htmlFor="reminder1" className="text-gray-400 font-normal">1 dia</Label>
+                    <Label
+                      htmlFor="reminder1"
+                      className="text-gray-400 font-normal"
+                    >
+                      1 dia
+                    </Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Checkbox
@@ -276,7 +393,12 @@ export default function EventDialog({
                       onCheckedChange={() => form.toggleReminder(7)}
                       className="border-zinc-600 data-[state=checked]:bg-zinc-100 data-[state=checked]:text-black"
                     />
-                    <Label htmlFor="reminder7" className="text-gray-400 font-normal">1 semana</Label>
+                    <Label
+                      htmlFor="reminder7"
+                      className="text-gray-400 font-normal"
+                    >
+                      1 semana
+                    </Label>
                   </div>
                 </div>
               </div>
@@ -290,8 +412,10 @@ export default function EventDialog({
               </Label>
               {assistants.length > 0 ? (
                 <div className="flex flex-wrap gap-2 p-3 bg-white/[0.02] border border-white/5 rounded-xl">
-                  {assistants.map(assistant => {
-                    const isSelected = form.selectedAssistants.includes(assistant.id);
+                  {assistants.map((assistant) => {
+                    const isSelected = form.selectedAssistants.includes(
+                      assistant.id,
+                    )
                     return (
                       <button
                         key={assistant.id}
@@ -299,19 +423,23 @@ export default function EventDialog({
                         onClick={() => form.toggleAssistant(assistant.id)}
                         className={`
                           flex items-center gap-2 px-3 py-1.5 rounded-full text-xs transition-all border
-                          ${isSelected
-                            ? 'bg-white/20 text-white border-white/40'
-                            : 'bg-black/30 text-gray-500 border-transparent hover:bg-black/50 hover:text-gray-300'}
+                          ${
+                            isSelected
+                              ? 'bg-white/20 text-white border-white/40'
+                              : 'bg-black/30 text-gray-500 border-transparent hover:bg-black/50 hover:text-gray-300'
+                          }
                         `}
                       >
                         {isSelected && <Users className="h-3 w-3" />}
                         {assistant.name}
                       </button>
-                    );
+                    )
                   })}
                 </div>
               ) : (
-                <p className="text-xs text-gray-600 italic">Nenhuma assistente disponível.</p>
+                <p className="text-xs text-gray-600 italic">
+                  Nenhuma assistente disponível.
+                </p>
               )}
             </div>
 
@@ -322,7 +450,7 @@ export default function EventDialog({
                 Cor da Etiqueta
               </Label>
               <div className="flex gap-2">
-                {COLORS.map(c => (
+                {COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
@@ -370,7 +498,7 @@ export default function EventDialog({
                 disabled={form.loading}
                 className="bg-zinc-100 hover:bg-zinc-200 text-black font-medium min-w-[120px] border border-transparent"
               >
-                {form.loading ? "Salvando..." : "Salvar Agendamento"}
+                {form.loading ? 'Salvando...' : 'Salvar Agendamento'}
               </Button>
             </div>
           </form>
@@ -397,5 +525,5 @@ export default function EventDialog({
         onComplete={form.handleConfirmationComplete}
       />
     </>
-  );
+  )
 }

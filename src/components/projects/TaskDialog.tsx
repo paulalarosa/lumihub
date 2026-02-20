@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { ProjectService } from '@/services/projectService'
 import { useToast } from '@/hooks/use-toast'
 import type { Task } from '@/types/database'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 type TaskPriority = 'low' | 'medium' | 'high'
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuthStore } from '@/stores/useAuthStore'
 import { addDays, startOfDay } from 'date-fns'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 export interface DashboardStats {
   totalBudgets: number // "Total de orçamentos geridos" (Sum of project values)

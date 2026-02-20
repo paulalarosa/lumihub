@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
 import { Database } from '@/types/supabase'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 type _Project = Database['public']['Tables']['projects']['Row']
 type ProjectInsert = Database['public']['Tables']['projects']['Insert']
@@ -48,7 +48,7 @@ export const ProjectService = {
                 `,
         )
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return { data, error: null }
@@ -85,7 +85,7 @@ export const ProjectService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       return data
@@ -210,7 +210,7 @@ export const ProjectService = {
         .update(updates)
         .eq('id', id)
         .select()
-        .single()
+        .maybeSingle()
 
       if (error) throw error
       logger.success('Projeto atualizado com sucesso!')

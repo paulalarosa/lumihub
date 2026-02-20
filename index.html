@@ -6,6 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+  <!-- HTTPS Redirect -->
+  <script>
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      location.replace(`https:${location.href.substring(location.protocol.length)}`);
+    }
+  </script>
+
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-C24BXN2S6H"></script>
   <script>

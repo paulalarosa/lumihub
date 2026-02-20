@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import {
   Card,
   CardContent,

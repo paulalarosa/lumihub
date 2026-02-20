@@ -269,8 +269,13 @@ CREATE TRIGGER after_project_insert
   FOR EACH ROW
   EXECUTE FUNCTION trigger_check_achievements();
 
-DROP TRIGGER IF EXISTS after_review_insert ON reviews;
-CREATE TRIGGER after_review_insert
-  AFTER INSERT ON reviews
-  FOR EACH ROW
-  EXECUTE FUNCTION trigger_check_achievements();
+DO $$
+BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'reviews') THEN
+    DROP TRIGGER IF EXISTS after_review_insert ON reviews;
+    CREATE TRIGGER after_review_insert
+      AFTER INSERT ON reviews
+      FOR EACH ROW
+      EXECUTE FUNCTION trigger_check_achievements();
+  END IF;
+END $$;

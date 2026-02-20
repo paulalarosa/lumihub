@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { Database } from '@/integrations/supabase/types'
 import { SupabaseClient } from '@supabase/supabase-js'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 type LocalDatabase = Database & {
   public: {

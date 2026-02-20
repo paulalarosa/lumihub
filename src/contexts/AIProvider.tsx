@@ -1,30 +1,8 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react'
+import React, { useState, useEffect, ReactNode } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 
-export type AIProviderMode = 'cloud' | 'local'
-
-interface AIProviderContextType {
-  mode: AIProviderMode
-  setMode: (mode: AIProviderMode) => void
-  byokSettings: {
-    provider: string
-    apiKey: string
-    modelName: string
-  } | null
-  isLoading: boolean
-  refreshSettings: () => Promise<void>
-}
-
-const AIProviderContext = createContext<AIProviderContextType | undefined>(
-  undefined,
-)
+import { AIContext, AIProviderContextType, AIProviderMode } from './AIContext'
 
 export function AIProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
@@ -78,17 +56,5 @@ export function AIProvider({ children }: { children: ReactNode }) {
     refreshSettings: fetchSettings,
   }
 
-  return (
-    <AIProviderContext.Provider value={value}>
-      {children}
-    </AIProviderContext.Provider>
-  )
-}
-
-export function useAI() {
-  const context = useContext(AIProviderContext)
-  if (context === undefined) {
-    throw new Error('useAI must be used within an AIProvider')
-  }
-  return context
+  return <AIContext.Provider value={value}>{children}</AIContext.Provider>
 }

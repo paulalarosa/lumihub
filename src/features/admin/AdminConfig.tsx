@@ -6,7 +6,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { supabase } from '@/integrations/supabase/client'
 import { AlertOctagon, UserPlus, Megaphone, Terminal } from 'lucide-react'
 import { useEffect, useState } from 'react'

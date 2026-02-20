@@ -1,5 +1,5 @@
 import { loadStripe } from '@stripe/stripe-js'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 const STRIPE_PUBLISHABLE_KEY = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 

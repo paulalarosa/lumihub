@@ -156,7 +156,7 @@ const AuthCallbackHandler = () => {
               </p>
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={() => navigate('/onboarding')}
+                  onClick={() => navigate('/dashboard')}
                   className="w-full h-12 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-sm uppercase tracking-wider"
                 >
                   Retry Connection

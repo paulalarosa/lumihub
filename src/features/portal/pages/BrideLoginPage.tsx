@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'

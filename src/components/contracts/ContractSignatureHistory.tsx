@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { Download, FileText } from 'lucide-react';
-import { logger } from '@/utils/logger';
+import { useEffect, useState } from 'react'
+import { supabase } from '@/integrations/supabase/client'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Download, FileText } from 'lucide-react'
+import { logger } from '@/services/logger'
 
 interface ContractSignatureData {
-  id: string;
-  project_id: string;
-  signed_by?: string | null;
-  signed_at: string | null;
-  signature_data: string | null;
-  status: string;
-  created_at: string;
+  id: string
+  project_id: string
+  signed_by?: string | null
+  signed_at: string | null
+  signature_data: string | null
+  status: string
+  created_at: string
 }
 
 export function ContractSignatureHistory({ projectId }: { projectId: string }) {
-  const [signatures, setSignatures] = useState<ContractSignatureData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [signatures, setSignatures] = useState<ContractSignatureData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchSignatures = async () => {
@@ -26,26 +26,30 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
         // For now, we'll handle the error gracefully
         const { data, error } = await supabase
           .from('contracts')
-          .select('id, project_id, status, signed_at, signature_data, created_at')
+          .select(
+            'id, project_id, status, signed_at, signature_data, created_at',
+          )
           .eq('project_id', projectId)
           .eq('status', 'signed')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
 
-        if (error) throw error;
-        setSignatures(data || []);
+        if (error) throw error
+        setSignatures(data || [])
       } catch (error) {
-        logger.error(error, 'ContractSignatureHistory.fetchSignatures', { showToast: false });
-        setSignatures([]);
+        logger.error(error, 'ContractSignatureHistory.fetchSignatures', {
+          showToast: false,
+        })
+        setSignatures([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchSignatures();
-  }, [projectId]);
+    fetchSignatures()
+  }, [projectId])
 
   if (loading) {
-    return <div className="text-gray-500">Carregando histórico...</div>;
+    return <div className="text-gray-500">Carregando histórico...</div>
   }
 
   if (signatures.length === 0) {
@@ -54,12 +58,14 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
         <FileText className="w-8 h-8 mx-auto mb-2 opacity-50" />
         <p>Nenhuma assinatura ainda</p>
       </div>
-    );
+    )
   }
 
   return (
     <div className="space-y-4">
-      <h3 className="font-mono text-xs uppercase tracking-widest text-white/50 border-b border-white/10 pb-2">Histórico de Assinaturas</h3>
+      <h3 className="font-mono text-xs uppercase tracking-widest text-white/50 border-b border-white/10 pb-2">
+        Histórico de Assinaturas
+      </h3>
       <div className="space-y-2">
         {signatures.map((signature) => (
           <div
@@ -73,9 +79,13 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
                 </p>
                 {signature.signed_at && (
                   <p className="text-[10px] text-white/40 font-mono mt-1">
-                    {format(new Date(signature.signed_at), 'dd/MM/yyyy HH:mm:ss', {
-                      locale: ptBR,
-                    })}
+                    {format(
+                      new Date(signature.signed_at),
+                      'dd/MM/yyyy HH:mm:ss',
+                      {
+                        locale: ptBR,
+                      },
+                    )}
                   </p>
                 )}
               </div>
@@ -90,5 +100,5 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
         ))}
       </div>
     </div>
-  );
+  )
 }

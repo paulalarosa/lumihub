@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import {
   DndContext,
   DragEndEvent,

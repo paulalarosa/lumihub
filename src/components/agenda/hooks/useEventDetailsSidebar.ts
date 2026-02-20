@@ -71,6 +71,22 @@ export function useEventDetailsSidebar({
   const [fetchingDetail, setFetchingDetail] = useState(false)
   const [saving, setSaving] = useState(false)
 
+  const resetForm = useCallback(() => {
+    setTitle('')
+    setClientId(null)
+    setEventDate(undefined)
+    setStartTime('')
+    setEndTime('')
+    setLocation('')
+    setNotes('')
+    setSelectedAssistants([])
+  }, [])
+
+  const fetchLists = useCallback(async () => {
+    // Current implementation uses empty states for clients/assistants
+    // This stub maintains compatibility with the existing logic
+  }, [])
+
   const fetchEventDetails = useCallback(
     async (id: string) => {
       setFetchingDetail(true)
@@ -79,7 +95,7 @@ export function useEventDetailsSidebar({
           .from('events')
           .select(`*, client:wedding_clients(id, name:full_name)`)
           .eq('id', id)
-          .single()
+          .maybeSingle()
 
         if (error) throw error
         if (eventData) {
@@ -113,7 +129,7 @@ export function useEventDetailsSidebar({
     } else {
       resetForm()
     }
-  }, [open, initialEvent, fetchEventDetails])
+  }, [open, initialEvent, fetchEventDetails, fetchLists, resetForm])
 
   const handleSave = async () => {
     if (!initialEvent?.id) return
@@ -219,5 +235,7 @@ export function useEventDetailsSidebar({
     handleSave,
     handleDelete,
     toggleAssistant,
+    resetForm,
+    fetchLists,
   }
 }

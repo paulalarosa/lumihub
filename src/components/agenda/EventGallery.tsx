@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Image as ImageIcon, Upload, Loader2, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { AspectRatio } from '@/components/ui/aspect-ratio'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 interface EventGalleryProps {
   eventId: string

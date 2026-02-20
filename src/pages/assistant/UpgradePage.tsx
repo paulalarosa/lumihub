@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Check, Loader2, CreditCard } from 'lucide-react'
 import { toast } from 'sonner'
 import { StripeService } from '@/services/stripe'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 const PLANS = [
   {

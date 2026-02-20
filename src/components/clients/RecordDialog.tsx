@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { Plus, Upload, X } from 'lucide-react'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 interface RecordDialogProps {
   clientId: string

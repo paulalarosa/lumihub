@@ -57,15 +57,6 @@ export default function Dashboard() {
     )
   }
 
-  if (!d.checkingOnboarding && !d.onboardingCompleted) {
-    d.navigate('/onboarding')
-    return (
-      <div className="p-8 text-center text-white">
-        Redirecionando para Onboarding...
-      </div>
-    )
-  }
-
   const stats = [
     ...(d.isOwner
       ? [

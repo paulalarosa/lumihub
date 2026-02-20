@@ -4,83 +4,16 @@ import { ptBR } from 'date-fns/locale'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
-export interface EventFormData {
-  id?: string
-  title: string
-  description: string | null
-  event_date: string
-  event_type: string | null
-  start_time: string | null
-  end_time: string | null
-  arrival_time: string | null
-  making_of_time: string | null
-  ceremony_time: string | null
-  advisory_time: string | null
-  address: string | null
-  latitude: string | null
-  longitude: string | null
-  notes: string | null
-  color: string
-  client_id: string | null
-  project_id: string | null
-  reminder_days: number[]
-  assistants?: { id: string; name: string }[]
-  google_calendar_event_id?: string | null
-}
-
-export interface EventClient {
-  id: string
-  name: string
-  phone: string | null
-}
-
-export interface EventProject {
-  id: string
-  name: string
-  client_id: string
-}
-
-export interface EventService {
-  id: string
-  name: string
-  price: number
-  duration_minutes: number
-  description: string | null
-}
-
-export interface EventAssistant {
-  id: string
-  name: string
-  email: string | null
-  phone: string | null
-}
-
-export const COLORS = [
-  '#5A7D7C',
-  '#E57373',
-  '#64B5F6',
-  '#81C784',
-  '#FFD54F',
-  '#CE93D8',
-  '#FF8A65',
-  '#4FC3F7',
-]
-
-export const EVENT_TYPES = [
-  { value: 'noivas', label: 'Noivas' },
-  { value: 'pre_wedding', label: 'Pré Wedding' },
-  { value: 'producoes_sociais', label: 'Produções Sociais' },
-]
-
-export const REMINDER_OPTIONS = [
-  { value: 1, label: '1 dia antes' },
-  { value: 3, label: '3 dias antes' },
-  { value: 7, label: '1 semana antes' },
-  { value: 14, label: '2 semanas antes' },
-  { value: 30, label: '1 mês antes' },
-]
+import {
+  EventFormData,
+  EventClient,
+  EventProject,
+  EventService,
+  EventAssistant,
+} from './event-form.types'
+import { COLORS } from './event-form.constants'
 
 interface UseEventFormProps {
   event: EventFormData | null
@@ -361,7 +294,7 @@ export function useEventForm({
           .from('events')
           .insert(eventData)
           .select()
-          .single()
+          .maybeSingle()
         if (error) throw error
         eventId = data.id
       }
@@ -439,10 +372,13 @@ export function useEventForm({
             description: 'Evento sincronizado com Google Calendar.',
           })
         }
-      } catch (calendarError) {
-        logger.error(calendarError, 'useEventForm.calendarSync', {
-          showToast: false,
-        })
+      } catch (calendarError: any) {
+        logger.error(
+          'Erro na sincronização Google (useEventForm.calendarSync)',
+          calendarError,
+          'SYSTEM',
+          { showToast: false } as any,
+        )
       }
 
       toast({
@@ -453,8 +389,13 @@ export function useEventForm({
       })
 
       onSuccess()
-    } catch (error: unknown) {
-      logger.error(error, 'useEventForm.handleSubmit', { showToast: false })
+    } catch (error: any) {
+      logger.error(
+        'Erro ao salvar formulário (useEventForm.handleSubmit)',
+        error,
+        'SYSTEM',
+        { showToast: false } as any,
+      )
       toast({
         title: 'Erro',
         description:

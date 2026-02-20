@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { MarketingService, MarketingCampaign } from '@/services/marketing'
 import { supabase } from '@/integrations/supabase/client'
 import { differenceInDays } from 'date-fns'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 
 export interface InactiveClient {
   id: string

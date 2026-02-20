@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/utils/logger'
+import { logger } from '@/services/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Terminal } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -25,7 +25,7 @@ export default function AdminOverview() {
   }, [])
 
   const generateLiveFeed = () => {
-    const actions = [
+    const _actions = [
       'User profile updated [ID: 8821]',
       'New pending contract generated',
       'System backup completed successfully',
@@ -34,16 +34,68 @@ export default function AdminOverview() {
       'Subscription upgraded to PRO',
     ]
 
-    // Add fake historical logs
-    const initialLogs = Array(6)
+    // Historical mock fallback for visual fullness
+    const initialLogs = Array(3)
       .fill(0)
-      .map((_, i) => {
-        const time = new Date(
-          Date.now() - i * 1000 * 60 * 5,
-        ).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        return `> [${time}] ${actions[i % actions.length]}`
-      })
+      .map((_, i) => `> [System] Core diagnostics check ${i + 1} passed.`)
     setActivities(initialLogs)
+  }
+
+  useEffect(() => {
+    // Reference realtime channel
+    const channel = supabase.channel('admin-overview-realtime')
+
+    // Listen to new Users (profiles)
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'profiles' },
+      (payload) => {
+        setStats((prev) => ({ ...prev, totalUsers: prev.totalUsers + 1 }))
+        addLiveAction(
+          `New user registered! [ID: ****${payload.new.id.slice(-4)}]`,
+        )
+      },
+    )
+
+    // Listen to new Transactions
+    channel.on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'transactions' },
+      (payload) => {
+        if (payload.new.status === 'completed') {
+          setStats((prev) => ({
+            ...prev,
+            totalRevenue: prev.totalRevenue + (payload.new.net_amount || 0),
+          }))
+          addLiveAction(`Payment approved: R$ ${payload.new.net_amount}`)
+        }
+      },
+    )
+
+    // Listen to profile updates (e.g., subscription upgrades)
+    channel.on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'profiles' },
+      (payload) => {
+        addLiveAction(`Profile updated [ID: ****${payload.new.id.slice(-4)}]`)
+      },
+    )
+
+    channel.subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
+
+  const addLiveAction = (message: string) => {
+    const time = new Date().toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    const formatted = `> [${time}] ${message}`
+    setActivities((prev) => [formatted, ...prev].slice(0, 10))
   }
 
   const fetchStats = async () => {

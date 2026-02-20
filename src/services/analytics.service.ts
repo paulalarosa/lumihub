@@ -3,12 +3,12 @@
 
 declare global {
   interface Window {
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
+    gtag?: (...args: unknown[]) => void
+    dataLayer?: unknown[]
   }
 }
 
-import { logger } from '@/utils/logger';
+import { logger } from '@/services/logger'
 
 export type EventCategory =
   | 'cta_click'
@@ -19,54 +19,52 @@ export type EventCategory =
   | 'form'
   | 'auth'
   | 'booking'
-  | 'subscription';
+  | 'subscription'
 
 export interface AnalyticsEvent {
-  category: EventCategory;
-  action: string;
-  label?: string;
-  value?: number;
-  customParameters?: Record<string, unknown>;
+  category: EventCategory
+  action: string
+  label?: string
+  value?: number
+  customParameters?: Record<string, unknown>
 }
 
 export interface PageViewEvent {
-  page_path: string;
-  page_title: string;
-  page_location?: string;
+  page_path: string
+  page_title: string
+  page_location?: string
 }
 
 export interface ConversionEvent {
-  conversion_id: string;
-  value?: number;
-  currency?: string;
-  transaction_id?: string;
+  conversion_id: string
+  value?: number
+  currency?: string
+  transaction_id?: string
 }
 
 class AnalyticsService {
-  private isInitialized = false;
-  private pageStartTime: number = Date.now();
-  private sessionId: string;
+  private isInitialized = false
+  private pageStartTime: number = Date.now()
+  private sessionId: string
 
   constructor() {
-    this.sessionId = this.generateSessionId();
-    this.initialize();
+    this.sessionId = this.generateSessionId()
+    this.initialize()
   }
 
   private generateSessionId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   private initialize() {
     if (typeof window !== 'undefined' && window.gtag) {
-      this.isInitialized = true;
+      this.isInitialized = true
     }
   }
 
   // Track custom event
   trackEvent(event: AnalyticsEvent) {
-    const { category, action, label, value, customParameters } = event;
-
-
+    const { category, action, label, value, customParameters } = event
 
     // Enviar para Google Analytics
     if (window.gtag) {
@@ -76,7 +74,7 @@ class AnalyticsService {
         value: value,
         session_id: this.sessionId,
         ...customParameters,
-      });
+      })
     }
 
     // Armazenar localmente para análise
@@ -88,7 +86,7 @@ class AnalyticsService {
       value,
       timestamp: new Date().toISOString(),
       sessionId: this.sessionId,
-    });
+    })
   }
 
   // Track CTA clicks
@@ -101,38 +99,34 @@ class AnalyticsService {
         cta_location: location,
         cta_destination: destination,
       },
-    });
+    })
   }
 
   // Track page view
   trackPageView(pageView: PageViewEvent) {
-
-
     if (window.gtag) {
       window.gtag('event', 'page_view', {
         page_path: pageView.page_path,
         page_title: pageView.page_title,
         page_location: pageView.page_location || window.location.href,
         session_id: this.sessionId,
-      });
+      })
     }
 
     // Reset page timer
-    this.pageStartTime = Date.now();
+    this.pageStartTime = Date.now()
 
     this.storeLocalEvent({
       type: 'page_view',
       ...pageView,
       timestamp: new Date().toISOString(),
       sessionId: this.sessionId,
-    });
+    })
   }
 
   // Track time on page
   trackTimeOnPage(pagePath: string) {
-    const timeSpent = Math.round((Date.now() - this.pageStartTime) / 1000);
-
-
+    const timeSpent = Math.round((Date.now() - this.pageStartTime) / 1000)
 
     if (window.gtag) {
       window.gtag('event', 'time_on_page', {
@@ -140,7 +134,7 @@ class AnalyticsService {
         page_path: pagePath,
         time_seconds: timeSpent,
         session_id: this.sessionId,
-      });
+      })
     }
 
     this.storeLocalEvent({
@@ -149,15 +143,13 @@ class AnalyticsService {
       timeSpent,
       timestamp: new Date().toISOString(),
       sessionId: this.sessionId,
-    });
+    })
 
-    return timeSpent;
+    return timeSpent
   }
 
   // Track conversions
   trackConversion(conversion: ConversionEvent) {
-
-
     if (window.gtag) {
       window.gtag('event', 'conversion', {
         send_to: conversion.conversion_id,
@@ -165,7 +157,7 @@ class AnalyticsService {
         currency: conversion.currency || 'BRL',
         transaction_id: conversion.transaction_id,
         session_id: this.sessionId,
-      });
+      })
     }
 
     this.storeLocalEvent({
@@ -173,7 +165,7 @@ class AnalyticsService {
       ...conversion,
       timestamp: new Date().toISOString(),
       sessionId: this.sessionId,
-    });
+    })
   }
 
   // Track form submissions
@@ -185,99 +177,122 @@ class AnalyticsService {
       customParameters: {
         error_message: errorMessage,
       },
-    });
+    })
   }
 
   // Track auth events
-  trackAuth(action: 'login' | 'signup' | 'logout' | 'password_reset', method?: string) {
+  trackAuth(
+    action: 'login' | 'signup' | 'logout' | 'password_reset',
+    method?: string,
+  ) {
     this.trackEvent({
       category: 'auth',
       action,
       label: method,
-    });
+    })
   }
 
   // Track booking events
-  trackBooking(action: 'started' | 'completed' | 'cancelled', serviceId?: string, value?: number) {
+  trackBooking(
+    action: 'started' | 'completed' | 'cancelled',
+    serviceId?: string,
+    value?: number,
+  ) {
     this.trackEvent({
       category: 'booking',
       action,
       label: serviceId,
       value,
-    });
+    })
   }
 
   // Track subscription events
-  trackSubscription(action: 'view_plans' | 'select_plan' | 'start_trial' | 'subscribe' | 'cancel', planName?: string, value?: number) {
+  trackSubscription(
+    action:
+      | 'view_plans'
+      | 'select_plan'
+      | 'start_trial'
+      | 'subscribe'
+      | 'cancel',
+    planName?: string,
+    value?: number,
+  ) {
     this.trackEvent({
       category: 'subscription',
       action,
       label: planName,
       value,
-    });
+    })
   }
 
   // Track scroll depth
   trackScrollDepth(percentage: number, pagePath: string) {
-    if (percentage === 25 || percentage === 50 || percentage === 75 || percentage === 100) {
+    if (
+      percentage === 25 ||
+      percentage === 50 ||
+      percentage === 75 ||
+      percentage === 100
+    ) {
       this.trackEvent({
         category: 'engagement',
         action: 'scroll_depth',
         label: pagePath,
         value: percentage,
-      });
+      })
     }
   }
 
   // Store events locally for analysis
   private storeLocalEvent(event: Record<string, unknown>) {
     try {
-      const events = JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
-      events.push(event);
+      const events = JSON.parse(
+        localStorage.getItem('kontrol_analytics') || '[]',
+      )
+      events.push(event)
 
       // Keep only last 100 events
       if (events.length > 100) {
-        events.shift();
+        events.shift()
       }
 
-      localStorage.setItem('kontrol_analytics', JSON.stringify(events));
+      localStorage.setItem('kontrol_analytics', JSON.stringify(events))
     } catch (error) {
       logger.error(error, {
-        message: "Erro ao registrar evento analítico.",
-        showToast: false
-      });
+        message: 'Erro ao registrar evento analítico.',
+        showToast: false,
+      })
     }
   }
 
   // Get stored events
   getStoredEvents(): Record<string, unknown>[] {
     try {
-      return JSON.parse(localStorage.getItem('kontrol_analytics') || '[]');
+      return JSON.parse(localStorage.getItem('kontrol_analytics') || '[]')
     } catch {
-      return [];
+      return []
     }
   }
 
   // Clear stored events
   clearStoredEvents() {
-    localStorage.removeItem('kontrol_analytics');
+    localStorage.removeItem('kontrol_analytics')
   }
 
   // Get session analytics summary
   getSessionSummary() {
-    const events = this.getStoredEvents();
-    const sessionEvents = events.filter(e => e.sessionId === this.sessionId);
+    const events = this.getStoredEvents()
+    const sessionEvents = events.filter((e) => e.sessionId === this.sessionId)
 
     return {
       sessionId: this.sessionId,
       totalEvents: sessionEvents.length,
-      pageViews: sessionEvents.filter(e => e.type === 'page_view').length,
-      ctaClicks: sessionEvents.filter(e => e.category === 'cta_click').length,
-      conversions: sessionEvents.filter(e => e.type === 'conversion').length,
+      pageViews: sessionEvents.filter((e) => e.type === 'page_view').length,
+      ctaClicks: sessionEvents.filter((e) => e.category === 'cta_click').length,
+      conversions: sessionEvents.filter((e) => e.type === 'conversion').length,
       startTime: sessionEvents[0]?.timestamp,
-    };
+    }
   }
 }
 
 // Singleton instance
-export const analyticsService = new AnalyticsService();
+export const analyticsService = new AnalyticsService()
