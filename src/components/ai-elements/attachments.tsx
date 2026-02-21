@@ -1,6 +1,6 @@
 "use client";
 
-import type { FileUIPart, SourceDocumentUIPart } from "ai";
+
 import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,36 +9,34 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { useCallback, useMemo } from "react";
+import {
+  AttachmentContext,
+  AttachmentsContext,
+  useAttachmentContext,
+  useAttachmentsContext,
+} from "./attachments.context";
 import { cn } from "@/lib/utils";
 import {
-  FileTextIcon,
-  GlobeIcon,
   ImageIcon,
-  Music2Icon,
-  PaperclipIcon,
-  VideoIcon,
   XIcon,
 } from "lucide-react";
-import { createContext, useCallback, useContext, useMemo } from "react";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type AttachmentData =
-  | (FileUIPart & { id: string })
-  | (SourceDocumentUIPart & { id: string });
+import type { AttachmentData, AttachmentVariant } from "./attachments.types";
 
-export type AttachmentMediaCategory =
-  | "image"
-  | "video"
-  | "audio"
-  | "document"
-  | "source"
-  | "unknown";
+import {
+  getAttachmentLabel,
+  getMediaCategory,
+  mediaCategoryIcons,
+} from "./attachments.utils";
 
-export type AttachmentVariant = "grid" | "inline" | "list";
+// ... (Rest of imports are fine, but ensure icons are not duplicated if used only in utils)
 
+<<<<<<< HEAD
 import {
   getAttachmentLabel,
   getMediaCategory,
@@ -101,6 +99,23 @@ export const useAttachmentContext = () => {
   }
   return ctx;
 };
+=======
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+const renderAttachmentImage = (url: string, alt: string | null | undefined, isGrid: boolean) => (
+  <img
+    src={url}
+    alt={alt ?? "Attachment"}
+    className={cn(
+      "h-full w-full object-cover transition-transform duration-300 group-hover:scale-105",
+      !isGrid && "rounded"
+    )}
+  />
+);
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 
 // ============================================================================
 // Attachments - Container
@@ -152,15 +167,15 @@ export const Attachment = ({
   ...props
 }: AttachmentProps) => {
   const { variant } = useAttachmentsContext();
-  const mediaCategory = getMediaCategory(data);
+  const mediaCategory = getMediaCategory(data as any);
 
-  const contextValue = useMemo<AttachmentContextValue>(
+  const contextValue = useMemo(
     () => ({ data, mediaCategory, onRemove, variant }),
     [data, mediaCategory, onRemove, variant]
   );
 
   return (
-    <AttachmentContext.Provider value={contextValue}>
+    <AttachmentContext.Provider value={contextValue as any}>
       <div
         className={cn(
           "group relative",

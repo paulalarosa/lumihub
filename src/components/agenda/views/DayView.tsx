@@ -1,35 +1,35 @@
-import { useMemo } from "react";
-import { format, isToday, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { MapPin, User, Clock } from "lucide-react";
+import { useMemo } from 'react'
+import { format, isToday } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { cn } from '@/lib/utils'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { MapPin, User, Clock } from 'lucide-react'
 
 interface Event {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  end_time: string | null;
-  color: string | null;
-  event_type: string | null;
-  location: string | null;
-  description: string | null;
-  client?: { name: string } | null;
-  project?: { name: string } | null;
+  id: string
+  title: string
+  event_date: string
+  start_time: string | null
+  end_time: string | null
+  color: string | null
+  event_type: string | null
+  location: string | null
+  description: string | null
+  client?: { name: string } | null
+  project?: { name: string } | null
 }
 
 interface DayViewProps {
-  currentDate: Date;
-  events: Event[];
-  onEventClick: (event: Event) => void;
-  onEventDoubleClick: (event: Event) => void;
-  onCreateEvent: (date: Date, time?: string) => void;
+  currentDate: Date
+  events: Event[]
+  onEventClick: (event: Event) => void
+  onEventDoubleClick: (event: Event) => void
+  onCreateEvent: (date: Date, time?: string) => void
 }
 
-const HOUR_HEIGHT = 80;
-const START_HOUR = 6;
-const END_HOUR = 22;
+const HOUR_HEIGHT = 80
+const START_HOUR = 6
+const END_HOUR = 22
 
 export function DayView({
   currentDate,
@@ -39,43 +39,48 @@ export function DayView({
   onCreateEvent,
 }: DayViewProps) {
   const hours = useMemo(() => {
-    return Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => START_HOUR + i);
-  }, []);
+    return Array.from(
+      { length: END_HOUR - START_HOUR + 1 },
+      (_, i) => START_HOUR + i,
+    )
+  }, [])
 
-  const dateKey = format(currentDate, 'yyyy-MM-dd');
-  const dayEvents = events.filter((e) => e.event_date === dateKey);
-  const timedEvents = dayEvents.filter((e) => e.start_time);
-  const allDayEvents = dayEvents.filter((e) => !e.start_time);
-  const isTodayDate = isToday(currentDate);
+  const dateKey = format(currentDate, 'yyyy-MM-dd')
+  const dayEvents = events.filter((e) => e.event_date === dateKey)
+  const timedEvents = dayEvents.filter((e) => e.start_time)
+  const allDayEvents = dayEvents.filter((e) => !e.start_time)
+  const isTodayDate = isToday(currentDate)
 
   const getEventPosition = (event: Event) => {
-    if (!event.start_time) return null;
+    if (!event.start_time) return null
 
-    const [hours, minutes] = event.start_time.split(':').map(Number);
-    const top = (hours - START_HOUR) * HOUR_HEIGHT + (minutes / 60) * HOUR_HEIGHT;
+    const [hours, minutes] = event.start_time.split(':').map(Number)
+    const top =
+      (hours - START_HOUR) * HOUR_HEIGHT + (minutes / 60) * HOUR_HEIGHT
 
-    let height = HOUR_HEIGHT;
+    let height = HOUR_HEIGHT
     if (event.end_time) {
-      const [endHours, endMinutes] = event.end_time.split(':').map(Number);
-      const endTop = (endHours - START_HOUR) * HOUR_HEIGHT + (endMinutes / 60) * HOUR_HEIGHT;
-      height = Math.max(endTop - top, 50);
+      const [endHours, endMinutes] = event.end_time.split(':').map(Number)
+      const endTop =
+        (endHours - START_HOUR) * HOUR_HEIGHT + (endMinutes / 60) * HOUR_HEIGHT
+      height = Math.max(endTop - top, 50)
     }
 
-    return { top, height };
-  };
+    return { top, height }
+  }
 
   const handleTimeSlotClick = (hour: number) => {
-    const time = `${hour.toString().padStart(2, '0')}:00`;
-    onCreateEvent(currentDate, time);
-  };
+    const time = `${hour.toString().padStart(2, '0')}:00`
+    onCreateEvent(currentDate, time)
+  }
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div
         className={cn(
-          "py-4 px-6 border-b text-center",
-          isTodayDate && "bg-primary/5"
+          'py-4 px-6 border-b text-center',
+          isTodayDate && 'bg-primary/5',
         )}
       >
         <div className="text-sm text-muted-foreground uppercase">
@@ -83,8 +88,8 @@ export function DayView({
         </div>
         <div
           className={cn(
-            "text-3xl font-bold mt-1",
-            isTodayDate && "text-primary"
+            'text-3xl font-bold mt-1',
+            isTodayDate && 'text-primary',
           )}
         >
           {format(currentDate, 'd')}
@@ -101,7 +106,7 @@ export function DayView({
             Dia Inteiro
           </div>
           {allDayEvents.map((event) => {
-            const eventColor = event.color || '#5A7D7C';
+            const eventColor = event.color || '#5A7D7C'
             return (
               <div
                 key={event.id}
@@ -123,7 +128,7 @@ export function DayView({
                   </div>
                 )}
               </div>
-            );
+            )
           })}
         </div>
       )}
@@ -145,7 +150,7 @@ export function DayView({
           </div>
 
           {/* Main column */}
-          <div className={cn("flex-1 relative", isTodayDate && "bg-primary/5")}>
+          <div className={cn('flex-1 relative', isTodayDate && 'bg-primary/5')}>
             {/* Hour slots */}
             {hours.map((hour) => (
               <div
@@ -155,8 +160,8 @@ export function DayView({
                 onClick={() => handleTimeSlotClick(hour)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleTimeSlotClick(hour);
+                    e.preventDefault()
+                    handleTimeSlotClick(hour)
                   }
                 }}
                 role="button"
@@ -170,10 +175,10 @@ export function DayView({
 
             {/* Events */}
             {timedEvents.map((event) => {
-              const position = getEventPosition(event);
-              if (!position) return null;
+              const position = getEventPosition(event)
+              if (!position) return null
 
-              const eventColor = event.color || '#5A7D7C';
+              const eventColor = event.color || '#5A7D7C'
 
               return (
                 <div
@@ -186,12 +191,12 @@ export function DayView({
                     borderLeft: `4px solid ${eventColor}`,
                   }}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    onEventClick(event);
+                    e.stopPropagation()
+                    onEventClick(event)
                   }}
                   onDoubleClick={(e) => {
-                    e.stopPropagation();
-                    onEventDoubleClick(event);
+                    e.stopPropagation()
+                    onEventDoubleClick(event)
                   }}
                 >
                   <div
@@ -229,11 +234,11 @@ export function DayView({
                     </div>
                   )}
                 </div>
-              );
+              )
             })}
           </div>
         </div>
       </ScrollArea>
     </div>
-  );
+  )
 }

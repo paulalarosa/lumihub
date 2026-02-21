@@ -7,7 +7,7 @@ import {
     Project,
     Event,
     Service,
-    Payment,
+    Service,
     EventFormData,
     ClientFormData,
     ProjectFormData,
@@ -59,7 +59,7 @@ export interface EventFormProps extends FormProps<EventFormData> {
     services?: Service[];
 }
 
-export interface ClientFormProps extends FormProps<ClientFormData> { }
+export type ClientFormProps = FormProps<ClientFormData>;
 
 export interface ProjectFormProps extends FormProps<ProjectFormData> {
     clients?: Client[];
@@ -205,6 +205,6 @@ export interface SettingsTabProps extends BaseComponentProps {
     onSave?: () => void;
 }
 
-export interface ProfileSettingsProps extends SettingsTabProps { }
-export interface NotificationSettingsProps extends SettingsTabProps { }
-export interface IntegrationSettingsProps extends SettingsTabProps { }
+export type ProfileSettingsProps = SettingsTabProps;
+export type NotificationSettingsProps = SettingsTabProps;
+export type IntegrationSettingsProps = SettingsTabProps;

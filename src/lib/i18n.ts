@@ -30,11 +30,4 @@ i18n
         }
     });
 
-console.log('i18n initialized:', {
-    language: i18n.language,
-    resources: i18n.options.resources,
-    pt: i18n.getDataByLanguage('pt'),
-    en: i18n.getDataByLanguage('en')
-});
-
 export default i18n;

@@ -83,6 +83,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         console.error("No user ID found in session", session.id);
         return;
     }
+<<<<<<< HEAD
 
     // Determine plan based on amount or price ID if strict mapping allows
     // For now, we update status to active. 
@@ -102,13 +103,44 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         // I will trust the prompt "profiles" but I should check if 'makeup_artists' IS the profile table.
         // Let's safe bet: update 'profiles' if it exists.
 
+=======
+
+    const planType = session.metadata?.plan_type || 'profissional';
+
+    console.log(`Processing checkout for user ${userId}, plan: ${planType}`);
+
+    // Update profiles table (Primary Request)
+    const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+            plan_type: planType,
+            stripe_customer_id: session.customer as string
+        })
+        .eq("id", userId);
+
+    if (profileError) {
+        console.error("Error updating profile:", profileError);
+    }
+
+    // Update makeup_artists table (Legacy/Backward Compatibility)
+    const { error: artistError } = await supabase
+        .from("makeup_artists")
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         .update({
             stripe_subscription_id: session.subscription as string,
             plan_status: "active",
             plan_started_at: new Date().toISOString(),
+<<<<<<< HEAD
             // stripe_customer_id: session.customer as string // Update this too
+=======
+            stripe_customer_id: session.customer as string
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         })
         .eq("user_id", userId);
+
+    if (artistError) {
+        console.warn("Error updating makeup_artists:", artistError);
+    }
 
     console.log(`Subscription activated for user ${userId}`);
 }

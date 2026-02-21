@@ -16,6 +16,8 @@ interface KanbanColumnProps {
   isFirstColumn: boolean;
   onNewTask: () => void;
   activeTaskId: string | null;
+  onEdit: (task: KanbanTask) => void;
+  onDelete: (taskId: string) => void;
 }
 
 export function KanbanColumn({
@@ -27,6 +29,8 @@ export function KanbanColumn({
   isFirstColumn,
   onNewTask,
   activeTaskId,
+  onEdit,
+  onDelete,
 }: KanbanColumnProps) {
   const { setNodeRef } = useDroppable({
     id: status,
@@ -62,6 +66,8 @@ export function KanbanColumn({
                 priorityColor={priorityColors[task.priority]}
                 priorityLabel={priorityLabels[task.priority]}
                 isActive={activeTaskId === task.id}
+                onEdit={onEdit}
+                onDelete={onDelete}
               />
             ))
           )}

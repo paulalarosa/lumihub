@@ -34,7 +34,7 @@ export const CreateEventModal = ({
         startTime: '09:00',
         endTime: '12:00',
         location: '',
-        eventType: 'wedding' as const,
+        eventType: 'wedding' as 'wedding' | 'social' | 'test' | 'blocked',
     });
 
     const createEventMutation = useMutation({
@@ -71,8 +71,7 @@ export const CreateEventModal = ({
                     },
                 });
             } catch (syncError) {
-                console.error('Google sync failed:', syncError);
-                // Não falhar a criação se o sync falhar
+                console.warn("Falha ao sincronizar com Google Calendar:", syncError);
             }
 
             return event;
@@ -83,8 +82,7 @@ export const CreateEventModal = ({
             onClose();
             resetForm();
         },
-        onError: (error: any) => {
-            console.error('Create error:', error);
+        onError: (error: Error) => {
             toast.error('Erro ao criar evento: ' + error.message);
         },
     });
@@ -132,7 +130,7 @@ export const CreateEventModal = ({
                         <Label htmlFor="eventType" className="text-white">Tipo de Evento *</Label>
                         <Select
                             value={formData.eventType}
-                            onValueChange={(value: any) => setFormData({ ...formData, eventType: value })}
+                            onValueChange={(value: string) => setFormData({ ...formData, eventType: value as 'wedding' | 'social' | 'test' | 'blocked' })}
                         >
                             <SelectTrigger className="bg-neutral-800 border-neutral-700 text-white">
                                 <SelectValue />

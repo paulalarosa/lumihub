@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 /**
  * FilePreview Component
@@ -7,43 +7,49 @@
  * Supports zoomable images, copy URL, open in new tab, and download actions.
  */
 
-import { Button } from '@/components/ui/button';
-import { DownloadIcon, ExternalLinkIcon, FileIcon, LinkIcon, Copy, Check } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button'
+import {
+  DownloadIcon,
+  ExternalLinkIcon,
+  FileIcon,
+  LinkIcon,
+  Check,
+} from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { cn } from '@/lib/utils'
 
 /** Partial file structure from SDK */
 export interface PartialFile {
-  uri: string;
-  path?: string;
-  filename?: string;
-  content_type?: string;
-  size?: number;
+  uri: string
+  path?: string
+  filename?: string
+  content_type?: string
+  size?: number
 }
 
 export interface FilePreviewProps {
-  file: PartialFile;
-  index?: number;
-  onLoad?: () => void;
-  onError?: () => void;
+  file: PartialFile
+  index?: number
+  onLoad?: () => void
+  onError?: () => void
   /** Show action buttons on hover */
-  buttons?: boolean;
+  buttons?: boolean
   /** Allow clicking to interact */
-  clickable?: boolean;
+  clickable?: boolean
   /** Auto-play videos */
-  autoplay?: boolean;
+  autoplay?: boolean
   /** Object fit mode */
-  objectFit?: 'contain' | 'cover';
+  objectFit?: 'contain' | 'cover'
   /** Show card border */
-  card?: boolean;
+  card?: boolean
   /** Allow dragging */
-  draggable?: boolean;
-  className?: string;
+  draggable?: boolean
+  className?: string
 }
 
 /** Guess content type from URL extension */
 function guessContentType(uri: string): string | null {
-  const ext = uri.split('.').pop()?.toLowerCase().split('?')[0];
+  const ext = uri.split('.').pop()?.toLowerCase().split('?')[0]
   const mimeTypes: Record<string, string> = {
     // Images
     jpg: 'image/jpeg',
@@ -77,13 +83,13 @@ function guessContentType(uri: string): string | null {
     js: 'text/javascript',
     // Documents
     pdf: 'application/pdf',
-  };
-  return ext ? mimeTypes[ext] || null : null;
+  }
+  return ext ? mimeTypes[ext] || null : null
 }
 
 /** Get friendly type name from MIME type */
 function getFriendlyType(mime: string | undefined): string | null {
-  if (!mime) return null;
+  if (!mime) return null
 
   const friendlyNames: Record<string, string> = {
     'application/pdf': 'PDF',
@@ -99,29 +105,33 @@ function getFriendlyType(mime: string | undefined): string | null {
     'video/webm': 'WebM',
     'audio/mpeg': 'MP3',
     'audio/wav': 'WAV',
-  };
+  }
 
-  if (friendlyNames[mime]) return friendlyNames[mime];
+  if (friendlyNames[mime]) return friendlyNames[mime]
 
   // Fallback: extract subtype
-  const parts = mime.split('/');
+  const parts = mime.split('/')
   if (parts.length === 2) {
-    let subtype = parts[1].replace(/^x-/, '').replace(/^vnd\./, '').split('.')[0];
-    return subtype.charAt(0).toUpperCase() + subtype.slice(1);
+    const subtype = parts[1]
+      .replace(/^x-/, '')
+      .replace(/^vnd\./, '')
+      .split('.')[0]
+    return subtype.charAt(0).toUpperCase() + subtype.slice(1)
   }
-  return null;
+  return null
 }
 
 /** Get content category for rendering */
 function getContentCategory(
   contentType: string | undefined,
-  uri: string
+  _uri: string,
 ): 'image' | 'video' | 'audio' | 'text' | 'file' {
-  if (contentType?.startsWith('image/')) return 'image';
-  if (contentType?.startsWith('video/')) return 'video';
-  if (contentType?.startsWith('audio/')) return 'audio';
-  if (contentType === 'text/plain' || contentType === 'text/markdown') return 'text';
-  return 'file';
+  if (contentType?.startsWith('image/')) return 'image'
+  if (contentType?.startsWith('video/')) return 'video'
+  if (contentType?.startsWith('audio/')) return 'audio'
+  if (contentType === 'text/plain' || contentType === 'text/markdown')
+    return 'text'
+  return 'file'
 }
 
 export function FilePreview({
@@ -137,49 +147,49 @@ export function FilePreview({
   draggable = true,
   className,
 }: FilePreviewProps) {
-  const [contentType, setContentType] = useState(file.content_type);
-  const [copied, setCopied] = useState(false);
+  const [contentType, setContentType] = useState(file.content_type)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (!file.content_type) {
-      const guessed = guessContentType(file.uri);
+      const guessed = guessContentType(file.uri)
       if (guessed) {
-        setContentType(guessed);
+        setContentType(guessed)
       }
     }
-  }, [file.content_type, file.uri]);
+  }, [file.content_type, file.uri])
 
   const handleDragStart = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      if (!draggable) return;
-      e.dataTransfer.setData('text/uri-list', file.uri);
-      e.dataTransfer.setData('text/plain', file.uri);
-      e.dataTransfer.effectAllowed = 'copyMove';
+      if (!draggable) return
+      e.dataTransfer.setData('text/uri-list', file.uri)
+      e.dataTransfer.setData('text/plain', file.uri)
+      e.dataTransfer.effectAllowed = 'copyMove'
     },
-    [draggable, file.uri]
-  );
+    [draggable, file.uri],
+  )
 
   const handleCopyUrl = useCallback(
     (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      navigator.clipboard.writeText(file.uri);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      e.preventDefault()
+      e.stopPropagation()
+      navigator.clipboard.writeText(file.uri)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
     },
-    [file.uri]
-  );
+    [file.uri],
+  )
 
   const handleOpenExternal = useCallback(
     (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      window.open(file.uri, '_blank');
+      e.preventDefault()
+      e.stopPropagation()
+      window.open(file.uri, '_blank')
     },
-    [file.uri]
-  );
+    [file.uri],
+  )
 
-  const category = getContentCategory(contentType, file.uri);
+  const category = getContentCategory(contentType, file.uri)
 
   const renderContent = () => {
     switch (category) {
@@ -190,12 +200,12 @@ export function FilePreview({
             alt={file.filename || 'Image'}
             className={cn(
               'rounded-md w-full h-full',
-              objectFit === 'cover' ? 'object-cover' : 'object-contain'
+              objectFit === 'cover' ? 'object-cover' : 'object-contain',
             )}
             onLoad={onLoad}
             onError={() => onError?.()}
           />
-        );
+        )
 
       case 'video':
         return (
@@ -208,7 +218,7 @@ export function FilePreview({
             playsInline={autoplay}
             className={cn(
               'rounded-md w-full h-full',
-              objectFit === 'cover' ? 'object-cover' : 'object-contain'
+              objectFit === 'cover' ? 'object-cover' : 'object-contain',
             )}
             onLoadedData={onLoad}
             onError={() => onError?.()}
@@ -216,28 +226,33 @@ export function FilePreview({
             <source src={file.uri} type={contentType || undefined} />
             Your browser does not support the video tag.
           </video>
-        );
+        )
 
       case 'audio':
         return (
           <div className="flex items-center justify-center p-4 w-full">
-            <audio controls className="w-full max-w-md" onLoadedData={onLoad} onError={() => onError?.()}>
+            <audio
+              controls
+              className="w-full max-w-md"
+              onLoadedData={onLoad}
+              onError={() => onError?.()}
+            >
               <source src={file.uri} type={contentType || undefined} />
               Your browser does not support the audio tag.
             </audio>
           </div>
-        );
+        )
 
       case 'text':
         return (
           <div className="p-4 font-mono text-xs whitespace-pre-wrap break-words max-h-[300px] overflow-y-auto text-muted-foreground">
             <TextPreview url={file.uri} onLoad={onLoad} onError={onError} />
           </div>
-        );
+        )
 
       case 'file':
-      default:
-        const friendlyType = getFriendlyType(contentType);
+      default: {
+        const friendlyType = getFriendlyType(contentType)
         return (
           <div
             className="flex flex-col items-center justify-center gap-2 p-4 w-full h-full min-h-[120px] text-xs text-muted-foreground cursor-pointer hover:bg-muted/10 transition-colors"
@@ -247,11 +262,16 @@ export function FilePreview({
             <span className="text-foreground font-mono text-center truncate max-w-full px-2">
               {file.filename || 'Unknown file'}
             </span>
-            {friendlyType && <span className="text-muted-foreground/60 text-[10px]">{friendlyType}</span>}
+            {friendlyType && (
+              <span className="text-muted-foreground/60 text-[10px]">
+                {friendlyType}
+              </span>
+            )}
           </div>
-        );
+        )
+      }
     }
-  };
+  }
 
   return (
     <div
@@ -260,7 +280,7 @@ export function FilePreview({
         'relative w-full h-full group overflow-hidden',
         card && 'border rounded-xl bg-background',
         draggable && 'cursor-grab active:cursor-grabbing',
-        className
+        className,
       )}
       draggable={draggable}
       onDragStart={handleDragStart}
@@ -275,7 +295,11 @@ export function FilePreview({
             className="h-8 w-8"
             title="Copy URL"
           >
-            {copied ? <Check className="h-3 w-3 text-green-500" /> : <LinkIcon className="h-3 w-3" />}
+            {copied ? (
+              <Check className="h-3 w-3 text-green-500" />
+            ) : (
+              <LinkIcon className="h-3 w-3" />
+            )}
           </Button>
           <Button
             onClick={handleOpenExternal}
@@ -298,7 +322,7 @@ export function FilePreview({
         </div>
       )}
     </div>
-  );
+  )
 }
 
 /** Simple text preview that fetches and displays text content */
@@ -307,30 +331,32 @@ function TextPreview({
   onLoad,
   onError,
 }: {
-  url: string;
-  onLoad?: () => void;
-  onError?: () => void;
+  url: string
+  onLoad?: () => void
+  onError?: () => void
 }) {
-  const [content, setContent] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [content, setContent] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch(url)
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch');
-        return res.text();
+        if (!res.ok) throw new Error('Failed to fetch')
+        return res.text()
       })
       .then((text) => {
-        setContent(text);
-        onLoad?.();
+        setContent(text)
+        onLoad?.()
       })
       .catch((err) => {
-        setError(err.message);
-        onError?.();
-      });
-  }, [url, onLoad, onError]);
+        setError(err.message)
+        onError?.()
+      })
+  }, [url, onLoad, onError])
 
-  if (error) return <span className="text-red-500">Failed to load: {error}</span>;
-  if (content === null) return <span className="text-muted-foreground/50">Loading...</span>;
-  return <>{content}</>;
+  if (error)
+    return <span className="text-red-500">Failed to load: {error}</span>
+  if (content === null)
+    return <span className="text-muted-foreground/50">Loading...</span>
+  return <>{content}</>
 }

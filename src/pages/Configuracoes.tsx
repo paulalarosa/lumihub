@@ -1,26 +1,32 @@
-import MessageTemplatesSettings from '@/components/settings/MessageTemplatesSettings';
-import AISettings from '@/components/settings/AISettings';
-import IntegrationsTab from '@/components/settings/IntegrationsTab';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Upload, Briefcase } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useConfiguracoes } from '@/hooks/useConfiguracoes';
+import { AutomationTabNoir } from '@/components/settings/AutomationTabNoir'
+import AISettings from '@/components/settings/AISettings'
+import IntegrationsTab from '@/components/settings/IntegrationsTab'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ArrowLeft, Upload, Briefcase } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useConfiguracoes } from '@/hooks/useConfiguracoes'
 
 export default function Configuracoes() {
-  const cfg = useConfiguracoes();
+  const cfg = useConfiguracoes()
 
   if (cfg.loading || cfg.loadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
-    );
+    )
   }
 
   return (
@@ -28,17 +34,28 @@ export default function Configuracoes() {
       <header className="border-b border-border bg-background px-6 py-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-4">
           <Link to="/dashboard">
-            <Button variant="ghost" size="icon" className="rounded-none hover:bg-muted text-muted-foreground hover:text-foreground">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-none hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
           <div>
-            <h1 className="text-xl font-serif font-bold text-foreground tracking-tight">SYSTEM CONFIG</h1>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Control Panel // v2.0</p>
+            <h1 className="text-xl font-serif font-bold text-foreground tracking-tight">
+              SYSTEM CONFIG
+            </h1>
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+              Control Panel // v2.0
+            </p>
           </div>
         </div>
-        <Button onClick={cfg.saveSettings} disabled={cfg.saving}
-          className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-xs uppercase tracking-widest px-6">
+        <Button
+          onClick={cfg.saveSettings}
+          disabled={cfg.saving}
+          className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-xs uppercase tracking-widest px-6"
+        >
           {cfg.saving ? 'PROCESSING...' : 'SAVE_CHANGES'}
         </Button>
       </header>
@@ -46,20 +63,59 @@ export default function Configuracoes() {
       <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
         <Tabs defaultValue="perfil" className="w-full space-y-8">
           <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-white/10 h-auto p-0 mb-8 overflow-x-auto">
-            {['Perfil', 'Negócio', 'Bancário', 'Automação', 'IA', 'Integrações', 'Assinatura'].map((tab) => (
-              <TabsTrigger
-                key={tab}
-                value={tab.toLowerCase().replace('ó', 'o').replace('á', 'a')}
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-2 py-4 font-mono text-xs uppercase tracking-widest">
-                {tab === 'Negócio' ? 'NEGÓCIO' : tab === 'Bancário' ? 'DADOS BANCÁRIOS' : tab === 'Automação' ? 'AUTOMAÇÃO' : tab === 'Integrações' ? 'INTEGRAÇÕES' : tab.toUpperCase()}
-              </TabsTrigger>
-            ))}
+            <TabsTrigger
+              value="perfil"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              PERFIL
+            </TabsTrigger>
+            <TabsTrigger
+              value="negocio"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              NEGÓCIO
+            </TabsTrigger>
+            <TabsTrigger
+              value="banco"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              DADOS BANCÁRIOS
+            </TabsTrigger>
+            <TabsTrigger
+              value="automacao"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              AUTOMAÇÃO
+            </TabsTrigger>
+            <TabsTrigger
+              value="ia"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              IA
+            </TabsTrigger>
+            <TabsTrigger
+              value="integracoes"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              INTEGRAÇÕES
+            </TabsTrigger>
+            <TabsTrigger
+              value="assinatura"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              ASSINATURA
+            </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="perfil" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="perfil"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="col-span-1 border-border bg-card rounded-none shadow-none">
-                <CardHeader><CardTitle className="font-serif text-lg">Avatar</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">Avatar</CardTitle>
+                </CardHeader>
                 <CardContent className="flex flex-col items-center">
                   <Avatar className="h-40 w-40 rounded-none border border-border mb-6">
                     <AvatarImage src={cfg.user?.user_metadata?.avatar_url} />
@@ -67,48 +123,88 @@ export default function Configuracoes() {
                       {cfg.user?.email?.[0].toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <p className="text-xs text-muted-foreground font-mono text-center mb-4">SQUARE RATIO <br /> 500x500px RECOMENDADO</p>
+                  <p className="text-xs text-muted-foreground font-mono text-center mb-4">
+                    SQUARE RATIO <br /> 500x500px RECOMENDADO
+                  </p>
                 </CardContent>
               </Card>
 
               <Card className="col-span-2 border-border bg-card rounded-none shadow-none">
                 <CardHeader>
-                  <CardTitle className="font-serif text-lg">Dados Pessoais</CardTitle>
-                  <CardDescription className="font-mono text-xs uppercase tracking-widest">Credenciais de Acesso</CardDescription>
+                  <CardTitle className="font-serif text-lg">
+                    Dados Pessoais
+                  </CardTitle>
+                  <CardDescription className="font-mono text-xs uppercase tracking-widest">
+                    Credenciais de Acesso
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Nome Completo</Label>
-                    <Input value={cfg.fullName} onChange={e => cfg.setFullName(e.target.value)}
-                      className="rounded-none border-border bg-background focus-visible:ring-0 focus-visible:border-foreground" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Nome Completo
+                    </Label>
+                    <Input
+                      value={cfg.fullName}
+                      onChange={(e) => cfg.setFullName(e.target.value)}
+                      className="rounded-none border-border bg-background focus-visible:ring-0 focus-visible:border-foreground"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">E-mail (ID)</Label>
-                    <Input value={cfg.user?.email} disabled className="rounded-none border-border bg-muted/50 text-muted-foreground cursor-not-allowed" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      E-mail (ID)
+                    </Label>
+                    <Input
+                      value={cfg.user?.email}
+                      disabled
+                      className="rounded-none border-border bg-muted/50 text-muted-foreground cursor-not-allowed"
+                    />
                   </div>
                   <div className="pt-4 border-t border-border">
-                    <Button variant="outline" className="rounded-none w-full font-mono text-xs uppercase tracking-widest border-border hover:bg-muted">Redefinir Senha</Button>
+                    <Button
+                      variant="outline"
+                      className="rounded-none w-full font-mono text-xs uppercase tracking-widest border-border hover:bg-muted"
+                    >
+                      Redefinir Senha
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
-          <TabsContent value="negocio" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="negocio"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <Card className="border-border bg-card rounded-none shadow-none">
-              <CardHeader><CardTitle className="font-serif text-lg">Identidade Visual</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="font-serif text-lg">
+                  Identidade Visual
+                </CardTitle>
+              </CardHeader>
               <CardContent className="space-y-8">
                 <div className="flex items-start gap-8">
                   <div className="w-32 h-32 border border-dashed border-border flex items-center justify-center bg-muted/20 relative group">
                     {cfg.logoUrl ? (
-                      <img src={cfg.logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                      <img
+                        src={cfg.logoUrl}
+                        alt="Logo"
+                        className="w-full h-full object-contain p-2"
+                      />
                     ) : (
                       <div className="text-center">
                         <Upload className="h-6 w-6 mx-auto text-muted-foreground mb-2" />
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase">Upload</span>
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase">
+                          Upload
+                        </span>
                       </div>
                     )}
-                    <input type="file" accept="image/*" onChange={cfg.handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={cfg.handleLogoUpload}
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                    />
                     {cfg.uploadingLogo && (
                       <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-foreground"></div>
@@ -117,16 +213,31 @@ export default function Configuracoes() {
                   </div>
                   <div className="flex-1 space-y-4">
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Nome do Negócio</Label>
-                      <Input value={cfg.businessName} onChange={e => cfg.setBusinessName(e.target.value)}
-                        className="rounded-none border-border bg-background font-serif text-lg" placeholder="EX: SILVA BEAUTY STUDIO" />
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Nome do Negócio
+                      </Label>
+                      <Input
+                        value={cfg.businessName}
+                        onChange={(e) => cfg.setBusinessName(e.target.value)}
+                        className="rounded-none border-border bg-background font-serif text-lg"
+                        placeholder="EX: SILVA BEAUTY STUDIO"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Cor da Marca (HEX)</Label>
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Cor da Marca (HEX)
+                      </Label>
                       <div className="flex gap-2">
-                        <div className="w-10 h-10 border border-border" style={{ backgroundColor: cfg.primaryColor }} />
-                        <Input value={cfg.primaryColor} onChange={e => cfg.setPrimaryColor(e.target.value)}
-                          className="rounded-none border-border bg-background font-mono" placeholder="#000000" />
+                        <div
+                          className="w-10 h-10 border border-border"
+                          style={{ backgroundColor: cfg.primaryColor }}
+                        />
+                        <Input
+                          value={cfg.primaryColor}
+                          onChange={(e) => cfg.setPrimaryColor(e.target.value)}
+                          className="rounded-none border-border bg-background font-mono"
+                          placeholder="#000000"
+                        />
                       </div>
                     </div>
                   </div>
@@ -134,34 +245,64 @@ export default function Configuracoes() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-border">
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Instagram</Label>
-                    <Input value={cfg.instagram} onChange={e => cfg.setInstagram(e.target.value)} className="rounded-none border-border bg-background" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Instagram
+                    </Label>
+                    <Input
+                      value={cfg.instagram}
+                      onChange={(e) => cfg.setInstagram(e.target.value)}
+                      className="rounded-none border-border bg-background"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Website</Label>
-                    <Input value={cfg.website} onChange={e => cfg.setWebsite(e.target.value)} className="rounded-none border-border bg-background" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Website
+                    </Label>
+                    <Input
+                      value={cfg.website}
+                      onChange={(e) => cfg.setWebsite(e.target.value)}
+                      className="rounded-none border-border bg-background"
+                    />
                   </div>
                   <div className="col-span-2 space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Bio / Sobre</Label>
-                    <Textarea value={cfg.bio} onChange={e => cfg.setBio(e.target.value)} className="rounded-none border-border bg-background min-h-[100px]" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Bio / Sobre
+                    </Label>
+                    <Textarea
+                      value={cfg.bio}
+                      onChange={(e) => cfg.setBio(e.target.value)}
+                      className="rounded-none border-border bg-background min-h-[100px]"
+                    />
                   </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          <TabsContent value="banco" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="banco"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card className="border-border bg-card rounded-none shadow-none">
                 <CardHeader>
-                  <CardTitle className="font-serif text-lg">Chave PIX</CardTitle>
-                  <CardDescription className="font-mono text-[10px] uppercase">Principal método de recebimento</CardDescription>
+                  <CardTitle className="font-serif text-lg">
+                    Chave PIX
+                  </CardTitle>
+                  <CardDescription className="font-mono text-[10px] uppercase">
+                    Principal método de recebimento
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Tipo</Label>
-                    <select className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
-                      value={cfg.pixKeyType} onChange={e => cfg.setPixKeyType(e.target.value)}>
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Tipo
+                    </Label>
+                    <select
+                      className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
+                      value={cfg.pixKeyType}
+                      onChange={(e) => cfg.setPixKeyType(e.target.value)}
+                    >
                       <option value="">SELECIONE...</option>
                       <option value="cpf">CPF</option>
                       <option value="cnpj">CNPJ</option>
@@ -171,22 +312,37 @@ export default function Configuracoes() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Chave</Label>
-                    <Input value={cfg.pixKey} onChange={e => cfg.setPixKey(e.target.value)} className="rounded-none border-border bg-background" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Chave
+                    </Label>
+                    <Input
+                      value={cfg.pixKey}
+                      onChange={(e) => cfg.setPixKey(e.target.value)}
+                      className="rounded-none border-border bg-background"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="border-border bg-card rounded-none shadow-none">
                 <CardHeader>
-                  <CardTitle className="font-serif text-lg">Conta Digital</CardTitle>
-                  <CardDescription className="font-mono text-[10px] uppercase">Integração Gateway</CardDescription>
+                  <CardTitle className="font-serif text-lg">
+                    Conta Digital
+                  </CardTitle>
+                  <CardDescription className="font-mono text-[10px] uppercase">
+                    Integração Gateway
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Plataforma</Label>
-                    <select className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
-                      value={cfg.digitalWalletType} onChange={e => cfg.setDigitalWalletType(e.target.value)}>
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Plataforma
+                    </Label>
+                    <select
+                      className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
+                      value={cfg.digitalWalletType}
+                      onChange={(e) => cfg.setDigitalWalletType(e.target.value)}
+                    >
                       <option value="">SELECIONE...</option>
                       <option value="banco">BANCO TRADICIONAL</option>
                       <option value="pagbank">PAGBANK</option>
@@ -194,32 +350,67 @@ export default function Configuracoes() {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">Conta / Email</Label>
-                    <Input value={cfg.digitalWalletAccount} onChange={e => cfg.setDigitalWalletAccount(e.target.value)} className="rounded-none border-border bg-background" />
+                    <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                      Conta / Email
+                    </Label>
+                    <Input
+                      value={cfg.digitalWalletAccount}
+                      onChange={(e) =>
+                        cfg.setDigitalWalletAccount(e.target.value)
+                      }
+                      className="rounded-none border-border bg-background"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
               <Card className="col-span-1 md:col-span-2 border-border bg-card rounded-none shadow-none">
-                <CardHeader><CardTitle className="font-serif text-lg">Dados Bancários (TED/DOC)</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="font-serif text-lg">
+                    Dados Bancários (TED/DOC)
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Banco</Label>
-                      <Input value={cfg.bankName} onChange={e => cfg.setBankName(e.target.value)} className="rounded-none border-border bg-background" />
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Banco
+                      </Label>
+                      <Input
+                        value={cfg.bankName}
+                        onChange={(e) => cfg.setBankName(e.target.value)}
+                        className="rounded-none border-border bg-background"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Agência</Label>
-                      <Input value={cfg.agency} onChange={e => cfg.setAgency(e.target.value)} className="rounded-none border-border bg-background" />
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Agência
+                      </Label>
+                      <Input
+                        value={cfg.agency}
+                        onChange={(e) => cfg.setAgency(e.target.value)}
+                        className="rounded-none border-border bg-background"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Conta</Label>
-                      <Input value={cfg.accountNumber} onChange={e => cfg.setAccountNumber(e.target.value)} className="rounded-none border-border bg-background" />
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Conta
+                      </Label>
+                      <Input
+                        value={cfg.accountNumber}
+                        onChange={(e) => cfg.setAccountNumber(e.target.value)}
+                        className="rounded-none border-border bg-background"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">Tipo</Label>
-                      <select className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
-                        value={cfg.accountType} onChange={e => cfg.setAccountType(e.target.value)}>
+                      <Label className="font-mono text-[10px] uppercase text-muted-foreground">
+                        Tipo
+                      </Label>
+                      <select
+                        className="w-full h-10 px-3 rounded-none border border-border bg-background text-foreground font-mono text-sm uppercase focus:border-foreground appearance-none"
+                        value={cfg.accountType}
+                        onChange={(e) => cfg.setAccountType(e.target.value)}
+                      >
                         <option value="checking">CORRENTE</option>
                         <option value="savings">POUPANÇA</option>
                       </select>
@@ -230,11 +421,17 @@ export default function Configuracoes() {
             </div>
           </TabsContent>
 
-          <TabsContent value="automacao" className="space-y-6 focus-visible:outline-none">
-            <MessageTemplatesSettings />
+          <TabsContent
+            value="automacao"
+            className="space-y-6 focus-visible:outline-none"
+          >
+            <AutomationTabNoir />
           </TabsContent>
 
-          <TabsContent value="ia" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="ia"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <AISettings
               provider={cfg.aiProvider}
               setProvider={cfg.setAiProvider}
@@ -247,15 +444,23 @@ export default function Configuracoes() {
             />
           </TabsContent>
 
-          <TabsContent value="integracoes" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="integracoes"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <IntegrationsTab />
           </TabsContent>
 
-          <TabsContent value="assinatura" className="space-y-6 focus-visible:outline-none">
+          <TabsContent
+            value="assinatura"
+            className="space-y-6 focus-visible:outline-none"
+          >
             <Card className="border-border bg-card rounded-none shadow-none">
               <CardHeader>
                 <CardTitle className="font-serif text-lg">Seu Plano</CardTitle>
-                <CardDescription className="font-mono text-xs uppercase tracking-widest">Detalhes da Assinatura</CardDescription>
+                <CardDescription className="font-mono text-xs uppercase tracking-widest">
+                  Detalhes da Assinatura
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="p-6 border border-border bg-muted/20 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -265,16 +470,26 @@ export default function Configuracoes() {
                       <span className="font-serif text-2xl font-bold">PRO</span>
                     </div>
                     <p className="text-muted-foreground text-sm font-mono max-w-md">
-                      Acesso total a todas as funcionalidades, suporte prioritário e taxas reduzidas.
+                      Acesso total a todas as funcionalidades, suporte
+                      prioritário e taxas reduzidas.
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-muted-foreground font-mono uppercase mb-1">Status</p>
-                    <span className="inline-block px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 font-mono text-xs uppercase rounded-none">ATIVE</span>
+                    <p className="text-sm text-muted-foreground font-mono uppercase mb-1">
+                      Status
+                    </p>
+                    <span className="inline-block px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 font-mono text-xs uppercase rounded-none">
+                      ATIVE
+                    </span>
                   </div>
                 </div>
                 <div className="mt-6 flex justify-end">
-                  <Button variant="outline" className="rounded-none font-mono text-xs uppercase tracking-widest border-border">Gerenciar Assinatura</Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-none font-mono text-xs uppercase tracking-widest border-border"
+                  >
+                    Gerenciar Assinatura
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -282,5 +497,5 @@ export default function Configuracoes() {
         </Tabs>
       </main>
     </div>
-  );
+  )
 }

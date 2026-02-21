@@ -1,4 +1,4 @@
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 
 // Extend the Database interface to include missing tables if needed, 
 // or define loose types for them. Since we can't easily extend the types.ts directly

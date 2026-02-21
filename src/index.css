@@ -1,6 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
-@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..800&display=swap");
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,7 +69,7 @@
 
     --font-sans: 'Inter', system-ui, sans-serif;
     --font-serif: 'Playfair Display', serif;
-    --font-mono: 'JetBrains Mono', 'Roboto Mono', monospace;
+    --font-mono: 'Inter', system-ui, sans-serif;
   }
 
   .dark {
@@ -754,12 +752,39 @@ textarea:focus {
   color: #ffffff !important;
 }
 
+.rbc-toolbar {
+  margin-bottom: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.rbc-toolbar button {
+  @apply rounded-none border border-white/20 text-white uppercase tracking-widest text-[10px] font-bold py-2 px-4 transition-all duration-200;
+  background: transparent !important;
+}
+
+.rbc-toolbar button:hover {
+  @apply bg-white text-black border-white !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-white text-black border-white !important;
+  box-shadow: none !important;
+}
+
+.rbc-toolbar-label {
+  @apply font-serif text-lg sm:text-2xl uppercase tracking-tighter text-white !important;
+}
+
 .rbc-header {
   text-transform: uppercase !important;
-  font-size: 0.75rem !important;
-  letter-spacing: 0.1em !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.15em !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  padding: 10px !important;
+  padding: 15px 10px !important;
+  background: #000 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .rbc-today {
@@ -777,6 +802,7 @@ textarea:focus {
   border: 1px solid #ffffff !important;
   font-weight: bold !important;
   font-size: 0.75rem !important;
+  padding: 4px 8px !important;
 }
 
 .rbc-event.rbc-selected {
@@ -795,10 +821,30 @@ textarea:focus {
   border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+.rbc-time-header {
+  margin-right: 0 !important;
+}
+
 .rbc-time-header-content {
   border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .rbc-time-content {
   border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  min-height: 60px !important;
+  /* Larger slots for better spacing */
+}
+
+.rbc-time-slot {
+  border-top: 1px solid rgba(255, 255, 255, 0.02) !important;
+}
+
+.rbc-time-gutter .rbc-timeslot-group {
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-size: 0.7rem !important;
+  color: rgba(255, 255, 255, 0.4) !important;
 }

@@ -1,32 +1,32 @@
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar } from "@/components/ui/calendar";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { User, Phone, Mail, Plus, Minus } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import { Calendar } from '@/components/ui/calendar'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { User, Mail, Plus, Minus } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface Assistant {
-  id: string;
-  name: string;
-  email: string | null;
-  phone: string | null;
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
 }
 
-import { Event } from '@/hooks/useEvents';
+import { Event } from '@/hooks/useEvents'
 
-export type CalendarSize = 'small' | 'medium' | 'large';
+export type CalendarSize = 'small' | 'medium' | 'large'
 
 interface CalendarSidebarProps {
-  currentDate: Date;
-  selectedDate: Date | null;
-  onDateSelect: (date: Date) => void;
-  onMonthChange: (date: Date) => void;
-  onClearDateFilter?: () => void;
-  assistants: Assistant[];
-  events: Event[];
-  calendarSize?: CalendarSize;
-  onCalendarSizeChange?: (size: CalendarSize) => void;
+  currentDate: Date
+  selectedDate: Date | null
+  onDateSelect: (date: Date) => void
+  onMonthChange: (date: Date) => void
+  onClearDateFilter?: () => void
+  assistants: Assistant[]
+  events: Event[]
+  calendarSize?: CalendarSize
+  onCalendarSizeChange?: (size: CalendarSize) => void
 }
 
 export function CalendarSidebar({
@@ -41,34 +41,39 @@ export function CalendarSidebar({
   onCalendarSizeChange,
 }: CalendarSidebarProps) {
   // Create a map of dates with events for highlighting
-  const eventDates = events.reduce((acc, event) => {
-    const dateStr = event.event_date;
-    if (!acc[dateStr]) {
-      acc[dateStr] = [];
-    }
-    acc[dateStr].push(event.color || '#FFFFFF');
-    return acc;
-  }, {} as Record<string, string[]>);
+  const eventDates = events.reduce(
+    (acc, event) => {
+      const dateStr = event.event_date
+      if (!acc[dateStr]) {
+        acc[dateStr] = []
+      }
+      acc[dateStr].push(event.color || '#FFFFFF')
+      return acc
+    },
+    {} as Record<string, string[]>,
+  )
 
   const handleIncreaseSize = () => {
     if (onCalendarSizeChange) {
-      if (calendarSize === 'small') onCalendarSizeChange('medium');
-      else if (calendarSize === 'medium') onCalendarSizeChange('large');
+      if (calendarSize === 'small') onCalendarSizeChange('medium')
+      else if (calendarSize === 'medium') onCalendarSizeChange('large')
     }
-  };
+  }
 
   const handleDecreaseSize = () => {
     if (onCalendarSizeChange) {
-      if (calendarSize === 'large') onCalendarSizeChange('medium');
-      else if (calendarSize === 'medium') onCalendarSizeChange('small');
+      if (calendarSize === 'large') onCalendarSizeChange('medium')
+      else if (calendarSize === 'medium') onCalendarSizeChange('small')
     }
-  };
+  }
 
   const calendarClassName = cn(
-    "w-full transition-all duration-200",
-    calendarSize === 'medium' && "[&_.rdp-cell]:p-1 [&_.rdp-day]:h-10 [&_.rdp-day]:w-10",
-    calendarSize === 'large' && "[&_.rdp-cell]:p-1.5 [&_.rdp-day]:h-12 [&_.rdp-day]:w-12 [&_.rdp-head_cell]:text-sm"
-  );
+    'w-full transition-all duration-200',
+    calendarSize === 'medium' &&
+      '[&_.rdp-cell]:p-1 [&_.rdp-day]:h-10 [&_.rdp-day]:w-10',
+    calendarSize === 'large' &&
+      '[&_.rdp-cell]:p-1.5 [&_.rdp-day]:h-12 [&_.rdp-day]:w-12 [&_.rdp-head_cell]:text-sm',
+  )
 
   return (
     <div className="flex flex-col h-full font-mono">
@@ -114,13 +119,15 @@ export function CalendarSidebar({
           locale={ptBR}
           className={calendarClassName}
           classNames={{
-            day_selected: "bg-white text-black hover:bg-white/90 focus:bg-white focus:text-black rounded-none",
-            day_today: "bg-transparent border border-white text-white rounded-none",
+            day_selected:
+              'bg-white text-black hover:bg-white/90 focus:bg-white focus:text-black rounded-none',
+            day_today:
+              'bg-transparent border border-white text-white rounded-none',
           }}
           modifiers={{
             hasEvent: (date) => {
-              const dateStr = format(date, 'yyyy-MM-dd');
-              return !!eventDates[dateStr];
+              const dateStr = format(date, 'yyyy-MM-dd')
+              return !!eventDates[dateStr]
             },
           }}
           modifiersStyles={{
@@ -159,7 +166,9 @@ export function CalendarSidebar({
                     <User className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-mono text-xs uppercase truncate text-white">{assistant.name}</p>
+                    <p className="font-mono text-xs uppercase truncate text-white">
+                      {assistant.name}
+                    </p>
                     {assistant.email && (
                       <p className="text-[10px] text-white/50 flex items-center gap-1 truncate font-mono">
                         <Mail className="h-3 w-3 shrink-0" />
@@ -176,7 +185,9 @@ export function CalendarSidebar({
 
       {/* Legend */}
       <div className="mt-4 border border-white/20 rounded-none p-3 bg-black">
-        <h3 className="font-mono text-xs uppercase tracking-widest mb-2 text-white">EVENT_TYPES</h3>
+        <h3 className="font-mono text-xs uppercase tracking-widest mb-2 text-white">
+          EVENT_TYPES
+        </h3>
         <div className="space-y-1.5">
           <div className="flex items-center gap-2 text-xs font-mono uppercase text-white/70">
             <div className="w-2 h-2 rounded-none bg-white" />
@@ -193,5 +204,5 @@ export function CalendarSidebar({
         </div>
       </div>
     </div>
-  );
+  )
 }

@@ -34,7 +34,7 @@ serve(async (req) => {
         }
 
         let messageSid = "mock_sid_" + Date.now();
-        let status = "sent";
+        const status = "sent";
 
         // Check if Twilio is configured
         if (TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_PHONE_NUMBER) {

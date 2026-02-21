@@ -45,3 +45,10 @@ storybook-static
 *.bak
 *.old
 .env*
+
+# Cleanup Logs
+*.log
+build_log*.txt
+structure_log.txt
+estrutura.txt
+

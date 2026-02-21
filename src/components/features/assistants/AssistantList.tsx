@@ -40,10 +40,7 @@ export const AssistantList = () => {
                 .eq('makeup_artist_id', makeupArtistId)
                 .eq('status', 'active');
 
-            if (error) {
-                console.error('Error fetching assistants:', error);
-                throw error;
-            }
+            if (error) throw error;
 
             // Fetch PENDING invites
             const { data: invitesData, error: inviteError } = await supabase
@@ -73,7 +70,7 @@ export const AssistantList = () => {
             toast({ title: 'Acesso revogado.' });
             refetch();
         } catch (e) {
-            toast({ title: 'Erro ao revogar', description: e.message, variant: 'destructive' });
+            toast({ title: 'Erro ao revogar', description: e instanceof Error ? e.message : 'Erro desconhecido', variant: 'destructive' });
         }
     };
 
@@ -88,7 +85,7 @@ export const AssistantList = () => {
             toast({ title: 'Convite cancelado.' });
             refetch();
         } catch (e) {
-            toast({ title: 'Erro ao cancelar', description: e.message, variant: 'destructive' });
+            toast({ title: 'Erro ao cancelar', description: e instanceof Error ? e.message : 'Erro desconhecido', variant: 'destructive' });
         }
     };
 

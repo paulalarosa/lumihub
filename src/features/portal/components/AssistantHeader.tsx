@@ -1,27 +1,31 @@
-import { LogOut, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { LogOut } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+} from '@/components/ui/dropdown-menu'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
 interface AssistantHeaderProps {
-  assistantName: string;
-  professionalName: string;
-  onLogout: () => void;
+  assistantName: string
+  professionalName: string
+  onLogout: () => void
 }
 
-const AssistantHeader = ({ assistantName, professionalName, onLogout }: AssistantHeaderProps) => {
+const AssistantHeader = ({
+  assistantName,
+  professionalName,
+  onLogout,
+}: AssistantHeaderProps) => {
   const initials = assistantName
-    .split(" ")
+    .split(' ')
     .map((n) => n[0])
-    .join("")
+    .join('')
     .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2)
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -29,7 +33,9 @@ const AssistantHeader = ({ assistantName, professionalName, onLogout }: Assistan
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">B</span>
+              <span className="text-primary-foreground font-bold text-sm">
+                B
+              </span>
             </div>
             <span className="font-semibold hidden sm:inline">BeautyHub</span>
           </div>
@@ -40,7 +46,9 @@ const AssistantHeader = ({ assistantName, professionalName, onLogout }: Assistan
 
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className="hidden md:inline">Equipe de</span>
-          <span className="font-medium text-foreground">{professionalName}</span>
+          <span className="font-medium text-foreground">
+            {professionalName}
+          </span>
         </div>
 
         <DropdownMenu>
@@ -60,7 +68,10 @@ const AssistantHeader = ({ assistantName, professionalName, onLogout }: Assistan
                 <p className="text-xs text-muted-foreground">Assistente</p>
               </div>
             </div>
-            <DropdownMenuItem onClick={onLogout} className="text-destructive cursor-pointer">
+            <DropdownMenuItem
+              onClick={onLogout}
+              className="text-destructive cursor-pointer"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
@@ -68,7 +79,7 @@ const AssistantHeader = ({ assistantName, professionalName, onLogout }: Assistan
         </DropdownMenu>
       </div>
     </header>
-  );
-};
+  )
+}
 
-export default AssistantHeader;
+export default AssistantHeader

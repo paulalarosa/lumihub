@@ -1,7 +1,7 @@
 // API Response Types
 // Centralized type definitions for API responses and external data
 
-import { Database } from '@/integrations/supabase/types';
+import { Database } from '@/types/supabase';
 
 // Supabase Table Types (shortcuts)
 // Supabase Table Types (shortcuts)

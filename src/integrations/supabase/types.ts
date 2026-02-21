@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.1"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -177,6 +172,7 @@ export type Database = {
           accepted_at: string | null
           assistant_email: string
           created_at: string | null
+          email_status: string | null
           expires_at: string | null
           id: string
           invite_token: string
@@ -187,6 +183,7 @@ export type Database = {
           accepted_at?: string | null
           assistant_email: string
           created_at?: string | null
+          email_status?: string | null
           expires_at?: string | null
           id?: string
           invite_token?: string
@@ -197,6 +194,7 @@ export type Database = {
           accepted_at?: string | null
           assistant_email?: string
           created_at?: string | null
+          email_status?: string | null
           expires_at?: string | null
           id?: string
           invite_token?: string
@@ -318,6 +316,78 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string
+          source: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id: string
+          source?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string
+          source?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      audit_logs_archive: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string
+          source: string | null
+          table_name: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id: string
+          source?: string | null
+          table_name: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string
+          source?: string | null
+          table_name?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       backup_integrity_logs: {
         Row: {
           action: string
@@ -418,6 +488,74 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "briefings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendar_events: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          end_time: string
+          event_type: string | null
+          google_calendar_id: string | null
+          google_event_id: string | null
+          id: string
+          is_synced: boolean | null
+          last_synced_at: string | null
+          location: string | null
+          project_id: string | null
+          start_time: string
+          status: string | null
+          sync_error: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          end_time: string
+          event_type?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          location?: string | null
+          project_id?: string | null
+          start_time: string
+          status?: string | null
+          sync_error?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          end_time?: string
+          event_type?: string | null
+          google_calendar_id?: string | null
+          google_event_id?: string | null
+          id?: string
+          is_synced?: boolean | null
+          last_synced_at?: string | null
+          location?: string | null
+          project_id?: string | null
+          start_time?: string
+          status?: string | null
+          sync_error?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
@@ -688,6 +826,54 @@ export type Database = {
         }
         Relationships: []
       }
+      google_calendar_tokens: {
+        Row: {
+          access_token: string
+          calendar_id: string | null
+          channel_expiry: string | null
+          channel_id: string | null
+          created_at: string | null
+          id: string
+          last_sync_at: string | null
+          refresh_token: string
+          resource_id: string | null
+          sync_token: string | null
+          token_expiry: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          calendar_id?: string | null
+          channel_expiry?: string | null
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token: string
+          resource_id?: string | null
+          sync_token?: string | null
+          token_expiry: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          calendar_id?: string | null
+          channel_expiry?: string | null
+          channel_id?: string | null
+          created_at?: string | null
+          id?: string
+          last_sync_at?: string | null
+          refresh_token?: string
+          resource_id?: string | null
+          sync_token?: string | null
+          token_expiry?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           amount: number
@@ -739,6 +925,8 @@ export type Database = {
         Row: {
           client_name: string
           created_at: string | null
+          email: string | null
+          email_status: string | null
           id: string
           status: string | null
           user_id: string | null
@@ -747,6 +935,8 @@ export type Database = {
         Insert: {
           client_name: string
           created_at?: string | null
+          email?: string | null
+          email_status?: string | null
           id?: string
           status?: string | null
           user_id?: string | null
@@ -755,6 +945,8 @@ export type Database = {
         Update: {
           client_name?: string
           created_at?: string | null
+          email?: string | null
+          email_status?: string | null
           id?: string
           status?: string | null
           user_id?: string | null
@@ -787,8 +979,6 @@ export type Database = {
           subscription_status: string | null
           updated_at: string | null
           user_id: string
-          cpf: string | null
-          address: string | null
         }
         Insert: {
           business_name: string
@@ -799,8 +989,6 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
           user_id: string
-          cpf?: string | null
-          address?: string | null
         }
         Update: {
           business_name?: string
@@ -811,8 +999,6 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
           user_id?: string
-          cpf?: string | null
-          address?: string | null
         }
         Relationships: []
       }
@@ -916,22 +1102,37 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          metadata: Json | null
           notification_id: string | null
+          provider_id: string | null
+          recipient: string | null
           status: string | null
+          type: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string
           error_message?: string | null
           id?: string
+          metadata?: Json | null
           notification_id?: string | null
+          provider_id?: string | null
+          recipient?: string | null
           status?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string
           error_message?: string | null
           id?: string
+          metadata?: Json | null
           notification_id?: string | null
+          provider_id?: string | null
+          recipient?: string | null
           status?: string | null
+          type?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -939,6 +1140,68 @@ export type Database = {
             columns: ["notification_id"]
             isOneToOne: false
             referencedRelation: "assistant_notifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          id: string
+          metadata: Json | null
+          mp_payment_id: string | null
+          mp_preference_id: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_type: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_type?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          mp_payment_id?: string | null
+          mp_preference_id?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_type?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -978,10 +1241,10 @@ export type Database = {
           birth_date: string | null
           business_name: string | null
           city: string | null
-          contract_url: string | null
           created_at: string | null
           document_id: string | null
           email: string | null
+          email_status: string | null
           financial_goal: number | null
           first_name: string | null
           full_name: string | null
@@ -990,7 +1253,6 @@ export type Database = {
           has_completed_onboarding: boolean | null
           id: string
           last_name: string | null
-          logo_url: string | null
           name: string | null
           onboarding_completed: boolean | null
           parent_user_id: string | null
@@ -1004,7 +1266,6 @@ export type Database = {
           subscription_tier: string | null
           total_clients: number | null
           "updated_at'": string | null
-          website: string | null
         }
         Insert: {
           address?: string | null
@@ -1013,10 +1274,10 @@ export type Database = {
           birth_date?: string | null
           business_name?: string | null
           city?: string | null
-          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
+          email_status?: string | null
           financial_goal?: number | null
           first_name?: string | null
           full_name?: string | null
@@ -1025,7 +1286,6 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id: string
           last_name?: string | null
-          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -1039,7 +1299,6 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
-          website?: string | null
         }
         Update: {
           address?: string | null
@@ -1048,10 +1307,10 @@ export type Database = {
           birth_date?: string | null
           business_name?: string | null
           city?: string | null
-          contract_url?: string | null
           created_at?: string | null
           document_id?: string | null
           email?: string | null
+          email_status?: string | null
           financial_goal?: number | null
           first_name?: string | null
           full_name?: string | null
@@ -1060,7 +1319,6 @@ export type Database = {
           has_completed_onboarding?: boolean | null
           id?: string
           last_name?: string | null
-          logo_url?: string | null
           name?: string | null
           onboarding_completed?: boolean | null
           parent_user_id?: string | null
@@ -1074,7 +1332,6 @@ export type Database = {
           subscription_tier?: string | null
           total_clients?: number | null
           "updated_at'"?: string | null
-          website?: string | null
         }
         Relationships: []
       }
@@ -1132,8 +1389,8 @@ export type Database = {
       projects: {
         Row: {
           budget: number | null
-          client_cpf: string | null
           client_id: string | null
+          "clients_1.cpf": string | null
           cover_url: string | null
           created_at: string
           deadline: string | null
@@ -1160,8 +1417,8 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
-          client_cpf?: string | null
           client_id?: string | null
+          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1188,8 +1445,8 @@ export type Database = {
         }
         Update: {
           budget?: number | null
-          client_cpf?: string | null
           client_id?: string | null
+          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -1268,6 +1525,104 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string | null
+          currency: string | null
+          current_period_end: string
+          current_period_start: string
+          id: string
+          mp_payer_id: string | null
+          mp_preference_id: string | null
+          mp_subscription_id: string | null
+          plan_type: string
+          price_monthly: number
+          status: string
+          trial_ends_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          mp_payer_id?: string | null
+          mp_preference_id?: string | null
+          mp_subscription_id?: string | null
+          plan_type?: string
+          price_monthly: number
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          current_period_end?: string
+          current_period_start?: string
+          id?: string
+          mp_payer_id?: string | null
+          mp_preference_id?: string | null
+          mp_subscription_id?: string | null
+          plan_type?: string
+          price_monthly?: number
+          status?: string
+          trial_ends_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sync_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          event_id: string | null
+          google_event_id: string | null
+          id: string
+          operation: string
+          success: boolean
+          sync_direction: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          google_event_id?: string | null
+          id?: string
+          operation: string
+          success: boolean
+          sync_direction: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          google_event_id?: string | null
+          id?: string
+          operation?: string
+          success?: boolean
+          sync_direction?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sync_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "calendar_events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_config: {
         Row: {
@@ -1631,6 +1986,7 @@ export type Database = {
           cpf: string | null
           created_at: string | null
           email: string | null
+          email_status: string | null
           full_name: string | null
           id: string
           instagram: string | null
@@ -1647,8 +2003,6 @@ export type Database = {
           status: string | null
           user_id: string | null
           wedding_date: string | null
-          contract_url: string | null
-          contract_url: string | null
         }
         Insert: {
           access_pin?: string | null
@@ -1659,6 +2013,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          email_status?: string | null
           full_name?: string | null
           id?: string
           instagram?: string | null
@@ -1675,7 +2030,6 @@ export type Database = {
           status?: string | null
           user_id?: string | null
           wedding_date?: string | null
-          contract_url?: string | null
         }
         Update: {
           access_pin?: string | null
@@ -1686,6 +2040,7 @@ export type Database = {
           cpf?: string | null
           created_at?: string | null
           email?: string | null
+          email_status?: string | null
           full_name?: string | null
           id?: string
           instagram?: string | null
@@ -1702,7 +2057,6 @@ export type Database = {
           status?: string | null
           user_id?: string | null
           wedding_date?: string | null
-          contract_url?: string | null
         }
         Relationships: []
       }
@@ -1711,35 +2065,29 @@ export type Database = {
       clients: {
         Row: {
           birth_date: string | null
-          contract_url: string | null
           created_at: string | null
           email: string | null
           first_name: string | null
           id: string | null
           last_name: string | null
-          name: string | null
           phone: string | null
         }
         Insert: {
           birth_date?: string | null
-          contract_url?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string | null
           last_name?: string | null
-          name?: never
           phone?: string | null
         }
         Update: {
           birth_date?: string | null
-          contract_url?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
           id?: string | null
           last_name?: string | null
-          name?: never
           phone?: string | null
         }
         Relationships: []
@@ -1750,15 +2098,43 @@ export type Database = {
         Args: { p_invite_token: string; p_user_id?: string }
         Returns: Json
       }
+      archive_old_audit_logs: {
+        Args: { retention_days?: number }
+        Returns: undefined
+      }
       check_assistant_exists: { Args: { p_email: string }; Returns: Json }
       create_assistant_invite: {
         Args: { p_assistant_email: string; p_makeup_artist_id: string }
         Returns: Json
       }
+      enable_auditing: {
+        Args: { table_name_input: string }
+        Returns: undefined
+      }
+      get_active_subscription: {
+        Args: { p_user_id: string }
+        Returns: {
+          current_period_end: string
+          id: string
+          plan_type: string
+          status: string
+        }[]
+      }
       get_bride_dashboard_data:
-      | { Args: { p_client_id: string }; Returns: Json }
-      | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
+        | { Args: { p_client_id: string }; Returns: Json }
+        | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
+      has_active_subscription: { Args: { p_user_id: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      send_templated_email: {
+        Args: {
+          recipient: string
+          template_data: Json
+          template_name: string
+          user_id?: string
+        }
+        Returns: undefined
+      }
+      set_audit_source: { Args: { source_text: string }; Returns: undefined }
       validate_bride_pin: {
         Args: { client_id: string; pin_code: string }
         Returns: boolean
@@ -1779,116 +2155,116 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   graphql_public: {
@@ -1900,3 +2276,4 @@ export const Constants = {
     },
   },
 } as const
+

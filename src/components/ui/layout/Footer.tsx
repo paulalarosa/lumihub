@@ -1,5 +1,5 @@
-import { Link } from "react-router-dom";
-import { Mail, Phone, MessageCircle } from "lucide-react";
+import { Link } from 'react-router-dom'
+import { Mail, MessageCircle } from 'lucide-react'
 
 const Footer = () => {
   return (
@@ -10,7 +10,11 @@ const Footer = () => {
           <div className="space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl flex items-center justify-center overflow-hidden relative">
-                <img src="/favicon-khaoskontrol.webp" alt="K" className="w-full h-full object-cover" />
+                <img
+                  src="/favicon-khaoskontrol.webp"
+                  alt="K"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <span className="font-serif font-light text-2xl text-white">
                 KHAOS KONTROL
@@ -24,7 +28,9 @@ const Footer = () => {
 
           {/* Produto */}
           <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">Produto</h3>
+            <h3 className="font-serif font-light text-lg text-white">
+              Produto
+            </h3>
             <ul className="space-y-3">
               <li>
                 <Link
@@ -47,7 +53,9 @@ const Footer = () => {
 
           {/* Empresa */}
           <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">Empresa</h3>
+            <h3 className="font-serif font-light text-lg text-white">
+              Empresa
+            </h3>
             <ul className="space-y-3">
               <li>
                 <Link
@@ -78,7 +86,9 @@ const Footer = () => {
 
           {/* Contato */}
           <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">Fale Conosco</h3>
+            <h3 className="font-serif font-light text-lg text-white">
+              Fale Conosco
+            </h3>
             <div className="space-y-3">
               <a
                 href="mailto:khaoskontrol07@gmail.com"
@@ -130,7 +140,7 @@ const Footer = () => {
         </div>
       </div>
     </footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

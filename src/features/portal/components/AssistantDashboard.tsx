@@ -1,20 +1,35 @@
-import { format, isToday, parseISO } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar, CheckSquare, Clock, MapPin, Users, DollarSign, BarChart3, TrendingUp, Award, Target } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import FeatureLockedCard from "./FeatureLockedCard";
-import { motion } from "framer-motion";
-import { useAssistantDashboard, Event, Task } from "../hooks/useAssistantDashboard";
+import { format, isToday, parseISO } from 'date-fns'
+import {
+  Calendar,
+  CheckSquare,
+  Clock,
+  MapPin,
+  Users,
+  DollarSign,
+  BarChart3,
+} from 'lucide-react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import FeatureLockedCard from './FeatureLockedCard'
+import { motion } from 'framer-motion'
+import {
+  useAssistantDashboard,
+  Event,
+  Task,
+} from '../hooks/useAssistantDashboard'
 
 interface AssistantDashboardProps {
-  events: Event[];
-  tasks: Task[];
-  onLockedClick: (feature: string) => void;
+  events: Event[]
+  tasks: Task[]
+  onLockedClick: (feature: string) => void
 }
 
-const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboardProps) => {
+const AssistantDashboard = ({
+  events,
+  tasks,
+  onLockedClick,
+}: AssistantDashboardProps) => {
   const {
     upcomingEvents,
     pendingTasks,
@@ -23,8 +38,8 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
     progressToTarget,
     progressToMilestone,
     missingToMilestone,
-    monthGrowth
-  } = useAssistantDashboard(events, tasks);
+    monthGrowth,
+  } = useAssistantDashboard(events, tasks)
 
   return (
     <div className="space-y-6">
@@ -39,40 +54,40 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Eventos do Mês</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Eventos do Mês
+            </CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{monthEvents}</div>
-            <p className="text-xs text-muted-foreground">
-              eventos atribuídos
-            </p>
+            <p className="text-xs text-muted-foreground">eventos atribuídos</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tarefas Pendentes</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tarefas Pendentes
+            </CardTitle>
             <CheckSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingTasks.length}</div>
-            <p className="text-xs text-muted-foreground">
-              para completar
-            </p>
+            <p className="text-xs text-muted-foreground">para completar</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próximos Eventos</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Próximos Eventos
+            </CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{upcomingEvents.length}</div>
-            <p className="text-xs text-muted-foreground">
-              hoje e amanhã
-            </p>
+            <p className="text-xs text-muted-foreground">hoje e amanhã</p>
           </CardContent>
         </Card>
       </div>
@@ -89,7 +104,10 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
               <CardTitle className="flex items-center gap-2 text-primary">
                 <DollarSign className="h-5 w-5" />
                 Meus Ganhos
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary"
+                >
                   Privado
                 </Badge>
               </CardTitle>
@@ -99,7 +117,10 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-white/50 rounded-lg">
                   <div className="text-2xl font-bold text-primary">
-                    R$ {earningsData.thisMonth.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R${' '}
+                    {earningsData.thisMonth.toLocaleString('pt-BR', {
+                      minimumFractionDigits: 2,
+                    })}
                   </div>
                   <div className="text-sm text-muted-foreground">Este mês</div>
                 </div>
@@ -107,7 +128,9 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                   <div className="text-2xl font-bold text-green-600">
                     +{monthGrowth.toFixed(1)}%
                   </div>
-                  <div className="text-sm text-muted-foreground">vs mês passado</div>
+                  <div className="text-sm text-muted-foreground">
+                    vs mês passado
+                  </div>
                 </div>
               </div>
 
@@ -116,7 +139,8 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                 <div className="flex justify-between text-sm">
                   <span>Meta do mês</span>
                   <span className="font-medium">
-                    {progressToTarget.toFixed(0)}% • R$ {earningsData.targetThisMonth.toLocaleString('pt-BR')}
+                    {progressToTarget.toFixed(0)}% • R${' '}
+                    {earningsData.targetThisMonth.toLocaleString('pt-BR')}
                   </span>
                 </div>
                 <Progress value={progressToTarget} className="h-3" />
@@ -139,11 +163,15 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
               {/* Quick Stats */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                 <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{earningsData.eventsCompleted}</div>
+                  <div className="text-lg font-bold text-primary">
+                    {earningsData.eventsCompleted}
+                  </div>
                   <div className="text-xs text-muted-foreground">Eventos</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-primary">{earningsData.commissionRate}%</div>
+                  <div className="text-lg font-bold text-primary">
+                    {earningsData.commissionRate}%
+                  </div>
                   <div className="text-xs text-muted-foreground">Comissão</div>
                 </div>
                 <div className="text-center">
@@ -173,15 +201,18 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
             ) : (
               <div className="space-y-4">
                 {upcomingEvents.map((event) => {
-                  const eventDate = parseISO(event.event_date);
+                  const eventDate = parseISO(event.event_date)
                   return (
-                    <div key={event.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
+                    <div
+                      key={event.id}
+                      className="flex items-start gap-3 p-3 rounded-lg bg-muted/50"
+                    >
                       <div className="text-center min-w-[50px]">
                         <div className="text-xs uppercase text-muted-foreground">
-                          {isToday(eventDate) ? "Hoje" : "Amanhã"}
+                          {isToday(eventDate) ? 'Hoje' : 'Amanhã'}
                         </div>
                         <div className="text-lg font-bold">
-                          {format(eventDate, "dd")}
+                          {format(eventDate, 'dd')}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -212,7 +243,7 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                         </Badge>
                       )}
                     </div>
-                  );
+                  )
                 })}
               </div>
             )}
@@ -236,7 +267,10 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
           ) : (
             <div className="space-y-3">
               {pendingTasks.map((task) => (
-                <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                <div
+                  key={task.id}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                >
                   <div className="h-2 w-2 rounded-full bg-primary" />
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{task.title}</p>
@@ -248,7 +282,7 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
                   </div>
                   {task.due_date && (
                     <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {format(parseISO(task.due_date), "dd/MM")}
+                      {format(parseISO(task.due_date), 'dd/MM')}
                     </span>
                   )}
                 </div>
@@ -266,23 +300,23 @@ const AssistantDashboard = ({ events, tasks, onLockedClick }: AssistantDashboard
             title="Clientes"
             description="Acesse informações completas dos clientes atribuídos"
             icon={<Users className="h-8 w-8" />}
-            onUnlock={() => onLockedClick("Clientes")}
+            onUnlock={() => onLockedClick('Clientes')}
           />
           <FeatureLockedCard
             title="Financeiro"
             description="Visualize valores e sua comissão por evento"
             icon={<DollarSign className="h-8 w-8" />}
-            onUnlock={() => onLockedClick("Financeiro")}
+            onUnlock={() => onLockedClick('Financeiro')}
           />
           <FeatureLockedCard
             title="Relatórios"
             description="Acompanhe sua performance e estatísticas"
             icon={<BarChart3 className="h-8 w-8" />}
-            onUnlock={() => onLockedClick("Relatórios")}
+            onUnlock={() => onLockedClick('Relatórios')}
           />
         </div>
       </div>
     </div>
-  );
-};
-export default AssistantDashboard;
+  )
+}
+export default AssistantDashboard

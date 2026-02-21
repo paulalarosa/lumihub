@@ -1,79 +1,106 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
+import { useLanguage } from '@/hooks/useLanguage'
+import { supabase } from '@/integrations/supabase/client'
+import { useProjectDetails } from '@/features/projects/hooks/useProjectDetails'
+import { useProjectActions } from '@/features/projects/hooks/useProjectActions'
 
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useOrganization } from '@/hooks/useOrganization';
-import { useLanguage } from '@/hooks/useLanguage';
-import { supabase } from '@/integrations/supabase/client';
-import { useProjectDetails } from '@/features/projects/hooks/useProjectDetails';
-import { useProjectActions } from '@/features/projects/hooks/useProjectActions';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Eye, FileText, ClipboardList, MessageCircle } from 'lucide-react'
+import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Eye, FileText, ClipboardList, MessageCircle } from 'lucide-react';
-import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons';
-
-import type { Task, Contract, BriefingWithContent, BriefingContent, ProjectServiceItem, Service, ServiceUI } from '@/types/api.types';
-import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader';
-import { ProjectStats } from '@/features/projects/components/details/ProjectStats';
-import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs';
+import type {
+  Task,
+  Contract,
+  BriefingWithContent,
+  BriefingContent,
+  ProjectServiceItem,
+  ServiceUI,
+} from '@/types/api.types'
+import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader'
+import { ProjectStats } from '@/features/projects/components/details/ProjectStats'
+import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
 
 export default function ProjectDetailsPage() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { organizationId, loading: orgLoading } = useOrganization();
-  const { t } = useLanguage();
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { user, loading: authLoading } = useAuth()
+  const { organizationId: _organizationId, loading: orgLoading } =
+    useOrganization()
+  const { t } = useLanguage()
 
-  const { data: projectDetails, isLoading, refetch } = useProjectDetails(id);
-  const project = projectDetails?.project || null;
+  const { data: projectDetails, isLoading, refetch } = useProjectDetails(id)
+  const project = projectDetails?.project || null
 
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [briefing, setBriefing] = useState<(BriefingWithContent & { is_submitted: boolean }) | null>(null);
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>([]);
-  const [services, setServices] = useState<ServiceUI[]>([]);
-  const [transactions, setTransactions] = useState<{ type: string; amount: number }[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [briefing, setBriefing] = useState<
+    (BriefingWithContent & { is_submitted: boolean }) | null
+  >(null)
+  const [contracts, setContracts] = useState<Contract[]>([])
+  const [projectServices, setProjectServices] = useState<ProjectServiceItem[]>(
+    [],
+  )
+  const [services, setServices] = useState<ServiceUI[]>([])
+  const [transactions, setTransactions] = useState<
+    { type: string; amount: number }[]
+  >([])
 
-  const [activeTab, setActiveTab] = useState('tarefas');
-  const [viewMode, setViewMode] = useState<'internal' | 'preview'>('internal');
+  const [activeTab, setActiveTab] = useState('tarefas')
+  const [viewMode, setViewMode] = useState<'internal' | 'preview'>('internal')
 
   useEffect(() => {
     if (projectDetails) {
-      setTasks(projectDetails.tasks as Task[]);
+      setTasks(projectDetails.tasks as Task[])
 
       if (projectDetails.briefing) {
-        const rawBriefing = projectDetails.briefing as unknown as BriefingWithContent;
-        const content = rawBriefing.content as BriefingContent | null;
+        const rawBriefing =
+          projectDetails.briefing as unknown as BriefingWithContent
+        const content = rawBriefing.content as BriefingContent | null
         setBriefing({
           ...rawBriefing,
           questions: rawBriefing.questions || content?.questions || [],
           answers: rawBriefing.answers || content?.answers || {},
-          is_submitted: rawBriefing.status === 'submitted'
-        });
+          is_submitted: rawBriefing.status === 'submitted',
+        })
       }
 
-      setContracts(projectDetails.contracts as Contract[]);
+      setContracts(projectDetails.contracts as Contract[])
 
-      setProjectServices((projectDetails.projectServices || []).map(ps => ({
-        ...ps,
-        quantity: Number(ps.quantity || 1),
-        paid_amount: 0,
-        notes: null,
-        service: ps.service ? {
-          ...ps.service,
-          description: ps.service.description || '',
-        } : undefined
-      })));
+      setProjectServices(
+        (projectDetails.projectServices || []).map((ps) => ({
+          ...ps,
+          quantity: Number(ps.quantity || 1),
+          paid_amount: 0,
+          notes: null,
+          service: ps.service
+            ? {
+                ...ps.service,
+                description: ps.service.description || '',
+              }
+            : undefined,
+        })),
+      )
 
-      setServices((projectDetails.services || []).map(s => ({
-        ...s,
-        description: s.description || ''
-      })));
+      setServices(
+        (projectDetails.services || []).map((s) => ({
+          ...s,
+          description: s.description || '',
+        })),
+      )
 
-      setTransactions(projectDetails.transactions || []);
+      setTransactions(projectDetails.transactions || [])
     }
-  }, [projectDetails]);
+  }, [projectDetails])
 
   const actions = useProjectActions({
     projectId: id,
@@ -83,42 +110,64 @@ export default function ProjectDetailsPage() {
     services,
     projectServices,
     refetch,
-  });
+  })
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      navigate('/auth')
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, navigate])
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) return
     const channel = supabase
       .channel('project-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'contracts', filter: `project_id=eq.${id}` }, () => refetch())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `project_id=eq.${id}` }, () => refetch())
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [id, refetch]);
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contracts',
+          filter: `project_id=eq.${id}`,
+        },
+        () => refetch(),
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `project_id=eq.${id}`,
+        },
+        () => refetch(),
+      )
+      .subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [id, refetch])
 
   if (authLoading || orgLoading || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-none h-8 w-8 border-b-2 border-white"></div>
+        <LoadingSpinner size={32} label="CARREGANDO MISSÃO..." />
       </div>
-    );
+    )
   }
 
-  if (!project) return null;
+  if (!project) return null
 
-  const completedTasks = tasks.filter(t => t.status === 'completed').length;
+  const completedTasks = tasks.filter((t) => t.status === 'completed').length
   const totalServiceAmount = projectServices.reduce((acc, curr) => {
-    const quantity = Number(curr.quantity || 0);
-    const unitPrice = Number(curr.unit_price || curr.price || 0);
-    return acc + (quantity * unitPrice);
-  }, 0);
-  const totalReceived = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Number(t.amount), 0);
-  const remainingAmount = totalServiceAmount - totalReceived;
+    const quantity = Number(curr.quantity || 0)
+    const unitPrice = Number(curr.unit_price || curr.price || 0)
+    return acc + quantity * unitPrice
+  }, 0)
+  const totalReceived = transactions
+    .filter((t) => t.type === 'income')
+    .reduce((sum, t) => sum + Number(t.amount), 0)
+  const remainingAmount = totalServiceAmount - totalReceived
 
   return (
     <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
@@ -156,20 +205,38 @@ export default function ProjectDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {contracts.filter(c => c.status === 'sent' || c.status === 'signed').length === 0 ? (
-                    <p className="text-white/40 font-mono text-xs uppercase">NO_CONTRACTS_AVAILABLE</p>
+                  {contracts.filter(
+                    (c) => c.status === 'sent' || c.status === 'signed',
+                  ).length === 0 ? (
+                    <p className="text-white/40 font-mono text-xs uppercase">
+                      NO_CONTRACTS_AVAILABLE
+                    </p>
                   ) : (
                     <div className="space-y-3">
-                      {contracts.filter(c => c.status === 'sent' || c.status === 'signed').map(contract => (
-                        <div key={contract.id} className="p-4 border border-white/10 rounded-none bg-white/5">
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono text-sm text-white">{contract.title}</span>
-                            <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${contract.status === 'signed' ? 'bg-white text-black border-white' : 'text-white border-white/40'}`}>
-                              {contract.status === 'signed' ? 'SIGNED' : 'PENDING'}
-                            </Badge>
+                      {contracts
+                        .filter(
+                          (c) => c.status === 'sent' || c.status === 'signed',
+                        )
+                        .map((contract) => (
+                          <div
+                            key={contract.id}
+                            className="p-4 border border-white/10 rounded-none bg-white/5"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-mono text-sm text-white">
+                                {contract.title}
+                              </span>
+                              <Badge
+                                variant="outline"
+                                className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${contract.status === 'signed' ? 'bg-white text-black border-white' : 'text-white border-white/40'}`}
+                              >
+                                {contract.status === 'signed'
+                                  ? 'SIGNED'
+                                  : 'PENDING'}
+                              </Badge>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                 </CardContent>
@@ -184,18 +251,32 @@ export default function ProjectDetailsPage() {
                 </CardHeader>
                 <CardContent>
                   {!briefing ? (
-                    <p className="text-white/40 font-mono text-xs uppercase">NO_DATA_AVAILABLE</p>
+                    <p className="text-white/40 font-mono text-xs uppercase">
+                      NO_DATA_AVAILABLE
+                    </p>
                   ) : (
                     <div className="space-y-4">
-                      <Badge variant="outline" className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${briefing.is_submitted ? 'bg-white text-black border-white' : 'text-white border-white/40'}`}>
+                      <Badge
+                        variant="outline"
+                        className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${briefing.is_submitted ? 'bg-white text-black border-white' : 'text-white border-white/40'}`}
+                      >
                         {briefing.is_submitted ? 'COMPLETED' : 'WAITING_INPUT'}
                       </Badge>
                       {briefing.is_submitted && (
                         <div className="space-y-3 mt-4">
-                          {(briefing.questions as Array<{ id: string; question: string }>).map((q) => (
+                          {(
+                            briefing.questions as Array<{
+                              id: string
+                              question: string
+                            }>
+                          ).map((q) => (
                             <div key={q.id} className="text-sm font-mono">
-                              <p className="text-white/60 mb-1 uppercase tracking-wide text-xs">{q.question}</p>
-                              <p className="text-white border-l border-white/20 pl-3">{briefing.answers[q.id] || '-'}</p>
+                              <p className="text-white/60 mb-1 uppercase tracking-wide text-xs">
+                                {q.question}
+                              </p>
+                              <p className="text-white border-l border-white/20 pl-3">
+                                {briefing.answers[q.id] || '-'}
+                              </p>
                             </div>
                           ))}
                         </div>
@@ -219,7 +300,11 @@ export default function ProjectDetailsPage() {
               <CardContent className="pt-4">
                 <WhatsAppButtons
                   phone={project.client?.phone || ''}
-                  clientName={project.client?.full_name || project.client?.name || 'Cliente'}
+                  clientName={
+                    project.client?.full_name ||
+                    project.client?.name ||
+                    'Cliente'
+                  }
                   eventDate={new Date(project.event_date || new Date())}
                   eventTime={project.event_time || undefined}
                   eventLocation={project.event_location || undefined}
@@ -282,5 +367,5 @@ export default function ProjectDetailsPage() {
         )}
       </main>
     </div>
-  );
+  )
 }

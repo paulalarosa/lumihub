@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database } from '@/types/supabase';
 
 // Fallback to placeholder to prevent build errors when env vars are missing.
 // This is critical for the build process to succeed even if secrets aren't available.
