@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
 import { ClientsTable } from '@/features/clients/components/ClientsTable'
 import { SearchBar } from '@/components/ui/SearchBar'
-import { MetricCard } from '@/components/ui/MetricCard'
+import { MetricCard } from '@/components/dashboard/MetricCard'
 import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetrics'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AssistantsTable } from '@/features/admin/components/AssistantsTable'
@@ -70,20 +70,20 @@ export default function AdminDashboard() {
       {/* Phase 3: HUD Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <MetricCard
-          label="TOTAL CLIENTS"
+          title="TOTAL CLIENTS"
           value={metrics?.totalClients || 0}
-          isLoading={dataLoading}
+          loading={dataLoading}
         />
         <MetricCard
-          label="ACTIVE CONTRACTS"
+          title="ACTIVE CONTRACTS"
           value={metrics?.activeContracts || 0}
-          isLoading={dataLoading}
+          loading={dataLoading}
           className="border-yellow-500/50"
         />
         <MetricCard
-          label="POTENTIAL LEADS"
+          title="POTENTIAL LEADS"
           value={metrics?.leads || 0}
-          isLoading={dataLoading}
+          loading={dataLoading}
         />
       </div>
 

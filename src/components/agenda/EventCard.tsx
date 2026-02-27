@@ -1,5 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import {
   Clock,
   Edit2,
@@ -14,65 +14,75 @@ import {
   Calendar as CalendarIcon,
   Download,
   ExternalLink,
-  Users
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+  Users,
+} from 'lucide-react'
+import { format, parseISO } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useEventCard } from '@/components/agenda/hooks/useEventCard';
-import { Event } from '@/hooks/useEvents';
+} from '@/components/ui/dropdown-menu'
+import { useEventCard } from '@/components/agenda/hooks/useEventCard'
+import { Event } from '@/hooks/useEvents'
 
 interface EventCardProps {
-  event: Event;
-  onEdit: () => void;
-  onDelete: () => void;
-  showDate?: boolean;
+  event: Event
+  onEdit: () => void
+  onDelete: () => void
+  showDate?: boolean
 }
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
-  'noivas': 'NOIVAS',
-  'pre_wedding': 'PRE_WEDDING',
-  'producoes_sociais': 'PROD_SOCIAIS'
-};
+  noivas: 'NOIVAS',
+  pre_wedding: 'PRE_WEDDING',
+  producoes_sociais: 'PROD_SOCIAIS',
+}
 
-export default function EventCard({ event, onEdit, onDelete, showDate = false }: EventCardProps) {
+export default function EventCard({
+  event,
+  onEdit,
+  onDelete,
+  showDate = false,
+}: EventCardProps) {
   const {
     formatTime,
     handleOpenMaps,
     handleExportICS,
     handleAddToGoogle,
     getWhatsAppAction,
-    handleSendWhatsApp
-  } = useEventCard(event);
+    handleSendWhatsApp,
+  } = useEventCard(event)
 
-  const isNoivas = event.event_type === 'noivas' || !event.event_type;
-  const hasNoivasTimes = event.arrival_time || event.making_of_time || event.ceremony_time || event.advisory_time;
-  const hasRegularTimes = event.start_time || event.end_time;
-  const displayAddress = event.address || event.location;
+  const isNoivas = event.event_type === 'noivas' || !event.event_type
+  const hasNoivasTimes =
+    event.arrival_time ||
+    event.making_of_time ||
+    event.ceremony_time ||
+    event.advisory_time
+  const hasRegularTimes = event.start_time || event.end_time
+  const displayAddress = event.address || event.location
 
   const WhatsAppSmartButton = () => {
-    if (!event.client?.phone) return null;
-    const { recommendedAction, buttonColor, buttonLabel, Icon } = getWhatsAppAction();
+    if (!event.client?.phone) return null
+    const { recommendedAction, buttonColor, buttonLabel, Icon } =
+      getWhatsAppAction()
 
     return (
       <button
         onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          handleSendWhatsApp(recommendedAction);
+          e.preventDefault()
+          e.stopPropagation()
+          handleSendWhatsApp(recommendedAction)
         }}
         className={`px-3 py-1 h-6 text-[10px] font-medium text-white rounded-md shadow-sm transition-all flex items-center gap-1.5 uppercase tracking-wider ${buttonColor}`}
       >
         <Icon className="h-3 w-3" />
         {buttonLabel}
       </button>
-    );
-  };
+    )
+  }
 
   return (
     <Card className="group border border-white/20 bg-black rounded-none hover:border-white transition-all duration-300">
@@ -81,14 +91,19 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
           {/* Status Bar instead of Color dot */}
           <div
             className="w-1 h-full min-h-[80px] flex-shrink-0"
-            style={{ backgroundColor: event.color === '#FFFFFF' ? '#333' : event.color || '#333' }}
+            style={{
+              backgroundColor:
+                event.color === '#FFFFFF' ? '#333' : event.color || '#333',
+            }}
           />
 
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <h3 className="font-serif text-white uppercase tracking-wider text-sm">{event.title}</h3>
+                  <h3 className="font-serif text-white uppercase tracking-wider text-sm">
+                    {event.title}
+                  </h3>
                   {event.event_type && (
                     <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 border border-white/20 px-1">
                       {EVENT_TYPE_LABELS[event.event_type] || event.event_type}
@@ -98,7 +113,8 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                     <span className="text-[9px] font-mono uppercase tracking-widest text-black bg-white px-1">
                       PAGO
                     </span>
-                  ) : event.payment_status === 'pending' || !event.payment_status ? (
+                  ) : event.payment_status === 'pending' ||
+                    !event.payment_status ? (
                     <span className="text-[9px] font-mono uppercase tracking-widest text-white/50 border border-dashed border-white/30 px-1">
                       PENDENTE
                     </span>
@@ -117,26 +133,49 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
                 {/* Calendar export dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10"
+                    >
                       <CalendarIcon className="h-3 w-3" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-black border border-white/20 rounded-none">
-                    <DropdownMenuItem onClick={handleAddToGoogle} className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-black border border-white/20 rounded-none"
+                  >
+                    <DropdownMenuItem
+                      onClick={handleAddToGoogle}
+                      className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black"
+                    >
                       <CalendarIcon className="h-3 w-3 mr-2" />
                       ADD TO GOOGLE
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportICS} className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black">
+                    <DropdownMenuItem
+                      onClick={handleExportICS}
+                      className="text-white hover:bg-white hover:text-black font-mono text-xs uppercase focus:bg-white focus:text-black"
+                    >
                       <Download className="h-3 w-3 mr-2" />
                       DOWNLOAD .ICS
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="ghost" size="icon" onClick={onEdit} className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onEdit}
+                  className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10"
+                >
                   <Edit2 className="h-3 w-3" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={onDelete} className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onDelete}
+                  className="h-6 w-6 rounded-none text-white/50 hover:text-white hover:bg-white/10"
+                >
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
@@ -147,7 +186,9 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
               {showDate && (
                 <span className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
-                  {format(new Date(event.event_date), "dd/MM", { locale: ptBR })}
+                  {format(parseISO(event.event_date), 'dd/MM', {
+                    locale: ptBR,
+                  })}
                 </span>
               )}
 
@@ -211,8 +252,8 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
             {displayAddress && (
               <button
                 onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenMaps();
+                  e.stopPropagation()
+                  handleOpenMaps()
                 }}
                 className="flex items-center gap-1.5 mt-2 text-xs text-white hover:bg-white hover:text-black transition-colors px-1 -ml-1 w-fit font-mono uppercase"
               >
@@ -226,8 +267,11 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
               <div className="flex items-center gap-2 mt-3 border-t border-white/10 pt-2 border-dashed">
                 <Users className="h-3 w-3 text-white/40" />
                 <div className="flex flex-wrap gap-1">
-                  {event.assistants.map(assistant => (
-                    <span key={assistant.id} className="text-[9px] font-mono uppercase tracking-widest text-white/60 bg-white/5 px-1">
+                  {event.assistants.map((assistant) => (
+                    <span
+                      key={assistant.id}
+                      className="text-[9px] font-mono uppercase tracking-widest text-white/60 bg-white/5 px-1"
+                    >
                       {assistant.name}
                     </span>
                   ))}
@@ -238,5 +282,5 @@ export default function EventCard({ event, onEdit, onDelete, showDate = false }:
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

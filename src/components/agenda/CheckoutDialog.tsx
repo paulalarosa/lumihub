@@ -64,8 +64,10 @@ export function CheckoutDialog({
   }, [open, event])
 
   const fetchAssistants = async () => {
-    const { data } = await supabase.from('assistants').select('id, name')
-    if (data) setAssistants(data)
+    const { data } = await supabase
+      .from('assistants')
+      .select('id, name:full_name')
+    if (data) setAssistants(data as Assistant[])
   }
 
   const handleFinish = async () => {
@@ -84,8 +86,11 @@ export function CheckoutDialog({
       }
 
       if (selectedAssistantId !== 'none') {
-        // Calculate commission based on rule (e.g. 15%)
-        updateData.assistant_commission = numericValue * 0.15 // Example 15% rule
+        const discount =
+          Number((event as unknown as Record<string, unknown>)?.discount) || 0
+        const netValue = numericValue - discount
+        const commissionRate = 0.15
+        updateData.assistant_commission = netValue * commissionRate
       }
 
       if (!event?.id) throw new Error('Evento inválido')

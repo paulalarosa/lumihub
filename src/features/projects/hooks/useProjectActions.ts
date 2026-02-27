@@ -107,32 +107,11 @@ export function useProjectActions({
         .single()
 
       if (error || !clientData) {
-        const { data: genericClient, error: genericError } = await supabase
-          .from('clients')
-          .select('secret_code')
-          .eq('id', clientId)
-          .single()
+        throw new Error('Cliente não encontrado.')
+      }
 
-        const typedGenericClient = genericClient as unknown as {
-          secret_code: string
-        } | null
-
-        if (genericError || !typedGenericClient) {
-          throw new Error('Cliente não encontrado em nenhuma tabela.')
-        }
-        if (!typedGenericClient.secret_code) {
-          throw new Error('Cliente sem código de acesso gerado.')
-        }
-
-        const link = `${window.location.origin}/portal/${typedGenericClient.secret_code}`
-        await navigator.clipboard.writeText(link)
-        setCopied(true)
-        toast({
-          title: 'Link copiado!',
-          description: 'Link do portal copiado.',
-        })
-        setTimeout(() => setCopied(false), 2000)
-        return
+      if (!clientData.secret_code) {
+        throw new Error('Cliente sem código de acesso gerado.')
       }
 
       const { secret_code } = clientData

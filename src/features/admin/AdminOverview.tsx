@@ -4,7 +4,7 @@ import { logger } from '@/services/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Terminal } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
-import { MetricCard } from '@/components/ui/MetricCard'
+import { MetricCard } from '@/components/dashboard/MetricCard'
 import { RevenueChart } from '@/components/ui/RevenueChart'
 
 export default function AdminOverview() {
@@ -143,25 +143,25 @@ export default function AdminOverview() {
       {/* 1. HUD Grid (Restored from Legacy) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <MetricCard
-          label="TOTAL USERS"
+          title="TOTAL USERS"
           value={stats.totalUsers}
-          isLoading={loading}
+          loading={loading}
         />
         <MetricCard
-          label="TOTAL REVENUE"
+          title="TOTAL REVENUE"
           value={`R$ ${stats.totalRevenue.toFixed(0)}`}
-          isLoading={loading}
+          loading={loading}
           className="border-yellow-500/50"
         />
         <MetricCard
-          label="ACTIVE SUBS"
+          title="ACTIVE SUBS"
           value={stats.activeSubscriptions}
-          isLoading={loading}
+          loading={loading}
         />
         <MetricCard
-          label="CHURN RATE"
+          title="CHURN RATE"
           value={`${stats.churnRate}%`}
-          isLoading={loading}
+          loading={loading}
         />
       </div>
 

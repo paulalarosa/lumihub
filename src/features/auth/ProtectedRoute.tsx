@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 
 export default function ProtectedRoute({
   children,
-  _requireOnboarding = true,
+  requireOnboarding = true,
 }: ProtectedRouteProps) {
   const { user, role, loading } = useAuth()
   const location = useLocation()

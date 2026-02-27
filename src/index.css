@@ -118,6 +118,12 @@
     box-shadow: 0 0 0 2px #09090b;
     /* Fundo preto para contraste */
   }
+
+  /* Set Global Default Font to Inter */
+  html,
+  body {
+    font-family: var(--font-sans);
+  }
 }
 
 @layer components {

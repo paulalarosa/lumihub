@@ -18,6 +18,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
+import DOMPurify from 'dompurify'
 
 export const CanvasPanel = () => {
   const {
@@ -232,7 +233,11 @@ export const CanvasPanel = () => {
           <div className="h-full overflow-y-auto p-8 bg-zinc-50 modern-scroll">
             <div className="max-w-3xl mx-auto prose prose-zinc prose-sm">
               {activeCanvas.type === 'html' ? (
-                <div dangerouslySetInnerHTML={{ __html: content }} />
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: DOMPurify.sanitize(content),
+                  }}
+                />
               ) : (
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {content}

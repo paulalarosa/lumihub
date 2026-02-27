@@ -57,7 +57,7 @@ export default function NewClientDialog({
 
   const loadClients = async () => {
     if (!user) return
-    const { data } = await ClientService.list(user.id)
+    const data = await ClientService.list(user.id)
     if (data) {
       setClients(data)
     }
@@ -105,9 +105,7 @@ export default function NewClientDialog({
       }
 
       // 2. Create Client
-      const { data: newClient, error } = await ClientService.create(payload)
-
-      if (error) throw error
+      const newClient = await ClientService.create(payload)
 
       // 3. Generate Portal Link if Bride
       if (formData.is_bride && newClient && 'id' in newClient) {

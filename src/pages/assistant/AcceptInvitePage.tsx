@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { Button } from '@/components/ui/button'
-import { AssistantSignupForm } from '@/components/features/assistants/AssistantSignupForm'
+import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
 
 export default function AcceptInvitePage() {
   const { token } = useParams<{ token: string }>()

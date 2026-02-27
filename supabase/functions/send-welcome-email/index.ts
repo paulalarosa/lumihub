@@ -1,14 +1,47 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+// @ts-ignore
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
+// @ts-ignore
+import { Resend } from 'https://esm.sh/resend@2.0.0'
+// @ts-ignore
+import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@0.4.3'
+// @ts-ignore
+import { Redis } from 'https://esm.sh/@upstash/redis@1.22.0'
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
 
-const welcomeEmailTemplate = (props: { brideName: string; portalLink: string; accessPin: string }) => `
+// Initialize Upstash Redis
+const redisUrl = Deno.env.get('UPSTASH_REDIS_REST_URL')
+const redisToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN')
+
+// fallback if not configured, though it should be in production
+const redis =
+  redisUrl && redisToken
+    ? new Redis({
+        url: redisUrl,
+        token: redisToken,
+      })
+    : null
+
+// Allow 5 requests per 10 seconds per IP
+const ratelimit = redis
+  ? new Ratelimit({
+      redis: redis,
+      limiter: Ratelimit.slidingWindow(5, '10 s'),
+      analytics: true,
+    })
+  : null
+
+const welcomeEmailTemplate = (props: {
+  brideName: string
+  portalLink: string
+  accessPin: string
+}) => `
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -61,90 +94,112 @@ const welcomeEmailTemplate = (props: { brideName: string; portalLink: string; ac
     </div>
   </body>
 </html>
-`;
+`
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-    );
+    // 0. Apply rate limiting if configured
+    if (ratelimit) {
+      const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
+      const { success } = await ratelimit.limit(`send-welcome-email_${ip}`)
 
-    const { clientId, projectName, subject } = await req.json();
+      if (!success) {
+        return new Response(JSON.stringify({ error: 'Too Many Requests' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    )
+
+    const { clientId, projectName, subject } = (await req.json()) as {
+      clientId?: string
+      projectName?: string
+      subject?: string
+    }
 
     if (!clientId) {
-      throw new Error("Missing clientId");
+      throw new Error('Missing clientId')
     }
 
     // 1. Fetch Client
     const { data: client, error: clientError } = await supabaseClient
-      .from("wedding_clients")
-      .select("*")
-      .eq("id", clientId)
-      .single();
+      .from('wedding_clients')
+      .select('*')
+      .eq('id', clientId)
+      .single()
 
     if (clientError || !client) {
-      throw new Error("Client not found");
+      throw new Error('Client not found')
     }
 
-    let accessPin = client.access_pin;
+    let accessPin = client.access_pin
 
     // 2. Generate PIN if missing
     if (!accessPin) {
-      accessPin = Math.floor(1000 + Math.random() * 9000).toString();
+      accessPin = Math.floor(1000 + Math.random() * 9000).toString()
 
       const { error: updateError } = await supabaseClient
-        .from("wedding_clients")
+        .from('wedding_clients')
         .update({ access_pin: accessPin })
-        .eq("id", clientId);
+        .eq('id', clientId)
 
       if (updateError) {
-        console.error("Error updating PIN:", updateError);
-        throw new Error("Failed to generate PIN");
+        console.error('Error updating PIN:', updateError)
+        throw new Error('Failed to generate PIN')
       }
     }
 
     // 3. Send Email
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
     // Safety check just in case email is missing (though unlikely for a registered client)
     if (!client.email) {
-      console.log("Client has no email, skipping send.");
-      return new Response(JSON.stringify({ message: "Client has no email, skipped." }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+      console.log('Client has no email, skipping send.')
+      return new Response(
+        JSON.stringify({ message: 'Client has no email, skipped.' }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
     }
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "KONTROL <no-reply@khaoskontrol.com.br>",
+      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
       to: client.email,
-      subject: subject || "KONTROL // Seu acesso exclusivo ao Khaos Studio",
+      subject: subject || 'KONTROL // Seu acesso exclusivo ao Khaos Studio',
       html: welcomeEmailTemplate({
-        brideName: client.name || "Noiva",
-        portalLink: "https://khaoskontrol.com.br/portal",
-        accessPin: accessPin
+        brideName: client.name || 'Noiva',
+        portalLink: 'https://khaoskontrol.com.br/portal',
+        accessPin: accessPin,
       }),
-    });
+    })
 
     if (emailError) {
-      console.error("Error sending email:", emailError);
-      throw new Error("Failed to send email");
+      console.error('Error sending email:', emailError)
+      throw new Error('Failed to send email')
     }
 
-    return new Response(JSON.stringify({ success: true, pinGenerated: !client.access_pin }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
-
+    return new Response(
+      JSON.stringify({ success: true, pinGenerated: !client.access_pin }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      },
+    )
   } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
-    });
+    })
   }
-});
+})

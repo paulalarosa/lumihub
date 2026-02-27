@@ -46,7 +46,7 @@ export function ContratosTab({
   projectId,
   contracts,
   setContracts,
-  _loading,
+  loading,
   project,
   projectServices,
   totalValue,

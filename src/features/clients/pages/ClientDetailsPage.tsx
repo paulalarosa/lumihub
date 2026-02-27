@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { RecordDialog } from '@/components/clients/RecordDialogLegacy'
+import { RecordDialog } from '@/components/clients/RecordDialog'
 import { useClientDetails } from '../hooks/useClientDetails'
 import {
   ArrowLeft,
@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 
 export default function ClientDetailsPage() {
   const { id } = useParams()
@@ -298,7 +299,7 @@ export default function ClientDetailsPage() {
                                 key={i}
                                 className="aspect-square border border-white/10 relative group/photo overflow-hidden"
                               >
-                                <img
+                                <OptimizedImage
                                   src={photo}
                                   alt="Tratamento"
                                   className="w-full h-full object-cover grayscale group-hover/photo:grayscale-0 transition-all duration-500"

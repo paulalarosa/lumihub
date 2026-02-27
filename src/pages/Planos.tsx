@@ -1,20 +1,23 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { Zap, Crown, Star } from 'lucide-react'
+import { Check, X } from 'lucide-react'
 import SEOHead from '@/components/seo/SEOHead'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useState } from 'react'
+import { cn } from '@/lib/utils'
+import { motion } from 'framer-motion'
 
 const Planos = () => {
   const { t } = useLanguage()
+  const [billedYearly, setBilledYearly] = useState(false)
 
   const plans = [
     {
       name: t('plan_essential_name'),
-      price: '39,90',
-      period: 'MÊS',
+      price: billedYearly ? '399,00' : '39,90',
+      period: billedYearly ? 'ANO' : 'MÊS',
       description: t('plan_essential_desc'),
       badge: null,
-      icon: Zap,
       features: [
         { name: t('feat_10_clients'), included: true },
         { name: t('feat_tech_pack_basic'), included: true },
@@ -25,18 +28,15 @@ const Planos = () => {
         { name: t('feat_commission'), included: false },
         { name: t('feat_ai_support'), included: false },
       ],
-      limitations: t('plan_essential_limit'),
       ctaKey: 'cta_bottom_start',
-      ctaVariant: 'outline' as const,
       highlight: false,
     },
     {
       name: t('plan_professional_name'),
-      price: '89,90',
-      period: 'MÊS',
+      price: billedYearly ? '899,00' : '89,90',
+      period: billedYearly ? 'ANO' : 'MÊS',
       description: t('plan_professional_desc'),
       badge: t('plan_professional_badge'),
-      icon: Star,
       features: [
         { name: t('feat_unlimited_clients'), included: true },
         { name: t('feat_tech_pack_gold'), included: true },
@@ -47,18 +47,15 @@ const Planos = () => {
         { name: t('feat_commission'), included: false },
         { name: t('feat_ai_support'), included: false },
       ],
-      limitations: null,
       ctaKey: 'cta_bottom_plans',
-      ctaVariant: 'default' as const,
       highlight: true,
     },
     {
       name: t('plan_studio_name'),
-      price: '149,90',
-      period: 'MÊS',
+      price: billedYearly ? '1499,00' : '149,90',
+      period: billedYearly ? 'ANO' : 'MÊS',
       description: t('plan_studio_desc'),
       badge: t('plan_studio_badge'),
-      icon: Crown,
       features: [
         { name: t('feat_all_pro'), included: true },
         { name: t('feat_team_mgmt'), included: true },
@@ -69,29 +66,39 @@ const Planos = () => {
         { name: t('feat_priority_support'), included: true },
         { name: t('feat_api'), included: true },
       ],
-      limitations: null,
       ctaKey: 'cta_bottom_plans',
-      ctaVariant: 'outline' as const,
       highlight: false,
     },
   ]
 
-  const faqs = [
-    {
-      question: 'POSSO CANCELAR A QUALQUER MOMENTO?',
-      answer: 'SIM. SEM CONTRATOS DE FIDELIDADE. CONTROLE TOTAL DO SEU ACESSO.',
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.1,
+      },
     },
-    {
-      question: 'COMO FUNCIONA O TRIAL?',
-      answer:
-        '14 DIAS DE ACESSO TOTAL AO SISTEMA. SEM CARTÃO DE CRÉDITO NECESSÁRIO.',
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 300,
+        damping: 24,
+      },
     },
-  ]
+  }
 
   return (
     <>
       <SEOHead
-        title="Planos e Preços - KONTROL"
+        title="Planos e Preços - Premium"
         description="Escolha o plano ideal para seu negócio de beleza."
         keywords="preços kontrol, planos khaos kontrol"
         url="https://khaoskontrol.com.br/planos"
@@ -102,182 +109,220 @@ const Planos = () => {
         ]}
         priceRange="R$39-R$149"
       />
-      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
-        {/* Header Block */}
-        <section className="border-b border-white/20 pt-32 pb-16">
-          <div className="container mx-auto px-4 text-center">
-            <h1 className="font-mono text-xs md:text-sm uppercase tracking-[0.3em] text-white/60 mb-6">
-              {t('plans_badge')}
-            </h1>
-            <h2 className="font-serif text-5xl md:text-7xl text-white mb-8">
-              {t('plans_title')}
+
+      {/* Main Background with Radial Glow and grid */}
+      <div className="min-h-screen bg-[#000000] text-white selection:bg-purple-500/30 selection:text-white font-sans relative flex flex-col items-center overflow-x-hidden">
+        {/* 1. Global Structure / Radial Glow Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          {/* Ultra-subtle purple/gray radial glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120vw] max-w-[1200px] h-[60vh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/10 via-[#000000]/0 to-transparent blur-[100px] opacity-70" />
+          {/* Dotted grid effect very subtle */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
+              backgroundSize: '32px 32px',
+            }}
+          />
+        </div>
+
+        {/* Top Nav Pill (Return/Home) */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+          className="relative z-20 mt-8 flex items-center bg-[#050505] border border-white/5 rounded-full p-1.5 shadow-2xl backdrop-blur-md"
+        >
+          <Link
+            to="/"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors mr-4"
+          >
+            <X className="w-4 h-4 text-zinc-400" />
+          </Link>
+          <nav className="flex items-center gap-6 px-4 text-sm font-medium text-zinc-400">
+            <Link to="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <span className="text-white">Pricing</span>
+          </nav>
+        </motion.div>
+
+        {/* Main Content Area */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="relative z-10 w-full max-w-6xl px-4 md:px-6 flex flex-col items-center pt-16 pb-32"
+        >
+          {/* Title */}
+          <motion.div variants={itemVariants} className="text-center mb-10">
+            <h2 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-br from-white to-zinc-500">
+              Invest in your Growth
             </h2>
-            <div className="flex items-center justify-center gap-4 text-xs font-mono uppercase tracking-widest text-white/80">
-              <span className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-white" />
-                {t('plans_no_card')}
-              </span>
-              <span className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-white" />
-                {t('plans_trial')}
-              </span>
-              <span className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-white" />
-                {t('plans_cancel')}
-              </span>
+            <p className="text-zinc-400 text-sm md:text-base max-w-lg mx-auto">
+              Transparent pricing for beauty professionals. Scale your
+              operations without worrying about infrastructure.
+            </p>
+          </motion.div>
+
+          {/* 1. Toggle (Mensal / Anual) */}
+          <motion.div
+            variants={itemVariants}
+            className="relative flex items-center p-1 bg-[#050505] border border-white/10 rounded-full backdrop-blur-md mb-20 shadow-[0_0_20px_rgba(0,0,0,0.5)]"
+          >
+            {['Mensal', 'Anual'].map((option) => {
+              const isAnual = option === 'Anual'
+              const isActive = isAnual ? billedYearly : !billedYearly
+              return (
+                <button
+                  key={option}
+                  onClick={() => setBilledYearly(isAnual)}
+                  className={cn(
+                    'relative px-8 py-3 text-sm font-semibold rounded-full uppercase tracking-wider transition-colors z-10',
+                    isActive
+                      ? 'text-white'
+                      : 'text-zinc-500 hover:text-zinc-300',
+                  )}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="pricing-toggle-pill"
+                      className="absolute inset-0 bg-white/10 rounded-full -z-10 border border-white/10 shadow-[0_2px_10px_rgba(0,0,0,0.3)]"
+                      transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 25,
+                      }}
+                    />
+                  )}
+                  {option}
+                </button>
+              )
+            })}
+
+            {/* Neon Green Tag */}
+            <div className="absolute -top-3 -right-2 md:-right-6 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center gap-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Economize 20%
             </div>
-          </div>
-        </section>
+          </motion.div>
 
-        {/* Pricing Grid */}
-        <section className="container mx-auto px-4 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 border border-white/20">
-            {plans.map((plan, index) => (
-              <div
-                key={index}
-                className={`
-                  relative p-10 flex flex-col h-full border-b lg:border-b-0 lg:border-r border-white/20 last:border-r-0
-                  ${plan.highlight ? 'bg-white text-black' : 'bg-black text-white'}
-                `}
-              >
-                {plan.badge && (
-                  <div
-                    className={`
-                    absolute top-0 right-0 px-4 py-2 text-xs font-mono uppercase tracking-widest border-l border-b
-                    ${plan.highlight ? 'bg-black text-white border-black' : 'bg-white text-black border-white'}
-                  `}
-                  >
-                    {plan.badge}
+          {/* 2. Pricing Cards Grid */}
+          <div className="grid md:grid-cols-3 gap-6 w-full items-center">
+            {plans.map((plan, index) => {
+              const isPro = plan.highlight
+
+              return (
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  whileHover="hover"
+                  className={cn(
+                    'group relative rounded-3xl p-8 flex flex-col transition-all duration-500 w-full overflow-hidden',
+                    isPro
+                      ? 'bg-[#050505] border border-purple-500/30 shadow-[0_0_40px_rgba(168,85,247,0.1)] backdrop-blur-2xl z-10 md:py-12 md:scale-105'
+                      : 'bg-[#050505] border border-white/5 backdrop-blur-xl h-full',
+                  )}
+                >
+                  {/* Subtly Glowing Border / Spotlight Effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+                    <div
+                      className={cn(
+                        'absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_var(--tw-gradient-stops))] to-transparent',
+                        isPro ? 'from-purple-500/20' : 'from-white/10',
+                      )}
+                    />
+                    {/* Hover border highlight */}
+                    <div
+                      className={cn(
+                        'absolute inset-0 border rounded-3xl',
+                        isPro ? 'border-purple-500/50' : 'border-white/20',
+                      )}
+                    />
                   </div>
-                )}
 
-                <div className="mb-10">
-                  <plan.icon
-                    className={`w-8 h-8 mb-6 ${plan.highlight ? 'text-black' : 'text-white'}`}
-                    strokeWidth={1}
-                  />
-                  <h3 className="font-mono text-sm uppercase tracking-widest mb-2 opacity-80">
-                    {plan.name}
-                  </h3>
-                  <div className="flex items-baseline gap-1 mb-4">
-                    <span className="font-serif text-sm">R$</span>
-                    <span className="font-mono text-5xl tracking-tighter font-light">
-                      {plan.price}
-                    </span>
-                    <span className="font-mono text-xs uppercase opacity-60">
-                      /{plan.period}
-                    </span>
+                  {/* 3. Typography & Content */}
+                  <div className="relative z-10 mb-8">
+                    {plan.badge && (
+                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                        {plan.badge}
+                      </div>
+                    )}
+                    <p className="text-zinc-400 text-sm font-semibold uppercase tracking-widest mb-4">
+                      {plan.name}
+                    </p>
+                    <div className="flex items-start gap-1">
+                      <span className="text-lg font-bold text-zinc-500 mt-1 align-top">
+                        R$
+                      </span>
+                      <span className="text-5xl font-bold tracking-tighter text-white">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-zinc-500 font-medium self-end mb-1">
+                        /{plan.period}
+                      </span>
+                    </div>
+                    <p className="text-sm text-zinc-500 mt-4 h-10 leading-relaxed">
+                      {plan.description}
+                    </p>
                   </div>
-                  <p
-                    className={`text-xs font-mono uppercase tracking-wide ${plan.highlight ? 'text-black/60' : 'text-white/60'}`}
-                  >
-                    {plan.description}
-                  </p>
-                </div>
 
-                <div className="flex-grow mb-10">
-                  <ul className="space-y-4">
+                  {/* Ultra-thin divider */}
+                  <div className="relative z-10 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent mb-8" />
+
+                  {/* Features List */}
+                  <div className="relative z-10 flex-1 space-y-4 mb-10">
                     {plan.features.map((feature, idx) => (
-                      <li
-                        key={idx}
-                        className="flex items-center gap-4 text-xs font-mono tracking-wide uppercase"
-                      >
-                        {feature.included ? (
-                          <div
-                            className={`w-1.5 h-1.5 flex-shrink-0 ${plan.highlight ? 'bg-black' : 'bg-white'}`}
-                          />
-                        ) : (
-                          <div
-                            className={`w-1.5 h-1.5 flex-shrink-0 ${plan.highlight ? 'bg-black/10' : 'bg-white/10'}`}
-                          />
-                        )}
+                      <div key={idx} className="flex items-start gap-3">
+                        <div className="mt-0.5 shrink-0">
+                          {feature.included ? (
+                            <Check
+                              className={cn(
+                                'w-4 h-4',
+                                isPro ? 'text-purple-400' : 'text-white/80',
+                              )}
+                            />
+                          ) : (
+                            <X className="w-4 h-4 text-zinc-700" />
+                          )}
+                        </div>
                         <span
-                          className={
+                          className={cn(
+                            'text-sm',
                             feature.included
-                              ? plan.highlight
-                                ? 'opacity-100'
-                                : 'opacity-100'
-                              : 'opacity-30 line-through'
-                          }
+                              ? 'text-gray-400'
+                              : 'text-zinc-700 line-through opacity-50',
+                          )}
                         >
                           {feature.name}
                         </span>
-                      </li>
+                      </div>
                     ))}
-                  </ul>
-                </div>
+                  </div>
 
-                <div className="mt-auto">
-                  <Link to="/cadastro" className="block w-full">
-                    <Button
-                      className={`
-                        w-full h-12 rounded-none font-mono text-xs uppercase tracking-[0.2em] transition-all
-                        ${
-                          plan.highlight
-                            ? 'bg-black text-white hover:bg-black/80 hover:scale-[1.02]'
-                            : 'bg-white text-black hover:bg-white/90 hover:scale-[1.02]'
-                        }
-                      `}
-                    >
-                      {plan.ctaKey ? t(plan.ctaKey) : 'MIGRAR AGORA'}
-                    </Button>
+                  {/* 4. Call to Action Button */}
+                  <Link to="/cadastro" className="relative z-10 w-full mt-auto">
+                    <motion.div whileTap={{ scale: 0.98 }}>
+                      <Button
+                        className={cn(
+                          'w-full h-12 rounded-xl text-sm font-bold transition-all duration-300 relative overflow-hidden group/btn',
+                          isPro
+                            ? 'bg-white text-black hover:bg-zinc-200 shadow-[0_0_20px_rgba(255,255,255,0.2)]'
+                            : 'bg-transparent border border-white/10 text-white hover:bg-white/5 hover:border-white/20',
+                        )}
+                      >
+                        {isPro && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-[150%] skew-x-12 group-hover/btn:animate-[shimmer_1.5s_infinite]" />
+                        )}
+                        {isPro ? 'Comece com o PRO' : 'Assine o Básico'}
+                      </Button>
+                    </motion.div>
                   </Link>
-                </div>
-              </div>
-            ))}
+                </motion.div>
+              )
+            })}
           </div>
-        </section>
-
-        {/* Feature Matrix / "All Plans Include" */}
-        <section className="border-t border-white/20 py-20 bg-black">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {[
-                t('plans_security'),
-                t('plans_cloud'),
-                t('plans_mobile'),
-                t('plans_updates'),
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center text-center p-6 border border-white/10 hover:border-white/50 transition-colors"
-                >
-                  <div className="w-2 h-2 bg-white mb-4" />
-                  <span className="font-mono text-xs uppercase tracking-widest text-white/80">
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ - Brutalist List */}
-        <section className="border-t border-white/20 py-24">
-          <div className="container mx-auto px-4 max-w-4xl">
-            <h2 className="font-mono text-xs uppercase tracking-widest text-white/40 mb-12 text-center">
-              {t('plans_faq_title')}
-            </h2>
-            <div className="space-y-0 divide-y divide-white/20 border-t border-b border-white/20">
-              {faqs.map((faq, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-1 md:grid-cols-12 gap-8 py-10 group hover:bg-white/5 transition-colors"
-                >
-                  <div className="md:col-span-1 font-mono text-xs text-white/30">
-                    {(index + 1).toString().padStart(2, '0')}
-                  </div>
-                  <div className="md:col-span-5 font-mono text-sm uppercase tracking-wider text-white">
-                    {faq.question}
-                  </div>
-                  <div className="md:col-span-6 font-mono text-xs text-white/60 leading-relaxed uppercase">
-                    {faq.answer}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        </motion.div>
       </div>
     </>
   )

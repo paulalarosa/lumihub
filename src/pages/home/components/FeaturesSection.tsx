@@ -69,8 +69,8 @@ export function FeaturesSection() {
           {features.map((feature, index) => (
             <SpotlightCard
               key={index}
-              className="bg-black hover:bg-neutral-900/50 transition-colors duration-300 border-white/10"
-              spotlightColor="rgba(255, 255, 255, 0.15)"
+              className="bg-black/80 hover:bg-neutral-900/40 transition-colors duration-500"
+              spotlightColor="rgba(255, 255, 255, 0.08)"
             >
               <motion.div
                 initial={{ opacity: 0 }}

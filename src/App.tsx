@@ -87,7 +87,6 @@ const ProjectContract = lazy(() => import('./pages/ProjectContract'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 const PublicBooking = lazy(() => import('./pages/PublicBooking'))
 const Analytics = lazy(() => import('./pages/Analytics'))
-const PricingPage = lazy(() => import('./pages/PricingPage'))
 const AcceptInvitePage = lazy(
   () => import('@/pages/assistant/AcceptInvitePage'),
 )
@@ -117,6 +116,12 @@ const Microsite = lazy(() => import('@/pages/Microsite'))
 const MicrositeEditor = lazy(() => import('@/pages/MicrositeEditor'))
 const SalesPipeline = lazy(() => import('./pages/SalesPipeline'))
 const IntegrationsPage = lazy(() => import('./pages/Integrations'))
+const AssistantQuickLogin = lazy(
+  () => import('@/features/assistant-portal/pages/AssistantQuickLogin'),
+)
+const AssistantFreeDashboard = lazy(
+  () => import('@/features/assistant-portal/pages/AssistantFreeDashboard'),
+)
 
 // Custom styles
 import '@/styles/calendar.css'
@@ -309,14 +314,6 @@ const App = () => {
                           }
                         />
                         <Route
-                          path="/pricing"
-                          element={
-                            <ProtectedRoute>
-                              <PricingPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
                           path="/configuracoes"
                           element={
                             <ProtectedRoute>
@@ -376,7 +373,15 @@ const App = () => {
 
                       <Route
                         path="/assistant/accept/:token"
-                        element={<AcceptInvitePage />}
+                        element={
+                          <Navigate
+                            to={window.location.pathname.replace(
+                              '/assistant/accept/',
+                              '/assistente/convite/',
+                            )}
+                            replace
+                          />
+                        }
                       />
                       <Route
                         path="/assistant"
@@ -413,6 +418,17 @@ const App = () => {
                         element={<UpgradePendingPage />}
                       />
                       <Route path="/b/:slug" element={<PublicBooking />} />
+
+                      {/* Assistant Portal Free (Shadow Accounts) */}
+                      <Route
+                        path="/agenda-equipa/:professionalId"
+                        element={<AssistantQuickLogin />}
+                      />
+                      <Route
+                        path="/agenda-equipa/:professionalId/dashboard"
+                        element={<AssistantFreeDashboard />}
+                      />
+
                       <Route
                         path="/assinar/:requestId"
                         element={<SignContract />}

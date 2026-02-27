@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { ReportProject, FinancialExportItem } from '@/types/service-types'
+import { formatCurrency } from '@/lib/format'
 
 interface Client {
   full_name: string
@@ -125,11 +126,7 @@ export const generateClientPDF = (
       doc.setFontSize(10)
       doc.setTextColor(colors.secondary)
       const totalValue = project.total_value || 0
-      doc.text(
-        `Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}`,
-        150,
-        yPos + 8,
-      )
+      doc.text(`Total: ${formatCurrency(totalValue)}`, 150, yPos + 8)
 
       yPos += 25
 
@@ -148,14 +145,8 @@ export const generateClientPDF = (
           // Handle dynamic structure: 'services' join or direct fields
           s.services?.name || s.name || 'Serviço Personalizado',
           s.quantity || 1,
-          new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-          }).format(s.unit_price || 0),
-          new Intl.NumberFormat('pt-BR', {
-            style: 'currency',
-            currency: 'BRL',
-          }).format(s.total_price || 0),
+          formatCurrency(s.unit_price || 0),
+          formatCurrency(s.total_price || 0),
         ])
 
         autoTable(doc, {

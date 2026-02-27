@@ -42,7 +42,7 @@ export const LocalAISettings = () => {
             <Button
               size="sm"
               className="bg-purple-600 hover:bg-purple-700 text-white rounded-none h-8 font-mono text-[9px] uppercase tracking-widest px-4"
-              onClick={() => (window.location.href = '/pricing')}
+              onClick={() => (window.location.href = '/planos')}
             >
               Upgrade_Now
             </Button>
