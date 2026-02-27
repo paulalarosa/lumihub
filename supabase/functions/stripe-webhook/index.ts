@@ -1,270 +1,236 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import Stripe from "https://esm.sh/stripe@14.11.0";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import Stripe from 'https://esm.sh/stripe@14.11.0'
 
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
-    apiVersion: "2023-10-16",
-});
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+  apiVersion: '2023-10-16',
+})
 
 const supabase = createClient(
-    Deno.env.get("SUPABASE_URL")!,
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-);
+  Deno.env.get('SUPABASE_URL')!,
+  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+)
 
-const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET")!;
+const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')!
 
 serve(async (req) => {
-    const signature = req.headers.get("stripe-signature")!;
-    const body = await req.text();
+  const signature = req.headers.get('stripe-signature')!
+  const body = await req.text()
 
-    let event: Stripe.Event;
+  let event: Stripe.Event
 
-    try {
-        event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err: any) {
-        console.error("Webhook signature verification failed:", err.message);
-        return new Response(JSON.stringify({ error: err.message }), { status: 400 });
+  try {
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+  } catch (err: any) {
+    console.error('Webhook signature verification failed:', err.message)
+    return new Response(JSON.stringify({ error: err.message }), { status: 400 })
+  }
+
+  console.log('Event type:', event.type)
+
+  try {
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleCheckoutCompleted(session)
+        break
+      }
+
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object as Stripe.Subscription
+        await handleSubscriptionUpdate(subscription)
+        break
+      }
+
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object as Stripe.Subscription
+        await handleSubscriptionCancelled(subscription)
+        break
+      }
+
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice
+        await handlePaymentSucceeded(invoice)
+        break
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice
+        await handlePaymentFailed(invoice)
+        break
+      }
     }
 
-    console.log("Event type:", event.type);
-
-    try {
-        switch (event.type) {
-            case "checkout.session.completed": {
-                const session = event.data.object as Stripe.Checkout.Session;
-                await handleCheckoutCompleted(session);
-                break;
-            }
-
-            case "customer.subscription.created":
-            case "customer.subscription.updated": {
-                const subscription = event.data.object as Stripe.Subscription;
-                await handleSubscriptionUpdate(subscription);
-                break;
-            }
-
-            case "customer.subscription.deleted": {
-                const subscription = event.data.object as Stripe.Subscription;
-                await handleSubscriptionCancelled(subscription);
-                break;
-            }
-
-            case "invoice.payment_succeeded": {
-                const invoice = event.data.object as Stripe.Invoice;
-                await handlePaymentSucceeded(invoice);
-                break;
-            }
-
-            case "invoice.payment_failed": {
-                const invoice = event.data.object as Stripe.Invoice;
-                await handlePaymentFailed(invoice);
-                break;
-            }
-
-            case "account.updated": {
-                const account = event.data.object as Stripe.Account;
-                await handleAccountUpdated(account);
-                break;
-            }
-        }
-
-        return new Response(JSON.stringify({ received: true }), { status: 200 });
-    } catch (error: any) {
-        console.error("Webhook handler error:", error);
-        return new Response(JSON.stringify({ error: error.message }), { status: 500 });
-    }
-});
+    return new Response(JSON.stringify({ received: true }), { status: 200 })
+  } catch (error: any) {
+    console.error('Webhook handler error:', error)
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+    })
+  }
+})
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-    const clientReferenceId = session.client_reference_id;
-    const userId = clientReferenceId || session.metadata?.user_id;
+  const clientReferenceId = session.client_reference_id
+  const userId = clientReferenceId || session.metadata?.user_id
 
-    if (!userId) {
-        console.error("No user ID found in session", session.id);
-        return;
-    }
-<<<<<<< HEAD
+  if (!userId) {
+    console.error('No user ID found in session', session.id)
+    return
+  }
 
-    // Determine plan based on amount or price ID if strict mapping allows
-    // For now, we update status to active. 
-    // Ideally we fetch line items to get the specific price/plan.
+  const planType = session.metadata?.plan_type || 'profissional'
 
-    // Defaulting to "professional" or keeping existing logic if any
-    let planType = 'professional'; // Default fallback
+  console.log(`Processing checkout for user ${userId}, plan: ${planType}`)
 
-    await supabase
-        .from("makeup_artists") // Or profiles, need to be consistent. User said 'profiles' in prompt but file used 'makeup_artists'. checking...
-        // The file previously used 'makeup_artists'. I will stick to it unless user correction. The prompt said "tabela de perfis" (profiles table).
-        // BUT the existing code uses 'makeup_artists'. I will check schema/codebase again to be safe.
-        // Wait, step 1125 showed 'makeup_artists'. 
-        // I'll try to update 'profiles' AND 'makeup_artists' if they are separate?
-        // Or just 'profiles' as requested?
-        // "O Webhook deve extrair o client_reference_id ... para atualizar o plan_type na tabela de perfis."
-        // I will trust the prompt "profiles" but I should check if 'makeup_artists' IS the profile table.
-        // Let's safe bet: update 'profiles' if it exists.
+  // Update profiles table (Primary Request)
+  const { error: profileError } = await supabase
+    .from('profiles')
+    .update({
+      plan_type: planType,
+      stripe_customer_id: session.customer as string,
+    })
+    .eq('id', userId)
 
-=======
+  if (profileError) {
+    console.error('Error updating profile:', profileError)
+  }
 
-    const planType = session.metadata?.plan_type || 'profissional';
+  // Update makeup_artists table (Legacy/Backward Compatibility)
+  const { error: artistError } = await supabase
+    .from('makeup_artists')
+    .update({
+      stripe_subscription_id: session.subscription as string,
+      plan_type: planType,
+      plan_status: 'active',
+      plan_started_at: new Date().toISOString(),
+      stripe_customer_id: session.customer as string,
+    })
+    .eq('user_id', userId)
 
-    console.log(`Processing checkout for user ${userId}, plan: ${planType}`);
+  if (artistError) {
+    console.warn('Error updating makeup_artists:', artistError)
+  }
 
-    // Update profiles table (Primary Request)
-    const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-            plan_type: planType,
-            stripe_customer_id: session.customer as string
-        })
-        .eq("id", userId);
-
-    if (profileError) {
-        console.error("Error updating profile:", profileError);
-    }
-
-    // Update makeup_artists table (Legacy/Backward Compatibility)
-    const { error: artistError } = await supabase
-        .from("makeup_artists")
->>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
-        .update({
-            stripe_subscription_id: session.subscription as string,
-            plan_status: "active",
-            plan_started_at: new Date().toISOString(),
-<<<<<<< HEAD
-            // stripe_customer_id: session.customer as string // Update this too
-=======
-            stripe_customer_id: session.customer as string
->>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
-        })
-        .eq("user_id", userId);
-
-    if (artistError) {
-        console.warn("Error updating makeup_artists:", artistError);
-    }
-
-    console.log(`Subscription activated for user ${userId}`);
+  console.log(`Subscription activated for user ${userId}`)
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
-    const userId = subscription.metadata?.user_id;
+  const userId = subscription.metadata?.user_id
 
-    if (!userId) {
-        // Buscar pelo subscription_id
-        const { data: artist } = await supabase
-            .from("makeup_artists")
-            .select("user_id")
-            .eq("stripe_subscription_id", subscription.id)
-            .single();
+  if (!userId) {
+    // Buscar pelo subscription_id
+    const { data: artist } = await supabase
+      .from('makeup_artists')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single()
 
-        if (!artist) return;
+    if (!artist) return
 
-        // update status
-        const status = mapStripeStatus(subscription.status);
+    // update status
+    const status = mapStripeStatus(subscription.status)
 
-        await supabase
-            .from("makeup_artists")
-            .update({
-                plan_status: status,
-                plan_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
-            })
-            .eq("user_id", artist.user_id);
-    } else {
-        const status = mapStripeStatus(subscription.status);
+    await supabase
+      .from('makeup_artists')
+      .update({
+        plan_status: status,
+        plan_expires_at: new Date(
+          subscription.current_period_end * 1000,
+        ).toISOString(),
+      })
+      .eq('user_id', artist.user_id)
+  } else {
+    const status = mapStripeStatus(subscription.status)
 
-        await supabase
-            .from("makeup_artists")
-            .update({
-                plan_status: status,
-                plan_expires_at: new Date(subscription.current_period_end * 1000).toISOString(),
-            })
-            .eq("user_id", userId);
-    }
+    await supabase
+      .from('makeup_artists')
+      .update({
+        plan_status: status,
+        plan_expires_at: new Date(
+          subscription.current_period_end * 1000,
+        ).toISOString(),
+      })
+      .eq('user_id', userId)
+  }
 }
 
 function mapStripeStatus(stripeStatus: string): string {
-    switch (stripeStatus) {
-        case 'active': return 'active';
-        case 'trialing': return 'trialing';
-        case 'past_due': return 'past_due';
-        case 'canceled': return 'cancelled';
-        case 'paused': return 'paused';
-        default: return 'paused';
-    }
+  switch (stripeStatus) {
+    case 'active':
+      return 'active'
+    case 'trialing':
+      return 'trialing'
+    case 'past_due':
+      return 'past_due'
+    case 'canceled':
+      return 'cancelled'
+    case 'paused':
+      return 'paused'
+    default:
+      return 'paused'
+  }
 }
 
 async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
-    await supabase
-        .from("makeup_artists")
-        .update({
-            plan_status: "cancelled",
-        })
-        .eq("stripe_subscription_id", subscription.id);
+  await supabase
+    .from('makeup_artists')
+    .update({
+      plan_status: 'cancelled',
+    })
+    .eq('stripe_subscription_id', subscription.id)
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-    const customerId = invoice.customer as string;
+  const customerId = invoice.customer as string
 
-    // Buscar user_id pelo customer_id
-    const { data: artist } = await supabase
-        .from("makeup_artists")
-        .select("user_id")
-        .eq("stripe_customer_id", customerId)
-        .single();
+  // Buscar user_id pelo customer_id
+  const { data: artist } = await supabase
+    .from('makeup_artists')
+    .select('user_id')
+    .eq('stripe_customer_id', customerId)
+    .single()
 
-    if (!artist) return;
+  if (!artist) return
 
-    // Registrar pagamento
-    await supabase.from("payment_history").insert({
-        user_id: artist.user_id,
-        stripe_payment_intent_id: invoice.payment_intent as string,
-        stripe_invoice_id: invoice.id,
-        amount: invoice.amount_paid / 100,
-        currency: invoice.currency.toUpperCase(),
-        status: "succeeded",
-        description: `Pagamento ${invoice.billing_reason}`,
-        paid_at: new Date(invoice.created * 1000).toISOString(),
-    });
+  // Registrar pagamento
+  await supabase.from('payment_history').insert({
+    user_id: artist.user_id,
+    stripe_payment_intent_id: invoice.payment_intent as string,
+    stripe_invoice_id: invoice.id,
+    amount: invoice.amount_paid / 100,
+    currency: invoice.currency.toUpperCase(),
+    status: 'succeeded',
+    description: `Pagamento ${invoice.billing_reason}`,
+    paid_at: new Date(invoice.created * 1000).toISOString(),
+  })
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-    const customerId = invoice.customer as string;
+  const customerId = invoice.customer as string
 
-    const { data: artist } = await supabase
-        .from("makeup_artists")
-        .select("user_id")
-        .eq("stripe_customer_id", customerId)
-        .single();
+  const { data: artist } = await supabase
+    .from('makeup_artists')
+    .select('user_id')
+    .eq('stripe_customer_id', customerId)
+    .single()
 
-    if (!artist) return;
+  if (!artist) return
 
-    // Registrar falha
-    await supabase.from("payment_history").insert({
-        user_id: artist.user_id,
-        stripe_invoice_id: invoice.id,
-        amount: invoice.amount_due / 100,
-        currency: invoice.currency.toUpperCase(),
-        status: "failed",
-        description: `Falha no pagamento: ${invoice.billing_reason}`,
-    });
+  // Registrar falha
+  await supabase.from('payment_history').insert({
+    user_id: artist.user_id,
+    stripe_invoice_id: invoice.id,
+    amount: invoice.amount_due / 100,
+    currency: invoice.currency.toUpperCase(),
+    status: 'failed',
+    description: `Falha no pagamento: ${invoice.billing_reason}`,
+  })
 
-    // Atualizar status do plano
-    await supabase
-        .from("makeup_artists")
-        .update({ plan_status: "past_due" })
-        .eq("user_id", artist.user_id);
-}
-
-async function handleAccountUpdated(account: Stripe.Account) {
-    const accountId = account.id;
-    const chargesEnabled = account.charges_enabled;
-    const payoutsEnabled = account.payouts_enabled;
-
-    console.log(`Account ${accountId} updated. Charges: ${chargesEnabled}, Payouts: ${payoutsEnabled}`);
-
-    await supabase
-        .from("makeup_artists")
-        .update({
-            charges_enabled: chargesEnabled,
-        })
-        .eq("stripe_account_id", accountId);
+  // Atualizar status do plano
+  await supabase
+    .from('makeup_artists')
+    .update({ plan_status: 'past_due' })
+    .eq('user_id', artist.user_id)
 }
