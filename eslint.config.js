@@ -7,9 +7,18 @@ import tseslint from "typescript-eslint";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import unusedImports from "eslint-plugin-unused-imports";
 
+<<<<<<< HEAD
+export default tseslint.config({ ignores: ["dist", "dev-dist", "node_modules", "coverage"] }, {
+  extends: [js.configs.recommended, ...tseslint.configs.recommended],
+  files: ["**/*.{ts,tsx}"],
+  languageOptions: {
+    ecmaVersion: 2020,
+    globals: globals.browser,
+=======
 export default tseslint.config(
   {
     ignores: ["dist", "dev-dist", "storybook-static", "public", "node_modules", "supabase/functions"]
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
   },
   ...(storybook.configs?.["flat/recommended"] ? [storybook.configs["flat/recommended"]].flat() : []),
   {

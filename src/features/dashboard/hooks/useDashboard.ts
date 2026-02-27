@@ -17,6 +17,22 @@ export function useDashboard() {
   const { user, isAdmin, signOut } = useAuth()
   const { organizationId, isOwner, loading: orgLoading } = useOrganization()
 
+<<<<<<< HEAD
+    const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true);
+    const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+    const [clientsCount, setClientsCount] = useState<number>(0);
+    const [projectsCount, setProjectsCount] = useState<number>(0);
+    const [totalRevenue, setTotalRevenue] = useState<number>(0);
+    const [totalCommissions, setTotalCommissions] = useState<number>(0);
+    const [upcomingEvents, setUpcomingEvents] = useState<DashboardEvent[]>([]);
+    const [marketingTriggers, setMarketingTriggers] = useState<MarketingTrigger[]>([]);
+    const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [originStats, setOriginStats] = useState<{ name: string; value: number }[]>([]);
+    const [profileName, setProfileName] = useState<string>('');
+    const [chargesEnabled, setChargesEnabled] = useState<boolean>(false);
+    const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
+=======
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true)
   const [checkingOnboarding, setCheckingOnboarding] = useState(true)
   const [clientsCount, setClientsCount] = useState<number>(0)
@@ -33,6 +49,7 @@ export function useDashboard() {
     { name: string; value: number }[]
   >([])
   const [profileName, setProfileName] = useState<string>('')
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 
   useEffect(() => {
     if (!user) return
@@ -43,6 +60,36 @@ export function useDashboard() {
         .eq('id', user.id)
         .maybeSingle()
 
+<<<<<<< HEAD
+            if (profileData) {
+                if (profileData.full_name) {
+                    setProfileName((profileData.full_name || '').split(' ')[0]);
+                }
+                if (profileData.onboarding_completed === false) {
+                    setOnboardingCompleted(false);
+                }
+                if (user.email === 'nathaliasbrb@gmail.com' && profileData.subscription_tier !== 'studio') {
+                    await supabase.from('profiles').update({ subscription_tier: 'studio' } as Record<string, unknown>).eq('id', user.id);
+                }
+            }
+
+            // Fetch Stripe Connect Status
+            const { data: artist } = await supabase
+                .from('makeup_artists')
+                .select('charges_enabled, stripe_account_id')
+                .eq('user_id', user.id)
+                .maybeSingle();
+
+            if (artist) {
+                setChargesEnabled(artist.charges_enabled || false);
+                setStripeAccountId(artist.stripe_account_id || null);
+            }
+
+            setCheckingOnboarding(false);
+        };
+        checkUserStatus();
+    }, [user]);
+=======
       if (profileData) {
         if (profileData.full_name) {
           setProfileName((profileData.full_name || '').split(' ')[0])
@@ -64,6 +111,7 @@ export function useDashboard() {
     }
     checkUserStatus()
   }, [user])
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 
   useEffect(() => {
     if (!organizationId) return
@@ -172,6 +220,30 @@ export function useDashboard() {
     navigate('/')
   }
 
+<<<<<<< HEAD
+    return {
+        user,
+        isAdmin,
+        isOwner,
+        orgLoading,
+        dataLoading,
+        onboardingCompleted,
+        checkingOnboarding,
+        clientsCount,
+        projectsCount,
+        totalRevenue,
+        totalCommissions,
+        upcomingEvents,
+        marketingTriggers,
+        isGoogleConnected,
+        originStats,
+        profileName,
+        chargesEnabled,
+        stripeAccountId,
+        handleSignOut,
+        navigate,
+    };
+=======
   return {
     user,
     isAdmin,
@@ -192,4 +264,5 @@ export function useDashboard() {
     handleSignOut,
     navigate,
   }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 }

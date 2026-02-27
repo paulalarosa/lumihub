@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 export type Json =
   | string
   | number
@@ -10,6 +14,12 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
+<<<<<<< HEAD
+    PostgrestVersion: "14.1"
+  }
+  public: {
+    Tables: {
+=======
     PostgrestVersion: '14.1'
   }
   public: {
@@ -53,6 +63,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       analytics_logs: {
         Row: {
           client_id: string | null
@@ -77,18 +88,29 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "analytics_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_clients"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'analytics_logs_client_id_fkey'
             columns: ['client_id']
             isOneToOne: false
             referencedRelation: 'wedding_clients'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
       appointments: {
         Row: {
           assistant_commission: number | null
+<<<<<<< HEAD
+=======
           assistant_id: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           client_id: string | null
           created_at: string | null
           description: string | null
@@ -104,7 +126,10 @@ export type Database = {
         }
         Insert: {
           assistant_commission?: number | null
+<<<<<<< HEAD
+=======
           assistant_id?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           client_id?: string | null
           created_at?: string | null
           description?: string | null
@@ -120,7 +145,10 @@ export type Database = {
         }
         Update: {
           assistant_commission?: number | null
+<<<<<<< HEAD
+=======
           assistant_id?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           client_id?: string | null
           created_at?: string | null
           description?: string | null
@@ -134,6 +162,9 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
+<<<<<<< HEAD
+        Relationships: []
+=======
         Relationships: [
           {
             foreignKeyName: 'appointments_assistant_id_fkey'
@@ -229,6 +260,7 @@ export type Database = {
             referencedColumns: ['id']
           },
         ]
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       }
       assistant_notifications: {
         Row: {
@@ -265,6 +297,8 @@ export type Database = {
       }
       assistants: {
         Row: {
+<<<<<<< HEAD
+=======
           created_at: string | null
           full_name: string
           id: string
@@ -298,6 +332,7 @@ export type Database = {
       }
       assistants_legacy: {
         Row: {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           assistant_user_id: string | null
           created_at: string | null
           email: string
@@ -335,6 +370,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       audit_logs: {
         Row: {
           action: string
@@ -371,6 +408,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       backup_integrity_logs: {
         Row: {
           action: string
@@ -428,6 +466,20 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "bride_access_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bride_access_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'bride_access_professional_id_fkey'
             columns: ['professional_id']
             isOneToOne: false
@@ -440,6 +492,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -470,6 +523,16 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "briefings_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+=======
             foreignKeyName: 'briefings_project_id_fkey'
             columns: ['project_id']
             isOneToOne: false
@@ -612,6 +675,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       contracts: {
         Row: {
           attachment_url: string | null
@@ -660,6 +724,20 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "contracts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'contracts_client_id_fkey'
             columns: ['client_id']
             isOneToOne: false
@@ -672,6 +750,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'projects'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -693,6 +772,41 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "assistants"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assistants"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_assistants_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'assistants'
             columns: ['assistant_id']
             isOneToOne: false
@@ -726,6 +840,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'events'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -819,6 +934,34 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "event_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'event_client_id_fkey'
             columns: ['client_id']
             isOneToOne: false
@@ -845,6 +988,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'projects'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -875,6 +1019,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       google_calendar_tokens: {
         Row: {
           access_token: string
@@ -1252,6 +1398,7 @@ export type Database = {
           },
         ]
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       invoices: {
         Row: {
           amount: number
@@ -1291,6 +1438,13 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'invoices_project_id_fkey'
             columns: ['project_id']
             isOneToOne: false
@@ -1490,11 +1644,54 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'leads'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
       leads: {
         Row: {
+<<<<<<< HEAD
+          client_name: string
+          created_at: string | null
+          id: string
+          status: string | null
+          user_id: string | null
+          value: number | null
+        }
+        Insert: {
+          client_name: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Update: {
+          client_name?: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+=======
           assigned_to: string | null
           client_name: string
           converted_at: string | null
@@ -1682,6 +1879,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       marketing_campaigns: {
         Row: {
           created_at: string | null
@@ -1769,11 +1967,19 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "moodboard_images_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'moodboard_images_project_id_fkey'
             columns: ['project_id']
             isOneToOne: false
             referencedRelation: 'projects'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -1801,11 +2007,19 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "notification_logs_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_notifications"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'notification_logs_notification_id_fkey'
             columns: ['notification_id']
             isOneToOne: false
             referencedRelation: 'assistant_notifications'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -1836,6 +2050,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       pipeline_custom_fields: {
         Row: {
           created_at: string | null
@@ -1935,6 +2151,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       profiles: {
         Row: {
           address: string | null
@@ -1947,7 +2164,10 @@ export type Database = {
           created_at: string | null
           document_id: string | null
           email: string | null
+<<<<<<< HEAD
+=======
           email_status: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           financial_goal: number | null
           first_name: string | null
           full_name: string | null
@@ -1962,11 +2182,18 @@ export type Database = {
           parent_user_id: string | null
           phone: string | null
           plan: string | null
+<<<<<<< HEAD
+          "profiles.role": string | null
+          role: string | null
+          slug: string | null
+          state: string | null
+=======
           'profiles.role': string | null
           role: string | null
           slug: string | null
           state: string | null
           stripe_customer_id: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           subscription_status: string | null
           subscription_tier: string | null
           total_clients: number | null
@@ -1984,7 +2211,10 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           email?: string | null
+<<<<<<< HEAD
+=======
           email_status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           financial_goal?: number | null
           first_name?: string | null
           full_name?: string | null
@@ -1999,11 +2229,18 @@ export type Database = {
           parent_user_id?: string | null
           phone?: string | null
           plan?: string | null
+<<<<<<< HEAD
+          "profiles.role"?: string | null
+          role?: string | null
+          slug?: string | null
+          state?: string | null
+=======
           'profiles.role'?: string | null
           role?: string | null
           slug?: string | null
           state?: string | null
           stripe_customer_id?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           subscription_status?: string | null
           subscription_tier?: string | null
           total_clients?: number | null
@@ -2021,7 +2258,10 @@ export type Database = {
           created_at?: string | null
           document_id?: string | null
           email?: string | null
+<<<<<<< HEAD
+=======
           email_status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           financial_goal?: number | null
           first_name?: string | null
           full_name?: string | null
@@ -2036,11 +2276,18 @@ export type Database = {
           parent_user_id?: string | null
           phone?: string | null
           plan?: string | null
+<<<<<<< HEAD
+          "profiles.role"?: string | null
+          role?: string | null
+          slug?: string | null
+          state?: string | null
+=======
           'profiles.role'?: string | null
           role?: string | null
           slug?: string | null
           state?: string | null
           stripe_customer_id?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           subscription_status?: string | null
           subscription_tier?: string | null
           total_clients?: number | null
@@ -2085,6 +2332,20 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "project_services_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_services_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'project_services_project_id_fkey'
             columns: ['project_id']
             isOneToOne: false
@@ -2097,6 +2358,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'services'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -2187,11 +2449,19 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "wedding_clients"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_clients"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'wedding_clients'
             columns: ['client_id']
             isOneToOne: false
             referencedRelation: 'wedding_clients'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -2240,6 +2510,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       subscriptions: {
         Row: {
           cancelled_at: string | null
@@ -2388,6 +2660,7 @@ export type Database = {
           },
         ]
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       system_config: {
         Row: {
           created_at: string
@@ -2481,11 +2754,19 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'tasks_project_id_fkey'
             columns: ['project_id']
             isOneToOne: false
             referencedRelation: 'projects'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -2546,6 +2827,34 @@ export type Database = {
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "team_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+=======
             foreignKeyName: 'team_members_owner_id_fkey'
             columns: ['owner_id']
             isOneToOne: false
@@ -2572,6 +2881,7 @@ export type Database = {
             isOneToOne: false
             referencedRelation: 'profiles'
             referencedColumns: ['id']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           },
         ]
       }
@@ -2588,7 +2898,10 @@ export type Database = {
           payment_method: string | null
           project_id: string | null
           service_id: string | null
+<<<<<<< HEAD
+=======
           status: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           type: string | null
           user_id: string
           wallet_id: string | null
@@ -2605,7 +2918,10 @@ export type Database = {
           payment_method?: string | null
           project_id?: string | null
           service_id?: string | null
+<<<<<<< HEAD
+=======
           status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           type?: string | null
           user_id: string
           wallet_id?: string | null
@@ -2622,13 +2938,54 @@ export type Database = {
           payment_method?: string | null
           project_id?: string | null
           service_id?: string | null
+<<<<<<< HEAD
+=======
           status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           type?: string | null
           user_id?: string
           wallet_id?: string | null
         }
         Relationships: [
           {
+<<<<<<< HEAD
+            foreignKeyName: "transactions_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_assistant_id_fkey"
+            columns: ["assistant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+=======
             foreignKeyName: 'transactions_assistant_id_fkey'
             columns: ['assistant_id']
             isOneToOne: false
@@ -2730,6 +3087,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       user_integrations: {
         Row: {
           access_token: string | null
@@ -2766,6 +3124,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       user_onboarding: {
         Row: {
           business_info_completed: boolean | null
@@ -2829,6 +3189,7 @@ export type Database = {
         }
         Relationships: []
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       user_roles: {
         Row: {
           role: string
@@ -2844,6 +3205,8 @@ export type Database = {
         }
         Relationships: []
       }
+<<<<<<< HEAD
+=======
       user_seen_tips: {
         Row: {
           id: string
@@ -2873,6 +3236,7 @@ export type Database = {
           },
         ]
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       wallets: {
         Row: {
           balance: number | null
@@ -2907,11 +3271,17 @@ export type Database = {
           assistant_commission: string | null
           avatar_url: string | null
           bride_status: boolean | null
+<<<<<<< HEAD
+          cpf: string | null
+          created_at: string | null
+          email: string | null
+=======
           contract_url: string | null
           cpf: string | null
           created_at: string | null
           email: string | null
           email_status: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           full_name: string | null
           id: string
           instagram: string | null
@@ -2935,11 +3305,17 @@ export type Database = {
           assistant_commission?: string | null
           avatar_url?: string | null
           bride_status?: boolean | null
+<<<<<<< HEAD
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+=======
           contract_url?: string | null
           cpf?: string | null
           created_at?: string | null
           email?: string | null
           email_status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           full_name?: string | null
           id?: string
           instagram?: string | null
@@ -2963,11 +3339,17 @@ export type Database = {
           assistant_commission?: string | null
           avatar_url?: string | null
           bride_status?: boolean | null
+<<<<<<< HEAD
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+=======
           contract_url?: string | null
           cpf?: string | null
           created_at?: string | null
           email?: string | null
           email_status?: string | null
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
           full_name?: string | null
           id?: string
           instagram?: string | null
@@ -3027,6 +3409,12 @@ export type Database = {
       }
     }
     Functions: {
+<<<<<<< HEAD
+      get_bride_dashboard_data:
+        | { Args: { p_client_id: string }; Returns: Json }
+        | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
+      is_admin: { Args: never; Returns: boolean }
+=======
       accept_assistant_invite: {
         Args: { p_invite_token: string; p_user_id?: string }
         Returns: Json
@@ -3109,13 +3497,18 @@ export type Database = {
         }
         Returns: undefined
       }
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       validate_bride_pin: {
         Args: { client_id: string; pin_code: string }
         Returns: boolean
       }
     }
     Enums: {
+<<<<<<< HEAD
+      user_role: "admin" | "editor" | "viewer"
+=======
       user_role: 'admin' | 'editor' | 'viewer'
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3123,6 +3516,15 @@ export type Database = {
   }
 }
 
+<<<<<<< HEAD
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+=======
 type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
 
 type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
@@ -3130,26 +3532,44 @@ type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, 'public'>]
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema['Tables'] & DefaultSchema['Views'])
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
+<<<<<<< HEAD
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+=======
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
+<<<<<<< HEAD
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+=======
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Views'])[TableName] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       Row: infer R
     }
     ? R
     : never
+<<<<<<< HEAD
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+=======
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema['Tables'] &
         DefaultSchema['Views'])
     ? (DefaultSchema['Tables'] &
         DefaultSchema['Views'])[DefaultSchemaTableNameOrOptions] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         Row: infer R
       }
       ? R
@@ -3158,23 +3578,40 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
+<<<<<<< HEAD
+    | keyof DefaultSchema["Tables"]
+=======
     | keyof DefaultSchema['Tables']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
+<<<<<<< HEAD
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+=======
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
+<<<<<<< HEAD
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+=======
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       Insert: infer I
     }
     ? I
     : never
+<<<<<<< HEAD
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+=======
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
     ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         Insert: infer I
       }
       ? I
@@ -3183,23 +3620,40 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
+<<<<<<< HEAD
+    | keyof DefaultSchema["Tables"]
+=======
     | keyof DefaultSchema['Tables']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
+<<<<<<< HEAD
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+=======
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
+<<<<<<< HEAD
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+=======
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions['schema']]['Tables'][TableName] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
       Update: infer U
     }
     ? U
     : never
+<<<<<<< HEAD
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+=======
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema['Tables']
     ? DefaultSchema['Tables'][DefaultSchemaTableNameOrOptions] extends {
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         Update: infer U
       }
       ? U
@@ -3208,42 +3662,80 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
+<<<<<<< HEAD
+    | keyof DefaultSchema["Enums"]
+=======
     | keyof DefaultSchema['Enums']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
+<<<<<<< HEAD
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+=======
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
+<<<<<<< HEAD
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+=======
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions['schema']]['Enums'][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema['Enums']
     ? DefaultSchema['Enums'][DefaultSchemaEnumNameOrOptions]
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
+<<<<<<< HEAD
+    | keyof DefaultSchema["CompositeTypes"]
+=======
     | keyof DefaultSchema['CompositeTypes']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
+<<<<<<< HEAD
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+=======
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
+<<<<<<< HEAD
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+=======
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema['CompositeTypes']
     ? DefaultSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
     : never
 
 export const Constants = {
   public: {
     Enums: {
+<<<<<<< HEAD
+      user_role: ["admin", "editor", "viewer"],
+    },
+  },
+} as const
+=======
+export * from "@/integrations/supabase/types";
+>>>>>>> 8758fab092d565a170d01d782ac7cced1e35034c
+=======
       user_role: ['admin', 'editor', 'viewer'],
     },
   },
 } as const
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec

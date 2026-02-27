@@ -29,10 +29,16 @@ export const useAuthStore = create<AuthState>()(
             login: async () => {
                 set({ loading: true, error: null });
                 try {
+                    const origin = window.location.origin;
+                    // Ensure no double slashes by handling the trailing slash dynamically
+                    const redirectTo = origin.endsWith('/')
+                        ? `${origin}auth/callback`
+                        : `${origin}/auth/callback`;
+
                     const { error } = await supabase.auth.signInWithOAuth({
                         provider: 'google',
                         options: {
-                            redirectTo: `${window.location.origin}/auth/callback`,
+                            redirectTo,
                         },
                     });
                     if (error) throw error;

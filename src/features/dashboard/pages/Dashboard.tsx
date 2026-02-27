@@ -2,6 +2,17 @@ import { Link } from 'react-router-dom'
 import { useLanguage } from '@/hooks/useLanguage'
 import { Button } from '@/components/ui/button'
 import {
+<<<<<<< HEAD
+  Users, Calendar, DollarSign, FolderOpen, Sparkles, CheckCircle2
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { AssistantsPanelCard } from '@/components/dashboard/AssistantsPanelCard';
+import { motion } from 'framer-motion';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { useDashboard } from '../hooks/useDashboard';
+=======
   Users,
   Calendar,
   DollarSign,
@@ -23,6 +34,7 @@ import {
 } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { SetupChecklist } from '@/components/onboarding/SetupChecklist'
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 
 export default function Dashboard() {
   const { t } = useLanguage()
@@ -113,12 +125,37 @@ export default function Dashboard() {
         <SetupChecklist />
 
         <div className="mb-12 p-6 border border-white/10 bg-white/5 rounded-none">
+<<<<<<< HEAD
+          <span className="font-mono text-xs text-white/50 tracking-widest uppercase">STATUS:</span>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xl font-serif text-white">AGUARDANDO CRONOGRAMA</p>
+            {!d.chargesEnabled && (
+              <Button
+                variant="outline"
+                className="border-purple-500 text-purple-400 hover:bg-purple-900/20"
+                onClick={async () => {
+                  const { data, error } = await supabase.functions.invoke('stripe-connect-onboarding', {
+                    body: { userId: d.user.id }
+                  });
+                  if (data?.url) {
+                    window.location.href = data.url;
+                  } else {
+                    console.error('Error creating onboarding link:', error);
+                  }
+                }}
+              >
+                Ativar Pagamentos
+              </Button>
+            )}
+          </div>
+=======
           <span className="font-mono text-xs text-white/50 tracking-widest uppercase">
             STATUS:
           </span>
           <p className="text-xl font-serif text-white mt-1">
             AGUARDANDO CRONOGRAMA
           </p>
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 auto-rows-[minmax(180px,auto)]">

@@ -36,6 +36,70 @@ import {
 
 // ... (Rest of imports are fine, but ensure icons are not duplicated if used only in utils)
 
+<<<<<<< HEAD
+import {
+  getAttachmentLabel,
+  getMediaCategory,
+  mediaCategoryIcons,
+} from "@/lib/attachment-utils";
+
+const renderAttachmentImage = (
+  url: string,
+  filename: string | undefined,
+  isGrid: boolean
+) =>
+  isGrid ? (
+    <img
+      alt={filename || "Image"}
+      className="size-full object-cover"
+      height={96}
+      src={url}
+      width={96}
+    />
+  ) : (
+    <img
+      alt={filename || "Image"}
+      className="size-full rounded object-cover"
+      height={20}
+      src={url}
+      width={20}
+    />
+  );
+
+// ============================================================================
+// Contexts
+// ============================================================================
+
+interface AttachmentsContextValue {
+  variant: AttachmentVariant;
+}
+
+const AttachmentsContext = createContext<AttachmentsContextValue | null>(null);
+
+interface AttachmentContextValue {
+  data: AttachmentData;
+  mediaCategory: AttachmentMediaCategory;
+  onRemove?: () => void;
+  variant: AttachmentVariant;
+}
+
+const AttachmentContext = createContext<AttachmentContextValue | null>(null);
+
+// ============================================================================
+// Hooks
+// ============================================================================
+
+export const useAttachmentsContext = () =>
+  useContext(AttachmentsContext) ?? { variant: "grid" as const };
+
+export const useAttachmentContext = () => {
+  const ctx = useContext(AttachmentContext);
+  if (!ctx) {
+    throw new Error("Attachment components must be used within <Attachment>");
+  }
+  return ctx;
+};
+=======
 
 // ============================================================================
 // Helpers
@@ -51,6 +115,7 @@ const renderAttachmentImage = (url: string, alt: string | null | undefined, isGr
     )}
   />
 );
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
 
 // ============================================================================
 // Attachments - Container

@@ -8,7 +8,7 @@ import {
   useInternalNode,
 } from "@xyflow/react";
 
-const Temporary = ({
+export const TemporaryEdge = ({
   id,
   sourceX,
   sourceY,
@@ -106,7 +106,7 @@ const getEdgeParams = (
   };
 };
 
-const Animated = ({ id, source, target, markerEnd, style }: EdgeProps) => {
+export const AnimatedEdge = ({ id, source, target, markerEnd, style }: EdgeProps) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
 
@@ -138,8 +138,15 @@ const Animated = ({ id, source, target, markerEnd, style }: EdgeProps) => {
   );
 };
 
+<<<<<<< HEAD
+export const Edge = {
+  Animated: AnimatedEdge,
+  Temporary: TemporaryEdge,
+};
+=======
 export const AnimatedEdge = Animated;
 export const TemporaryEdge = Temporary;
 
 // Edge object export removed to fix Fast Refresh issues.
 // Use AnimatedEdge and TemporaryEdge instead.
+>>>>>>> aef15b389676cb9989b70b2e5a35dfa4a86317ec
