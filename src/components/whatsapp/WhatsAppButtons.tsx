@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { MessageCircle, Bell, Star } from 'lucide-react'
 import { whatsappUtils } from '@/utils/whatsapp'
 import { toast } from 'sonner'

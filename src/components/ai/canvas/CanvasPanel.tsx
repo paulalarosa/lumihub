@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAIStore } from '@/stores/useAIStore'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import {

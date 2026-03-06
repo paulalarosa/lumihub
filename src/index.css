@@ -3,13 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Google Places Autocomplete Fix */
 .pac-container {
   z-index: 9999 !important;
   pointer-events: auto !important;
   font-family: inherit;
   border-radius: 0 !important;
-  /* Noir style */
+
   background-color: #050505 !important;
   border: 1px solid #333 !important;
   color: #fff !important;
@@ -32,94 +31,92 @@
   color: #fff !important;
 }
 
-
-/* Lumi Design System - Beauty Tech (Dark/Silver/Neon) */
-
 @layer base {
   :root {
-    /* LIGHT MODE (Laboratory/Blueprint Style) */
-    --background: 0 0% 100%;
-    /* Pure White */
-    --foreground: 0 0% 0%;
-    /* Pure Black */
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
-    --primary: 0 0% 0%;
-    /* Black */
-    --primary-foreground: 0 0% 100%;
-    /* White */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 96%;
-    /* Zinc-100 */
-    --muted-foreground: 0 0% 45%;
-    /* Zinc-500 */
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 0%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 90%;
-    /* Zinc-200 / Black/10 */
-    --input: 0 0% 90%;
-    --ring: 0 0% 0%;
-    --radius: 0px;
-    --radius-button: 0px;
-
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-serif: 'Playfair Display', serif;
-    --font-mono: 'Inter', system-ui, sans-serif;
-  }
-
-  .dark {
-    /* DARK MODE (Industrial Noir - Current) */
     --background: 0 0% 0%;
-    /* Pure Black */
     --foreground: 0 0% 100%;
-    /* Pure White */
-    --card: 0 0% 0%;
+
+    --card: 0 0% 5%;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 0%;
+
+    --popover: 0 0% 5%;
     --popover-foreground: 0 0% 100%;
+
     --primary: 0 0% 100%;
-    /* White */
     --primary-foreground: 0 0% 0%;
-    /* Black */
+
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 100%;
+
     --muted: 0 0% 10%;
     --muted-foreground: 0 0% 60%;
-    --accent: 0 0% 10%;
+
+    --accent: 0 0% 15%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 20%;
-    /* White/20 approx */
-    --input: 0 0% 20%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
     --ring: 0 0% 100%;
 
-    /* Sidebar - Industrial Noir */
-    --sidebar-background: 0 0% 0%;
-    --sidebar-foreground: 0 0% 100%;
+    --radius: 2rem;
+    --card-radius: 2.5rem;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 80%;
     --sidebar-primary: 0 0% 100%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 10%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 20%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 100%;
+
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Playfair Display', serif;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
     --sidebar-ring: 0 0% 100%;
   }
 
-  /* Global Focus Ring - Industrial/Brutalist */
   :focus-visible {
     outline: 2px solid #ef4444;
-    /* Vermelho Alerta */
+
     outline-offset: 2px;
     box-shadow: 0 0 0 2px #09090b;
-    /* Fundo preto para contraste */
+
   }
 
-  /* Set Global Default Font to Inter */
   html,
   body {
     font-family: var(--font-sans);
@@ -128,7 +125,6 @@
 
 @layer components {
 
-  /* Mobile Button Touch Targets */
   @media screen and (max-width: 768px) {
 
     .lumi-button,
@@ -138,7 +134,6 @@
     }
   }
 
-  /* Industrial Noir Noise Texture */
   .bg-noise {
     position: relative;
   }
@@ -156,19 +151,16 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
-  /* Lumi Card - Industrial Noir Standard */
   .lumi-card {
     @apply border border-white/20 bg-black p-0 shadow-none;
     border-radius: 0 !important;
   }
 
-  /* Alias for Dashboard compatibility */
   .tech-card {
     @apply lumi-card;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Glass Card - Noir Edition */
   .glass-card {
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(20px);
@@ -183,13 +175,11 @@
     box-shadow: none;
   }
 
-  /* Global Button Micro-interactions */
   button:active {
     transform: translateY(2px);
     transition: transform 0.1s;
   }
 
-  /* Prevent iOS zoom on inputs */
   @media screen and (max-width: 768px) {
 
     input,
@@ -199,9 +189,8 @@
     }
   }
 
-  /* Tech Noir Utilities */
   .silver-gradient-text {
-    /* Fallback/Override for Noir: Solid White */
+
     color: #FFFFFF;
     background: none;
     -webkit-text-fill-color: #FFFFFF;
@@ -211,7 +200,6 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Industrial Noir Noise Texture */
   .bg-noise {
     position: relative;
   }
@@ -229,7 +217,6 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
-  /* Brutalist Components */
   .noir-card {
     @apply bg-black border border-white p-6 relative overflow-hidden;
     border-radius: 0 !important;
@@ -245,21 +232,65 @@
     border-radius: 0 !important;
   }
 
-  /* Grid Lines */
   .noir-grid-lines {
     background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
       linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
     background-size: 100px 100px;
   }
 
-  /* Utilities */
   .text-chrome {
     color: #ffffff;
   }
+
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .glass-card {
+    background: hsl(var(--glass) / 0.05);
+    backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+    box-shadow: 0 8px 32px 0 hsl(var(--glass) / 0.02);
+  }
+
+  .glass-pill {
+    background: hsl(var(--glass) / 0.05);
+    backdrop-filter: blur(48px);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+  }
+
+  .glow-soft {
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.1);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+
+  @keyframes marquee-reverse {
+    0% {
+      transform: translateX(-33.333%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
 }
 
-
-/* Glow Hover Effect - Noir Edition (White Glow) */
 .glow-hover {
   transition: all 0.3s ease;
 }
@@ -268,7 +299,6 @@
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-/* Typography */
 .lumi-title {
   font-family: var(--font-serif);
   font-weight: 700;
@@ -289,11 +319,10 @@
   color: hsl(var(--muted-foreground));
 }
 
-/* Buttons */
 .lumi-button {
   padding: 0.6rem 1.25rem;
   border-radius: 0 !important;
-  /* Brutalist */
+
   font-family: var(--font-sans);
   font-weight: 600;
   background: #000000;
@@ -313,7 +342,7 @@
 .lumi-button-ghost {
   padding: 0.45rem 1rem;
   border-radius: 0 !important;
-  /* Brutalist */
+
   font-weight: 600;
   color: #C0C0C0;
   border: 1px solid transparent;
@@ -330,23 +359,20 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* subtle metallic divider used on headers and card accents */
 .metallic-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-/* Inputs and textareas */
 input,
 textarea,
 .input,
 .textarea {
   border-radius: 0 !important;
-  /* Brutalist */
+
   background: transparent;
   color: #F3F4F6;
 }
 
-/* Override Chrome Autofill background */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -370,7 +396,6 @@ textarea:focus {
   box-shadow: none;
 }
 
-/* Dashboard: glass-style buttons */
 .dashboard-root .lumi-button {
   background: #000000;
   color: #FFFFFF;
@@ -378,7 +403,6 @@ textarea:focus {
   backdrop-filter: none;
 }
 
-/* Badge */
 .lumi-badge {
   @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-white/5 text-white/70 border border-white/20;
   border-radius: 0 !important;
@@ -394,7 +418,6 @@ textarea:focus {
   border-radius: 0 !important;
 }
 
-/* Grid Bento */
 .bento-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -410,14 +433,13 @@ textarea:focus {
   grid-column: span 2;
 }
 
-/* Quick Nav Cards */
 .quick-nav-card {
   @apply cursor-pointer;
 }
 
 .quick-nav-card-inner {
   @apply lumi-card p-6 h-full flex flex-col items-center justify-center gap-4 transition-all duration-300;
-  /* lumi-card already has p-0, usually overrides but let's be safe */
+
 }
 
 .quick-nav-card:hover .quick-nav-card-inner {
@@ -425,24 +447,26 @@ textarea:focus {
   box-shadow: none;
 }
 
-/* Metric Card */
 .metric-card {
   @apply lumi-card p-6 flex flex-col items-center justify-center;
 }
 
 @layer utilities {
+  .noise-texture {
+    position: relative;
+  }
 
-  .rounded-none,
-  .rounded-sm,
-  .rounded-md,
-  .rounded-lg,
-  .rounded-xl,
-  .rounded-2xl,
-  .rounded-3xl,
-  .rounded-full {
-    border-radius: 0px !important;
+  .noise-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    pointer-events: none;
   }
 }
+
 
 .metric-value {
   @apply lumi-title text-4xl font-bold text-white;
@@ -452,7 +476,6 @@ textarea:focus {
   @apply lumi-label mt-2;
 }
 
-/* Icon Styling */
 .icon-thin {
   @apply stroke-[1.5];
 }
@@ -462,7 +485,6 @@ textarea:focus {
 
 }
 
-/* Scrollbar */
 .scrollbar-thin::-webkit-scrollbar {
   width: 6px;
 }
@@ -497,9 +519,6 @@ textarea:focus {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Autocomplete styles moved to end of file */
-
-/* Hero Section */
 .hero-title {
   @apply font-serif font-light tracking-[-0.04em];
 }
@@ -508,7 +527,6 @@ textarea:focus {
   @apply font-sans font-light text-lg;
 }
 
-/* Animations */
 @keyframes glow {
 
   0%,
@@ -530,7 +548,6 @@ textarea:focus {
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
 }
 
-/* Skeleton Loader Animations */
 @keyframes skeleton-shimmer {
   0% {
     transform: translateX(-100%);
@@ -580,7 +597,6 @@ textarea:focus {
   animation: skeleton-wave 1.5s ease-in-out infinite;
 }
 
-/* Fade In + Slide Up */
 @keyframes fadeInSlideUp {
   from {
     opacity: 0;
@@ -597,7 +613,6 @@ textarea:focus {
   animation: fadeInSlideUp 0.6s ease-out forwards;
 }
 
-/* Blog / Journal styles */
 .journal-title {
   font-family: var(--font-serif);
   font-style: italic;
@@ -641,7 +656,6 @@ textarea:focus {
   color: #FFFFFF;
 }
 
-/* Article page styles */
 .article-body {
   font-family: var(--font-sans);
   font-size: 1.125rem;
@@ -655,35 +669,33 @@ textarea:focus {
   text-align: justify;
 }
 
-/* Google Maps Autocomplete High Z-Index */
-/* Google Maps Autocomplete High Z-Index & Interaction Fix */
 .pac-container {
   z-index: 99999 !important;
   background-color: #09090b !important;
-  /* Zinc-950 for deeper black */
+
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   font-family: var(--font-sans) !important;
   pointer-events: auto !important;
   box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
   margin-top: 8px !important;
-  /* Slight gap */
+
 }
 
 .pac-item {
   color: #e4e4e7 !important;
-  /* Zinc-200 */
+
   cursor: pointer !important;
   padding: 12px 16px !important;
   border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
   font-size: 0.875rem !important;
-  /* 14px */
+
   line-height: 1.5 !important;
 }
 
 .pac-item:hover,
 .pac-item-selected {
   background-color: #27272a !important;
-  /* Zinc-800 */
+
   color: #fff !important;
 }
 
@@ -700,7 +712,7 @@ textarea:focus {
 
 .pac-icon {
   display: none !important;
-  /* Minimalist: hide default icon */
+
 }
 
 .pac-item-query {
@@ -708,8 +720,6 @@ textarea:focus {
   font-weight: 500;
 }
 
-
-/* Global Text Selection Override - Noir */
 ::selection {
   background-color: #FFFFFF !important;
   color: #000000 !important;
@@ -722,7 +732,6 @@ textarea:focus {
   text-shadow: none !important;
 }
 
-/* Joyride (Onboarding) - Industrial Noir Override */
 .react-joyride__tooltip {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -752,7 +761,6 @@ textarea:focus {
   color: #888888 !important;
 }
 
-/* Calendar (react-big-calendar/fullcalendar) - Industrial Noir Override */
 .rbc-calendar {
   font-family: var(--font-mono) !important;
   color: #ffffff !important;
@@ -842,7 +850,7 @@ textarea:focus {
 .rbc-timeslot-group {
   border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
   min-height: 60px !important;
-  /* Larger slots for better spacing */
+
 }
 
 .rbc-time-slot {
@@ -853,4 +861,333 @@ textarea:focus {
   border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
   font-size: 0.7rem !important;
   color: rgba(255, 255, 255, 0.4) !important;
+}
+
+@layer utilities {
+  .text-responsive-xl {
+    @apply text-4xl md:text-6xl lg:text-8xl;
+  }
+
+  .text-responsive-lg {
+    @apply text-3xl md:text-4xl lg:text-6xl;
+  }
+
+  .text-responsive-md {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+
+}
+
+.rounded-3xl {
+  border-radius: 1.5rem;
+
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+button {
+  border-radius: 9999px !important;
+
+  border: none;
+}
+
+button.glass {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.card {
+  border-radius: 1.5rem !important;
+
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.noise-texture {
+  position: relative;
+}
+
+.noise-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+* {
+  border-radius: inherit;
+}
+
+input,
+textarea,
+select {
+  border-radius: 0.5rem !important;
+}
+/* ===== CORREÇÕES CRÍTICAS ===== */
+
+/* Forçar arredondamento em TODOS os botões do site */
+button:not(.no-round) {
+  border-radius: 9999px !important;
+}
+
+/* Exceção: botão do hero deve ser quadrado */
+button.hero-btn,
+button[class*="rounded-none"] {
+  border-radius: 0 !important;
+}
+
+/* ===== GLASSMORPHISM UTILITIES ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  border-radius: 9999px !important;
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+  border-radius: 9999px !important;
+}
+
+/* ===== CARD GLASSMORPHISM ===== */
+.card,
+[class*="glass-card"],
+[class*="GlassCard"] {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.card:hover,
+[class*="glass-card"]:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ===== NOISE TEXTURE OVERLAY ===== */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ===== ROUNDED UTILITIES ===== */
+.rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+.rounded-3xl {
+  border-radius: 1.5rem !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+.rounded-none {
+  border-radius: 0 !important;
+}
+
+/* ===== INPUT GLASSMORPHISM ===== */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  color: white !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== BACKDROP BLUR SUPPORT ===== */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass,
+  .glass-strong,
+  .card,
+  [class*="backdrop-blur"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* ===== ANTI-ALIASING ===== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== TEXT SELECTION ===== */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ===== FOCUS VISIBLE ===== */
+*:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+/* ===== SMOOTH SCROLLING ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== PREVENT LAYOUT SHIFT ===== */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+  /* Touch targets mínimo de 44x44px */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ===== TRANSITION PERFORMANCE ===== */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== REMOVE DEFAULT OUTLINES ===== */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== TAILWIND LAYER FIXES ===== */
+@layer components {
+  .btn-glass {
+    @apply bg-white/10 text-white border border-white/20;
+    @apply hover:bg-white/15 hover:border-white/30;
+    @apply backdrop-blur-2xl rounded-full;
+    @apply shadow-2xl shadow-black/20;
+    @apply transition-all duration-300;
+  }
+
+  .btn-primary {
+    @apply bg-white text-black font-bold;
+    @apply hover:bg-white/90;
+    @apply shadow-lg shadow-black/20;
+    @apply rounded-none;
+    @apply transition-all duration-300;
+  }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Image as ImageIcon, Upload, Loader2, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { AspectRatio } from '@/components/ui/aspect-ratio'

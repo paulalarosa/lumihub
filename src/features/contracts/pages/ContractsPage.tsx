@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Plus, FileText, Download, Eye, Calendar, User } from 'lucide-react'
 import { ContractDialog } from '@/components/contracts/ContractDialog'
 import { format } from 'date-fns'

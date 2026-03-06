@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Plus, Minus } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useFinancials } from '../hooks/useFinancials'

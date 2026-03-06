@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 
 export type TemplateType = 'confirmation' | 'reminder_24h' | 'thanks'
 

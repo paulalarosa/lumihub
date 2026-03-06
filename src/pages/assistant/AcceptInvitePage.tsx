@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
 
 export default function AcceptInvitePage() {

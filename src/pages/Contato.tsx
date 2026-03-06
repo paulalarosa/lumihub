@@ -1,223 +1,257 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Mail, MessageCircle, ArrowRight, Send } from 'lucide-react';
-import SEOHead from '@/components/seo/SEOHead';
-import { useLanguage } from '@/hooks/useLanguage';
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { useToast } from '@/hooks/use-toast'
+import {
+  Mail,
+  MessageCircle,
+  ArrowRight,
+  Send,
+  ArrowUpRight,
+} from 'lucide-react'
+import { motion } from 'framer-motion'
+import SEOHead from '@/components/seo/SEOHead'
 
-export default function Contato() {
-    const { t } = useLanguage();
-    const { toast } = useToast();
-    const [loading, setLoading] = useState(false);
+export default function ContatoPage() {
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  })
 
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-    });
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: 'Campos obrigatórios',
+        description: 'Por favor preencha todos os campos.',
+        variant: 'destructive',
+      })
+      setLoading(false)
+      return
+    }
 
-        if (!formData.name || !formData.email || !formData.message) {
-            toast({
-                title: "CAMPOS OBRIGATÓRIOS",
-                description: "POR FAVOR PREENCHA TODOS OS CAMPOS.",
-                variant: "destructive"
-            });
-            setLoading(false);
-            return;
-        }
+    setTimeout(() => {
+      toast({
+        title: 'Mensagem preparada',
+        description: 'Abrindo cliente de e-mail...',
+      })
+      const subject = encodeURIComponent(
+        `[KONTROL CONTATO] ${formData.subject || 'Nova Mensagem'}`,
+      )
+      const body = encodeURIComponent(
+        `Nome: ${formData.name}\nEmail: ${formData.email}\n\nMensagem:\n${formData.message}`,
+      )
+      window.location.href = `mailto:khaoskontrol07@gmail.com?subject=${subject}&body=${body}`
+      setLoading(false)
+      setFormData({ name: '', email: '', subject: '', message: '' })
+    }, 1000)
+  }
 
-        setTimeout(() => {
-            toast({
-                title: "MENSAGEM PREPARADA",
-                description: "ABRINDO CLIENTE DE EMAIL..."
-            });
+  return (
+    <>
+      <SEOHead
+        title="Contato | KHAOS KONTROL"
+        description="Fale conosco. Suporte premium, parcerias e consultoria personalizada para profissionais de beleza."
+      />
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        {/* Textured Overlay Image */}
+        <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
+          <img
+            src="/khaos-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png"
+            alt="Background Texture"
+            className="w-full h-full object-cover grayscale brightness-50"
+          />
+        </div>
+        {/* Ambient Glows */}
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-white/[0.015] blur-[150px] rounded-full pointer-events-none" />
 
-            const subject = encodeURIComponent(`[KONTROL CONTATO] ${formData.subject || 'NOVA MENSAGEM'}`);
-            const body = encodeURIComponent(`NOME: ${formData.name}\nEMAIL: ${formData.email}\n\nMENSAGEM:\n${formData.message}`);
+        <main className="container mx-auto px-6 lg:px-10 pt-20 pb-24 relative z-10">
+          <div className="max-w-6xl mx-auto space-y-24">
+            {/* Hero Split */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start"
+            >
+              {/* Left */}
+              <div className="flex flex-col justify-center space-y-6 lg:sticky lg:top-40 text-left">
+                <span className="text-xs text-muted-foreground tracking-widest uppercase">
+                  Contato
+                </span>
+                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[1.05] tracking-tight">
+                  Fale
+                  <br />
+                  <span className="italic font-serif">Conosco</span>
+                </h1>
+                <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
+                  Conecte-se com nossa equipe. Suporte premium, parcerias e
+                  consultoria personalizada.
+                </p>
+                <Link
+                  to="/planos"
+                  className="inline-flex items-center gap-2.5 px-6 py-3 border border-white/10 bg-white/[0.03] rounded-full text-sm text-white transition-all group w-fit hover:bg-white/[0.06] hover:border-white/20"
+                >
+                  Ver Planos
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
 
-            window.location.href = `mailto:khaoskontrol07@gmail.com?subject=${subject}&body=${body}`;
-            setLoading(false);
-            setFormData({ name: '', email: '', subject: '', message: '' });
-        }, 1000);
-    };
+              {/* Right — Form */}
+              <div className="p-8 md:p-12 rounded-[2.5rem] border border-white/5 bg-white/[0.02] relative overflow-hidden text-left">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] blur-[100px] rounded-full pointer-events-none" />
 
-    return (
-        <>
-            <SEOHead
-                title="CONTATO - KONTROL | SUPORTE"
-                description="Entre em contato. Suporte, parcerias e concierge."
-                keywords="contato, kontrol, khaos kontrol, suporte, ajuda"
-                url="https://khaoskontrol.com.br/contato"
-            />
-            <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
+                <div className="space-y-3 relative z-10 mb-8">
+                  <h2 className="font-serif text-3xl md:text-4xl text-white">
+                    Envie uma mensagem
+                  </h2>
+                  <p className="text-xs text-muted-foreground tracking-wide">
+                    Resposta em até 24 horas
+                  </p>
+                </div>
 
-                <main className="container mx-auto px-4 py-32">
-                    <div className="max-w-6xl mx-auto space-y-24">
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-5 relative z-10"
+                >
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground ml-3">
+                      Nome Completo
+                    </label>
+                    <Input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Seu nome"
+                      className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                    />
+                  </div>
 
-                        {/* Section A: Upsell CTA */}
-                        <section className="relative border border-white/20 p-12 overflow-hidden">
-                            <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                                <div className="space-y-6">
-                                    <h1 className="text-4xl md:text-6xl font-serif text-white tracking-tight leading-none">
-                                        {t("contact_hero_title")} <br />
-                                        <span className="italic font-light opacity-70">{t("contact_hero_subtitle")}</span>
-                                    </h1>
-                                    <p className="text-sm font-mono uppercase text-white/60 max-w-md leading-relaxed">
-                                        {t("contact_hero_desc")}
-                                    </p>
-                                </div>
-                                <div className="flex justify-start lg:justify-end">
-                                    <Link to="/planos">
-                                        <Button className="h-16 px-8 rounded-none bg-white text-black font-mono text-xs uppercase tracking-widest hover:bg-white/90">
-                                            {t("contact_hero_cta")}
-                                            <ArrowRight className="ml-4 h-4 w-4" />
-                                        </Button>
-                                    </Link>
-                                </div>
-                            </div>
-                        </section>
-
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start border-t border-white/20 pt-24">
-                            {/* Section B: Contact Form */}
-                            <section className="space-y-12">
-                                <div className="space-y-4">
-                                    <h2 className="text-4xl font-serif text-white">{t("contact_title")}</h2>
-                                    <p className="font-mono text-xs uppercase text-white/40 tracking-widest">
-                                        {t("contact_subtitle")}
-                                    </p>
-                                </div>
-
-                                <form onSubmit={handleSubmit} className="space-y-8">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-xs font-mono uppercase tracking-widest text-white/50">{t("contact_name")}</label>
-                                        <Input
-                                            id="name"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleChange}
-                                            placeholder={t("contact_name_placeholder")}
-                                            className="bg-black border-white/30 text-white placeholder:text-white/20 focus:border-white h-14 rounded-none font-mono text-sm"
-                                        />
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="space-y-2">
-                                            <label htmlFor="email" className="text-xs font-mono uppercase tracking-widest text-white/50">{t("contact_email")}</label>
-                                            <Input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                value={formData.email}
-                                                onChange={handleChange}
-                                                placeholder={t("contact_email_placeholder")}
-                                                className="bg-black border-white/30 text-white placeholder:text-white/20 focus:border-white h-14 rounded-none font-mono text-sm"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label htmlFor="subject" className="text-xs font-mono uppercase tracking-widest text-white/50">{t("contact_subject")}</label>
-                                            <Input
-                                                id="subject"
-                                                name="subject"
-                                                value={formData.subject}
-                                                onChange={handleChange}
-                                                placeholder={t("contact_subject_placeholder")}
-                                                className="bg-black border-white/30 text-white placeholder:text-white/20 focus:border-white h-14 rounded-none font-mono text-sm"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <label htmlFor="message" className="text-xs font-mono uppercase tracking-widest text-white/50">{t("contact_message")}</label>
-                                        <Textarea
-                                            id="message"
-                                            name="message"
-                                            value={formData.message}
-                                            onChange={handleChange}
-                                            placeholder={t("contact_message_placeholder")}
-                                            className="min-h-[150px] bg-black border-white/30 text-white placeholder:text-white/20 focus:border-white resize-none rounded-none font-mono text-sm"
-                                        />
-                                    </div>
-
-                                    <Button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="w-full h-14 bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest"
-                                    >
-                                        {loading ? (
-                                            <span className="flex items-center gap-2">{t("contact_submitting")}</span>
-                                        ) : (
-                                            <span className="flex items-center gap-2">{t("contact_submit")} <Send className="w-4 h-4" /></span>
-                                        )}
-                                    </Button>
-                                </form>
-                            </section>
-
-                            {/* Section C: Contact Info */}
-                            <section className="space-y-12 lg:pl-12 lg:border-l border-white/20 h-full">
-                                <div className="space-y-6">
-                                    <h3 className="text-2xl font-serif text-white">{t("contact_channels_title")}</h3>
-                                    <p className="font-mono text-xs uppercase text-white/60 leading-relaxed tracking-wide">
-                                        {t("contact_channels_desc")}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    {/* WhatsApp Button */}
-                                    <a
-                                        href="https://wa.me/5521983604870"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="block group"
-                                    >
-                                        <div className="p-8 border border-white/20 flex items-center gap-6 hover:bg-white text-white hover:text-black transition-all duration-300">
-                                            <MessageCircle className="w-6 h-6" />
-                                            <div>
-                                                <h4 className="font-mono text-sm uppercase tracking-widest">{t("contact_whatsapp")}</h4>
-                                                <p className="font-mono text-xs opacity-60 mt-1">{t("contact_whatsapp_desc")}</p>
-                                            </div>
-                                            <ArrowRight className="w-5 h-5 ml-auto" />
-                                        </div>
-                                    </a>
-
-                                    {/* Email Button */}
-                                    <a
-                                        href="mailto:khaoskontrol07@gmail.com"
-                                        className="block group"
-                                    >
-                                        <div className="p-8 border border-white/20 flex items-center gap-6 hover:bg-white text-white hover:text-black transition-all duration-300">
-                                            <Mail className="w-6 h-6" />
-                                            <div>
-                                                <h4 className="font-mono text-sm uppercase tracking-widest">{t("contact_email_btn")}</h4>
-                                                <p className="font-mono text-xs opacity-60 mt-1">{t("contact_email_desc")}</p>
-                                            </div>
-                                            <ArrowRight className="w-5 h-5 ml-auto" />
-                                        </div>
-                                    </a>
-                                </div>
-
-                                <div className="pt-12 border-t border-white/10">
-                                    <p className="font-mono text-[10px] text-white/30 uppercase tracking-[0.2em] text-center">
-                                        Khaos Kontrol • Operações Globais
-                                    </p>
-                                </div>
-                            </section>
-                        </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground ml-3">
+                        E-mail
+                      </label>
+                      <Input
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="email@exemplo.com"
+                        className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                      />
                     </div>
-                </main>
-            </div>
-        </>
-    );
+                    <div className="space-y-2">
+                      <label className="text-xs font-medium text-muted-foreground ml-3">
+                        Assunto
+                      </label>
+                      <Input
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleChange}
+                        placeholder="Assunto da mensagem"
+                        className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium text-muted-foreground ml-3">
+                      Mensagem
+                    </label>
+                    <Textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Conte-nos como podemos ajudar..."
+                      className="min-h-[140px] bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 resize-none text-sm"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <Button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-full text-sm font-medium"
+                    >
+                      {loading ? (
+                        <span>Enviando...</span>
+                      ) : (
+                        <span className="flex items-center gap-2">
+                          Enviar Mensagem <Send className="w-4 h-4" />
+                        </span>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </motion.section>
+
+            {/* Contact Channels */}
+            <section>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <motion.a
+                  whileHover={{ y: -4 }}
+                  href="https://wa.me/5521983604870"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block group"
+                >
+                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 flex items-center gap-6 text-left">
+                    <div className="w-12 h-12 flex items-center text-white/40 group-hover:text-white transition-colors duration-500">
+                      <MessageCircle className="w-8 h-8" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-white">
+                        WhatsApp
+                      </h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Atendimento rápido e direto
+                      </p>
+                    </div>
+                    <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />
+                  </div>
+                </motion.a>
+
+                <motion.a
+                  whileHover={{ y: -4 }}
+                  href="mailto:khaoskontrol07@gmail.com"
+                  className="block group"
+                >
+                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 flex items-center gap-6 text-left">
+                    <div className="w-12 h-12 flex items-center text-white/40 group-hover:text-white transition-colors duration-500">
+                      <Mail className="w-8 h-8" strokeWidth={1.5} />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-medium text-white">E-mail</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Enviar mensagem para suporte
+                      </p>
+                    </div>
+                    <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />
+                  </div>
+                </motion.a>
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    </>
+  )
 }

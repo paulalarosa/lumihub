@@ -6,13 +6,9 @@ import { ReactNode } from 'react'
 
 interface ProtectedRouteProps {
   children?: ReactNode
-  requireOnboarding?: boolean
 }
 
-export default function ProtectedRoute({
-  children,
-  requireOnboarding = true,
-}: ProtectedRouteProps) {
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
   const location = useLocation()
 

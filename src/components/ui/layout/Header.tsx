@@ -1,151 +1,176 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
-import { Menu, X } from 'lucide-react'
-import { useLanguage } from '@/hooks/useLanguage'
-import { LanguageSwitcher } from '@/components/ui/language-switcher'
-import { ModeToggle } from '@/components/ui/mode-toggle'
+import { Menu, X, Moon } from 'lucide-react'
+import { cn } from '@/lib/utils'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
+const navLinks = [
+  { label: 'Recursos', path: '/recursos' },
+  { label: 'Planos', path: '/planos' },
+  { label: 'Blog', path: '/blog' },
+  { label: 'Contato', path: '/contato' },
+]
+
+export default function Header() {
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
-  const { language, setLanguage, t } = useLanguage()
-
-  // Check if we're on the home page (dark bg)
-  const isHomePage = location.pathname === '/'
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const navigation = [
-    { name: t('header_features'), href: '/recursos' },
-    { name: t('header_plans'), href: '/planos' },
-    { name: t('header_blog'), href: '/blog' },
-    { name: t('header_contact'), href: '/contato' },
-  ]
+  useEffect(() => {
+    setMobileOpen(false)
+  }, [location.pathname])
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled || !isHomePage
-          ? 'bg-background/90 backdrop-blur-xl border-b border-border'
-          : 'bg-transparent'
-      }`}
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
+        scrolled
+          ? 'py-4 bg-black/95 backdrop-blur-3xl border-b border-white/5'
+          : 'py-6 bg-transparent',
+      )}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 py-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-foreground/20 to-foreground/5 border border-foreground/20 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:border-metallic/40 overflow-hidden">
-              <img
-                src="/favicon-khaoskontrol.webp"
-                alt="K"
-                className="w-6 h-6 object-contain"
-              />
-            </div>
-            <span className="font-serif font-light text-2xl text-foreground tracking-tight">
-              KHAOS KONTROL
-            </span>
-          </Link>
+      <div className="container mx-auto px-6 lg:px-10 flex items-center justify-between">
+        {/* Logo — Portfolite style: icon + wordmark */}
+        <Link to="/" className="flex items-center gap-2.5 group">
+          <img
+            src="/favicon-khaoskontrol.webp"
+            alt="KHAOS KONTROL"
+            className="w-7 h-7 rounded-md group-hover:scale-110 transition-transform object-contain"
+          />
+          <span className="text-sm font-medium text-foreground tracking-wide uppercase">
+            KHAOS KONTROL
+          </span>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navigation.map((item) => (
-              <Link
-                key={item.href} // Changed key to href to be unique regardless of lang
-                to={item.href}
-                className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light text-sm tracking-wide uppercase"
-              >
-                {item.name}
-              </Link>
-            ))}
+        {/* Desktop Nav & Controls */}
+        <div className="hidden md:flex items-center gap-8">
+          {/* Navigation Links */}
+          <nav className="flex items-center gap-8">
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={cn(
+                    'text-sm transition-colors relative font-medium uppercase tracking-wider',
+                    isActive
+                      ? 'text-foreground'
+                      : 'text-muted-foreground hover:text-foreground',
+                  )}
+                >
+                  {link.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-underline"
+                      className="absolute -bottom-1 left-0 right-0 h-[1px] bg-foreground"
+                      transition={{
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 25,
+                      }}
+                    />
+                  )}
+                </Link>
+              )
+            })}
           </nav>
 
-          {/* Desktop CTA Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {/* Language Toggle */}
-            <LanguageSwitcher />
-
-            <ModeToggle />
-
-            <div className="flex items-center space-x-4 ml-4">
-              <Link to="/auth">
-                <Button className="bg-foreground text-background hover:bg-foreground/90 border-0 transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] rounded-none font-mono text-xs uppercase tracking-widest px-6">
-                  {t('header_start')}
-                </Button>
-              </Link>
+          {/* Controls & CTAs */}
+          <div className="flex items-center gap-6 border-l border-border/50 pl-6">
+            {/* PT | EN Toggle */}
+            <div className="flex items-center border border-border rounded-sm overflow-hidden text-xs font-medium tracking-widest uppercase">
+              <button className="px-3 py-1.5 bg-foreground text-background">
+                PT
+              </button>
+              <button className="px-3 py-1.5 bg-transparent text-foreground hover:bg-foreground/10 transition-colors">
+                EN
+              </button>
             </div>
-          </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-xl text-foreground hover:bg-foreground/10 transition-colors"
-          >
-            {isMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+            {/* Dark Mode Toggle */}
+            <button className="text-foreground hover:text-muted-foreground transition-colors">
+              <Moon className="w-4 h-4" />
+            </button>
+
+            {/* ACESSO KONTROL Button */}
+            <Link
+              to="/planos"
+              className="px-6 py-2.5 bg-white/10 text-white backdrop-blur-md rounded-[2rem] border border-white/20 text-xs font-bold hover:bg-white/20 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] uppercase tracking-[0.2em]"
+            >
+              Acesso Kontrol
+            </Link>
+          </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border animate-fade-in bg-background/95 backdrop-blur-xl">
-            <nav className="flex flex-col space-y-4">
-              {navigation.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-light py-2 uppercase"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              <div className="flex justify-center space-x-6 py-4 border-y border-border">
-                <span
-                  className={`cursor-pointer font-mono text-xs uppercase ${language === 'pt' ? 'text-foreground underline' : 'text-muted-foreground'}`}
-                  onClick={() => {
-                    setLanguage('pt')
-                    setIsMenuOpen(false)
-                  }}
-                >
-                  PORTUGUÊS
-                </span>
-                <span
-                  className={`cursor-pointer font-mono text-xs uppercase ${language === 'en' ? 'text-foreground underline' : 'text-muted-foreground'}`}
-                  onClick={() => {
-                    setLanguage('en')
-                    setIsMenuOpen(false)
-                  }}
-                >
-                  ENGLISH
-                </span>
-              </div>
-              <div className="flex justify-center py-2">
-                <ModeToggle />
-              </div>
-              <div className="flex flex-col space-y-3 pt-4">
-                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
-                  <Button className="w-full bg-foreground text-background hover:bg-foreground/90 font-mono uppercase tracking-widest text-xs">
-                    {t('header_start')}
-                  </Button>
-                </Link>
-              </div>
-            </nav>
-          </div>
-        )}
+        {/* Mobile Toggle */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors"
+        >
+          {mobileOpen ? (
+            <X className="w-4 h-4" />
+          ) : (
+            <Menu className="w-4 h-4" />
+          )}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden overflow-hidden bg-background/98 backdrop-blur-2xl border-b border-border/30"
+          >
+            <nav className="container mx-auto px-6 py-8 flex flex-col gap-1">
+              <Link
+                to="/"
+                className={cn(
+                  'px-4 py-3.5 rounded-xl text-sm transition-all uppercase tracking-wider',
+                  location.pathname === '/'
+                    ? 'bg-foreground/10 text-foreground font-medium'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+              >
+                Home
+              </Link>
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={cn(
+                      'px-4 py-3.5 rounded-xl text-sm transition-all uppercase tracking-wider',
+                      isActive
+                        ? 'bg-foreground/10 text-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground',
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                )
+              })}
+              <Link
+                to="/planos"
+                className="mt-4 text-center px-6 py-3.5 bg-foreground text-background rounded-full text-sm font-medium flex items-center justify-center gap-2 uppercase tracking-[0.2em]"
+              >
+                Acesso Kontrol
+              </Link>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   )
 }
-
-export default Header

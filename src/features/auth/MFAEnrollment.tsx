@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useMFA } from '@/hooks/useMFA'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'

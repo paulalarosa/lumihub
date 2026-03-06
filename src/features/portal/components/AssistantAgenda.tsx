@@ -1,87 +1,107 @@
-import { useState } from "react";
-import { format, parseISO, isSameDay } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, MapPin, ExternalLink, Minus, Plus, CalendarDays } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { useState } from 'react'
+import { format, parseISO, isSameDay } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  MapPin,
+  ExternalLink,
+  Minus,
+  Plus,
+  CalendarDays,
+} from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Calendar } from '@/components/ui/calendar'
+import { cn } from '@/lib/utils'
 
 interface Event {
-  id: string;
-  title: string;
-  event_date: string;
-  start_time: string | null;
-  end_time: string | null;
-  location: string | null;
-  address: string | null;
-  event_type: string | null;
-  description: string | null;
-  client?: { name: string } | null;
-  projects?: { name: string } | null;
+  id: string
+  title: string
+  event_date: string
+  start_time: string | null
+  end_time: string | null
+  location: string | null
+  address: string | null
+  event_type: string | null
+  description: string | null
+  client?: { name: string } | null
+  projects?: { name: string } | null
 }
 
 interface AssistantAgendaProps {
-  events: Event[];
-  currentMonth: Date;
-  onMonthChange: (date: Date) => void;
+  events: Event[]
+  currentMonth: Date
+  onMonthChange: (date: Date) => void
 }
 
-type CalendarSize = "small" | "medium" | "large";
+type CalendarSize = 'small' | 'medium' | 'large'
 
-const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgendaProps) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [calendarSize, setCalendarSize] = useState<CalendarSize>("small");
+const AssistantAgenda = ({
+  events,
+  currentMonth,
+  onMonthChange,
+}: AssistantAgendaProps) => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [calendarSize, setCalendarSize] = useState<CalendarSize>('small')
 
   const filteredEvents = selectedDate
     ? events.filter((e) => isSameDay(parseISO(e.event_date), selectedDate))
-    : events;
+    : events
 
-  const eventDates = events.map((e) => parseISO(e.event_date));
+  const eventDates = events.map((e) => parseISO(e.event_date))
 
   const handlePrevMonth = () => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(newDate.getMonth() - 1);
-    onMonthChange(newDate);
-  };
+    const newDate = new Date(currentMonth)
+    newDate.setMonth(newDate.getMonth() - 1)
+    onMonthChange(newDate)
+  }
 
   const handleNextMonth = () => {
-    const newDate = new Date(currentMonth);
-    newDate.setMonth(newDate.getMonth() + 1);
-    onMonthChange(newDate);
-  };
+    const newDate = new Date(currentMonth)
+    newDate.setMonth(newDate.getMonth() + 1)
+    onMonthChange(newDate)
+  }
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
       if (selectedDate && isSameDay(date, selectedDate)) {
-        setSelectedDate(null);
+        setSelectedDate(null)
       } else {
-        setSelectedDate(date);
+        setSelectedDate(date)
       }
     }
-  };
+  }
 
   const openInMaps = (address: string) => {
-    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`, "_blank");
-  };
+    window.open(
+      `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`,
+      '_blank',
+    )
+  }
 
   const calendarSizeClasses = {
-    small: "scale-90 origin-top-left",
-    medium: "scale-100",
-    large: "scale-110 origin-top-left",
-  };
+    small: 'scale-90 origin-top-left',
+    medium: 'scale-100',
+    large: 'scale-110 origin-top-left',
+  }
 
-  const groupedEvents = filteredEvents.reduce((acc, event) => {
-    const dateKey = event.event_date;
-    if (!acc[dateKey]) {
-      acc[dateKey] = [];
-    }
-    acc[dateKey].push(event);
-    return acc;
-  }, {} as Record<string, Event[]>);
+  const groupedEvents = filteredEvents.reduce(
+    (acc, event) => {
+      const dateKey = event.event_date
+      if (!acc[dateKey]) {
+        acc[dateKey] = []
+      }
+      acc[dateKey].push(event)
+      return acc
+    },
+    {} as Record<string, Event[]>,
+  )
 
-  const sortedDates = Object.keys(groupedEvents).sort();
+  const sortedDates = Object.keys(groupedEvents).sort()
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -100,14 +120,24 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
           <Card className="bg-black border border-white/20 rounded-none">
             <CardHeader className="pb-2 border-b border-white/10">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm font-mono text-white uppercase tracking-widest">NAVIGATOR</CardTitle>
+                <CardTitle className="text-sm font-mono text-white uppercase tracking-widest">
+                  NAVIGATOR
+                </CardTitle>
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 rounded-none text-white/50 hover:text-white"
-                    onClick={() => setCalendarSize(calendarSize === "small" ? "small" : calendarSize === "medium" ? "small" : "medium")}
-                    disabled={calendarSize === "small"}
+                    onClick={() =>
+                      setCalendarSize(
+                        calendarSize === 'small'
+                          ? 'small'
+                          : calendarSize === 'medium'
+                            ? 'small'
+                            : 'medium',
+                      )
+                    }
+                    disabled={calendarSize === 'small'}
                   >
                     <Minus className="h-3 w-3" />
                   </Button>
@@ -115,8 +145,16 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                     variant="ghost"
                     size="icon"
                     className="h-6 w-6 rounded-none text-white/50 hover:text-white"
-                    onClick={() => setCalendarSize(calendarSize === "large" ? "large" : calendarSize === "medium" ? "large" : "medium")}
-                    disabled={calendarSize === "large"}
+                    onClick={() =>
+                      setCalendarSize(
+                        calendarSize === 'large'
+                          ? 'large'
+                          : calendarSize === 'medium'
+                            ? 'large'
+                            : 'medium',
+                      )
+                    }
+                    disabled={calendarSize === 'large'}
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
@@ -125,17 +163,32 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
             </CardHeader>
             <CardContent className="pb-4 pt-4">
               <div className="flex items-center justify-between mb-4">
-                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black" onClick={handlePrevMonth}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black"
+                  onClick={handlePrevMonth}
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="font-mono text-xs text-white uppercase tracking-widest">
-                  {format(currentMonth, "MMMM yyyy", { locale: ptBR })}
+                  {format(currentMonth, 'MMMM yyyy', { locale: ptBR })}
                 </span>
-                <Button variant="ghost" size="icon" className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black" onClick={handleNextMonth}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-none text-white hover:bg-white hover:text-black"
+                  onClick={handleNextMonth}
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-              <div className={cn("overflow-hidden invert text-white", calendarSizeClasses[calendarSize])}>
+              <div
+                className={cn(
+                  'overflow-hidden invert text-white',
+                  calendarSizeClasses[calendarSize],
+                )}
+              >
                 {/* Invert filter is a hack to make standard shadcn calendar dark mode compatible if it isn't already, but assuming global styles handle it. 
                      Better to rely on global styles. Removing invert check if global css handles it. 
                      Actually, forcing dark theme classes on Calendar container might be safer. */}
@@ -148,15 +201,21 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                     onMonthChange={onMonthChange}
                     modifiers={{ hasEvent: eventDates }}
                     modifiersStyles={{
-                      hasEvent: { fontWeight: "bold", border: "1px solid currentColor", borderRadius: "0px" }
+                      hasEvent: {
+                        fontWeight: 'bold',
+                        border: '1px solid currentColor',
+                        borderRadius: '0px',
+                      },
                     }}
                     className="pointer-events-auto text-white p-0"
                     classNames={{
-                      day_selected: "bg-white text-black hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none",
-                      day_today: "bg-white/20 text-white rounded-none",
-                      day: "h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-white/20 rounded-none transition-colors",
-                      head_cell: "text-muted-foreground rounded-none w-8 font-normal text-[0.8rem]",
-                      cell: "h-8 w-8 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                      day_selected:
+                        'bg-white text-black hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none',
+                      day_today: 'bg-white/20 text-white rounded-none',
+                      day: 'h-8 w-8 p-0 font-normal aria-selected:opacity-100 hover:bg-white/20 rounded-none transition-colors',
+                      head_cell:
+                        'text-muted-foreground rounded-none w-8 font-normal text-[0.8rem]',
+                      cell: 'h-8 w-8 text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20',
                     }}
                   />
                 </div>
@@ -181,10 +240,13 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
           <div className="flex items-center justify-between border-b border-white/20 pb-2">
             <h3 className="font-mono text-sm text-white uppercase tracking-wider">
               {selectedDate
-                ? `DATE: ${format(selectedDate, "dd.MM.yyyy")}`
-                : `MONTH: ${format(currentMonth, "MM.yyyy")}`}
+                ? `DATE: ${format(selectedDate, 'dd.MM.yyyy')}`
+                : `MONTH: ${format(currentMonth, 'MM.yyyy')}`}
             </h3>
-            <Badge variant="outline" className="rounded-none border-white/20 text-white/50 font-mono text-[10px] uppercase">
+            <Badge
+              variant="outline"
+              className="rounded-none border-white/20 text-white/50 font-mono text-[10px] uppercase"
+            >
               COUNT: {filteredEvents.length}
             </Badge>
           </div>
@@ -202,25 +264,33 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                 <div key={dateKey}>
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-8 w-8 bg-white flex items-center justify-center text-sm font-bold text-black font-mono rounded-none">
-                      {format(parseISO(dateKey), "dd")}
+                      {format(parseISO(dateKey), 'dd')}
                     </div>
                     <div>
                       <p className="font-serif text-white uppercase tracking-wider">
-                        {format(parseISO(dateKey), "EEEE", { locale: ptBR })}
+                        {format(parseISO(dateKey), 'EEEE', { locale: ptBR })}
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-4 pl-11">
                     {groupedEvents[dateKey].map((event) => (
-                      <Card key={event.id} className="bg-black border border-white/20 rounded-none hover:border-white transition-colors group">
+                      <Card
+                        key={event.id}
+                        className="bg-black border border-white/20 rounded-none hover:border-white transition-colors group"
+                      >
                         <CardContent className="p-5">
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-3 mb-2">
-                                <h4 className="font-bold text-white uppercase tracking-wide truncate">{event.title}</h4>
+                                <h4 className="font-bold text-white uppercase tracking-wide truncate">
+                                  {event.title}
+                                </h4>
                                 {event.event_type && (
-                                  <Badge variant="outline" className="shrink-0 rounded-none border-white/30 text-white/50 text-[9px] uppercase font-mono tracking-widest">
+                                  <Badge
+                                    variant="outline"
+                                    className="shrink-0 rounded-none border-white/30 text-white/50 text-[9px] uppercase font-mono tracking-widest"
+                                  >
                                     {event.event_type}
                                   </Badge>
                                 )}
@@ -236,13 +306,17 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
                                 {event.start_time && (
                                   <span className="flex items-center gap-2">
                                     <Clock className="h-3 w-3" />
-                                    {event.start_time} - {event.end_time || "?"}
+                                    {event.start_time} - {event.end_time || '?'}
                                   </span>
                                 )}
 
                                 {(event.location || event.address) && (
                                   <button
-                                    onClick={() => openInMaps(event.address || event.location || "")}
+                                    onClick={() =>
+                                      openInMaps(
+                                        event.address || event.location || '',
+                                      )
+                                    }
                                     className="flex items-center gap-2 hover:text-white transition-colors text-left"
                                   >
                                     <MapPin className="h-3 w-3" />
@@ -266,7 +340,7 @@ const AssistantAgenda = ({ events, currentMonth, onMonthChange }: AssistantAgend
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default AssistantAgenda;
+export default AssistantAgenda

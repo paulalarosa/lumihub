@@ -1,22 +1,22 @@
-import React, { memo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { MarkdownRenderer } from '@/components/markdown-renderer';
-import { Button } from '@/components/ui/button';
-import { FileIcon, ExternalLink } from 'lucide-react';
+import React, { memo, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { MarkdownRenderer } from '@/components/markdown-renderer'
+import { Button } from '@/components/ui/Button'
+import { FileIcon, ExternalLink } from 'lucide-react'
 import {
   ChatMessageRoleUser,
   ChatMessageContentTypeText,
   ChatMessageContentTypeImage,
   ChatMessageContentTypeFile,
-} from '@inferencesh/sdk';
-import type { ChatMessageDTO } from '@inferencesh/sdk/agent';
+} from '@inferencesh/sdk'
+import type { ChatMessageDTO } from '@inferencesh/sdk/agent'
 
 interface MessageContentProps {
-  message: ChatMessageDTO;
-  className?: string;
-  truncate?: boolean;
+  message: ChatMessageDTO
+  className?: string
+  truncate?: boolean
   /** Custom markdown renderer - defaults to built-in MarkdownRenderer */
-  renderMarkdown?: (content: string) => React.ReactNode;
+  renderMarkdown?: (content: string) => React.ReactNode
 }
 
 // =============================================================================
@@ -24,43 +24,45 @@ interface MessageContentProps {
 // =============================================================================
 
 function getTextContent(message: ChatMessageDTO): string {
-  const textContent = message.content.find((c) => c.type === ChatMessageContentTypeText);
-  return textContent?.text ?? '';
+  const textContent = message.content.find(
+    (c) => c.type === ChatMessageContentTypeText,
+  )
+  return textContent?.text ?? ''
 }
 
 function getImageUrls(message: ChatMessageDTO): string[] {
   return message.content
     .filter((c) => c.type === ChatMessageContentTypeImage && c.image)
-    .map((c) => c.image!);
+    .map((c) => c.image!)
 }
 
 function getFileUrls(message: ChatMessageDTO): string[] {
   return message.content
     .filter((c) => c.type === ChatMessageContentTypeFile && c.file)
-    .map((c) => c.file!);
+    .map((c) => c.file!)
 }
 
 function getFileName(url: string): string {
   // Try to extract filename from URL
-  const parts = url.split('/');
-  const lastPart = parts[parts.length - 1];
+  const parts = url.split('/')
+  const lastPart = parts[parts.length - 1]
   // Remove query params
-  return lastPart.split('?')[0] || 'file';
+  return lastPart.split('?')[0] || 'file'
 }
 
 function getFileExtension(filename: string): string {
-  const ext = filename.split('.').pop()?.toUpperCase() || '';
-  return ext.length <= 5 ? ext : ext.slice(0, 5);
+  const ext = filename.split('.').pop()?.toUpperCase() || ''
+  return ext.length <= 5 ? ext : ext.slice(0, 5)
 }
 
 function isImageUrl(url: string): boolean {
-  const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || '';
-  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext);
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || ''
+  return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].includes(ext)
 }
 
 function isVideoUrl(url: string): boolean {
-  const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || '';
-  return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext);
+  const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || ''
+  return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)
 }
 
 // =============================================================================
@@ -68,15 +70,18 @@ function isVideoUrl(url: string): boolean {
 // =============================================================================
 
 interface FileAttachmentProps {
-  url: string;
-  className?: string;
+  url: string
+  className?: string
 }
 
-const FileAttachment = memo(function FileAttachment({ url, className }: FileAttachmentProps) {
-  const fileName = getFileName(url);
-  const extension = getFileExtension(fileName);
-  const isImage = isImageUrl(url);
-  const isVideo = isVideoUrl(url);
+const FileAttachment = memo(function FileAttachment({
+  url,
+  className,
+}: FileAttachmentProps) {
+  const fileName = getFileName(url)
+  const extension = getFileExtension(fileName)
+  const isImage = isImageUrl(url)
+  const isVideo = isVideoUrl(url)
 
   return (
     <a
@@ -87,7 +92,7 @@ const FileAttachment = memo(function FileAttachment({ url, className }: FileAtta
         'flex items-center gap-2.5 rounded-lg border bg-muted/30 p-2 pr-3',
         'hover:bg-muted/50 transition-colors cursor-pointer',
         'max-w-[240px]',
-        className
+        className,
       )}
     >
       {/* Thumbnail */}
@@ -102,7 +107,11 @@ const FileAttachment = memo(function FileAttachment({ url, className }: FileAtta
           <div className="relative h-full w-full bg-black/10">
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="rounded-full bg-white/90 p-1">
-                <svg className="h-3 w-3 text-black" fill="currentColor" viewBox="0 0 20 20">
+                <svg
+                  className="h-3 w-3 text-black"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
                   <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                 </svg>
               </div>
@@ -127,19 +136,22 @@ const FileAttachment = memo(function FileAttachment({ url, className }: FileAtta
         </p>
       </div>
     </a>
-  );
-});
+  )
+})
 
 // =============================================================================
 // Image Attachment Component
 // =============================================================================
 
 interface ImageAttachmentProps {
-  url: string;
-  className?: string;
+  url: string
+  className?: string
 }
 
-const ImageAttachment = memo(function ImageAttachment({ url, className }: ImageAttachmentProps) {
+const ImageAttachment = memo(function ImageAttachment({
+  url,
+  className,
+}: ImageAttachmentProps) {
   return (
     <a
       href={url}
@@ -148,7 +160,7 @@ const ImageAttachment = memo(function ImageAttachment({ url, className }: ImageA
       className={cn(
         'block overflow-hidden rounded-lg border cursor-pointer',
         'hover:opacity-90 transition-opacity',
-        className
+        className,
       )}
     >
       <img
@@ -157,8 +169,8 @@ const ImageAttachment = memo(function ImageAttachment({ url, className }: ImageA
         className="max-w-[300px] max-h-[300px] object-contain"
       />
     </a>
-  );
-});
+  )
+})
 
 // =============================================================================
 // Component
@@ -166,7 +178,7 @@ const ImageAttachment = memo(function ImageAttachment({ url, className }: ImageA
 
 /**
  * MessageContent - Renders message text with markdown
- * 
+ *
  * @example
  * ```tsx
  * <MessageContent message={message} />
@@ -178,21 +190,22 @@ export const MessageContent = memo(function MessageContent({
   truncate = false,
   renderMarkdown,
 }: MessageContentProps) {
-  const isUser = message.role === ChatMessageRoleUser;
-  const textContent = getTextContent(message);
-  const imageUrls = getImageUrls(message);
-  const fileUrls = getFileUrls(message);
+  const isUser = message.role === ChatMessageRoleUser
+  const textContent = getTextContent(message)
+  const imageUrls = getImageUrls(message)
+  const fileUrls = getFileUrls(message)
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const MAX_LENGTH = 500;
-  const shouldTruncate = truncate && isUser && textContent.length > MAX_LENGTH;
-  const displayContent = shouldTruncate && !isExpanded
-    ? textContent.slice(0, MAX_LENGTH) + '...'
-    : textContent;
+  const [isExpanded, setIsExpanded] = useState(false)
+  const MAX_LENGTH = 500
+  const shouldTruncate = truncate && isUser && textContent.length > MAX_LENGTH
+  const displayContent =
+    shouldTruncate && !isExpanded
+      ? textContent.slice(0, MAX_LENGTH) + '...'
+      : textContent
 
   // Don't render if no content
   if (!textContent && imageUrls.length === 0 && fileUrls.length === 0) {
-    return null;
+    return null
   }
 
   return (
@@ -232,14 +245,15 @@ export const MessageContent = memo(function MessageContent({
                 </Button>
               )}
             </div>
+          ) : renderMarkdown ? (
+            renderMarkdown(textContent)
           ) : (
-            renderMarkdown ? renderMarkdown(textContent) : <MarkdownRenderer content={textContent} />
+            <MarkdownRenderer content={textContent} />
           )}
         </div>
       )}
     </div>
-  );
-});
+  )
+})
 
-MessageContent.displayName = 'MessageContent';
-
+MessageContent.displayName = 'MessageContent'

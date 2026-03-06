@@ -1,19 +1,19 @@
-import React, { memo, useState, useLayoutEffect, type ReactNode } from 'react';
-import { cn } from '@/lib/utils';
-import { useAutoScroll } from '@/hooks/use-auto-scroll';
-import { Button } from '@/components/ui/button';
-import { ArrowDown } from 'lucide-react';
-import { useAgentChat, type ChatMessageDTO } from '@inferencesh/sdk/agent';
+import React, { memo, useState, useLayoutEffect, type ReactNode } from 'react'
+import { cn } from '@/lib/utils'
+import { useAutoScroll } from '@/hooks/use-auto-scroll'
+import { Button } from '@/components/ui/Button'
+import { ArrowDown } from 'lucide-react'
+import { useAgentChat, type ChatMessageDTO } from '@inferencesh/sdk/agent'
 
 interface ChatMessagesProps {
-  children: (props: { messages: ChatMessageDTO[] }) => ReactNode;
-  className?: string;
-  scrollToTopPadding?: boolean;
+  children: (props: { messages: ChatMessageDTO[] }) => ReactNode
+  className?: string
+  scrollToTopPadding?: boolean
 }
 
 /**
  * ChatMessages - Scrollable message container with render prop
- * 
+ *
  * @example
  * ```tsx
  * <ChatMessages>
@@ -28,7 +28,7 @@ interface ChatMessagesProps {
  *   )}
  * </ChatMessages>
  * ```
- * 
+ *
  * @example With scroll-to-top padding (allows first message to scroll to top)
  * ```tsx
  * <ChatMessages scrollToTopPadding>
@@ -41,8 +41,8 @@ export const ChatMessages = memo(function ChatMessages({
   className,
   scrollToTopPadding = false,
 }: ChatMessagesProps) {
-  const { messages } = useAgentChat();
-  const [spacerHeight, setSpacerHeight] = useState(0);
+  const { messages } = useAgentChat()
+  const [spacerHeight, setSpacerHeight] = useState(0)
 
   const {
     containerRef,
@@ -50,25 +50,25 @@ export const ChatMessages = memo(function ChatMessages({
     handleScroll,
     shouldAutoScroll,
     handleTouchStart,
-  } = useAutoScroll([messages]);
+  } = useAutoScroll([messages])
 
   // Measure container height for the scroll-to-top spacer
   useLayoutEffect(() => {
-    if (!scrollToTopPadding || !containerRef.current) return;
+    if (!scrollToTopPadding || !containerRef.current) return
 
     const updateHeight = () => {
       if (containerRef.current) {
-        setSpacerHeight(containerRef.current.clientHeight * 0.9);
+        setSpacerHeight(containerRef.current.clientHeight * 0.9)
       }
-    };
+    }
 
-    updateHeight();
+    updateHeight()
 
-    const resizeObserver = new ResizeObserver(updateHeight);
-    resizeObserver.observe(containerRef.current);
+    const resizeObserver = new ResizeObserver(updateHeight)
+    resizeObserver.observe(containerRef.current)
 
-    return () => resizeObserver.disconnect();
-  }, [scrollToTopPadding, containerRef]);
+    return () => resizeObserver.disconnect()
+  }, [scrollToTopPadding, containerRef])
 
   return (
     <div className={cn('flex flex-col min-h-0 min-w-0 relative', className)}>
@@ -80,7 +80,11 @@ export const ChatMessages = memo(function ChatMessages({
       >
         {children({ messages })}
         {scrollToTopPadding && messages.length > 0 && (
-          <div aria-hidden="true" className="shrink-0" style={{ minHeight: spacerHeight }} />
+          <div
+            aria-hidden="true"
+            className="shrink-0"
+            style={{ minHeight: spacerHeight }}
+          />
         )}
       </div>
 
@@ -94,13 +98,14 @@ export const ChatMessages = memo(function ChatMessages({
             className="bg-background hover:bg-muted text-foreground hover:text-foreground rounded-full shadow-md animate-in fade-in-0 slide-in-from-bottom-2 cursor-pointer"
           >
             <ArrowDown className="h-4 w-4" />
-            <span className="text-xs font-normal text-muted-foreground">scroll to bottom</span>
+            <span className="text-xs font-normal text-muted-foreground">
+              scroll to bottom
+            </span>
           </Button>
         </div>
       )}
     </div>
-  );
-});
+  )
+})
 
-ChatMessages.displayName = 'ChatMessages';
-
+ChatMessages.displayName = 'ChatMessages'

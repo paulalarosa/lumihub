@@ -1,146 +1,169 @@
 import { Link } from 'react-router-dom'
-import { Mail, MessageCircle } from 'lucide-react'
+import {
+  Instagram,
+  Youtube,
+  MessageCircle,
+  Mail,
+  ArrowUpRight,
+  Sparkles,
+} from 'lucide-react'
 
-const Footer = () => {
+const footerLinks = [
+  {
+    title: 'Plataforma',
+    links: [
+      { label: 'Recursos', href: '/recursos' },
+      { label: 'Planos', href: '/planos' },
+      { label: 'Blog', href: '/blog' },
+      { label: 'Contato', href: '/contato' },
+    ],
+  },
+  {
+    title: 'Ferramentas',
+    links: [
+      { label: 'Agenda Inteligente', href: '/recursos' },
+      { label: 'Gestão de Clientes', href: '/recursos' },
+      { label: 'Contratos Digitais', href: '/recursos' },
+      { label: 'Dashboard', href: '/recursos' },
+    ],
+  },
+  {
+    title: 'Suporte',
+    links: [
+      { label: 'Central de Ajuda', href: '/contato' },
+      {
+        label: 'WhatsApp',
+        href: 'https://wa.me/5521983604870',
+        external: true,
+      },
+      {
+        label: 'E-mail',
+        href: 'mailto:khaoskontrol07@gmail.com',
+        external: true,
+      },
+    ],
+  },
+]
+
+const socials = [
+  { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+  { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
+  {
+    icon: MessageCircle,
+    href: 'https://wa.me/5521983604870',
+    label: 'WhatsApp',
+  },
+  { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com', label: 'E-mail' },
+]
+
+export default function Footer() {
   return (
-    <footer className="bg-[#050505] border-t border-white/10">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-xl flex items-center justify-center overflow-hidden relative">
-                <img
-                  src="/favicon-khaoskontrol.webp"
-                  alt="K"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <span className="font-serif font-light text-2xl text-white">
-                KHAOS KONTROL
-              </span>
-            </div>
-            <p className="text-white/40 text-sm leading-relaxed font-light">
-              A plataforma premium para profissionais de beleza que desejam
-              elevar sua gestão e oferecer experiências extraordinárias.
+    <footer className="relative border-t border-border/30 bg-background text-foreground">
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[50%] h-[200px] bg-foreground/[0.015] blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="container mx-auto px-6 lg:px-10 relative z-10">
+        {/* CTA Band — Portfolite style large heading */}
+        <div className="py-24 flex flex-col md:flex-row items-start md:items-center justify-between gap-10 border-b border-border/20">
+          <div className="space-y-4 max-w-lg text-left">
+            <h3 className="font-serif text-3xl md:text-5xl text-foreground tracking-tight leading-[1.1] text-left">
+              Pronto para <span className="italic">começar</span>?
+            </h3>
+            <p className="text-sm text-muted-foreground leading-relaxed text-left">
+              Junte-se a profissionais que já transformaram suas operações com o
+              KONTROL.
             </p>
           </div>
-
-          {/* Produto */}
-          <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">
-              Produto
-            </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  to="/recursos"
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Recursos
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/planos"
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Planos e Preços
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Empresa */}
-          <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">
-              Empresa
-            </h3>
-            <ul className="space-y-3">
-              <li>
-                <Link
-                  to="/blog"
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/contato"
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Contato
-                </Link>
-              </li>
-              <li>
-                <Link
-                  to="/suporte"
-                  className="text-white/40 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-                >
-                  Suporte
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contato */}
-          <div className="space-y-4">
-            <h3 className="font-serif font-light text-lg text-white">
-              Fale Conosco
-            </h3>
-            <div className="space-y-3">
-              <a
-                href="mailto:khaoskontrol07@gmail.com"
-                className="flex items-center space-x-3 group"
-              >
-                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">
-                  <Mail className="h-4 w-4 text-[#C0C0C0] group-hover:text-[#00e5ff]" />
-                </div>
-                <span className="text-white/40 text-sm font-light group-hover:text-white transition-colors">
-                  Enviar E-mail
-                </span>
-              </a>
-
-              <a
-                href="https://wa.me/5521983604870"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-3 group"
-              >
-                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center border border-white/10 group-hover:bg-[#00e5ff]/10 group-hover:border-[#00e5ff]/30 transition-all">
-                  <MessageCircle className="h-4 w-4 text-[#C0C0C0] group-hover:text-[#00e5ff]" />
-                </div>
-                <span className="text-white/40 text-sm font-light group-hover:text-white transition-colors">
-                  WhatsApp
-                </span>
-              </a>
-            </div>
-          </div>
+          <Link
+            to="/planos"
+            className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 transition-all group uppercase tracking-wide"
+          >
+            <Sparkles className="w-4 h-4" />
+            Ver Planos
+            <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </Link>
         </div>
 
-        <div className="border-t border-white/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-white/30 text-sm font-light">
-            © 2026 KHAOS KONTROL. Todos os direitos reservados.
-          </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link
-              to="/termos"
-              className="text-white/30 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-            >
-              Termos de Uso
+        {/* Links */}
+        <div className="py-16 grid grid-cols-2 md:grid-cols-5 gap-10 text-left">
+          {/* Brand */}
+          <div className="col-span-2 flex flex-col gap-6 text-left">
+            <Link to="/" className="flex items-center gap-2.5 group w-fit">
+              <img
+                src="/favicon-khaoskontrol.webp"
+                alt="KHAOS KONTROL"
+                className="w-6 h-6 rounded group-hover:scale-110 transition-transform object-contain"
+              />
+              <span className="text-sm font-medium text-foreground tracking-widest uppercase">
+                KHAOS KONTROL
+              </span>
             </Link>
-            <Link
-              to="/privacidade"
-              className="text-white/30 hover:text-[#C0C0C0] transition-colors text-sm font-light"
-            >
-              Política de Privacidade
-            </Link>
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-[240px]">
+              Gestão de alta performance para profissionais que buscam o
+              extraordinário.
+            </p>
+            <div className="flex items-center gap-2.5">
+              {socials.map((social) => (
+                <a
+                  key={social.label}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full border border-border/30 bg-foreground/[0.03] flex items-center justify-center hover:bg-foreground hover:border-foreground transition-all group"
+                  aria-label={social.label}
+                >
+                  <social.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-background transition-colors" />
+                </a>
+              ))}
+            </div>
           </div>
+
+          {/* Link columns */}
+          {footerLinks.map((group) => (
+            <div key={group.title} className="space-y-4 text-left">
+              <h4 className="text-xs font-medium text-foreground tracking-wide uppercase">
+                {group.title}
+              </h4>
+              <ul className="space-y-2.5">
+                {group.links.map((link) =>
+                  link.external ? (
+                    <li key={link.label}>
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                      >
+                        {link.label}
+                        <ArrowUpRight className="w-3 h-3" />
+                      </a>
+                    </li>
+                  ) : (
+                    <li key={link.label}>
+                      <Link
+                        to={link.href}
+                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom */}
+        <div className="py-6 border-t border-border/20 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-muted-foreground/50">
+            © {new Date().getFullYear()} Khaos Kontrol · Todos os direitos
+            reservados
+          </p>
+          <p className="text-xs text-muted-foreground/30 uppercase tracking-[0.2em]">
+            Operações Globais
+          </p>
         </div>
       </div>
     </footer>
   )
 }
-
-export default Footer

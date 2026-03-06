@@ -44,8 +44,8 @@ const DEFAULT_IMAGE = '/og-image.png'
 const BASE_URL = 'https://khaoskontrol.com.br'
 
 const SEOHead = ({
-  title = 'KHAOS KONTROL | System',
-  description = 'Industrial Management System for Beauty Professionals.',
+  title = 'KHAOS KONTROL | Gerenciamento de Alta Performance',
+  description = 'Plataforma definitiva para profissionais de beleza que buscam o extraordinário.',
   keywords = 'management, crm, beauty, industrial, system',
   image = DEFAULT_IMAGE,
   url = BASE_URL,
@@ -72,9 +72,9 @@ const SEOHead = ({
     // Sanitize and truncate title/description
     const sanitizedTitle =
       title.length > 60 ? title.slice(0, 57) + '...' : title
-    const fullTitle = title.includes(SITE_NAME)
-      ? sanitizedTitle
-      : `${sanitizedTitle} | ${SITE_NAME}`
+    const fullTitle = title
+      ? `${sanitizedTitle} | KHAOS KONTROL`
+      : 'KHAOS KONTROL'
     const sanitizedDescription =
       description.length > 160 ? description.slice(0, 157) + '...' : description
 

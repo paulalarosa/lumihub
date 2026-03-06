@@ -38,11 +38,11 @@ const CanvasPanel = lazy(() =>
 )
 
 // Lazy Imports (Code Splitting)
-const Home = lazy(() => import('./pages/Home'))
+const Index = lazy(() => import('./pages/HomePage'))
 const Login = lazy(() => import('@/features/auth/pages/Login'))
 const Register = lazy(() => import('@/features/auth/pages/Register'))
 const Recursos = lazy(() => import('./pages/Recursos'))
-const Planos = lazy(() => import('./pages/Planos'))
+const Planos = lazy(() => import('./pages/PlanosPage'))
 const Blog = lazy(() => import('./pages/Blog'))
 const BlogArticle = lazy(() => import('./pages/BlogArticle'))
 const ForgotPassword = lazy(
@@ -165,7 +165,7 @@ const App = () => {
                   <Suspense fallback={<PageLoader />}>
                     <Routes>
                       {/* Public Marketing Pages */}
-                      <Route path="/" element={<Home />} />
+                      <Route path="/" element={<Index />} />
                       <Route element={<MarketingLayout />}>
                         <Route path="/recursos" element={<Recursos />} />
                         <Route path="/planos" element={<Planos />} />

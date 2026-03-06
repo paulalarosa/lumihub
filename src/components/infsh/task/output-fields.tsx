@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 /**
  * OutputField Component
@@ -10,61 +10,69 @@
  * - Booleans with colored pills
  */
 
-import { memo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { ChevronDownIcon, ChevronRightIcon, Copy, Check } from 'lucide-react';
-import { FilePreview, type PartialFile } from './file-preview';
-import { MarkdownRenderer } from '@/components/markdown-renderer';
+import { memo, useState } from 'react'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Label } from '@/components/ui/label'
+import { ChevronDownIcon, ChevronRightIcon, Copy, Check } from 'lucide-react'
+import { FilePreview, type PartialFile } from './file-preview'
+import { MarkdownRenderer } from '@/components/markdown-renderer'
 
 /** Field schema (simplified from SDK) */
 export interface Field {
-  key?: string;
-  type?: string;
-  properties?: Record<string, Field>;
-  items?: Field;
+  key?: string
+  type?: string
+  properties?: Record<string, Field>
+  items?: Field
 }
 
 /** Check if data is a file object */
 export function isFile(data: unknown): data is PartialFile {
-  return typeof data === 'object' && data !== null && 'uri' in data && typeof (data as PartialFile).uri === 'string';
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'uri' in data &&
+    typeof (data as PartialFile).uri === 'string'
+  )
 }
 
 /** Check if data is a URL string */
 export function isUrl(data: unknown): boolean {
-  return typeof data === 'string' && (data.startsWith('http://') || data.startsWith('https://'));
+  return (
+    typeof data === 'string' &&
+    (data.startsWith('http://') || data.startsWith('https://'))
+  )
 }
 
 /** Transform URL or file to PartialFile */
 function transformToFileObject(data: unknown): PartialFile {
   if (isUrl(data)) {
-    const uri = data as string;
+    const uri = data as string
     return {
       uri,
       path: uri,
       filename: uri.split('/').pop()?.split('?')[0],
-    };
+    }
   }
-  return data as PartialFile;
+  return data as PartialFile
 }
 
 export interface OutputFieldProps {
   /** Field schema (optional, for labels) */
-  field?: Field;
+  field?: Field
   /** The data to render */
-  data: unknown;
+  data: unknown
   /** Additional classes */
-  className?: string;
+  className?: string
   /** Compact mode (hide labels) */
-  compact?: boolean;
+  compact?: boolean
   /** Show action buttons */
-  buttons?: boolean;
+  buttons?: boolean
   /** Allow clicking to interact */
-  clickable?: boolean;
+  clickable?: boolean
   /** Auto-play videos */
-  autoplay?: boolean;
+  autoplay?: boolean
 }
 
 export const OutputField = memo(function OutputField({
@@ -76,39 +84,42 @@ export const OutputField = memo(function OutputField({
   clickable = true,
   autoplay,
 }: OutputFieldProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [isOpen, setIsOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   // Handle null/undefined
   if (data === null || data === undefined) {
-    return null;
+    return null
   }
 
-  const isArray = Array.isArray(data);
+  const isArray = Array.isArray(data)
   const isFileArray =
-    isArray && data.length > 0 && data.every((item) => item !== null && (isUrl(item) || isFile(item)));
-  const isSingleFile = !isArray && (isUrl(data) || isFile(data));
+    isArray &&
+    data.length > 0 &&
+    data.every((item) => item !== null && (isUrl(item) || isFile(item)))
+  const isSingleFile = !isArray && (isUrl(data) || isFile(data))
 
   // Transform data if needed
   const transformedData = isFileArray
     ? (data as unknown[]).map(transformToFileObject)
     : isSingleFile
       ? transformToFileObject(data)
-      : data;
+      : data
 
-  const isObject = !isSingleFile && !isFileArray && typeof data === 'object' && !isArray;
+  const isObject =
+    !isSingleFile && !isFileArray && typeof data === 'object' && !isArray
 
   // Empty arrays
   if (isArray && data.length === 0) {
-    return null;
+    return null
   }
 
   const handleCopy = async () => {
-    const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  };
+    const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2)
+    await navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <div className={cn('space-y-2', className)}>
@@ -118,12 +129,23 @@ export const OutputField = memo(function OutputField({
           <Label className="text-muted-foreground flex items-center gap-2 lowercase">
             {field.key}
             {field.type && (
-              <span className="text-xs text-muted-foreground/60 font-normal">{field.type}</span>
+              <span className="text-xs text-muted-foreground/60 font-normal">
+                {field.type}
+              </span>
             )}
           </Label>
           {isObject && (
-            <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              {isOpen ? (
+                <ChevronDownIcon className="h-4 w-4" />
+              ) : (
+                <ChevronRightIcon className="h-4 w-4" />
+              )}
             </Button>
           )}
         </div>
@@ -162,10 +184,16 @@ export const OutputField = memo(function OutputField({
                   <Label className="text-muted-foreground flex items-center gap-2 lowercase">
                     {field?.key}
                     {field?.type && (
-                      <span className="text-xs text-muted-foreground/60 font-normal">{field.type}</span>
+                      <span className="text-xs text-muted-foreground/60 font-normal">
+                        {field.type}
+                      </span>
                     )}
                   </Label>
-                  {isOpen ? <ChevronDownIcon className="h-4 w-4" /> : <ChevronRightIcon className="h-4 w-4" />}
+                  {isOpen ? (
+                    <ChevronDownIcon className="h-4 w-4" />
+                  ) : (
+                    <ChevronRightIcon className="h-4 w-4" />
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -184,7 +212,7 @@ export const OutputField = memo(function OutputField({
                           buttons={buttons}
                           clickable={clickable}
                         />
-                      )
+                      ),
                   )}
                 </div>
               </CardContent>
@@ -198,7 +226,9 @@ export const OutputField = memo(function OutputField({
               <div
                 className={cn(
                   'px-2 py-1 rounded-full text-sm font-medium',
-                  data ? 'bg-green-500/15 text-green-600' : 'bg-red-500/15 text-red-600'
+                  data
+                    ? 'bg-green-500/15 text-green-600'
+                    : 'bg-red-500/15 text-red-600',
                 )}
               >
                 {data ? 'true' : 'false'}
@@ -234,9 +264,18 @@ export const OutputField = memo(function OutputField({
                 onClick={handleCopy}
                 aria-label="Copy output"
               >
-                {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+                {copied ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </Button>
-              <div className={cn('max-h-[300px] break-all pr-8', clickable ? 'overflow-y-auto' : 'overflow-y-hidden')}>
+              <div
+                className={cn(
+                  'max-h-[300px] break-all pr-8',
+                  clickable ? 'overflow-y-auto' : 'overflow-y-hidden',
+                )}
+              >
                 {typeof data === 'string' ? (
                   <MarkdownRenderer content={data} />
                 ) : (
@@ -248,18 +287,18 @@ export const OutputField = memo(function OutputField({
         </Card>
       )}
     </div>
-  );
-});
+  )
+})
 
 export interface OutputFieldsProps {
   /** The output data object */
-  output: Record<string, unknown>;
+  output: Record<string, unknown>
   /** Field schema for labels */
-  fields?: Record<string, Field>;
+  fields?: Record<string, Field>
   /** Additional classes */
-  className?: string;
+  className?: string
   /** Compact mode */
-  compact?: boolean;
+  compact?: boolean
 }
 
 /** Render multiple output fields */
@@ -270,7 +309,7 @@ export const OutputFields = memo(function OutputFields({
   compact,
 }: OutputFieldsProps) {
   if (!output || typeof output !== 'object') {
-    return null;
+    return null
   }
 
   return (
@@ -284,5 +323,5 @@ export const OutputFields = memo(function OutputFields({
         />
       ))}
     </div>
-  );
-});
+  )
+})

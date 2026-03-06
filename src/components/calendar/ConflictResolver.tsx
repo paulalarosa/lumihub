@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'

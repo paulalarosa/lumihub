@@ -1,5 +1,5 @@
 import { ActionButton } from '@/components/ui/action-buttons'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
@@ -12,7 +12,6 @@ import {
 import {
   Search,
   Plus,
-  Filter,
   FileText,
   CheckCircle2,
   Calendar,
@@ -74,31 +73,32 @@ export default function Contratos() {
           />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-          <Filter className="w-4 h-4 text-white/50" />
-          <button
-            onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors ${statusFilter === 'all' ? 'bg-white text-black font-bold' : 'text-white/60 hover:text-white border border-white/10'}`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setStatusFilter('draft')}
-            className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors ${statusFilter === 'draft' ? 'bg-white text-black font-bold' : 'text-white/60 hover:text-white border border-white/10'}`}
-          >
-            Rascunhos
-          </button>
-          <button
-            onClick={() => setStatusFilter('sent')}
-            className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors ${statusFilter === 'sent' ? 'bg-white text-black font-bold' : 'text-white/60 hover:text-white border border-white/10'}`}
-          >
-            Enviados
-          </button>
-          <button
-            onClick={() => setStatusFilter('signed')}
-            className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors ${statusFilter === 'signed' ? 'bg-white text-black font-bold' : 'text-white/60 hover:text-white border border-white/10'}`}
-          >
-            Assinados
-          </button>
+          <div className="flex bg-white/[0.02] border border-white/5 p-1 rounded-full w-fit mb-6 overflow-x-auto">
+            <button
+              onClick={() => setStatusFilter('all')}
+              className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'all' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setStatusFilter('draft')}
+              className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'draft' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
+            >
+              Rascunhos
+            </button>
+            <button
+              onClick={() => setStatusFilter('sent')}
+              className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'sent' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
+            >
+              Enviados
+            </button>
+            <button
+              onClick={() => setStatusFilter('signed')}
+              className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'signed' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
+            >
+              Assinados
+            </button>
+          </div>
         </div>
       </div>
 
@@ -182,7 +182,7 @@ export default function Contratos() {
                         <DialogTitle>{contract.title}</DialogTitle>
                       </DialogHeader>
                       <div className="mt-4 space-y-4">
-                        <div className="bg-white text-black p-8 rounded-sm min-h-[500px] shadow-xl font-serif text-sm leading-relaxed whitespace-pre-wrap">
+                        <div className="bg-white/5 text-white/90 p-8 rounded-[2.5rem] min-h-[500px] border border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)] backdrop-blur-md font-serif text-sm leading-relaxed whitespace-pre-wrap">
                           <h2 className="text-center text-xl font-bold mb-8 uppercase tracking-widest border-b-2 border-black pb-4">
                             Contrato de Prestação de Serviços
                           </h2>

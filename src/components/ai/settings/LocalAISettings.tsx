@@ -1,5 +1,5 @@
 import { useWebLLM } from '@/hooks/useWebLLM'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Progress } from '@/components/ui/progress'
 import {
   Select,

@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import SignaturePad from 'react-signature-canvas'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Eraser, Check } from 'lucide-react'
 
 interface SignatureCanvasProps {

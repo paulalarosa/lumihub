@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { logger } from '@/services/logger'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { CreditCard, Users, TrendingUp, Download, Loader2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { exportMonthlyClosing } from '@/services/reportService'

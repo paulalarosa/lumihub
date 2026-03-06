@@ -1,36 +1,36 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/integrations/supabase/client'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
-import { FolderPlus } from 'lucide-react';
+} from '@/components/ui/select'
+import { useToast } from '@/hooks/use-toast'
+import { FolderPlus } from 'lucide-react'
 
 interface Client {
-  id: string;
-  name: string;
+  id: string
+  name: string
 }
 
 interface QuickCreateProjectDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: (project: { id: string; name: string; client_id: string }) => void;
-  preselectedClientId?: string;
-  clients: Client[];
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess: (project: { id: string; name: string; client_id: string }) => void
+  preselectedClientId?: string
+  clients: Client[]
 }
 
 export function QuickCreateProjectDialog({
@@ -38,26 +38,26 @@ export function QuickCreateProjectDialog({
   onOpenChange,
   onSuccess,
   preselectedClientId,
-  clients
+  clients,
 }: QuickCreateProjectDialogProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [name, setName] = useState('');
-  const [clientId, setClientId] = useState('');
-  const [eventDate, setEventDate] = useState('');
+  const { user } = useAuth()
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('')
+  const [clientId, setClientId] = useState('')
+  const [eventDate, setEventDate] = useState('')
 
   useEffect(() => {
     if (preselectedClientId) {
-      setClientId(preselectedClientId);
+      setClientId(preselectedClientId)
     }
-  }, [preselectedClientId]);
+  }, [preselectedClientId])
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !name.trim() || !clientId) return;
+    e.preventDefault()
+    if (!user || !name.trim() || !clientId) return
 
-    setLoading(true);
+    setLoading(true)
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -65,34 +65,37 @@ export function QuickCreateProjectDialog({
           user_id: user.id,
           client_id: clientId,
           name: name.trim(),
-          event_date: eventDate || null
+          event_date: eventDate || null,
         })
         .select('id, name, client_id')
-        .single();
+        .single()
 
-      if (error) throw error;
+      if (error) throw error
 
       toast({
-        title: "Sucesso",
-        description: "Projeto criado"
-      });
+        title: 'Sucesso',
+        description: 'Projeto criado',
+      })
 
-      onSuccess(data);
-      setName('');
-      setClientId('');
-      setEventDate('');
-      onOpenChange(false);
+      onSuccess(data)
+      setName('')
+      setClientId('')
+      setEventDate('')
+      onOpenChange(false)
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Não foi possível criar o projeto";
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível criar o projeto'
       toast({
-        title: "Erro",
+        title: 'Erro',
         description: message,
-        variant: "destructive"
-      });
+        variant: 'destructive',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -118,13 +121,16 @@ export function QuickCreateProjectDialog({
 
           <div className="space-y-2">
             <Label>Cliente *</Label>
-            <Select value={clientId || "__none__"} onValueChange={(v) => setClientId(v === "__none__" ? "" : v)}>
+            <Select
+              value={clientId || '__none__'}
+              onValueChange={(v) => setClientId(v === '__none__' ? '' : v)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecione um cliente" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__none__">Selecione...</SelectItem>
-                {clients.map(client => (
+                {clients.map((client) => (
                   <SelectItem key={client.id} value={client.id}>
                     {client.name}
                   </SelectItem>
@@ -151,12 +157,15 @@ export function QuickCreateProjectDialog({
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading || !name.trim() || !clientId}>
+            <Button
+              type="submit"
+              disabled={loading || !name.trim() || !clientId}
+            >
               {loading ? 'Criando...' : 'Criar Projeto'}
             </Button>
           </div>
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

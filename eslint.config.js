@@ -9,7 +9,7 @@ import unusedImports from "eslint-plugin-unused-imports";
 
 export default tseslint.config(
   {
-    ignores: ["dist", "dev-dist", "storybook-static", "public", "node_modules", "supabase/functions"]
+    ignores: ["dist", "dev-dist", "storybook-static", "public", "node_modules", "supabase/functions", "my-app"]
   },
   ...(storybook.configs?.["flat/recommended"] ? [storybook.configs["flat/recommended"]].flat() : []),
   {

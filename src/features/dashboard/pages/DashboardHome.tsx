@@ -3,7 +3,8 @@ import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { SummaryHeader } from '../components/SummaryHeader'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
+import SEOHead from '@/components/seo/SEOHead'
 
 export default function DashboardHome() {
   const { _user } = useAuthStore()
@@ -63,23 +64,26 @@ export default function DashboardHome() {
 
   if (isEmptyState) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 bg-[#000000]">
-        <div className="max-w-md text-center">
-          <h2 className="text-white font-serif text-3xl mb-4 tracking-tight">
-            Bem-vinda ao KONTROL
-          </h2>
-          <p className="text-[#666666] mb-8 font-light">
-            Nenhuma noiva cadastrada. Inicie o fluxo de gestão para desbloquear
-            a inteligência do sistema.
-          </p>
-          <Link to="/clientes/novo">
-            <Button className="bg-white text-black hover:bg-gray-200 rounded-none px-8 py-6 uppercase tracking-widest text-xs font-bold transition-all hover:scale-105">
-              <Plus className="w-4 h-4 mr-2" />
-              Cadastrar Primeira Noiva
-            </Button>
-          </Link>
+      <>
+        <SEOHead title="Dashboard | KHAOS KONTROL" />
+        <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 bg-[#000000]">
+          <div className="max-w-md text-center">
+            <h2 className="text-white font-serif text-3xl mb-4 tracking-tight">
+              Bem-vinda ao KHAOS KONTROL
+            </h2>
+            <p className="text-[#666666] mb-8 font-light">
+              Nenhuma noiva cadastrada. Inicie o fluxo de gestão para
+              desbloquear a inteligência do sistema.
+            </p>
+            <Link to="/clientes/novo">
+              <Button className="bg-white/10 text-white hover:bg-white/20 backdrop-blur-md border border-white/20 shadow-[0_4px_30px_rgba(0,0,0,0.1)] rounded-full px-8 py-6 uppercase tracking-widest text-xs font-bold transition-all hover:scale-105">
+                <Plus className="w-4 h-4 mr-2" />
+                Cadastrar Primeira Noiva
+              </Button>
+            </Link>
+          </div>
         </div>
-      </div>
+      </>
     )
   }
 

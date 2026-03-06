@@ -1,14 +1,19 @@
-import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from '@/components/ui/Button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  isLoading?: boolean;
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  isLoading?: boolean
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange, isLoading }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  isLoading,
+}: PaginationProps) => {
   return (
     <div className="flex items-center justify-between px-4 py-4 border-t border-black bg-white">
       <div className="flex-1 text-xs text-gray-500 font-mono">
@@ -37,5 +42,5 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, isLoading }:
         </Button>
       </div>
     </div>
-  );
-};
+  )
+}

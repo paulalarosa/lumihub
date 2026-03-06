@@ -5,24 +5,24 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Plus, Loader2 } from 'lucide-react';
-import { Controller } from 'react-hook-form';
-import { useNewProjectDialog } from './hooks/useNewProjectDialog';
+} from '@/components/ui/select'
+import { Plus, Loader2 } from 'lucide-react'
+import { Controller } from 'react-hook-form'
+import { useNewProjectDialog } from './hooks/useNewProjectDialog'
 
 interface NewProjectDialogProps {
-  onSuccess: () => void;
-  onCreateClient?: () => void;
+  onSuccess: () => void
+  onCreateClient?: () => void
 }
 
 export function NewProjectDialog({
@@ -37,10 +37,10 @@ export function NewProjectDialog({
     form: {
       control,
       handleSubmit,
-      formState: { errors, isSubmitting }
+      formState: { errors, isSubmitting },
     },
     onSubmit,
-  } = useNewProjectDialog({ onSuccess });
+  } = useNewProjectDialog({ onSuccess })
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -54,7 +54,8 @@ export function NewProjectDialog({
         <DialogHeader>
           <DialogTitle className="text-xl">Novo Projeto</DialogTitle>
           <DialogDescription className="text-gray-400">
-            Crie um novo projeto. O e-mail do cliente será validado automaticamente.
+            Crie um novo projeto. O e-mail do cliente será validado
+            automaticamente.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,8 +71,8 @@ export function NewProjectDialog({
             <Button
               variant="outline"
               onClick={() => {
-                setOpen(false);
-                onCreateClient?.();
+                setOpen(false)
+                onCreateClient?.()
               }}
               className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
             >
@@ -86,11 +87,13 @@ export function NewProjectDialog({
                 Nome do Projeto <span className="text-red-500">*</span>
               </Label>
               <Input
-                {...control.register("name")}
+                {...control.register('name')}
                 placeholder="Casamento Maria & João"
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
               />
-              {errors.name && <p className="text-xs text-red-400">{errors.name.message}</p>}
+              {errors.name && (
+                <p className="text-xs text-red-400">{errors.name.message}</p>
+              )}
             </div>
 
             {/* Cliente */}
@@ -102,7 +105,10 @@ export function NewProjectDialog({
                 control={control}
                 name="client_id"
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue placeholder="Selecione um cliente" />
                     </SelectTrigger>
@@ -116,13 +122,18 @@ export function NewProjectDialog({
                   </Select>
                 )}
               />
-              {errors.client_id && <p className="text-xs text-red-400">{errors.client_id.message}</p>}
+              {errors.client_id && (
+                <p className="text-xs text-red-400">
+                  {errors.client_id.message}
+                </p>
+              )}
 
               {/* Hidden Email Validation Feedback */}
-              <input type="hidden" {...control.register("client_email")} />
+              <input type="hidden" {...control.register('client_email')} />
               {errors.client_email && (
                 <p className="text-xs text-amber-400 flex items-center gap-1">
-                  ⚠️ {errors.client_email.message} (Atualize o cadastro do cliente)
+                  ⚠️ {errors.client_email.message} (Atualize o cadastro do
+                  cliente)
                 </p>
               )}
             </div>
@@ -134,14 +145,19 @@ export function NewProjectDialog({
                 control={control}
                 name="event_type"
                 render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue placeholder="Selecione o tipo..." />
                     </SelectTrigger>
                     <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
                       <SelectItem value="noivas">Noivas</SelectItem>
                       <SelectItem value="pre_wedding">Pré Wedding</SelectItem>
-                      <SelectItem value="producoes_sociais">Produções Sociais</SelectItem>
+                      <SelectItem value="producoes_sociais">
+                        Produções Sociais
+                      </SelectItem>
                       <SelectItem value="other">Outro</SelectItem>
                     </SelectContent>
                   </Select>
@@ -155,7 +171,7 @@ export function NewProjectDialog({
                 <Label className="text-gray-300">Data do Evento</Label>
                 <Input
                   type="date"
-                  {...control.register("event_date")}
+                  {...control.register('event_date')}
                   className="bg-white/5 border-white/10 text-white focus:border-white/50 focus:ring-white/50"
                 />
               </div>
@@ -163,7 +179,7 @@ export function NewProjectDialog({
               <div className="space-y-2">
                 <Label className="text-gray-300">Local</Label>
                 <Input
-                  {...control.register("event_location")}
+                  {...control.register('event_location')}
                   placeholder="Local do evento"
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
                 />
@@ -174,7 +190,7 @@ export function NewProjectDialog({
             <div className="space-y-2">
               <Label className="text-gray-300">Notas</Label>
               <textarea
-                {...control.register("notes")}
+                {...control.register('notes')}
                 placeholder="Observações sobre o projeto..."
                 rows={3}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white/50 focus:border-white/50"
@@ -192,8 +208,14 @@ export function NewProjectDialog({
               >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-white hover:bg-white/90 text-black">
-                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="bg-white hover:bg-white/90 text-black"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
                 {isSubmitting ? 'Salvando...' : 'Criar Projeto'}
               </Button>
             </div>
@@ -201,5 +223,5 @@ export function NewProjectDialog({
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }

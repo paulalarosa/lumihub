@@ -1,12 +1,15 @@
-import { Sparkles, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Sparkles, ArrowRight } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
 interface UpgradeBannerProps {
-  professionalName: string;
-  onContactClick: () => void;
+  professionalName: string
+  onContactClick: () => void
 }
 
-const UpgradeBanner = ({ professionalName, onContactClick }: UpgradeBannerProps) => {
+const UpgradeBanner = ({
+  professionalName,
+  onContactClick,
+}: UpgradeBannerProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 md:left-64 z-40">
       <div className="bg-gradient-to-r from-primary via-primary/90 to-primary/80 text-primary-foreground p-4 shadow-lg">
@@ -22,18 +25,18 @@ const UpgradeBanner = ({ professionalName, onContactClick }: UpgradeBannerProps)
               </p>
             </div>
           </div>
-          <Button 
-            variant="secondary" 
+          <Button
+            variant="secondary"
             onClick={onContactClick}
             className="whitespace-nowrap"
           >
-            Falar com {professionalName.split(" ")[0]}
+            Falar com {professionalName.split(' ')[0]}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default UpgradeBanner;
+export default UpgradeBanner

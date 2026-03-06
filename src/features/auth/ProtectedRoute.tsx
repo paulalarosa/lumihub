@@ -4,13 +4,9 @@ import { Loader2 } from 'lucide-react'
 
 interface ProtectedRouteProps {
   children?: React.ReactNode
-  requireOnboarding?: boolean
 }
 
-export default function ProtectedRoute({
-  children,
-  requireOnboarding = true,
-}: ProtectedRouteProps) {
+export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, role, loading } = useAuth()
   const location = useLocation()
 

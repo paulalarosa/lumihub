@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
 import { Bot } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import {
   Inference,
   ChatMessageStatusReady,

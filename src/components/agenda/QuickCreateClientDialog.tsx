@@ -1,41 +1,41 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { supabase } from '@/integrations/supabase/client'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { UserPlus } from 'lucide-react';
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { UserPlus } from 'lucide-react'
 
 interface QuickCreateClientDialogProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSuccess: (client: { id: string; name: string }) => void;
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onSuccess: (client: { id: string; name: string }) => void
 }
 
 export function QuickCreateClientDialog({
   open,
   onOpenChange,
-  onSuccess
+  onSuccess,
 }: QuickCreateClientDialogProps) {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
+  const { user } = useAuth()
+  const { toast } = useToast()
+  const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user || !name.trim()) return;
+    e.preventDefault()
+    if (!user || !name.trim()) return
 
-    setLoading(true);
+    setLoading(true)
     try {
       const { data, error } = await supabase
         .from('wedding_clients')
@@ -43,33 +43,33 @@ export function QuickCreateClientDialog({
           user_id: user.id,
           name: name.trim(),
           email: email.trim() || null,
-          phone: phone.trim() || null
+          phone: phone.trim() || null,
         })
         .select('id, name')
-        .single();
+        .single()
 
-      if (error) throw error;
+      if (error) throw error
 
       toast({
-        title: "Sucesso",
-        description: "Cliente criado"
-      });
+        title: 'Sucesso',
+        description: 'Cliente criado',
+      })
 
-      onSuccess(data);
-      setName('');
-      setEmail('');
-      setPhone('');
-      onOpenChange(false);
+      onSuccess(data)
+      setName('')
+      setEmail('')
+      setPhone('')
+      onOpenChange(false)
     } catch (error) {
       toast({
-        title: "Erro",
-        description: error.message || "Não foi possível criar o cliente",
-        variant: "destructive"
-      });
+        title: 'Erro',
+        description: error.message || 'Não foi possível criar o cliente',
+        variant: 'destructive',
+      })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,5 +129,5 @@ export function QuickCreateClientDialog({
         </form>
       </DialogContent>
     </Dialog>
-  );
+  )
 }

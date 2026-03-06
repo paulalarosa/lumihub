@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { LoadingSpinner } from '@/components/ui/loading-spinner'
@@ -9,13 +9,7 @@ import { AlertCircle, CheckCircle, Copy, Send } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
 
-interface InviteAssistantFormProps {
-  onSuccess?: () => void
-}
-
-export const InviteAssistantForm = ({
-  onSuccess,
-}: InviteAssistantFormProps) => {
+export const InviteAssistantForm = () => {
   const { user } = useAuth()
   const { toast } = useToast()
   const [assistantName, setAssistantName] = useState('')
@@ -146,12 +140,6 @@ export const InviteAssistantForm = ({
       navigator.clipboard.writeText(generatedLink)
       toast({ title: 'Link copiado!' })
     }
-  }
-
-  const copyCredentials = () => {
-    const text = `Acesse a agenda da equipa:\n\nLink: ${generatedLink}\nEmail: ${assistantEmail}\nPIN: ${assistantPin}`
-    navigator.clipboard.writeText(text)
-    toast({ title: 'Credenciais copiadas!' })
   }
 
   const shareViaWhatsApp = () => {

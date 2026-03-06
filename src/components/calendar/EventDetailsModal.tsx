@@ -4,7 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Calendar, MapPin, AlignLeft, ExternalLink } from 'lucide-react'
 import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
 import { format } from 'date-fns'

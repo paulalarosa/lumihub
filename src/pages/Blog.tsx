@@ -1,153 +1,198 @@
-import { Link } from 'react-router-dom';
-import heroFallback from '@/assets/hero-beauty.jpg';
-import SEOHead from '@/components/seo/SEOHead';
-import { ArrowRight } from 'lucide-react';
-import { useLanguage } from '@/hooks/useLanguage';
+import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import SEOHead from '@/components/seo/SEOHead'
+import { SectionHeader } from '@/components/ui/SectionHeader'
 
-export default function Blog() {
-  const { t } = useLanguage();
+const blogPosts = [
+  {
+    slug: 'vencer-na-carreira-maker',
+    title: 'A Ciência do Sucesso na Carreira de Makeup Artist',
+    excerpt:
+      'Como estruturar sua carreira do zero ao reconhecimento internacional no mercado de beleza de luxo.',
+    category: 'CARREIRA',
+    date: '15 Mar 2025',
+    readTime: '8 min',
+    featured: true,
+    image: '/blog/career-success.png',
+  },
+  {
+    slug: 'tendencias-noivas-2025',
+    title: 'Tendências de Maquiagem Nupcial para 2025',
+    excerpt:
+      'Descubra as texturas, cores e acabamentos que vão dominar as cerimônias mais exclusivas da temporada.',
+    category: 'ESTILO',
+    date: '10 Mar 2025',
+    readTime: '6 min',
+    featured: false,
+    image: '/blog/bridal-2025.png', // Bride portrait
+  },
+  {
+    slug: 'contratos-digitais-luxo',
+    title: 'A Importância de Contratos Digitais no Mercado de Luxo',
+    excerpt:
+      'Segurança jurídica e experiência do cliente: por que a automação é o novo padrão ouro.',
+    category: 'NEGÓCIOS',
+    date: '05 Mar 2025',
+    readTime: '10 min',
+    featured: false,
+    image:
+      'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=2000&auto=format&fit=crop',
+  },
+  {
+    slug: 'marketing-digital-makeup',
+    title: 'Domine o Algoritmo: Marketing para Maquiadoras',
+    excerpt:
+      'Estratégias avançadas de posicionamento para atrair clientes de alto ticket no Instagram e TikTok.',
+    category: 'MARKETING',
+    date: '01 Mar 2025',
+    readTime: '12 min',
+    featured: false,
+    image:
+      'https://images.unsplash.com/photo-1595476108010-b4d1f10d5e43?q=80&w=2000&auto=format&fit=crop', // Makeup artist applying makeup
+  },
+]
 
-  const posts = [
-    {
-      id: 'career-management',
-      title: t("post_1_title"),
-      date: '05 JAN, 2026',
-      read: t("post_1_read"),
-      image: heroFallback,
-      excerpt: t("post_1_excerpt"),
-      category: t("post_1_cat")
-    },
-    {
-      id: 'bridal-trends-2026',
-      title: t("post_2_title"),
-      date: '28 DEZ, 2025',
-      read: t("post_2_read"),
-      image: heroFallback,
-      excerpt: t("post_2_excerpt"),
-      category: t("post_2_cat")
-    },
-    {
-      id: 'financial-independence',
-      title: t("post_3_title"),
-      date: '12 NOV, 2025',
-      read: t("post_3_read"),
-      image: heroFallback,
-      excerpt: t("post_3_excerpt"),
-      category: t("post_3_cat")
-    },
-    {
-      id: 'art-of-networking',
-      title: t("post_4_title"),
-      date: '03 OUT, 2025',
-      read: t("post_4_read"),
-      image: heroFallback,
-      excerpt: t("post_4_excerpt"),
-      category: t("post_4_cat")
-    },
-  ];
-
-  const blogJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    "name": "KONTROL Journal",
-    "description": "Perspectivas editoriais sobre o negócio da beleza.",
-    "url": "https://khaoskontrol.com.br/blog",
-  };
+export default function BlogPage() {
+  const featuredPost = blogPosts.find((p) => p.featured)
+  const otherPosts = blogPosts.filter((p) => !p.featured)
 
   return (
     <>
       <SEOHead
-        title="JOURNAL - KONTROL | EDITORIAL"
-        description="Insights e estratégias para o profissional de beleza moderno."
-        keywords="blog, beleza negócios, carreira, tendências"
-        url="https://khaoskontrol.com.br/blog"
-        type="website"
-        jsonLd={blogJsonLd}
+        title="Journal | KHAOS KONTROL"
+        description="Novidades, tendências e insights sobre o mercado de luxo e gestão para profissionais de beleza."
       />
-      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black font-sans">
+      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+        {/* Textured Overlay Image */}
+        <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
+          <img
+            src="/khaos-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png"
+            alt="Background Texture"
+            className="w-full h-full object-cover grayscale brightness-50"
+          />
+        </div>
+        {/* Ambient Glow */}
+        <div className="fixed top-[-20%] right-[-10%] w-[40%] h-[40%] bg-white/[0.015] blur-[180px] rounded-full pointer-events-none" />
 
-        <header className="pt-32 pb-20 border-b border-white/20">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col items-center text-center">
-              <span className="font-mono text-xs uppercase tracking-[0.4em] text-white/50 mb-6">
-                {t("blog_badge")}
-              </span>
-              <h1 className="font-serif text-6xl md:text-9xl mb-8 tracking-tight">
-                JOURNAL
-              </h1>
-              <p className="font-mono text-sm max-w-lg uppercase leading-relaxed text-white/70">
-                {t("blog_subtitle")}
-                <br />{t("features_page_title")} {t("features_page_subtitle")}.
-              </p>
-            </div>
+        <main className="container mx-auto px-6 lg:px-10 pt-40 pb-24 relative z-10 text-left">
+          {/* Header */}
+          <div className="max-w-4xl mb-20 space-y-6 text-left">
+            <SectionHeader
+              eyebrow="DEPARTAMENTO EDITORIAL"
+              title="JOURNAL"
+              subtitle="Insights, tendências e guias para profissionais de beleza que buscam excelência."
+              centered={false}
+            />
           </div>
-        </header>
 
-        <section className="container mx-auto px-4 py-20">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-24">
-            {posts.map((post) => (
-              <article key={post.id} className="group cursor-pointer">
-                <Link to={`/blog/${post.id}`} className="block">
-                  <div className="relative aspect-[4/3] overflow-hidden mb-8 border border-white/10 group-hover:border-white/50 transition-colors">
+          {/* Featured Post */}
+          {featuredPost && (
+            <motion.article
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="mb-16 group text-left"
+            >
+              <Link to={`/blog/${featuredPost.slug}`} className="block">
+                <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden">
+                  <div className="aspect-[21/9] bg-white/[0.03] relative overflow-hidden">
                     <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 ease-out transform group-hover:scale-105"
+                      src={featuredPost.image}
+                      alt={featuredPost.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 opacity-80"
                     />
-                    <div className="absolute top-4 left-4 bg-black border border-white px-3 py-1">
-                      <span className="font-mono text-[10px] uppercase tracking-widest text-white">
-                        {post.category}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <span className="font-serif text-[8rem] md:text-[12rem] text-white/10 italic select-none mix-blend-overlay">
+                        Featured
                       </span>
                     </div>
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="flex divide-x divide-white/20 font-mono text-xs text-white/40 uppercase tracking-widest">
-                      <span className="pr-3">{post.date}</span>
-                      <span className="pl-3">{post.read}</span>
+                  <div className="p-10 md:p-14 space-y-6">
+                    <div className="flex items-center gap-4">
+                      <span className="text-[10px] font-medium text-white border border-white/10 px-3 py-1 rounded-full">
+                        {featuredPost.category}
+                      </span>
+                      <span className="text-xs text-muted-foreground/50">
+                        {featuredPost.date} · {featuredPost.readTime}
+                      </span>
                     </div>
-
-                    <h2 className="font-serif text-3xl group-hover:underline decoration-1 underline-offset-4 leading-tight">
-                      {post.title}
+                    <h2 className="font-serif text-3xl md:text-5xl text-white italic group-hover:text-muted-foreground transition-colors leading-tight text-left">
+                      {featuredPost.title}
                     </h2>
-
-                    <p className="font-mono text-xs text-white/60 leading-relaxed uppercase max-w-md">
-                      {post.excerpt}
+                    <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed text-left">
+                      {featuredPost.excerpt}
                     </p>
-
-                    <div className="pt-4 flex items-center text-white/50 group-hover:text-white transition-colors">
-                      <span className="font-mono text-xs uppercase tracking-widest mr-2">{t("blog_read_article")}</span>
+                    <div className="flex items-center gap-2 text-white group-hover:gap-4 transition-all">
+                      <span className="text-xs font-medium">Ler mais</span>
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
+                </div>
+              </Link>
+            </motion.article>
+          )}
+
+          {/* Post Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {otherPosts.map((post, index) => (
+              <motion.article
+                key={post.slug}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08, duration: 0.6 }}
+                className="group text-left"
+              >
+                <Link to={`/blog/${post.slug}`} className="block h-full">
+                  <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden h-full flex flex-col">
+                    {/* Image placeholder */}
+                    <div className="aspect-[4/3] bg-white/[0.03] relative overflow-hidden">
+                      <img
+                        src={post.image}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0 opacity-80"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span className="font-serif text-6xl text-white/10 italic select-none mix-blend-overlay">
+                          {String(index + 2).padStart(2, '0')}
+                        </span>
+                      </div>
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 pointer-events-none" />
+                    </div>
+
+                    <div className="p-7 space-y-4 flex-1 flex flex-col">
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] font-medium text-white border border-white/10 px-2.5 py-1 rounded-full">
+                          {post.category}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground/40">
+                          {post.readTime}
+                        </span>
+                      </div>
+
+                      <h3 className="font-serif text-xl text-white italic group-hover:text-muted-foreground transition-colors leading-snug flex-1 text-left">
+                        {post.title}
+                      </h3>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed text-left">
+                        {post.excerpt}
+                      </p>
+
+                      <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground/40">
+                          {post.date}
+                        </span>
+                        <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </div>
+                  </div>
                 </Link>
-              </article>
+              </motion.article>
             ))}
           </div>
-        </section>
-
-        <section className="border-t border-white/20 py-24 bg-white text-black">
-          <div className="container mx-auto px-4 max-w-2xl text-center">
-            <h3 className="font-serif text-4xl mb-6">{t("blog_subscribe_title")}</h3>
-            <p className="font-mono text-sm uppercase mb-10 text-black/60">
-              {t("blog_subscribe_desc")}
-            </p>
-            <form className="flex flex-col sm:flex-row gap-0 border border-black" onSubmit={(e) => e.preventDefault()}>
-              <input
-                placeholder={t("blog_subscribe_placeholder")}
-                className="w-full bg-transparent border-none py-4 px-6 outline-none font-mono text-sm uppercase placeholder:text-black/30"
-              />
-              <button
-                className="bg-black text-white px-8 py-4 font-mono text-xs uppercase tracking-widest hover:bg-black/80 transition-colors whitespace-nowrap border-l border-black sm:border-l-0"
-                type="submit"
-              >
-                {t("blog_subscribe_btn")}
-              </button>
-            </form>
-          </div>
-        </section>
-
+        </main>
       </div>
     </>
-  );
+  )
 }

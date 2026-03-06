@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { logger } from '@/services/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import {
   Dialog,
   DialogContent,

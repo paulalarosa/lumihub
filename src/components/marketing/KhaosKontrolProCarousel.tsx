@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import {
   Carousel,
   CarouselContent,
@@ -57,7 +57,7 @@ const slides: Slide[] = [
   },
 ]
 
-export function KontrolProCarousel() {
+export const KhaosKontrolProCarousel = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
 
   return (

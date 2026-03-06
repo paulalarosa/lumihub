@@ -7,7 +7,7 @@
  * Supports zoomable images, copy URL, open in new tab, and download actions.
  */
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import {
   DownloadIcon,
   ExternalLinkIcon,

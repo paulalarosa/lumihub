@@ -7,7 +7,7 @@ import { MessageReasoning } from '@/components/infsh/agent/message-reasoning'
 import { ToolInvocation } from '@/components/infsh/agent/tool-invocation'
 import { cn } from '@/lib/utils'
 import { Bot, Sparkles, Shield, User, CornerDownLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/Button'
 import { Canvas } from './Canvas'
 
 export function KhaosAgent() {
