@@ -68,6 +68,7 @@ export default function HomePage() {
               src="/assets/hero-image-B5FCqZ87.png"
               alt="Hero Background"
               className="w-full h-full object-cover grayscale contrast-125"
+              fetchPriority="high"
             />
           </motion.div>
 
