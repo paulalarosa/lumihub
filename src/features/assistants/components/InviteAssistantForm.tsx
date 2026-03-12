@@ -36,7 +36,9 @@ export const InviteAssistantForm = () => {
         .eq('id', user.id)
         .maybeSingle()
 
-      const { data: created } = await (supabase.from('makeup_artists') as any)
+      // @ts-expect-error - Expected missing table typescript definition
+      const { data: created } = await supabase
+        .from('makeup_artists')
         .insert({
           user_id: user.id,
           business_name:
@@ -70,7 +72,9 @@ export const InviteAssistantForm = () => {
     try {
       const normalizedEmail = assistantEmail.trim().toLowerCase()
 
-      const { data: existing } = await (supabase.from('assistants') as any)
+      // @ts-expect-error - Expected missing table typescript definition
+      const { data: existing } = await supabase
+        .from('assistants')
         .select('id')
         .eq('email', normalizedEmail)
         .maybeSingle()
@@ -78,13 +82,15 @@ export const InviteAssistantForm = () => {
       let assistantId = existing?.id
 
       if (existing) {
-        await (supabase.from('assistants') as any)
+        // @ts-expect-error - Expected missing table typescript definition
+        await supabase
+          .from('assistants')
           .update({ full_name: assistantName, pin: assistantPin })
           .eq('id', existing.id)
       } else {
-        const { data: newAssistant, error: insertError } = await (
-          supabase.from('assistants') as any
-        )
+        // @ts-expect-error - Expected missing table typescript definition
+        const { data: newAssistant, error: insertError } = await supabase
+          .from('assistants')
           .insert({
             full_name: assistantName,
             email: normalizedEmail,
@@ -99,23 +105,24 @@ export const InviteAssistantForm = () => {
       }
 
       if (makeupArtistId && assistantId) {
-        const { data: existingAccess } = await (
-          supabase.from('assistant_access') as any
-        )
+        // @ts-expect-error - Expected missing table typescript definition
+        const { data: existingAccess } = await supabase
+          .from('assistant_access')
           .select('id')
           .eq('makeup_artist_id', makeupArtistId)
           .eq('assistant_id', assistantId)
           .maybeSingle()
 
         if (!existingAccess) {
-          const { error: accessError } = await (
-            supabase.from('assistant_access') as any
-          ).insert({
-            makeup_artist_id: makeupArtistId,
-            assistant_id: assistantId,
-            status: 'active',
-            granted_at: new Date().toISOString(),
-          })
+          // @ts-expect-error - Expected missing table typescript definition
+          const { error: accessError } = await supabase
+            .from('assistant_access')
+            .insert({
+              makeup_artist_id: makeupArtistId,
+              assistant_id: assistantId,
+              status: 'active',
+              granted_at: new Date().toISOString(),
+            })
 
           if (accessError) throw accessError
         }

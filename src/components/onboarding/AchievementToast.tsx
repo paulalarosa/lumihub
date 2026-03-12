@@ -5,6 +5,16 @@ import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 
+interface AchievementData {
+  id: string
+  achievement: {
+    icon: string
+    name: string
+    description: string
+    reward_message?: string
+  }
+}
+
 export const AchievementNotifications = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
@@ -47,7 +57,7 @@ export const AchievementNotifications = () => {
 
   useEffect(() => {
     if (newAchievements && newAchievements.length > 0) {
-      newAchievements.forEach((achievement: any) => {
+      newAchievements.forEach((achievement: AchievementData) => {
         // Confetti
         confetti({
           particleCount: 50,

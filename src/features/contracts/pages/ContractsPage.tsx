@@ -9,11 +9,11 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/Button'
 import { Plus, FileText, Download, Eye, Calendar, User } from 'lucide-react'
-import { ContractDialog } from '@/components/contracts/ContractDialog'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { ContractDialog } from '@/features/contracts/components/ContractDialog'
+// Remove unused import of format if possible, but keep other imports
 import { Badge } from '@/components/ui/badge'
 import { useLanguage } from '@/hooks/useLanguage'
+import { formatDate, DATE_FORMATS } from '@/lib/date-utils'
 
 export default function ContractsPage() {
   const { contracts, loading, fetchContracts } = useContracts()
@@ -106,9 +106,10 @@ export default function ContractsPage() {
                   <div className="text-[10px] text-white/30 font-mono uppercase tracking-widest flex items-center gap-2">
                     <Calendar className="w-3 h-3" />
                     CRIADO EM{' '}
-                    {format(new Date(contract.created_at), 'dd MMM yyyy', {
-                      locale: ptBR,
-                    }).toUpperCase()}
+                    {formatDate(
+                      contract.created_at,
+                      DATE_FORMATS.DISPLAY,
+                    ).toUpperCase()}
                   </div>
 
                   <div className="flex gap-3">

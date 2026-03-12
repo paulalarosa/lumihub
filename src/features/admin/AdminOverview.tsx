@@ -4,7 +4,7 @@ import { logger } from '@/services/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Terminal } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
-import { MetricCard } from '@/components/dashboard/MetricCard'
+import { MetricCard } from '@/features/dashboard/components/MetricCard'
 import { RevenueChart } from '@/components/ui/RevenueChart'
 
 export default function AdminOverview() {

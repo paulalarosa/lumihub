@@ -8,6 +8,7 @@ describe('Logger', () => {
 
   it('should call persistLog with info level', async () => {
     const persistSpy = vi
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .spyOn(Logger as any, 'persistLog')
       .mockImplementation(async () => {})
 
@@ -23,6 +24,7 @@ describe('Logger', () => {
 
   it('should call persistLog with error level and stack trace', async () => {
     const persistSpy = vi
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .spyOn(Logger as any, 'persistLog')
       .mockImplementation(async () => {})
     const error = new Error('Something went wrong')

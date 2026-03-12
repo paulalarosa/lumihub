@@ -8,7 +8,7 @@ import {
   ClientService,
   Client,
   TreatmentRecord,
-} from '@/services/clientService'
+} from '@/features/clients/api/clientService'
 import { ReportProject } from '@/types/service-types'
 
 export interface EventWithServices {

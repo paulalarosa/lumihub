@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { RecordDialog } from '@/components/clients/RecordDialog'
+import { RecordDialog } from '@/features/clients/components/RecordDialog'
 import { useClientDetails } from '../hooks/useClientDetails'
 import {
   ArrowLeft,

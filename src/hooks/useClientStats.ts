@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
-import { subDays, subMonths, startOfMonth, endOfMonth, format } from 'date-fns'
+import { subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns'
+import { formatDate } from '@/lib/date-utils'
 
 interface ClientStats {
   total: number
@@ -104,7 +105,7 @@ export function useClientGrowth() {
         if (error) throw error
 
         months.push({
-          month: format(monthDate, 'MMM'),
+          month: formatDate(monthDate, 'MMM'),
           count: count || 0,
         })
       }

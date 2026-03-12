@@ -109,7 +109,7 @@ export const OnboardingWizard = () => {
 
   // Mutation: Atualizar progresso
   const updateMutation = useMutation({
-    mutationFn: async (updates: any) => {
+    mutationFn: async (updates: Record<string, unknown>) => {
       const { error } = await supabase
         .from('user_onboarding')
         .update(updates)

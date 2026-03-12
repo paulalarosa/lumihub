@@ -12,8 +12,8 @@ export interface Widget {
     | 'stats_card'
     | 'events_table'
     | 'client_card'
-  data: any
-  props?: any
+  data: unknown
+  props?: unknown
 }
 
 export interface Message {
@@ -66,10 +66,7 @@ interface AIStore {
   isCanvasOpen: boolean
 
   // Actions
-  addMessage: (
-    conversationId: string,
-    message: Omit<Message, 'id' | 'timestamp'>,
-  ) => void
+  addMessage: (conversationId: string, message: Message) => void
   updateMessage: (
     conversationId: string,
     messageId: string,
@@ -79,9 +76,7 @@ interface AIStore {
   setCurrentConversation: (id: string) => void
   clearConversation: (id: string) => void
 
-  createCanvas: (
-    canvas: Omit<Canvas, 'id' | 'createdAt' | 'updatedAt'>,
-  ) => string
+  createCanvas: (canvas: Canvas) => string
   updateCanvas: (id: string, updates: Partial<Canvas>) => void
   setActiveCanvas: (id: string | null) => void
 
@@ -114,18 +109,12 @@ export const useAIStore = create<AIStore>()(
       isCanvasOpen: false,
 
       addMessage: (conversationId, message) => {
-        const newMessage: Message = {
-          ...message,
-          id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-        }
-
         set((state) => ({
           conversations: {
             ...state.conversations,
             [conversationId]: [
               ...(state.conversations[conversationId] || []),
-              newMessage,
+              message as Message,
             ],
           },
         }))
@@ -170,21 +159,13 @@ export const useAIStore = create<AIStore>()(
       },
 
       createCanvas: (canvas) => {
-        const id = crypto.randomUUID()
-        const newCanvas: Canvas = {
-          ...canvas,
-          id,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-
         set((state) => ({
-          canvases: [...state.canvases, newCanvas],
-          activeCanvasId: id,
+          canvases: [...state.canvases, canvas],
+          activeCanvasId: canvas.id,
           isCanvasOpen: true,
         }))
 
-        return id
+        return canvas.id
       },
 
       updateCanvas: (id, updates) => {

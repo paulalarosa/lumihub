@@ -38,9 +38,11 @@ export const PlanCheckout = ({ priceId }: PlanCheckoutProps) => {
       if (data?.error) throw new Error(data.error)
 
       return data.clientSecret
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating checkout session:', err)
-      setError(err.message || 'Erro ao iniciar o pagamento')
+      setError(
+        err instanceof Error ? err.message : 'Erro ao iniciar o pagamento',
+      )
       toast.error('Erro ao iniciar o checkout. Tente novamente.')
       return null
     }

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from '@/types/supabase'
+import type { Database } from './types'
 import { env } from '@/lib/env'
 
 const FALLBACK_URL = 'https://pymdkngcpbmcnayxieod.supabase.co'

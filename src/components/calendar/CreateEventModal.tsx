@@ -18,10 +18,11 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 interface CreateEventModalProps {
   isOpen: boolean
@@ -37,6 +38,7 @@ export const CreateEventModal = ({
   onSuccess,
 }: CreateEventModalProps) => {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -90,6 +92,9 @@ export const CreateEventModal = ({
     },
     onSuccess: () => {
       toast.success('Evento criado e sincronizado!')
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CALENDAR_EVENTS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
       onSuccess()
       onClose()
       resetForm()

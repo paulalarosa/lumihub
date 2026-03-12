@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ProjectTasks } from './ProjectTasks'
 import { ProjectBriefing } from './ProjectBriefing'
 import { ProjectFinancials } from './ProjectFinancials'
-import { ContratosTab } from '@/features/projects/sections/contratos'
+import { ContractsTab } from '@/features/projects/sections/contratos'
 
 import type {
   Task,
@@ -162,7 +162,7 @@ export const ProjectTabs = ({
       </TabsContent>
 
       <TabsContent value="contratos">
-        <ContratosTab
+        <ContractsTab
           projectId={projectId}
           contracts={contracts}
           setContracts={setContracts}

@@ -17,7 +17,7 @@ import { logger } from '@/services/logger'
 
 export default function AppLayout() {
   const { user } = useAuth()
-  const [_profile, setProfile] = useState<any>(null)
+  const [_profile, setProfile] = useState<Record<string, unknown> | null>(null)
   const [_loadingProfile, setLoadingProfile] = useState(true)
 
   useEffect(() => {

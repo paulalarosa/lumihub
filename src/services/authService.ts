@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import { Database } from '@/types/supabase'
+import { Database } from '@/integrations/supabase/types'
 import { AuthChangeEvent, Session } from '@supabase/supabase-js'
 
 export const AuthService = {
@@ -9,6 +9,28 @@ export const AuthService = {
 
   async getUser() {
     return await supabase.auth.getUser()
+  },
+
+  async signIn(email: string, pass: string) {
+    return await supabase.auth.signInWithPassword({ email, password: pass })
+  },
+
+  async signUp(email: string, pass: string) {
+    return await supabase.auth.signUp({ email, password: pass })
+  },
+
+  async signInWithOAuth(provider: 'google') {
+    return await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'https://www.googleapis.com/auth/calendar.events.readonly',
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      },
+    })
   },
 
   async signOut() {

@@ -101,6 +101,7 @@ export const Attachment = ({
   ...props
 }: AttachmentProps) => {
   const { variant } = useAttachmentsContext()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const mediaCategory = getMediaCategory(data as any)
 
   const contextValue = useMemo(
@@ -109,6 +110,7 @@ export const Attachment = ({
   )
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <AttachmentContext.Provider value={contextValue as any}>
       <div
         className={cn(

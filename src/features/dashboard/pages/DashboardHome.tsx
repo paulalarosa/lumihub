@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useAuth } from '@/hooks/useAuth'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { SummaryHeader } from '../components/SummaryHeader'
 import { Plus } from 'lucide-react'
@@ -7,14 +7,15 @@ import { Button } from '@/components/ui/Button'
 import SEOHead from '@/components/seo/SEOHead'
 
 export default function DashboardHome() {
-  const { _user } = useAuthStore()
+  const { user } = useAuth()
+  const { data, isLoading: loading } = useDashboardStats()
+
   const {
-    totalBudgets,
-    avgWeddingValue,
-    weddingsNext90Days,
-    leadsConversion,
-    loading,
-  } = useDashboardStats()
+    totalBudgets = 0,
+    avgWeddingValue = 0,
+    weddingsNext90Days = 0,
+    leadsConversion = { converted: 0, pending: 0, total: 0 },
+  } = data || {}
 
   // Empty State Check
   // If no clients and no budget, assume empty state (new account)

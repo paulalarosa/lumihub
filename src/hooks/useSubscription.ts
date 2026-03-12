@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from './useAuth'
 import { supabase, handleSupabaseError } from '@/integrations/supabase/client'
 import { differenceInDays, parseISO } from 'date-fns'
+import { handleError } from '@/lib/error-handling'
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'expired'
 export type PlanType = 'free' | 'pro' | 'empire' | 'studio'
@@ -83,9 +84,8 @@ export const useSubscription = () => {
           daysRemaining: status === 'trialing' ? daysRemaining : 0,
           isLoading: false,
         })
-      } catch (_error) {
-        // Default to safe state or retry?
-        // For now, let's assume trial to avoid blocking valid users on error
+      } catch (error) {
+        handleError(error, 'useSubscription')
         setState((prev) => ({ ...prev, isLoading: false }))
       }
     }

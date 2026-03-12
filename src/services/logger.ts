@@ -173,9 +173,14 @@ export class Logger {
    * In prod, sends to Supabase 'system_logs' with severity 'error'.
    * Tries to capture stack trace if errorObj is provided.
    */
-  static async error(arg1: any, arg2?: any, arg3?: any, arg4?: any) {
+  static async error(
+    arg1: unknown,
+    arg2?: unknown,
+    arg3?: unknown,
+    arg4?: unknown,
+  ) {
     let message = 'Unknown Error'
-    let errorObj: any = undefined
+    let errorObj: unknown = undefined
     let userId = 'SYSTEM'
     let metadata: LogMetadata = {}
 
@@ -186,19 +191,21 @@ export class Logger {
       if (typeof arg2 === 'string') {
         // logger.error(error, 'Message', ...)
         message = arg2
-        if (typeof arg3 === 'object') {
-          metadata = arg3
+        if (typeof arg3 === 'object' && arg3 !== null) {
+          metadata = arg3 as LogMetadata
           // userId defaults to SYSTEM
         } else if (typeof arg3 === 'string') {
           userId = arg3
-          metadata = arg4 || {}
+          metadata = (arg4 as LogMetadata) || {}
         }
-      } else if (typeof arg2 === 'object') {
+      } else if (typeof arg2 === 'object' && arg2 !== null) {
         // logger.error(error, { message: '...', ...meta })
+        const arg2Record = arg2 as Record<string, unknown>
         message =
-          arg2.message ||
-          (arg1 instanceof Error ? arg1.message : 'Unknown Error')
-        metadata = arg2
+          (typeof arg2Record.message === 'string'
+            ? arg2Record.message
+            : null) || (arg1 instanceof Error ? arg1.message : 'Unknown Error')
+        metadata = arg2Record as LogMetadata
         if (typeof arg3 === 'string') userId = arg3
       } else {
         message = arg1 instanceof Error ? arg1.message : 'Unknown Error'
@@ -209,11 +216,11 @@ export class Logger {
       errorObj = arg2
       if (typeof arg3 === 'string') {
         userId = arg3
-        metadata = arg4 || {}
-      } else if (typeof arg3 === 'object') {
+        metadata = (arg4 as LogMetadata) || {}
+      } else if (typeof arg3 === 'object' && arg3 !== null) {
         // logger.error('Msg', error, { meta })
         userId = 'SYSTEM'
-        metadata = arg3
+        metadata = arg3 as LogMetadata
       }
     }
 

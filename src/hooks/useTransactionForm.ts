@@ -1,21 +1,15 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { transactionSchema } from '@/lib/validators'
+import * as z from 'zod'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
-import { Logger } from '@/services/logger'
-import { logger } from '@/services/logger'
+import { Logger, logger } from '@/services/logger'
 
-export interface TransactionFormData {
-  description: string
-  amount: string
-  category: string
-  date: string
-  payment_method: string
-  project_id: string
-  service_id: string
-  assistant_id: string
-}
+export type TransactionFormData = z.infer<typeof transactionSchema>
 
 interface UseTransactionFormProps {
   open: boolean
@@ -31,16 +25,19 @@ export function useTransactionForm({
   onOpenChange,
 }: UseTransactionFormProps) {
   const { user } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [formData, setFormData] = useState<TransactionFormData>({
-    description: '',
-    amount: '',
-    category: '',
-    date: format(new Date(), 'yyyy-MM-dd'),
-    payment_method: 'pix',
-    project_id: '',
-    service_id: '',
-    assistant_id: '',
+
+  const form = useForm<TransactionFormData>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      description: '',
+      amount: '',
+      category: '',
+      date: format(new Date(), 'yyyy-MM-dd'),
+      payment_method: 'pix',
+      project_id: '',
+      service_id: '',
+      assistant_id: '',
+    },
   })
 
   const [projects, setProjects] = useState<{ id: string; name: string }[]>([])
@@ -54,6 +51,21 @@ export function useTransactionForm({
       fetchOptions()
     }
   }, [open, user])
+
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        description: '',
+        amount: '',
+        category: '',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        payment_method: 'pix',
+        project_id: '',
+        service_id: '',
+        assistant_id: '',
+      })
+    }
+  }, [open, form])
 
   const fetchOptions = async () => {
     try {
@@ -77,36 +89,23 @@ export function useTransactionForm({
   }
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, '')
-    value = (Number(value) / 100).toFixed(2) + ''
-    value = value.replace('.', ',')
-    value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
-    setFormData((prev) => ({ ...prev, amount: `R$ ${value}` }))
-  }
-
-  const handleChange = (field: keyof TransactionFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user) return
-
-    if (
-      !formData.description ||
-      !formData.amount ||
-      !formData.category ||
-      !formData.date
-    ) {
-      toast.error('Preencha todos os campos obrigatórios')
+    const value = e.target.value.replace(/\D/g, '')
+    if (!value) {
+      form.setValue('amount', '')
       return
     }
+    const numericValue = (Number(value) / 100).toFixed(2)
+    let formattedValue = numericValue.replace('.', ',')
+    formattedValue = formattedValue.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')
+    form.setValue('amount', `R$ ${formattedValue}`, { shouldValidate: true })
+  }
+
+  const onSubmit = async (data: TransactionFormData) => {
+    if (!user) return
 
     try {
-      setLoading(true)
-
       const amountValue = parseFloat(
-        formData.amount.replace('R$ ', '').replace('.', '').replace(',', '.'),
+        data.amount.replace('R$ ', '').replace(/\./g, '').replace(',', '.'),
       )
 
       const { data: transaction, error } = await supabase
@@ -114,21 +113,20 @@ export function useTransactionForm({
         .insert({
           user_id: user.id,
           type: type,
-          description: formData.description,
+          description: data.description,
           amount: amountValue,
-          category: formData.category,
-          date: formData.date,
-          payment_method: formData.payment_method,
-          project_id: formData.project_id || null,
-          service_id: formData.service_id || null,
-          assistant_id: formData.assistant_id || null,
+          category: data.category,
+          date: data.date,
+          payment_method: data.payment_method,
+          project_id: data.project_id || null,
+          service_id: data.service_id || null,
+          assistant_id: data.assistant_id || null,
         })
         .select()
         .single()
 
       if (error) throw error
 
-      // Audit the action
       if (transaction) {
         Logger.action(
           'FINANCIAL_TRANSACTION_CREATE',
@@ -147,32 +145,18 @@ export function useTransactionForm({
         `${type === 'income' ? 'Receita' : 'Despesa'} registrada com sucesso!`,
       )
       onOpenChange(false)
-      setFormData({
-        description: '',
-        amount: '',
-        category: '',
-        date: format(new Date(), 'yyyy-MM-dd'),
-        payment_method: 'pix',
-        project_id: '',
-        service_id: '',
-        assistant_id: '',
-      })
       onSuccess?.()
     } catch (error) {
       logger.error(error, {
         message: 'Erro ao salvar transação. Tente novamente.',
       })
-    } finally {
-      setLoading(false)
     }
   }
 
   return {
-    formData,
-    loading,
+    form,
     options: { projects, services, assistants },
     handleAmountChange,
-    handleChange,
-    handleSubmit,
+    onSubmit,
   }
 }

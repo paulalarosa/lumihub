@@ -1,14 +1,27 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { assistantSchema } from '@/lib/validators'
+import * as z from 'zod'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Assistant } from '../hooks/useAssistants'
+
+type AssistantFormData = z.infer<typeof assistantSchema>
 
 interface AssistantDialogProps {
   open: boolean
@@ -27,35 +40,43 @@ export function AssistantDialog({
   assistant,
   onSave,
 }: AssistantDialogProps) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
-  const [saving, setSaving] = useState(false)
+  const form = useForm<AssistantFormData>({
+    resolver: zodResolver(assistantSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '',
+    },
+  })
 
   useEffect(() => {
-    if (assistant) {
-      setName(assistant.name)
-      setEmail(assistant.email || '')
-      setPhone(assistant.phone || '')
-    } else {
-      setName('')
-      setEmail('')
-      setPhone('')
+    if (open) {
+      if (assistant) {
+        form.reset({
+          name: assistant.name,
+          email: assistant.email || '',
+          phone: assistant.phone || '',
+        })
+      } else {
+        form.reset({
+          name: '',
+          email: '',
+          phone: '',
+        })
+      }
     }
-  }, [assistant, open])
+  }, [assistant, open, form])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
+  const onSubmit = async (data: AssistantFormData) => {
     try {
       await onSave({
-        name,
-        email: email || null,
-        phone: phone || null,
+        name: data.name,
+        email: data.email || null,
+        phone: data.phone || null,
       })
       onOpenChange(false)
-    } finally {
-      setSaving(false)
+    } catch (error) {
+      // Error handling is usually handled by the parent's onSave or a toast
     }
   }
 
@@ -71,75 +92,97 @@ export function AssistantDialog({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          <div className="space-y-2">
-            <Label
-              htmlFor="name"
-              className="text-xs uppercase tracking-wider text-gray-400"
-            >
-              Nome *
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="NOME COMPLETO"
-              required
-              className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-6 mt-4"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs uppercase tracking-wider text-gray-400">
+                    Nome *
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="NOME COMPLETO"
+                      {...field}
+                      className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="email"
-              className="text-xs uppercase tracking-wider text-gray-400"
-            >
-              E-mail
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="EMAIL@EXEMPLO.COM"
-              className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs uppercase tracking-wider text-gray-400">
+                    E-mail
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="email"
+                      placeholder="EMAIL@EXEMPLO.COM"
+                      {...field}
+                      value={field.value || ''}
+                      className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label
-              htmlFor="phone"
-              className="text-xs uppercase tracking-wider text-gray-400"
-            >
-              Telefone
-            </Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="(00) 00000-0000"
-              className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-xs uppercase tracking-wider text-gray-400">
+                    Telefone
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="(00) 00000-0000"
+                      {...field}
+                      value={field.value || ''}
+                      className="bg-white/5 border-white/10 rounded-none text-white focus:border-white/50 focus:ring-0 placeholder:text-gray-700"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              className="rounded-none border-white/10 text-gray-400 hover:text-white hover:bg-white/5 hover:border-white/30 uppercase text-xs tracking-wider"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={saving}
-              className="rounded-none bg-white text-black hover:bg-gray-200 border-none uppercase text-xs tracking-wider font-semibold px-6"
-            >
-              {saving ? 'Salvando...' : assistant ? 'Salvar' : 'Cadastrar'}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="rounded-none border-white/10 text-gray-400 hover:text-white hover:bg-white/5 hover:border-white/30 uppercase text-xs tracking-wider"
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+                className="rounded-none bg-white text-black hover:bg-gray-200 border-none uppercase text-xs tracking-wider font-semibold px-6"
+              >
+                {form.formState.isSubmitting
+                  ? 'Salvando...'
+                  : assistant
+                    ? 'Salvar'
+                    : 'Cadastrar'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

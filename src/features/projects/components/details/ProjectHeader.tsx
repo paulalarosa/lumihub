@@ -10,7 +10,7 @@ import {
   Check,
   MessageCircle,
 } from 'lucide-react'
-import { GenerateContractButton } from '@/components/projects/GenerateContractButton'
+import { GenerateContractButton } from '@/features/projects/components/GenerateContractButton'
 import { format } from 'date-fns'
 
 interface ProjectHeaderProps {

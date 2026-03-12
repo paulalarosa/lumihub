@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
-import { Database } from '@/types/supabase'
+import { Database } from '@/integrations/supabase/types'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 interface UserIntegration {
@@ -17,7 +17,7 @@ interface UserIntegration {
   access_token: string | null
   refresh_token: string | null
   expires_at: string | null
-  metadata: any
+  metadata: Record<string, unknown> | null
 }
 
 interface NotificationSettings {
@@ -164,19 +164,19 @@ export function useIntegrations() {
 
     // Map to UserIntegration to be safe
     const mappedIntegrations: UserIntegration[] = (integrationsData || []).map(
-      (i: any) => ({
-        id: i.id,
-        provider: i.provider,
+      (i: Record<string, unknown>) => ({
+        id: i.id as string,
+        provider: i.provider as string,
         is_active: true, // Assuming active if present? Or use i.metadata field?
         sync_enabled: true,
-        last_sync_at: i.updated_at,
-        user_id: i.user_id,
-        created_at: i.created_at,
-        updated_at: i.updated_at,
-        access_token: i.access_token,
-        refresh_token: i.refresh_token,
-        expires_at: i.expires_at,
-        metadata: i.metadata,
+        last_sync_at: i.updated_at as string | null,
+        user_id: i.user_id as string,
+        created_at: i.created_at as string,
+        updated_at: i.updated_at as string,
+        access_token: i.access_token as string | null,
+        refresh_token: i.refresh_token as string | null,
+        expires_at: i.expires_at as string | null,
+        metadata: (i.metadata as Record<string, unknown>) || null,
       }),
     )
 
@@ -358,7 +358,7 @@ export function useIntegrations() {
         notify_event_cancel: notificationSettings.notify_event_cancel,
         notify_assistant_assigned:
           notificationSettings.notify_assistant_assigned,
-      } as any,
+      } as never,
       { onConflict: 'user_id' },
     ) // Cast payload due to strict checking of Insert type vs Omit return
 

@@ -3,7 +3,15 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { Float, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
-const FloatingShape = ({ position, color, speed }: any) => {
+const FloatingShape = ({
+  position,
+  color,
+  speed,
+}: {
+  position: [number, number, number]
+  color: string
+  speed: number
+}) => {
   const meshRef = useRef<THREE.Mesh>(null)
 
   useFrame((state) => {

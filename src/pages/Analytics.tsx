@@ -8,10 +8,10 @@ import {
   TrendingUp,
   BarChart3,
 } from 'lucide-react'
-import { MetricCard } from '@/components/dashboard/MetricCard'
-import { ClientGrowthChart } from '@/components/dashboard/ClientGrowthChart'
-import { ClientsByCompanyChart } from '@/components/dashboard/ClientsByCompanyChart'
-import { ClientStatusChart } from '@/components/dashboard/ClientStatusChart'
+import { MetricCard } from '@/features/dashboard/components/MetricCard'
+import { ClientGrowthChart } from '@/features/dashboard/components/ClientGrowthChart'
+import { ClientsByCompanyChart } from '@/features/dashboard/components/ClientsByCompanyChart'
+import { ClientStatusChart } from '@/features/dashboard/components/ClientStatusChart'
 import {
   useClientStats,
   useClientGrowth,

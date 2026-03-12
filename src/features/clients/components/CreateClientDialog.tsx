@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { logger } from '@/services/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { clientSchema } from '@/lib/validators'
 import * as z from 'zod'
 import { Button } from '@/components/ui/Button'
 import {
@@ -20,22 +21,19 @@ import { useAuth } from '@/hooks/useAuth'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
-const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  phone: z.string().min(10, { message: 'Phone number required.' }),
-})
+// Local formSchema removed in favor of centralized clientSchema
 
 export function CreateClientDialog() {
   const [open, setOpen] = useState(false)
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [contractUrl, setContractUrl] = useState<string | null>(null)
-  const { uploadFile, isUploading } = useContractUpload()
+  const [contractFile, setContractFile] = useState<File | null>(null)
+  const { uploadFile, deleteFile, isUploading } = useContractUpload()
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof clientSchema>>({
+    resolver: zodResolver(clientSchema),
     defaultValues: {
       name: '',
       email: '',
@@ -43,11 +41,26 @@ export function CreateClientDialog() {
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof clientSchema>) => {
     if (!user) return
 
+    let uploadedFilePath: string | null = null
+    let uploadedPublicUrl: string | null = null
+
     try {
-      // 1. Create Client
+      // 1. Upload File FIRST (if exists)
+      if (contractFile) {
+        const result = await uploadFile(contractFile)
+        if (!result) {
+          throw new Error(
+            'FAILED_TO_UPLOAD_CONTRACT: Could not upload file to storage.',
+          )
+        }
+        uploadedPublicUrl = result.publicUrl
+        uploadedFilePath = result.filePath
+      }
+
+      // 2. Create Client with URL
       const { data: _client, error } = await supabase
         .from('wedding_clients')
         .insert({
@@ -57,40 +70,34 @@ export function CreateClientDialog() {
           email: values.email,
           phone: values.phone,
           status: 'lead',
-          wedding_date: new Date().toISOString(), // Temporary default
-          contract_url: contractUrl,
+          wedding_date: new Date().toISOString(),
+          contract_url: uploadedPublicUrl,
         })
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        // CLEANUP: Delete file if DB insert fails
+        if (uploadedFilePath) {
+          await deleteFile(uploadedFilePath)
+        }
+        throw error
+      }
 
       toast.success('New client record created.')
 
-      // 2. Alert upload URL if exists (as requested)
-      if (contractUrl) {
-        // In a real scenario, we would update the client record here
-        // await supabase.from('wedding_clients').update({ contract_url: contractUrl }).eq('id', client.id);
-        alert(`CONTRACT UPLOADED SUCCESSFULLY!\nURL: ${contractUrl}`)
-      }
-
       setOpen(false)
       form.reset()
-      setContractUrl(null)
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      setContractFile(null)
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CLIENTS] })
     } catch (error) {
       logger.error(error, 'CreateClientDialog.onSubmit', { showToast: false })
       toast.error('Failed to create client record.')
     }
   }
 
-  const handleFileUpload = async (file: File) => {
-    // We pass the entered name as a prefix or just let the hook handle it
-    // Ideally we would have the client ID, but here we upload FIRST (or in parallel)
-    const url = await uploadFile(file)
-    if (url) {
-      setContractUrl(url)
-    }
+  const handleFileSelect = async (file: File) => {
+    setContractFile(file)
   }
 
   return (
@@ -180,7 +187,7 @@ export function CreateClientDialog() {
                 Contract Document (Optional)
               </Label>
               <FileUploader
-                onUpload={handleFileUpload}
+                onUpload={handleFileSelect}
                 isUploading={isUploading}
               />
             </div>

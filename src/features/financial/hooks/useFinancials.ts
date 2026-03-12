@@ -1,83 +1,84 @@
-
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { subMonths, format, parseISO } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/integrations/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
+import { subMonths } from 'date-fns'
+import { formatDate, toZonedTime } from '@/lib/date-utils'
+// format, parseISO, and ptBR removed
 
 export interface Transaction {
-    id: string;
-    type: 'income' | 'expense';
-    amount: number;
-    category: string;
-    description: string;
-    date: string;
-    payment_method: string;
-    created_at: string;
+  id: string
+  type: 'income' | 'expense'
+  amount: number
+  category: string
+  description: string
+  date: string
+  payment_method: string
+  created_at: string
 }
 
 export const useFinancials = () => {
-    const { user } = useAuth();
+  const { user } = useAuth()
 
-    const query = useQuery({
-        queryKey: ['financial-transactions', user?.id],
-        queryFn: async () => {
-            if (!user) return [];
+  const query = useQuery({
+    queryKey: ['financial-transactions', user?.id],
+    queryFn: async () => {
+      if (!user) return []
 
-            const { data, error } = await supabase
-                .from('transactions')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('date', { ascending: false });
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('date', { ascending: false })
 
-            if (error) throw error;
-            return data as Transaction[];
-        },
-        enabled: !!user
-    });
+      if (error) throw error
+      return data as Transaction[]
+    },
+    enabled: !!user,
+  })
 
-    const transactions = query.data || [];
+  const transactions = query.data || []
 
-    // Calculate Metrics
-    const income = transactions
-        .filter(t => t.type === 'income')
-        .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  // Calculate Metrics
+  const income = transactions
+    .filter((t) => t.type === 'income')
+    .reduce((acc, curr) => acc + Number(curr.amount), 0)
 
-    const expense = transactions
-        .filter(t => t.type === 'expense')
-        .reduce((acc, curr) => acc + Number(curr.amount), 0);
+  const expense = transactions
+    .filter((t) => t.type === 'expense')
+    .reduce((acc, curr) => acc + Number(curr.amount), 0)
 
-    const profit = income - expense;
+  const profit = income - expense
 
-    // Prepare Chart Data (Last 6 Months)
-    const chartData = Array.from({ length: 6 }, (_, i) => {
-        const d = subMonths(new Date(), i);
-        return {
-            month: format(d, 'MMM', { locale: ptBR }).toUpperCase(),
-            fullDate: d,
-            income: 0,
-            expense: 0
-        };
-    }).reverse();
-
-    transactions.forEach(tx => {
-        const txDate = parseISO(tx.date);
-        const monthEntry = chartData.find(m =>
-            txDate.getMonth() === m.fullDate.getMonth() &&
-            txDate.getFullYear() === m.fullDate.getFullYear()
-        );
-        if (monthEntry) {
-            if (tx.type === 'income') monthEntry.income += Number(tx.amount);
-            if (tx.type === 'expense') monthEntry.expense += Number(tx.amount);
-        }
-    });
-
+  // Prepare Chart Data (Last 6 Months)
+  const chartData = Array.from({ length: 6 }, (_, i) => {
+    const d = subMonths(toZonedTime(new Date()), i)
     return {
-        transactions,
-        metrics: { income, expense, profit },
-        chartData,
-        isLoading: query.isLoading,
-        error: query.error,
-        refetch: query.refetch
-    };
-};
+      month: formatDate(d, 'MMM').toUpperCase(),
+      fullDate: d,
+      income: 0,
+      expense: 0,
+    }
+  }).reverse()
+
+  transactions.forEach((tx) => {
+    const txDate = toZonedTime(tx.date)
+    const monthEntry = chartData.find(
+      (m) =>
+        txDate.getMonth() === m.fullDate.getMonth() &&
+        txDate.getFullYear() === m.fullDate.getFullYear(),
+    )
+    if (monthEntry) {
+      if (tx.type === 'income') monthEntry.income += Number(tx.amount)
+      if (tx.type === 'expense') monthEntry.expense += Number(tx.amount)
+    }
+  })
+
+  return {
+    transactions,
+    metrics: { income, expense, profit },
+    chartData,
+    isLoading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  }
+}

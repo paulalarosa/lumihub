@@ -29,17 +29,17 @@ interface PlaceSuggestion {
 interface GeoCacheTable {
   Row: {
     query: string
-    response: any
+    response: Record<string, unknown>
     expires_at: string
   }
   Insert: {
     query: string
-    response: any
+    response: Record<string, unknown>
     expires_at: string
   }
   Update: {
     query?: string
-    response?: any
+    response?: Record<string, unknown>
     expires_at?: string
   }
   Relationships: []
@@ -208,7 +208,10 @@ export function AddressAutocomplete({
         .maybeSingle()
 
       if (cached?.response) {
-        const location = cached.response.geometry.location
+        const responseData = cached.response as {
+          geometry: { location: { lat: number; lng: number } }
+        }
+        const location = responseData.geometry.location
         if (onCoordinatesChange) onCoordinatesChange(location.lat, location.lng)
         setCoords({ lat: location.lat, lng: location.lng })
         return

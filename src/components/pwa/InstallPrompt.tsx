@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/Button'
 import { X, Download } from 'lucide-react'
 
 export const InstallPrompt = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showPrompt, setShowPrompt] = useState(false)
 

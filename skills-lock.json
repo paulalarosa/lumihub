@@ -166,6 +166,11 @@
       "sourceType": "github",
       "computedHash": "4da6dbcdce380eba00ceed8868abe316d6c1a986642f9b0ba12f690eb8403318"
     },
+    "remotion-best-practices": {
+      "source": "remotion-dev/skills",
+      "sourceType": "github",
+      "computedHash": "9851afb52e1b892c43b2af973bda1776ce01fedfdfe704e0cfd70069a3a9c300"
+    },
     "scorecard-marketing": {
       "source": "wondelai/skills",
       "sourceType": "github",

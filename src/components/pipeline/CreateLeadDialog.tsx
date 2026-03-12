@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 interface CreateLeadDialogProps {
   isOpen: boolean
@@ -90,7 +91,9 @@ export const CreateLeadDialog = ({
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pipeline-leads'] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PIPELINE_LEADS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
       toast.success('Lead criado com sucesso!')
       reset()
       onClose()

@@ -1,3 +1,3 @@
-import { Database as SupabaseDatabase } from '@/types/supabase';
+import { Database as SupabaseDatabase } from '@/integrations/supabase/types'
 
-export type Database = SupabaseDatabase;
+export type Database = SupabaseDatabase

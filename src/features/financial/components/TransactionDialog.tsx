@@ -6,7 +6,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/Button'
-import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -15,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
 import { Loader2 } from 'lucide-react'
 import { useTransactionForm } from '@/hooks/useTransactionForm'
 
@@ -59,14 +66,12 @@ export default function TransactionDialog({
   type,
   onSuccess,
 }: TransactionDialogProps) {
-  const {
-    formData,
-    loading,
-    options,
-    handleAmountChange,
-    handleChange,
-    handleSubmit,
-  } = useTransactionForm({ open, type, onOpenChange, onSuccess })
+  const { form, options, handleAmountChange, onSubmit } = useTransactionForm({
+    open,
+    type,
+    onOpenChange,
+    onSuccess,
+  })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -80,163 +85,236 @@ export default function TransactionDialog({
           </p>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Descrição</Label>
-            <Input
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
-              placeholder="Ex: Corte de Cabelo"
-              className="bg-white/5 border-white/10 focus:border-white/50"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: Corte de Cabelo"
+                      {...field}
+                      className="bg-white/5 border-white/10 focus:border-white/50"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Valor</Label>
-              <Input
-                value={formData.amount}
-                onChange={handleAmountChange}
-                placeholder="R$ 0,00"
-                className="bg-white/5 border-white/10 focus:border-white/50 font-mono"
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Valor</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="R$ 0,00"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e)
+                          handleAmountChange(e)
+                        }}
+                        className="bg-white/5 border-white/10 focus:border-white/50 font-mono"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Data</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="date"
+                        {...field}
+                        className="bg-white/5 border-white/10 focus:border-white/50"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                  </FormItem>
+                )}
               />
             </div>
-            <div className="space-y-2">
-              <Label>Data</Label>
-              <Input
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleChange('date', e.target.value)}
-                className="bg-white/5 border-white/10 focus:border-white/50"
+
+            {type === 'income' && (
+              <div className="space-y-4 border-t border-white/10 pt-4 mt-2">
+                <FormField
+                  control={form.control}
+                  name="project_id"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Vincular a Projeto (Noiva)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || undefined}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                            <SelectValue placeholder="Selecione o Projeto" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                          {options.projects.map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="service_id"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Serviço Dedicado</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || undefined}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                            <SelectValue placeholder="Selecione o Serviço" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                          {options.services.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="assistant_id"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormLabel>Assistente Responsável (Opcional)</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || undefined}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                          {options.assistants.map((a) => (
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.full_name || 'Sem nome'}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Categoria</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                        {CATEGORIES[type].map((cat) => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            {cat.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="payment_method"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel>Método de Pagamento</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
+                          <SelectValue placeholder="Selecione" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
+                        {PAYMENT_METHODS.map((method) => (
+                          <SelectItem key={method.value} value={method.value}>
+                            {method.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                  </FormItem>
+                )}
               />
             </div>
-          </div>
 
-          {/* New Fields: Project, Service, Assistant */}
-          {type === 'income' && (
-            <div className="space-y-4 border-t border-white/10 pt-4 mt-2">
-              <div className="space-y-2">
-                <Label>Vincular a Projeto (Noiva)</Label>
-                <Select
-                  value={formData.project_id}
-                  onValueChange={(value) => handleChange('project_id', value)}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                    <SelectValue placeholder="Selecione o Projeto" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                    {options.projects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Serviço Dedicado</Label>
-                <Select
-                  value={formData.service_id}
-                  onValueChange={(value) => handleChange('service_id', value)}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                    <SelectValue placeholder="Selecione o Serviço" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                    {options.services.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Assistente Responsável (Opcional)</Label>
-                <Select
-                  value={formData.assistant_id}
-                  onValueChange={(value) => handleChange('assistant_id', value)}
-                >
-                  <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                    <SelectValue placeholder="Selecione" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                    {options.assistants.map((a) => (
-                      <SelectItem key={a.id} value={a.id}>
-                        {a.full_name || 'Sem nome'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Categoria</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => handleChange('category', value)}
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+                className="text-white/60 hover:text-white hover:bg-white/5"
               >
-                <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                  {CATEGORIES[type].map((cat) => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      {cat.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Método de Pagamento</Label>
-              <Select
-                value={formData.payment_method}
-                onValueChange={(value) => handleChange('payment_method', value)}
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={form.formState.isSubmitting}
+                className={`text-black ${
+                  type === 'income'
+                    ? 'bg-emerald-400 hover:bg-emerald-500'
+                    : 'bg-red-400 hover:bg-red-500'
+                }`}
               >
-                <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
-                  {PAYMENT_METHODS.map((method) => (
-                    <SelectItem key={method.value} value={method.value}>
-                      {method.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <DialogFooter className="pt-4">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              className="text-white/60 hover:text-white hover:bg-white/5"
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading}
-              className={`text-black ${
-                type === 'income'
-                  ? 'bg-emerald-400 hover:bg-emerald-500'
-                  : 'bg-red-400 hover:bg-red-500'
-              }`}
-            >
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Salvar {type === 'income' ? 'Receita' : 'Despesa'}
-            </Button>
-          </DialogFooter>
-        </form>
+                {form.formState.isSubmitting && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                Salvar {type === 'income' ? 'Receita' : 'Despesa'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   )

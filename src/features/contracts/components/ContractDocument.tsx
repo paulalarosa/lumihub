@@ -99,16 +99,10 @@ const styles = StyleSheet.create({
   },
 })
 
+import { Contract } from '../types'
+
 interface ContractDocumentProps {
-  contract: {
-    id: string
-    clientName: string
-    totalValue: number
-    eventDate: string
-    servicesList?: string[]
-    terms?: string
-    created_at?: string
-  }
+  contract: Contract
   businessName?: string
 }
 
@@ -167,58 +161,32 @@ export const ContractDocument = ({
         </Text>
         <Text style={styles.text}>
           <Text style={{ fontFamily: 'Helvetica-Bold' }}>CLIENT:</Text>{' '}
-          {contract.clientName}
+          {contract.clients?.name || 'Client'}
         </Text>
         <Text style={styles.text}>
-          <Text style={{ fontFamily: 'Helvetica-Bold' }}>EVENT DATE:</Text>{' '}
-          {contract.eventDate}
+          <Text style={{ fontFamily: 'Helvetica-Bold' }}>DATE:</Text>{' '}
+          {contract.created_at
+            ? new Date(contract.created_at).toLocaleDateString('pt-BR')
+            : '-'}
         </Text>
       </View>
 
       {/* Services Table */}
-      <Text style={styles.sectionTitle}>SERVICES & FEES</Text>
-      {contract.servicesList && contract.servicesList.length > 0 ? (
-        <View style={styles.table}>
-          {contract.servicesList.map((service, index) => (
-            <View style={styles.tableRow} key={index}>
-              <View style={{ ...styles.tableCol, width: '100%' }}>
-                <Text style={styles.tableCell}>{service}</Text>
-              </View>
-            </View>
-          ))}
-          <View style={styles.tableRow}>
-            <View
-              style={{
-                ...styles.tableCol,
-                width: '100%',
-                backgroundColor: '#f0f0f0',
-              }}
-            >
-              <Text
-                style={{ ...styles.tableCell, fontFamily: 'Helvetica-Bold' }}
-              >
-                TOTAL:{' '}
-                {new Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(contract.totalValue)}
-              </Text>
-            </View>
-          </View>
-        </View>
-      ) : (
+      <Text style={styles.sectionTitle}>TERMS & CONDITIONS</Text>
+      <View style={{ marginBottom: 20 }}>
         <Text style={styles.text}>
-          Total Agreed Value:{' '}
+          Value:{' '}
           {new Intl.NumberFormat('pt-BR', {
             style: 'currency',
             currency: 'BRL',
-          }).format(contract.totalValue)}
+          }).format(0)}{' '}
+          {/* Simplified for now as Contract doesn't have totalValue yet */}
         </Text>
-      )}
+      </View>
 
       {/* Clauses */}
-      <Text style={styles.sectionTitle}>TERMS AND CONDITIONS</Text>
-      <Text style={styles.text}>{contract.terms || DEFAULT_TERMS}</Text>
+      <Text style={styles.sectionTitle}>CLAUSES</Text>
+      <Text style={styles.text}>{contract.content || DEFAULT_TERMS}</Text>
 
       {/* Signatures */}
       <View style={styles.signatureSection}>
@@ -227,7 +195,9 @@ export const ContractDocument = ({
           <Text style={{ fontSize: 8, color: '#666' }}>Service Provider</Text>
         </View>
         <View style={styles.signatureBlock}>
-          <Text style={styles.signatureText}>{contract.clientName}</Text>
+          <Text style={styles.signatureText}>
+            {contract.clients?.name || 'Client'}
+          </Text>
           <Text style={{ fontSize: 8, color: '#666' }}>Client</Text>
         </View>
       </View>

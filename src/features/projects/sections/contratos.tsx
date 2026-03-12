@@ -30,7 +30,7 @@ import type {
   ProjectWithRelations,
   ProjectServiceItem,
 } from '@/types/api.types'
-import { useContratos } from '../hooks/useContratos'
+import { useContracts } from '../hooks/useContracts'
 
 interface ContratosTabProps {
   projectId: string
@@ -41,7 +41,7 @@ interface ContratosTabProps {
   totalValue: number
 }
 
-export function ContratosTab({
+export function ContractsTab({
   projectId,
   contracts,
   setContracts,
@@ -66,7 +66,7 @@ export function ContratosTab({
     shareOnWhatsApp,
     handleArchitectMode,
     handleEditorMode,
-  } = useContratos({
+  } = useContracts({
     projectId,
     project,
     projectServices,

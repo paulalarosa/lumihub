@@ -19,7 +19,8 @@ export const usePerformance = () => {
       const cores = navigator.hardwareConcurrency || 2
 
       // Check memory (low-end if < 4GB)
-      const memory = (navigator as any).deviceMemory || 4
+      const memory =
+        (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4
 
       setIsLowEnd(cores < 4 || memory < 4)
     }

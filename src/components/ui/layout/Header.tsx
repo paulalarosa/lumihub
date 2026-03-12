@@ -3,6 +3,8 @@ import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, Moon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useTheme } from '@/contexts/ThemeContext'
+import { useLanguage } from '@/hooks/useLanguage'
 
 const navLinks = [
   { label: 'Recursos', path: '/recursos' },
@@ -15,6 +17,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const { theme, setTheme } = useTheme()
+  const { language, setLanguage } = useLanguage()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
@@ -86,17 +90,42 @@ export default function Header() {
           <div className="flex items-center gap-6 border-l border-border/50 pl-6">
             {/* PT | EN Toggle */}
             <div className="flex items-center border border-border rounded-sm overflow-hidden text-xs font-medium tracking-widest uppercase">
-              <button className="px-3 py-1.5 bg-foreground text-background">
+              <button
+                onClick={() => setLanguage('pt')}
+                className={cn(
+                  'px-3 py-1.5 transition-colors',
+                  language === 'pt'
+                    ? 'bg-foreground text-background'
+                    : 'bg-transparent text-foreground hover:bg-foreground/10',
+                )}
+              >
                 PT
               </button>
-              <button className="px-3 py-1.5 bg-transparent text-foreground hover:bg-foreground/10 transition-colors">
+              <button
+                onClick={() => setLanguage('en')}
+                className={cn(
+                  'px-3 py-1.5 transition-colors',
+                  language === 'en'
+                    ? 'bg-foreground text-background'
+                    : 'bg-transparent text-foreground hover:bg-foreground/10',
+                )}
+              >
                 EN
               </button>
             </div>
 
             {/* Dark Mode Toggle */}
-            <button className="text-foreground hover:text-muted-foreground transition-colors">
-              <Moon className="w-4 h-4" />
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="text-foreground hover:text-muted-foreground transition-colors p-2 rounded-full hover:bg-foreground/5"
+            >
+              {theme === 'dark' ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <div className="w-4 h-4 rounded-full border-2 border-foreground relative">
+                  <div className="absolute inset-0 bg-foreground/20 rounded-full" />
+                </div>
+              )}
             </button>
 
             {/* ACESSO KONTROL Button */}

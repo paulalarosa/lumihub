@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { formatDate } from '@/lib/date-utils'
+// format and ptBR removed (handled by formatDate)
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -37,11 +37,7 @@ export function NoirDatePicker({
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? (
-            format(date, 'PPP', { locale: ptBR })
-          ) : (
-            <span>{placeholder}</span>
-          )}
+          {date ? formatDate(date, 'PPP') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent
@@ -53,7 +49,6 @@ export function NoirDatePicker({
           selected={date}
           onSelect={setDate}
           initialFocus
-          locale={ptBR}
           className="p-3 pointer-events-auto bg-[#050505] text-white rounded-none font-mono"
           classNames={{
             caption: 'flex justify-center pt-1 relative items-center',

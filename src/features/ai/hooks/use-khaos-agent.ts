@@ -50,9 +50,8 @@ export function useKhaosAgent() {
         'x-ai-model': byokSettings.modelName,
       }),
     },
-    // @ts-expect-error dynamic type mismatch
     model: mode === 'local' ? localModel : undefined,
-    onFinish: ({ message }: { message: any }) => {
+    onFinish: ({ message }: { message: { content: string } }) => {
       // Artifact detection logic - looking for <artifact title="...">...</artifact>
       const artifactMatch = message.content.match(
         /<artifact\s+title="([^"]+)"(?:\s+type="([^"]+)")?>([\s\S]*?)<\/artifact>/i,
@@ -60,20 +59,24 @@ export function useKhaosAgent() {
       if (artifactMatch) {
         setArtifact({
           title: artifactMatch[1],
-          type: (artifactMatch[2] as any) || 'document',
+          type: (artifactMatch[2] as 'document' | 'code') || 'document',
           content: artifactMatch[3].trim(),
           isOpen: true,
         })
       }
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any) as any
 
   // 3. Map Vercel Messages to Inference UI DTOs
   const chatMessages = useMemo((): ChatMessageDTO[] => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (chatHelpers.messages || []).map((m: any) => {
       // Extract reasoning if available (Vercel AI SDK 3.x parts)
       const reasoning =
-        m.parts?.find((p: any) => p.type === 'reasoning')?.reasoning ||
+        (m.parts as Record<string, unknown>[])?.find(
+          (p) => p.type === 'reasoning',
+        )?.reasoning ||
         m.reasoning || // Backup for older versions or custom implementation
         null
 
@@ -89,19 +92,20 @@ export function useKhaosAgent() {
               .trim(),
           },
         ],
-        // @ts-expect-error - Adding custom field for reasoning component
         reasoning: reasoning,
         status: ChatMessageStatusReady,
         created_at: m.createdAt?.toISOString() || new Date().toISOString(),
-        tool_invocations: m.toolInvocations?.map((ti: any) => ({
-          id: ti.toolCallId,
-          status: ti.state,
-          function: {
-            name: ti.toolName,
-            arguments: ti.args,
-          },
-          result: ti.result,
-        })),
+        tool_invocations: (m.toolInvocations as Record<string, unknown>[])?.map(
+          (ti) => ({
+            id: ti.toolCallId as string,
+            status: ti.state as string,
+            function: {
+              name: ti.toolName as string,
+              arguments: ti.args as string,
+            },
+            result: ti.result,
+          }),
+        ),
       }
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps

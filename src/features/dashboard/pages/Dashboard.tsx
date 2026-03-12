@@ -9,7 +9,7 @@ import {
   Sparkles,
   CheckCircle2,
 } from 'lucide-react'
-import { AssistantsPanelCard } from '@/components/dashboard/AssistantsPanelCard'
+import { AssistantsPanelCard } from '@/features/dashboard/components/AssistantsPanelCard'
 import { motion } from 'framer-motion'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'

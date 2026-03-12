@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAIStore } from '@/stores/useAIStore'
+import { useCanvasActions } from '@/features/ai/hooks/useCanvasActions'
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
@@ -17,23 +17,19 @@ import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { toast } from 'sonner'
-import { supabase } from '@/integrations/supabase/client'
-import DOMPurify from 'dompurify'
-
+import { SafeHTML } from '@/components/ui/SafeHTML'
 export const CanvasPanel = () => {
   const {
-    canvases,
+    activeCanvas,
     activeCanvasId,
     isCanvasOpen,
+    isSaving,
     updateCanvas,
     setActiveCanvas,
-  } = useAIStore()
-
-  const activeCanvas = canvases.find((c) => c.id === activeCanvasId)
+  } = useCanvasActions()
 
   const [content, setContent] = useState(activeCanvas?.content || '')
   const [title, setTitle] = useState(activeCanvas?.title || 'Novo Documento')
-  const [isSaving, setIsSaving] = useState(false)
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('preview')
 
   useEffect(() => {
@@ -44,42 +40,8 @@ export const CanvasPanel = () => {
   }, [activeCanvas])
 
   const handleSave = async () => {
-    if (!activeCanvasId) return
-
-    setIsSaving(true)
-
-    // Atualizar no store
-    updateCanvas(activeCanvasId, {
-      content,
-      title,
-    })
-
-    // Salvar no Supabase
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        const { error } = await supabase.from('ai_documents').upsert({
-          id: activeCanvasId,
-          user_id: user.id,
-          title,
-          content,
-          type: activeCanvas?.type || 'markdown',
-          updated_at: new Date().toISOString(),
-        })
-
-        if (error) throw error
-      }
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Erro desconhecido'
-      toast.error('Erro ao sincronizar com nuvem: ' + message)
-    } finally {
-      setIsSaving(false)
-      toast.success('Documento salvo!')
-    }
+    if (!activeCanvasId || !activeCanvas) return
+    updateCanvas(activeCanvasId, { content, title })
   }
 
   const _handleDownload = () => {
@@ -233,11 +195,7 @@ export const CanvasPanel = () => {
           <div className="h-full overflow-y-auto p-8 bg-zinc-50 modern-scroll">
             <div className="max-w-3xl mx-auto prose prose-zinc prose-sm">
               {activeCanvas.type === 'html' ? (
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(content),
-                  }}
-                />
+                <SafeHTML html={content} />
               ) : (
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {content}

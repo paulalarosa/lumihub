@@ -21,10 +21,12 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/Button'
 import { Textarea } from '@/components/ui/textarea'
 
+import { PipelineLead } from '@/pages/SalesPipeline'
+
 interface LeadDetailsDialogProps {
   isOpen: boolean
   onClose: () => void
-  lead: any
+  lead: PipelineLead | null
 }
 
 export const LeadDetailsDialog = ({

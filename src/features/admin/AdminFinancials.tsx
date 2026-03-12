@@ -30,7 +30,7 @@ export default function AdminFinancials({
   loading,
 }: AdminFinancialsProps) {
   const { toast } = useToast()
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<Record<string, unknown>[]>([])
   const [commissions, setCommissions] = useState<AssistantCommission[]>([])
   const [dataLoading, setDataLoading] = useState(true)
 
@@ -83,17 +83,24 @@ export default function AdminFinancials({
     const commissionMap = new Map<string, AssistantCommission>()
 
     eventsData.forEach((event) => {
-      const totalCommission = Number(event.assistant_commission) || 0
-      const assistants = event.event_assistants || []
+      const eventObj = event as Record<string, unknown>
+      const totalCommission = Number(eventObj.assistant_commission) || 0
+      const assistants =
+        (eventObj.event_assistants as Record<string, unknown>[]) || []
 
       if (assistants.length > 0 && totalCommission > 0) {
         // Split commission equally among assistants for now
         // In a real scenario, we might have individual commission fields per assistant
         const splitCommission = totalCommission / assistants.length
 
-        assistants.forEach((ea) => {
-          const assistantName = ea.assistants?.name || 'Desconhecido'
-          const assistantId = ea.assistant_id
+        assistants.forEach((_ea) => {
+          const ea = _ea as Record<string, unknown>
+          const assistantsRecord = ea.assistants as
+            | Record<string, unknown>
+            | undefined
+          const assistantName =
+            (assistantsRecord?.name as string) || 'Desconhecido'
+          const assistantId = ea.assistant_id as string
 
           if (!commissionMap.has(assistantId)) {
             commissionMap.set(assistantId, {

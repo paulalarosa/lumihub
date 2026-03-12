@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { QUERY_KEYS } from '@/constants/queryKeys'
 
 export const useDeleteClient = () => {
   const queryClient = useQueryClient()
@@ -9,7 +10,6 @@ export const useDeleteClient = () => {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      // Using 'wedding_clients' as confirmed in previous steps
       const { error } = await supabase
         .from('wedding_clients')
         .delete()
@@ -18,8 +18,9 @@ export const useDeleteClient = () => {
       if (error) throw error
     },
     onSuccess: () => {
-      // Invalidate to refetch list
-      queryClient.invalidateQueries({ queryKey: ['clients'] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CLIENTS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
 
       toast({
         title: 'CLIENTE REMOVIDO',

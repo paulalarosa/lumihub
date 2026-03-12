@@ -46,7 +46,7 @@ export const CheckoutReturn = () => {
           setStatus('error')
           setMessage('Pagamento não confirmado. Tente novamente.')
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Verification error:', err)
         setStatus('error')
         setMessage(

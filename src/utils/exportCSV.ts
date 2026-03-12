@@ -1,4 +1,4 @@
-import { format } from 'date-fns'
+import { formatDate } from '@/lib/date-utils'
 import { logger } from '@/services/logger'
 
 interface ExportColumn<T> {
@@ -11,7 +11,7 @@ const formatValue = (value: unknown): string => {
   if (value === null || value === undefined) return ''
 
   if (value instanceof Date) {
-    return format(value, 'dd/MM/yyyy')
+    return formatDate(value, 'dd/MM/yyyy')
   }
 
   if (typeof value === 'string') {
@@ -19,9 +19,9 @@ const formatValue = (value: unknown): string => {
     const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/
     if (isoDateRegex.test(value)) {
       try {
-        return format(new Date(value), 'dd/MM/yyyy')
+        return formatDate(value as string, 'dd/MM/yyyy')
       } catch {
-        return value
+        return value as string
       }
     }
     // Escape quotes and wrap in quotes if contains comma
@@ -83,7 +83,7 @@ export function exportToCSV<T extends Record<string, unknown>>(
     const link = document.createElement('a')
 
     // Generate filename with date
-    const dateStr = format(new Date(), 'yyyy-MM-dd')
+    const dateStr = formatDate(new Date(), 'yyyy-MM-dd')
     const finalFilename = filename.includes('.csv')
       ? filename
       : `${filename}_${dateStr}.csv`

@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 
-const articleData: Record<string, any> = {
+const articleData: Record<string, Record<string, string>> = {
   'vencer-na-carreira-maker': {
     title: 'A Ciência do Sucesso na Carreira de Makeup Artist',
     author: 'KHAOS KONTROL Editorial',

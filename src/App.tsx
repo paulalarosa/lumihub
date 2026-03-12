@@ -41,8 +41,8 @@ const CanvasPanel = lazy(() =>
 const Index = lazy(() => import('./pages/HomePage'))
 const Login = lazy(() => import('@/features/auth/pages/Login'))
 const Register = lazy(() => import('@/features/auth/pages/Register'))
-const Recursos = lazy(() => import('./pages/Recursos'))
-const Planos = lazy(() => import('./pages/PlanosPage'))
+const Resources = lazy(() => import('./pages/Resources'))
+const Plans = lazy(() => import('./pages/Plans'))
 const Blog = lazy(() => import('./pages/Blog'))
 const BlogArticle = lazy(() => import('./pages/BlogArticle'))
 const ForgotPassword = lazy(
@@ -65,56 +65,70 @@ const FinancialPage = lazy(
   () => import('@/features/financial/pages/FinancialPage'),
 )
 const AdminDashboard = lazy(() => import('@/features/admin/AdminDashboard'))
-const Clientes = lazy(() => import('@/features/clients/pages/ClientsPage'))
-const ClienteDetalhes = lazy(
+const Clients = lazy(() => import('@/features/clients/pages/ClientsPage'))
+const ClientDetails = lazy(
   () => import('@/features/clients/pages/ClientDetailsPage'),
 )
-const Projetos = lazy(() => import('@/features/projects/pages/ProjectsPage'))
-const ProjetoDetalhes = lazy(
+const Projects = lazy(() => import('@/features/projects/pages/ProjectsPage'))
+const ProjectDetails = lazy(
   () => import('@/features/projects/pages/ProjectDetailsPage'),
 )
-const Configuracoes = lazy(() => import('./pages/Configuracoes'))
-const Contato = lazy(() => import('./pages/Contato'))
-const Privacidade = lazy(() => import('./pages/Privacidade'))
-const Termos = lazy(() => import('./pages/Termos'))
+const Settings = lazy(() => import('./pages/Settings'))
+const Contact = lazy(() => import('./pages/Contact'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const Terms = lazy(() => import('./pages/Terms'))
 const AssistantsPage = lazy(
   () => import('@/features/assistants/pages/AssistantsPage'),
 )
-const Servicos = lazy(() => import('./pages/Servicos'))
+const Services = lazy(() => import('./pages/Services'))
 const Marketing = lazy(() => import('./pages/Marketing'))
-const Contratos = lazy(() => import('./pages/Contratos'))
-const ProjectContract = lazy(() => import('./pages/ProjectContract'))
+const Contracts = lazy(() => import('@/features/contracts/pages/Contracts'))
+const ProjectContract = lazy(
+  () => import('@/features/contracts/pages/ProjectContract'),
+)
 const NotFound = lazy(() => import('./pages/NotFound'))
-const PublicBooking = lazy(() => import('./pages/PublicBooking'))
+const PublicBooking = lazy(
+  () => import('@/features/public-booking/pages/PublicBooking'),
+)
 const Analytics = lazy(() => import('./pages/Analytics'))
 const AcceptInvitePage = lazy(
-  () => import('@/pages/assistant/AcceptInvitePage'),
+  () => import('@/features/assistant-portal/pages/AcceptInvitePage'),
 )
 const AssistantDashboard = lazy(
-  () => import('@/pages/assistant/AssistantDashboard'),
+  () => import('@/features/assistant-portal/pages/AssistantDashboard'),
 )
 const AssistantLayout = lazy(
   () => import('@/components/ui/layout/AssistantLayout'),
 )
-const UpgradePage = lazy(() => import('@/pages/assistant/UpgradePage'))
+const UpgradePage = lazy(
+  () => import('@/features/assistant-portal/pages/UpgradePage'),
+)
 const UpgradeSuccessPage = lazy(
-  () => import('@/pages/assistant/UpgradeSuccessPage'),
+  () => import('@/features/assistant-portal/pages/UpgradeSuccessPage'),
 )
 const UpgradeFailurePage = lazy(
-  () => import('@/pages/assistant/UpgradeFailurePage'),
+  () => import('@/features/assistant-portal/pages/UpgradeFailurePage'),
 )
 const UpgradePendingPage = lazy(
-  () => import('@/pages/assistant/UpgradePendingPage'),
+  () => import('@/features/assistant-portal/pages/UpgradePendingPage'),
 )
-const CalendarPage = lazy(() => import('@/pages/CalendarPage'))
+const CalendarPage = lazy(
+  () => import('@/features/calendar/pages/CalendarPage'),
+)
 const GoogleCalendarCallback = lazy(
   () => import('@/pages/GoogleCalendarCallback'),
 )
-const SignContract = lazy(() => import('@/pages/SignContract'))
+const SignContract = lazy(
+  () => import('@/features/contracts/pages/SignContract'),
+)
 const LeaveReview = lazy(() => import('@/pages/LeaveReview'))
-const Microsite = lazy(() => import('@/pages/Microsite'))
-const MicrositeEditor = lazy(() => import('@/pages/MicrositeEditor'))
-const SalesPipeline = lazy(() => import('./pages/SalesPipeline'))
+const Microsite = lazy(() => import('@/features/microsite/pages/Microsite'))
+const MicrositeEditor = lazy(
+  () => import('@/features/microsite/pages/MicrositeEditor'),
+)
+const SalesPipeline = lazy(
+  () => import('@/features/pipeline/pages/SalesPipeline'),
+)
 const IntegrationsPage = lazy(() => import('./pages/Integrations'))
 const AssistantQuickLogin = lazy(
   () => import('@/features/assistant-portal/pages/AssistantQuickLogin'),
@@ -167,13 +181,13 @@ const App = () => {
                       {/* Public Marketing Pages */}
                       <Route path="/" element={<Index />} />
                       <Route element={<MarketingLayout />}>
-                        <Route path="/recursos" element={<Recursos />} />
-                        <Route path="/planos" element={<Planos />} />
+                        <Route path="/recursos" element={<Resources />} />
+                        <Route path="/planos" element={<Plans />} />
                         <Route path="/blog" element={<Blog />} />
                         <Route path="/blog/:slug" element={<BlogArticle />} />
-                        <Route path="/contato" element={<Contato />} />
-                        <Route path="/privacidade" element={<Privacidade />} />
-                        <Route path="/termos" element={<Termos />} />
+                        <Route path="/contato" element={<Contact />} />
+                        <Route path="/privacidade" element={<Privacy />} />
+                        <Route path="/termos" element={<Terms />} />
                       </Route>
 
                       {/* Auth */}
@@ -267,7 +281,7 @@ const App = () => {
                           path="/clientes"
                           element={
                             <ProtectedRoute>
-                              <Clientes />
+                              <Clients />
                             </ProtectedRoute>
                           }
                         />
@@ -275,7 +289,7 @@ const App = () => {
                           path="/clientes/:id"
                           element={
                             <ProtectedRoute>
-                              <ClienteDetalhes />
+                              <ClientDetails />
                             </ProtectedRoute>
                           }
                         />
@@ -284,7 +298,7 @@ const App = () => {
                           element={
                             <ProtectedRoute>
                               <CustomErrorBoundary>
-                                <Projetos />
+                                <Projects />
                               </CustomErrorBoundary>
                             </ProtectedRoute>
                           }
@@ -293,7 +307,7 @@ const App = () => {
                           path="/projetos/novo"
                           element={
                             <ProtectedRoute>
-                              <Projetos />
+                              <Projects />
                             </ProtectedRoute>
                           }
                         />
@@ -301,7 +315,7 @@ const App = () => {
                           path="/projetos/:id"
                           element={
                             <ProtectedRoute>
-                              <ProjetoDetalhes />
+                              <ProjectDetails />
                             </ProtectedRoute>
                           }
                         />
@@ -317,7 +331,7 @@ const App = () => {
                           path="/configuracoes"
                           element={
                             <ProtectedRoute>
-                              <Configuracoes />
+                              <Settings />
                             </ProtectedRoute>
                           }
                         />
@@ -333,7 +347,7 @@ const App = () => {
                           path="/servicos"
                           element={
                             <ProtectedRoute>
-                              <Servicos />
+                              <Services />
                             </ProtectedRoute>
                           }
                         />
@@ -357,7 +371,7 @@ const App = () => {
                           path="/contratos"
                           element={
                             <ProtectedRoute>
-                              <Contratos />
+                              <Contracts />
                             </ProtectedRoute>
                           }
                         />

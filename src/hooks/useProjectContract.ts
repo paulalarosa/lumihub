@@ -5,7 +5,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
 import html2pdf from 'html2pdf.js'
-import type { Tables } from '@/types/supabase'
+import type { Tables } from '@/integrations/supabase/types'
 import type { Editor } from '@tiptap/react'
 
 interface ProjectData {

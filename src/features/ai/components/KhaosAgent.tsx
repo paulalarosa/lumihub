@@ -5,6 +5,7 @@ import { MessageBubble } from '@/components/infsh/agent/message-bubble'
 import { MessageContent } from '@/components/infsh/agent/message-content'
 import { MessageReasoning } from '@/components/infsh/agent/message-reasoning'
 import { ToolInvocation } from '@/components/infsh/agent/tool-invocation'
+import type { ChatMessageDTO } from '@inferencesh/sdk'
 import { cn } from '@/lib/utils'
 import { Bot, Sparkles, Shield, User, CornerDownLeft } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -136,7 +137,7 @@ export function KhaosAgent() {
               </div>
             )}
 
-            {messages.map((m: any) => (
+            {messages.map((m: ChatMessageDTO & { reasoning?: string }) => (
               <MessageBubble key={m.id} message={m} className="max-w-full">
                 <div className="flex gap-4 w-full group">
                   <div className="shrink-0 mt-1">
@@ -173,9 +174,15 @@ export function KhaosAgent() {
                     {/* Tool Invocations - Serialized widgets */}
                     {m.tool_invocations && m.tool_invocations.length > 0 && (
                       <div className="space-y-3 pt-2">
-                        {m.tool_invocations.map((ti: any) => (
-                          <ToolInvocation key={ti.id} invocation={ti as any} />
-                        ))}
+                        {m.tool_invocations.map((ti) => {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          return (
+                            <ToolInvocation
+                              key={ti.id}
+                              invocation={ti as any}
+                            />
+                          )
+                        })}
                       </div>
                     )}
                   </div>
@@ -183,18 +190,24 @@ export function KhaosAgent() {
               </MessageBubble>
             ))}
 
-            {isGenerating && !messages[messages.length - 1]?.reasoning && (
-              <div className="flex items-center gap-3 opacity-30 px-12">
-                <div className="flex gap-1">
-                  <div className="h-1 w-1 bg-white animate-bounce [animation-delay:-0.3s]" />
-                  <div className="h-1 w-1 bg-white animate-bounce [animation-delay:-0.15s]" />
-                  <div className="h-1 w-1 bg-white animate-bounce" />
+            {isGenerating &&
+              !(
+                messages[messages.length - 1] as unknown as Record<
+                  string,
+                  unknown
+                >
+              )?.reasoning && (
+                <div className="flex items-center gap-3 opacity-30 px-12">
+                  <div className="flex gap-1">
+                    <div className="h-1 w-1 bg-white animate-bounce [animation-delay:-0.3s]" />
+                    <div className="h-1 w-1 bg-white animate-bounce [animation-delay:-0.15s]" />
+                    <div className="h-1 w-1 bg-white animate-bounce" />
+                  </div>
+                  <span className="text-[9px] font-mono uppercase tracking-[0.2em]">
+                    Neural Processing
+                  </span>
                 </div>
-                <span className="text-[9px] font-mono uppercase tracking-[0.2em]">
-                  Neural Processing
-                </span>
-              </div>
-            )}
+              )}
           </div>
         </ChatContainer>
 
@@ -208,7 +221,11 @@ export function KhaosAgent() {
             <div className="relative flex flex-col bg-zinc-900/50 border border-white/10 rounded-none focus-within:border-white/30 transition-all duration-300">
               <textarea
                 value={input}
-                onChange={(e) => handleInputChange(e as any)}
+                onChange={(e) =>
+                  handleInputChange(
+                    e as unknown as React.ChangeEvent<HTMLTextAreaElement>,
+                  )
+                }
                 placeholder="Digite seu comando..."
                 className="w-full bg-transparent border-none focus:ring-0 text-[13px] font-sans text-white placeholder:text-zinc-600 resize-none min-h-[50px] max-h-[200px] p-4 custom-scrollbar"
                 onKeyDown={(e) => {

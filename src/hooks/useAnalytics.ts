@@ -7,6 +7,7 @@ import {
 } from '@/services/analytics.service'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
+import { useOrganization } from './useOrganization'
 
 // Hook para tracking automático de page views e tempo na página
 export function usePageTracking() {
@@ -73,6 +74,8 @@ export function useScrollTracking() {
 
 // Hook principal para tracking de eventos
 export function useAnalytics() {
+  const { organizationId } = useOrganization()
+
   const trackEvent = useCallback((event: AnalyticsEvent) => {
     analyticsService.trackEvent(event)
   }, [])
@@ -138,6 +141,8 @@ export function useAnalytics() {
 
   const fetchDashboardStats = useCallback(async () => {
     try {
+      if (!organizationId) return null
+
       // 1. Get stored events (Local)
       const storedEvents = analyticsService.getStoredEvents()
 
@@ -145,10 +150,12 @@ export function useAnalytics() {
       const { data: clients, count: clientsCount } = await supabase
         .from('wedding_clients')
         .select('created_at, last_visit', { count: 'exact' })
+        .eq('user_id', organizationId)
 
       const { data: eventsData } = await supabase
         .from('events')
         .select('total_value, start_time, created_at')
+        .eq('user_id', organizationId)
         .not('total_value', 'is', null)
 
       const totalRevenue =

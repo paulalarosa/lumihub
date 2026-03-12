@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { bookingSchema } from '@/lib/validators'
 import * as z from 'zod'
 import { Calendar } from '@/components/ui/calendar'
 import { Button } from '@/components/ui/Button'
@@ -24,13 +25,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { ptBR } from 'date-fns/locale'
 
-const bookingSchema = z.object({
-  name: z.string().min(2, 'Nome é obrigatório'),
-  email: z.string().email('Email inválido'),
-  phone: z.string().min(10, 'Telefone inválido'),
-  date: z.date({ required_error: 'Data é obrigatória' }),
-  service_type: z.string().min(1, 'Selecione um serviço'),
-})
+// Local bookingSchema removed in favor of centralized schema
 
 interface PublicBookingFormProps {
   micrositeId: string
@@ -54,12 +49,13 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
     try {
       // 1. Get the owner of the microsite
       const { data, error: micrositeError } = await supabase
-        .from('microsites' as any)
+        // @ts-expect-error - Expected missing table typescript definition
+        .from('microsites')
         .select('user_id, business_name')
         .eq('id', micrositeId)
         .single()
 
-      const microsite = data as any
+      const microsite = data as unknown as Record<string, unknown>
 
       if (micrositeError) throw micrositeError
 
@@ -68,7 +64,10 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       // For now, we'll insert into 'leads' if it exists, or just log/toast for the prototype.
       // Assuming 'leads' table exists based on useLeads hook presence.
 
-      const { error: leadError } = await supabase.from('leads' as any).insert({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error: leadError } = await (
+        (supabase as any).from('leads') as any
+      ).insert({
         user_id: microsite.user_id,
         name: values.name,
         email: values.email,

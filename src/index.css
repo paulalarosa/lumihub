@@ -1194,7 +1194,7 @@ a:focus:not(:focus-visible) {
 
 /* --- Visual Overhaul v2.9 Globals --- */
 
-button:not(.no-round):not(.hero-btn):not(.rounded-none):not([class*="rounded-none"]) {
+button:not(.no-round):not(.rounded-none):not([class*="rounded-none"]) {
   border-radius: 9999px !important;
 }
 

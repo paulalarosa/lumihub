@@ -1,84 +1,52 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, UseMutationOptions } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { useToast } from '@/hooks/use-toast'
+import { Database } from '@/integrations/supabase/types'
 
-type Operation = 'insert' | 'update' | 'delete' | 'upsert'
+type TableName = keyof Database['public']['Tables']
+type Operation = 'insert' | 'update' | 'upsert' | 'delete'
 
-interface MutationOptions {
-  table: string
+interface SupabaseMutationParams<T extends TableName> {
+  table: T
   operation: Operation
-  invalidateKeys?: string[][]
-  successMessage?: string
-  errorMessage?: string
-  onSuccess?: () => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  options?: Omit<UseMutationOptions<any, Error, any, unknown>, 'mutationFn'>
 }
 
-export function useSupabaseMutation<T extends Record<string, unknown>>({
+/**
+ * Universal wrapper for Supabase PostgREST mutations.
+ * Centralizes duplicate data-fetching chains into a single TanStack hook.
+ *
+ * @example
+ * const { mutate: createClient } = useSupabaseMutation({
+ *    table: 'wedding_clients',
+ *    operation: 'insert'
+ * });
+ *
+ * createClient({ name: 'John Doe', status: 'lead' });
+ */
+export function useSupabaseMutation<T extends TableName>({
   table,
   operation,
-  invalidateKeys,
-  successMessage,
-  errorMessage,
-  onSuccess: onSuccessCallback,
-}: MutationOptions) {
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
-
-  const operationLabels: Record<Operation, string> = {
-    insert: 'Criado',
-    update: 'Atualizado',
-    delete: 'Removido',
-    upsert: 'Salvo',
-  }
-
+  options,
+}: SupabaseMutationParams<T>) {
   return useMutation({
-    mutationFn: async (data: T & { id?: string }) => {
-      const query = (supabase as any).from(table)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    mutationFn: async (payload: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const query = (supabase.from(table as any) as any)[operation](payload)
 
-      switch (operation) {
-        case 'insert': {
-          const { error } = await (query as any).insert(data)
-          if (error) throw error
-          break
-        }
-        case 'update': {
-          if (!data.id) throw new Error('ID obrigatório para update')
-          const { id, ...rest } = data
-          const { error } = await (query as any).update(rest).eq('id', id)
-          if (error) throw error
-          break
-        }
-        case 'delete': {
-          if (!data.id) throw new Error('ID obrigatório para delete')
-          const { error } = await (query as any).delete().eq('id', data.id)
-          if (error) throw error
-          break
-        }
-        case 'upsert': {
-          const { error } = await (query as any).upsert(data)
-          if (error) throw error
-          break
-        }
+      // PostgREST "delete" operations do not typically return data without an explicit select and eq chain,
+      // handled uniquely per component. This abstracts insert/update/upserts.
+      if (operation !== 'delete') {
+        const { data, error } = await query.select().single()
+        if (error) throw error
+        return data
+      } else {
+        const { data, error } = await query
+        if (error) throw error
+        return data
       }
     },
-    onSuccess: () => {
-      const keysToInvalidate = invalidateKeys || [[table]]
-      keysToInvalidate.forEach((key) => {
-        queryClient.invalidateQueries({ queryKey: key })
-      })
-
-      toast({
-        title: successMessage || `${operationLabels[operation]} com sucesso!`,
-      })
-
-      onSuccessCallback?.()
-    },
-    onError: (error: Error) => {
-      toast({
-        title: errorMessage || 'Erro',
-        description: error.message,
-        variant: 'destructive',
-      })
-    },
+    ...options,
   })
 }

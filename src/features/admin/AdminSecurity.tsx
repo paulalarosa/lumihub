@@ -28,7 +28,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 
 export default function AdminSecurity() {
   const { t } = useLanguage()
-  const [logs, setLogs] = useState<any[]>([])
+  const [logs, setLogs] = useState<Record<string, unknown>[]>([])
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [backupLoading, setBackupLoading] = useState(false)
   const [integrityStatus, _setIntegrityStatus] = useState<'secure' | 'risk'>(
@@ -161,7 +161,7 @@ export default function AdminSecurity() {
                 ) : (
                   logs.map((log) => (
                     <div
-                      key={log.id}
+                      key={String(log.id)}
                       className="p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
                     >
                       <div className="flex items-center gap-3">
@@ -170,11 +170,11 @@ export default function AdminSecurity() {
                         </div>
                         <div>
                           <p className="text-white text-sm font-medium">
-                            {log.action}
+                            {String(log.action)}
                           </p>
                           <p className="text-gray-500 text-[10px] font-mono">
                             {log.user_id
-                              ? log.user_id.substring(0, 8)
+                              ? String(log.user_id).substring(0, 8)
                               : 'SYSTEM'}
                           </p>
                         </div>
@@ -182,9 +182,13 @@ export default function AdminSecurity() {
                       <div className="text-right">
                         <span className="text-gray-500 text-[10px] font-mono block">
                           {log.created_at
-                            ? format(new Date(log.created_at), 'HH:mm', {
-                                locale: ptBR,
-                              })
+                            ? format(
+                                new Date(String(log.created_at)),
+                                'HH:mm',
+                                {
+                                  locale: ptBR,
+                                },
+                              )
                             : '-'}
                         </span>
                         <Badge

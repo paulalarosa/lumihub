@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
-import { format, parseISO } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { formatDate } from '@/lib/date-utils'
+// format, parseISO, and ptBR removed
 import { Transaction } from '../hooks/useFinancials'
 import { EmptyState } from '@/components/ui/empty-state'
 import { FileSearch } from 'lucide-react'
@@ -48,11 +48,7 @@ export function TransactionList({ transactions }: TransactionListProps) {
                       {tx.description}
                     </p>
                     <div className="flex items-center gap-2 text-[10px] text-white/40 font-mono uppercase">
-                      <span>
-                        {format(parseISO(tx.date), 'dd MMM yyyy', {
-                          locale: ptBR,
-                        })}
-                      </span>
+                      <span>{formatDate(tx.date, 'dd MMM yyyy')}</span>
                       <span>//</span>
                       <span className="capitalize">{tx.category}</span>
                     </div>

@@ -31,8 +31,8 @@ export const useAdminUsers = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'profiles' },
-        (payload: any) => {
-          logger.info('Real-time event on profiles:', payload)
+        (payload: Record<string, unknown>) => {
+          console.log('Real-time event on profiles:', payload)
           queryClient.invalidateQueries({ queryKey: ['admin-users'] })
         },
       )

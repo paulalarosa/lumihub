@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
-import { format, addMinutes, isBefore, startOfDay, parse } from 'date-fns'
+import { addMinutes, isBefore, startOfDay, parse } from 'date-fns'
+import { formatDate, toZonedTime } from '@/lib/date-utils'
+// format removed
 import { Profile, Service, TimeSlot } from '../types'
-import { Database } from '@/types/supabase'
+import { Database } from '@/integrations/supabase/types'
 import { SupabaseClient } from '@supabase/supabase-js'
 
 type LocalDatabase = Database & {
@@ -118,7 +120,7 @@ export const usePublicBooking = (
 
     setLoadingSlots(true)
     try {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd')
+      const dateStr = formatDate(selectedDate, 'yyyy-MM-dd')
       const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
 
       const { data: eventsData, error } = await typedSupabase.rpc(
@@ -167,8 +169,8 @@ export const usePublicBooking = (
           }
 
           if (
-            isBefore(selectedDate, startOfDay(new Date())) &&
-            isBefore(slotStart, new Date())
+            isBefore(selectedDate, startOfDay(toZonedTime(new Date()))) &&
+            isBefore(slotStart, toZonedTime(new Date()))
           ) {
             isBlocked = true
           }
@@ -199,7 +201,7 @@ export const usePublicBooking = (
       if (!profile || !selectedService || !selectedDate || !selectedTime)
         throw new Error('Missing data')
 
-      const dateStr = format(selectedDate, 'yyyy-MM-dd')
+      const dateStr = formatDate(selectedDate, 'yyyy-MM-dd')
       let clientId = null
 
       try {

@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { User, Session } from '@supabase/supabase-js'
 import { Logger } from '@/services/logger'
+import { handleError } from '@/lib/error-handling'
 
 import { AuthContext } from '@/contexts/AuthContextDefinition'
 
@@ -34,8 +35,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Default to professional to be safe if column is null
       const safeData = data as { role?: string }
       return safeData?.role || 'professional'
-    } catch (_err) {
-      // console.error("Auth: Crash fetching role", err);
+    } catch (err) {
+      handleError(err, 'AuthContext:fetchRole')
       return 'professional'
     }
   }
@@ -169,7 +170,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         handleSession(session)
       })
-      .catch((_err) => {
+      .catch((err) => {
+        handleError(err, 'AuthContext:getSession')
         signOut()
       })
 

@@ -112,8 +112,9 @@ export const PostScheduler = () => {
         setHashtags(data.hashtags.slice(0, 30))
         toast.success('Hashtags geradas!')
       }
-    } catch (error: any) {
-      toast.error('Erro ao gerar hashtags: ' + error.message)
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Desconhecido'
+      toast.error('Erro ao gerar hashtags: ' + msg)
     } finally {
       setIsGeneratingHashtags(false)
     }
