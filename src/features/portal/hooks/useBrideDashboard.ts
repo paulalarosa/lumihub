@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { differenceInDays } from 'date-fns/differenceInDays'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import type {
   Project,
@@ -51,15 +51,11 @@ export type { ServiceItem, BrideData, Event as BrideEvent, BrideProject }
 export function useBrideDashboard() {
   const { clientId } = useParams()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
 
   const [isSigOpen, setIsSigOpen] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null,
   )
-
-  const storedAuth = localStorage.getItem(`bride_auth_${clientId}`)
-  const storedPin = storedAuth ? JSON.parse(storedAuth).pin : null
 
   const {
     data: dashboardData,
