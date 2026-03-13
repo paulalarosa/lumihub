@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { logger } from '@/services/logger'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Terminal, RefreshCw, FileDown } from 'lucide-react'
 import { format } from 'date-fns'

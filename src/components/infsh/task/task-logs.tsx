@@ -22,7 +22,7 @@ import {
   TaskLogTypeSetup,
   TaskLogTypeTask,
 } from '@inferencesh/sdk'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   Tooltip,
   TooltipContent,

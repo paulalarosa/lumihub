@@ -4,7 +4,7 @@ import { logger } from '@/services/logger'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { clientSchema } from '@/lib/validators'
 import * as z from 'zod'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,

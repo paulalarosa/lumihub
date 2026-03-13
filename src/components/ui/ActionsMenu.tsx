@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { MoreHorizontal, Copy, FileText, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 

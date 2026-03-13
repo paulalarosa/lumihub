@@ -3,7 +3,7 @@
 import type { LanguageModelUsage } from 'ai'
 import type { ComponentProps } from 'react'
 
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   HoverCard,
   HoverCardContent,

@@ -7,7 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Plus, Trash2, Mail, User } from 'lucide-react'
 
 export const AssistantsTable = () => {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Sparkles, Zap, Rocket } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import SEOHead from '@/components/seo/SEOHead'
 import { SectionHeader } from '@/components/ui/SectionHeader'

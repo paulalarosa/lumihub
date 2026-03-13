@@ -2,7 +2,7 @@
 
 import type { ComponentProps, HTMLAttributes, ReactNode } from 'react'
 
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   HoverCard,
   HoverCardContent,

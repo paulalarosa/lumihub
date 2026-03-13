@@ -8,7 +8,7 @@ import { ToolInvocation } from '@/components/infsh/agent/tool-invocation'
 import type { ChatMessageDTO } from '@inferencesh/sdk'
 import { cn } from '@/lib/utils'
 import { Bot, Sparkles, Shield, User, CornerDownLeft } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Canvas } from './Canvas'
 
 export function KhaosAgent() {
@@ -175,7 +175,6 @@ export function KhaosAgent() {
                     {m.tool_invocations && m.tool_invocations.length > 0 && (
                       <div className="space-y-3 pt-2">
                         {m.tool_invocations.map((ti) => {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           return (
                             <ToolInvocation
                               key={ti.id}

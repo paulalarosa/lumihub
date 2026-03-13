@@ -1,7 +1,7 @@
 import { Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useRole } from '@/hooks/useRole'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { LogOut, User } from 'lucide-react'
 import { PageLoader } from '@/components/ui/LoadingStates'
 

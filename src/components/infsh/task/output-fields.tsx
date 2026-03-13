@@ -12,7 +12,7 @@
 
 import { memo, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { ChevronDownIcon, ChevronRightIcon, Copy, Check } from 'lucide-react'

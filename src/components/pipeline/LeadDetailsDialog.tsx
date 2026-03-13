@@ -18,7 +18,7 @@ import {
 } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
 import { PipelineLead } from '@/pages/SalesPipeline'

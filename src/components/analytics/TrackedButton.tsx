@@ -1,5 +1,5 @@
 import { forwardRef, MouseEvent } from 'react'
-import { Button, ButtonProps } from '@/components/ui/Button'
+import { Button, ButtonProps } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
 interface TrackedButtonProps extends ButtonProps {

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { bookingSchema } from '@/lib/validators'
 import * as z from 'zod'
 import { Calendar } from '@/components/ui/calendar'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Form,

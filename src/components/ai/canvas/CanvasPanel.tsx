@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useCanvasActions } from '@/features/ai/hooks/useCanvasActions'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import {

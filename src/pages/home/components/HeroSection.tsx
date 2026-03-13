@@ -2,7 +2,7 @@ import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { TypewriterText } from './TypewriterText'
 
 export const HeroSection = () => {

@@ -5,7 +5,7 @@ import { Bot, X, Settings, CornerDownLeft } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { AISettingsModal } from './settings/AISettingsModal'
 
 export const ModernAIChat = ({

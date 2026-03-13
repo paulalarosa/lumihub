@@ -16,7 +16,7 @@ import {
   CircleDashed,
 } from 'lucide-react'
 import { Spinner } from '@/components/ui/spinner'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   ToolInvocationStatusPending,
   ToolInvocationStatusInProgress,

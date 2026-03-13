@@ -2,7 +2,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar } from '@/components/ui/calendar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { User, Mail, Plus, Minus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

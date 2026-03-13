@@ -5,7 +5,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar'
 import { Check, RefreshCw, X } from 'lucide-react'
 

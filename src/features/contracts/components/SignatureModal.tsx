@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Eraser, CheckCircle2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

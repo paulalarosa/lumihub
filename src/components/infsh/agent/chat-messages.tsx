@@ -1,7 +1,7 @@
 import React, { memo, useState, useLayoutEffect, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { useAutoScroll } from '@/hooks/use-auto-scroll'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { ArrowDown } from 'lucide-react'
 import { useAgentChat, type ChatMessageDTO } from '@inferencesh/sdk/agent'
 

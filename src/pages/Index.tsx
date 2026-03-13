@@ -9,7 +9,7 @@ import {
   Shield,
   Sparkles,
 } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 import SEOHead from '@/components/seo/SEOHead'

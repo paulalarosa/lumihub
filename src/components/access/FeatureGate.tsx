@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { usePlanAccess } from '@/hooks/usePlanAccess'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Lock, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 

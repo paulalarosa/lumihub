@@ -1,5 +1,5 @@
 import { Sparkles, ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface UpgradeBannerProps {
   professionalName: string

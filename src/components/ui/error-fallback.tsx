@@ -1,6 +1,6 @@
 import React from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface ErrorFallbackProps {
   error: Error | null

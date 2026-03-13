@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { FileText, Download } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { ContractTemplate } from '@/features/contracts/components/ContractTemplate'

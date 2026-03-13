@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import { logger } from '@/services/logger'
 import { Bot } from 'lucide-react'
 
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   Inference,
   ChatMessageStatusReady,

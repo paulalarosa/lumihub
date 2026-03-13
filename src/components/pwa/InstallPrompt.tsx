@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { X, Download } from 'lucide-react'
 
 export const InstallPrompt = () => {

@@ -1,5 +1,5 @@
 import { User, Mail, Phone, FileText, ExternalLink } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface ClientCardProps {
   client: {

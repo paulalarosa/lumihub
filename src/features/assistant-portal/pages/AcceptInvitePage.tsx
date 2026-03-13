@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { PageLoader } from '@/components/ui/LoadingStates'
 
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
 import { getErrorMessage } from '@/utils/error-handler'
 

@@ -2,7 +2,7 @@ import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
 import { LogOut, CheckCircle2, CalendarDays } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { DigitalSignature } from '../components/DigitalSignature'

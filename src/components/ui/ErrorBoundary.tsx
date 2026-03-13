@@ -1,6 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import { Logger } from '@/services/logger'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { FileWarning, RefreshCw, Terminal } from 'lucide-react'
 
 interface Props {

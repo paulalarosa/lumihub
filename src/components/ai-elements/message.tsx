@@ -3,8 +3,8 @@
 import type { UIMessage } from 'ai'
 import type { ComponentProps, HTMLAttributes, ReactElement } from 'react'
 
-import { Button } from '@/components/ui/Button'
-import { ButtonGroup, ButtonGroupText } from '@/components/ui/Button-group'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup, ButtonGroupText } from '@/components/ui/button-group'
 import {
   Tooltip,
   TooltipContent,

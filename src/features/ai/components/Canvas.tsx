@@ -8,7 +8,7 @@ import {
   FileText,
   Code,
 } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
 

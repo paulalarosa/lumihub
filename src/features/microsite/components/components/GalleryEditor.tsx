@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { CardLoader } from '@/components/ui/LoadingStates'
 
 import { Upload, Trash2, Image } from 'lucide-react'

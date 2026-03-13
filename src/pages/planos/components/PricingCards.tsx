@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, Sparkles, Zap, Rocket } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 const plans = [
   {

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Clock, Loader2 } from 'lucide-react'
 
 export default function UpgradePendingPage() {

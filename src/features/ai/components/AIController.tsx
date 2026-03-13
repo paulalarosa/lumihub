@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import AIAssistantFAB from './AIAssistantFAB'
 import { KhaosAgent } from '@/features/ai/components/KhaosAgent'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Bot } from 'lucide-react'
 
 export default function AIController() {

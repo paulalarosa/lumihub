@@ -1,6 +1,6 @@
 import { Lock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 interface FeatureLockedCardProps {
   title: string

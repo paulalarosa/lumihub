@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { AlertTriangle, RefreshCcw, Home } from 'lucide-react'
 import { logger } from '@/services/logger'
 

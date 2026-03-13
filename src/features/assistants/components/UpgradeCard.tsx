@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom' // Add navigation if needed

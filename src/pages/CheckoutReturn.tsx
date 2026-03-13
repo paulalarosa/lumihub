@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import {
   Card,

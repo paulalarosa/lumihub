@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import ServiceDialog from '@/components/services/ServiceDialog'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, Search, Edit2, Trash2, Clock, Terminal } from 'lucide-react'
 import { useServices } from '@/hooks/useServices'

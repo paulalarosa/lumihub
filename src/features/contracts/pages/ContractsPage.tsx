@@ -7,7 +7,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Plus, FileText, Download, Eye, Calendar, User } from 'lucide-react'
 import { ContractDialog } from '@/features/contracts/components/ContractDialog'
 // Remove unused import of format if possible, but keep other imports

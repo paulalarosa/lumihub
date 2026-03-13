@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useInviteLanding } from '@/hooks/useInviteLanding'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import SEOHead from '@/components/seo/SEOHead'
 import { Input } from '@/components/ui/input'
 import { Loader2, AlertCircle, ShieldCheck, UserPlus } from 'lucide-react'

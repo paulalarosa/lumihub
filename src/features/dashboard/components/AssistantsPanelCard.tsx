@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Users, Plus, Copy, Check, ArrowRight } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'

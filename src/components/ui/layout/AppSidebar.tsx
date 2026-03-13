@@ -27,7 +27,7 @@ import {
 import { useAuth } from '@/hooks/useAuth'
 import { Link, useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 
 export function AppSidebar() {

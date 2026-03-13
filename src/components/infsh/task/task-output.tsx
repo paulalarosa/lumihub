@@ -18,7 +18,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
 import { CircleAlert, XCircle, Copy, Check } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { StatusPill } from './task-status'
 import { TaskLogs, SimpleLogs } from './task-logs'
 import { OutputFields } from './output-fields'

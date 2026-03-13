@@ -1,9 +1,9 @@
 import Header from '@/components/ui/layout/Header'
 import Footer from '@/components/ui/layout/Footer'
-import { HeroSection } from './home/components/HeroSection'
-import { KeyNumbersSection } from './home/components/KeyNumbersSection'
-import { ProcessSection } from './home/components/ProcessSection'
-import { CTASection } from './home/components/CTASection'
+import { HeroSection } from '@/pages/home/components/HeroSection'
+import { KeyNumbersSection } from '@/pages/home/components/KeyNumbersSection'
+import { ProcessSection } from '@/pages/home/components/ProcessSection'
+import { CTASection } from '@/pages/home/components/CTASection'
 
 export default function HomePage() {
   return (

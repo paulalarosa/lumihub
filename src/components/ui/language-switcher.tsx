@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 import { cn } from '@/lib/utils'
 

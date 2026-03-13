@@ -4,7 +4,7 @@ import { subMonths } from 'date-fns/subMonths'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 
 interface CalendarHeaderProps {

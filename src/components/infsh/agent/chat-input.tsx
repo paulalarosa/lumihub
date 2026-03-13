@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import {
   ArrowUp,
   Square,

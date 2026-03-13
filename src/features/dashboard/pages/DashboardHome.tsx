@@ -3,7 +3,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats'
 import { SummaryHeader } from '../components/SummaryHeader'
 import { Plus } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import SEOHead from '@/components/seo/SEOHead'
 
 export default function DashboardHome() {
