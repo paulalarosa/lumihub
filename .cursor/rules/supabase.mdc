@@ -1,0 +1,60 @@
+---
+description: Rules for working with Supabase queries, migrations, and Edge Functions
+globs: ["src/**/*.ts", "src/**/*.tsx", "supabase/**/*"]
+---
+
+## Supabase Rules
+
+### Before Writing Any Query
+1. Open `src/integrations/supabase/types.ts` and verify the column exists.
+2. Never assume columns — the schema is the source of truth.
+3. After any schema change, run `npm run type-gen` to regenerate types.
+
+### Client
+```ts
+import { supabase } from '@/integrations/supabase/client'
+```
+
+### Query Pattern (always via React Query)
+```ts
+const { data, isLoading, error } = useQuery({
+  queryKey: ['resource', id],
+  queryFn: async () => {
+    const { data, error } = await supabase.from('table').select('*').eq('id', id).single()
+    if (error) throw error
+    return data
+  },
+  enabled: !!id,
+})
+```
+
+### Mutation Pattern
+```ts
+const mutation = useMutation({
+  mutationFn: async (payload) => {
+    const { data, error } = await supabase.from('table').insert(payload).select().single()
+    if (error) throw error
+    return data
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ['resource'] })
+    toast.success('...')
+  },
+  onError: (error: Error) => {
+    logger.error(error, { message: '...', showToast: true })
+  },
+})
+```
+
+### RLS
+- All user-data tables have Row Level Security enabled.
+- Never use the service role key on the frontend.
+
+### Edge Functions
+- Located in `supabase/functions/` — one directory per function.
+- Runtime: Deno (TypeScript).
+- Invoke from frontend: `supabase.functions.invoke('function-name', { body: {...} })`
+
+### Environments
+- Dev: `npm run db:push:dev` (project ref `nqufpfpqtycxxqtnkkfh`)
+- Prod: `npm run db:push:prod` (project ref `pymdkngcpbmcnayxieod`)

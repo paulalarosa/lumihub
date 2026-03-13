@@ -1,0 +1,55 @@
+---
+description: Core project rules for Lumihub / Khaos Kontrol
+alwaysApply: true
+---
+
+# Lumihub / Khaos Kontrol
+
+High-end CRM/ERP for the wedding industry. React SPA + Supabase backend. "Industrial Noir" aesthetic.
+
+## Stack
+- React 18 + TypeScript (strict) + Vite
+- Tailwind CSS + Shadcn/Radix UI
+- TanStack Query v5 (server state) + Zustand (client state)
+- Supabase (PostgreSQL + Auth + Storage + Edge Functions)
+- Zod + React Hook Form (validation)
+- Sentry + custom `logger` service (observability)
+
+## Package Manager
+**npm only.** Never suggest yarn, pnpm, or bun — `preinstall` enforces this.
+
+## Path Alias
+`@/` → `src/`. Always use this alias for internal imports.
+
+## TypeScript
+- No `any`. Define explicit interfaces for all data shapes.
+- Check `src/integrations/supabase/types.ts` before writing Supabase queries — never assume columns exist.
+- Regenerate types after schema changes: `npm run type-gen`
+
+## Data Fetching
+- **Always use TanStack Query** (`useQuery`/`useMutation`) for Supabase data.
+- Never use `useEffect` to fetch data.
+- QueryClient config: 5 min stale time, no refetch on window focus.
+
+## Error Handling
+- Use `logger` service (`src/services/logger.ts`) — not `console.error`. It integrates with Sentry.
+- All async functions require `try/catch` with toast feedback via `sonner`.
+- Critical actions (delete, financial updates) must write to `system_logs` or `audit_logs` tables.
+- Gate debug-only UI behind `import.meta.env.DEV`.
+
+## Components
+- All data-driven components require Loading (skeleton), Error, and Empty states.
+- All pages use `React.lazy()` + `<Suspense>` for code splitting.
+- `console.log` / `debugger` are stripped in production builds automatically.
+
+## Commands
+```
+npm run dev          # Dev server (port 8080)
+npm run build        # tsc + vite build
+npm run lint         # ESLint
+npm test             # Vitest (jsdom)
+npm run test:e2e     # Playwright
+npm run type-gen     # Regenerate Supabase types
+npm run db:push:dev  # Push migrations → dev
+npm run db:push:prod # Push migrations → prod
+```

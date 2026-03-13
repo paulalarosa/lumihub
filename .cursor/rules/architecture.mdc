@@ -1,0 +1,60 @@
+---
+description: Directory structure and feature module architecture
+alwaysApply: true
+---
+
+## Directory Structure
+
+```
+src/
+  features/       # Domain-driven modules — main business logic lives here
+  components/     # Shared components (UI atoms, layouts, AI elements)
+  hooks/          # Shared hooks
+  stores/         # Zustand stores (UI/client state only)
+  lib/            # queryClient, i18n, sentry, env, utils
+  integrations/supabase/  # client.ts + generated types.ts
+  contexts/       # React contexts (Auth, AI, Language, Analytics)
+  services/       # Business services (stripe, logger, analytics, etc.)
+  pages/          # Public/marketing pages (thin wrappers)
+  types/          # Shared TypeScript interfaces
+supabase/
+  functions/      # Deno Edge Functions
+  migrations/     # SQL migrations
+```
+
+## Feature Modules (`src/features/`)
+
+Each feature has `pages/`, `components/`, `hooks/`, and `api/` subdirectories.
+
+| Feature | Responsibility |
+|---|---|
+| `admin` | Admin panel — users, subscriptions, logs, config |
+| `ai` | AI chat canvas, Khaos Agent |
+| `assistant-portal` | Assistant upgrade flow, shadow accounts |
+| `assistants` | Professional's team management |
+| `auth` | Login, register, MFA, password reset |
+| `calendar` | Event calendar + Google Calendar sync |
+| `clients` | Client (wedding client) management |
+| `contracts` | Contract editor, e-signature, PDF |
+| `dashboard` | Main dashboard with metrics |
+| `financial` | Revenue, billing, transactions |
+| `microsite` | Public microsite editor |
+| `pipeline` | Sales pipeline / leads |
+| `portal` | Client-facing bride dashboard |
+| `projects` | Project/event management |
+| `public-booking` | Public booking form (`/b/:slug`) |
+
+## Auth & Roles
+
+- `useAuth()` — access current user (from `AuthContext`)
+- `useRole()` — checks `makeup_artists` and `assistants` tables
+- `usePlanAccess()` — feature flags and usage limits via Supabase RPC
+- `<ProtectedRoute>` — requires authenticated user
+- `<AdminRoute>` — requires admin role
+
+## Supabase
+
+- Two environments: **dev** (`nqufpfpqtycxxqtnkkfh`) and **prod** (`pymdkngcpbmcnayxieod`)
+- RLS enabled on all user-data tables
+- Edge Functions are Deno/TypeScript in `supabase/functions/`
+- Import client from `@/integrations/supabase/client`
