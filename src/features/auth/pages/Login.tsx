@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast'
 import { Loader2, Terminal } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useLanguage } from '@/hooks/useLanguage'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -26,12 +27,13 @@ export default function Login() {
     const { error } = await signIn(email, password)
 
     if (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        t('login_toast_denied'),
+      )
       toast({
-        title: t('login_toast_denied'),
-        description:
-          error.message === 'Invalid login credentials'
-            ? t('login_toast_invalid')
-            : error.message,
+        title,
+        description,
         variant: 'destructive',
       })
     } else {
@@ -66,9 +68,13 @@ export default function Login() {
   const handleGoogle = async () => {
     const { error } = await signInWithGoogle()
     if (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        t('login_toast_error'),
+      )
       toast({
-        title: t('login_toast_error'),
-        description: error.message,
+        title,
+        description,
         variant: 'destructive',
       })
     }

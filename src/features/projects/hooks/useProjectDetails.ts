@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { ProjectService as ProjectServiceClass } from '@/services/projectService'
+import { ProjectService as ProjectServiceClass } from '../api/projectService'
+
 import { supabase } from '@/integrations/supabase/client'
 import type {
   ProjectDetailsResponse,

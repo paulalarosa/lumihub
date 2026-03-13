@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client'
 import { Database } from '@/integrations/supabase/types'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { useAuth } from '@/hooks/useAuth'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { startOfMonth } from 'date-fns/startOfMonth'
+import { endOfMonth } from 'date-fns/endOfMonth'
+import { format } from 'date-fns/format'
 
 // Define manual type since Supabase types seem mismatched
 export interface Assistant {

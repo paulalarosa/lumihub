@@ -29,7 +29,7 @@ import type {
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader'
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats'
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -149,11 +149,7 @@ export default function ProjectDetailsPage() {
   }, [id, refetch])
 
   if (authLoading || orgLoading || isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <LoadingSpinner size={32} label="CARREGANDO MISSÃO..." />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (!project) return null

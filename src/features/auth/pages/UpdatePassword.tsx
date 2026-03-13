@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { Loader2 } from 'lucide-react'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export default function UpdatePassword() {
   const navigate = useNavigate()
@@ -21,9 +22,13 @@ export default function UpdatePassword() {
     const { error } = await supabase.auth.updateUser({ password })
 
     if (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao atualizar senha',
+      )
       toast({
-        title: 'Erro ao atualizar senha',
-        description: error.message,
+        title,
+        description,
         variant: 'destructive',
       })
     } else {

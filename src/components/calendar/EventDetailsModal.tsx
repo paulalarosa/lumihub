@@ -7,7 +7,8 @@ import {
 import { Button } from '@/components/ui/Button'
 import { Calendar, MapPin, AlignLeft, ExternalLink } from 'lucide-react'
 import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
+
 import { ptBR } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
 

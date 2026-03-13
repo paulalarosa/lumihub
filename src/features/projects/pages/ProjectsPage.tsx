@@ -30,7 +30,7 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useProjectsPage } from '../hooks/useProjectsPage'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader, TableLoader } from '@/components/ui/LoadingStates'
 
 const EVENT_TYPES = [
   'Casamento',
@@ -47,11 +47,7 @@ export default function Projetos() {
   const p = useProjectsPage()
 
   if (p.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-black">
-        <LoadingSpinner size={32} label="INICIALIZANDO DATABASE..." />
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (
@@ -249,9 +245,7 @@ export default function Projetos() {
         </div>
 
         {p.loadingData ? (
-          <div className="flex justify-center py-12">
-            <LoadingSpinner size={32} label="BUSCANDO PROJETOS..." />
-          </div>
+          <TableLoader />
         ) : p.filteredProjects.length === 0 ? (
           <Card className="bg-black border border-white/10 border-dashed rounded-none">
             <CardContent className="py-12 text-center">

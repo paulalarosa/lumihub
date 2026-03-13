@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Terminal } from 'lucide-react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { MetricCard } from '@/features/dashboard/components/MetricCard'
-import { RevenueChart } from '@/components/ui/RevenueChart'
+
+const RevenueChart = lazy(() =>
+  import('@/components/ui/RevenueChart').then((m) => ({
+    default: m.RevenueChart,
+  })),
+)
 
 export default function AdminOverview() {
   const { t } = useLanguage()
@@ -179,14 +184,22 @@ export default function AdminOverview() {
           </div>
           <div className="p-6 h-[340px] bg-white">
             {/* Inject Global Stats into Revenue Chart */}
-            <RevenueChart
-              className="h-full w-full"
-              overrideMetrics={{
-                activeContracts: stats.activeSubscriptions,
-                leads: stats.totalUsers - stats.activeSubscriptions, // "Leads" mapped to Non-Subscribers
-                subtitle: 'SaaS REVENUE',
-              }}
-            />
+            <Suspense
+              fallback={
+                <div className="w-full h-full flex items-center justify-center bg-gray-50/50 animate-pulse">
+                  <div className="h-8 w-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                </div>
+              }
+            >
+              <RevenueChart
+                className="h-full w-full"
+                overrideMetrics={{
+                  activeContracts: stats.activeSubscriptions,
+                  leads: stats.totalUsers - stats.activeSubscriptions, // "Leads" mapped to Non-Subscribers
+                  subtitle: 'SaaS REVENUE',
+                }}
+              />
+            </Suspense>
           </div>
         </div>
 

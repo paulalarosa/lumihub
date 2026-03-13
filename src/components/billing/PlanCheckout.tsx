@@ -6,6 +6,7 @@ import {
   EmbeddedCheckout,
 } from '@stripe/react-stripe-js'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { toast } from 'sonner'
 
 // Make sure to add this key to your .env file
@@ -39,7 +40,7 @@ export const PlanCheckout = ({ priceId }: PlanCheckoutProps) => {
 
       return data.clientSecret
     } catch (err: unknown) {
-      console.error('Error creating checkout session:', err)
+      logger.error('Error creating checkout session:', err)
       setError(
         err instanceof Error ? err.message : 'Erro ao iniciar o pagamento',
       )

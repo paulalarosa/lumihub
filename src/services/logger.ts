@@ -122,6 +122,16 @@ export class Logger {
   }
 
   /**
+   * Log debug messages.
+   * ONLY logs to console in DEV. Never persists or reports.
+   */
+  static debug(message: string, ...args: unknown[]) {
+    if (this.isDev) {
+      safeConsole.log(`[DEBUG] ${message}`, ...args)
+    }
+  }
+
+  /**
    * Log informational messages.
    * In prod, sends to Supabase 'system_logs' with severity 'info'.
    */

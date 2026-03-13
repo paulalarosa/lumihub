@@ -3,19 +3,14 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRole } from '@/hooks/useRole'
 import { Button } from '@/components/ui/Button'
 import { LogOut, User } from 'lucide-react'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 export default function AssistantLayout() {
   const { signOut } = useAuth()
   const { isAssistant, loading } = useRole()
 
   // If checking role, show loader
-  if (loading)
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    )
+  if (loading) return <PageLoader />
 
   // If not assistant, redirect or show error?
   // ProtectedRoute usually handles this, but layout can enforce too.

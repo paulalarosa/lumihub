@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/Button'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { CardLoader } from '@/components/ui/LoadingStates'
+
 import { Upload, Trash2, Image } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -133,11 +134,7 @@ export function GalleryEditor({ micrositeId }: { micrositeId?: string }) {
         </div>
       </CardHeader>
       <CardContent>
-        {isLoading && (
-          <div className="py-8 flex justify-center">
-            <LoadingSpinner />
-          </div>
-        )}
+        {isLoading && <CardLoader />}
 
         {gallery && gallery.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

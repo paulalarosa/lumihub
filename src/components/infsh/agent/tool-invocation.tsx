@@ -1,5 +1,6 @@
 import React, { memo, useState, useMemo, useCallback } from 'react'
 import { cn } from '@/lib/utils'
+import { logger } from '@/services/logger'
 import {
   Collapsible,
   CollapsibleContent,
@@ -310,7 +311,7 @@ export const ToolInvocation = memo(function ToolInvocation({
             JSON.stringify({ action, form_data: formData }),
           )
         } catch (error) {
-          console.error(
+          logger.error(
             '[ToolInvocation] Failed to submit widget action:',
             error,
           )
@@ -335,7 +336,7 @@ export const ToolInvocation = memo(function ToolInvocation({
             files.length > 0 ? files : undefined,
           )
         } catch (error) {
-          console.error(
+          logger.error(
             '[ToolInvocation] Failed to send widget action as message:',
             error,
           )
@@ -350,7 +351,7 @@ export const ToolInvocation = memo(function ToolInvocation({
     try {
       await approveTool(invocation.id)
     } catch (error) {
-      console.error('[ToolInvocation] Failed to approve:', error)
+      logger.error('[ToolInvocation] Failed to approve:', error)
     }
   }, [invocation.id, approveTool])
 
@@ -358,7 +359,7 @@ export const ToolInvocation = memo(function ToolInvocation({
     try {
       await rejectTool(invocation.id)
     } catch (error) {
-      console.error('[ToolInvocation] Failed to reject:', error)
+      logger.error('[ToolInvocation] Failed to reject:', error)
     }
   }, [invocation.id, rejectTool])
 
@@ -366,7 +367,7 @@ export const ToolInvocation = memo(function ToolInvocation({
     try {
       await alwaysAllowTool(invocation.id, functionName)
     } catch (error) {
-      console.error('[ToolInvocation] Failed to always-allow:', error)
+      logger.error('[ToolInvocation] Failed to always-allow:', error)
     }
   }, [invocation.id, functionName, alwaysAllowTool])
 

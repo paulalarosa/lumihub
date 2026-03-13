@@ -1,5 +1,6 @@
 import React, { useState, useEffect, ReactNode } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { useAuth } from '@/hooks/useAuth'
 
 import { AIContext, AIProviderContextType, AIProviderMode } from './AIContext'
@@ -37,7 +38,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
         setByokSettings(null)
       }
     } catch (err) {
-      console.error('[AIProvider] Error fetching settings:', err)
+      logger.error('[AIProvider] Error fetching settings:', err)
     } finally {
       setIsLoading(false)
     }

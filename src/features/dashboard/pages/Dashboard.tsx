@@ -11,8 +11,9 @@ import {
 } from 'lucide-react'
 import { AssistantsPanelCard } from '@/features/dashboard/components/AssistantsPanelCard'
 import { motion } from 'framer-motion'
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns/format'
+import { ptBR } from 'date-fns/locale/pt-BR'
+
 import {
   PieChart,
   Pie,
@@ -23,39 +24,20 @@ import {
 } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { SetupChecklist } from '@/components/onboarding/SetupChecklist'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 export default function Dashboard() {
   const { t } = useLanguage()
   const d = useDashboard()
 
   if (d.orgLoading || d.dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full"
-        />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (!d.user)
     return (
       <div className="p-8 text-center text-white">Carregando sessão...</div>
     )
-  if (d.orgLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-          className="w-12 h-12 border-2 border-white/20 border-t-white rounded-full"
-        />
-        <p className="ml-4 text-white/50">Carregando organização...</p>
-      </div>
-    )
-  }
 
   const stats = [
     ...(d.isOwner
@@ -195,16 +177,12 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
               {d.upcomingEvents.length > 0 ? (
                 d.upcomingEvents.map((event, i: number) => {
-                  const _isGoogle = event.type === 'google'
                   const title = event.title
-                  const _dateStr = event.date // ISO or YYYY-MM-DD
 
                   let dateObj: Date
                   if (event.date.includes('T')) {
                     dateObj = new Date(event.date)
                   } else {
-                    // Append time if exists or use midnight local?
-                    // safest is creating date from YYYY-MM-DD + T00:00
                     const timePart = event.time ? event.time : '00:00'
                     dateObj = new Date(`${event.date}T${timePart}`)
                   }

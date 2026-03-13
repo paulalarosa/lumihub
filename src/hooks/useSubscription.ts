@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from './useAuth'
 import { supabase, handleSupabaseError } from '@/integrations/supabase/client'
-import { differenceInDays, parseISO } from 'date-fns'
+import { differenceInDays } from 'date-fns/differenceInDays'
+import { parseISO } from 'date-fns/parseISO'
+
 import { handleError } from '@/lib/error-handling'
 
 export type SubscriptionStatus = 'trialing' | 'active' | 'expired'

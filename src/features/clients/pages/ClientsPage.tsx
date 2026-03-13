@@ -40,13 +40,15 @@ import {
   Download,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+
 import { MobileFAB } from '@/components/ui/MobileFAB'
 import { ClientForm } from '../components/ClientForm'
 import { ClientFilters } from '@/components/filters/ClientFilters'
-import { useClientsQuery } from '@/hooks/useClientsQuery'
+import { useClientsQuery } from '../hooks/useClientsQuery'
+
 import { useClientFilterStore } from '@/stores/useClientFilterStore'
 import { useClientActions } from '@/features/clients/hooks/useClientActions'
+import { PageLoader, TableLoader } from '@/components/ui/LoadingStates'
 
 export default function Clientes() {
   const navigate = useNavigate()
@@ -70,11 +72,7 @@ export default function Clientes() {
   }, [user, authLoading, navigate])
 
   if (authLoading || orgLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#050505]">
-        <LoadingSpinner size={32} label="INICIALIZANDO DATABASE..." />
-      </div>
-    )
+    return <PageLoader />
   }
 
   const filteredClients = clients
@@ -176,9 +174,7 @@ export default function Clientes() {
 
         <div className="space-y-4">
           {loadingClients ? (
-            <div className="flex justify-center py-20">
-              <LoadingSpinner size={32} label="CARREGANDO CLIENTES..." />
-            </div>
+            <TableLoader />
           ) : isError ? (
             <div className="flex justify-center py-20">
               <EmptyState

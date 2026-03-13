@@ -1,5 +1,8 @@
-import { format, addMonths, subMonths } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns/format'
+import { addMonths } from 'date-fns/addMonths'
+import { subMonths } from 'date-fns/subMonths'
+import { ptBR } from 'date-fns/locale/pt-BR'
+
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useLanguage } from '@/hooks/useLanguage'

@@ -1,11 +1,13 @@
-import { format } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { format } from 'date-fns/format'
+import { ptBR } from 'date-fns/locale/pt-BR'
+
 import { LogOut, CheckCircle2, CalendarDays } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { DigitalSignature } from '../components/DigitalSignature'
 import { useBrideDashboard } from '../hooks/useBrideDashboard'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 export default function BrideDashboardPage() {
   const { t } = useLanguage()
@@ -16,16 +18,7 @@ export default function BrideDashboardPage() {
     d.totalContract > 0 ? (d.paidAmount / d.totalContract) * 100 : 0
 
   if (d.loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] text-white">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-2 border-white border-t-transparent animate-spin rounded-full" />
-          <p className="font-mono text-[10px] uppercase tracking-widest text-neutral-500">
-            Loading System
-          </p>
-        </div>
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (d.error) {
@@ -326,7 +319,7 @@ export default function BrideDashboardPage() {
                             variant={
                               contract.status === 'signed'
                                 ? 'outline'
-                                : 'default'
+                                : 'primary'
                             }
                             className={
                               contract.status === 'signed'

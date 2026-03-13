@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
+
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
 import html2pdf from 'html2pdf.js'

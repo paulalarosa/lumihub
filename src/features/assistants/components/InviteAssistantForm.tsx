@@ -4,10 +4,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { LoadingSpinner } from '@/components/ui/LoadingStates'
+
 import { AlertCircle, CheckCircle, Copy, Send } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export const InviteAssistantForm = () => {
   const { user } = useAuth()
@@ -133,10 +135,12 @@ export const InviteAssistantForm = () => {
 
       toast({ title: 'Assistente cadastrada com sucesso!' })
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Erro ao cadastrar assistente'
-      setError(message)
-      toast({ title: 'Erro', description: message, variant: 'destructive' })
+      const { title, description } = getErrorMessage(
+        err,
+        'Erro ao cadastrar assistente',
+      )
+      setError(description)
+      toast({ title, description, variant: 'destructive' })
     } finally {
       setLoading(false)
     }
@@ -282,11 +286,7 @@ export const InviteAssistantForm = () => {
         </div>
 
         <Button type="submit" disabled={loading} className="w-full gap-2">
-          {loading ? (
-            <LoadingSpinner className="w-4 h-4" />
-          ) : (
-            <Send className="w-4 h-4" />
-          )}
+          {loading ? <LoadingSpinner /> : <Send className="w-4 h-4" />}
           Cadastrar e Gerar Link
         </Button>
       </form>

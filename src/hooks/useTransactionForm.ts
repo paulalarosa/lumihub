@@ -6,7 +6,8 @@ import * as z from 'zod'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
+
 import { Logger, logger } from '@/services/logger'
 
 export type TransactionFormData = z.infer<typeof transactionSchema>

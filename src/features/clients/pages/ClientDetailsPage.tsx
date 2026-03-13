@@ -20,7 +20,8 @@ import {
   Trash2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
+
 import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
@@ -38,11 +39,7 @@ export default function ClientDetailsPage() {
   const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false)
 
   if (loadingData) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <LoadingSpinner size={32} label="CARREGANDO PERFIL..." />
-      </div>
-    )
+    return <PageLoader />
   }
 
   if (!client) return null

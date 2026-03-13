@@ -8,6 +8,7 @@ import { toast as sonnerToast } from 'sonner'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { ClientFormData } from '../components/ClientForm'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export interface ClientRecord {
   id: string
@@ -143,8 +144,12 @@ export function useClientActions({
       setIsDialogOpen(false)
       setEditingClient(null)
       fetchClients()
-    } catch (_error) {
-      toast({ title: 'Erro ao salvar cliente', variant: 'destructive' })
+    } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao salvar cliente',
+      )
+      toast({ title, description, variant: 'destructive' })
     }
   }
 
@@ -155,8 +160,12 @@ export function useClientActions({
       await ClientService.delete(id)
       toast({ title: 'Cliente excluído!' })
       fetchClients()
-    } catch (_error) {
-      toast({ title: 'Erro ao excluir cliente', variant: 'destructive' })
+    } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao excluir cliente',
+      )
+      toast({ title, description, variant: 'destructive' })
     }
   }
 
@@ -186,10 +195,14 @@ export function useClientActions({
         title: 'Link do Portal Copiado!',
         description: 'Envie este link para a noiva.',
       })
-    } catch (_e) {
+    } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao gerar link',
+      )
       toast({
-        title: 'Erro ao gerar link',
-        description: 'Não foi possível configurar o portal.',
+        title,
+        description,
         variant: 'destructive',
       })
     }

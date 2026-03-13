@@ -6,7 +6,9 @@ import {
 } from '@stripe/react-stripe-js'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { Skeleton } from '@/components/ui/skeleton'
+
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 
@@ -30,7 +32,7 @@ export const StripeEmbeddedCheckout = ({
         throw new Error('Usuário não autenticado')
       }
 
-      console.log('Fetching client secret for price:', priceId)
+      logger.debug('Fetching client secret for price:', priceId)
 
       const { data, error } = await supabase.functions.invoke(
         'create-checkout',
@@ -44,7 +46,8 @@ export const StripeEmbeddedCheckout = ({
       )
 
       if (error) {
-        console.error('Supabase function error:', error)
+        logger.error('Supabase function error:', error)
+
         throw error
       }
 
@@ -54,7 +57,8 @@ export const StripeEmbeddedCheckout = ({
 
       setClientSecret(data.clientSecret)
     } catch (err: unknown) {
-      console.error('Error fetching client secret:', err)
+      logger.error('Error fetching client secret:', err)
+
       setError(
         err instanceof Error ? err.message : 'Erro ao iniciar o checkout.',
       )

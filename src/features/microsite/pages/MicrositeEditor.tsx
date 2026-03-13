@@ -8,13 +8,15 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ColorPicker } from './microsite-editor/components/ColorPicker'
-import { SettingToggle } from './microsite-editor/components/SettingToggle'
-import { ImageUploader } from './microsite-editor/components/ImageUploader'
-import { ServicesEditor } from './microsite-editor/components/ServicesEditor'
-import { GalleryEditor } from './microsite-editor/components/GalleryEditor'
-import { TestimonialsEditor } from './microsite-editor/components/TestimonialsEditor'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { ColorPicker } from '../components/components/ColorPicker'
+import { SettingToggle } from '../components/components/SettingToggle'
+import { ImageUploader } from '../components/components/ImageUploader'
+import { ServicesEditor } from '../components/components/ServicesEditor'
+import { GalleryEditor } from '../components/components/GalleryEditor'
+import { TestimonialsEditor } from '../components/components/TestimonialsEditor'
+
+import { PageLoader } from '@/components/ui/LoadingStates'
+
 import { Eye, Save } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -188,11 +190,7 @@ export default function MicrositeEditor() {
     : ''
 
   if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (

@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/Button'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { TableLoader } from '@/components/ui/LoadingStates'
+
 import {
   Table,
   TableBody,
@@ -36,7 +37,8 @@ export const AssistantList = () => {
         .eq('id', user.id)
         .maybeSingle()
 
-      // @ts-expect-error - Expected missing table typescript definition
+      // Fetch Makeup Artist ID
+
       const { data: created } = await supabase
         .from('makeup_artists')
         .insert({
@@ -62,8 +64,8 @@ export const AssistantList = () => {
   } = useQuery({
     queryKey: ['assistants-list', makeupArtistId],
     queryFn: async () => {
-      // @ts-expect-error - Expected missing table typescript definition
       const { data: accessData, error } = await supabase
+
         .from('assistant_access')
         .select(
           `
@@ -112,7 +114,7 @@ export const AssistantList = () => {
     })
   }
 
-  if (maLoading || isLoading) return <LoadingSpinner />
+  if (maLoading || isLoading) return <TableLoader />
 
   const activeList = assistantsData?.active || []
 
@@ -133,7 +135,6 @@ export const AssistantList = () => {
             </TableHeader>
             <TableBody>
               {activeList.map((item: Record<string, unknown>) => {
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const finalPin =
                   (item.assistant as any)?.pin ||
                   (item.assistant as any)?.access_pin ||

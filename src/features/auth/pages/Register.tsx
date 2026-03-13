@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { z } from 'zod'
 import { Loader2 } from 'lucide-react'
+import { getErrorMessage } from '@/utils/error-handler'
 
 const registerSchema = z.object({
   fullName: z.string().trim().min(2, { message: 'TAMANHO_NOME_INVALIDO' }),
@@ -51,13 +52,10 @@ export default function Register() {
     )
 
     if (error) {
-      let message = error.message
-      if (error.message.includes('already registered')) {
-        message = 'IDENTIDADE_JÁ_EXISTE'
-      }
+      const { title, description } = getErrorMessage(error, 'FALHA_REGISTRO')
       toast({
-        title: 'FALHA_REGISTRO',
-        description: message,
+        title,
+        description,
         variant: 'destructive',
       })
     } else {
@@ -73,9 +71,10 @@ export default function Register() {
   const handleGoogle = async () => {
     const { error } = await signInWithGoogle()
     if (error) {
+      const { title, description } = getErrorMessage(error, 'FALHA_CONEXÃO')
       toast({
-        title: 'FALHA_CONEXÃO',
-        description: error.message,
+        title,
+        description,
         variant: 'destructive',
       })
     }

@@ -10,6 +10,7 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 
 export const CheckoutReturn = () => {
   const [searchParams] = useSearchParams()
@@ -47,7 +48,8 @@ export const CheckoutReturn = () => {
           setMessage('Pagamento não confirmado. Tente novamente.')
         }
       } catch (err: unknown) {
-        console.error('Verification error:', err)
+        logger.error('Verification error:', err)
+
         setStatus('error')
         setMessage(
           'Erro ao verificar pagamento. Entre em contato com o suporte.',

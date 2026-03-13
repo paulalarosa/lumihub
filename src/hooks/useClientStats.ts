@@ -1,7 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
-import { subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns'
+import { subDays } from 'date-fns/subDays'
+import { subMonths } from 'date-fns/subMonths'
+import { startOfMonth } from 'date-fns/startOfMonth'
+import { endOfMonth } from 'date-fns/endOfMonth'
+
 import { formatDate } from '@/lib/date-utils'
 
 interface ClientStats {

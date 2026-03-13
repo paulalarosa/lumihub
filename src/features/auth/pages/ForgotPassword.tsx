@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { Loader2, ArrowLeft, ShieldAlert } from 'lucide-react'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export default function ForgotPassword() {
   const { toast } = useToast()
@@ -20,7 +21,7 @@ export default function ForgotPassword() {
 
     try {
       // Use Edge Function to send templated SES email
-      const { _data, error } = await supabase.functions.invoke(
+      const { data, error } = await supabase.functions.invoke(
         'request-password-reset',
         {
           body: { email },
@@ -36,11 +37,10 @@ export default function ForgotPassword() {
         className: 'bg-black border border-white/20 text-white',
       })
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : 'Erro ao processar solicitação'
+      const { title, description } = getErrorMessage(error, 'FALHA_TRANSMISSÃO')
       toast({
-        title: 'FALHA_TRANSMISSÃO',
-        description: message,
+        title,
+        description,
         variant: 'destructive',
       })
     } finally {

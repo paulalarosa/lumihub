@@ -4,14 +4,16 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { LoadingSpinner } from '@/components/ui/LoadingStates'
+
 import { useNavigate } from 'react-router-dom'
+import { getErrorMessage } from '@/utils/error-handler'
 
 interface AssistantSignupFormProps {
   token: string
 }
 
-export const AssistantSignupForm = ({ _token }: AssistantSignupFormProps) => {
+export const AssistantSignupForm = ({ token }: AssistantSignupFormProps) => {
   const { toast } = useToast()
   const _navigate = useNavigate()
   const [isLogin, setIsLogin] = useState(false)
@@ -50,9 +52,13 @@ export const AssistantSignupForm = ({ _token }: AssistantSignupFormProps) => {
       }
       // Once auth state changes, parent component (AcceptInvitePage) will detect user and trigger accept logic.
     } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro de autenticação',
+      )
       toast({
-        title: 'Erro de autenticação',
-        description: error.message,
+        title,
+        description,
         variant: 'destructive',
       })
     } finally {
@@ -113,7 +119,8 @@ export const AssistantSignupForm = ({ _token }: AssistantSignupFormProps) => {
         </div>
 
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading && <LoadingSpinner className="mr-2 w-4 h-4" />}
+          {loading && <LoadingSpinner className="mr-2" />}
+
           {isLogin ? 'Entrar' : 'Cadastrar e Aceitar'}
         </Button>
 

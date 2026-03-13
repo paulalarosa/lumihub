@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { format, parseISO, isPast, isToday } from 'date-fns'
+import { format } from 'date-fns/format'
+import { parseISO } from 'date-fns/parseISO'
+import { isPast } from 'date-fns/isPast'
+import { isToday } from 'date-fns/isToday'
+
 import {
   CheckCircle2,
   Circle,

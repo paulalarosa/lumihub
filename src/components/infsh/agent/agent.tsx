@@ -1,6 +1,8 @@
 import React, { memo, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { logger } from '@/services/logger'
 import { Bot } from 'lucide-react'
+
 import { Button } from '@/components/ui/Button'
 import {
   Inference,
@@ -263,9 +265,10 @@ export function Agent({
   // Create client internally - memoized to prevent re-creation
   const client = useMemo(() => {
     if (!proxyUrl && !apiKey) {
-      console.error('[Agent] Either proxyUrl or apiKey is required')
+      logger.error('[Agent] Either proxyUrl or apiKey is required')
       return null
     }
+
     return new Inference({ proxyUrl, apiKey, baseUrl })
   }, [proxyUrl, apiKey, baseUrl])
 

@@ -7,7 +7,7 @@ import { FinancialMetrics } from '../components/FinancialMetrics'
 import { CashFlowChart } from '../components/CashFlowChart'
 import { TransactionList } from '../components/TransactionList'
 import TransactionDialog from '../components/TransactionDialog'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 export default function FinancialPage() {
   const { t } = useLanguage()
@@ -26,11 +26,7 @@ export default function FinancialPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <LoadingSpinner size={32} label="SINCRONIZANDO FINANÇAS..." />
-      </div>
-    )
+    return <PageLoader />
   }
 
   return (

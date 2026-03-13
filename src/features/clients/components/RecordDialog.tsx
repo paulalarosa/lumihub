@@ -39,13 +39,6 @@ export function RecordDialog({
     setLoading(true)
     // Mock submission for now
     setTimeout(() => {
-      // console.log("Creating record:", {
-      //     client_id: clientId,
-      //     date: date,
-      //     description: title,
-      //     notes: notes
-      // });
-
       toast({
         title: 'RECORD_LOGGED',
         description: 'CLIENT_HISTORY_UPDATED (MOCKED)',

@@ -4,7 +4,8 @@ import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/hooks/useAuth'
-import { ProjectService as ProjectServiceAPI } from '@/services/projectService'
+import { ProjectService as ProjectServiceAPI } from '../api/projectService'
+
 import type {
   Contract,
   ProjectWithRelations,

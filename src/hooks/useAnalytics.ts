@@ -219,7 +219,7 @@ export function useAnalytics() {
       })
       return null
     }
-  }, [])
+  }, [organizationId])
 
   return {
     trackEvent,

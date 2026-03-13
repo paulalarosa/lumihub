@@ -13,7 +13,7 @@ import {
   Calendar,
   Clock,
 } from 'lucide-react'
-import { MicrositeService } from '@/services/micrositeService'
+import { MicrositeService } from '../api/micrositeService'
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',

@@ -10,7 +10,14 @@ import { useDashboardMetrics } from '@/features/dashboard/hooks/useDashboardMetr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AssistantsTable } from '@/features/admin/components/AssistantsTable'
 import { SystemLogs } from '@/features/admin/components/SystemLogs'
-import { RevenueChart } from '@/components/ui/RevenueChart'
+import { lazy, Suspense } from 'react'
+import { Skeleton } from '@/components/ui/skeleton'
+
+const RevenueChart = lazy(() =>
+  import('@/components/ui/RevenueChart').then((m) => ({
+    default: m.RevenueChart,
+  })),
+)
 
 const ExampleMutationButton = () => {
   const queryClient = useQueryClient()
@@ -99,7 +106,9 @@ export default function AdminDashboard() {
           </span>
         </div>
         <div className="p-6 h-[300px] bg-white">
-          <RevenueChart className="h-full w-full" />
+          <Suspense fallback={<Skeleton className="h-full w-full" />}>
+            <RevenueChart className="h-full w-full" />
+          </Suspense>
         </div>
       </div>
 

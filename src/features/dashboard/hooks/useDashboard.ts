@@ -1,195 +1,159 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
-import { supabase } from '@/integrations/supabase/client'
-import { ClientService } from '@/features/clients/api/clientService'
-import { ProjectService } from '@/services/projectService'
-import { EventService, DashboardEvent } from '@/services/event.service'
-import { CommissionLogic } from '@/services/commissionLogic'
-import {
-  MarketingLogic,
-  type MarketingTrigger,
-} from '@/services/marketingLogic'
+import { useDashboardStats } from '@/hooks/useDashboardStats'
 
 export function useDashboard() {
-  const navigate = useNavigate()
-  const { user, isAdmin, signOut } = useAuth()
+  const { user } = useAuth()
   const { organizationId, isOwner, loading: orgLoading } = useOrganization()
+  const { data: stats, isLoading: statsLoading } = useDashboardStats()
 
-  const [onboardingCompleted, setOnboardingCompleted] = useState<boolean>(true)
-  const [checkingOnboarding, setCheckingOnboarding] = useState(true)
-  const [clientsCount, setClientsCount] = useState<number>(0)
-  const [projectsCount, setProjectsCount] = useState<number>(0)
-  const [totalRevenue, setTotalRevenue] = useState<number>(0)
-  const [totalCommissions, setTotalCommissions] = useState<number>(0)
-  const [upcomingEvents, setUpcomingEvents] = useState<DashboardEvent[]>([])
-  const [marketingTriggers, setMarketingTriggers] = useState<
-    MarketingTrigger[]
-  >([])
-  const [isGoogleConnected, setIsGoogleConnected] = useState(false)
-  const [dataLoading, setDataLoading] = useState(true)
-  const [originStats, setOriginStats] = useState<
-    { name: string; value: number }[]
-  >([])
-  const [profileName, setProfileName] = useState<string>('')
-
-  useEffect(() => {
-    if (!user) return
-    const checkUserStatus = async () => {
-      const { data: profileData } = await supabase
+  // 1. Profile Name
+  const { data: profileName = '', isLoading: profileLoading } = useQuery({
+    queryKey: ['dashboard-profile', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return ''
+      const { data } = await supabase
         .from('profiles')
-        .select('onboarding_completed, full_name, subscription_tier')
-        .eq('id', user.id)
+        .select('full_name')
+        .eq('id', organizationId)
         .maybeSingle()
+      return data?.full_name || ''
+    },
+    enabled: !!organizationId,
+  })
 
-      if (profileData) {
-        if (profileData.full_name) {
-          setProfileName((profileData.full_name || '').split(' ')[0])
-        }
-        if (profileData.onboarding_completed === false) {
-          setOnboardingCompleted(false)
-        }
-        if (
-          user.email === 'nathaliasbrb@gmail.com' &&
-          profileData.subscription_tier !== 'studio'
-        ) {
-          await supabase
-            .from('profiles')
-            .update({ subscription_tier: 'studio' } as Record<string, unknown>)
-            .eq('id', user.id)
-        }
-      }
-      setCheckingOnboarding(false)
-    }
-    checkUserStatus()
-  }, [user])
+  // 2. Clients Count
+  const { data: clientsCount = 0, isLoading: clientsLoading } = useQuery({
+    queryKey: ['dashboard-clients-count', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return 0
+      const { count } = await supabase
+        .from('wedding_clients')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', organizationId)
+      return count || 0
+    },
+    enabled: !!organizationId,
+  })
 
-  useEffect(() => {
-    if (!organizationId) return
+  // 3. Projects Count
+  const { data: projectsCount = 0, isLoading: projectsLoading } = useQuery({
+    queryKey: ['dashboard-projects-count', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return 0
+      const { count } = await supabase
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', organizationId)
+      return count || 0
+    },
+    enabled: !!organizationId,
+  })
 
-    const fetchDashboardData = async () => {
-      try {
-        setDataLoading(true)
+  // 4. Upcoming Events
+  const { data: upcomingEvents = [], isLoading: eventsLoading } = useQuery({
+    queryKey: ['dashboard-upcoming-events', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return []
+      const { data } = await supabase
+        .from('events')
+        .select('*')
+        .eq('user_id', organizationId)
+        .gte('event_date', new Date().toISOString())
+        .order('event_date', { ascending: true })
+        .limit(5)
+      return data || []
+    },
+    enabled: !!organizationId,
+  })
 
-        let currentAssistantId: string | null = null
-        if (!isAdmin) {
-          const { data: assistant } = await supabase
-            .from('assistants')
-            .select('id')
-            .eq('user_id', user!.id)
-            .maybeSingle()
-          currentAssistantId = assistant?.id ?? null
-        }
+  // 5. Marketing Triggers
+  const { data: marketingTriggers = [], isLoading: triggersLoading } = useQuery(
+    {
+      queryKey: ['dashboard-marketing-triggers', organizationId],
+      queryFn: async () => {
+        if (!organizationId) return []
+        const { data } = await supabase
+          .from('marketing_triggers')
+          .select('*, wedding_clients(name)')
+          .eq('user_id', organizationId)
+          .eq('is_active', true)
+          .limit(5)
 
-        const promises: Promise<unknown>[] = [
-          EventService.getUpcomingEvents(
-            organizationId,
-            user!.id,
-            isAdmin ? 'admin' : 'assistant',
-          ),
-          ClientService.count(organizationId),
-          ProjectService.count(organizationId),
-        ]
+        return (data || []).map((t: any) => ({
+          clientName: t.wedding_clients?.name || 'Cliente',
+          details: t.trigger_type,
+        }))
+      },
+      enabled: !!organizationId,
+    },
+  )
 
-        if (isAdmin) {
-          promises.push(CommissionLogic.getFinancialReport(organizationId))
-        } else if (currentAssistantId) {
-          promises.push(
-            CommissionLogic.getAssistantCommissions(currentAssistantId),
-          )
-        } else {
-          promises.push(
-            Promise.resolve({ totalRevenue: 0, totalCommissions: 0 }),
-          )
-        }
+  // 6. Financials (Owner Only)
+  const {
+    data: financials = { totalRevenue: 0, totalCommissions: 0 },
+    isLoading: financialsLoading,
+  } = useQuery({
+    queryKey: ['dashboard-financials', organizationId],
+    queryFn: async () => {
+      if (!organizationId || !isOwner)
+        return { totalRevenue: 0, totalCommissions: 0 }
+      const { data: invoices } = await supabase
+        .from('invoices')
+        .select('amount, commission_amount, status')
+        .eq('user_id', organizationId)
+        .eq('status', 'paid')
 
-        if (isAdmin) {
-          promises.push(MarketingLogic.getTriggers(organizationId))
-          promises.push(ClientService.getOriginStats(organizationId))
-        } else {
-          promises.push(Promise.resolve([]))
-          promises.push(Promise.resolve([]))
-        }
+      if (!invoices) return { totalRevenue: 0, totalCommissions: 0 }
 
-        const [
-          eventData,
-          clientCountVal,
-          projectCountVal,
-          financialStats,
-          marketingData,
-          originData,
-        ] = await Promise.all(promises)
-
-        const evtResult = eventData as {
-          events: DashboardEvent[]
-          isGoogleConnected: boolean
-        }
-        setUpcomingEvents(evtResult.events)
-        setIsGoogleConnected(evtResult.isGoogleConnected)
-        setClientsCount(clientCountVal as number)
-        setProjectsCount(projectCountVal as number)
-
-        const finStats = financialStats as {
-          totalRevenue: number
-          totalCommissions: number
-        }
-        setTotalRevenue(isAdmin ? finStats.totalRevenue : 0)
-        setTotalCommissions(finStats.totalCommissions)
-        setMarketingTriggers(marketingData as MarketingTrigger[])
-        setOriginStats(originData as { name: string; value: number }[])
-      } catch (_) {
-        // Error handled silently
-      } finally {
-        setDataLoading(false)
-      }
-    }
-
-    fetchDashboardData()
-
-    const channel = supabase
-      .channel('dashboard-realtime')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'wedding_clients' },
-        () => fetchDashboardData(),
+      const total = invoices.reduce(
+        (acc, curr) => acc + (Number(curr.amount) || 0),
+        0,
       )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'projects' },
-        () => fetchDashboardData(),
+      const comms = invoices.reduce(
+        (acc, curr) => acc + (Number(curr.commission_amount) || 0),
+        0,
       )
-      .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [organizationId])
+      return { totalRevenue: total, totalCommissions: comms }
+    },
+    enabled: !!organizationId && isOwner,
+  })
 
-  const handleSignOut = async () => {
-    await signOut()
-    navigate('/')
-  }
+  const originStats = useMemo(() => {
+    if (!stats?.leadsConversion) return []
+    return [
+      { name: 'Convertidos', value: stats.leadsConversion.converted },
+      { name: 'Pendentes', value: stats.leadsConversion.pending },
+    ]
+  }, [stats])
+
+  const dataLoading =
+    statsLoading ||
+    profileLoading ||
+    clientsLoading ||
+    projectsLoading ||
+    eventsLoading ||
+    triggersLoading ||
+    financialsLoading
 
   return {
     user,
-    isAdmin,
+    organizationId,
     isOwner,
     orgLoading,
     dataLoading,
-    onboardingCompleted,
-    checkingOnboarding,
     clientsCount,
     projectsCount,
-    totalRevenue,
-    totalCommissions,
+    totalRevenue: financials.totalRevenue,
+    totalCommissions: financials.totalCommissions,
     upcomingEvents,
     marketingTriggers,
-    isGoogleConnected,
-    originStats,
     profileName,
-    handleSignOut,
-    navigate,
+    originStats,
+    stats,
   }
 }

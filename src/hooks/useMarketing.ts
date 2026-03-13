@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { MarketingService, MarketingCampaign } from '@/services/marketing'
 import { supabase } from '@/integrations/supabase/client'
-import { differenceInDays } from 'date-fns'
+import { differenceInDays } from 'date-fns/differenceInDays'
+
 import { logger } from '@/services/logger'
 
 export interface InactiveClient {

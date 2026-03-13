@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { logger } from '@/services/logger'
 import {
   DndContext,
@@ -10,7 +10,8 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { ProjectService } from '@/services/projectService'
+import { ProjectService } from '../api/projectService'
+
 import { useToast } from '@/hooks/use-toast'
 import { KanbanColumn } from './KanbanColumn'
 import { TaskDialog } from './TaskDialog'
@@ -27,7 +28,6 @@ import {
 
 const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done']
 
-// Map is_completed to status
 function mapTaskToKanban(task: Tables<'tasks'>): KanbanTask {
   return {
     ...task,
@@ -45,8 +45,6 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
   const [tasks, setTasks] = useState<KanbanTask[]>([])
   const [loading, setLoading] = useState(true)
   const [activeId, setActiveId] = useState<string | null>(null)
-
-  // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingTask, setEditingTask] = useState<KanbanTask | null>(null)
 
@@ -58,17 +56,11 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     }),
   )
 
-  // Fetch tasks from Supabase
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const data = await ProjectService.getTasks(projectId)
-
-        // ProjectService.getTasks returns { data, error } or just data depending on implementation
-        // My implementation in projectService.ts returns Supabase builder which is then awaited.
-        // It returns { data, error }.
         if (data.error) throw data.error
-
         setTasks((data.data || []).map(mapTaskToKanban))
       } catch (error) {
         logger.error(error, 'ProjectKanban.fetchTasks', { showToast: false })
@@ -85,118 +77,127 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     fetchTasks()
   }, [projectId, toast])
 
-  const handleDragStart = (event: DragStartEvent) => {
+  const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string)
-  }
+  }, [])
 
-  const handleDragOver = (event: DragOverEvent) => {
+  const handleDragOver = useCallback((event: DragOverEvent) => {
     const { active, over } = event
     if (!over) return
 
-    const activeTask = tasks.find((t) => t.id === active.id)
     const overStatus = over.id as string
+    if (!STATUSES.includes(overStatus as TaskStatus)) return
 
-    if (activeTask && STATUSES.includes(overStatus as TaskStatus)) {
-      setTasks((tasks) =>
-        tasks.map((task) =>
-          task.id === activeTask.id
-            ? { ...task, status: overStatus as TaskStatus }
-            : task,
-        ),
+    setTasks((prevTasks) => {
+      const activeTask = prevTasks.find((t) => t.id === active.id)
+      if (!activeTask || activeTask.status === overStatus) return prevTasks
+
+      return prevTasks.map((task) =>
+        task.id === active.id
+          ? { ...task, status: overStatus as TaskStatus }
+          : task,
       )
-    }
-  }
+    })
+  }, [])
 
-  const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
-    setActiveId(null)
+  const handleDragEnd = useCallback(
+    async (event: DragEndEvent) => {
+      const { active, over } = event
+      setActiveId(null)
 
-    if (!over) return
+      if (!over) return
 
-    const activeTask = tasks.find((t) => t.id === active.id)
-    const newStatus = over.id as string
+      const newStatus = over.id as string
+      if (!STATUSES.includes(newStatus as TaskStatus)) return
 
-    if (
-      activeTask &&
-      STATUSES.includes(newStatus as TaskStatus) &&
-      activeTask.status !== newStatus
-    ) {
-      const originalStatus = activeTask.status
+      setTasks((prevTasks) => {
+        const activeTask = prevTasks.find((t) => t.id === active.id)
+        if (!activeTask || activeTask.status === newStatus) return prevTasks
 
-      // 1. Optimistic Update (Immediate Feedback)
-      setTasks((prev) =>
-        prev.map((t) =>
-          t.id === activeTask.id
-            ? { ...t, status: newStatus as TaskStatus }
-            : t,
-        ),
-      )
+        const originalStatus = activeTask.status
 
-      // 2. Persist via ProjectService
-      const success = await ProjectService.updateTaskStatus(
-        activeTask.id,
-        newStatus,
-      )
-
-      // 3. Rollback on Failure
-      if (!success) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === activeTask.id ? { ...t, status: originalStatus } : t,
-          ),
+        ProjectService.updateTaskStatus(activeTask.id, newStatus).then(
+          (success) => {
+            if (!success) {
+              setTasks((currentTasks) =>
+                currentTasks.map((t) =>
+                  t.id === active.id ? { ...t, status: originalStatus } : t,
+                ),
+              )
+              toast({
+                title: 'Erro',
+                description: 'Falha ao mover a tarefa. Sincronizando...',
+                variant: 'destructive',
+              })
+            }
+          },
         )
-        toast({
-          title: 'Erro',
-          description: 'Falha ao mover a tarefa. Sincronizando...',
-          variant: 'destructive',
-        })
+
+        return prevTasks.map((t) =>
+          t.id === active.id ? { ...t, status: newStatus as TaskStatus } : t,
+        )
+      })
+    },
+    [toast],
+  )
+
+  const handleTaskSaved = useCallback((savedTask: Task) => {
+    const kanbanTask = mapTaskToKanban(savedTask as Tables<'tasks'>)
+
+    setTasks((prev) => {
+      const exists = prev.some((t) => t.id === savedTask.id)
+      if (exists) {
+        return prev.map((t) => (t.id === savedTask.id ? kanbanTask : t))
       }
-    }
-  }
-
-  const handleTaskSaved = (savedTask: Task) => {
-    // Determine if it was an edit or create based on presence in state, or use `editingTask` ref
-    // But safely: check if ID exists
-    const exists = tasks.some((t) => t.id === savedTask.id)
-    const kanbanTask = mapTaskToKanban(savedTask as Tables<'tasks'>) // Cast safe as Task matches Table
-
-    if (exists) {
-      setTasks((prev) =>
-        prev.map((t) => (t.id === savedTask.id ? kanbanTask : t)),
-      )
-    } else {
-      setTasks((prev) => [kanbanTask, ...prev])
-    }
+      return [kanbanTask, ...prev]
+    })
 
     setEditingTask(null)
     setIsDialogOpen(false)
-  }
+  }, [])
 
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task as KanbanTask) // KanbanTask extends Task
+  const handleEditTask = useCallback((task: Task) => {
+    setEditingTask(task as KanbanTask)
     setIsDialogOpen(true)
-  }
+  }, [])
 
-  const handleDeleteTask = async (taskId: string) => {
-    // 1. Optimistic Delete
-    const originalTasks = [...tasks]
-    setTasks((prev) => prev.filter((t) => t.id !== taskId))
+  const handleDeleteTask = useCallback(
+    async (taskId: string) => {
+      let originalTasks: KanbanTask[] = []
 
-    // 2. Persist
-    const success = await ProjectService.deleteTask(taskId)
-
-    // 3. Rollback
-    if (!success) {
-      setTasks(originalTasks)
-      toast({
-        title: 'Erro',
-        description: 'Falha ao excluir a tarefa.',
-        variant: 'destructive',
+      setTasks((prev) => {
+        originalTasks = [...prev]
+        return prev.filter((t) => t.id !== taskId)
       })
-    } else {
-      toast({ title: 'Sucesso', description: 'Tarefa excluída.' })
-    }
-  }
+
+      const success = await ProjectService.deleteTask(taskId)
+
+      if (!success) {
+        setTasks(originalTasks)
+        toast({
+          title: 'Erro',
+          description: 'Falha ao excluir a tarefa.',
+          variant: 'destructive',
+        })
+      } else {
+        toast({ title: 'Sucesso', description: 'Tarefa excluída.' })
+      }
+    },
+    [toast],
+  )
+
+  const handleNewTask = useCallback(() => {
+    setIsDialogOpen(true)
+  }, [])
+
+  const tasksByStatus = useMemo(
+    () =>
+      STATUSES.map((status) => ({
+        status,
+        tasks: tasks.filter((task) => task.status === status),
+      })),
+    [tasks],
+  )
 
   if (loading) {
     return (
@@ -206,23 +207,16 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
     )
   }
 
-  const tasksByStatus = STATUSES.map((status) => ({
-    status,
-    tasks: tasks.filter((task) => task.status === status),
-  }))
-
   return (
     <div className="space-y-6">
-      {/* Toolbar */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">
           Tarefas do Projeto
         </h3>
         <button
-          onClick={() => setIsDialogOpen(true)}
+          onClick={handleNewTask}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
         >
-          {/* Plus icon included in button or text */}
           Nova Tarefa
         </button>
       </div>
@@ -238,7 +232,6 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
         taskToEdit={editingTask}
       />
 
-      {/* Kanban Board */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -256,7 +249,7 @@ export function ProjectKanban({ projectId }: ProjectKanbanProps) {
               priorityColors={TASK_PRIORITY_COLORS}
               priorityLabels={TASK_PRIORITY_LABELS}
               isFirstColumn={status === 'todo'}
-              onNewTask={() => setIsDialogOpen(true)}
+              onNewTask={handleNewTask}
               activeTaskId={activeId}
               onEdit={handleEditTask}
               onDelete={handleDeleteTask}

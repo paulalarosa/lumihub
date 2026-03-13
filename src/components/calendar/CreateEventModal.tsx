@@ -17,11 +17,14 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { useAuth } from '@/hooks/useAuth'
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
+
 import { QUERY_KEYS } from '@/constants/queryKeys'
 
 interface CreateEventModalProps {
@@ -85,7 +88,7 @@ export const CreateEventModal = ({
           },
         })
       } catch (syncError) {
-        console.warn('Falha ao sincronizar com Google Calendar:', syncError)
+        logger.warning('Falha ao sincronizar com Google Calendar:', syncError)
       }
 
       return event

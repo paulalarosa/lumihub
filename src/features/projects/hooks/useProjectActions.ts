@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/hooks/useAuth'
-import { ProjectService } from '@/services/projectService'
+import { ProjectService } from '../api/projectService'
+
 import { generateWhatsAppLink } from '@/utils/whatsappGenerator'
 import { format } from 'date-fns'
 import type {
@@ -12,6 +13,7 @@ import type {
   ProjectWithRelations,
   ServiceUI,
 } from '@/types/api.types'
+import { getErrorMessage } from '@/utils/error-handler'
 
 interface UseProjectActionsProps {
   projectId: string | undefined
@@ -62,7 +64,11 @@ export function useProjectActions({
     })
 
     if (error) {
-      toast({ title: 'Erro ao adicionar tarefa', variant: 'destructive' })
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao adicionar tarefa',
+      )
+      toast({ title, description, variant: 'destructive' })
     } else {
       setNewTaskTitle('')
       refetch()
@@ -123,8 +129,12 @@ export function useProjectActions({
         description: 'Link enviado para a área de transferência.',
       })
       setTimeout(() => setCopied(false), 2000)
-    } catch (_e) {
-      toast({ title: 'Erro ao gerar link', variant: 'destructive' })
+    } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao gerar link',
+      )
+      toast({ title, description, variant: 'destructive' })
     }
   }
 
@@ -180,8 +190,12 @@ export function useProjectActions({
       })
 
       window.open(link, '_blank')
-    } catch (_error) {
-      toast({ title: 'Erro ao gerar link', variant: 'destructive' })
+    } catch (error) {
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao gerar link',
+      )
+      toast({ title, description, variant: 'destructive' })
     }
   }
 
@@ -243,7 +257,11 @@ export function useProjectActions({
     })
 
     if (error) {
-      toast({ title: 'Erro ao adicionar serviço', variant: 'destructive' })
+      const { title, description } = getErrorMessage(
+        error,
+        'Erro ao adicionar serviço',
+      )
+      toast({ title, description, variant: 'destructive' })
     } else {
       toast({ title: 'Serviço adicionado!' })
       setIsServiceDialogOpen(false)
@@ -313,9 +331,13 @@ export function useProjectActions({
       .insert([payload])
 
     if (transError) {
+      const { title, description } = getErrorMessage(
+        transError,
+        'Erro ao registrar transação',
+      )
       toast({
-        title: 'Erro ao registrar transação',
-        description: transError.message,
+        title,
+        description,
         variant: 'destructive',
       })
       return

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
@@ -145,12 +145,16 @@ export function useProjectsPage() {
     }
   }
 
-  const filteredProjects = projects.filter(
-    (project) =>
-      project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      ((project.client as Record<string, unknown>)?.full_name as string)
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()),
+  const filteredProjects = useMemo(
+    () =>
+      projects.filter(
+        (project) =>
+          project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          ((project.client as Record<string, unknown>)?.full_name as string)
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()),
+      ),
+    [projects, searchTerm],
   )
 
   return {

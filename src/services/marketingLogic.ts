@@ -1,7 +1,9 @@
 // Marketing logic - simplified (some columns don't exist)
 
 import { supabase } from '@/integrations/supabase/client'
-import { subMonths, format } from 'date-fns'
+import { subMonths } from 'date-fns/subMonths'
+import { format } from 'date-fns/format'
+
 import { logger } from '@/services/logger'
 
 export interface MarketingTrigger {

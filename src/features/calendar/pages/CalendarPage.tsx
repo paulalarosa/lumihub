@@ -15,9 +15,9 @@ import { GoogleCalendarSettings } from '@/components/calendar/GoogleCalendarSett
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar'
 import { ConflictResolver } from '@/components/calendar/ConflictResolver'
 import { toast } from 'sonner'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
 import { EmptyState } from '@/components/ui/empty-state'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { PageLoader } from '@/components/ui/LoadingStates'
 
 const locales = { 'pt-BR': ptBR }
 
@@ -281,7 +281,7 @@ export const CalendarPage = () => {
         <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 calendar-dark">
           {isLoading ? (
             <div className="h-[700px] flex items-center justify-center">
-              <LoadingSpinner size={32} label="CARREGANDO AGENDA..." />
+              <PageLoader />
             </div>
           ) : isError ? (
             <div className="h-[700px] flex items-center justify-center">

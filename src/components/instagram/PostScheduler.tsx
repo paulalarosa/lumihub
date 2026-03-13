@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Calendar as CalendarIcon, Upload, Sparkles } from 'lucide-react'
+import { logger } from '@/services/logger'
 import { toast } from 'sonner'
 
 export const PostScheduler = () => {
@@ -88,7 +89,7 @@ export const PostScheduler = () => {
       toast.success('Post agendado com sucesso!')
     },
     onError: (error) => {
-      console.error(error)
+      logger.error(error)
       toast.error('Erro ao agendar post: ' + error.message)
     },
   })

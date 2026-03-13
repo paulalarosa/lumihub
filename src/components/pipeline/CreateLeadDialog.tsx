@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+import { logger } from '@/services/logger'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 
 interface CreateLeadDialogProps {
@@ -45,25 +46,27 @@ export const CreateLeadDialog = ({
   const createLead = useMutation({
     mutationFn: async (data: LeadFormData) => {
       // 1. Get default stage
-      const { data: stages } = await supabase
-        .from('pipeline_stages')
-        .select('id')
-        .eq('user_id', user?.id)
-        .eq('is_default', true)
-        .eq('stage_type', 'lead')
-        .single()
+      const { data: stages }: any = await (
+        supabase
+          .from('pipeline_stages' as any)
+          .select('id')
+          .eq('user_id', user?.id)
+          .eq('is_default', true)
+          .eq('stage_type', 'lead') as any
+      ).single()
 
       let stageId = stages?.id
 
       // Fallback if no specific default lead stage found, take the first one
       if (!stageId) {
-        const { data: firstStage } = await supabase
-          .from('pipeline_stages')
-          .select('id')
-          .eq('user_id', user?.id)
-          .order('display_order', { ascending: true })
-          .limit(1)
-          .single()
+        const { data: firstStage }: any = await (
+          supabase
+            .from('pipeline_stages' as any)
+            .select('id')
+            .eq('user_id', user?.id)
+            .order('display_order', { ascending: true })
+            .limit(1) as any
+        ).single()
         stageId = firstStage?.id
       }
 
@@ -72,7 +75,7 @@ export const CreateLeadDialog = ({
           'Nenhum estágio de pipeline encontrado. Crie os estágios primeiro.',
         )
 
-      const { error } = await supabase.from('leads').insert({
+      const { error } = await (supabase.from('leads' as any).insert({
         user_id: user?.id,
         name: data.name,
         email: data.email || null,
@@ -86,7 +89,7 @@ export const CreateLeadDialog = ({
         notes: data.notes || null,
         current_stage_id: stageId,
         status: 'active',
-      })
+      } as any) as any)
 
       if (error) throw error
     },
@@ -99,9 +102,10 @@ export const CreateLeadDialog = ({
       onClose()
     },
     onError: (error) => {
-      console.error('Error creating lead:', error)
+      logger.error('Error creating lead:', error)
       toast.error('Erro ao criar lead: ' + error.message)
     },
+
     onSettled: () => {
       setIsLoading(false)
     },

@@ -1,67 +1,83 @@
-import { User, Clock } from 'lucide-react'
-import { format } from 'date-fns'
+import React, { memo, useRef } from 'react'
+import { Calendar } from 'lucide-react'
+import { format } from 'date-fns/format'
+
 import { ptBR } from 'date-fns/locale'
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 interface Event {
+  id: string
   title: string
-  date: string
-  client?: string
-  type?: string
+  start_time: string
+  category: string
 }
 
 interface EventsTableProps {
   events: Event[]
 }
 
-export const EventsTable = ({ events }: EventsTableProps) => {
-  return (
-    <div className="bg-zinc-950/50 border border-white/10 rounded-none overflow-hidden backdrop-blur-sm">
-      <div className="p-3 border-b border-white/5 bg-white/5">
-        <h4 className="text-[10px] font-mono uppercase tracking-[0.2em] text-white font-bold">
-          Protocol Schedule
-        </h4>
-      </div>
+const EventRow = memo(({ event }: { event: Event }) => (
+  <div className="flex items-center gap-4 p-3 rounded-lg bg-muted/50 border border-border/50">
+    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+      <Calendar className="w-5 h-5" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <h4 className="font-medium truncate">{event.title}</h4>
+      <p className="text-sm text-muted-foreground">
+        {format(new Date(event.start_time), "EEEE, d 'de' MMMM", {
+          locale: ptBR,
+        })}
+      </p>
+    </div>
+    <div className="text-xs font-medium px-2 py-1 rounded-full bg-primary/20 text-primary">
+      {event.category}
+    </div>
+  </div>
+))
 
-      <div className="divide-y divide-white/5">
+EventRow.displayName = 'EventRow'
+
+export const EventsTable: React.FC<EventsTableProps> = ({ events }) => {
+  const parentRef = useRef<HTMLDivElement>(null)
+
+  const rowVirtualizer = useVirtualizer({
+    count: events.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 72,
+    overscan: 5,
+  })
+
+  return (
+    <div
+      ref={parentRef}
+      className="max-h-[400px] overflow-auto pr-2 custom-scrollbar"
+    >
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          width: '100%',
+          position: 'relative',
+        }}
+      >
         {events.length === 0 ? (
-          <div className="p-4 text-center">
-            <p className="text-[10px] font-mono uppercase text-zinc-600">
-              No events detected in stream
-            </p>
+          <div className="text-center py-8 text-muted-foreground">
+            Nenhum evento programado
           </div>
         ) : (
-          events.map((event, idx) => (
+          rowVirtualizer.getVirtualItems().map((virtualRow) => (
             <div
-              key={idx}
-              className="p-3 hover:bg-white/5 transition-colors group"
+              key={virtualRow.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualRow.size}px`,
+                transform: `translateY(${virtualRow.start}px)`,
+                paddingBottom: '8px',
+              }}
             >
-              <div className="flex justify-between items-start mb-1">
-                <span className="text-[11px] font-bold text-white font-mono group-hover:text-emerald-400 transition-colors uppercase">
-                  {event.title}
-                </span>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 border border-zinc-800 bg-black text-[8px] font-mono uppercase text-zinc-500">
-                  {event.type || 'Social'}
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3 h-3 text-zinc-500" />
-                  <span className="text-[10px] text-zinc-400 font-mono">
-                    {format(new Date(event.date), 'dd MMM, HH:mm', {
-                      locale: ptBR,
-                    })}
-                  </span>
-                </div>
-                {event.client && (
-                  <div className="flex items-center gap-1.5">
-                    <User className="w-3 h-3 text-zinc-500" />
-                    <span className="text-[10px] text-zinc-400 font-mono italic">
-                      {event.client}
-                    </span>
-                  </div>
-                )}
-              </div>
+              <EventRow event={events[virtualRow.index]} />
             </div>
           ))
         )}

@@ -3,9 +3,11 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
+
 import { Button } from '@/components/ui/Button'
 import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
+import { getErrorMessage } from '@/utils/error-handler'
 
 export default function AcceptInvitePage() {
   const { token } = useParams<{ token: string }>()
@@ -38,9 +40,15 @@ export default function AcceptInvitePage() {
 
       if (error) throw error
 
-      if (data.success) {
+      const result = data as unknown as {
+        success: boolean
+        is_new_connection: boolean
+        error?: string
+      }
+
+      if (result.success) {
         toast({
-          title: data.is_new_connection
+          title: result.is_new_connection
             ? 'Acesso Concedido!'
             : 'Acesso Verificado',
           description: 'Você agora tem acesso à agenda desta maquiadora.',
@@ -48,7 +56,7 @@ export default function AcceptInvitePage() {
         // Redirect to Assistant Dashboard
         setTimeout(() => navigate('/assistant/dashboard'), 1500)
       } else {
-        const errorMessage = data.error || 'Convite inválido ou expirado.'
+        const errorMessage = result.error || 'Convite inválido ou expirado.'
         setError(errorMessage)
         toast({
           title: 'Erro',
@@ -56,11 +64,15 @@ export default function AcceptInvitePage() {
           variant: 'destructive',
         })
       }
-    } catch (err) {
-      setError(err.message)
+    } catch (err: any) {
+      const { title, description } = getErrorMessage(
+        err,
+        'Erro ao aceitar convite',
+      )
+      setError(description)
       toast({
-        title: 'Erro ao aceitar convite',
-        description: err.message,
+        title,
+        description,
         variant: 'destructive',
       })
     } finally {
@@ -68,12 +80,7 @@ export default function AcceptInvitePage() {
     }
   }
 
-  if (authLoading)
-    return (
-      <div className="flex justify-center mt-20">
-        <LoadingSpinner />
-      </div>
-    )
+  if (authLoading) return <PageLoader />
 
   // If user is not logged in, show signup form
   if (!user) {
@@ -88,8 +95,8 @@ export default function AcceptInvitePage() {
   if (processing) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <LoadingSpinner className="w-8 h-8 mb-4" />
-        <p className="text-muted-foreground animate-pulse">
+        <PageLoader />
+        <p className="text-muted-foreground animate-pulse mt-4">
           Verificando convite e configurando acesso...
         </p>
       </div>

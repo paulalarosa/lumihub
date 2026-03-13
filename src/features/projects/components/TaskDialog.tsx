@@ -9,7 +9,8 @@ import {
 } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
-import { ProjectService } from '@/services/projectService'
+import { ProjectService } from '../api/projectService'
+
 import { useToast } from '@/hooks/use-toast'
 import type { Task, TaskPriority } from '@/types/database'
 import { logger } from '@/services/logger'

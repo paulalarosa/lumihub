@@ -1,7 +1,8 @@
 import { Button } from '@/components/ui/Button'
 import { FileText, Download } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
-import { ContractTemplate } from '../contracts/ContractTemplate'
+import { ContractTemplate } from '@/features/contracts/components/ContractTemplate'
+
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { useState } from 'react'

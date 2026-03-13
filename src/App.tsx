@@ -2,28 +2,43 @@ import { Toaster } from '@/components/ui/toaster'
 import { useEffect, useState, lazy, Suspense } from 'react'
 import { SplashScreen } from './components/ui/layout/SplashScreen'
 import { Toaster as Sonner } from '@/components/ui/sonner'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { AnalyticsProvider } from '@/components/analytics/AnalyticsProvider'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 import AdminRoute from '@/features/auth/AdminRoute'
-import AIController from './features/ai/components/AIController'
 import { AIProvider } from '@/contexts/AIProvider'
-import AuthCallbackHandler from '@/features/auth/AuthCallbackHandler'
-import MFAVerifyPage from '@/features/auth/pages/MFAVerifyPage'
+const AIController = lazy(() => import('./features/ai/components/AIController'))
+
+const AuthCallbackHandler = lazy(
+  () => import('@/features/auth/AuthCallbackHandler'),
+)
+const MFAVerifyPage = lazy(() => import('@/features/auth/pages/MFAVerifyPage'))
+
 import AppLayout from './components/ui/layout/AppLayout'
 import MarketingLayout from './components/ui/layout/MarketingLayout'
 import { ScrollToTop } from './components/utils/ScrollToTop'
 import { GoogleAnalytics } from './components/analytics/GoogleAnalytics'
-import { PageLoader } from './components/ui/PageLoader'
+import { PageLoader } from './components/ui/LoadingStates'
+
 import { ErrorBoundary } from 'react-error-boundary'
 import { SystemFailure } from './components/ui/SystemFailure'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 import { CustomErrorBoundary } from '@/components/ui/CustomErrorBoundary'
-import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
-import { AchievementNotifications } from '@/components/onboarding/AchievementToast'
+const OnboardingWizard = lazy(() =>
+  import('@/components/onboarding/OnboardingWizard').then((m) => ({
+    default: m.OnboardingWizard,
+  })),
+)
+const AchievementNotifications = lazy(() =>
+  import('@/components/onboarding/AchievementToast').then((m) => ({
+    default: m.AchievementNotifications,
+  })),
+)
 
 // Lazy AI Components
 const ModernAIChat = lazy(() =>
@@ -140,6 +155,16 @@ const AssistantFreeDashboard = lazy(
 // Custom styles
 import '@/styles/calendar.css'
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+})
+
 const App = () => {
   const [isLoading, setIsLoading] = useState(true)
 
@@ -166,319 +191,332 @@ const App = () => {
       <ScrollToTop />
       <GoogleAnalytics />
       <AuthProvider>
-        <AnalyticsProvider>
-          <Suspense fallback={null}>
-            <ModernAIChat />
-            <CanvasPanel />
-          </Suspense>
-          <AIProvider>
-            <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
-              <SkipToContent />
-              <main id="main-content">
-                <ErrorBoundary FallbackComponent={SystemFailure}>
-                  <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      {/* Public Marketing Pages */}
-                      <Route path="/" element={<Index />} />
-                      <Route element={<MarketingLayout />}>
-                        <Route path="/recursos" element={<Resources />} />
-                        <Route path="/planos" element={<Plans />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:slug" element={<BlogArticle />} />
-                        <Route path="/contato" element={<Contact />} />
-                        <Route path="/privacidade" element={<Privacy />} />
-                        <Route path="/termos" element={<Terms />} />
-                      </Route>
+        <QueryClientProvider client={queryClient}>
+          <AnalyticsProvider>
+            <Suspense fallback={null}>
+              <ModernAIChat />
+              <CanvasPanel />
+            </Suspense>
+            <AIProvider>
+              <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
+                <SkipToContent />
+                <main id="main-content">
+                  <ErrorBoundary FallbackComponent={SystemFailure}>
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        {/* Public Marketing Pages */}
+                        <Route path="/" element={<Index />} />
+                        <Route element={<MarketingLayout />}>
+                          <Route path="/recursos" element={<Resources />} />
+                          <Route path="/planos" element={<Plans />} />
+                          <Route path="/blog" element={<Blog />} />
+                          <Route path="/blog/:slug" element={<BlogArticle />} />
+                          <Route path="/contato" element={<Contact />} />
+                          <Route path="/privacidade" element={<Privacy />} />
+                          <Route path="/termos" element={<Terms />} />
+                        </Route>
 
-                      {/* Auth */}
-                      <Route path="/login" element={<Login />} />
-                      <Route path="/register" element={<Register />} />
-                      <Route path="/auth">
-                        <Route
-                          index
-                          element={<Navigate to="/login" replace />}
-                        />
-                        <Route
-                          path="login"
-                          element={<Navigate to="/login" replace />}
-                        />
-                        <Route
-                          path="register"
-                          element={<Navigate to="/register" replace />}
-                        />
-                        <Route path="mfa-verify" element={<MFAVerifyPage />} />
-                      </Route>
-                      <Route
-                        path="/auth/callback"
-                        element={<AuthCallbackHandler />}
-                      />
-                      <Route
-                        path="/auth/forgot-password"
-                        element={<ForgotPassword />}
-                      />
-                      <Route
-                        path="/auth/update-password"
-                        element={<UpdatePassword />}
-                      />
-
-                      {/* Protected App Pages with Layout */}
-                      <Route element={<AppLayout />}>
-                        <Route
-                          path="/dashboard"
-                          element={
-                            <ProtectedRoute>
-                              <CustomErrorBoundary>
-                                <Dashboard />
-                              </CustomErrorBoundary>
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/dashboard/financial"
-                          element={
-                            <ProtectedRoute>
-                              <FinancialPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/analytics"
-                          element={
-                            <ProtectedRoute>
-                              <Analytics />
-                            </ProtectedRoute>
-                          }
-                        />
-
-                        <Route element={<AdminRoute />}>
-                          <Route path="/admin" element={<AdminDashboard />} />
+                        {/* Auth */}
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/auth">
                           <Route
-                            path="/admin/users"
-                            element={<Navigate to="/admin?tab=users" replace />}
+                            index
+                            element={<Navigate to="/login" replace />}
                           />
                           <Route
-                            path="/admin/dashboard"
+                            path="login"
+                            element={<Navigate to="/login" replace />}
+                          />
+                          <Route
+                            path="register"
+                            element={<Navigate to="/register" replace />}
+                          />
+                          <Route
+                            path="mfa-verify"
+                            element={<MFAVerifyPage />}
+                          />
+                        </Route>
+                        <Route
+                          path="/auth/callback"
+                          element={<AuthCallbackHandler />}
+                        />
+                        <Route
+                          path="/auth/forgot-password"
+                          element={<ForgotPassword />}
+                        />
+                        <Route
+                          path="/auth/update-password"
+                          element={<UpdatePassword />}
+                        />
+
+                        {/* Protected App Pages with Layout */}
+                        <Route element={<AppLayout />}>
+                          <Route
+                            path="/dashboard"
                             element={
-                              <Navigate to="/admin?tab=overview" replace />
+                              <ProtectedRoute>
+                                <CustomErrorBoundary>
+                                  <Dashboard />
+                                </CustomErrorBoundary>
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/dashboard/financial"
+                            element={
+                              <ProtectedRoute>
+                                <FinancialPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/analytics"
+                            element={
+                              <ProtectedRoute>
+                                <Analytics />
+                              </ProtectedRoute>
+                            }
+                          />
+
+                          <Route element={<AdminRoute />}>
+                            <Route path="/admin" element={<AdminDashboard />} />
+                            <Route
+                              path="/admin/users"
+                              element={
+                                <Navigate to="/admin?tab=users" replace />
+                              }
+                            />
+                            <Route
+                              path="/admin/dashboard"
+                              element={
+                                <Navigate to="/admin?tab=overview" replace />
+                              }
+                            />
+                          </Route>
+
+                          <Route
+                            path="/calendar"
+                            element={
+                              <ProtectedRoute>
+                                <CalendarPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/calendar/callback"
+                            element={<GoogleCalendarCallback />}
+                          />
+
+                          <Route
+                            path="/clientes"
+                            element={
+                              <ProtectedRoute>
+                                <Clients />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/clientes/:id"
+                            element={
+                              <ProtectedRoute>
+                                <ClientDetails />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/projetos"
+                            element={
+                              <ProtectedRoute>
+                                <CustomErrorBoundary>
+                                  <Projects />
+                                </CustomErrorBoundary>
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/projetos/novo"
+                            element={
+                              <ProtectedRoute>
+                                <Projects />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/projetos/:id"
+                            element={
+                              <ProtectedRoute>
+                                <ProjectDetails />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/projects/:projectId/contract"
+                            element={
+                              <ProtectedRoute>
+                                <ProjectContract />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/configuracoes"
+                            element={
+                              <ProtectedRoute>
+                                <Settings />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/assistentes"
+                            element={
+                              <ProtectedRoute>
+                                <AssistantsPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/servicos"
+                            element={
+                              <ProtectedRoute>
+                                <Services />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/funil"
+                            element={
+                              <ProtectedRoute>
+                                <SalesPipeline />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/integracoes"
+                            element={
+                              <ProtectedRoute>
+                                <IntegrationsPage />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/contratos"
+                            element={
+                              <ProtectedRoute>
+                                <Contracts />
+                              </ProtectedRoute>
+                            }
+                          />
+                          <Route
+                            path="/marketing"
+                            element={
+                              <ProtectedRoute>
+                                <Marketing />
+                              </ProtectedRoute>
                             }
                           />
                         </Route>
 
                         <Route
-                          path="/calendar"
+                          path="/assistant/accept/:token"
                           element={
-                            <ProtectedRoute>
-                              <CalendarPage />
-                            </ProtectedRoute>
+                            <Navigate
+                              to={window.location.pathname.replace(
+                                '/assistant/accept/',
+                                '/assistente/convite/',
+                              )}
+                              replace
+                            />
                           }
                         />
                         <Route
-                          path="/calendar/callback"
-                          element={<GoogleCalendarCallback />}
-                        />
-
-                        <Route
-                          path="/clientes"
+                          path="/assistant"
                           element={
                             <ProtectedRoute>
-                              <Clients />
+                              <AssistantLayout />
                             </ProtectedRoute>
                           }
-                        />
-                        <Route
-                          path="/clientes/:id"
-                          element={
-                            <ProtectedRoute>
-                              <ClientDetails />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/projetos"
-                          element={
-                            <ProtectedRoute>
-                              <CustomErrorBoundary>
-                                <Projects />
-                              </CustomErrorBoundary>
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/projetos/novo"
-                          element={
-                            <ProtectedRoute>
-                              <Projects />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/projetos/:id"
-                          element={
-                            <ProtectedRoute>
-                              <ProjectDetails />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/projects/:projectId/contract"
-                          element={
-                            <ProtectedRoute>
-                              <ProjectContract />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/configuracoes"
-                          element={
-                            <ProtectedRoute>
-                              <Settings />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/assistentes"
-                          element={
-                            <ProtectedRoute>
-                              <AssistantsPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/servicos"
-                          element={
-                            <ProtectedRoute>
-                              <Services />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/funil"
-                          element={
-                            <ProtectedRoute>
-                              <SalesPipeline />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/integracoes"
-                          element={
-                            <ProtectedRoute>
-                              <IntegrationsPage />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/contratos"
-                          element={
-                            <ProtectedRoute>
-                              <Contracts />
-                            </ProtectedRoute>
-                          }
-                        />
-                        <Route
-                          path="/marketing"
-                          element={
-                            <ProtectedRoute>
-                              <Marketing />
-                            </ProtectedRoute>
-                          }
-                        />
-                      </Route>
-
-                      <Route
-                        path="/assistant/accept/:token"
-                        element={
-                          <Navigate
-                            to={window.location.pathname.replace(
-                              '/assistant/accept/',
-                              '/assistente/convite/',
-                            )}
-                            replace
+                        >
+                          <Route
+                            path="dashboard"
+                            element={<AssistantDashboard />}
                           />
-                        }
-                      />
-                      <Route
-                        path="/assistant"
-                        element={
-                          <ProtectedRoute>
-                            <AssistantLayout />
-                          </ProtectedRoute>
-                        }
-                      >
+                          <Route
+                            index
+                            element={<Navigate to="dashboard" replace />}
+                          />
+                        </Route>
                         <Route
-                          path="dashboard"
-                          element={<AssistantDashboard />}
+                          path="/assistente/convite/:token"
+                          element={<AcceptInvitePage />}
+                        />
+                        <Route path="/upgrade" element={<UpgradePage />} />
+                        <Route
+                          path="/upgrade/success"
+                          element={<UpgradeSuccessPage />}
                         />
                         <Route
-                          index
-                          element={<Navigate to="dashboard" replace />}
+                          path="/upgrade/failure"
+                          element={<UpgradeFailurePage />}
                         />
-                      </Route>
-                      <Route
-                        path="/assistente/convite/:token"
-                        element={<AcceptInvitePage />}
-                      />
-                      <Route path="/upgrade" element={<UpgradePage />} />
-                      <Route
-                        path="/upgrade/success"
-                        element={<UpgradeSuccessPage />}
-                      />
-                      <Route
-                        path="/upgrade/failure"
-                        element={<UpgradeFailurePage />}
-                      />
-                      <Route
-                        path="/upgrade/pending"
-                        element={<UpgradePendingPage />}
-                      />
-                      <Route path="/b/:slug" element={<PublicBooking />} />
+                        <Route
+                          path="/upgrade/pending"
+                          element={<UpgradePendingPage />}
+                        />
+                        <Route path="/b/:slug" element={<PublicBooking />} />
 
-                      {/* Assistant Portal Free (Shadow Accounts) */}
-                      <Route
-                        path="/agenda-equipa/:professionalId"
-                        element={<AssistantQuickLogin />}
-                      />
-                      <Route
-                        path="/agenda-equipa/:professionalId/dashboard"
-                        element={<AssistantFreeDashboard />}
-                      />
-
-                      <Route
-                        path="/assinar/:requestId"
-                        element={<SignContract />}
-                      />
-                      <Route path="/avaliar/:token" element={<LeaveReview />} />
-                      <Route path="/site/:slug" element={<Microsite />} />
-                      <Route
-                        path="/meu-site/editor"
-                        element={
-                          <ProtectedRoute>
-                            <MicrositeEditor />
-                          </ProtectedRoute>
-                        }
-                      />
-                      <Route
-                        path="/portal/:clientId/login"
-                        element={<BrideLoginPage />}
-                      />
-                      <Route element={<BrideProtectedRoute />}>
+                        {/* Assistant Portal Free (Shadow Accounts) */}
                         <Route
-                          path="/portal/:clientId/dashboard"
-                          element={<BrideDashboardPage />}
+                          path="/agenda-equipa/:professionalId"
+                          element={<AssistantQuickLogin />}
                         />
-                      </Route>
-                      <Route path="*" element={<Dashboard />} />
-                      <Route path="/404" element={<NotFound />} />
-                    </Routes>
-                  </Suspense>
-                </ErrorBoundary>
-              </main>
-            </div>
-            <AIController />
-            <OnboardingWizard />
-            <AchievementNotifications />
-          </AIProvider>
-        </AnalyticsProvider>
+                        <Route
+                          path="/agenda-equipa/:professionalId/dashboard"
+                          element={<AssistantFreeDashboard />}
+                        />
+
+                        <Route
+                          path="/assinar/:requestId"
+                          element={<SignContract />}
+                        />
+                        <Route
+                          path="/avaliar/:token"
+                          element={<LeaveReview />}
+                        />
+                        <Route path="/site/:slug" element={<Microsite />} />
+                        <Route
+                          path="/meu-site/editor"
+                          element={
+                            <ProtectedRoute>
+                              <MicrositeEditor />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/portal/:clientId/login"
+                          element={<BrideLoginPage />}
+                        />
+                        <Route element={<BrideProtectedRoute />}>
+                          <Route
+                            path="/portal/:clientId/dashboard"
+                            element={<BrideDashboardPage />}
+                          />
+                        </Route>
+                        <Route path="*" element={<Dashboard />} />
+                        <Route path="/404" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </ErrorBoundary>
+                </main>
+              </div>
+              <Suspense fallback={null}>
+                <AIController />
+                <OnboardingWizard />
+                <AchievementNotifications />
+              </Suspense>
+            </AIProvider>
+          </AnalyticsProvider>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </AuthProvider>
     </BrowserRouter>
   )

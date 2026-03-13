@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
-import { differenceInDays } from 'date-fns'
+import { differenceInDays } from 'date-fns/differenceInDays'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+
 import type {
   Project,
   ProjectService,
@@ -49,17 +51,8 @@ export type { ServiceItem, BrideData, Event as BrideEvent, BrideProject }
 export function useBrideDashboard() {
   const { clientId } = useParams()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [project, setProject] = useState<BrideProject | null>(null)
-  const [totalContract, setTotalContract] = useState(0)
-  const [paidAmount, setPaidAmount] = useState(0)
-  const [services, setServices] = useState<ServiceItem[]>([])
-  const [contracts, setContracts] = useState<Contract[]>([])
-  const [events, _setEvents] = useState<Event[]>([])
-  const [daysLeft, setDaysLeft] = useState(0)
-  const [bride, _setBride] = useState<BrideData | null>(null)
   const [isSigOpen, setIsSigOpen] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null,
@@ -68,16 +61,16 @@ export function useBrideDashboard() {
   const storedAuth = localStorage.getItem(`bride_auth_${clientId}`)
   const storedPin = storedAuth ? JSON.parse(storedAuth).pin : null
 
-  useEffect(() => {
-    if (clientId) fetchData(storedPin || '')
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId])
+  const {
+    data: dashboardData,
+    isLoading: loading,
+    error: queryError,
+    refetch: refreshData,
+  } = useQuery({
+    queryKey: ['bride-dashboard', clientId],
+    queryFn: async () => {
+      if (!clientId) throw new Error('Client ID is required')
 
-  const fetchData = async (_pin: string) => {
-    setLoading(true)
-    setError(null)
-
-    try {
       const { data: projectData, error: projectError } = await supabase
         .from('projects')
         .select(
@@ -93,14 +86,10 @@ export function useBrideDashboard() {
 
       if (projectError) throw projectError
       if (!projectData) {
-        setError('Projeto não encontrado para este cliente.')
-        setLoading(false)
-        return
+        throw new Error('Projeto não encontrado para este cliente.')
       }
 
       const typedProject = projectData as unknown as BrideProject
-      setProject(typedProject)
-
       const sData = typedProject.services || []
       const tData = typedProject.transactions || []
 
@@ -120,11 +109,24 @@ export function useBrideDashboard() {
         .filter((t) => t.type === 'income')
         .reduce((sum: number, t) => sum + (Number(t.amount) || 0), 0)
 
-      setTotalContract(totalValue)
-      setPaidAmount(paidValue)
+      const targetDate =
+        typedProject.event_date || typedProject.client?.wedding_date
+      let daysLeft = 0
+      if (targetDate) {
+        const diff = differenceInDays(new Date(targetDate), new Date())
+        daysLeft = diff > 0 ? diff : 0
+      }
 
-      setServices(
-        sData.map((s) => {
+      const { data: contractsData } = await supabase
+        .from('contracts')
+        .select('*')
+        .eq('project_id', typedProject.id)
+
+      return {
+        project: typedProject,
+        totalContract: totalValue,
+        paidAmount: paidValue,
+        services: sData.map((s) => {
           const uPrice =
             typeof s.unit_price === 'string'
               ? parseFloat(s.unit_price)
@@ -136,27 +138,20 @@ export function useBrideDashboard() {
             status: 'pending' as const,
             paid_amount: 0,
           }
-        }),
-      )
-
-      const targetDate =
-        typedProject.event_date || typedProject.client?.wedding_date
-      if (targetDate) {
-        const diff = differenceInDays(new Date(targetDate), new Date())
-        setDaysLeft(diff > 0 ? diff : 0)
+        }) as ServiceItem[],
+        contracts: (contractsData || []) as Contract[],
+        daysLeft,
+        events: [] as Event[], // Placeholder for now or fetch if needed
+        bride: {
+          id: typedProject.client_id,
+          name: typedProject.client?.full_name || 'Noiva',
+          wedding_date: typedProject.client?.wedding_date || null,
+        } as BrideData,
       }
-
-      const { data: contractsData } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('project_id', typedProject.id)
-      setContracts(contractsData || [])
-    } catch (_e) {
-      setError('Não foi possível carregar os dados.')
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    enabled: !!clientId,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
 
   const handleLogout = () => {
     localStorage.removeItem(`bride_auth_${clientId}`)
@@ -164,22 +159,18 @@ export function useBrideDashboard() {
     navigate(`/portal/${clientId}/login`)
   }
 
-  const refreshData = () => {
-    if (storedPin) fetchData(storedPin)
-  }
-
   return {
     clientId,
     loading,
-    error,
-    project,
-    totalContract,
-    paidAmount,
-    services,
-    contracts,
-    events,
-    daysLeft,
-    bride,
+    error: queryError ? (queryError as Error).message : null,
+    project: dashboardData?.project || null,
+    totalContract: dashboardData?.totalContract || 0,
+    paidAmount: dashboardData?.paidAmount || 0,
+    services: dashboardData?.services || [],
+    contracts: dashboardData?.contracts || [],
+    events: dashboardData?.events || [],
+    daysLeft: dashboardData?.daysLeft || 0,
+    bride: dashboardData?.bride || null,
     isSigOpen,
     setIsSigOpen,
     selectedContract,

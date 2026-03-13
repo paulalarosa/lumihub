@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { TableLoader } from '@/components/ui/LoadingStates'
 import { Plus, Trash2, Star, MessageSquare } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -109,11 +109,7 @@ export function TestimonialsEditor({ micrositeId }: { micrositeId?: string }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        {isLoading && (
-          <div className="py-8 flex justify-center">
-            <LoadingSpinner />
-          </div>
-        )}
+        {isLoading && <TableLoader />}
 
         {testimonials?.map((t) => (
           <div

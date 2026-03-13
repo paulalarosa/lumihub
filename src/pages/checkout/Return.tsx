@@ -10,6 +10,7 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 
 export default function Return() {
   const [status, setStatus] = useState<string | null>(null)
@@ -56,7 +57,7 @@ export default function Return() {
           setStatus('failed')
         }
       } catch (err) {
-        console.error(err)
+        logger.error(err)
         setStatus('failed')
       }
     }

@@ -3,7 +3,8 @@ import { useRole } from '@/hooks/useRole'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { PageLoader } from '@/components/ui/LoadingStates'
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
@@ -212,12 +213,7 @@ export default function AssistantDashboard() {
       currency: 'BRL',
     }).format(val)
 
-  if (roleLoading || connectionsLoading)
-    return (
-      <div className="h-screen flex justify-center items-center">
-        <LoadingSpinner />
-      </div>
-    )
+  if (roleLoading || connectionsLoading) return <PageLoader />
 
   if (!isAssistant) {
     return (
@@ -416,9 +412,7 @@ export default function AssistantDashboard() {
                 className="space-y-4 mt-0"
               >
                 {artistEventsLoading ? (
-                  <div className="py-12 flex justify-center">
-                    <LoadingSpinner />
-                  </div>
+                  <PageLoader />
                 ) : artistEvents && artistEvents.length === 0 ? (
                   <div className="text-center py-16 border rounded-lg bg-card/50 border-dashed">
                     <Calendar className="w-10 h-10 mx-auto text-muted-foreground mb-3 opacity-30" />

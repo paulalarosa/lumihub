@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle()
 
       if (error) {
-        // console.warn("Auth: Error fetching role, defaulting to professional.", error);
         return 'professional'
       }
 
@@ -96,8 +95,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const signUp = useCallback(
-    (email: string, pass: string) =>
-      supabase.auth.signUp({ email, password: pass }),
+    (email: string, pass: string, fullName?: string, businessName?: string) =>
+      supabase.auth.signUp({
+        email,
+        password: pass,
+        options: {
+          data: {
+            full_name: fullName,
+            business_name: businessName,
+          },
+        },
+      }),
     [],
   )
 
@@ -218,7 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navigate, signOut])
+  }, [navigate])
 
   return (
     <AuthContext.Provider

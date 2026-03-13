@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { ptBR } from 'date-fns/locale'
 
 // Local bookingSchema removed in favor of centralized schema
@@ -64,7 +65,6 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       // For now, we'll insert into 'leads' if it exists, or just log/toast for the prototype.
       // Assuming 'leads' table exists based on useLeads hook presence.
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: leadError } = await (
         (supabase as any).from('leads') as any
       ).insert({
@@ -78,7 +78,7 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
 
       if (leadError) {
         // Fallback if leads table has different schema or issues, just show success for demo
-        console.error(
+        logger.error(
           'Lead insertion error (might be schema mismatch):',
           leadError,
         )
@@ -87,7 +87,7 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       toast.success('Solicitação enviada com sucesso!')
       form.reset()
     } catch (error) {
-      console.error('Error submitting booking:', error)
+      logger.error('Error submitting booking:', error)
       toast.error('Erro ao enviar solicitação. Tente novamente.')
     } finally {
       setIsSubmitting(false)

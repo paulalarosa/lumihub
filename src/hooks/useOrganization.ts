@@ -1,69 +1,48 @@
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/services/logger'
+
+export interface OrganizationInfo {
+  organizationId: string | null
+  isOwner: boolean
+  loading: boolean
+  user: any
+}
 
 export function useOrganization() {
   const { user } = useAuth()
-  const [organizationId, setOrganizationId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isOwner, setIsOwner] = useState(false)
 
-  useEffect(() => {
-    if (!user) {
-      setOrganizationId(null)
-      setLoading(false)
-      return
-    }
+  const { data, isLoading } = useQuery({
+    queryKey: ['organization', user?.id],
+    queryFn: async () => {
+      if (!user) return { organizationId: null, isOwner: false }
 
-    const fetchOrganization = async () => {
-      try {
-        setLoading(true)
-        // Check if user is an owner or assistant
-        // We need to fetch the profile to see if there is a parent_user_id
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('id, parent_user_id, role, subscription_tier')
-          .eq('id', user.id)
-          .maybeSingle()
+      // Check if user is an owner or assistant
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('id, parent_user_id')
+        .eq('id', user.id)
+        .maybeSingle()
 
-        const profileData = profile
-
-        if (error) {
-          logger.error(error, {
-            message: 'Erro ao carregar organização.',
-            showToast: false,
-          })
-          // Fallback to user.id as organization if profile fetch fails (safe default)
-          setOrganizationId(user.id)
-          setIsOwner(true)
-        } else if (profileData?.parent_user_id) {
-          // User is an assistant, organization is the parent
-          setOrganizationId(profileData.parent_user_id)
-          setIsOwner(false)
-        } else {
-          // User is the owner
-          setOrganizationId(user.id)
-          setIsOwner(true)
-        }
-      } catch (err) {
-        logger.error(err, {
-          message: 'Erro inesperado ao carregar organização.',
-          showToast: false,
-        })
-        setOrganizationId(user.id)
-      } finally {
-        setLoading(false)
+      if (error) {
+        // Fallback to user.id as organization if profile fetch fails
+        return { organizationId: user.id, isOwner: true }
       }
-    }
 
-    fetchOrganization()
-  }, [user])
+      if (profile?.parent_user_id) {
+        return { organizationId: profile.parent_user_id, isOwner: false }
+      }
+
+      return { organizationId: user.id, isOwner: true }
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 60, // 1 hour (organization rarely changes)
+  })
 
   return {
-    organizationId,
-    isOwner,
-    loading,
+    organizationId: data?.organizationId ?? null,
+    isOwner: data?.isOwner ?? false,
+    loading: isLoading,
     user,
   }
 }
