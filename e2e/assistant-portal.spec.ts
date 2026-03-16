@@ -29,7 +29,8 @@ test.describe('Assistant Portal Flow', () => {
   test('Guest user should see signup form when visiting invite link', async ({
     page,
   }) => {
-    await page.goto(`/assistant/accept/${mockToken}`)
+    await page.goto(`/assistente/convite/${mockToken}`)
+    await page.waitForLoadState('networkidle')
 
     // Expect signup form to be visible
     await expect(page.getByText('Criar Conta de Assistente')).toBeVisible()
@@ -39,7 +40,8 @@ test.describe('Assistant Portal Flow', () => {
   })
 
   test('Existing user should see login form toggle', async ({ page }) => {
-    await page.goto(`/assistant/accept/${mockToken}`)
+    await page.goto(`/assistente/convite/${mockToken}`)
+    await page.waitForLoadState('networkidle')
 
     await page.click('text=Já tem conta? Entre')
 
