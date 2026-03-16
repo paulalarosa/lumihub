@@ -2,13 +2,14 @@ import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganization } from '@/hooks/useOrganization'
-import { ClientService } from '@/features/clients/api/clientService'
 import { exportClientsToCSV } from '@/utils/exportCSV'
 import { toast as sonnerToast } from 'sonner'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import type { ClientFormData } from '../components/ClientForm'
 import { getErrorMessage } from '@/utils/error-handler'
+import { useClientMutations } from './useClientMutations'
+import { useDeleteClient } from './useDeleteClient'
 
 export interface ClientRecord {
   id: string
@@ -38,6 +39,9 @@ export function useClientActions({
   const { organizationId } = useOrganization()
   const { toast } = useToast()
 
+  const { createMutation, updateMutation } = useClientMutations()
+  const { mutateAsync: deleteClient } = useDeleteClient()
+
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingClient, setEditingClient] = useState<ClientRecord | null>(null)
   const [isExporting, setIsExporting] = useState(false)
@@ -53,20 +57,7 @@ export function useClientActions({
       return
     }
 
-    interface ClientPayload {
-      full_name: string
-      name: string
-      email: string | null
-      phone: string | null
-      notes: string | null
-      user_id: string
-      is_bride: boolean
-      wedding_date: string | null
-      access_pin: string | null
-      portal_link?: string
-    }
-
-    const clientData: ClientPayload = {
+    const clientData = {
       full_name: formData.name.trim(),
       name: formData.name.trim(),
       email: formData.email.trim() || null,
@@ -84,72 +75,19 @@ export function useClientActions({
 
     try {
       if (editingClient) {
-        if (clientData.is_bride) {
-          clientData.portal_link = `https://khaoskontrol.com.br/portal/${editingClient.id}`
-        }
-
-        await ClientService.update(editingClient.id, clientData)
-
-        if (clientData.is_bride && clientData.wedding_date) {
-          const { error: projectError } = await supabase
-            .from('projects')
-            .update({ event_date: clientData.wedding_date })
-            .eq('client_id', editingClient.id)
-
-          if (projectError) {
-            toast({
-              title: 'Aviso',
-              description:
-                'Data do cliente salva, mas erro ao sincronizar projeto.',
-              variant: 'default',
-            })
-          }
-        }
-
-        toast({ title: 'Cliente atualizado!' })
+        await updateMutation.mutateAsync({
+          id: editingClient.id,
+          data: clientData,
+        })
       } else {
-        const newClient = await ClientService.create(clientData)
-
-        if (clientData.is_bride && newClient && 'id' in newClient) {
-          const link = `https://khaoskontrol.com.br/portal/${newClient.id}`
-          await ClientService.update(newClient.id, { portal_link: link })
-        }
-
-        toast({ title: 'Cliente adicionado!' })
-
-        if (clientData.is_bride && clientData.email) {
-          try {
-            toast({ title: 'Enviando email de boas-vindas...', duration: 2000 })
-            const { error: emailError } = await supabase.functions.invoke(
-              'send-welcome-email',
-              {
-                body: {
-                  clientId: newClient?.id,
-                  subject: 'Bem-vinda ao KONTROL',
-                },
-              },
-            )
-            if (emailError) throw emailError
-            toast({ title: 'Email enviado com sucesso!', variant: 'default' })
-          } catch (_emailErr) {
-            toast({
-              title: 'Erro ao enviar email',
-              description: 'O cliente foi salvo, mas o email falhou.',
-              variant: 'destructive',
-            })
-          }
-        }
+        await createMutation.mutateAsync(clientData)
       }
 
       setIsDialogOpen(false)
       setEditingClient(null)
       fetchClients()
     } catch (error) {
-      const { title, description } = getErrorMessage(
-        error,
-        'Erro ao salvar cliente',
-      )
-      toast({ title, description, variant: 'destructive' })
+      // Error handling is managed by mutations, but we catch to stop flow
     }
   }
 
@@ -157,15 +95,10 @@ export function useClientActions({
     if (!confirm('Tem certeza que deseja excluir este cliente?')) return
 
     try {
-      await ClientService.delete(id)
-      toast({ title: 'Cliente excluído!' })
+      await deleteClient(id)
       fetchClients()
     } catch (error) {
-      const { title, description } = getErrorMessage(
-        error,
-        'Erro ao excluir cliente',
-      )
-      toast({ title, description, variant: 'destructive' })
+      // Error handling is managed by mutation
     }
   }
 

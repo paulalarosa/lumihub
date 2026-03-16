@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import { Microsite, Service } from '@/types/database'
+import { Microsite, Service } from '@/types'
 import { logger } from '@/services/logger'
 
 // Domain Types

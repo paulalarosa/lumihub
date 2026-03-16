@@ -16,16 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/services/logger'
 import { useAuth } from '@/hooks/useAuth'
-
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { useEventMutations } from '@/features/calendar/hooks/useEventMutations'
 import { Loader2 } from 'lucide-react'
 import { format } from 'date-fns/format'
-
-import { QUERY_KEYS } from '@/constants/queryKeys'
 
 interface CreateEventModalProps {
   isOpen: boolean
@@ -41,7 +35,8 @@ export const CreateEventModal = ({
   onSuccess,
 }: CreateEventModalProps) => {
   const { user } = useAuth()
-  const queryClient = useQueryClient()
+  const { createMutation } = useEventMutations()
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -50,61 +45,6 @@ export const CreateEventModal = ({
     endTime: '12:00',
     location: '',
     eventType: 'wedding' as 'wedding' | 'social' | 'test' | 'blocked',
-  })
-
-  const createEventMutation = useMutation({
-    mutationFn: async () => {
-      if (!user) throw new Error('Não autenticado')
-
-      const startDateTime = new Date(
-        `${formData.startDate}T${formData.startTime}`,
-      )
-      const endDateTime = new Date(`${formData.startDate}T${formData.endTime}`)
-
-      // 1. Criar evento no Supabase
-      const { data: event, error } = await supabase
-        .from('calendar_events')
-        .insert({
-          user_id: user.id,
-          title: formData.title,
-          description: formData.description,
-          start_time: startDateTime.toISOString(),
-          end_time: endDateTime.toISOString(),
-          location: formData.location,
-          event_type: formData.eventType,
-          status: 'confirmed',
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-
-      // 2. Sincronizar com Google Calendar (se conectado)
-      try {
-        await supabase.functions.invoke('sync-event-to-google', {
-          body: {
-            event_id: event.id,
-            action: 'create',
-          },
-        })
-      } catch (syncError) {
-        logger.warning('Falha ao sincronizar com Google Calendar:', syncError)
-      }
-
-      return event
-    },
-    onSuccess: () => {
-      toast.success('Evento criado e sincronizado!')
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CALENDAR_EVENTS] })
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
-      onSuccess()
-      onClose()
-      resetForm()
-    },
-    onError: (error: Error) => {
-      toast.error('Erro ao criar evento: ' + error.message)
-    },
   })
 
   const resetForm = () => {
@@ -119,9 +59,28 @@ export const CreateEventModal = ({
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    createEventMutation.mutate()
+
+    const startDateTime = new Date(
+      `${formData.startDate}T${formData.startTime}`,
+    )
+    const endDateTime = new Date(`${formData.startDate}T${formData.endTime}`)
+
+    await createMutation.mutateAsync({
+      user_id: user?.id,
+      title: formData.title,
+      description: formData.description,
+      start_time: startDateTime.toISOString(),
+      end_time: endDateTime.toISOString(),
+      location: formData.location,
+      event_type: formData.eventType,
+      status: 'confirmed',
+    })
+
+    onSuccess()
+    onClose()
+    resetForm()
   }
 
   return (
@@ -269,10 +228,10 @@ export const CreateEventModal = ({
             </Button>
             <Button
               type="submit"
-              disabled={createEventMutation.isPending}
+              disabled={createMutation.isPending}
               className="bg-white text-black hover:bg-neutral-200"
             >
-              {createEventMutation.isPending ? (
+              {createMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Criando...

@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Plus } from 'lucide-react'
 import { TaskCard } from './TaskCard'
-import type { KanbanTask } from '@/types/database'
+import type { KanbanTask } from '@/types'
 
 interface KanbanColumnProps {
   status: string

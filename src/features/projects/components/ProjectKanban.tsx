@@ -24,7 +24,7 @@ import {
   TASK_PRIORITY_LABELS,
   TASK_PRIORITY_COLORS,
   Task,
-} from '@/types/database'
+} from '@/types'
 
 const STATUSES: TaskStatus[] = ['todo', 'in_progress', 'review', 'done']
 

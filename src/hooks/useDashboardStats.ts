@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
 import { addDays } from 'date-fns/addDays'
@@ -18,6 +19,56 @@ export interface DashboardStats {
 export function useDashboardStats() {
   const { session } = useAuth()
   const userId = session?.user?.id
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (!userId) return
+
+    const channel = supabase
+      .channel('dashboard-stats-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wedding_clients',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'project_services',
+        },
+        () => {
+          // Note: Cannot filter by userId easily here because it's a join.
+          // Invalidation is relatively cheap as it's just a mark.
+          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userId, queryClient])
 
   return useQuery({
     queryKey: ['dashboard-stats', userId],

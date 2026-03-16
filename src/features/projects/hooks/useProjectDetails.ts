@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { ProjectService as ProjectServiceClass } from '../api/projectService'
 
 import { supabase } from '@/integrations/supabase/client'
@@ -11,8 +12,58 @@ import type {
 } from '@/types/api.types'
 
 export const useProjectDetails = (projectId: string | undefined) => {
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (!projectId) return
+
+    const channel = supabase
+      .channel(`project-details-${projectId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects',
+          filter: `id=eq.${projectId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['project', projectId] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'contracts',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['project', projectId] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'transactions',
+          filter: `project_id=eq.${projectId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['project', projectId] })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [projectId, queryClient])
+
   return useQuery<ProjectDetailsResponse>({
-    queryKey: ['project-details', projectId],
+    queryKey: ['project', projectId],
     queryFn: async () => {
       if (!projectId) throw new Error('Project ID is required')
 

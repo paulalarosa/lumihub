@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useLanguage } from '@/hooks/useLanguage'
-import { supabase } from '@/integrations/supabase/client'
 import { useProjectDetails } from '@/features/projects/hooks/useProjectDetails'
 import { useProjectActions } from '@/features/projects/hooks/useProjectActions'
 
@@ -117,36 +116,6 @@ export default function ProjectDetailsPage() {
       navigate('/auth')
     }
   }, [user, authLoading, navigate])
-
-  useEffect(() => {
-    if (!id) return
-    const channel = supabase
-      .channel('project-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'contracts',
-          filter: `project_id=eq.${id}`,
-        },
-        () => refetch(),
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'transactions',
-          filter: `project_id=eq.${id}`,
-        },
-        () => refetch(),
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [id, refetch])
 
   if (authLoading || orgLoading || isLoading) {
     return <PageLoader />
@@ -271,7 +240,7 @@ export default function ProjectDetailsPage() {
                                 {q.question}
                               </p>
                               <p className="text-white border-l border-white/20 pl-3">
-                                {briefing.answers[q.id] || '-'}
+                                {(briefing.answers[q.id] as string) || '-'}
                               </p>
                             </div>
                           ))}

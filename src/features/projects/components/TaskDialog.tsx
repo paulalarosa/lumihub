@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { ProjectService } from '../api/projectService'
 
 import { useToast } from '@/hooks/use-toast'
-import type { Task, TaskPriority } from '@/types/database'
+import type { Task, TaskPriority } from '@/types'
 import { logger } from '@/services/logger'
 
 interface TaskDialogProps {

@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Upload, X, Loader2 } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/integrations/supabase/client'
+import { uploadImageSafely } from '@/lib/upload'
 import { useToast } from '@/hooks/use-toast'
 
 interface ImageUploaderProps {
@@ -50,18 +50,8 @@ export function ImageUploader({
     setUploading(true)
 
     try {
-      const ext = file.name.split('.').pop()
-      const path = `${user.id}/${folder}/${Date.now()}.${ext}`
-
-      const { error } = await supabase.storage
-        .from(bucket)
-        .upload(path, file, { upsert: true })
-
-      if (error) throw error
-
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path)
-      onUpload(data.publicUrl)
-
+      const publicUrl = await uploadImageSafely(file, bucket, folder)
+      onUpload(publicUrl)
       toast({ title: `${label} enviado!` })
     } catch (err: unknown) {
       toast({

@@ -6,7 +6,7 @@ import './lib/i18n'
 import './lib/sentry' // Sentry Init
 import './lib/chart-setup'
 import { registerSW } from 'virtual:pwa-register'
-import { validateEnv } from './lib/envValidator'
+import { validateEnv } from './config/env'
 
 // Validar variáveis de ambiente críticas antes de inicializar a UI
 validateEnv()

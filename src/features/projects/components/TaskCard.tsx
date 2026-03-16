@@ -2,7 +2,7 @@ import { memo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { GripVertical, MoreVertical, Pencil, Trash2 } from 'lucide-react'
-import { Task } from '@/types/database'
+import { Task } from '@/types'
 import {
   DropdownMenu,
   DropdownMenuContent,

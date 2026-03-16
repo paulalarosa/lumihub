@@ -1,4 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useClientFilterStore } from '@/stores/useClientFilterStore'
 import { useAuth } from '@/hooks/useAuth'
@@ -33,6 +34,30 @@ export function useClientsQuery(options: UseClientsQueryOptions = {}) {
 
   const { search, status, dateRange, company, sortBy } = useClientFilterStore()
 
+  useEffect(() => {
+    if (!organizationId) return
+
+    const channel = supabase
+      .channel('clients-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'wedding_clients',
+          filter: `user_id=eq.${organizationId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['clients'] })
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [organizationId, queryClient])
+
   const queryKey = [
     'clients',
     organizationId,
@@ -44,7 +69,7 @@ export function useClientsQuery(options: UseClientsQueryOptions = {}) {
     sortBy,
   ]
 
-  const query = useQuery({
+  const query = useQuery<Client[]>({
     queryKey,
     queryFn: async (): Promise<Client[]> => {
       if (!organizationId) return []

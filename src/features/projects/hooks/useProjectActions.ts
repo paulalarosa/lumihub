@@ -14,6 +14,7 @@ import type {
   ServiceUI,
 } from '@/types/api.types'
 import { getErrorMessage } from '@/utils/error-handler'
+import { useProjectMutations } from './useProjectMutations'
 
 interface UseProjectActionsProps {
   projectId: string | undefined
@@ -38,6 +39,15 @@ export function useProjectActions({
   const { organizationId } = useOrganization()
   const { toast } = useToast()
 
+  const {
+    createTaskMutation,
+    updateTaskMutation,
+    deleteTaskMutation,
+    addServiceMutation,
+    removeServiceMutation,
+    registerPaymentMutation,
+  } = useProjectMutations()
+
   const [newTaskTitle, setNewTaskTitle] = useState('')
   const [copied, setCopied] = useState(false)
 
@@ -55,42 +65,47 @@ export function useProjectActions({
     if (e) e.preventDefault()
     if (!newTaskTitle.trim() || !projectId || !organizationId) return
 
-    const { error } = await ProjectService.createTask({
-      project_id: projectId,
-      user_id: organizationId,
-      title: newTaskTitle.trim(),
-      status: 'pending',
-      sort_order: tasks.length,
-    })
-
-    if (error) {
-      const { title, description } = getErrorMessage(
-        error,
-        'Erro ao adicionar tarefa',
-      )
-      toast({ title, description, variant: 'destructive' })
-    } else {
+    try {
+      await createTaskMutation.mutateAsync({
+        project_id: projectId,
+        user_id: organizationId,
+        title: newTaskTitle.trim(),
+        status: 'pending',
+        sort_order: tasks.length,
+      })
       setNewTaskTitle('')
       refetch()
+    } catch (error) {
+      // Error handled by mutation
     }
   }
 
   const toggleTask = async (taskId: string, currentStatus: string | null) => {
     const newStatus = currentStatus === 'completed' ? 'pending' : 'completed'
-    const success = await ProjectService.updateTask(taskId, {
-      status: newStatus,
-    })
-    if (success) {
+    try {
+      await updateTaskMutation.mutateAsync({
+        id: taskId,
+        project_id: projectId || '',
+        data: { status: newStatus },
+      })
       setTasks(
         tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
       )
+    } catch (error) {
+      // Error handled by mutation
     }
   }
 
   const deleteTask = async (taskId: string) => {
-    const success = await ProjectService.deleteTask(taskId)
-    if (success) {
+    if (!projectId) return
+    try {
+      await deleteTaskMutation.mutateAsync({
+        id: taskId,
+        project_id: projectId,
+      })
       setTasks(tasks.filter((t) => t.id !== taskId))
+    } catch (error) {
+      // Error handled by mutation
     }
   }
 
@@ -248,36 +263,34 @@ export function useProjectActions({
     const price = servicePrice ? parseFloat(servicePrice) : parseFloat(priceStr)
     const total = qty * price
 
-    const { error } = await ProjectService.addProjectService({
-      project_id: projectId,
-      service_id: selectedServiceId,
-      quantity: qty.toString(),
-      unit_price: price,
-      total_price: total.toString(),
-    })
-
-    if (error) {
-      const { title, description } = getErrorMessage(
-        error,
-        'Erro ao adicionar serviço',
-      )
-      toast({ title, description, variant: 'destructive' })
-    } else {
-      toast({ title: 'Serviço adicionado!' })
+    try {
+      await addServiceMutation.mutateAsync({
+        project_id: projectId,
+        service_id: selectedServiceId,
+        quantity: qty.toString(),
+        unit_price: price,
+        total_price: total.toString(),
+      })
       setIsServiceDialogOpen(false)
       setSelectedServiceId('')
       setServiceQuantity('1')
       setServicePrice('')
       refetch()
+    } catch (error) {
+      // Handled by mutation
     }
   }
 
   const removeServiceFromProject = async (projectServiceId: string) => {
-    const { error } =
-      await ProjectService.deleteProjectService(projectServiceId)
-    if (!error) {
-      toast({ title: 'Serviço removido!' })
+    if (!projectId) return
+    try {
+      await removeServiceMutation.mutateAsync({
+        id: projectServiceId,
+        project_id: projectId,
+      })
       refetch()
+    } catch (error) {
+      // Handled by mutation
     }
   }
 
@@ -326,29 +339,16 @@ export function useProjectActions({
       category: 'Projeto',
     }
 
-    const { error: transError } = await supabase
-      .from('transactions')
-      .insert([payload])
-
-    if (transError) {
-      const { title, description } = getErrorMessage(
-        transError,
-        'Erro ao registrar transação',
-      )
-      toast({
-        title,
-        description,
-        variant: 'destructive',
-      })
-      return
+    try {
+      await registerPaymentMutation.mutateAsync(payload)
+      setIsPaymentDialogOpen(false)
+      setPaymentServiceId('')
+      setPaymentAmount('')
+      setPaymentDescription('')
+      refetch()
+    } catch (error) {
+      // Handled by mutation
     }
-
-    toast({ title: 'Pagamento registrado!' })
-    setIsPaymentDialogOpen(false)
-    setPaymentServiceId('')
-    setPaymentAmount('')
-    setPaymentDescription('')
-    refetch()
   }
 
   const handleSelectService = (serviceId: string) => {

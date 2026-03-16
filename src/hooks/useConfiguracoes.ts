@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
+import { uploadImageSafely } from '@/lib/upload'
 
 export function useConfiguracoes() {
   const navigate = useNavigate()
@@ -140,19 +141,7 @@ export function useConfiguracoes() {
     setUploadingLogo(true)
     try {
       const file = e.target.files[0]
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${user?.id}-${Math.random()}.${fileExt}`
-      const filePath = `logos/${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file)
-      if (uploadError) throw uploadError
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from('avatars').getPublicUrl(filePath)
-
+      const publicUrl = await uploadImageSafely(file, 'avatars', 'logos')
       setLogoUrl(publicUrl)
     } catch (error: unknown) {
       const message =
