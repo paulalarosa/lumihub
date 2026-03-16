@@ -24,6 +24,7 @@ import { ContractDialog } from '@/features/contracts/components/ContractDialog'
 import { SignatureModal } from '@/features/contracts/components/SignatureModal'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { useContracts } from '@/features/contracts/hooks/useContracts'
+import { sanitizeHTML } from '@/lib/sanitize'
 
 export default function Contracts() {
   const {
@@ -186,7 +187,11 @@ export default function Contracts() {
                           <h2 className="text-center text-xl font-bold mb-8 uppercase tracking-widest border-b-2 border-black pb-4">
                             Contrato de Prestação de Serviços
                           </h2>
-                          {contract.content}
+                          <div
+                            dangerouslySetInnerHTML={{
+                              __html: sanitizeHTML(contract.content || ''),
+                            }}
+                          />
 
                           <div className="mt-12 grid grid-cols-2 gap-12 pt-8">
                             {contract.signature_url ? (
