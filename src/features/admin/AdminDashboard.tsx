@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { Button } from '@/components/ui/button'
 import {
   BarChart3,
@@ -41,19 +42,9 @@ type AdminTab =
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const {
-    user,
-    isAdmin: authIsAdmin,
-    loading: authLoading,
-    signOut,
-  } = useAuth()
+  const { user, loading: authLoading, signOut } = useAuth()
+  const isAuthorizedAdmin = useIsAdmin()
   const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(true)
-
-  const activeTab = (searchParams.get('tab') as AdminTab) || 'overview'
-
-  const isAuthorizedAdmin = authIsAdmin || user?.email === 'prenata@gmail.com'
 
   useEffect(() => {
     if (!authLoading) {
