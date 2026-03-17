@@ -252,168 +252,91 @@ const App = () => {
 
                         {/* Protected App Pages with Layout */}
                         <Route element={<AppLayout />}>
-                          <Route
-                            path="/dashboard"
-                            element={
-                              <ProtectedRoute>
+                          <Route element={<ProtectedRoute />}>
+                            <Route
+                              path="/dashboard"
+                              element={
                                 <CustomErrorBoundary>
                                   <Dashboard />
                                 </CustomErrorBoundary>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/dashboard/financial"
-                            element={
-                              <ProtectedRoute>
-                                <FinancialPage />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/analytics"
-                            element={
-                              <ProtectedRoute>
-                                <Analytics />
-                              </ProtectedRoute>
-                            }
-                          />
-
-                          <Route element={<AdminRoute />}>
-                            <Route path="/admin" element={<AdminDashboard />} />
-                            <Route
-                              path="/admin/users"
-                              element={
-                                <Navigate to="/admin?tab=users" replace />
                               }
                             />
                             <Route
-                              path="/admin/dashboard"
-                              element={
-                                <Navigate to="/admin?tab=overview" replace />
-                              }
+                              path="/dashboard/financial"
+                              element={<FinancialPage />}
                             />
-                          </Route>
+                            <Route path="/analytics" element={<Analytics />} />
 
-                          <Route
-                            path="/calendar"
-                            element={
-                              <ProtectedRoute>
-                                <CalendarPage />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/calendar/callback"
-                            element={<GoogleCalendarCallback />}
-                          />
+                            <Route element={<AdminRoute />}>
+                              <Route
+                                path="/admin"
+                                element={<AdminDashboard />}
+                              />
+                              <Route
+                                path="/admin/users"
+                                element={
+                                  <Navigate to="/admin?tab=users" replace />
+                                }
+                              />
+                              <Route
+                                path="/admin/dashboard"
+                                element={
+                                  <Navigate to="/admin?tab=overview" replace />
+                                }
+                              />
+                            </Route>
 
-                          <Route
-                            path="/clientes"
-                            element={
-                              <ProtectedRoute>
-                                <Clients />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/clientes/:id"
-                            element={
-                              <ProtectedRoute>
-                                <ClientDetails />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/projetos"
-                            element={
-                              <ProtectedRoute>
+                            <Route
+                              path="/calendar"
+                              element={<CalendarPage />}
+                            />
+                            <Route
+                              path="/calendar/callback"
+                              element={<GoogleCalendarCallback />}
+                            />
+
+                            <Route path="/clientes" element={<Clients />} />
+                            <Route
+                              path="/clientes/:id"
+                              element={<ClientDetails />}
+                            />
+                            <Route
+                              path="/projetos"
+                              element={
                                 <CustomErrorBoundary>
                                   <Projects />
                                 </CustomErrorBoundary>
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/projetos/novo"
-                            element={
-                              <ProtectedRoute>
-                                <Projects />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/projetos/:id"
-                            element={
-                              <ProtectedRoute>
-                                <ProjectDetails />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/projects/:projectId/contract"
-                            element={
-                              <ProtectedRoute>
-                                <ProjectContract />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/configuracoes"
-                            element={
-                              <ProtectedRoute>
-                                <Settings />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/assistentes"
-                            element={
-                              <ProtectedRoute>
-                                <AssistantsPage />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/servicos"
-                            element={
-                              <ProtectedRoute>
-                                <Services />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/funil"
-                            element={
-                              <ProtectedRoute>
-                                <SalesPipeline />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/integracoes"
-                            element={
-                              <ProtectedRoute>
-                                <IntegrationsPage />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/contratos"
-                            element={
-                              <ProtectedRoute>
-                                <Contracts />
-                              </ProtectedRoute>
-                            }
-                          />
-                          <Route
-                            path="/marketing"
-                            element={
-                              <ProtectedRoute>
-                                <Marketing />
-                              </ProtectedRoute>
-                            }
-                          />
+                              }
+                            />
+                            <Route
+                              path="/projetos/novo"
+                              element={<Projects />}
+                            />
+                            <Route
+                              path="/projetos/:id"
+                              element={<ProjectDetails />}
+                            />
+                            <Route
+                              path="/projects/:projectId/contract"
+                              element={<ProjectContract />}
+                            />
+                            <Route
+                              path="/configuracoes"
+                              element={<Settings />}
+                            />
+                            <Route
+                              path="/assistentes"
+                              element={<AssistantsPage />}
+                            />
+                            <Route path="/servicos" element={<Services />} />
+                            <Route path="/funil" element={<SalesPipeline />} />
+                            <Route
+                              path="/integracoes"
+                              element={<IntegrationsPage />}
+                            />
+                            <Route path="/contratos" element={<Contracts />} />
+                            <Route path="/marketing" element={<Marketing />} />
+                          </Route>
                         </Route>
 
                         <Route
@@ -428,22 +351,20 @@ const App = () => {
                             />
                           }
                         />
-                        <Route
-                          path="/assistant"
-                          element={
-                            <ProtectedRoute>
-                              <AssistantLayout />
-                            </ProtectedRoute>
-                          }
-                        >
+                        <Route element={<ProtectedRoute />}>
                           <Route
-                            path="dashboard"
-                            element={<AssistantDashboard />}
-                          />
-                          <Route
-                            index
-                            element={<Navigate to="dashboard" replace />}
-                          />
+                            path="/assistant"
+                            element={<AssistantLayout />}
+                          >
+                            <Route
+                              path="dashboard"
+                              element={<AssistantDashboard />}
+                            />
+                            <Route
+                              index
+                              element={<Navigate to="dashboard" replace />}
+                            />
+                          </Route>
                         </Route>
                         <Route
                           path="/assistente/convite/:token"
@@ -483,14 +404,12 @@ const App = () => {
                           element={<LeaveReview />}
                         />
                         <Route path="/site/:slug" element={<Microsite />} />
-                        <Route
-                          path="/meu-site/editor"
-                          element={
-                            <ProtectedRoute>
-                              <MicrositeEditor />
-                            </ProtectedRoute>
-                          }
-                        />
+                        <Route element={<ProtectedRoute />}>
+                          <Route
+                            path="/meu-site/editor"
+                            element={<MicrositeEditor />}
+                          />
+                        </Route>
                         <Route
                           path="/portal/:clientId/login"
                           element={<BrideLoginPage />}
