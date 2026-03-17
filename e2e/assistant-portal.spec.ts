@@ -2,10 +2,8 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Assistant Portal Flow', () => {
   const mockToken = 'mock-invite-token-123'
-  const _mockEmail = 'test+assistant@example.com'
 
   test.beforeEach(async ({ page }) => {
-    // Mock Supabase RPC calls
     await page.route(
       '**/rest/v1/rpc/accept_assistant_invite',
       async (route) => {
@@ -24,6 +22,33 @@ test.describe('Assistant Portal Flow', () => {
         body: JSON.stringify({ exists: false, is_assistant: false }),
       })
     })
+
+    await page.route('**/auth/v1/token?grant_type=*', async (route) => {
+      await route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          error: 'invalid_grant',
+          error_description: 'Invalid Refresh Token',
+        }),
+      })
+    })
+
+    await page.route('**/auth/v1/session', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'not_authenticated' }),
+      })
+    })
+
+    await page.route('**/auth/v1/user', async (route) => {
+      await route.fulfill({
+        status: 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'not_authenticated' }),
+      })
+    })
   })
 
   test('Guest user should see signup form when visiting invite link', async ({
@@ -32,8 +57,9 @@ test.describe('Assistant Portal Flow', () => {
     await page.goto(`/assistente/convite/${mockToken}`)
     await page.waitForLoadState('networkidle')
 
-    // Expect signup form to be visible
-    await expect(page.getByText('Criar Conta de Assistente')).toBeVisible()
+    await expect(page.getByText('Criar Conta de Assistente')).toBeVisible({
+      timeout: 15000,
+    })
     await expect(page.getByLabel('Email')).toBeVisible()
     await expect(page.getByLabel('Senha')).toBeVisible()
     await expect(page.getByLabel('Nome Completo')).toBeVisible()
@@ -43,13 +69,13 @@ test.describe('Assistant Portal Flow', () => {
     await page.goto(`/assistente/convite/${mockToken}`)
     await page.waitForLoadState('networkidle')
 
+    await expect(page.getByText('Criar Conta de Assistente')).toBeVisible({
+      timeout: 15000,
+    })
+
     await page.click('text=Já tem conta? Entre')
 
-    // Expect login form
     await expect(page.getByText('Acessar Portal da Assistente')).toBeVisible()
     await expect(page.getByLabel('Nome Completo')).not.toBeVisible()
   })
-
-  // Note: Full auth flow mocking requires more complex Supabase auth mocking
-  // or a real test environment. checking UI logic here.
 })

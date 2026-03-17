@@ -1,4 +1,0 @@
-
-> khaos-kontrol-system@0.0.0 build
-> tsc && vite build && cp dist/index.html dist/404.html
-
