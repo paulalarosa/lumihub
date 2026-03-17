@@ -164,12 +164,14 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // React ecosystem
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-hooks': ['react-helmet-async', 'zustand'],
-
-          // UI Components & Icons
-          'vendor-ui': [
+          // Core libs, UI, and Query consolidated to avoid circularities
+          'vendor-core': [
+            'react',
+            'react-dom',
+            'react-router-dom',
+            '@tanstack/react-query',
+            'zustand',
+            'react-helmet-async',
             'lucide-react',
             '@radix-ui/react-dialog',
             '@radix-ui/react-dropdown-menu',
@@ -178,8 +180,7 @@ export default defineConfig(({ mode }) => ({
             'tailwind-merge',
           ],
 
-          // Data Management
-          'vendor-query': ['@tanstack/react-query'],
+          // Data Layer
           'vendor-supabase': ['@supabase/supabase-js'],
 
           // Utilities

@@ -2,12 +2,14 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from './types'
 import { env } from '@/config/env'
 
-const FALLBACK_URL = 'https://pymdkngcpbmcnayxieod.supabase.co'
-const FALLBACK_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB5bWRrbmdjcGJtY25heXhpZW9kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc5NzA3NTcsImV4cCI6MjA4MzU0Njc1N30.XJ9D0EpjkhCR6u74aIywb1MlmFDJPOktomudBL5iszE'
+const supabaseUrl = env.supabase.url
+const supabaseKey = env.supabase.anonKey
 
-const supabaseUrl = env.supabase.url || FALLBACK_URL
-const supabaseKey = env.supabase.anonKey || FALLBACK_KEY
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Supabase credentials are missing. Check your environment variables.',
+  )
+}
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
 

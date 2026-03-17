@@ -33,9 +33,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // 3. CHECK USER AFTER LOADING
   // Allow simulation with localStorage if requested by the user
-  const simulatedToken = localStorage.getItem('LUMI_TEST_TOKEN')
-
-  if (!user && !simulatedToken) {
+  if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 

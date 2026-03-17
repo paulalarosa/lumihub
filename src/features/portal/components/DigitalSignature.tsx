@@ -125,19 +125,25 @@ export function DigitalSignature({
       } = supabase.storage.from('contracts').getPublicUrl(fileName)
 
       // 4. Update Contract Status
-      const { error: updateError } = await supabase
-        .from('contracts')
-        .update({
-          status: 'signed',
-          signed_at: new Date().toISOString(),
-          signature_data: JSON.stringify({
-            pdf_url: publicUrl,
-            signed_by: 'client',
-          }),
-        })
-        .eq('id', contract.id)
+      try {
+        const { error: updateError } = await supabase
+          .from('contracts')
+          .update({
+            status: 'signed',
+            signed_at: new Date().toISOString(),
+            signature_data: JSON.stringify({
+              pdf_url: publicUrl,
+              signed_by: 'client',
+            }),
+          })
+          .eq('id', contract.id)
 
-      if (updateError) throw updateError
+        if (updateError) throw updateError
+      } catch (updateError) {
+        // Cleanup: remove uploaded file if DB update fails
+        await supabase.storage.from('contracts').remove([fileName])
+        throw updateError
+      }
 
       toast({
         title: 'Contrato Assinado! ✅',

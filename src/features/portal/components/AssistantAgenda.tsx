@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { format, parseISO, isSameDay } from 'date-fns'
+import { format } from 'date-fns/format'
+import { isSameDay } from 'date-fns/isSameDay'
+import { parseISO } from 'date-fns/parseISO'
 import { ptBR } from 'date-fns/locale'
 import {
   Calendar as CalendarIcon,

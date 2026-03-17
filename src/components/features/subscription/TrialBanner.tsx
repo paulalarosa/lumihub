@@ -3,19 +3,15 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { Clock, Sparkles } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export function TrialBanner() {
-  const { status, daysRemaining, _isLoading, plan } = useSubscription()
-  const { isAdmin, user } = useAuth()
+  const { status, daysRemaining, isLoading, plan } = useSubscription()
+  const { user } = useAuth()
+  const isAdmin = useIsAdmin()
   const navigate = useNavigate()
 
-  // Specific check for hardcoded admin/studio emails
-  const isHardcodedAdmin = user?.email === 'prenata@gmail.com'
-  const isNathalia = user?.email === 'nathaliasbrb@gmail.com'
-  // User requested "conta da Paula" - assuming explicit email or name match to be safe
-  const isPaula = user?.email?.toLowerCase().includes('paula')
-
-  if (isAdmin || isHardcodedAdmin || isNathalia || isPaula) return null
+  if (isAdmin) return null
   if (plan === 'pro' || plan === 'empire' || plan === 'studio') return null
   if (status !== 'trialing' || typeof daysRemaining !== 'number') return null
 

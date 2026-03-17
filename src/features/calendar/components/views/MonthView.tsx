@@ -1,13 +1,11 @@
 import { useMemo } from 'react'
-import {
-  startOfMonth,
-  endOfMonth,
-  startOfWeek,
-  endOfWeek,
-  eachDayOfInterval,
-  isSameMonth,
-  isSameDay,
-} from 'date-fns'
+import { startOfMonth } from 'date-fns/startOfMonth'
+import { endOfMonth } from 'date-fns/endOfMonth'
+import { startOfWeek } from 'date-fns/startOfWeek'
+import { endOfWeek } from 'date-fns/endOfWeek'
+import { eachDayOfInterval } from 'date-fns/eachDayOfInterval'
+import { isSameMonth } from 'date-fns/isSameMonth'
+import { isSameDay } from 'date-fns/isSameDay'
 import { ptBR } from 'date-fns/locale'
 import { formatDate } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'

@@ -6,7 +6,7 @@
 const requiredEnvVars = [
   'VITE_SUPABASE_URL',
   'VITE_SUPABASE_ANON_KEY',
-  // 'VITE_GOOGLE_MAPS_API_KEY', // Opcional segundo o GEMINI.md, mas pode ser adicionado
+  'VITE_GOOGLE_MAPS_API_KEY',
 ] as const
 
 export function validateEnv() {

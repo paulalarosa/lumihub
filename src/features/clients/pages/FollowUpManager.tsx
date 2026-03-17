@@ -81,6 +81,7 @@ export const FollowUpManager = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.SCHEDULED_FOLLOWUPS],
       })
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
       toast.success('Template atualizado!')
     },
     onError: (error) => {

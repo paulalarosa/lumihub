@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { CreditCard, Users, TrendingUp, Download, Loader2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { exportMonthlyClosing } from '@/services/reportService'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { format } from 'date-fns/format'
+import { startOfMonth } from 'date-fns/startOfMonth'
+import { endOfMonth } from 'date-fns/endOfMonth'
 import { ptBR } from 'date-fns/locale'
 import {
   CommissionTable,

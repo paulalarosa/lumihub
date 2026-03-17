@@ -29,11 +29,11 @@ import { Link, useLocation } from 'react-router-dom'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export function AppSidebar() {
-  const { user, signOut, isAdmin: authIsAdmin } = useAuth()
-  // Force admin for specific user as backup
-  const isAdmin = authIsAdmin || user?.email === 'prenata@gmail.com'
+  const { user, signOut } = useAuth()
+  const isAdmin = useIsAdmin()
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
 

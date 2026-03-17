@@ -8,11 +8,11 @@ import {
   openInMaps,
 } from '@/lib/calendar-utils'
 import { generateWhatsAppLink } from '@/utils/whatsappGenerator'
-import { differenceInDays } from 'date-fns'
+import { differenceInDays } from 'date-fns/differenceInDays'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
 // format removed
 import { MessageCircle, Clock, Check, Heart } from 'lucide-react'
-import { Event } from '@/hooks/useEvents'
+import { Event } from '@/features/calendar/hooks/useEvents'
 import { logger } from '@/services/logger'
 
 export function useEventCard(event: Event) {

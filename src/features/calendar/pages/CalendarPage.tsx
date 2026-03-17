@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
-import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { format } from 'date-fns/format'
+import { parse } from 'date-fns/parse'
+import { startOfWeek } from 'date-fns/startOfWeek'
+import { getDay } from 'date-fns/getDay'
 import { ptBR } from 'date-fns/locale'
 import { toZonedTime, formatDate } from '@/lib/date-utils'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -336,7 +339,14 @@ export const CalendarPage = () => {
           onClose={() => setIsCreateModalOpen(false)}
           initialDate={createEventDate}
           onSuccess={() => {
-            queryClient.invalidateQueries({ queryKey: ['calendar-events'] })
+            queryClient.invalidateQueries({
+              queryKey: [QUERY_KEYS.CALENDAR_EVENTS],
+            })
+            queryClient.invalidateQueries({ queryKey: ['events'] })
+            queryClient.invalidateQueries({ queryKey: ['calendar'] })
+            queryClient.invalidateQueries({
+              queryKey: [QUERY_KEYS.DASHBOARD_STATS],
+            })
             setIsCreateModalOpen(false)
           }}
         />

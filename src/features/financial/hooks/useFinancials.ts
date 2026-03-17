@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { subMonths } from 'date-fns'
+import { subMonths } from 'date-fns/subMonths'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
 // format, parseISO, and ptBR removed
 

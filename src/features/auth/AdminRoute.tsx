@@ -1,12 +1,13 @@
 import { useAuth } from '@/hooks/useAuth'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
+import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export default function AdminRoute() {
   const { user, role, loading } = useAuth()
   const _location = useLocation()
 
-  const isAdmin = role === 'admin' || user?.email === 'prenata@gmail.com'
+  const isAdmin = useIsAdmin()
 
   // 1. STRICT LOADING FIRST
   if (loading) {
