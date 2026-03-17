@@ -45,7 +45,6 @@ export default function Dashboard() {
           {
             label: t('dashboard.stats.revenue'),
             value: `R$ ${d.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-            description: `${t('dashboard.stats.commissions')}: R$ ${d.totalCommissions.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
             icon: DollarSign,
             ctaLabel: t('dashboard.actions.details'),
             ctaLink: '/admin',
@@ -123,10 +122,10 @@ export default function Dashboard() {
                   {stat.label}
                 </p>
               </div>
-              {'description' in stat && stat.description && (
+              {'description' in stat && (stat as any).description && (
                 <div className="mt-4 pt-4 border-t border-white/10 group-hover:border-black/10">
                   <p className="font-mono text-xs text-white/60 group-hover:text-black/60">
-                    {stat.description}
+                    {(stat as any).description}
                   </p>
                 </div>
               )}
@@ -177,22 +176,17 @@ export default function Dashboard() {
             <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
               {d.upcomingEvents.length > 0 ? (
                 d.upcomingEvents.map((event, i: number) => {
-                  const title = event.title
+                  const startTime = (event as any).start_time
+                  const dateObj = startTime ? new Date(startTime) : null
+                  const isValidDate = dateObj && !isNaN(dateObj.getTime())
 
-                  let dateObj: Date
-                  if (event.date.includes('T')) {
-                    dateObj = new Date(event.date)
-                  } else {
-                    const timePart = event.time ? event.time : '00:00'
-                    dateObj = new Date(`${event.date}T${timePart}`)
-                  }
-
-                  const isValidDate = !isNaN(dateObj.getTime())
                   const day = isValidDate ? dateObj.getDate() : '--'
                   const month = isValidDate
                     ? format(dateObj, 'MMM', { locale: ptBR })
                     : ''
-                  const time = event.time || ''
+                  const time = isValidDate
+                    ? format(dateObj, 'HH:mm', { locale: ptBR })
+                    : ''
 
                   return (
                     <div
@@ -209,7 +203,7 @@ export default function Dashboard() {
                       </div>
                       <div className="flex-1">
                         <h4 className="text-sm text-white font-medium truncate group-hover:underline decoration-1 underline-offset-4">
-                          {title}
+                          {event.title}
                         </h4>
                         <p className="text-xs text-white/40 font-mono mt-0.5">
                           {time}

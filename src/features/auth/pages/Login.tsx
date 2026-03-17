@@ -50,11 +50,11 @@ export default function Login() {
         const { data: assistant } = await supabase
           .from('assistants')
           .select('id')
-          .eq('assistant_user_id', user.id)
+          .eq('user_id', user.id)
           .maybeSingle()
 
         if (assistant) {
-          navigate('/portal-assistente')
+          navigate('/assistant/dashboard')
         } else {
           navigate('/dashboard')
         }

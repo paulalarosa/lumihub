@@ -70,55 +70,32 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  // 5. Marketing Triggers
-  const { data: marketingTriggers = [], isLoading: triggersLoading } = useQuery(
-    {
-      queryKey: ['dashboard-marketing-triggers', organizationId],
-      queryFn: async () => {
-        if (!organizationId) return []
-        const { data } = await supabase
-          .from('marketing_triggers')
-          .select('*, wedding_clients(name)')
-          .eq('user_id', organizationId)
-          .eq('is_active', true)
-          .limit(5)
-
-        return (data || []).map((t: any) => ({
-          clientName: t.wedding_clients?.name || 'Cliente',
-          details: t.trigger_type,
-        }))
-      },
-      enabled: !!organizationId,
-    },
-  )
+  // 5. Marketing Triggers (Feature disabled - table does not exist)
+  const marketingTriggers: { clientName: string; details: string }[] = []
+  const triggersLoading = false
 
   // 6. Financials (Owner Only)
   const {
-    data: financials = { totalRevenue: 0, totalCommissions: 0 },
+    data: financials = { totalRevenue: 0 },
     isLoading: financialsLoading,
   } = useQuery({
     queryKey: ['dashboard-financials', organizationId],
     queryFn: async () => {
-      if (!organizationId || !isOwner)
-        return { totalRevenue: 0, totalCommissions: 0 }
+      if (!organizationId || !isOwner) return { totalRevenue: 0 }
       const { data: invoices } = await supabase
         .from('invoices')
-        .select('amount, commission_amount, status')
+        .select('amount, status')
         .eq('user_id', organizationId)
         .eq('status', 'paid')
 
-      if (!invoices) return { totalRevenue: 0, totalCommissions: 0 }
+      if (!invoices) return { totalRevenue: 0 }
 
       const total = invoices.reduce(
         (acc, curr) => acc + (Number(curr.amount) || 0),
         0,
       )
-      const comms = invoices.reduce(
-        (acc, curr) => acc + (Number(curr.commission_amount) || 0),
-        0,
-      )
 
-      return { totalRevenue: total, totalCommissions: comms }
+      return { totalRevenue: total }
     },
     enabled: !!organizationId && isOwner,
   })
@@ -149,7 +126,6 @@ export function useDashboard() {
     clientsCount,
     projectsCount,
     totalRevenue: financials.totalRevenue,
-    totalCommissions: financials.totalCommissions,
     upcomingEvents,
     marketingTriggers,
     profileName,
