@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useQuery } from '@tanstack/react-query'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 
 interface SystemLog {

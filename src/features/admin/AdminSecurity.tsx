@@ -21,7 +21,7 @@ import {
 import { BackupService } from '@/services/backup.service'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import MFAEnrollment from '@/features/auth/MFAEnrollment'
 import { useLanguage } from '@/hooks/useLanguage'

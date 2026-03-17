@@ -4,7 +4,7 @@ import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Terminal, RefreshCw, FileDown } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { supabase } from '@/integrations/supabase/client'
 import { SupabaseClient } from '@supabase/supabase-js'
 import {

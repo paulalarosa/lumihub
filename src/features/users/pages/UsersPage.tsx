@@ -16,7 +16,7 @@ import {
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Search, Shield, User, Crown, Star } from 'lucide-react'
 import { toast } from 'sonner'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 
 interface UserProfile {
   id: string

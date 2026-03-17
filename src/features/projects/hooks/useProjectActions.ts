@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { ProjectService } from '../api/projectService'
 
 import { generateWhatsAppLink } from '@/utils/whatsappGenerator'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import type {
   Task,
   ProjectServiceItem,

@@ -28,7 +28,7 @@ import {
   User,
   ArrowLeft,
 } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { useProjectsPage } from '../hooks/useProjectsPage'
 import { PageLoader, TableLoader } from '@/components/ui/LoadingStates'
 

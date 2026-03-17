@@ -1,22 +1,26 @@
 /// <reference types="vitest" />
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import path from "path";
-import { VitePWA } from 'vite-plugin-pwa';
-import { visualizer } from 'rollup-plugin-visualizer';
-import { compression } from 'vite-plugin-compression2';
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+import path from 'path'
+import { VitePWA } from 'vite-plugin-pwa'
+import { visualizer } from 'rollup-plugin-visualizer'
+import { compression } from 'vite-plugin-compression2'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: "::",
+    host: '::',
     port: 8080,
   },
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon-khaoskontrol.webp', 'android-chrome-192x192.png', 'android-chrome-512x512.png'],
+      includeAssets: [
+        'favicon-khaoskontrol.webp',
+        'android-chrome-192x192.png',
+        'android-chrome-512x512.png',
+      ],
       manifest: {
         name: 'Khaos Kontrol - CRM para Maquiadoras',
         short_name: 'Khaos Kontrol',
@@ -124,21 +128,25 @@ export default defineConfig(({ mode }) => ({
       exclude: [/\.(br)$/, /\.(gz)$/],
     }),
 
-    // Brotli compression 
+    // Brotli compression
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br)$/, /\.(gz)$/],
     }),
 
     // Bundle analyzer (only in build mode if ANALYZE is set)
-    ...(process.env.ANALYZE ? [visualizer({
-      open: true,
-      filename: 'dist/stats.html',
-    })] : []),
+    ...(process.env.ANALYZE
+      ? [
+          visualizer({
+            open: true,
+            filename: 'dist/stats.html',
+          }),
+        ]
+      : []),
   ].filter(Boolean),
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'),
     },
   },
   esbuild: {
@@ -156,17 +164,34 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Vendor chunks
+          // React ecosystem
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-ui': ['lucide-react', '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
+          'vendor-hooks': ['react-helmet-async', 'zustand'],
+
+          // UI Components & Icons
+          'vendor-ui': [
+            'lucide-react',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            'class-variance-authority',
+            'clsx',
+            'tailwind-merge',
+          ],
+
+          // Data Management
+          'vendor-query': ['@tanstack/react-query'],
           'vendor-supabase': ['@supabase/supabase-js'],
 
-          // AI chunks (lazy)
-          'ai-core': ['@mlc-ai/web-llm', '@google/generative-ai', 'zustand'],
-          'ai-ui': ['react-markdown', 'remark-gfm'],
+          // Utilities
+          'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
 
-          // Calendar chunk
-          'calendar': ['date-fns'],
+          // AI ecosystem (lazy)
+          'ai-engine': ['@mlc-ai/web-llm', '@google/generative-ai'],
+          'ai-markdown': ['react-markdown', 'remark-gfm'],
+
+          // Calendar & Forms (heavy features)
+          'feature-calendar': ['react-big-calendar'],
+          'feature-forms': ['react-hook-form', '@hookform/resolvers'],
         },
       },
     },
@@ -184,4 +209,4 @@ export default defineConfig(({ mode }) => ({
     css: true,
     exclude: ['**/node_modules/**', '**/dist/**', '**/e2e/**'],
   },
-}));
+}))

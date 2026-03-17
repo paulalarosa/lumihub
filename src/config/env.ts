@@ -3,7 +3,11 @@
  * Garante que todas as keys necessárias estão presentes
  */
 
-const requiredEnvVars = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const
+const requiredEnvVars = [
+  'VITE_SUPABASE_URL',
+  'VITE_SUPABASE_ANON_KEY',
+  // 'VITE_GOOGLE_MAPS_API_KEY', // Opcional segundo o GEMINI.md, mas pode ser adicionado
+] as const
 
 export function validateEnv() {
   const missing: string[] = []
@@ -16,7 +20,7 @@ export function validateEnv() {
 
   if (missing.length > 0) {
     throw new Error(
-      `Missing required environment variables:\n${missing.join('\n')}`,
+      `CRITICAL ERROR: Missing required environment variables:\n${missing.join('\n')}\nVerifique seu arquivo .env`,
     )
   }
 }

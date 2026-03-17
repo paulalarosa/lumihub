@@ -17,7 +17,7 @@ import {
   Calendar,
   PenTool,
 } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { ContractDocument } from '@/features/contracts/components/ContractDocument'
 import { ContractDialog } from '@/features/contracts/components/ContractDialog'

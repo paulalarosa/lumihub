@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import { Download, FileText } from 'lucide-react'
 import { logger } from '@/services/logger'

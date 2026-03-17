@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Calendar, MapPin, User } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { Project } from '../hooks/useProjectsPage'
 
 interface ProjectCardProps {

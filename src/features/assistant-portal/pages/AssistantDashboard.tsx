@@ -19,7 +19,7 @@ import {
 import { UpgradeCard } from '@/features/assistants/components/UpgradeCard'
 import { NotificationCenter } from '@/features/assistants/components/NotificationCenter'
 import { EventActionButtons } from '@/features/assistants/components/EventActionButtons'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 
 interface AssistantConnection {

@@ -11,7 +11,7 @@ import {
   MessageCircle,
 } from 'lucide-react'
 import { GenerateContractButton } from '@/features/projects/components/GenerateContractButton'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 
 interface ProjectHeaderProps {
   project: {

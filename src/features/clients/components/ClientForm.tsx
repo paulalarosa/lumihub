@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { CalendarIcon, Gem } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
 

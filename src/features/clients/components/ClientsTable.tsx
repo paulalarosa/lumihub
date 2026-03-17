@@ -11,7 +11,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Mail, Phone, Calendar } from 'lucide-react'
-import { format } from 'date-fns'
+import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import { Pagination } from '@/components/ui/pagination'
 import { useVirtualizer } from '@tanstack/react-virtual'
