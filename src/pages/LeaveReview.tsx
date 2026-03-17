@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -24,6 +24,7 @@ const CRITERIA_LABELS: Record<keyof ReviewCriteria, string> = {
 
 export default function LeaveReview() {
   const { token } = useParams<{ token: string }>()
+  const queryClient = useQueryClient()
   const [rating, setRating] = useState(0)
   const [hoveredRating, setHoveredRating] = useState(0)
   const [criteria, setCriteria] = useState<ReviewCriteria>({
@@ -112,6 +113,9 @@ export default function LeaveReview() {
     },
     onSuccess: () => {
       setSubmitted(true)
+      queryClient.invalidateQueries({ queryKey: ['reviews'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-metrics'] })
       toast.success('Avaliação enviada com sucesso!')
     },
     onError: (err: Error) => {

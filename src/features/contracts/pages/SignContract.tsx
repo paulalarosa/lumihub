@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -42,6 +42,7 @@ export default function SignContract() {
   const { requestId } = useParams<{ requestId: string }>()
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
+  const queryClient = useQueryClient()
 
   const [step, setStep] = useState<StepId>('validation')
   const [signatureMethod, setSignatureMethod] =
@@ -138,6 +139,11 @@ export default function SignContract() {
     },
     onSuccess: () => {
       setStep('complete')
+      queryClient.invalidateQueries({ queryKey: ['contracts'] })
+      queryClient.invalidateQueries({
+        queryKey: ['signature-request', requestId],
+      })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
       toast.success('Contrato assinado com sucesso!')
     },
     onError: (err: Error) => {
