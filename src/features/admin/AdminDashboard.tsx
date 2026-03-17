@@ -45,6 +45,10 @@ export default function AdminDashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
   const isAuthorizedAdmin = useIsAdmin()
   const [isAdmin, setIsAdmin] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  const activeTab = (searchParams.get('tab') as AdminTab) || 'overview'
 
   useEffect(() => {
     if (!authLoading) {
