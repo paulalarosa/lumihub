@@ -20,8 +20,8 @@ export function useAdminAnalytics() {
   const charts = data?.charts || { revenue: [], clients: [] }
 
   const eventsByCategory = events.reduce(
-    (acc: Record<string, number>, e: Record<string, any>) => {
-      const cat = e.category || e.type || 'other'
+    (acc: Record<string, number>, e: Record<string, unknown>) => {
+      const cat = (e.category as string) || (e.type as string) || 'other'
       acc[cat] = (acc[cat] || 0) + 1
       return acc
     },
@@ -33,9 +33,9 @@ export function useAdminAnalytics() {
   )
 
   const pageViewData = events
-    .filter((e: Record<string, any>) => e.type === 'page_view')
-    .reduce((acc: Record<string, number>, e: Record<string, any>) => {
-      const path = e.page_path || '/'
+    .filter((e: Record<string, unknown>) => e.type === 'page_view')
+    .reduce((acc: Record<string, number>, e: Record<string, unknown>) => {
+      const path = (e.page_path as string) || '/'
       acc[path] = (acc[path] || 0) + 1
       return acc
     }, {})
@@ -49,10 +49,12 @@ export function useAdminAnalytics() {
 
   const handleExportExcel = () => {
     if (!charts?.revenue) return
-    const dataToExport = charts.revenue.map((item: Record<string, any>) => ({
-      Mês: item.name,
-      Receita: item.value,
-    }))
+    const dataToExport = charts.revenue.map(
+      (item: Record<string, unknown>) => ({
+        Mês: item.name as string,
+        Receita: item.value as number,
+      }),
+    )
     exportFinancialExcel(dataToExport, 'Relatorio_Financeiro_Lumi')
   }
 

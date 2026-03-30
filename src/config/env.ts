@@ -24,8 +24,12 @@ export function validateEnv() {
 // Tipos seguros para env vars
 export const env = {
   supabase: {
-    url: import.meta.env.VITE_SUPABASE_URL as string,
-    anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY as string,
+    url:
+      (import.meta.env.VITE_SUPABASE_URL as string) ||
+      (import.meta.env.MODE === 'test' ? 'http://localhost:54321' : ''),
+    anonKey:
+      (import.meta.env.VITE_SUPABASE_ANON_KEY as string) ||
+      (import.meta.env.MODE === 'test' ? 'dummy' : ''),
   },
   stripe: {
     publicKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string,
