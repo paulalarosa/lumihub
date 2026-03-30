@@ -1,13 +1,19 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCorners,
+} from '@dnd-kit/core'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
 import { Plus, Search, Filter, TrendingUp } from 'lucide-react'
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
-import { LeadCard } from '@/components/pipeline/LeadCard'
+import { PipelineColumn } from '@/components/pipeline/PipelineColumn'
 import { CreateLeadDialog } from '@/components/pipeline/CreateLeadDialog'
 import { toast } from 'sonner'
 import { QUERY_KEYS } from '@/constants/queryKeys'
@@ -41,6 +47,14 @@ export const SalesPipeline = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+  )
+
   // Buscar estágios
   const { data: stages } = useQuery({
     queryKey: ['pipeline-stages'],
@@ -69,9 +83,6 @@ export const SalesPipeline = () => {
         .order('lead_score', { ascending: false })
 
       if (searchQuery) {
-        // Simple client-side filtering might be better for complex OR logic if Supabase filter is tricky with OR across columns
-        // avoiding complex syntax errors, let's use a simpler text search on name for first version or specialized rpc
-        // Trying explicit OR syntax
         query = query.or(
           `name.ilike.%${searchQuery}%,email.ilike.%${searchQuery}%`,
         )
@@ -104,31 +115,28 @@ export const SalesPipeline = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PIPELINE_LEADS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
-      // We optimistically updated UI via DnD state or just refetch.
-      // React Query refetch will sync everything.
     },
     onError: (error) => {
       toast.error('Erro ao mover card: ' + error.message)
     },
   })
 
-  const handleDragEnd = (result: {
-    destination?: { droppableId: string; index: number }
-    source: { droppableId: string; index: number }
-    draggableId: string
-  }) => {
-    const { destination, source, draggableId } = result
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event
+      if (!over) return
 
-    if (!destination) return
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    )
-      return
+      const leadId = active.id as string
+      const newStageId = over.id as string
 
-    const newStageId = destination.droppableId
-    moveMutation.mutate({ leadId: draggableId, newStageId })
-  }
+      // Find the current lead's stage
+      const lead = leads?.find((l) => l.id === leadId)
+      if (!lead || lead.current_stage_id === newStageId) return
+
+      moveMutation.mutate({ leadId, newStageId })
+    },
+    [leads, moveMutation],
+  )
 
   // Agrupar leads por estágio
   const leadsByStage =
@@ -214,79 +222,25 @@ export const SalesPipeline = () => {
       </div>
 
       {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+      >
         <div className="flex-1 overflow-x-auto overflow-y-hidden">
           <div className="flex gap-4 h-full min-w-max pb-4">
             {stages?.map((stage: PipelineStage) => (
-              <div
+              <PipelineColumn
                 key={stage.id}
-                className="w-80 flex flex-col h-full bg-neutral-900/30 rounded-lg border border-neutral-800/50"
-              >
-                {/* Stage Header */}
-                <div
-                  className="p-3 border-t-4 bg-neutral-900 rounded-t-lg shadow-sm"
-                  style={{ borderColor: stage.color }}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <h3
-                      className="font-semibold text-white truncate px-1"
-                      title={stage.name}
-                    >
-                      {stage.name}
-                    </h3>
-                    <Badge
-                      variant="secondary"
-                      className="bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-                    >
-                      {leadsByStage[stage.id]?.length || 0}
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Droppable Area */}
-                <Droppable droppableId={stage.id}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={`flex-1 p-2 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent ${
-                        snapshot.isDraggingOver ? 'bg-neutral-800/20' : ''
-                      }`}
-                    >
-                      {leadsByStage[stage.id]?.map(
-                        (lead: PipelineLead, index: number) => (
-                          <Draggable
-                            key={lead.id}
-                            draggableId={lead.id}
-                            index={index}
-                          >
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={{ ...provided.draggableProps.style }}
-                                className={
-                                  snapshot.isDragging
-                                    ? 'opacity-50 rotate-2'
-                                    : ''
-                                }
-                              >
-                                <LeadCard lead={lead} />
-                              </div>
-                            )}
-                          </Draggable>
-                        ),
-                      )}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
+                id={stage.id}
+                name={stage.name}
+                color={stage.color}
+                leads={leadsByStage[stage.id] || []}
+              />
             ))}
           </div>
         </div>
-      </DragDropContext>
+      </DndContext>
 
       {/* Dialogs */}
       <CreateLeadDialog

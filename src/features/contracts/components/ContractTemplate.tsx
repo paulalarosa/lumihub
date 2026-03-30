@@ -322,7 +322,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
           }}
         >
           Este contrato possui validade jurídica conforme MP 2.200-2/2001.
-          Aceite registrado eletronicamente via logs de sistema Lumihub sob o
+          Aceite registrado eletronicamente via logs de sistema Khaos Kontrol sob o
           ID: {data.contractNumber}.
         </Text>
       </View>

@@ -1,11 +1,13 @@
 import { useState, memo } from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Phone, Mail, Calendar, DollarSign, TrendingUp } from 'lucide-react'
 import { LeadDetailsDialog } from './LeadDetailsDialog'
 
-import { PipelineLead } from '@/pages/SalesPipeline'
+import { PipelineLead } from '@/features/pipeline/pages/SalesPipeline'
 
 interface LeadCardProps {
   lead: PipelineLead
@@ -13,6 +15,21 @@ interface LeadCardProps {
 
 export const LeadCard = memo(({ lead }: LeadCardProps) => {
   const [isOpen, setIsOpen] = useState(false)
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: lead.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
 
   // Score color
   const getScoreColor = (score: number) => {
@@ -24,7 +41,13 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
   return (
     <>
       <Card
-        className="p-4 hover:shadow-lg transition-shadow cursor-pointer bg-neutral-800 border-neutral-700"
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className={`p-4 hover:shadow-lg transition-shadow cursor-pointer bg-neutral-800 border-neutral-700 ${
+          isDragging ? 'ring-2 ring-white/20' : ''
+        }`}
         onClick={() => setIsOpen(true)}
       >
         {/* Header */}

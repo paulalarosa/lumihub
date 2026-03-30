@@ -127,7 +127,7 @@
 
   @media screen and (max-width: 768px) {
 
-    .lumi-button,
+    .kk-button,
     button {
       padding-top: 0.75rem !important;
       padding-bottom: 0.75rem !important;
@@ -151,13 +151,13 @@
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 
-  .lumi-card {
+  .kk-card {
     @apply border border-white/20 bg-black p-0 shadow-none;
     border-radius: 0 !important;
   }
 
   .tech-card {
-    @apply lumi-card;
+    @apply kk-card;
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
@@ -299,27 +299,27 @@
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
 }
 
-.lumi-title {
+.kk-title {
   font-family: var(--font-serif);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: #FFFFFF;
 }
 
-.lumi-text {
+.kk-text {
   font-family: var(--font-sans);
   font-weight: 400;
   color: #C0C0C0;
 }
 
-.lumi-label {
+.kk-label {
   font-family: var(--font-sans);
   font-weight: 600;
   font-size: 0.75rem;
   color: hsl(var(--muted-foreground));
 }
 
-.lumi-button {
+.kk-button {
   padding: 0.6rem 1.25rem;
   border-radius: 0 !important;
 
@@ -332,14 +332,14 @@
   box-shadow: none;
 }
 
-.lumi-button:hover {
+.kk-button:hover {
   border-color: #FFFFFF;
   background: #FFFFFF;
   color: #000000;
   box-shadow: none;
 }
 
-.lumi-button-ghost {
+.kk-button-ghost {
   padding: 0.45rem 1rem;
   border-radius: 0 !important;
 
@@ -348,7 +348,7 @@
   border: 1px solid transparent;
 }
 
-.lumi-button-ghost:hover {
+.kk-button-ghost:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #FFFFFF;
   border-color: rgba(255, 255, 255, 0.2);
@@ -396,24 +396,24 @@ textarea:focus {
   box-shadow: none;
 }
 
-.dashboard-root .lumi-button {
+.dashboard-root .kk-button {
   background: #000000;
   color: #FFFFFF;
   border: 1px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: none;
 }
 
-.lumi-badge {
+.kk-badge {
   @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-white/5 text-white/70 border border-white/20;
   border-radius: 0 !important;
 }
 
-.lumi-badge-pending {
+.kk-badge-pending {
   @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-transparent text-white border border-white;
   border-radius: 0 !important;
 }
 
-.lumi-badge-active {
+.kk-badge-active {
   @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-white text-black border border-white;
   border-radius: 0 !important;
 }
@@ -438,7 +438,7 @@ textarea:focus {
 }
 
 .quick-nav-card-inner {
-  @apply lumi-card p-6 h-full flex flex-col items-center justify-center gap-4 transition-all duration-300;
+  @apply kk-card p-6 h-full flex flex-col items-center justify-center gap-4 transition-all duration-300;
 
 }
 
@@ -448,7 +448,7 @@ textarea:focus {
 }
 
 .metric-card {
-  @apply lumi-card p-6 flex flex-col items-center justify-center;
+  @apply kk-card p-6 flex flex-col items-center justify-center;
 }
 
 @layer utilities {
@@ -469,11 +469,11 @@ textarea:focus {
 
 
 .metric-value {
-  @apply lumi-title text-4xl font-bold text-white;
+  @apply kk-title text-4xl font-bold text-white;
 }
 
 .metric-label {
-  @apply lumi-label mt-2;
+  @apply kk-label mt-2;
 }
 
 .icon-thin {
@@ -1183,7 +1183,7 @@ a:focus:not(:focus-visible) {
     @apply transition-all duration-300;
   }
 
-  .btn-primary {
+  .kk-button {
     @apply bg-white text-black font-bold;
     @apply hover:bg-white/90;
     @apply shadow-lg shadow-black/20;

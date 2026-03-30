@@ -6,47 +6,41 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
 import {
-  CheckCircle,
   ArrowRight,
-  Sparkles,
-  Calendar,
+  CheckCircle,
   User,
-  Palette,
+  Sparkles,
+  Heart,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
+import { useNavigate } from 'react-router-dom'
 
-const ONBOARDING_STEPS = [
+// Hooked UX: Cada step deve ter ACTION + IMMEDIATE REWARD
+const STEPS = [
   {
     id: 'welcome',
-    title: 'Bem-vinda ao Khaos Kontrol! 👋',
-    description: 'Vamos configurar sua conta em poucos passos',
+    title: 'Sua conta está quase pronta',
+    subtitle: '3 passos rápidos para você começar a organizar sua carreira',
     icon: Sparkles,
   },
   {
     id: 'profile',
-    title: 'Seu Perfil Profissional',
-    description: 'Conte um pouco sobre você',
+    title: 'Como suas clientes vão te encontrar',
+    subtitle: 'Essas informações aparecem no seu portal público',
     icon: User,
   },
   {
-    id: 'services',
-    title: 'Seus Serviços',
-    description: 'O que você oferece?',
-    icon: Palette,
-  },
-  {
-    id: 'calendar',
-    title: 'Sincronizar Agenda',
-    description: 'Conecte com Google Calendar',
-    icon: Calendar,
+    id: 'first_client',
+    title: 'Cadastre sua primeira cliente',
+    subtitle: 'Pode ser uma cliente real ou fictícia para testar',
+    icon: Heart,
   },
   {
     id: 'complete',
-    title: 'Tudo Pronto! 🎉',
-    description: 'Você está pronta para começar',
+    title: 'Pronta para começar!',
+    subtitle: 'Seu sistema está configurado',
     icon: CheckCircle,
   },
 ]
@@ -54,19 +48,23 @@ const ONBOARDING_STEPS = [
 export const OnboardingWizard = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
-  const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const navigate = useNavigate()
+  const [step, setStep] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
 
-  // Estado do formulário
-  const [formData, setFormData] = useState({
+  const [profileData, setProfileData] = useState({
     business_name: '',
     bio: '',
-    specialty: '',
-    instagram: '',
     phone: '',
+    instagram: '',
   })
 
-  // Buscar progresso
+  const [clientData, setClientData] = useState({
+    name: '',
+    phone: '',
+    event_date: '',
+  })
+
   const { data: onboarding } = useQuery({
     queryKey: ['user-onboarding'],
     queryFn: async () => {
@@ -75,18 +73,17 @@ export const OnboardingWizard = () => {
         .select('*')
         .eq('user_id', user?.id)
         .single()
+
       if (error && error.code !== 'PGRST116') throw error
 
-      // Se não existe, criar
       if (!data) {
-        const { data: newOnboarding, error: createError } = await supabase
+        const { data: created, error: createError } = await supabase
           .from('user_onboarding')
           .insert({ user_id: user?.id })
           .select()
           .single()
-
         if (createError) throw createError
-        return newOnboarding
+        return created
       }
 
       return data
@@ -94,27 +91,18 @@ export const OnboardingWizard = () => {
     enabled: !!user,
   })
 
-  // Abrir automaticamente se não completou
   useEffect(() => {
     if (onboarding && !onboarding.is_completed && !onboarding.has_seen_tour) {
       setIsOpen(true)
-
-      // Restore current step if available
-      const savedStepIndex = ONBOARDING_STEPS.findIndex(
-        (s) => s.id === onboarding.current_step,
-      )
-      if (savedStepIndex !== -1) setCurrentStepIndex(savedStepIndex)
     }
   }, [onboarding])
 
-  // Mutation: Atualizar progresso
   const updateMutation = useMutation({
     mutationFn: async (updates: Record<string, unknown>) => {
       const { error } = await supabase
         .from('user_onboarding')
         .update(updates)
         .eq('user_id', user?.id)
-
       if (error) throw error
     },
     onSuccess: () => {
@@ -122,89 +110,75 @@ export const OnboardingWizard = () => {
     },
   })
 
-  const currentStep = ONBOARDING_STEPS[currentStepIndex]
-  const progress = ((currentStepIndex + 1) / ONBOARDING_STEPS.length) * 100
+  const currentStep = STEPS[step]
+  const progress = ((step + 1) / STEPS.length) * 100
 
   const handleNext = async () => {
-    const stepId = currentStep.id
-
-    // Validações por step
-    if (stepId === 'profile') {
-      if (!formData.business_name || !formData.bio) {
-        toast.error('Preencha todos os campos obrigatórios')
+    if (currentStep.id === 'profile') {
+      if (!profileData.business_name) {
+        toast.error('Dá um nome pro seu negócio')
         return
       }
 
-      // Salvar dados do perfil
-      // Try to find existing artist profile or create one
-      const { data: artist } = await supabase
-        .from('makeup_artists')
-        .select('id')
-        .eq('user_id', user?.id)
-        .maybeSingle()
-
-      if (artist) {
-        await supabase
-          .from('makeup_artists')
-          .update({
-            name: formData.business_name,
-            bio: formData.bio,
-            specialty: formData.specialty,
-            instagram: formData.instagram,
-            phone: formData.phone,
-          })
-          .eq('id', artist.id)
-      } else {
-        // Create placeholder if needed or handle logic elsewhere
-        // For now assumes profile exists or we just update onboarding
-      }
+      // Salvar perfil — INVESTMENT: dados que a usuária não quer perder
+      await supabase
+        .from('profiles')
+        .update({
+          business_name: profileData.business_name,
+          bio: profileData.bio,
+          phone: profileData.phone,
+        })
+        .eq('id', user?.id)
 
       await updateMutation.mutateAsync({ profile_customized: true })
+
+      // VARIABLE REWARD: mostrar feedback imediato
+      toast.success('Perfil salvo! Suas clientes já podem te encontrar.')
     }
 
-    // Calcular próximo index
-    const nextIndex = currentStepIndex + 1
+    if (currentStep.id === 'first_client') {
+      if (!clientData.name) {
+        toast.error('Dá um nome pra sua primeira cliente')
+        return
+      }
 
-    // Marcar step como completo
-    const completedSteps = [...(onboarding?.completed_steps || [])]
-    if (!completedSteps.includes(stepId)) completedSteps.push(stepId)
+      // Criar cliente real — INVESTMENT: dados reais no sistema
+      const { error } = await supabase.from('wedding_clients').insert({
+        user_id: user?.id,
+        name: clientData.name,
+        phone: clientData.phone || null,
+        event_date: clientData.event_date || null,
+      })
 
-    // Se é o último passo (Complete)
-    if (stepId === 'complete') {
-      setIsOpen(false)
-      return
+      if (error) {
+        toast.error('Erro ao salvar cliente')
+        return
+      }
+
+      await updateMutation.mutateAsync({ first_client_added: true })
+
+      // VARIABLE REWARD
+      toast.success(`${clientData.name} cadastrada! Sua primeira cliente no sistema.`)
     }
 
-    // Se o PRÓXIMO passo é o de complete, finaliza o onboarding
-    if (nextIndex === ONBOARDING_STEPS.length - 1) {
+    if (currentStep.id === 'complete') {
       await updateMutation.mutateAsync({
-        current_step: ONBOARDING_STEPS[nextIndex].id,
-        completed_steps: completedSteps,
         is_completed: true,
         completed_at: new Date().toISOString(),
         has_seen_tour: true,
       })
 
-      // Verificar conquistas
-      await supabase.rpc('check_and_unlock_achievements', {
-        p_user_id: user?.id,
-      })
-
-      // Confetti!
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-      })
-    } else {
-      // Apenas avança
-      await updateMutation.mutateAsync({
-        current_step: ONBOARDING_STEPS[nextIndex].id,
-        completed_steps: completedSteps,
-      })
+      confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } })
+      setIsOpen(false)
+      return
     }
 
-    setCurrentStepIndex(nextIndex)
+    // Avançar
+    const nextStep = step + 1
+    await updateMutation.mutateAsync({
+      current_step: STEPS[nextStep].id,
+    })
+    setStep(nextStep)
   }
 
   const handleSkip = async () => {
@@ -214,247 +188,228 @@ export const OnboardingWizard = () => {
       completed_at: new Date().toISOString(),
     })
     setIsOpen(false)
-    toast.info('Tour de onboarding pulado.')
   }
 
   if (!isOpen) return null
 
   return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open && onboarding?.is_completed) setIsOpen(false)
-        // Prevent closing by clicking outside if not completed (optional enforcement)
-      }}
-    >
-      <DialogContent className="bg-neutral-900 border-neutral-800 max-w-2xl text-white sm:max-h-[90vh] overflow-y-auto">
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-neutral-400">
-              Passo {currentStepIndex + 1} de {ONBOARDING_STEPS.length}
-            </span>
-            <span className="text-sm font-semibold text-purple-400">
-              {Math.round(progress)}%
-            </span>
-          </div>
-          <Progress value={progress} className="h-2" />
+    <Dialog open={isOpen} onOpenChange={() => {}}>
+      <DialogContent className="bg-[#0a0a0a] border border-white/10 max-w-lg text-white p-0 overflow-hidden">
+
+        {/* Progress — minimal */}
+        <div className="h-1 bg-white/5">
+          <div
+            className="h-full bg-white transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
         </div>
 
-        {/* Step Content */}
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-purple-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-            <currentStep.icon className="w-10 h-10 text-purple-400" />
-          </div>
+        <div className="p-8">
+          {/* Step indicator */}
+          <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-6">
+            {step + 1} de {STEPS.length}
+          </p>
 
-          <h2 className="text-3xl font-bold text-white mb-2">
+          {/* Title */}
+          <h2 className="text-2xl font-serif text-white mb-1 tracking-tight">
             {currentStep.title}
           </h2>
-          <p className="text-neutral-400">{currentStep.description}</p>
-        </div>
+          <p className="text-sm text-white/40 mb-8">
+            {currentStep.subtitle}
+          </p>
 
-        {/* Step-specific content */}
-        {currentStep.id === 'welcome' && (
-          <div className="space-y-4 text-center">
-            <p className="text-neutral-300">
-              Em menos de 5 minutos você estará pronta para gerenciar seus
-              clientes, agenda e contratos de forma profissional! ✨
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div className="p-4 bg-neutral-800 rounded-lg">
-                <p className="text-2xl mb-2">📅</p>
-                <p className="text-white font-semibold">Agenda</p>
-                <p className="text-neutral-400">Sincronizada</p>
+          {/* STEP: Welcome */}
+          {currentStep.id === 'welcome' && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { emoji: '👩💼', label: 'Perfil', desc: '30 segundos' },
+                  { emoji: '💍', label: 'Cliente', desc: '30 segundos' },
+                  { emoji: '🎉', label: 'Pronta!', desc: 'Imediato' },
+                ].map((item, i) => (
+                  <div key={i} className="text-center p-4 border border-white/[0.06] bg-white/[0.02]">
+                    <span className="text-xl block mb-2">{item.emoji}</span>
+                    <p className="text-xs text-white font-medium">{item.label}</p>
+                    <p className="text-[10px] text-white/30">{item.desc}</p>
+                  </div>
+                ))}
               </div>
-              <div className="p-4 bg-neutral-800 rounded-lg">
-                <p className="text-2xl mb-2">📱</p>
-                <p className="text-white font-semibold">Instagram</p>
-                <p className="text-neutral-400">Integrado</p>
-              </div>
-              <div className="p-4 bg-neutral-800 rounded-lg">
-                <p className="text-2xl mb-2">✨</p>
-                <p className="text-white font-semibold">IA</p>
-                <p className="text-neutral-400">Assistente</p>
-              </div>
+              <p className="text-xs text-white/25 text-center">
+                Leva menos de 2 minutos
+              </p>
             </div>
-          </div>
-        )}
+          )}
 
-        {currentStep.id === 'profile' && (
-          <div className="space-y-4 text-left">
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Nome do Negócio *
-              </label>
-              <Input
-                value={formData.business_name}
-                onChange={(e) =>
-                  setFormData({ ...formData, business_name: e.target.value })
-                }
-                placeholder="Studio Glam Makeup"
-                className="bg-neutral-800 border-neutral-700"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                Sobre Você *
-              </label>
-              <Textarea
-                value={formData.bio}
-                onChange={(e) =>
-                  setFormData({ ...formData, bio: e.target.value })
-                }
-                rows={4}
-                placeholder="Conte um pouco sobre sua experiência, especialidades..."
-                className="bg-neutral-800 border-neutral-700"
-              />
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-4">
+          {/* STEP: Profile — ACTION: preencher dados reais */}
+          {currentStep.id === 'profile' && (
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Especialidade
+                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                  Nome do seu negócio *
                 </label>
                 <Input
-                  value={formData.specialty}
-                  onChange={(e) =>
-                    setFormData({ ...formData, specialty: e.target.value })
-                  }
-                  placeholder="Noivas, Festas, Editorial..."
-                  className="bg-neutral-800 border-neutral-700"
+                  value={profileData.business_name}
+                  onChange={(e) => setProfileData({ ...profileData, business_name: e.target.value })}
+                  placeholder="Ex: Studio Glam, Maria Makeup..."
+                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-white mb-2">
-                  Instagram
+                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                  Sobre você (aparece no seu portal)
                 </label>
-                <div className="flex gap-2">
-                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-neutral-700 bg-neutral-800 text-neutral-400">
-                    @
-                  </span>
+                <Textarea
+                  value={profileData.bio}
+                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  rows={3}
+                  placeholder="Maquiadora profissional especializada em..."
+                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 resize-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    WhatsApp
+                  </label>
                   <Input
-                    value={formData.instagram}
-                    onChange={(e) =>
-                      setFormData({ ...formData, instagram: e.target.value })
-                    }
-                    placeholder="seu.usuario"
-                    className="rounded-l-none bg-neutral-800 border-neutral-700"
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    placeholder="(11) 99999-9999"
+                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    Instagram
+                  </label>
+                  <Input
+                    value={profileData.instagram}
+                    onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
+                    placeholder="@seu.perfil"
+                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
                 </div>
               </div>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white mb-2">
-                WhatsApp
-              </label>
-              <Input
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                placeholder="(11) 99999-9999"
-                className="bg-neutral-800 border-neutral-700"
-              />
-            </div>
-          </div>
-        )}
-
-        {currentStep.id === 'services' && (
-          <div className="text-center space-y-4">
-            <p className="text-neutral-300">
-              Você pode configurar seus serviços e preços depois no menu
-              Configurações
-            </p>
-            <div className="bg-purple-900/20 border border-purple-500 rounded-lg p-4">
-              <p className="text-purple-400 text-sm">
-                💡 Dica: Defina seus serviços para gerar orçamentos automáticos!
-              </p>
-            </div>
-          </div>
-        )}
-
-        {currentStep.id === 'calendar' && (
-          <div className="text-center space-y-4">
-            <p className="text-neutral-300">
-              Sincronize com Google Calendar para nunca perder um compromisso
-            </p>
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-neutral-700 hover:bg-neutral-800 text-white"
-            >
-              <Calendar className="w-5 h-5 mr-2" />
-              Conectar Google Calendar
-            </Button>
-            <p className="text-sm text-neutral-500">
-              Você pode fazer isso depois em Integrações
-            </p>
-          </div>
-        )}
-
-        {currentStep.id === 'complete' && (
-          <div className="text-center space-y-6">
-            <div className="w-24 h-24 bg-green-900/30 rounded-full flex items-center justify-center mx-auto">
-              <CheckCircle className="w-16 h-16 text-green-500" />
-            </div>
-
-            <div>
-              <h3 className="text-2xl font-bold text-white mb-2">
-                Parabéns! Você está pronta! 🎉
-              </h3>
-              <p className="text-neutral-400">
-                Sua conta está configurada e você já pode começar a agendar seus
-                primeiros eventos
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-neutral-800 rounded-lg text-left">
-                <p className="text-sm text-neutral-400 mb-1">Próximo passo</p>
-                <p className="font-semibold text-white">
-                  Cadastrar primeira cliente
-                </p>
-              </div>
-              <div className="p-4 bg-neutral-800 rounded-lg text-left">
-                <p className="text-sm text-neutral-400 mb-1">Depois</p>
-                <p className="font-semibold text-white">
-                  Criar primeiro evento
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Actions */}
-        <div className="flex gap-2 mt-6">
-          {currentStep.id !== 'complete' && (
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              className="flex-1 hover:bg-neutral-800 text-neutral-400"
-            >
-              Pular
-            </Button>
           )}
 
-          <Button
-            onClick={handleNext}
-            disabled={updateMutation.isPending}
-            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            {currentStep.id === 'complete' ? (
-              'Começar a Usar'
-            ) : (
-              <>
-                Continuar
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </>
+          {/* STEP: First Client — ACTION: criar algo real no sistema */}
+          {currentStep.id === 'first_client' && (
+            <div className="space-y-4">
+              <p className="text-xs text-white/30 mb-2">
+                Cadastrar uma cliente real faz você sentir o sistema funcionando de verdade.
+              </p>
+
+              <div>
+                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                  Nome da cliente *
+                </label>
+                <Input
+                  value={clientData.name}
+                  onChange={(e) => setClientData({ ...clientData, name: e.target.value })}
+                  placeholder="Ex: Ana Silva"
+                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    WhatsApp da cliente
+                  </label>
+                  <Input
+                    value={clientData.phone}
+                    onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
+                    placeholder="(11) 99999-9999"
+                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    Data do evento
+                  </label>
+                  <Input
+                    type="date"
+                    value={clientData.event_date}
+                    onChange={(e) => setClientData({ ...clientData, event_date: e.target.value })}
+                    className="bg-white/[0.04] border-white/10 text-white h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 border border-white/[0.06] bg-white/[0.02]">
+                <p className="text-xs text-white/40">
+                  💡 Depois de cadastrar, você pode gerar um contrato e enviar o portal exclusivo para ela.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* STEP: Complete — VARIABLE REWARD */}
+          {currentStep.id === 'complete' && (
+            <div className="space-y-6 text-center">
+              <div className="w-16 h-16 mx-auto border border-white/20 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-white" />
+              </div>
+
+              <div>
+                <p className="text-white/60 text-sm mb-6">
+                  Seu sistema está configurado. Aqui está o que você já pode fazer:
+                </p>
+
+                <div className="grid grid-cols-2 gap-3 text-left">
+                  {[
+                    { action: 'Gerar contrato digital', path: '/contratos' },
+                    { action: 'Criar evento na agenda', path: '/calendar' },
+                    { action: 'Enviar portal da noiva', path: '/clientes' },
+                    { action: 'Ver seu dashboard', path: '/dashboard' },
+                  ].map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        handleNext()
+                        navigate(item.path)
+                      }}
+                      className="p-3 border border-white/[0.06] bg-white/[0.02] hover:border-white/20 transition-colors text-left"
+                    >
+                      <p className="text-xs text-white">{item.action}</p>
+                      <p className="text-[10px] text-white/25 mt-0.5">→ Ir agora</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 mt-8">
+            {currentStep.id !== 'complete' && (
+              <button
+                onClick={handleSkip}
+                className="text-xs text-white/20 hover:text-white/40 transition-colors"
+              >
+                Pular setup
+              </button>
             )}
-          </Button>
+            <div className="flex-1" />
+            <Button
+              onClick={handleNext}
+              disabled={updateMutation.isPending}
+              variant="primary"
+              className="group"
+            >
+              {currentStep.id === 'complete' ? (
+                'Ir para o Dashboard'
+              ) : (
+                <>
+                  Continuar
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

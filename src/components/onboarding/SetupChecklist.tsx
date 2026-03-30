@@ -1,47 +1,39 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { CheckCircle, Circle, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 const CHECKLIST_ITEMS = [
   {
     id: 'profile_customized',
-    title: 'Completar Perfil',
-    description: 'Adicione suas informações profissionais',
-    path: '/configuracoes', // Adjusted path or redirect logic might be needed
+    title: 'Completar perfil',
+    description: 'Suas clientes vão te encontrar pelo portal',
+    path: '/configuracoes',
     cta: 'Configurar',
   },
   {
     id: 'first_client_added',
-    title: 'Cadastrar Primeira Cliente',
-    description: 'Comece adicionando uma cliente',
+    title: 'Cadastrar primeira cliente',
+    description: 'Comece organizando quem você já atende',
     path: '/clientes',
-    cta: 'Adicionar Cliente',
+    cta: 'Adicionar',
   },
   {
     id: 'first_event_created',
-    title: 'Criar Primeiro Evento',
-    description: 'Agende seu primeiro serviço',
+    title: 'Criar primeiro evento',
+    description: 'Agende um serviço na sua agenda',
     path: '/calendar',
-    cta: 'Criar Evento',
-  },
-  {
-    id: 'calendar_synced',
-    title: 'Sincronizar Google Calendar',
-    description: 'Nunca perca um compromisso',
-    path: '/configuracoes', // Adjusted path
-    cta: 'Conectar',
+    cta: 'Agendar',
   },
   {
     id: 'first_contract_generated',
-    title: 'Gerar Primeiro Contrato',
-    description: 'Profissionalize seus acordos',
+    title: 'Gerar primeiro contrato',
+    description: 'Profissionalize seus acordos com assinatura digital',
     path: '/contratos',
-    cta: 'Ver Contratos',
+    cta: 'Criar',
   },
 ]
 
@@ -57,7 +49,6 @@ export const SetupChecklist = () => {
         .select('*')
         .eq('user_id', user?.id)
         .single()
-
       if (error && error.code !== 'PGRST116') throw error
       return data
     },
@@ -70,70 +61,93 @@ export const SetupChecklist = () => {
     (item) => onboarding[item.id as keyof typeof onboarding] === true,
   ).length
 
-  const progress = (completedCount / CHECKLIST_ITEMS.length) * 100
-
-  // If all completed, don't show or show success state?
-  // Requirement says "if completed return null" so it disappears.
   if (completedCount === CHECKLIST_ITEMS.length) return null
 
+  const progress = (completedCount / CHECKLIST_ITEMS.length) * 100
+
+  // Encontrar próximo step não completado
+  const nextItem = CHECKLIST_ITEMS.find(
+    (item) => onboarding[item.id as keyof typeof onboarding] !== true,
+  )
+
   return (
-    <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30 mb-6">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Configure sua Conta</CardTitle>
-          <span className="text-sm font-semibold text-purple-400">
-            {completedCount}/{CHECKLIST_ITEMS.length}
-          </span>
-        </div>
-        <Progress value={progress} className="h-2 bg-neutral-800" />
-      </CardHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-8 border border-white/10 bg-white/[0.02] overflow-hidden"
+    >
+      {/* Progress bar */}
+      <div className="h-0.5 bg-white/5">
+        <motion.div
+          className="h-full bg-white"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.8 }}
+        />
+      </div>
 
-      <CardContent className="space-y-3">
-        {CHECKLIST_ITEMS.map((item) => {
-          const isCompleted =
-            onboarding[item.id as keyof typeof onboarding] === true
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-medium text-white">
+              Configure sua conta
+            </h3>
+            <p className="text-xs text-white/30 mt-0.5">
+              {completedCount} de {CHECKLIST_ITEMS.length} concluídos
+            </p>
+          </div>
 
-          return (
-            <div
-              key={item.id}
-              className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
-                isCompleted
-                  ? 'bg-green-900/10 border border-green-900/30'
-                  : 'bg-neutral-800/50 hover:bg-neutral-800 border border-transparent'
-              }`}
+          {nextItem && (
+            <Button
+              size="sm"
+              variant="primary"
+              className="text-xs group"
+              onClick={() => navigate(nextItem.path)}
             >
-              <div className="flex items-center gap-3">
-                {isCompleted ? (
-                  <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                ) : (
-                  <Circle className="w-5 h-5 text-neutral-500 flex-shrink-0" />
-                )}
+              {nextItem.cta}
+              <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </Button>
+          )}
+        </div>
 
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          {CHECKLIST_ITEMS.map((item) => {
+            const isCompleted = onboarding[item.id as keyof typeof onboarding] === true
+            const isNext = item.id === nextItem?.id
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => !isCompleted && navigate(item.path)}
+                disabled={isCompleted}
+                className={`flex items-start gap-2.5 p-3 text-left transition-colors ${
+                  isCompleted
+                    ? 'opacity-40'
+                    : isNext
+                      ? 'border border-white/20 bg-white/[0.03]'
+                      : 'border border-white/[0.06] hover:border-white/15'
+                }`}
+              >
+                {isCompleted ? (
+                  <CheckCircle className="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <Circle className="w-4 h-4 text-white/20 flex-shrink-0 mt-0.5" />
+                )}
                 <div>
-                  <p
-                    className={`font-medium text-sm ${isCompleted ? 'text-green-400/70 line-through' : 'text-white'}`}
-                  >
+                  <p className={`text-xs font-medium ${
+                    isCompleted ? 'text-white/40 line-through' : 'text-white'
+                  }`}>
                     {item.title}
                   </p>
-                  <p className="text-xs text-neutral-400">{item.description}</p>
+                  <p className="text-[10px] text-white/25 mt-0.5 hidden sm:block">
+                    {item.description}
+                  </p>
                 </div>
-              </div>
-
-              {!isCompleted && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate(item.path)}
-                  className="h-8 text-xs bg-neutral-900 border-neutral-700 hover:text-white"
-                >
-                  {item.cta}
-                  <ArrowRight className="w-3 h-3 ml-1" />
-                </Button>
-              )}
-            </div>
-          )
-        })}
-      </CardContent>
-    </Card>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </motion.div>
   )
 }

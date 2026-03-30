@@ -28,8 +28,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/ui/empty-state'
-import Confetti from 'react-confetti'
-import { useWindowSize } from 'react-use'
+import confetti from 'canvas-confetti'
 import {
   useMarketing,
   useInactiveClients,
@@ -75,13 +74,11 @@ const DEFAULT_SCRIPTS: MarketingCampaign[] = [
 export default function Marketing() {
   const { user } = useAuth()
   const { t } = useLanguage()
-  const { width, height } = useWindowSize()
   const [selectedClient, setSelectedClient] = useState<InactiveClient | null>(
     null,
   )
   const [selectedScriptId, setSelectedScriptId] = useState<string>('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [showConfetti, setShowConfetti] = useState(false)
 
   const { campaigns, loading: campaignsLoading } = useMarketing()
   const {
@@ -126,8 +123,14 @@ export default function Marketing() {
     const whatsappUrl = `https://wa.me/55${selectedClient.phone.replace(/\D/g, '')}?text=${encodedMessage}`
 
     toast.success('Abrindo WhatsApp...')
-    setShowConfetti(true)
-    setTimeout(() => setShowConfetti(false), 5000)
+    
+    // Trigger confetti
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#ffffff', '#888888', '#000000']
+    })
 
     window.open(whatsappUrl, '_blank')
     setIsDialogOpen(false)
@@ -139,15 +142,6 @@ export default function Marketing() {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500 relative min-h-screen bg-black p-6 md:p-10 font-mono">
-      {showConfetti && (
-        <Confetti
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={50}
-          colors={['#ffffff', '#000000']}
-        />
-      )}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/20 pb-6">
         <div>

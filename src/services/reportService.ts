@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-import ExcelJS from 'exceljs'
+// ExcelJS will be dynamically imported when needed
 import { saveAs } from 'file-saver'
 import { format } from 'date-fns/format'
 
@@ -210,6 +210,7 @@ export const exportFinancialExcel = async (
   data: FinancialExportItem[],
   fileName: string = 'Financeiro',
 ) => {
+  const { default: ExcelJS } = await import('exceljs')
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Dados')
 
@@ -260,6 +261,7 @@ export const exportMonthlyClosing = async (events: MonthlyClosingEvent[]) => {
     }
   })
 
+  const { default: ExcelJS } = await import('exceljs')
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Fechamento Mensal')
 

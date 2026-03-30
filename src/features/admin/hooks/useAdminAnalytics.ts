@@ -55,7 +55,7 @@ export function useAdminAnalytics() {
         Receita: item.value as number,
       }),
     )
-    exportFinancialExcel(dataToExport, 'Relatorio_Financeiro_Lumi')
+    exportFinancialExcel(dataToExport, 'Relatorio_Financeiro_KhaosKontrol')
   }
 
   const isPositive = (value: number) => value > 0

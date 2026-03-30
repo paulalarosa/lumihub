@@ -135,7 +135,7 @@ export default function BlogArticle() {
             <p className="text-sm text-[#374151] mb-4">
               Ready to scale your creative business?
             </p>
-            <a href="/contact" className="lumi-button inline-block">
+            <a href="/contact" className="kk-button inline-block">
               Apply for Studio Pro
             </a>
           </div>

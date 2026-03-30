@@ -8,6 +8,6 @@ export interface AuthContextType {
     signIn: (email: string, pass: string) => Promise<AuthResponse>;
     signOut: () => Promise<void>;
     signInWithGoogle: () => Promise<OAuthResponse>;
-    signUp: (email: string, pass: string) => Promise<AuthResponse>;
+    signUp: (email: string, pass: string, fullName?: string, businessName?: string) => Promise<AuthResponse>;
     isAdmin?: boolean;
 }

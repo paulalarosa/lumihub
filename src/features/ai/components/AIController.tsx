@@ -27,7 +27,7 @@ export default function AIController() {
 
   const isPublicRoute = !isDashboardRoute
 
-  // 1. Internal AI (Lumi IA)
+  // 1. Internal AI (Khaos IA)
   // Render if authenticated and inside the internal area/dashboard
   if (user && isDashboardRoute) {
     return (
@@ -47,7 +47,7 @@ export default function AIController() {
     )
   }
 
-  // 2. Sales AI (Lumi Assistant)
+  // 2. Sales AI (Khaos Assistant)
   // Render only on public routes.
   // If user is logged in but on public page (e.g. Home), we could still show it,
   // or hide it. The requirement says: "If the user is logged in and inside the dashboard, this assistant should be hidden."

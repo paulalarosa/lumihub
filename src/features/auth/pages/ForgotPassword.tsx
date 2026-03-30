@@ -65,7 +65,7 @@ export default function ForgotPassword() {
             <Input
               id="email"
               type="email"
-              placeholder="OPERATIVA@LUMI.COM"
+              placeholder="seu@email.com"
               className="block w-full rounded-none bg-black border-white/20 text-white focus:border-white focus:ring-0 h-11 placeholder:text-white/20 font-mono text-sm"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

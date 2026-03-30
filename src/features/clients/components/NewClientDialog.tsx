@@ -230,7 +230,7 @@ export default function NewClientDialog({
                   name="company_name"
                   value={formData.company_name}
                   onChange={handleChange}
-                  placeholder="Ex: Lumi Inc."
+                  placeholder="Ex: Studio Glam"
                   className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none focus-visible:ring-0 focus-visible:border-white/40"
                 />
               </div>

@@ -1,5 +1,5 @@
 /**
- * Lumi Privacy Utilities
+ * Khaos Kontrol Privacy Utilities
  * UUID v4 Encrypted IDs for Contracts and Briefings
  * January 8, 2026
  */

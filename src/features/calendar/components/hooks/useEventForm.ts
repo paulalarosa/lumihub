@@ -442,7 +442,7 @@ export function useEventForm({
       '55' +
       (clients.find((c) => c.id === clientId)?.phone || '').replace(/\D/g, '')
     const dateStr = formatDate(eventDate, 'dd/MM')
-    const msg = `Olá ${clientName}! ✨ Aqui é a ${user?.user_metadata?.full_name?.split(' ')[0] || 'Lumi'}. Confirmando seu horário de ${title || 'Procedimento'} para ${dateStr} às ${isNoivas ? arrivalTime : startTime}. Podemos confirmar?`
+    const msg = `Olá ${clientName}! ✨ Aqui é a ${user?.user_metadata?.full_name?.split(' ')[0] || 'Profissional'}. Confirmando seu horário de ${title || 'Procedimento'} para ${dateStr} às ${isNoivas ? arrivalTime : startTime}. Podemos confirmar?`
     window.open(
       `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
       '_blank',

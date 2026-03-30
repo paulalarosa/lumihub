@@ -154,7 +154,7 @@ export default function Auth() {
                 </span>
               </div>
             </div>
-            <CardTitle className="font-serif text-3xl">Lumi</CardTitle>
+            <CardTitle className="font-serif text-3xl">Khaos Kontrol</CardTitle>
             <CardDescription className="text-base">
               Acesse sua conta ou crie uma nova para começar
             </CardDescription>

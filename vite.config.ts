@@ -68,7 +68,7 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 6000000,
+        maximumFileSizeToCacheInBytes: 10000000,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
@@ -187,7 +187,7 @@ export default defineConfig(({ mode }) => ({
           'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
 
           // AI ecosystem (lazy)
-          'ai-engine': ['@mlc-ai/web-llm', '@google/generative-ai'],
+          'ai-engine': ['@mlc-ai/web-llm'],
           'ai-markdown': ['react-markdown', 'remark-gfm'],
 
           // Calendar & Forms (heavy features)

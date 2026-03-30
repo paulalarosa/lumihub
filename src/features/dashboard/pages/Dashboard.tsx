@@ -6,25 +6,29 @@ import {
   Calendar,
   DollarSign,
   FolderOpen,
-  Sparkles,
-  CheckCircle2,
+  ArrowUpRight,
+  TrendingUp,
+  Clock,
 } from 'lucide-react'
 import { AssistantsPanelCard } from '@/features/dashboard/components/AssistantsPanelCard'
 import { motion } from 'framer-motion'
-import { format } from 'date-fns/format'
+import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
-
 import {
   PieChart,
   Pie,
   Cell,
   ResponsiveContainer,
   Tooltip,
-  Legend,
 } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { SetupChecklist } from '@/components/onboarding/SetupChecklist'
 import { PageLoader } from '@/components/ui/PageLoader'
+
+const fadeUp = {
+  initial: { opacity: 0, y: 12 },
+  animate: { opacity: 1, y: 0 },
+}
 
 export default function Dashboard() {
   const { t } = useLanguage()
@@ -34,264 +38,270 @@ export default function Dashboard() {
     return <PageLoader />
   }
 
-  if (!d.user)
-    return (
-      <div className="p-8 text-center text-white">Carregando sessão...</div>
-    )
+  if (!d.user) {
+    return <PageLoader message="Carregando sessão..." />
+  }
 
-  const stats = [
-    ...(d.isOwner
-      ? [
-          {
-            label: t('dashboard.stats.revenue'),
-            value: `R$ ${d.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
-            icon: DollarSign,
-            ctaLabel: t('dashboard.actions.details'),
-            ctaLink: '/admin',
-          },
-        ]
-      : []),
-    {
-      label: t('dashboard.stats.clients'),
-      value: d.clientsCount.toString(),
-      icon: Users,
-      ctaLabel: t('dashboard.actions.add_client'),
-      ctaLink: '/clientes',
-    },
-    {
-      label: t('dashboard.stats.projects'),
-      value: d.projectsCount.toString(),
-      icon: FolderOpen,
-      ctaLabel: t('dashboard.actions.create_project'),
-      ctaLink: '/projetos',
-    },
-  ]
+  const displayName =
+    d.profileName ||
+    d.user.user_metadata?.full_name?.split(' ')[0] ||
+    d.user.email?.split('@')[0] ||
+    'Olá'
+
+  const nextEvent = d.upcomingEvents[0]
+  const nextEventDate = nextEvent?.event_date
+    ? new Date(nextEvent.event_date)
+    : null
+  const nextEventValid = nextEventDate && !isNaN(nextEventDate.getTime())
 
   return (
-    <div className="min-h-screen bg-[#000000] text-white overflow-hidden selection:bg-white selection:text-black">
-      <div className="fixed inset-0 z-0 pointer-events-none bg-noise opacity-50" />
+    <div className="min-h-screen bg-[#030303] text-white selection:bg-white selection:text-black">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-      <main className="relative z-10 px-6 py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
-        >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="h-[1px] w-12 bg-white/20" />
-            <span className="font-mono uppercase tracking-[0.3em] text-gray-500 text-xs">
-              {t('dashboard.control_center')}
-            </span>
-          </div>
-          <h1 className="font-serif text-5xl tracking-tight text-white mb-4">
-            {d.profileName ||
-              d.user.email?.split('@')[0] ||
-              d.user.user_metadata?.full_name?.split(' ')[0] ||
-              'Maquiadora'}
+        {/* Header */}
+        <motion.div {...fadeUp} className="mb-10">
+          <p className="text-xs font-mono text-white/40 uppercase tracking-[0.2em] mb-1">
+            {t('dashboard.control_center')}
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-serif tracking-tight text-white">
+            {displayName}
           </h1>
         </motion.div>
 
         <SetupChecklist />
 
-        <div className="mb-12 p-6 border border-white/10 bg-white/5 rounded-none">
-          <span className="font-mono text-xs text-white/50 tracking-widest uppercase">
-            STATUS:
-          </span>
-          <p className="text-xl font-serif text-white mt-1">
-            AGUARDANDO CRONOGRAMA
-          </p>
-        </div>
+        {/* Quick Status */}
+        {nextEventValid && (
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.05 }}
+            className="mb-8 flex items-center gap-3 px-4 py-3 border border-white/10 bg-white/[0.03]"
+          >
+            <Clock className="w-4 h-4 text-white/40 flex-shrink-0" />
+            <p className="text-sm text-white/60">
+              Próximo evento:{' '}
+              <span className="text-white font-medium">{nextEvent.title}</span>
+              {' — '}
+              <span className="text-white/80">
+                {formatDistanceToNow(nextEventDate, { addSuffix: true, locale: ptBR })}
+              </span>
+            </p>
+          </motion.div>
+        )}
 
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 gap-6 auto-rows-[minmax(180px,auto)]">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="col-span-1 md:col-span-2 lg:col-span-2 lumi-card p-6 border border-white/20 relative overflow-hidden group hover:bg-white hover:text-black transition-colors duration-300 rounded-none"
-            >
-              <div className="absolute top-0 right-0 p-4 opacity-50 group-hover:opacity-100 transition-opacity">
-                <stat.icon className="w-6 h-6 text-white group-hover:text-black" />
-              </div>
-              <div className="mt-8">
-                <h3 className="font-mono text-3xl md:text-4xl text-white group-hover:text-black font-light tracking-tighter">
-                  {stat.value}
-                </h3>
-                <p className="text-xs text-white/40 group-hover:text-black/60 uppercase tracking-widest mt-2">
-                  {stat.label}
-                </p>
-              </div>
-              {'description' in stat && stat.description && (
-                <div className="mt-4 pt-4 border-t border-white/10 group-hover:border-black/10">
-                  <p className="font-mono text-xs text-white/60 group-hover:text-black/60">
-                    {stat.description as string}
-                  </p>
-                </div>
-              )}
-              <Link to={stat.ctaLink} className="absolute bottom-6 right-6">
-                <Button className="bg-white text-black rounded-none hover:bg-gray-200 text-xs uppercase tracking-widest px-4 h-8 group-hover:bg-black group-hover:text-white transition-colors">
-                  {stat.ctaLabel}
-                </Button>
-              </Link>
+        {/* Metric Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+          {d.isOwner && (
+            <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
+              <MetricCard
+                icon={DollarSign}
+                label={t('dashboard.stats.revenue')}
+                value={`R$ ${d.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                link="/admin"
+                linkLabel={t('dashboard.actions.details')}
+              />
             </motion.div>
-          ))}
-
-          {d.marketingTriggers.length > 0 && (
-            <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none">
-              <div className="flex items-center gap-3 mb-4">
-                <Sparkles className="w-4 h-4 text-white" />
-                <h3 className="text-sm font-medium text-white uppercase tracking-wider">
-                  {t('dashboard.sections.insights')}
-                </h3>
-              </div>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-                {d.marketingTriggers.map((trigger, idx) => (
-                  <div
-                    key={idx}
-                    className="flex-shrink-0 min-w-[200px] p-4 border border-white/10 hover:border-white transition-colors"
-                  >
-                    <p className="text-white text-sm font-medium">
-                      {trigger.clientName}
-                    </p>
-                    <p className="text-xs text-white/50">{trigger.details}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           )}
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-medium text-white tracking-wide">
+          <motion.div {...fadeUp} transition={{ delay: 0.15 }}>
+            <MetricCard
+              icon={Users}
+              label={t('dashboard.stats.clients')}
+              value={d.clientsCount.toString()}
+              link="/clientes"
+              linkLabel={t('dashboard.actions.add_client')}
+            />
+          </motion.div>
+
+          <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
+            <MetricCard
+              icon={FolderOpen}
+              label={t('dashboard.stats.projects')}
+              value={d.projectsCount.toString()}
+              link="/projetos"
+              linkLabel={t('dashboard.actions.create_project')}
+            />
+          </motion.div>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+          {/* Agenda */}
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.25 }}
+            className="border border-white/10 bg-white/[0.02] p-6 flex flex-col"
+          >
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
                 {t('dashboard.sections.agenda')}
-              </h3>
+              </h2>
               <Link
                 to="/calendar"
-                className="text-xs font-mono text-white/60 hover:text-white uppercase border-b border-transparent hover:border-white transition-all"
+                className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1"
               >
                 {t('dashboard.view_all')}
+                <ArrowUpRight className="w-3 h-3" />
               </Link>
             </div>
-            <div className="flex-1 overflow-y-auto space-y-3 scrollbar-thin max-h-[400px]">
-              {d.upcomingEvents.length > 0 ? (
-                d.upcomingEvents.map((event, i: number) => {
-                  const startTime = (event as { start_time?: string })
-                    .start_time
-                  const dateObj = startTime ? new Date(startTime) : null
-                  const isValidDate = dateObj && !isNaN(dateObj.getTime())
 
-                  const day = isValidDate ? dateObj.getDate() : '--'
-                  const month = isValidDate
-                    ? format(dateObj, 'MMM', { locale: ptBR })
-                    : ''
-                  const time = isValidDate
-                    ? format(dateObj, 'HH:mm', { locale: ptBR })
-                    : ''
+            <div className="flex-1 space-y-2 overflow-y-auto max-h-[380px] scrollbar-thin">
+              {d.upcomingEvents.length > 0 ? (
+                d.upcomingEvents.map((event, i) => {
+                  const startTime = (event as { start_time?: string; event_date?: string }).start_time || event.event_date
+                  const dateObj = startTime ? new Date(startTime) : null
+                  const isValid = dateObj && !isNaN(dateObj.getTime())
 
                   return (
                     <div
                       key={i}
-                      className="flex items-center gap-4 p-4 border border-white/10 hover:border-white transition-colors group"
+                      className="flex items-center gap-4 p-3 border border-white/[0.06] hover:border-white/20 transition-colors group"
                     >
-                      <div className="text-center w-12 pt-1 border-r border-white/10 group-hover:border-white/20 pr-4">
-                        <span className="block text-[10px] text-white/40 group-hover:text-white/60 uppercase">
-                          {month}
+                      <div className="text-center w-11 flex-shrink-0">
+                        <span className="block text-[10px] text-white/30 uppercase leading-none">
+                          {isValid ? format(dateObj, 'MMM', { locale: ptBR }) : ''}
                         </span>
-                        <span className="block text-xl font-mono text-white group-hover:text-white">
-                          {day}
+                        <span className="block text-lg font-mono text-white/90 leading-tight">
+                          {isValid ? dateObj.getDate() : '--'}
                         </span>
                       </div>
-                      <div className="flex-1">
-                        <h4 className="text-sm text-white font-medium truncate group-hover:underline decoration-1 underline-offset-4">
+                      <div className="h-8 w-px bg-white/10" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm text-white/90 truncate">
                           {event.title}
                         </h4>
-                        <p className="text-xs text-white/40 font-mono mt-0.5">
-                          {time}
+                        <p className="text-xs text-white/30 font-mono">
+                          {isValid ? format(dateObj, 'HH:mm', { locale: ptBR }) : ''}
                         </p>
                       </div>
                     </div>
                   )
                 })
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-white/30">
-                  <Calendar className="w-12 h-12 mb-4 opacity-20" />
-                  <p className="text-sm">{t('dashboard.no_events')}</p>
+                <div className="h-48 flex flex-col items-center justify-center">
+                  <Calendar className="w-8 h-8 text-white/10 mb-3" />
+                  <p className="text-sm text-white/20">{t('dashboard.no_events')}</p>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-3 row-span-2 lumi-card p-6 border border-white/20 rounded-none h-full">
-            <div className="flex items-center gap-3 mb-4">
-              <Users className="w-4 h-4 text-white" />
-              <h3 className="text-sm font-medium text-white uppercase tracking-wider">
-                {t('dashboard.sections.team')}
-              </h3>
-            </div>
+          {/* Team */}
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.3 }}
+            className="border border-white/10 bg-white/[0.02] p-6"
+          >
+            <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider mb-5">
+              {t('dashboard.sections.team')}
+            </h2>
             <AssistantsPanelCard />
-          </div>
-        </div>
+          </motion.div>
 
-        <div className="col-span-1 md:col-span-4 lg:col-span-6 lumi-card p-6 border border-white/20 rounded-none mt-6">
-          <div className="flex items-center gap-3 mb-6">
-            <CheckCircle2 className="w-4 h-4 text-white" />
-            <h3 className="text-sm font-medium text-white uppercase tracking-wider">
-              {t('dashboard.sections.origin')}
-            </h3>
-          </div>
-          <div className="h-[250px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={d.originStats}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {d.originStats.map((_entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        ['#FFFFFF', '#333333', '#666666', '#999999', '#CCCCCC'][
-                          index % 5
-                        ]
-                      }
+          {/* Lead Origin Chart */}
+          {d.originStats.length > 0 && (
+            <motion.div
+              {...fadeUp}
+              transition={{ delay: 0.35 }}
+              className="lg:col-span-2 border border-white/10 bg-white/[0.02] p-6"
+            >
+              <div className="flex items-center gap-2 mb-5">
+                <TrendingUp className="w-4 h-4 text-white/40" />
+                <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
+                  {t('dashboard.sections.origin')}
+                </h2>
+              </div>
+              <div className="h-[220px] w-full flex items-center justify-center">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={d.originStats}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {d.originStats.map((_entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={['#ffffff', '#555555'][index % 2]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: '#111',
+                        border: '1px solid #333',
+                        borderRadius: '0',
+                        fontSize: '12px',
+                      }}
+                      itemStyle={{ color: '#fff', textTransform: 'uppercase' }}
                     />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-col gap-2 ml-4">
+                  {d.originStats.map((stat, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div
+                        className="w-2 h-2"
+                        style={{ backgroundColor: ['#ffffff', '#555555'][i % 2] }}
+                      />
+                      <span className="text-xs text-white/50 uppercase tracking-wide">
+                        {stat.name}: {stat.value}
+                      </span>
+                    </div>
                   ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#000',
-                    border: '1px solid #333',
-                  }}
-                  itemStyle={{
-                    color: '#fff',
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                  }}
-                />
-                <Legend
-                  verticalAlign="middle"
-                  align="right"
-                  layout="vertical"
-                  iconType="circle"
-                  wrapperStyle={{
-                    fontSize: '12px',
-                    textTransform: 'uppercase',
-                    color: '#fff',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
       </main>
+    </div>
+  )
+}
+
+/* ================================================================
+   MetricCard — Componente extraído para clareza
+   ================================================================ */
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  link,
+  linkLabel,
+}: {
+  icon: React.ElementType
+  label: string
+  value: string
+  link: string
+  linkLabel: string
+}) {
+  return (
+    <div className="border border-white/10 bg-white/[0.02] p-5 h-full flex flex-col justify-between group hover:border-white/25 transition-colors">
+      <div className="flex items-start justify-between mb-6">
+        <div className="p-2 border border-white/10 bg-white/[0.04]">
+          <Icon className="w-4 h-4 text-white/50" />
+        </div>
+        <Link to={link}>
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider hover:text-white/60 transition-colors flex items-center gap-1">
+            {linkLabel}
+            <ArrowUpRight className="w-3 h-3" />
+          </span>
+        </Link>
+      </div>
+      <div>
+        <p className="text-2xl sm:text-3xl font-mono text-white tracking-tight font-light">
+          {value}
+        </p>
+        <p className="text-[11px] text-white/35 uppercase tracking-widest mt-1">
+          {label}
+        </p>
+      </div>
     </div>
   )
 }

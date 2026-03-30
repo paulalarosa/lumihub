@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { CreateMLCEngine, type MLCEngineInterface } from '@mlc-ai/web-llm'
+import type { MLCEngineInterface } from '@mlc-ai/web-llm'
 import { usePlanAccess } from '@/hooks/usePlanAccess'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
@@ -40,6 +40,7 @@ export const useWebLLM = () => {
     setLoadProgress(0)
 
     try {
+      const { CreateMLCEngine } = await import('@mlc-ai/web-llm')
       const engineInstance = await CreateMLCEngine(selectedModel, {
         initProgressCallback: (progress) => {
           setLoadProgress(Math.round(progress.progress * 100))

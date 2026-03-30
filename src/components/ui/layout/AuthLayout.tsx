@@ -18,7 +18,7 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
                 {/* Editorial Image */}
                 <img
                     src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1920&auto=format&fit=crop"
-                    alt="Lumi Beauty Studio"
+                    alt="Khaos Kontrol"
                     className="absolute inset-0 w-full h-full object-cover opacity-90"
                 />
 

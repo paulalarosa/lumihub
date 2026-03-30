@@ -1,4 +1,4 @@
-import { CreateMLCEngine, type MLCEngine } from '@mlc-ai/web-llm'
+import type { MLCEngine } from '@mlc-ai/web-llm'
 export class WebLLMProvider {
   readonly specificationVersion = 'v1'
   readonly provider = 'web-llm'
@@ -49,11 +49,12 @@ export class WebLLMProvider {
       content: p.content,
     }))
 
-    const asyncIterable = await engine.chat.completions.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const asyncIterable = (await engine.chat.completions.create({
       messages,
       stream: true,
       ...options.settings,
-    })
+    })) as any
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = new ReadableStream<any>({
@@ -82,6 +83,7 @@ export class WebLLMProvider {
   private async getEngine(): Promise<MLCEngine> {
     if (this.engine) return this.engine
 
+    const { CreateMLCEngine } = await import('@mlc-ai/web-llm')
     this.engine = await CreateMLCEngine(this.modelId, {
       initProgressCallback: (report) => {
         if (this.onProgress) {

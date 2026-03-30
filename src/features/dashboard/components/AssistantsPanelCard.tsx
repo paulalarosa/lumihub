@@ -46,7 +46,7 @@ export function AssistantsPanelCard() {
 
       if (error) throw error
       setAssistants(
-        ((data, unknown > []) || []).map((a) => ({
+        ((data as any) || []).map((a: any) => ({
           id: String(a.id),
           full_name: String(a.full_name),
           email: null,
@@ -151,10 +151,10 @@ export function AssistantsPanelCard() {
                 </div>
                 <div className="flex items-center gap-2">
                   {assistant.is_registered ? (
-                    <span className="lumi-badge-active">Ativa</span>
+                    <span className="kk-badge-active">Ativa</span>
                   ) : (
                     <>
-                      <span className="lumi-badge-pending">Pendente</span>
+                      <span className="kk-badge-pending">Pendente</span>
                       <Button
                         variant="ghost"
                         size="icon"

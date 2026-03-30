@@ -9,8 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import React, { Suspense } from "react";
 import { cn } from "@/lib/utils";
-import { Handle, Position } from "@xyflow/react";
+
+const HandlePrimitive = React.lazy(() => import('@xyflow/react').then(m => ({ default: m.Handle })));
 
 export type NodeProps = ComponentProps<typeof Card> & {
   handles: {
@@ -27,8 +29,10 @@ export const Node = ({ handles, className, ...props }: NodeProps) => (
     )}
     {...props}
   >
-    {handles.target && <Handle position={Position.Left} type="target" />}
-    {handles.source && <Handle position={Position.Right} type="source" />}
+    <Suspense fallback={null}>
+      {handles.target && <HandlePrimitive position={"left" as any} type="target" />}
+      {handles.source && <HandlePrimitive position={"right" as any} type="source" />}
+    </Suspense>
     {props.children}
   </Card>
 );

@@ -176,7 +176,7 @@ export function useProjectActions({
         templateData?.content ||
         'Olá {client_name}, passando para lembrar do seu agendamento dia {date} às {time}.'
 
-      let professionalName = 'LumiHub'
+      let professionalName = 'Khaos Kontrol'
       const { data: profData } = await supabase
         .from('profiles')
         .select('full_name')
