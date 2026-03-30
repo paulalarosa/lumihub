@@ -65,8 +65,8 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       // Assuming 'leads' table exists based on useLeads hook presence.
 
       const { error: leadError } = await supabase.from('leads').insert({
-        user_id: microsite.user_id,
-        name: values.name,
+        user_id: microsite.user_id as string,
+        client_name: values.name,
         email: values.email,
         phone: values.phone,
         status: 'new',

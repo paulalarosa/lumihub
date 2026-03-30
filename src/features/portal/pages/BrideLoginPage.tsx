@@ -7,6 +7,11 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Sparkles } from 'lucide-react'
 
+interface ValidateBridePinResult {
+  success: boolean
+  error?: string
+}
+
 export default function BrideLoginPage() {
   const { clientId } = useParams()
   const { toast } = useToast()
@@ -41,12 +46,15 @@ export default function BrideLoginPage() {
         p_pin_code: finalPin,
       })
 
+      const validation = data as unknown as ValidateBridePinResult | null
+
       if (error) throw error
 
-      if (!data?.success) {
+      if (!validation?.success) {
         toast({
           title: 'Acesso Negado',
-          description: data?.error || 'PIN incorreto ou acesso não autorizado.',
+          description:
+            validation?.error || 'PIN incorreto ou acesso não autorizado.',
           variant: 'destructive',
         })
         return
@@ -62,8 +70,10 @@ export default function BrideLoginPage() {
         throw new Error('Erro ao gerar token de acesso')
       }
 
+      const token = tokenData as unknown as string
+
       // Salvar token real (NÃO o client_id)
-      localStorage.setItem('bride_access_token', tokenData)
+      localStorage.setItem('bride_access_token', token)
       localStorage.setItem('bride_client_id', clientId)
 
       // Limpar chaves antigas inseguras
