@@ -46,25 +46,25 @@ export const CreateLeadDialog = ({
   const createLead = useMutation({
     mutationFn: async (data: LeadFormData) => {
       // 1. Get default stage
-      const { data: stages }: any = await supabase
+      const { data: stages } = (await supabase
         .from('pipeline_stages')
         .select('id')
         .eq('user_id', user?.id)
         .eq('is_default', true)
         .eq('stage_type', 'lead')
-        .single()
+        .single()) as { data: { id: string } | null }
 
       let stageId = stages?.id
 
       // Fallback if no specific default lead stage found, take the first one
       if (!stageId) {
-        const { data: firstStage }: any = await supabase
+        const { data: firstStage } = (await supabase
           .from('pipeline_stages')
           .select('id')
           .eq('user_id', user?.id)
           .order('display_order', { ascending: true })
           .limit(1)
-          .single()
+          .single()) as { data: { id: string } | null }
         stageId = firstStage?.id
       }
 
@@ -75,7 +75,7 @@ export const CreateLeadDialog = ({
 
       const { error } = await supabase.from('leads').insert({
         user_id: user?.id,
-        name: data.name,
+        client_name: data.name,
         email: data.email || null,
         phone: data.phone || null,
         event_type: data.event_type || null,

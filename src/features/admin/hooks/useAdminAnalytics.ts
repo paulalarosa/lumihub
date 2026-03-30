@@ -20,7 +20,7 @@ export function useAdminAnalytics() {
   const charts = data?.charts || { revenue: [], clients: [] }
 
   const eventsByCategory = events.reduce(
-    (acc: Record<string, number>, e: any) => {
+    (acc: Record<string, number>, e: Record<string, any>) => {
       const cat = e.category || e.type || 'other'
       acc[cat] = (acc[cat] || 0) + 1
       return acc
@@ -33,8 +33,8 @@ export function useAdminAnalytics() {
   )
 
   const pageViewData = events
-    .filter((e: any) => e.type === 'page_view')
-    .reduce((acc: Record<string, number>, e: any) => {
+    .filter((e: Record<string, any>) => e.type === 'page_view')
+    .reduce((acc: Record<string, number>, e: Record<string, any>) => {
       const path = e.page_path || '/'
       acc[path] = (acc[path] || 0) + 1
       return acc
@@ -49,7 +49,7 @@ export function useAdminAnalytics() {
 
   const handleExportExcel = () => {
     if (!charts?.revenue) return
-    const dataToExport = charts.revenue.map((item: any) => ({
+    const dataToExport = charts.revenue.map((item: Record<string, any>) => ({
       Mês: item.name,
       Receita: item.value,
     }))

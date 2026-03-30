@@ -18,8 +18,6 @@ interface AddressAutocompleteProps {
   longitude?: number | null
 }
 
-import { Database } from '@/integrations/supabase/types'
-
 interface PlaceSuggestion {
   description: string
   place_id: string
@@ -42,14 +40,6 @@ interface GeoCacheTable {
     expires_at?: string
   }
   Relationships: []
-}
-
-type LocalDatabase = Database & {
-  public: {
-    Tables: {
-      geo_cache: GeoCacheTable
-    }
-  }
 }
 
 // Simple debounce utility

@@ -1,13 +1,11 @@
 import { useSubscription } from '@/hooks/useSubscription'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { Clock, Sparkles } from 'lucide-react'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 
 export function TrialBanner() {
-  const { status, daysRemaining, isLoading, plan } = useSubscription()
-  const { user } = useAuth()
+  const { status, daysRemaining, plan } = useSubscription()
   const isAdmin = useIsAdmin()
   const navigate = useNavigate()
 

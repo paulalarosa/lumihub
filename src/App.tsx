@@ -166,7 +166,7 @@ const queryClient = new QueryClient({
 function LazyPage({
   component: Component,
 }: {
-  component: React.LazyExoticComponent<any>
+  component: React.ComponentType
 }) {
   return (
     <Suspense fallback={<PageLoader />}>
