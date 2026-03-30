@@ -175,12 +175,7 @@ export function KhaosAgent() {
                     {m.tool_invocations && m.tool_invocations.length > 0 && (
                       <div className="space-y-3 pt-2">
                         {m.tool_invocations.map((ti) => {
-                          return (
-                            <ToolInvocation
-                              key={ti.id}
-                              invocation={ti as any}
-                            />
-                          )
+                          return <ToolInvocation key={ti.id} invocation={ti} />
                         })}
                       </div>
                     )}
@@ -221,9 +216,7 @@ export function KhaosAgent() {
               <textarea
                 value={input}
                 onChange={(e) =>
-                  handleInputChange(
-                    e as unknown as React.ChangeEvent<HTMLTextAreaElement>,
-                  )
+                  handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement>)
                 }
                 placeholder="Digite seu comando..."
                 className="w-full bg-transparent border-none focus:ring-0 text-[13px] font-sans text-white placeholder:text-zinc-600 resize-none min-h-[50px] max-h-[200px] p-4 custom-scrollbar"

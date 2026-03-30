@@ -7,22 +7,23 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
+interface MFAFactor {
+  id: string
+  status: string
+  created_at: string
+}
+
+interface EnrollmentData {
+  id: string
+  totp: {
+    qr_code: string
+    secret: string
+  }
+}
+
 export default function MFAEnrollment() {
   const { enroll, verify, challenge, listFactors, unenroll, isLoading } =
     useMFA()
-  interface MFAFactor {
-    id: string
-    status: string
-    created_at: string
-  }
-
-  interface EnrollmentData {
-    id: string
-    totp: {
-      qr_code: string
-      secret: string
-    }
-  }
 
   const [factors, setFactors] = useState<MFAFactor[]>([])
   const [enrollmentData, setEnrollmentData] = useState<EnrollmentData | null>(
@@ -30,26 +31,7 @@ export default function MFAEnrollment() {
   )
   const [verificationCode, setVerificationCode] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
-  const [showRecovery, setShowRecovery] = useState(false) // Supabase doesn't give recovery codes this way usually, but we'll stick to the flow
-  // NOTE: Supabase Auth MFA (TOTP) does not auto-generate "recovery codes" in the same way some other providers do upon enrollment in the JS client response usually unless using a specific flow.
-  // However, the `enroll` response contains the TOTP secret.
-  // We can't actually generate "recovery codes" that Supabase accepts unless we implement a custom logic or store them.
-  // Since the user asked for "Ensure recovery codes are generated and presented once upon enrollment",
-  // and Supabase MFA via TOTP acts as a generic TOTP, recovery codes are usually a separate factor or handled by the app.
-  // For this task, I will mock the "generation" of recovery codes to satisfy the UI requirement,
-  // OR better yet, I'll check if I can just show the Secret as a backup.
-  // Actually, let's just show the Secret as the "backup" for now and clarify.
-  // Wait, the prompt says "Ensure recovery codes are generated and presented once upon enrollment."
-  // I will generate random codes for the user to store, but since Supabase doesn't natively support "recovery codes" as a backup login method for AAL2 without extra setup,
-  // this might be a "UI only" feature unless I implement a custom backend verification for them.
-  // But wait, `supabase.auth.mfa.verify` expects a TOTP code.
-  // I will simply enforce TOTP. The recovery code requirement might be slightly out of scope for pure Supabase Client TOTP unless I build a custom table.
-  // I'll leave recovery codes as a "Future" or just generate them visually for the user to save as a "manual" backup (which won't work automatically unless I implement a backdoor).
-  // Actually, to be safe and strictly follow instructions: "Ensure recovery codes are generated and presented once upon enrollment."
-  // I will just generate them and display them. If I cannot verify them against Supabase, I'll warn the user.
-  // BUT: standard TOTP flows often allow the Secret Key to be saved. I'll focus on that.
-  // Let's stick to showing the QR + Secret.
-
+  const [enrolled, setEnrolled] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
 
   const fetchFactors = async () => {
@@ -74,8 +56,6 @@ export default function MFAEnrollment() {
     if (!enrollmentData) return
     setIsVerifying(true)
     try {
-      // Upon enrollment, we need to verify the first code to activate the factor
-      // Challenge is needed first?
       const challengeData = await challenge(enrollmentData.id)
       if (challengeData) {
         const verifyData = await verify(
@@ -88,8 +68,8 @@ export default function MFAEnrollment() {
           setEnrollmentData(null)
           setQrCodeUrl(null)
           setVerificationCode('')
+          setEnrolled(true)
           fetchFactors()
-          setShowRecovery(true) // Trigger recovery view
         }
       }
     } catch (_e) {
@@ -109,13 +89,7 @@ export default function MFAEnrollment() {
 
   const hasMFA = factors.length > 0
 
-  if (showRecovery) {
-    // Mock recovery codes for display - purely client side for now as requested by "generated and presented"
-    // In a real scenario we'd save hashes of these in a `user_recovery_codes` table.
-    const codes = Array.from({ length: 8 }, () =>
-      Math.random().toString(36).substring(2, 10).toUpperCase(),
-    )
-
+  if (enrolled) {
     return (
       <div className="space-y-6">
         <Alert className="bg-green-500/10 border-green-500/20 text-green-500">
@@ -124,30 +98,22 @@ export default function MFAEnrollment() {
           <AlertDescription>Sua conta está mais segura.</AlertDescription>
         </Alert>
 
-        <div className="space-y-4">
-          <h3 className="font-medium text-white">Códigos de Recuperação</h3>
+        <div className="space-y-4 text-center">
+          <h3 className="font-medium text-white">Pronto para usar</h3>
           <p className="text-sm text-gray-400">
-            Salve estes códigos em um lugar seguro. Você pode usá-los para
-            recuperar o acesso à sua conta caso perca seu dispositivo
-            autenticador.
-            <br />
-            <span className="text-xs text-red-400 mt-1 block">
-              Atenção: Estes códigos são mostrados apenas uma vez. (Simulação:
-              Backend implementation pending for functionality)
-            </span>
+            Utilize seu aplicativo autenticador na próxima vez que fizer login.
           </p>
-          <div className="grid grid-cols-2 gap-2">
-            {codes.map((c) => (
-              <div
-                key={c}
-                className="bg-gray-800 p-2 text-center rounded text-mono text-sm tracking-widest"
-              >
-                {c}
-              </div>
-            ))}
+          <div className="p-4 border border-neutral-800 rounded-md bg-neutral-900/50 text-center">
+            <p className="text-sm text-muted-foreground">
+              Recovery codes estarão disponíveis em breve.
+            </p>
+            <p className="text-xs text-neutral-500 mt-2">
+              Por enquanto, guarde seu dispositivo de autenticação em local
+              seguro.
+            </p>
           </div>
-          <Button onClick={() => setShowRecovery(false)} className="w-full">
-            Entendi, salvei os códigos
+          <Button onClick={() => setEnrolled(false)} className="w-full">
+            Entendido
           </Button>
         </div>
       </div>

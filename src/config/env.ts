@@ -3,11 +3,7 @@
  * Garante que todas as keys necessárias estão presentes
  */
 
-const requiredEnvVars = [
-  'VITE_SUPABASE_URL',
-  'VITE_SUPABASE_ANON_KEY',
-  'VITE_GOOGLE_MAPS_API_KEY',
-] as const
+const requiredEnvVars = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const
 
 export function validateEnv() {
   const missing: string[] = []

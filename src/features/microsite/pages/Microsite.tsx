@@ -92,7 +92,6 @@ export default function Microsite() {
   }
 
   const visibleServices = (microsite.services || [])
-    // @ts-expect-error - is_visible might be missing in Service type but present in join
     .filter((s) => s.is_visible !== false)
     .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
 
@@ -253,7 +252,6 @@ export default function Microsite() {
                   >
                     {/* @ts-expect-error - service.image_url might be missing in type */}
                     {service.image_url && (
-                      // @ts-expect-error dynamic type mismatch
                       <img
                         src={service.image_url}
                         alt={service.name}

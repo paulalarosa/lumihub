@@ -15,7 +15,7 @@ import { ServicesEditor } from '../components/components/ServicesEditor'
 import { GalleryEditor } from '../components/components/GalleryEditor'
 import { TestimonialsEditor } from '../components/components/TestimonialsEditor'
 
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 import { Eye, Save } from 'lucide-react'
 import { toast } from 'sonner'
@@ -108,7 +108,7 @@ export default function MicrositeEditor() {
         .maybeSingle()
 
       if (error) throw error
-      return data as unknown as MicrositeRecord | null
+      return data | null
     },
     enabled: !!user,
   })

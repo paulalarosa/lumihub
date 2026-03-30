@@ -47,8 +47,7 @@ export default function AssistantQuickLogin() {
 
       if (error) throw error
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data = rpcData as any
+      const data = rpcData
 
       if (!data || data.error) {
         toast({

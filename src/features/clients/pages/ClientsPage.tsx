@@ -48,7 +48,8 @@ import { useClientsQuery } from '../hooks/useClientsQuery'
 
 import { useClientFilterStore } from '@/stores/useClientFilterStore'
 import { useClientActions } from '@/features/clients/hooks/useClientActions'
-import { PageLoader, TableLoader } from '@/components/ui/LoadingStates'
+import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 export default function Clientes() {
   const navigate = useNavigate()

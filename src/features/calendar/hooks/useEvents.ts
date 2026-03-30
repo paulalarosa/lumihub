@@ -92,9 +92,10 @@ export const useEvents = (start: Date, end: Date) => {
           ? event.project[0]
           : event.project,
         assistants:
-          (
-            event.event_assistants as unknown as { assistant_id: string }[]
-          )?.map((ea) => ({ id: ea.assistant_id, name: '' })) || [],
+          (event.event_assistants as { assistant_id: string }[])?.map((ea) => ({
+            id: ea.assistant_id,
+            name: '',
+          })) || [],
         reminder_days:
           typeof event.reminder_days === 'string'
             ? JSON.parse(event.reminder_days)

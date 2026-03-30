@@ -101,7 +101,7 @@ export const OutputField = memo(function OutputField({
 
   // Transform data if needed
   const transformedData = isFileArray
-    ? (data as unknown[]).map(transformToFileObject)
+    ? data.map(transformToFileObject)
     : isSingleFile
       ? transformToFileObject(data)
       : data
@@ -240,7 +240,7 @@ export const OutputField = memo(function OutputField({
         <Card className="p-0">
           <CardContent className="p-4">
             <div className="space-y-2 flex flex-col gap-2 max-h-[300px] overflow-y-auto">
-              {(data as unknown[]).map((item, index) => (
+              {data.map((item, index) => (
                 <OutputField
                   key={index}
                   field={field?.items}

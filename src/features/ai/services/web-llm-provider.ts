@@ -25,12 +25,11 @@ export class WebLLMProvider {
       content: p.content,
     }))
 
-    const result = (await engine.chat.completions.create({
+    const result = await engine.chat.completions.create({
       messages,
       stream: false,
       ...options.settings,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    })) as any
+    })
 
     return {
       text: result.choices[0].message.content,
@@ -50,12 +49,11 @@ export class WebLLMProvider {
       content: p.content,
     }))
 
-    const asyncIterable = (await engine.chat.completions.create({
+    const asyncIterable = await engine.chat.completions.create({
       messages,
       stream: true,
       ...options.settings,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    })) as any
+    })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = new ReadableStream<any>({

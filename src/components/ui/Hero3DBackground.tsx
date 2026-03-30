@@ -82,3 +82,5 @@ export function Hero3DBackground() {
     </div>
   )
 }
+
+export default Hero3DBackground

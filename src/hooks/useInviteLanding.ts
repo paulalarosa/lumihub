@@ -55,7 +55,7 @@ export function useInviteLanding() {
         return
       }
 
-      const safeData = data as unknown as AssistantInvite
+      const safeData = data
 
       if (safeData.is_registered) {
         toast.error('Este convite já foi utilizado.')

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database } from './types'
+import type { Database } from '@/types/supabase'
 import { env } from '@/config/env'
 
 const supabaseUrl = env.supabase.url
@@ -33,3 +33,13 @@ export const handleSupabaseError = (
   }
   return 'Ocorreu um erro inesperado no banco de dados.'
 }
+
+// Tipos úteis para usar no projeto:
+export type Tables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Row']
+
+export type InsertTables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Insert']
+
+export type UpdateTables<T extends keyof Database['public']['Tables']> =
+  Database['public']['Tables'][T]['Update']

@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { Database } from '@/integrations/supabase/types'
-import { SupabaseClient } from '@supabase/supabase-js'
 
 interface UserIntegration {
   id: string
@@ -77,7 +76,7 @@ export function useIntegrations() {
   const { toast } = useToast()
 
   // Use typed client
-  const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+  const typedSupabase = supabase
 
   const [integrations, setIntegrations] = useState<UserIntegration[]>([])
   const [notificationSettings, setNotificationSettings] = useState<
@@ -189,7 +188,7 @@ export function useIntegrations() {
       .maybeSingle()
 
     if (notifData) {
-      const nd = notifData as unknown as NotificationSettings
+      const nd = notifData
       setNotificationSettings({
         id: nd.id,
         email_enabled: nd.email_enabled,

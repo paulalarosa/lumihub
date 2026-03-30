@@ -30,7 +30,8 @@ import {
 } from 'lucide-react'
 import { format } from 'date-fns/format'
 import { useProjectsPage } from '../hooks/useProjectsPage'
-import { PageLoader, TableLoader } from '@/components/ui/LoadingStates'
+import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 const EVENT_TYPES = [
   'Casamento',

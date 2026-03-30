@@ -63,7 +63,7 @@ export const useInactiveClients = () => {
       if (clientError) throw clientError
 
       // Cast to bypass complex join typing
-      const allClients = data as unknown as {
+      const allClients = data as {
         id: string
         name: string
         phone: string | null

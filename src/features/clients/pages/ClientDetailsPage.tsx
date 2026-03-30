@@ -20,7 +20,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'

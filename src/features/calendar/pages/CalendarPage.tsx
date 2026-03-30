@@ -20,7 +20,7 @@ import { ConflictResolver } from '@/components/calendar/ConflictResolver'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/ui/empty-state'
 import { QUERY_KEYS } from '@/constants/queryKeys'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 const locales = { 'pt-BR': ptBR }
 

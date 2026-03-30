@@ -15,7 +15,7 @@ import {
   CheckCircle,
   CircleDashed,
 } from 'lucide-react'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@/components/ui/PageLoader'
 import { Button } from '@/components/ui/button'
 import {
   ToolInvocationStatusPending,

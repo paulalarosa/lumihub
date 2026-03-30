@@ -87,7 +87,7 @@ export function CheckoutDialog({
 
       if (selectedAssistantId !== 'none') {
         const discount =
-          Number((event as unknown as Record<string, unknown>)?.discount) || 0
+          Number((event as unknown as { discount?: number })?.discount) || 0
         const netValue = numericValue - discount
         const commissionRate = 0.15
         updateData.assistant_commission = netValue * commissionRate

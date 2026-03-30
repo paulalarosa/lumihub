@@ -22,7 +22,6 @@ export const GenerateContractButton = ({
 
     try {
       // 1. Buscar dados do projeto
-      // @ts-expect-error - Projects table might be missing from TS schema
       const { data: project, error } = await supabase
         .from('projects')
         .select(
@@ -102,7 +101,6 @@ export const GenerateContractButton = ({
       link.click()
 
       // 6. Log e Update
-      // @ts-expect-error - Projects table might be missing from TS schema
       await supabase
         .from('projects')
         .update({ contract_generated_at: new Date().toISOString() })

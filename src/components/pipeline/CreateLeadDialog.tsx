@@ -46,27 +46,25 @@ export const CreateLeadDialog = ({
   const createLead = useMutation({
     mutationFn: async (data: LeadFormData) => {
       // 1. Get default stage
-      const { data: stages }: any = await (
-        supabase
-          .from('pipeline_stages' as any)
-          .select('id')
-          .eq('user_id', user?.id)
-          .eq('is_default', true)
-          .eq('stage_type', 'lead') as any
-      ).single()
+      const { data: stages }: any = await supabase
+        .from('pipeline_stages')
+        .select('id')
+        .eq('user_id', user?.id)
+        .eq('is_default', true)
+        .eq('stage_type', 'lead')
+        .single()
 
       let stageId = stages?.id
 
       // Fallback if no specific default lead stage found, take the first one
       if (!stageId) {
-        const { data: firstStage }: any = await (
-          supabase
-            .from('pipeline_stages' as any)
-            .select('id')
-            .eq('user_id', user?.id)
-            .order('display_order', { ascending: true })
-            .limit(1) as any
-        ).single()
+        const { data: firstStage }: any = await supabase
+          .from('pipeline_stages')
+          .select('id')
+          .eq('user_id', user?.id)
+          .order('display_order', { ascending: true })
+          .limit(1)
+          .single()
         stageId = firstStage?.id
       }
 
@@ -75,7 +73,7 @@ export const CreateLeadDialog = ({
           'Nenhum estágio de pipeline encontrado. Crie os estágios primeiro.',
         )
 
-      const { error } = await (supabase.from('leads' as any).insert({
+      const { error } = await supabase.from('leads').insert({
         user_id: user?.id,
         name: data.name,
         email: data.email || null,
@@ -89,7 +87,7 @@ export const CreateLeadDialog = ({
         notes: data.notes || null,
         current_stage_id: stageId,
         status: 'active',
-      } as any) as any)
+      })
 
       if (error) throw error
     },

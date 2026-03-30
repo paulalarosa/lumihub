@@ -32,8 +32,7 @@ export function useSupabaseMutation<T extends TableName>({
   return useMutation({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (payload: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const query = (supabase.from(table as any) as any)[operation](payload)
+      const query = supabase.from(table)[operation](payload)
 
       // PostgREST "delete" operations do not typically return data without an explicit select and eq chain,
       // handled uniquely per component. This abstracts insert/update/upserts.

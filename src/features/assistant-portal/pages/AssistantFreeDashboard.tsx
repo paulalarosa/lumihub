@@ -89,10 +89,10 @@ export default function AssistantFreeDashboard() {
 
         const filtered = (data || [])
           .filter((item) => {
-            const evt = item.event as unknown as EventAssignment['event']
+            const evt = item.event as unknown as Record<string, unknown> | null
             if (!evt) return false
             const userIdMatch =
-              (evt as unknown as Record<string, unknown>).user_id ===
+              (evt as Record<string, unknown>).user_id ===
               session.professionalId
             return userIdMatch
           })

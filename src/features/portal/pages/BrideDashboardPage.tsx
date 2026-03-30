@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { DigitalSignature } from '../components/DigitalSignature'
 import { useBrideDashboard } from '../hooks/useBrideDashboard'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 export default function BrideDashboardPage() {
   const { t } = useLanguage()

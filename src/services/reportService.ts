@@ -1,5 +1,4 @@
 import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
 import ExcelJS from 'exceljs'
 import { saveAs } from 'file-saver'
 import { format } from 'date-fns/format'
@@ -143,39 +142,35 @@ export const generateClientPDF = (
       const services = project.project_services || []
       if (services.length > 0) {
         const tableData = services.map((s) => [
-          // Handle dynamic structure: 'services' join or direct fields
           s.services?.name || s.name || 'Serviço Personalizado',
-          s.quantity || 1,
+          String(s.quantity || 1),
           formatCurrency(s.unit_price || 0),
           formatCurrency(s.total_price || 0),
         ])
 
-        autoTable(doc, {
-          startY: yPos,
-          head: [['Serviço / Item', 'Qtd', 'Val. Unit.', 'Total']],
-          body: tableData,
-          theme: 'grid',
-          styles: { fontSize: 9, cellPadding: 3 },
-          headStyles: {
-            fillColor: colors.secondary,
-            textColor: [255, 255, 255],
-            fontStyle: 'bold',
-          },
-          columnStyles: {
-            0: { cellWidth: 'auto' },
-            1: { cellWidth: 20, halign: 'center' },
-            2: { cellWidth: 35, halign: 'right' },
-            3: { cellWidth: 35, halign: 'right' },
-          },
-          margin: { left: 20, right: 20 },
+        let ty = yPos
+        doc.setFillColor(colors.secondary)
+        doc.rect(20, ty, 170, 8, 'F')
+        doc.setTextColor(255, 255, 255)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(9)
+        doc.text('Serviço / Item', 22, ty + 6)
+        doc.text('Qtd', 100, ty + 6)
+        doc.text('Val. Unit.', 120, ty + 6)
+        doc.text('Total', 160, ty + 6)
+        ty += 12
+
+        doc.setTextColor(colors.text)
+        doc.setFont('helvetica', 'normal')
+        tableData.forEach((row) => {
+          doc.text(String(row[0]), 22, ty)
+          doc.text(String(row[1]), 100, ty)
+          doc.text(String(row[2]), 120, ty)
+          doc.text(String(row[3]), 160, ty)
+          ty += 8
         })
 
-        interface AutoTableJsPDF extends jsPDF {
-          lastAutoTable: { finalY: number }
-        }
-
-        // ... inside function
-        yPos = (doc as unknown as AutoTableJsPDF).lastAutoTable.finalY + 15
+        yPos = ty + 10
       } else {
         doc.setFontSize(9)
         doc.setTextColor(colors.textLight)

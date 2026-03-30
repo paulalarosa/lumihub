@@ -5,7 +5,7 @@ import { format } from 'date-fns/format'
 
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
-import html2pdf from 'html2pdf.js'
+import jsPDF from 'jspdf'
 import type { Tables } from '@/integrations/supabase/types'
 import type { Editor } from '@tiptap/react'
 
@@ -186,21 +186,28 @@ export function useProjectContract({
 
       const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:'Times New Roman',serif;line-height:1.6;color:#000;padding:40px;}p{margin:10px 0;}h1{font-size:24px;margin:20px 0;}h2{font-size:18px;margin:15px 0;}ul,ol{margin:10px 0 10px 20px;}li{margin:5px 0;}</style></head><body>${contractHTML}${signatureBlock}</body></html>`
 
-      const opt = {
-        margin: 10,
-        filename: `${project?.name || 'contrato'}_assinado.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-      }
-
       const pdfBlob = await new Promise<Blob>((resolve, reject) => {
-        html2pdf()
-          .set(opt as Record<string, unknown>)
-          .from(fullHTML)
-          .toPdf()
-          .output('blob')
-          .then((blob: Blob) => resolve(blob))
+        const doc = new jsPDF({
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait',
+        })
+        const container = document.createElement('div')
+        container.innerHTML = fullHTML
+        container.style.width = '190mm'
+        container.style.fontSize = '12px'
+
+        doc
+          .html(container, {
+            callback: function (doc) {
+              resolve(doc.output('blob'))
+            },
+            margin: [10, 10, 10, 10],
+            x: 10,
+            y: 10,
+            width: 190,
+            windowWidth: 800,
+          })
           .catch((err: Error) => reject(err))
       })
 
@@ -280,14 +287,26 @@ export function useProjectContract({
 
     try {
       const html = editor.getHTML()
-      const opt = {
-        margin: 10,
-        filename: `${project?.name || 'contrato'}_draft.pdf`,
-        image: { type: 'jpeg' as const, quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
-      }
-      html2pdf().set(opt).from(html).save()
+      const doc = new jsPDF({
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait',
+      })
+      const container = document.createElement('div')
+      container.innerHTML = html
+      container.style.width = '190mm'
+      container.style.fontSize = '12px'
+
+      doc.html(container, {
+        callback: function (doc) {
+          doc.save(`${project?.name || 'contrato'}_draft.pdf`)
+        },
+        margin: [10, 10, 10, 10],
+        x: 10,
+        y: 10,
+        width: 190,
+        windowWidth: 800,
+      })
     } catch (_) {
       /* ignore */
     }

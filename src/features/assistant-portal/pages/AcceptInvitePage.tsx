@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 import { Button } from '@/components/ui/button'
 import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
@@ -40,7 +40,7 @@ export default function AcceptInvitePage() {
 
       if (error) throw error
 
-      const result = data as unknown as {
+      const result = data as {
         success: boolean
         is_new_connection: boolean
         error?: string

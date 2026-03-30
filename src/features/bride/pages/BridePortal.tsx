@@ -4,6 +4,12 @@ import { supabase } from '@/integrations/supabase/client'
 import { Loader2, CalendarHeart, Clock, MapPin, Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
+interface ValidateBrideTokenResult {
+  valid: boolean
+  client_id: string
+  client_name: string
+}
+
 interface BrideAccessData {
   client_id: string
   bride_name: string
@@ -12,55 +18,59 @@ interface BrideAccessData {
 }
 
 export default function BridePortal() {
-  const { token } = useParams()
+  const { clientId } = useParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [data, setData] = useState<BrideAccessData | null>(null)
 
   useEffect(() => {
-    if (!token) {
+    if (!clientId) {
       setError('Link inválido.')
       setLoading(false)
       return
     }
-    fetchData(token)
-  }, [token])
+    fetchData(clientId)
+  }, [clientId])
 
-  const fetchData = async (accessToken: string) => {
+  const fetchData = async (cId: string) => {
     try {
-      // For now, allow a demo logic or specific token fetch
-      // In a real scenario, we query a 'bride_access_tokens' table.
+      const token = localStorage.getItem('bride_access_token')
 
-      // Mocking secure access fetch for MVP proof
-      // In production, this would be:
-      // const { data } = await supabase.from('bride_tokens').select('*, clients(*)').eq('token', token).single();
+      if (!token) {
+        throw new Error('Sessão expirada')
+      }
 
-      // Simulating API call
-      await new Promise((r) => setTimeout(r, 1000))
+      const { data: validation, error: valError } = await supabase.rpc(
+        'validate_bride_token',
+        { p_token: token },
+      )
 
-      // 1. Fetch Client (The Person)
-      const { data: client, error: clientError } = await supabase
-        .from('wedding_clients')
-        .select('name')
-        .eq('id', accessToken) // 'token' IS the client_id here
-        .single()
+      const typedValidation =
+        validation as unknown as ValidateBrideTokenResult | null
 
-      if (clientError || !client) throw new Error('Cliente não encontrado')
+      if (valError || !typedValidation?.valid) {
+        localStorage.removeItem('bride_access_token')
+        localStorage.removeItem('bride_client_id')
+        throw new Error('Token inválido ou expirado')
+      }
 
-      // 2. Fetch Project (The Event)
+      if (typedValidation.client_id !== cId) {
+        throw new Error('Acesso não autorizado')
+      }
+
       const { data: projects } = await supabase
         .from('projects')
         .select('event_date, event_location')
-        .eq('client_id', accessToken)
+        .eq('client_id', cId)
         .order('created_at', { ascending: false })
         .limit(1)
 
       const project = projects?.[0]
 
       setData({
-        client_id: accessToken,
-        bride_name: client.name, // ✅ Uses Real Name "Ana"
+        client_id: cId,
+        bride_name: typedValidation.client_name,
         wedding_date: project?.event_date || new Date().toISOString(),
         wedding_location: project?.event_location || 'Local a definir',
       })
@@ -98,10 +108,10 @@ export default function BridePortal() {
             {error || 'Não foi possível carregar os dados.'}
           </p>
           <Button
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/portal/${clientId}/login`)}
             className="w-full rounded-none bg-white text-black hover:bg-neutral-200 uppercase tracking-widest text-xs font-bold py-6"
           >
-            Voltar
+            Fazer Login
           </Button>
         </div>
       </div>
@@ -110,7 +120,6 @@ export default function BridePortal() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black font-sans">
-      {/* Simple Noir Header */}
       <header className="border-b border-neutral-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <span className="font-serif italic text-xl">KONTROL Bride</span>
@@ -121,7 +130,6 @@ export default function BridePortal() {
       </header>
 
       <main className="container mx-auto px-6 py-12 md:py-20">
-        {/* Hero Section */}
         <div className="flex flex-col items-center text-center mb-24">
           <p className="text-[10px] uppercase tracking-[0.4em] text-neutral-500 mb-6">
             Casamento de
@@ -135,7 +143,7 @@ export default function BridePortal() {
               <Clock className="w-4 h-4" />
               {new Date(data.wedding_date).toLocaleDateString()}
             </div>
-            <div className="hidden md:block w-px h-4 bg-neutral-800"></div>
+            <div className="hidden md:block w-px h-4 bg-neutral-800" />
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
               {data.wedding_location}
@@ -143,9 +151,7 @@ export default function BridePortal() {
           </div>
         </div>
 
-        {/* Content Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-neutral-900 border border-neutral-900">
-          {/* Timeline Block */}
           <div className="bg-[#050505] p-12 aspect-square flex flex-col justify-between group hover:bg-neutral-950 transition-colors">
             <div>
               <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-600 block mb-2">
@@ -169,7 +175,6 @@ export default function BridePortal() {
             </div>
           </div>
 
-          {/* Docs Block */}
           <div className="bg-[#050505] p-12 aspect-square flex flex-col justify-between group hover:bg-neutral-950 transition-colors">
             <div>
               <span className="text-[10px] uppercase tracking-[0.3em] text-neutral-600 block mb-2">

@@ -20,7 +20,6 @@ export const useGoogleCalendar = () => {
     }
 
     const { data } = await supabase
-      // @ts-expect-error - Expected missing table typescript definition
       .from('google_calendar_tokens')
       .select('id')
       .eq('user_id', user.id)
@@ -56,7 +55,6 @@ export const useGoogleCalendar = () => {
     if (!user) return
 
     await supabase
-      // @ts-expect-error - Expected missing table typescript definition
       .from('google_calendar_tokens')
       .delete()
       .eq('user_id', user.id)

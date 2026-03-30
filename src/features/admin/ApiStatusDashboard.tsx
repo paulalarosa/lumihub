@@ -51,7 +51,11 @@ export const ApiStatusDashboard = () => {
       status: 'operational',
       endpoint: 'google-calendar-sync',
     },
-    { name: 'Stripe', status: 'operational', endpoint: 'create-checkout' },
+    {
+      name: 'Stripe',
+      status: 'operational',
+      endpoint: 'create-checkout-session',
+    },
     { name: 'Google Maps', status: 'operational', endpoint: 'places-proxy' },
     {
       name: 'Resend Email',

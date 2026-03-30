@@ -44,7 +44,7 @@ export function NotificationCenter() {
         if (fallbackErr) return [] as NotificationRecord[]
         return (fallback || []) as NotificationRecord[]
       }
-      return (data || []) as unknown as NotificationRecord[]
+      return data || []
     },
     enabled: !!user,
     refetchInterval: 30000,

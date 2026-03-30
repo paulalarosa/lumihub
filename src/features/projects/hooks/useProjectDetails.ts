@@ -10,6 +10,12 @@ import type {
   BriefingContent,
   ServiceUI,
 } from '@/types/api.types'
+import type { Database } from '@/integrations/supabase/types'
+
+type LocalProjectWithRelations =
+  Database['public']['Tables']['projects']['Row'] & {
+    client: Database['public']['Tables']['wedding_clients']['Row'] | null
+  }
 
 export const useProjectDetails = (projectId: string | undefined) => {
   const queryClient = useQueryClient()
@@ -94,7 +100,7 @@ export const useProjectDetails = (projectId: string | undefined) => {
       // We'll fetch contracts separately or chaining?
       // Let's do a second step for contracts if client_id is needed.
 
-      const project = projectRes.data as unknown as ProjectWithRelations
+      const project = projectRes.data as LocalProjectWithRelations
 
       // Adapt Project Client Structure
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -118,7 +124,7 @@ export const useProjectDetails = (projectId: string | undefined) => {
       // Adapting Briefing
       let briefing = null
       if (briefingRes.data) {
-        const content = briefingRes.data.content as unknown as BriefingContent
+        const content = briefingRes.data.content as BriefingContent
         briefing = {
           ...briefingRes.data,
           questions: content?.questions || [],

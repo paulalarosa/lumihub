@@ -70,7 +70,7 @@ export const MicrositeService = {
       throw error
     }
 
-    return data as unknown as MicrositeData
+    return data
   },
 
   /**

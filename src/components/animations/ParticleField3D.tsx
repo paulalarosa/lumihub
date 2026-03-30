@@ -107,3 +107,5 @@ export const ParticleField3D = ({ className = '' }: { className?: string }) => {
     </div>
   )
 }
+
+export default ParticleField3D

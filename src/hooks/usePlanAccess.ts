@@ -81,7 +81,7 @@ export const usePlanAccess = () => {
   const createCheckoutSession = useMutation({
     mutationFn: async (planType: string) => {
       const { data, error } = await supabase.functions.invoke(
-        'stripe-checkout',
+        'create-checkout-session',
         {
           body: {
             plan_type: planType,
@@ -105,7 +105,6 @@ export const usePlanAccess = () => {
 
   const hasFeature = (feature: string): boolean => {
     if (!planData?.features) return false
-    // @ts-expect-error dynamic type mismatch
     return !!planData.features[feature]
   }
 

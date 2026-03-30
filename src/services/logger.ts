@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
 import { Database, Json } from '@/integrations/supabase/types'
-import { SupabaseClient } from '@supabase/supabase-js'
 import * as Sentry from '@sentry/react'
 
 // Safe console fallback for environments where console might be stripped
@@ -111,7 +110,7 @@ export class Logger {
     }
 
     // Use the custom RPC helper from Phase 20
-    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+    const typedSupabase = supabase
     const { error } = await typedSupabase.rpc('set_audit_source', {
       source_text: source,
     })
@@ -282,7 +281,7 @@ export class Logger {
       )
     }
 
-    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+    const typedSupabase = supabase
 
     // Validate recordId is a valid UUID to avoid PostgREST 22P02 error
     const uuidRegex =
@@ -355,7 +354,7 @@ export class Logger {
     const brandedMessage = `KONTROL: ${message}`
 
     // Don't await this in the main flow to avoid blocking
-    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+    const typedSupabase = supabase
     const jsonMetadata = metadata ? JSON.parse(JSON.stringify(metadata)) : null
 
     typedSupabase

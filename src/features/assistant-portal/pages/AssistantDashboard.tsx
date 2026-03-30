@@ -3,7 +3,8 @@ import { useRole } from '@/hooks/useRole'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
+import { useAssistantEarnings } from '../hooks/useAssistantEarnings'
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -82,48 +83,7 @@ export default function AssistantDashboard() {
     enabled: !!assistantId,
   })
 
-  const { data: earnings } = useQuery({
-    queryKey: ['assistant-earnings', assistantId],
-    queryFn: async () => {
-      if (!assistantId) return null
-      const now = new Date()
-      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
-      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
-
-      const { data: thisMonthData } = await supabase.rpc(
-        'calculate_assistant_earnings' as never,
-        {
-          p_assistant_id: assistantId,
-          p_start_date: thisMonthStart.toISOString().split('T')[0],
-          p_end_date: now.toISOString().split('T')[0],
-        } as never,
-      )
-
-      const { data: lastMonthData } = await supabase.rpc(
-        'calculate_assistant_earnings' as never,
-        {
-          p_assistant_id: assistantId,
-          p_start_date: lastMonthStart.toISOString().split('T')[0],
-          p_end_date: lastMonthEnd.toISOString().split('T')[0],
-        } as never,
-      )
-
-      const thisMonth = (
-        thisMonthData as unknown as EarningsResult[] | null
-      )?.[0]
-      const lastMonth = (
-        lastMonthData as unknown as EarningsResult[] | null
-      )?.[0]
-
-      return {
-        thisMonth: thisMonth?.commission_amount || 0,
-        lastMonth: lastMonth?.commission_amount || 0,
-        totalEvents: thisMonth?.total_events || 0,
-      }
-    },
-    enabled: !!assistantId,
-  })
+  const { data: earnings } = useAssistantEarnings(assistantId)
 
   useEffect(() => {
     if (connections && connections.length > 0 && !selectedArtistId) {
@@ -163,9 +123,9 @@ export default function AssistantDashboard() {
       if (error) throw error
 
       return (data || []).filter((item) => {
-        const evt = item.event as unknown as Record<string, unknown> | null
+        const evt = item.event as Record<string, unknown> | null
         return evt && evt.user_id === proAuthId
-      }) as unknown as Array<{
+      }) as Array<{
         event_id: string
         assistant_id: string
         status?: string

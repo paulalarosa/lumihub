@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/useAuth'
 import { Database } from '@/integrations/supabase/types'
-import { SupabaseClient } from '@supabase/supabase-js'
 import { logger } from '@/services/logger'
 
 type LocalDatabase = Database & {
@@ -101,7 +100,7 @@ export function useOnboarding() {
 
     try {
       // 2. UPSERT Profile (Critical Fix)
-      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+      const typedSupabase = supabase
       const { error } = await typedSupabase.from('profiles').upsert(
         {
           id: userData.user.id,

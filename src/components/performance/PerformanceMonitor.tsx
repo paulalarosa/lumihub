@@ -26,9 +26,7 @@ export const PerformanceMonitor = ({
         lastTime = currentTime
 
         // Measure memory (if available)
-        // @ts-expect-error - Non-standard performance API property
         if (performance.memory) {
-          // @ts-expect-error - Non-standard performance API property
           const memoryMB = performance.memory.usedJSHeapSize / 1048576
           setMemory(Math.round(memoryMB))
         }

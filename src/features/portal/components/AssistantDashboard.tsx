@@ -26,12 +26,14 @@ interface AssistantDashboardProps {
   events: Event[]
   tasks: Task[]
   onLockedClick: (feature: string) => void
+  assistantId?: string
 }
 
 const AssistantDashboard = ({
   events,
   tasks,
   onLockedClick,
+  assistantId,
 }: AssistantDashboardProps) => {
   const {
     upcomingEvents,
@@ -42,7 +44,7 @@ const AssistantDashboard = ({
     progressToMilestone,
     missingToMilestone,
     monthGrowth,
-  } = useAssistantDashboard(events, tasks)
+  } = useAssistantDashboard(events, tasks, assistantId)
 
   return (
     <div className="space-y-6">

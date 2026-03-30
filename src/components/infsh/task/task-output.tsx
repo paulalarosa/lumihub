@@ -16,7 +16,7 @@ import {
   TaskStatusCancelled,
 } from '@inferencesh/sdk'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@/components/ui/PageLoader'
 import { CircleAlert, XCircle, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StatusPill } from './task-status'

@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { TableLoader } from '@/components/ui/LoadingStates'
+import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
 import { Plus, Trash2, Star } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -38,7 +38,7 @@ export function ServicesEditor({ micrositeId }: { micrositeId?: string }) {
         .eq('microsite_id', micrositeId!)
         .order('display_order')
       if (error) throw error
-      return (data || []) as unknown as ServiceRecord[]
+      return data || []
     },
     enabled: !!micrositeId,
   })

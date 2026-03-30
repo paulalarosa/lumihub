@@ -24,7 +24,7 @@ export const useAssistants = () => {
       .order('full_name')
 
     if (error) throw error
-    return data as unknown as Assistant[]
+    return data
   }
 
   const query = useQuery({

@@ -32,7 +32,7 @@ export const useAssistant = () => {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setInvites((data as unknown as AssistantInvite[]) || [])
+      setInvites(data || [])
     } catch (error) {
       logger.error(error, {
         message: 'Erro ao carregar convites.',

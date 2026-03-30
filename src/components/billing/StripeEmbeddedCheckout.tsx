@@ -35,12 +35,13 @@ export const StripeEmbeddedCheckout = ({
       logger.debug('Fetching client secret for price:', priceId)
 
       const { data, error } = await supabase.functions.invoke(
-        'create-checkout',
+        'create-checkout-session',
         {
           body: {
             priceId,
             userId: user.id,
-            userEmail: user.email,
+            successUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+            cancelUrl: `${window.location.origin}/planos`,
           },
         },
       )

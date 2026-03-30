@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CardLoader } from '@/components/ui/LoadingStates'
+import { LoadingSpinner as CardLoader } from '@/components/ui/PageLoader'
 
 import { Upload, Trash2, Image } from 'lucide-react'
 import { toast } from 'sonner'
@@ -32,7 +32,7 @@ export function GalleryEditor({ micrositeId }: { micrositeId?: string }) {
         .eq('microsite_id', micrositeId!)
         .order('display_order')
       if (error) throw error
-      return (data || []) as unknown as GalleryRecord[]
+      return data || []
     },
     enabled: !!micrositeId,
   })

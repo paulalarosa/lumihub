@@ -26,7 +26,7 @@ export const getOptimizedStorageUrl = (
       width: options.width,
       height: options.height,
       quality: options.quality,
-      format: options.format as any,
+      format: options.format,
     },
   })
 

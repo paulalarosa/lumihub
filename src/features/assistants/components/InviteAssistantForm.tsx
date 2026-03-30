@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/LoadingStates'
+import { LoadingSpinner } from '@/components/ui/PageLoader'
 
 import { AlertCircle, CheckCircle, Copy, Send } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -38,7 +38,6 @@ export const InviteAssistantForm = () => {
         .eq('id', user.id)
         .maybeSingle()
 
-      // @ts-expect-error - Expected missing table typescript definition
       const { data: created } = await supabase
         .from('makeup_artists')
         .insert({
@@ -74,7 +73,6 @@ export const InviteAssistantForm = () => {
     try {
       const normalizedEmail = assistantEmail.trim().toLowerCase()
 
-      // @ts-expect-error - Expected missing table typescript definition
       const { data: existing } = await supabase
         .from('assistants')
         .select('id')
@@ -84,13 +82,11 @@ export const InviteAssistantForm = () => {
       let assistantId = existing?.id
 
       if (existing) {
-        // @ts-expect-error - Expected missing table typescript definition
         await supabase
           .from('assistants')
           .update({ full_name: assistantName, pin: assistantPin })
           .eq('id', existing.id)
       } else {
-        // @ts-expect-error - Expected missing table typescript definition
         const { data: newAssistant, error: insertError } = await supabase
           .from('assistants')
           .insert({
@@ -107,7 +103,6 @@ export const InviteAssistantForm = () => {
       }
 
       if (makeupArtistId && assistantId) {
-        // @ts-expect-error - Expected missing table typescript definition
         const { data: existingAccess } = await supabase
           .from('assistant_access')
           .select('id')
@@ -116,7 +111,6 @@ export const InviteAssistantForm = () => {
           .maybeSingle()
 
         if (!existingAccess) {
-          // @ts-expect-error - Expected missing table typescript definition
           const { error: accessError } = await supabase
             .from('assistant_access')
             .insert({

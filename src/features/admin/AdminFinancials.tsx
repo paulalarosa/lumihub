@@ -14,6 +14,15 @@ import {
   AssistantCommission,
 } from './components/CommissionTable'
 import { useToast } from '@/hooks/use-toast'
+import type { Database } from '@/integrations/supabase/types'
+
+type EventWithAssistants = Database['public']['Tables']['events']['Row'] & {
+  wedding_clients: { name: string | null } | null
+  event_assistants: {
+    assistant_id: string
+    assistant: { name: string | null } | null
+  }[]
+}
 
 interface FinancialStats {
   mrr: number
@@ -52,7 +61,7 @@ export default function AdminFinancials({
                         wedding_clients (name),
                         event_assistants (
                             assistant_id,
-                            assistant:profiles (name)
+                            assistant:profiles!assistants (name)
                         )
                     `,
           )
@@ -62,7 +71,7 @@ export default function AdminFinancials({
         if (error) throw error
 
         setEvents(eventsData || [])
-        calculateCommissions(eventsData || [])
+        calculateCommissions((eventsData as EventWithAssistants[]) || [])
       } catch (error) {
         logger.error('AdminFinancials.fetchMonthlyData', error, 'SYSTEM', {
           showToast: false,
@@ -81,28 +90,21 @@ export default function AdminFinancials({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const calculateCommissions = (eventsData: unknown[]) => {
+  const calculateCommissions = (eventsData: EventWithAssistants[]) => {
     const commissionMap = new Map<string, AssistantCommission>()
 
     eventsData.forEach((event) => {
-      const eventObj = event as Record<string, unknown>
-      const totalCommission = Number(eventObj.assistant_commission) || 0
-      const assistants =
-        (eventObj.event_assistants as Record<string, unknown>[]) || []
+      const totalCommission = Number(event.assistant_commission) || 0
+      const assistants = event.event_assistants || []
 
       if (assistants.length > 0 && totalCommission > 0) {
         // Split commission equally among assistants for now
         // In a real scenario, we might have individual commission fields per assistant
         const splitCommission = totalCommission / assistants.length
 
-        assistants.forEach((_ea) => {
-          const ea = _ea as Record<string, unknown>
-          const assistantsRecord = ea.assistants as
-            | Record<string, unknown>
-            | undefined
-          const assistantName =
-            (assistantsRecord?.name as string) || 'Desconhecido'
-          const assistantId = ea.assistant_id as string
+        assistants.forEach((ea) => {
+          const assistantName = ea.assistant?.name || 'Desconhecido'
+          const assistantId = ea.assistant_id
 
           if (!commissionMap.has(assistantId)) {
             commissionMap.set(assistantId, {

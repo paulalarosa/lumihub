@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { TableLoader } from '@/components/ui/LoadingStates'
+import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
 
 import {
   Table,
@@ -136,18 +136,16 @@ export const AssistantList = () => {
             <TableBody>
               {activeList.map((item: Record<string, unknown>) => {
                 const finalPin =
-                  (item.assistant as any)?.pin ||
-                  (item.assistant as any)?.access_pin ||
-                  'N/A'
+                  item.assistant?.pin || item.assistant?.access_pin || 'N/A'
                 return (
                   <TableRow key={item.id as string}>
                     <TableCell className="font-medium">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {(item.assistant as any)?.full_name || 'N/A'}
+                      {}
+                      {item.assistant?.full_name || 'N/A'}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                      {(item.assistant as any)?.email || '-'}
+                      {}
+                      {item.assistant?.email || '-'}
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">

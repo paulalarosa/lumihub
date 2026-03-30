@@ -77,20 +77,18 @@ export const useNotifications = (userId: string | undefined) => {
               client?: { name: string }
             }
           }
-          ;(pendingInvoices as unknown as InvoiceWithProject[]).forEach(
-            (inv) => {
-              const clientName = inv.projects?.client?.name || 'Cliente'
-              newNotifications.push({
-                id: `pay-${inv.id}`,
-                type: 'payment',
-                title: 'Pagamento Pendente',
-                description: `${clientName} - R$ ${inv.amount}`,
-                date: inv.due_date,
-                read: false,
-                link: '/financeiro',
-              })
-            },
-          )
+          pendingInvoices.forEach((inv) => {
+            const clientName = inv.projects?.client?.name || 'Cliente'
+            newNotifications.push({
+              id: `pay-${inv.id}`,
+              type: 'payment',
+              title: 'Pagamento Pendente',
+              description: `${clientName} - R$ ${inv.amount}`,
+              date: inv.due_date,
+              read: false,
+              link: '/financeiro',
+            })
+          })
         }
 
         // 3. Unpaid Commissions (Events with commission > 0 in current month)

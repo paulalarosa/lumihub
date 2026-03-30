@@ -27,7 +27,7 @@ export const useCanvasActions = () => {
       } = await supabase.auth.getUser()
       if (!user) throw new Error('Usuário não autenticado')
 
-      const { error } = await (supabase as any).from('ai_documents').upsert({
+      const { error } = await supabase.from('ai_documents').upsert({
         id,
         user_id: user.id,
         title,

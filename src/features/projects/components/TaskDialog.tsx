@@ -91,7 +91,7 @@ export function TaskDialog({
         toast({ title: 'Sucesso', description: 'Tarefa criada.' })
         // Need to cast data to Task because createTask returns DB type, but Task type might have extra fields?
         // Actually Task matches DB type mostly.
-        onTaskSaved(data as unknown as Task)
+        onTaskSaved(data)
       }
 
       onOpenChange(false)

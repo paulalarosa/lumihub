@@ -1,10 +1,11 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { jwtDecode } from 'https://esm.sh/jwt-decode@4'
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
 }
 
 serve(async (req: Request) => {
@@ -13,23 +14,50 @@ serve(async (req: Request) => {
   }
 
   try {
-    const adminToken = req.headers.get('Authorization')?.replace('Bearer ', '')
-    if (!adminToken) {
-      return new Response(
-        JSON.stringify({ error: 'No admin token provided' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const clientIp = req.headers.get('x-forwarded-for') || 'unknown'
+    const limit = checkRateLimit(clientIp, { maxRequests: 3, windowMs: 60000 })
+    if (!limit.allowed) return rateLimitResponse(limit.resetAt)
+
+    const supabaseAdmin = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    )
+
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing authorization' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    // Verify admin is actually an admin
-    const decoded = jwtDecode(adminToken) as any
-    const adminRole = decoded.user_metadata?.role || 'user'
-    
-    if (adminRole !== 'admin' && adminRole !== 'super_admin') {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized: not an admin' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    const token = authHeader.replace('Bearer ', '')
+
+    // Verificar quem está chamando
+    const {
+      data: { user: callerUser },
+      error: callerError,
+    } = await supabaseAdmin.auth.getUser(token)
+
+    if (callerError || !callerUser) {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // FIX 2: Validar admin via profiles.role no banco (NÃO via user_metadata)
+    const { data: callerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('role')
+      .eq('id', callerUser.id)
+      .single()
+
+    if (callerProfile?.role !== 'admin') {
+      return new Response(JSON.stringify({ error: 'Forbidden: admin only' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     const { target_user_id } = await req.json()
@@ -37,58 +65,68 @@ serve(async (req: Request) => {
     if (!target_user_id) {
       return new Response(
         JSON.stringify({ error: 'target_user_id required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       )
     }
 
-    // Service role client to generate session for target user
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // FIX 1: Usar auth.admin em vez de from('auth.users')
+    const {
+      data: { user: targetUser },
+      error: targetError,
+    } = await supabaseAdmin.auth.admin.getUserById(target_user_id)
 
-    // Create a short-lived JWT for the target user
-    const { data: sessionData, error: sessionError } = await supabaseClient.auth.admin.generateLink({
-      type: 'magiclink',
-      email: (await supabaseClient.from('auth.users').select('email').eq('id', target_user_id).single()).data?.email || '',
-    })
+    if (targetError || !targetUser) {
+      return new Response(JSON.stringify({ error: 'Target user not found' }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
-    if (sessionError || !sessionData?.properties?.email_otp) {
-      // Fallback: create a session directly using service role
-      const { data: authUser, error: authError } = await supabaseClient.auth.admin.getUserById(target_user_id)
-      
-      if (authError || !authUser) {
-        return new Response(
-          JSON.stringify({ error: `User not found: ${authError?.message}` }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
-      }
+    // Gerar magic link ou token para ghost login
+    const { data: linkData, error: linkError } =
+      await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: targetUser.email!,
+      })
 
-      // Return user ID and email for frontend to handle session
+    if (linkError) {
       return new Response(
         JSON.stringify({
-          success: true,
-          target_user_id: target_user_id,
-          message: 'Ready to impersonate. Frontend will handle session.',
+          error: 'Failed to generate link',
+          details: linkError.message,
         }),
-        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
       )
     }
+
+    // Log do ghost login no audit
+    await supabaseAdmin.from('audit_logs').insert({
+      user_id: callerUser.id,
+      action: 'GHOST_LOGIN',
+      details: { target_user_id, target_email: targetUser.email },
+    })
 
     return new Response(
       JSON.stringify({
         success: true,
-        target_user_id: target_user_id,
-        otp: sessionData.properties?.email_otp,
-        message: 'Magic link OTP generated',
+        link: linkData,
+        target_email: targetUser.email,
       }),
-      { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      },
     )
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    return new Response(
-      JSON.stringify({ error: errorMessage }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
 })

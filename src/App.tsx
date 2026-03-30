@@ -22,13 +22,11 @@ import AppLayout from './components/ui/layout/AppLayout'
 import MarketingLayout from './components/ui/layout/MarketingLayout'
 import { ScrollToTop } from './components/utils/ScrollToTop'
 import { GoogleAnalytics } from './components/analytics/GoogleAnalytics'
-import { PageLoader } from './components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
-import { ErrorBoundary } from 'react-error-boundary'
-import { SystemFailure } from './components/ui/SystemFailure'
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
-import { CustomErrorBoundary } from '@/components/ui/CustomErrorBoundary'
 const OnboardingWizard = lazy(() =>
   import('@/components/onboarding/OnboardingWizard').then((m) => ({
     default: m.OnboardingWizard,
@@ -165,6 +163,18 @@ const queryClient = new QueryClient({
   },
 })
 
+function LazyPage({
+  component: Component,
+}: {
+  component: React.LazyExoticComponent<any>
+}) {
+  return (
+    <Suspense fallback={<PageLoader />}>
+      <Component />
+    </Suspense>
+  )
+}
+
 const App = () => {
   const [isLoading, setIsLoading] = useState(true)
 
@@ -201,24 +211,54 @@ const App = () => {
               <div className="min-h-screen bg-[#050505] text-[#C0C0C0] selection:bg-white selection:text-black">
                 <SkipToContent />
                 <main id="main-content">
-                  <ErrorBoundary FallbackComponent={SystemFailure}>
+                  <ErrorBoundary>
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
                         {/* Public Marketing Pages */}
-                        <Route path="/" element={<Index />} />
+                        <Route
+                          path="/"
+                          element={<LazyPage component={Index} />}
+                        />
                         <Route element={<MarketingLayout />}>
-                          <Route path="/recursos" element={<Resources />} />
-                          <Route path="/planos" element={<Plans />} />
-                          <Route path="/blog" element={<Blog />} />
-                          <Route path="/blog/:slug" element={<BlogArticle />} />
-                          <Route path="/contato" element={<Contact />} />
-                          <Route path="/privacidade" element={<Privacy />} />
-                          <Route path="/termos" element={<Terms />} />
+                          <Route
+                            path="/recursos"
+                            element={<LazyPage component={Resources} />}
+                          />
+                          <Route
+                            path="/planos"
+                            element={<LazyPage component={Plans} />}
+                          />
+                          <Route
+                            path="/blog"
+                            element={<LazyPage component={Blog} />}
+                          />
+                          <Route
+                            path="/blog/:slug"
+                            element={<LazyPage component={BlogArticle} />}
+                          />
+                          <Route
+                            path="/contato"
+                            element={<LazyPage component={Contact} />}
+                          />
+                          <Route
+                            path="/privacidade"
+                            element={<LazyPage component={Privacy} />}
+                          />
+                          <Route
+                            path="/termos"
+                            element={<LazyPage component={Terms} />}
+                          />
                         </Route>
 
                         {/* Auth */}
-                        <Route path="/login" element={<Login />} />
-                        <Route path="/register" element={<Register />} />
+                        <Route
+                          path="/login"
+                          element={<LazyPage component={Login} />}
+                        />
+                        <Route
+                          path="/register"
+                          element={<LazyPage component={Register} />}
+                        />
                         <Route path="/auth">
                           <Route
                             index
@@ -243,11 +283,11 @@ const App = () => {
                         />
                         <Route
                           path="/auth/forgot-password"
-                          element={<ForgotPassword />}
+                          element={<LazyPage component={ForgotPassword} />}
                         />
                         <Route
                           path="/auth/update-password"
-                          element={<UpdatePassword />}
+                          element={<LazyPage component={UpdatePassword} />}
                         />
 
                         {/* Protected App Pages with Layout */}
@@ -255,22 +295,23 @@ const App = () => {
                           <Route element={<ProtectedRoute />}>
                             <Route
                               path="/dashboard"
-                              element={
-                                <CustomErrorBoundary>
-                                  <Dashboard />
-                                </CustomErrorBoundary>
-                              }
+                              element={<LazyPage component={Dashboard} />}
                             />
                             <Route
                               path="/dashboard/financial"
-                              element={<FinancialPage />}
+                              element={<LazyPage component={FinancialPage} />}
                             />
-                            <Route path="/analytics" element={<Analytics />} />
+                            <Route
+                              path="/analytics"
+                              element={<LazyPage component={Analytics} />}
+                            />
 
                             <Route element={<AdminRoute />}>
                               <Route
                                 path="/admin"
-                                element={<AdminDashboard />}
+                                element={
+                                  <LazyPage component={AdminDashboard} />
+                                }
                               />
                               <Route
                                 path="/admin/users"
@@ -288,54 +329,69 @@ const App = () => {
 
                             <Route
                               path="/calendar"
-                              element={<CalendarPage />}
+                              element={<LazyPage component={CalendarPage} />}
                             />
                             <Route
                               path="/calendar/callback"
-                              element={<GoogleCalendarCallback />}
+                              element={
+                                <LazyPage component={GoogleCalendarCallback} />
+                              }
                             />
 
-                            <Route path="/clientes" element={<Clients />} />
+                            <Route
+                              path="/clientes"
+                              element={<LazyPage component={Clients} />}
+                            />
                             <Route
                               path="/clientes/:id"
-                              element={<ClientDetails />}
+                              element={<LazyPage component={ClientDetails} />}
                             />
                             <Route
                               path="/projetos"
-                              element={
-                                <CustomErrorBoundary>
-                                  <Projects />
-                                </CustomErrorBoundary>
-                              }
+                              element={<LazyPage component={Projects} />}
                             />
                             <Route
                               path="/projetos/novo"
-                              element={<Projects />}
+                              element={<LazyPage component={Projects} />}
                             />
                             <Route
                               path="/projetos/:id"
-                              element={<ProjectDetails />}
+                              element={<LazyPage component={ProjectDetails} />}
                             />
                             <Route
                               path="/projects/:projectId/contract"
-                              element={<ProjectContract />}
+                              element={<LazyPage component={ProjectContract} />}
                             />
                             <Route
                               path="/configuracoes"
-                              element={<Settings />}
+                              element={<LazyPage component={Settings} />}
                             />
                             <Route
                               path="/assistentes"
-                              element={<AssistantsPage />}
+                              element={<LazyPage component={AssistantsPage} />}
                             />
-                            <Route path="/servicos" element={<Services />} />
-                            <Route path="/funil" element={<SalesPipeline />} />
+                            <Route
+                              path="/servicos"
+                              element={<LazyPage component={Services} />}
+                            />
+                            <Route
+                              path="/funil"
+                              element={<LazyPage component={SalesPipeline} />}
+                            />
                             <Route
                               path="/integracoes"
-                              element={<IntegrationsPage />}
+                              element={
+                                <LazyPage component={IntegrationsPage} />
+                              }
                             />
-                            <Route path="/contratos" element={<Contracts />} />
-                            <Route path="/marketing" element={<Marketing />} />
+                            <Route
+                              path="/contratos"
+                              element={<LazyPage component={Contracts} />}
+                            />
+                            <Route
+                              path="/marketing"
+                              element={<LazyPage component={Marketing} />}
+                            />
                           </Route>
                         </Route>
 
@@ -358,7 +414,9 @@ const App = () => {
                           >
                             <Route
                               path="dashboard"
-                              element={<AssistantDashboard />}
+                              element={
+                                <LazyPage component={AssistantDashboard} />
+                              }
                             />
                             <Route
                               index
@@ -368,60 +426,79 @@ const App = () => {
                         </Route>
                         <Route
                           path="/assistente/convite/:token"
-                          element={<AcceptInvitePage />}
+                          element={<LazyPage component={AcceptInvitePage} />}
                         />
-                        <Route path="/upgrade" element={<UpgradePage />} />
+                        <Route
+                          path="/upgrade"
+                          element={<LazyPage component={UpgradePage} />}
+                        />
                         <Route
                           path="/upgrade/success"
-                          element={<UpgradeSuccessPage />}
+                          element={<LazyPage component={UpgradeSuccessPage} />}
                         />
                         <Route
                           path="/upgrade/failure"
-                          element={<UpgradeFailurePage />}
+                          element={<LazyPage component={UpgradeFailurePage} />}
                         />
                         <Route
                           path="/upgrade/pending"
-                          element={<UpgradePendingPage />}
+                          element={<LazyPage component={UpgradePendingPage} />}
                         />
-                        <Route path="/b/:slug" element={<PublicBooking />} />
+                        <Route
+                          path="/b/:slug"
+                          element={<LazyPage component={PublicBooking} />}
+                        />
 
                         {/* Assistant Portal Free (Shadow Accounts) */}
                         <Route
                           path="/agenda-equipa/:professionalId"
-                          element={<AssistantQuickLogin />}
+                          element={<LazyPage component={AssistantQuickLogin} />}
                         />
                         <Route
                           path="/agenda-equipa/:professionalId/dashboard"
-                          element={<AssistantFreeDashboard />}
+                          element={
+                            <LazyPage component={AssistantFreeDashboard} />
+                          }
                         />
 
                         <Route
                           path="/assinar/:requestId"
-                          element={<SignContract />}
+                          element={<LazyPage component={SignContract} />}
                         />
                         <Route
                           path="/avaliar/:token"
-                          element={<LeaveReview />}
+                          element={<LazyPage component={LeaveReview} />}
                         />
-                        <Route path="/site/:slug" element={<Microsite />} />
+                        <Route
+                          path="/site/:slug"
+                          element={<LazyPage component={Microsite} />}
+                        />
                         <Route element={<ProtectedRoute />}>
                           <Route
                             path="/meu-site/editor"
-                            element={<MicrositeEditor />}
+                            element={<LazyPage component={MicrositeEditor} />}
                           />
                         </Route>
                         <Route
                           path="/portal/:clientId/login"
-                          element={<BrideLoginPage />}
+                          element={<LazyPage component={BrideLoginPage} />}
                         />
                         <Route element={<BrideProtectedRoute />}>
                           <Route
                             path="/portal/:clientId/dashboard"
-                            element={<BrideDashboardPage />}
+                            element={
+                              <LazyPage component={BrideDashboardPage} />
+                            }
                           />
                         </Route>
-                        <Route path="*" element={<Dashboard />} />
-                        <Route path="/404" element={<NotFound />} />
+                        <Route
+                          path="*"
+                          element={<LazyPage component={Dashboard} />}
+                        />
+                        <Route
+                          path="/404"
+                          element={<LazyPage component={NotFound} />}
+                        />
                       </Routes>
                     </Suspense>
                   </ErrorBoundary>

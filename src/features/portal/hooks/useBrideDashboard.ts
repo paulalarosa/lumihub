@@ -85,7 +85,7 @@ export function useBrideDashboard() {
         throw new Error('Projeto não encontrado para este cliente.')
       }
 
-      const typedProject = projectData as unknown as BrideProject
+      const typedProject = projectData
       const sData = typedProject.services || []
       const tData = typedProject.transactions || []
 

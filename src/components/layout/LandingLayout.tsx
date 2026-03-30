@@ -1,10 +1,13 @@
-import { ReactNode } from 'react'
+import { ReactNode, lazy, Suspense } from 'react'
 import Header from '@/components/ui/layout/Header'
 import Footer from '@/components/ui/layout/Footer'
 import { SparkleCanvas } from '@/components/animations/SparkleCanvas'
 import { GradientMesh } from '@/components/animations/GradientMesh'
-import { PerformanceWrapper } from '@/components/animations/PerformanceWrapper'
-import { ParticleField3D } from '@/components/animations/ParticleField3D'
+
+const Hero3DBackground = lazy(() => import('@/components/ui/Hero3DBackground'))
+const ParticleField3D = lazy(
+  () => import('@/components/animations/ParticleField3D'),
+)
 
 interface LandingLayoutProps {
   children: ReactNode
@@ -23,9 +26,12 @@ export const LandingLayout = ({
       <GradientMesh />
 
       {showParticles && (
-        <PerformanceWrapper require3D fallback={<GradientMesh />}>
-          <ParticleField3D />
-        </PerformanceWrapper>
+        <div className="fixed inset-0 -z-10 bg-black">
+          <Suspense fallback={<div className="h-screen bg-black" />}>
+            <ParticleField3D />
+            <Hero3DBackground />
+          </Suspense>
+        </div>
       )}
 
       <SparkleCanvas />

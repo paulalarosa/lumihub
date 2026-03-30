@@ -37,7 +37,6 @@ export function AssistantsPanelCard() {
       } = await supabase.auth.getUser()
       if (!user) return
 
-      // @ts-expect-error - Expected missing table typescript definition
       const { data, error } = await supabase
         .from('assistants')
         .select('id, full_name, phone, created_at')
@@ -47,7 +46,7 @@ export function AssistantsPanelCard() {
 
       if (error) throw error
       setAssistants(
-        ((data as unknown as Record<string, unknown>[]) || []).map((a) => ({
+        ((data, unknown > []) || []).map((a) => ({
           id: String(a.id),
           full_name: String(a.full_name),
           email: null,

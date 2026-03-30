@@ -55,7 +55,7 @@ export function useSmartContractEditor(
         .single()
 
       if (!projectError && project) {
-        setProjectData(project as unknown as ContractProjectData)
+        setProjectData(project)
       }
 
       const {

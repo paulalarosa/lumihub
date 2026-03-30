@@ -18,7 +18,6 @@ interface AddressAutocompleteProps {
   longitude?: number | null
 }
 
-import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/integrations/supabase/types'
 
 interface PlaceSuggestion {
@@ -200,7 +199,7 @@ export function AddressAutocomplete({
 
     // Optimize: Check cache for this place_id first
     try {
-      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+      const typedSupabase = supabase
       const { data: cached } = await typedSupabase
         .from('geo_cache')
         .select('response')
@@ -249,8 +248,7 @@ export function AddressAutocomplete({
               const expiresAt = new Date()
               expiresAt.setDate(expiresAt.getDate() + 30) // 30 days cache
 
-              const typedSupabase =
-                supabase as unknown as SupabaseClient<LocalDatabase>
+              const typedSupabase = supabase
               await typedSupabase.from('geo_cache').upsert({
                 query: place.place_id,
                 response: cachePayload,

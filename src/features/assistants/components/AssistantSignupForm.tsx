@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/LoadingStates'
+import { LoadingSpinner } from '@/components/ui/PageLoader'
 
 import { useNavigate } from 'react-router-dom'
 import { getErrorMessage } from '@/utils/error-handler'

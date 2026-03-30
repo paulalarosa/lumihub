@@ -10,52 +10,8 @@ import { TrialBanner } from '@/components/features/subscription/TrialBanner'
 import { PageTransition } from '../animation/PageTransition'
 import { NotificationBell } from './NotificationBell'
 import { ModeToggle } from '@/components/ui/mode-toggle'
-import { useEffect, useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { supabase } from '@/integrations/supabase/client'
-import { logger } from '@/services/logger'
 
 export default function AppLayout() {
-  const { user } = useAuth()
-  const [_profile, setProfile] = useState<Record<string, unknown> | null>(null)
-  const [_loadingProfile, setLoadingProfile] = useState(true)
-
-  useEffect(() => {
-    if (!user) return
-
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle()
-
-        if (!error && data) {
-          setProfile(data)
-        }
-      } catch (error) {
-        logger.error(error, 'AppLayout.fetchProfile', { showToast: false })
-      } finally {
-        setLoadingProfile(false)
-      }
-    }
-
-    fetchProfile()
-  }, [user])
-
-  const _handleOnboardingComplete = () => {
-    // Optimistically update profile to hide wizard immediately
-    setProfile((prev) => ({ ...prev, onboarding_completed: true }))
-    // Reload to ensure fresh state everywhere
-    window.location.reload()
-  }
-
-  // SYSTEM INITIALIZATION CHECK - Handled by ProtectedRoute now
-  // if (user && !loadingProfile && profile && profile.onboarding_completed === false) {
-  //    return <OnboardingWizard onComplete={handleOnboardingComplete} />;
-  // }
-
   return (
     <SidebarProvider>
       {/* Desktop Sidebar (Left) */}

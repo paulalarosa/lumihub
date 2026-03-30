@@ -58,9 +58,7 @@ export default function AdminLogs() {
           .limit(100)
         if (fallbackData) {
           const uniqueTables = Array.from(
-            new Set(
-              (fallbackData as unknown as AuditLog[]).map((d) => d.table_name),
-            ),
+            new Set((fallbackData as AuditLog[]).map((d) => d.table_name)),
           )
           setAvailableTables(uniqueTables)
         }
@@ -73,7 +71,7 @@ export default function AdminLogs() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const typedSupabase = supabase as unknown as SupabaseClient<AuditDatabase>
+      const typedSupabase = supabase
       if (activeTab === 'system') {
         let query = typedSupabase
           .from('system_logs')

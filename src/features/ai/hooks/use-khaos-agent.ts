@@ -65,8 +65,7 @@ export function useKhaosAgent() {
         })
       }
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any) as any
+  })
 
   // 3. Map Vercel Messages to Inference UI DTOs
   const chatMessages = useMemo((): ChatMessageDTO[] => {

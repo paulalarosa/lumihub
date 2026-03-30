@@ -1,6 +1,5 @@
 import { supabase } from '@/integrations/supabase/client'
-import { CalendarDatabase, CalendarEventDB, ProjectDB } from '@/types/calendar'
-import { SupabaseClient } from '@supabase/supabase-js'
+import { ProjectDB } from '@/types/calendar'
 
 export interface DashboardEvent {
   id: string
@@ -18,8 +17,7 @@ export const EventService = {
     _role?: string,
   ) {
     // Cast supabase client to use our extended database types
-    const typedSupabase =
-      supabase as unknown as SupabaseClient<CalendarDatabase>
+    const typedSupabase = supabase
 
     // 1. Check Google Connection (using new table)
     const { data: tokenData } = await typedSupabase
@@ -37,10 +35,9 @@ export const EventService = {
     try {
       // 2. Fetch Projects (Internal)
       // Fetch projects where the user is the makeup artist
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: projectsData } = await (
-        (supabase as any).from('projects') as any
-      )
+
+      const { data: projectsData } = await supabase
+        .from('projects')
         .select('*, client:wedding_clients(full_name)')
         .eq('user_id', userId)
         .gte('event_date', today.toISOString().split('T')[0])
@@ -48,7 +45,7 @@ export const EventService = {
         .limit(5)
 
       // Cast to unknown first to avoid "excessively deep" error, then to our shape
-      const projects = projectsData as unknown as (ProjectDB & {
+      const projects = projectsData as (ProjectDB & {
         client: { full_name: string } | { full_name: string }[] | null
       })[]
 
@@ -77,7 +74,7 @@ export const EventService = {
         .order('start_time', { ascending: true })
         .limit(5)
 
-      const googleEvents = googleEventsData as unknown as CalendarEventDB[]
+      const googleEvents = googleEventsData
 
       const externalEvents: DashboardEvent[] = (googleEvents || []).map(
         (e) => ({

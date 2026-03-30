@@ -50,7 +50,6 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
     try {
       // 1. Get the owner of the microsite
       const { data, error: micrositeError } = await supabase
-        // @ts-expect-error - Expected missing table typescript definition
         .from('microsites')
         .select('user_id, business_name')
         .eq('id', micrositeId)
@@ -65,9 +64,7 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       // For now, we'll insert into 'leads' if it exists, or just log/toast for the prototype.
       // Assuming 'leads' table exists based on useLeads hook presence.
 
-      const { error: leadError } = await (
-        (supabase as any).from('leads') as any
-      ).insert({
+      const { error: leadError } = await supabase.from('leads').insert({
         user_id: microsite.user_id,
         name: values.name,
         email: values.email,

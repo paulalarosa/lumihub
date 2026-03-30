@@ -9,7 +9,6 @@ import { parse } from 'date-fns/parse'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
 import { Profile, Service, TimeSlot } from '../types'
 import { Database } from '@/integrations/supabase/types'
-import { SupabaseClient } from '@supabase/supabase-js'
 
 type LocalDatabase = Database & {
   public: {
@@ -123,7 +122,7 @@ export const usePublicBooking = (
     setLoadingSlots(true)
     try {
       const dateStr = formatDate(selectedDate, 'yyyy-MM-dd')
-      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+      const typedSupabase = supabase
 
       const { data: eventsData, error } = await typedSupabase.rpc(
         'get_day_availability',

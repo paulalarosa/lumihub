@@ -1,7 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Database } from '@/integrations/supabase/types'
-import { SupabaseClient } from '@supabase/supabase-js'
 import { useAuth } from '@/hooks/useAuth'
 import { startOfMonth } from 'date-fns/startOfMonth'
 import { endOfMonth } from 'date-fns/endOfMonth'
@@ -52,7 +51,7 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
       if (error) throw error
       // Force cast to correct type
-      return (data || []) as unknown as Assistant[]
+      return data || []
     },
     enabled: !!user,
   })
@@ -128,18 +127,17 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
   // Actions
   const acceptInvite = async (assistantRecordId: string) => {
     // Use typed client with LocalDatabase
-    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+    const typedSupabase = supabase
 
-    const { error } =
-      await // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((typedSupabase as any).from('assistants') as any)
-        .update({
-          status: 'accepted',
-          is_registered: true,
-          assistant_user_id: user?.id,
-          invite_token: null,
-        })
-        .eq('id', assistantRecordId)
+    const { error } = await typedSupabase
+      .from('assistants')
+      .update({
+        status: 'accepted',
+        is_registered: true,
+        assistant_user_id: user?.id,
+        invite_token: null,
+      })
+      .eq('id', assistantRecordId)
 
     if (error) throw error
     queryClient.invalidateQueries({ queryKey: ['portal-assistants'] })

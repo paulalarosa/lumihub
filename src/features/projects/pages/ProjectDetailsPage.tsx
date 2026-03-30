@@ -28,7 +28,7 @@ import type {
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader'
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats'
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs'
-import { PageLoader } from '@/components/ui/LoadingStates'
+import { PageLoader } from '@/components/ui/PageLoader'
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -62,8 +62,7 @@ export default function ProjectDetailsPage() {
       setTasks(projectDetails.tasks as Task[])
 
       if (projectDetails.briefing) {
-        const rawBriefing =
-          projectDetails.briefing as unknown as BriefingWithContent
+        const rawBriefing = projectDetails.briefing
         const content = rawBriefing.content as BriefingContent | null
         setBriefing({
           ...rawBriefing,

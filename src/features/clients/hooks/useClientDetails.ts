@@ -27,7 +27,6 @@ export interface EventWithServices {
   }>
 }
 
-import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '@/integrations/supabase/types'
 
 // Local interface for the missing table
@@ -130,7 +129,7 @@ export function useClientDetails(id: string | undefined) {
 
       if (eventsData) {
         // Supabase types for joined queries can be tricky, safe cast here
-        setEvents(eventsData as unknown as EventWithServices[])
+        setEvents(eventsData)
       }
     } catch (error) {
       logger.error(error, 'useClientDetails.fetchData', { showToast: false })
@@ -171,7 +170,7 @@ export function useClientDetails(id: string | undefined) {
 
   const deleteRecord = async (recordId: string) => {
     try {
-      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
+      const typedSupabase = supabase
       const { error } = await typedSupabase
         .from('treatment_records')
         .delete()
