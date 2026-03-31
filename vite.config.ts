@@ -18,17 +18,19 @@ export default defineConfig(({ mode }) => ({
         'favicon-khaoskontrol.webp',
         'android-chrome-192x192.png',
         'android-chrome-512x512.png',
+        'apple-touch-icon.png',
       ],
       manifest: {
-        name: 'Khaos Kontrol - CRM para Maquiadoras',
+        name: 'Khaos Kontrol - Gestão para Maquiadoras',
         short_name: 'Khaos Kontrol',
-        description: 'Sistema de gestão profissional para maquiadoras',
+        description:
+          'Organize clientes, contratos, agenda e financeiro em um só lugar.',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/',
+        start_url: '/dashboard',
         icons: [
           {
             src: '/android-chrome-192x192.png',
@@ -50,17 +52,24 @@ export default defineConfig(({ mode }) => ({
         categories: ['business', 'productivity'],
         shortcuts: [
           {
-            name: 'Nova Agenda',
-            short_name: 'Agendar',
-            description: 'Criar novo agendamento',
-            url: '/projects/new',
+            name: 'Nova Cliente',
+            short_name: 'Cliente',
+            description: 'Cadastrar nova cliente',
+            url: '/clientes',
             icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }],
           },
           {
             name: 'Calendário',
             short_name: 'Agenda',
-            description: 'Ver calendário',
+            description: 'Ver calendário de eventos',
             url: '/calendar',
+            icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }],
+          },
+          {
+            name: 'Contratos',
+            short_name: 'Contratos',
+            description: 'Gerenciar contratos',
+            url: '/contratos',
             icons: [{ src: '/android-chrome-192x192.png', sizes: '192x192' }],
           },
         ],
@@ -90,7 +99,7 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-cache',
+              cacheName: 'google-fonts',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
@@ -104,13 +113,24 @@ export default defineConfig(({ mode }) => ({
             urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'gstatic-fonts-cache',
+              cacheName: 'gstatic-fonts',
               expiration: {
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
             },
           },
@@ -124,12 +144,10 @@ export default defineConfig(({ mode }) => ({
       algorithm: 'gzip',
       exclude: [/\.(br)$/, /\.(gz)$/],
     } as any),
-
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br)$/, /\.(gz)$/],
     } as any),
-
     ...(process.env.ANALYZE
       ? [
           visualizer({
@@ -167,14 +185,10 @@ export default defineConfig(({ mode }) => ({
             'clsx',
             'tailwind-merge',
           ],
-
           'vendor-supabase': ['@supabase/supabase-js'],
-
           'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
-
           'ai-engine': ['@mlc-ai/web-llm'],
           'ai-markdown': ['react-markdown', 'remark-gfm'],
-
           'feature-calendar': ['react-big-calendar'],
           'feature-forms': ['react-hook-form', '@hookform/resolvers'],
         },
