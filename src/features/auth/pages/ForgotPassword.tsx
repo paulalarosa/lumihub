@@ -20,8 +20,7 @@ export default function ForgotPassword() {
     setIsSubmitting(true)
 
     try {
-      // Use Edge Function to send templated SES email
-      const { data, error } = await supabase.functions.invoke(
+      const { error } = await supabase.functions.invoke(
         'request-password-reset',
         {
           body: { email },

@@ -13,13 +13,14 @@ interface AssistantSignupFormProps {
   token: string
 }
 
-export const AssistantSignupForm = ({ token }: AssistantSignupFormProps) => {
+export const AssistantSignupForm = ({
+  token: _token,
+}: AssistantSignupFormProps) => {
   const { toast } = useToast()
   const _navigate = useNavigate()
   const [isLogin, setIsLogin] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Form state
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
@@ -50,7 +51,6 @@ export const AssistantSignupForm = ({ token }: AssistantSignupFormProps) => {
         if (error) throw error
         toast({ title: 'Conta criada! Verifique seu email ou prossiga.' })
       }
-      // Once auth state changes, parent component (AcceptInvitePage) will detect user and trigger accept logic.
     } catch (error) {
       const { title, description } = getErrorMessage(
         error,

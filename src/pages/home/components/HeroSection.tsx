@@ -3,9 +3,11 @@ import { ArrowRight, Play } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 export const HeroSection = () => {
   const navigate = useNavigate()
+  const { trackCTAClick } = useAnalytics()
   const heroRef = useRef(null)
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -49,11 +51,15 @@ export const HeroSection = () => {
         >
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="w-5 h-5 rounded-full bg-white/20 border border-black" />
+              <div
+                key={i}
+                className="w-5 h-5 rounded-full bg-white/20 border border-black"
+              />
             ))}
           </div>
           <span className="text-white/60 text-xs">
-            Usado por <span className="text-white">+200 profissionais</span> de beleza
+            Usado por <span className="text-white">+200 profissionais</span> de
+            beleza
           </span>
         </motion.div>
 

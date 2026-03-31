@@ -75,9 +75,7 @@ export function AssistantDialog({
         phone: data.phone || null,
       })
       onOpenChange(false)
-    } catch (error) {
-      // Error handling is usually handled by the parent's onSave or a toast
-    }
+    } catch (_error) {}
   }
 
   return (

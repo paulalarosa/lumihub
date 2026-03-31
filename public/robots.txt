@@ -1,6 +1,3 @@
-# Khaos Kontrol - Robots.txt
-# https://khaoskontrol.com.br
-
 User-agent: *
 Allow: /
 Disallow: /dashboard
@@ -16,18 +13,18 @@ Disallow: /assistente
 Disallow: /admin
 Disallow: /portal/
 Disallow: /auth/
+Disallow: /assistant/
 
-# Allow marketing pages
 Allow: /
 Allow: /recursos
 Allow: /planos
+Allow: /cadastro
 Allow: /blog
 Allow: /contato
 Allow: /privacidade
 Allow: /b/
+Allow: /login
 
-# Crawl-delay for rate limiting
 Crawl-delay: 1
 
-# Sitemap
 Sitemap: https://khaoskontrol.com.br/sitemap.xml

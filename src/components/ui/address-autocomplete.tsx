@@ -13,7 +13,7 @@ interface AddressAutocompleteProps {
   onBlur?: () => void
   placeholder?: string
   className?: string
-  showMiniMap?: boolean // Kept for API compatibility, though map might be removed if we don't have SDK
+  showMiniMap?: boolean
   latitude?: number | null
   longitude?: number | null
 }
@@ -23,26 +23,6 @@ interface PlaceSuggestion {
   place_id: string
 }
 
-interface GeoCacheTable {
-  Row: {
-    query: string
-    response: Record<string, unknown>
-    expires_at: string
-  }
-  Insert: {
-    query: string
-    response: Record<string, unknown>
-    expires_at: string
-  }
-  Update: {
-    query?: string
-    response?: Record<string, unknown>
-    expires_at?: string
-  }
-  Relationships: []
-}
-
-// Simple debounce utility
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
   useEffect(() => {
@@ -52,7 +32,6 @@ function useDebounce<T>(value: T, delay: number): T {
   return debouncedValue
 }
 
-// Deep link helper
 function getGPSDeepLink(
   address: string,
   lat?: number | null,
@@ -94,19 +73,16 @@ export function AddressAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null)
   const debouncedSearch = useDebounce(inputValue, 500)
 
-  // Sync internal state if external value changes (and it's different from what we typed)
   useEffect(() => {
     if (value !== inputValue) {
       setInputValue(value)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
 
   useEffect(() => {
     if (latitude && longitude) setCoords({ lat: latitude, lng: longitude })
   }, [latitude, longitude])
 
-  // Load Google Maps Script if not loaded
   useEffect(() => {
     if (
       !window.google &&
@@ -133,16 +109,12 @@ export function AddressAutocomplete({
 
   useEffect(() => {
     const searchPlaces = async () => {
-      // If empty or just selected (matched value), don't search
       if (!debouncedSearch || debouncedSearch === value) {
         setSuggestions([])
         return
       }
 
-      // Check if Google Maps is loaded
       if (!window.google || !window.google.maps || !window.google.maps.places) {
-        // Wait retry? Or just let the script load...
-        // Ideally we wait for load event, but for debounce simple check is ok for now.
         return
       }
 
@@ -181,13 +153,11 @@ export function AddressAutocomplete({
     searchPlaces()
   }, [debouncedSearch, value])
 
-  // Handle selection
   const handleSelect = async (place: PlaceSuggestion) => {
     setInputValue(place.description)
     onChange(place.description)
     setShowSuggestions(false)
 
-    // Optimize: Check cache for this place_id first
     try {
       const typedSupabase = supabase
       const { data: cached } = await typedSupabase
@@ -206,7 +176,6 @@ export function AddressAutocomplete({
         return
       }
 
-      // Not in cache, fetch from Google
       if (window.google && window.google.maps && window.google.maps.places) {
         setLoading(true)
         const placesService = new window.google.maps.places.PlacesService(
@@ -227,8 +196,6 @@ export function AddressAutocomplete({
               if (onCoordinatesChange) onCoordinatesChange(lat, lng)
               setCoords({ lat, lng })
 
-              // Save to cache (valid for 30 days per ToS for lat/lng)
-              // Ensure we store simple JSON, not Google objects
               const cachePayload = {
                 geometry: {
                   location: { lat, lng },
@@ -236,7 +203,7 @@ export function AddressAutocomplete({
               }
 
               const expiresAt = new Date()
-              expiresAt.setDate(expiresAt.getDate() + 30) // 30 days cache
+              expiresAt.setDate(expiresAt.getDate() + 30)
 
               const typedSupabase = supabase
               await typedSupabase.from('geo_cache').upsert({
@@ -252,7 +219,6 @@ export function AddressAutocomplete({
       logger.error(err, 'AddressAutocomplete.handleSelect', {
         showToast: false,
       })
-      // Fallback or just ignore cache error
     }
   }
 
@@ -263,7 +229,6 @@ export function AddressAutocomplete({
     }
   }
 
-  // Click outside to close
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (

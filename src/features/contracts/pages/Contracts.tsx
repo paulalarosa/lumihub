@@ -8,7 +8,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog' // Kept for 'Ver Detalhes'
+} from '@/components/ui/dialog'
 import {
   Search,
   Plus,
@@ -38,7 +38,7 @@ export default function Contracts() {
     setIsDialogOpen,
     signatureOpen,
     setSignatureOpen,
-    selectedContract,
+    selectedContract: _selectedContract,
     setSelectedContract,
     handleSignatureSave,
   } = useContracts()
@@ -59,10 +59,8 @@ export default function Contracts() {
         </ActionButton>
       </div>
 
-      {/* Main Creation Dialog */}
       <ContractDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} />
 
-      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 bg-black p-4 border border-white/20">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
@@ -103,7 +101,6 @@ export default function Contracts() {
         </div>
       </div>
 
-      {/* Content Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           <div className="col-span-full py-20 text-center text-white/40 font-mono uppercase text-xs">
@@ -168,7 +165,6 @@ export default function Contracts() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 pt-2">
-                  {/* Preview / Edit Action */}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -269,7 +265,6 @@ export default function Contracts() {
                     </DialogContent>
                   </Dialog>
 
-                  {/* Quick Actions */}
                   {contract.status === 'signed' ? (
                     <PDFDownloadLink
                       document={<ContractDocument contract={contract} />}
@@ -304,7 +299,6 @@ export default function Contracts() {
         )}
       </div>
 
-      {/* Signature Dialog */}
       <SignatureModal
         isOpen={signatureOpen}
         onClose={() => setSignatureOpen(false)}

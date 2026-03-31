@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, ArrowRight, Shield, Clock, Users, Star } from 'lucide-react'
+import { Check, ArrowRight, Shield, Clock, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import SEOHead from '@/components/seo/SEOHead'
@@ -63,20 +63,31 @@ const plans = [
 ]
 
 export default function Plans() {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>(
+    'monthly',
+  )
   const navigate = useNavigate()
 
   return (
     <>
       <SEOHead
-        title="Planos | Khaos Kontrol"
-        description="Escolha o plano ideal para organizar sua carreira de maquiagem profissional."
+        title="Planos e Preços"
+        description="Escolha o plano ideal para organizar sua carreira de maquiagem. A partir de R$31,92/mês. Essencial, Profissional ou Studio. 14 dias grátis."
+        keywords="preço sistema maquiadora, plano CRM beauty, quanto custa sistema gestão maquiagem, software maquiadora preço"
+        url="https://khaoskontrol.com.br/planos"
+        type="product"
+        productPrice={31.92}
+        productCurrency="BRL"
+        productAvailability="InStock"
+        breadcrumbs={[
+          { name: 'Início', url: 'https://khaoskontrol.com.br/' },
+          { name: 'Planos', url: 'https://khaoskontrol.com.br/planos' },
+        ]}
       />
 
       <div className="min-h-screen bg-black text-white">
         <section className="pt-32 pb-8 px-6">
           <div className="container mx-auto max-w-5xl text-center">
-            {/* Headline com dor + solução */}
             <motion.p
               className="text-xs text-white/40 uppercase tracking-[0.2em] mb-4"
               initial={{ opacity: 0 }}
@@ -104,7 +115,6 @@ export default function Plans() {
               enviado custa mais do que qualquer plano abaixo.
             </motion.p>
 
-            {/* Billing toggle */}
             <div className="inline-flex items-center gap-1 p-1 bg-white/5 border border-white/10">
               <button
                 onClick={() => setBillingCycle('monthly')}
@@ -133,13 +143,18 @@ export default function Plans() {
           </div>
         </section>
 
-        {/* Plan cards */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="grid md:grid-cols-3 gap-6 items-stretch">
               {plans.map((plan, index) => {
-                const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice
-                const savings = ((plan.monthlyPrice - plan.annualPrice) * 12).toFixed(0)
+                const price =
+                  billingCycle === 'monthly'
+                    ? plan.monthlyPrice
+                    : plan.annualPrice
+                const savings = (
+                  (plan.monthlyPrice - plan.annualPrice) *
+                  12
+                ).toFixed(0)
 
                 return (
                   <motion.div
@@ -162,17 +177,13 @@ export default function Plans() {
                       </div>
                     )}
 
-                    {/* Header */}
                     <div className="mb-6">
                       <h3 className="text-xl font-semibold text-white mb-1">
                         {plan.name}
                       </h3>
-                      <p className="text-xs text-white/40">
-                        {plan.tagline}
-                      </p>
+                      <p className="text-xs text-white/40">{plan.tagline}</p>
                     </div>
 
-                    {/* Price */}
                     <div className="mb-2">
                       <div className="flex items-baseline gap-1">
                         <span className="text-sm text-white/40">R$</span>
@@ -191,7 +202,6 @@ export default function Plans() {
                       </div>
                     </div>
 
-                    {/* Value anchor — Hormozi: reframe the price */}
                     <p className="text-xs text-white/30 mb-1">
                       {plan.valueAnchor}
                     </p>
@@ -205,33 +215,38 @@ export default function Plans() {
 
                     <div className="h-px bg-white/10 mb-6" />
 
-                    {/* Features */}
                     <ul className="space-y-3 mb-8 flex-1">
                       {plan.features.map((feature, idx) => (
                         <li key={idx} className="flex items-start gap-3">
-                          <Check className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                            feature.highlight ? 'text-white' : 'text-white/30'
-                          }`} />
-                          <span className={`text-sm ${
-                            feature.highlight ? 'text-white' : 'text-white/50'
-                          }`}>
+                          <Check
+                            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                              feature.highlight ? 'text-white' : 'text-white/30'
+                            }`}
+                          />
+                          <span
+                            className={`text-sm ${
+                              feature.highlight ? 'text-white' : 'text-white/50'
+                            }`}
+                          >
                             {feature.text}
                           </span>
                         </li>
                       ))}
                     </ul>
 
-                    {/* Ideal for — Hormozi: qualify the buyer */}
                     <p className="text-[11px] text-white/25 mb-6 italic">
                       {plan.idealFor}
                     </p>
 
-                    {/* CTA */}
                     <Button
                       variant={plan.highlighted ? 'primary' : 'glass'}
                       size="lg"
                       className="w-full group"
-                      onClick={() => navigate(`/cadastro?plan=${plan.id}&cycle=${billingCycle}`)}
+                      onClick={() =>
+                        navigate(
+                          `/cadastro?plan=${plan.id}&cycle=${billingCycle}`,
+                        )
+                      }
                     >
                       Começar 14 dias grátis
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -243,14 +258,15 @@ export default function Plans() {
           </div>
         </section>
 
-        {/* Trust section — Hormozi: risk reversal + guarantees */}
         <section className="py-16 px-6">
           <div className="container mx-auto max-w-4xl">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               <div className="flex items-start gap-3 p-5 border border-white/[0.06]">
                 <Shield className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-white font-medium mb-1">14 dias grátis</p>
+                  <p className="text-sm text-white font-medium mb-1">
+                    14 dias grátis
+                  </p>
                   <p className="text-xs text-white/30">
                     Teste tudo sem compromisso. Sem cartão de crédito.
                   </p>
@@ -259,7 +275,9 @@ export default function Plans() {
               <div className="flex items-start gap-3 p-5 border border-white/[0.06]">
                 <Clock className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-white font-medium mb-1">Cancele quando quiser</p>
+                  <p className="text-sm text-white font-medium mb-1">
+                    Cancele quando quiser
+                  </p>
                   <p className="text-xs text-white/30">
                     Sem multa, sem burocracia. 2 cliques e pronto.
                   </p>
@@ -268,7 +286,9 @@ export default function Plans() {
               <div className="flex items-start gap-3 p-5 border border-white/[0.06]">
                 <Star className="w-5 h-5 text-white/40 flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm text-white font-medium mb-1">Suporte humano</p>
+                  <p className="text-sm text-white font-medium mb-1">
+                    Suporte humano
+                  </p>
                   <p className="text-xs text-white/30">
                     Não é chatbot. Fale com quem entende do mercado.
                   </p>
@@ -276,10 +296,10 @@ export default function Plans() {
               </div>
             </div>
 
-            {/* Final push */}
             <div className="mt-12 text-center">
               <p className="text-xs text-white/20">
-                Mais de 200 profissionais já organizam sua carreira com o Khaos Kontrol.
+                Mais de 200 profissionais já organizam sua carreira com o Khaos
+                Kontrol.
               </p>
             </div>
           </div>

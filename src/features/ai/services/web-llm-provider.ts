@@ -15,11 +15,9 @@ export class WebLLMProvider {
     this.onProgress = onProgress
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async doGenerate(options: any): Promise<any> {
     const engine = await this.getEngine()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages = options.prompt.map((p: any) => ({
       role: p.role,
       content: p.content,
@@ -39,24 +37,20 @@ export class WebLLMProvider {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async doStream(options: any): Promise<any> {
     const engine = await this.getEngine()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const messages = options.prompt.map((p: any) => ({
       role: p.role,
       content: p.content,
     }))
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const asyncIterable = (await engine.chat.completions.create({
       messages,
       stream: true,
       ...options.settings,
     })) as any
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const stream = new ReadableStream<any>({
       async start(controller) {
         for await (const chunk of asyncIterable) {

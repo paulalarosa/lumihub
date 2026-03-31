@@ -44,32 +44,6 @@ interface MicrositeFormData {
   is_published: boolean
 }
 
-interface MicrositeRecord {
-  id: string
-  slug: string
-  business_name: string
-  tagline: string | null
-  bio: string | null
-  primary_color: string
-  secondary_color: string
-  accent_color: string
-  background_color: string
-  text_color: string
-  email: string | null
-  phone: string | null
-  whatsapp: string | null
-  instagram_handle: string | null
-  show_prices: boolean
-  enable_booking: boolean
-  enable_gallery: boolean
-  enable_services: boolean
-  enable_about: boolean
-  enable_contact: boolean
-  enable_reviews: boolean
-  is_published: boolean
-  view_count: number
-}
-
 const defaultFormData: MicrositeFormData = {
   business_name: '',
   tagline: '',

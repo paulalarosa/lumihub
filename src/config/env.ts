@@ -1,11 +1,11 @@
-/**
- * Validação de variáveis de ambiente
- * Garante que todas as keys necessárias estão presentes
- */
-
 const requiredEnvVars = ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY'] as const
 
-export function validateEnv() {
+export interface EnvValidationResult {
+  isValid: boolean
+  missing: string[]
+}
+
+export function validateEnv(): EnvValidationResult {
   const missing: string[] = []
 
   for (const varName of requiredEnvVars) {
@@ -14,14 +14,12 @@ export function validateEnv() {
     }
   }
 
-  if (missing.length > 0) {
-    throw new Error(
-      `CRITICAL ERROR: Missing required environment variables:\n${missing.join('\n')}\nVerifique seu arquivo .env`,
-    )
+  return {
+    isValid: missing.length === 0,
+    missing,
   }
 }
 
-// Tipos seguros para env vars
 export const env = {
   supabase: {
     url:

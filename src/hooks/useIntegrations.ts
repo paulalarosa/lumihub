@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { Database } from '@/integrations/supabase/types'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 interface UserIntegration {
   id: string
@@ -10,8 +11,8 @@ interface UserIntegration {
   is_active: boolean
   sync_enabled: boolean
   last_sync_at: string | null
-  user_id: string // Add user_id to match DB
-  created_at: string // Add timestamps
+  user_id: string
+  created_at: string
   updated_at: string
   access_token: string | null
   refresh_token: string | null
@@ -20,7 +21,7 @@ interface UserIntegration {
 }
 
 interface NotificationSettings {
-  id: string // id is likely required in Row
+  id: string
   user_id: string
   email_enabled: boolean
   reminder_days: number[]
@@ -32,7 +33,6 @@ interface NotificationSettings {
   updated_at?: string
 }
 
-// Local Database override to include missing tables if any
 type LocalDatabase = Database & {
   public: {
     Tables: {
@@ -75,8 +75,7 @@ export function useIntegrations() {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  // Use typed client
-  const typedSupabase = supabase
+  const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
 
   const [integrations, setIntegrations] = useState<UserIntegration[]>([])
   const [notificationSettings, setNotificationSettings] = useState<
@@ -101,12 +100,10 @@ export function useIntegrations() {
 
   useEffect(() => {
     if (user) fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   useEffect(() => {
     const handleCallback = async () => {
-      // ... existing callback logic ...
       const urlParams = new URLSearchParams(window.location.search)
       const code = urlParams.get('code')
       const state = urlParams.get('state')
@@ -147,26 +144,22 @@ export function useIntegrations() {
       }
     }
     handleCallback()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchData = async () => {
     if (!user) return
     setLoading(true)
 
-    // user_integrations is in Database but we use typedSupabase to be consistent
-    // We need to cast the result because standard definitions might differ from local interface slightly
     const { data: integrationsData } = await typedSupabase
       .from('user_integrations')
       .select('*')
       .eq('user_id', user.id)
 
-    // Map to UserIntegration to be safe
     const mappedIntegrations: UserIntegration[] = (integrationsData || []).map(
       (i: Record<string, unknown>) => ({
         id: i.id as string,
         provider: i.provider as string,
-        is_active: true, // Assuming active if present? Or use i.metadata field?
+        is_active: true,
         sync_enabled: true,
         last_sync_at: i.updated_at as string | null,
         user_id: i.user_id as string,
@@ -188,7 +181,7 @@ export function useIntegrations() {
       .maybeSingle()
 
     if (notifData) {
-      const nd = notifData
+      const nd = notifData as NotificationSettings
       setNotificationSettings({
         id: nd.id,
         email_enabled: nd.email_enabled,
@@ -202,7 +195,6 @@ export function useIntegrations() {
       })
     }
 
-    // Fetch Deliverability Metrics
     const [
       { count: bounceCount },
       { count: complaintCount },
@@ -342,11 +334,9 @@ export function useIntegrations() {
 
   const saveNotificationSettings = async () => {
     setSaving(true)
-    // Exclude id if it's empty (for new insertion)
     const { id, ...settingsWithoutId } = notificationSettings
     const _payload = id ? notificationSettings : settingsWithoutId
 
-    // Upsert requires all fields for match? No, match on user_id.
     const { error } = await typedSupabase.from('notification_settings').upsert(
       {
         user_id: user!.id,
@@ -359,7 +349,7 @@ export function useIntegrations() {
           notificationSettings.notify_assistant_assigned,
       } as never,
       { onConflict: 'user_id' },
-    ) // Cast payload due to strict checking of Insert type vs Omit return
+    )
 
     if (error) {
       toast({ title: 'Erro ao salvar configurações', variant: 'destructive' })

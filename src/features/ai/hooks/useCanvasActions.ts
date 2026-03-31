@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useAIStore, Canvas } from '@/stores/useAIStore'
 import { AIDomainService } from '@/features/ai/services/AIDomainService'
 import { supabase } from '@/integrations/supabase/client'
@@ -16,7 +15,6 @@ export const useCanvasActions = () => {
   } = useAIStore()
 
   const queryClient = useQueryClient()
-  const [isSaving, setIsSaving] = useState(false)
 
   const activeCanvas = canvases.find((c) => c.id === activeCanvasId)
 
@@ -61,7 +59,6 @@ export const useCanvasActions = () => {
     const preparedUpdates = AIDomainService.prepareCanvasUpdate(updates)
     updateStore(id, preparedUpdates)
 
-    // Auto-save logic could go here or be triggered manually
     const canvas = canvases.find((c) => c.id === id)
     if (canvas) {
       const fullCanvas = { ...canvas, ...preparedUpdates }
@@ -73,7 +70,7 @@ export const useCanvasActions = () => {
     activeCanvas,
     activeCanvasId,
     isCanvasOpen,
-    isSaving: saveMutation.isPending || isSaving,
+    isSaving: saveMutation.isPending,
     createCanvas: handleCreateCanvas,
     updateCanvas: handleUpdateCanvas,
     saveCanvas: (canvas: Canvas) => saveMutation.mutate(canvas),

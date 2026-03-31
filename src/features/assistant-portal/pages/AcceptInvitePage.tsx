@@ -18,15 +18,12 @@ export default function AcceptInvitePage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // If auth is loading, wait.
     if (authLoading) return
 
-    // If user is logged in, and token exists, and not already processing/errored
     if (user && token && !processing && !error) {
       acceptInvite()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, authLoading, token]) // Dependencies
+  }, [user, authLoading, token])
 
   const acceptInvite = async () => {
     if (!token || !user) return
@@ -53,7 +50,6 @@ export default function AcceptInvitePage() {
             : 'Acesso Verificado',
           description: 'Você agora tem acesso à agenda desta maquiadora.',
         })
-        // Redirect to Assistant Dashboard
         setTimeout(() => navigate('/assistant/dashboard'), 1500)
       } else {
         const errorMessage = result.error || 'Convite inválido ou expirado.'
@@ -64,7 +60,7 @@ export default function AcceptInvitePage() {
           variant: 'destructive',
         })
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const { title, description } = getErrorMessage(
         err,
         'Erro ao aceitar convite',
@@ -82,7 +78,6 @@ export default function AcceptInvitePage() {
 
   if (authLoading) return <PageLoader />
 
-  // If user is not logged in, show signup form
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -91,7 +86,6 @@ export default function AcceptInvitePage() {
     )
   }
 
-  // If user is logged in but processing invite
   if (processing) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
@@ -121,5 +115,5 @@ export default function AcceptInvitePage() {
     )
   }
 
-  return null // Should redirect or show error/processing state
+  return null
 }

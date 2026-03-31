@@ -65,8 +65,11 @@ export default function Contact() {
   return (
     <>
       <SEOHead
-        title="Contato | KHAOS KONTROL"
-        description="Fale conosco. Suporte premium, parcerias e consultoria personalizada para profissionais de beleza."
+        title="Contato"
+        description="Entre em contato com a equipe Khaos Kontrol. Suporte para maquiadoras profissionais."
+        url="https://khaoskontrol.com.br/contato"
+        businessName="Khaos Kontrol"
+        priceRange="$$"
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
         {/* Textured Overlay Image */}

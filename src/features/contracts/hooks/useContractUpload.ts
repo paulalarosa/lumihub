@@ -12,13 +12,11 @@ export const useContractUpload = () => {
     setUploadError(null)
 
     try {
-      // Generate unique filename if not provided
       const timestamp = Date.now()
       const safeFileName = file.name.replace(/[^a-z0-9.]/gi, '_').toLowerCase()
       const filePath = customPath || `temp/${timestamp}_${safeFileName}`
 
-      // Upload to Supabase Storage
-      const { data, error } = await supabase.storage
+      const { data: _data, error } = await supabase.storage
         .from('contracts')
         .upload(filePath, file)
 
@@ -29,7 +27,6 @@ export const useContractUpload = () => {
         throw new Error('UPLOAD_FAILED: ' + error.message)
       }
 
-      // Get Public URL
       const {
         data: { publicUrl },
       } = supabase.storage.from('contracts').getPublicUrl(filePath)

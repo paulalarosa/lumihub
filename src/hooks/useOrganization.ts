@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from './useAuth'
 import { supabase } from '@/integrations/supabase/client'
+import { User } from '@supabase/supabase-js'
 
 export interface OrganizationInfo {
   organizationId: string | null
   isOwner: boolean
   loading: boolean
-  user: any
+  user: User | null
 }
 
 export function useOrganization() {
@@ -17,7 +18,6 @@ export function useOrganization() {
     queryFn: async () => {
       if (!user) return { organizationId: null, isOwner: false }
 
-      // Check if user is an owner or assistant
       const { data: profile, error } = await supabase
         .from('profiles')
         .select('id, parent_user_id')
@@ -25,7 +25,6 @@ export function useOrganization() {
         .maybeSingle()
 
       if (error) {
-        // Fallback to user.id as organization if profile fetch fails
         return { organizationId: user.id, isOwner: true }
       }
 
@@ -36,7 +35,7 @@ export function useOrganization() {
       return { organizationId: user.id, isOwner: true }
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 60, // 1 hour (organization rarely changes)
+    staleTime: 1000 * 60 * 60,
   })
 
   return {

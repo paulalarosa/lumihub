@@ -1,31 +1,25 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import ReactGA from "react-ga4";
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 
-const GA_MEASUREMENT_ID = "G-13336818738";
+const GA_MEASUREMENT_ID = 'G-C24BXN2S6H'
 
 export const GoogleAnalytics = () => {
-    const location = useLocation();
+  const location = useLocation()
 
-    useEffect(() => {
-        // Initialize GA4 once
-        if (!window.GA_INITIALIZED) {
-            ReactGA.initialize(GA_MEASUREMENT_ID);
-            window.GA_INITIALIZED = true;
-        }
-    }, []);
-
-    useEffect(() => {
-        // Send pageview on route change
-        ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
-    }, [location]);
-
-    return null;
-};
-
-// Add type definition for the global flag to avoid TS errors
-declare global {
-    interface Window {
-        GA_INITIALIZED?: boolean;
+  useEffect(() => {
+    if (window.gtag) {
+      window.gtag('config', GA_MEASUREMENT_ID, {
+        page_path: location.pathname + location.search,
+      })
     }
+  }, [location])
+
+  return null
+}
+
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void
+    dataLayer?: unknown[]
+  }
 }

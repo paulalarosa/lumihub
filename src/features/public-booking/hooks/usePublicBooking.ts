@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
+import { Database } from '@/integrations/supabase/types'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { logger } from '@/services/logger'
 import { addMinutes } from 'date-fns/addMinutes'
 import { isBefore } from 'date-fns/isBefore'
@@ -8,7 +10,6 @@ import { startOfDay } from 'date-fns/startOfDay'
 import { parse } from 'date-fns/parse'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
 import { Profile, Service, TimeSlot } from '../types'
-import { Database } from '@/integrations/supabase/types'
 
 type LocalDatabase = Database & {
   public: {
@@ -34,23 +35,19 @@ export const usePublicBooking = (
 ) => {
   const { toast } = useToast()
 
-  // State
   const [profile, setProfile] = useState<Profile | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Booking State
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1)
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined)
   const [selectedTime, setSelectedTime] = useState<string | null>(null)
 
-  // Form State
   const [clientName, setClientName] = useState('')
   const [clientPhone, setClientPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  // Time Slots
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([])
   const [loadingSlots, setLoadingSlots] = useState(false)
 
@@ -58,14 +55,12 @@ export const usePublicBooking = (
     if (slug) {
       fetchProfileAndServices()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
   useEffect(() => {
     if (selectedDate && profile && selectedService) {
       generateTimeSlots()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, profile, selectedService])
 
   const fetchProfileAndServices = async () => {
@@ -122,7 +117,7 @@ export const usePublicBooking = (
     setLoadingSlots(true)
     try {
       const dateStr = formatDate(selectedDate, 'yyyy-MM-dd')
-      const typedSupabase = supabase
+      const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
 
       const { data: eventsData, error } = await typedSupabase.rpc(
         'get_day_availability',
@@ -226,9 +221,7 @@ export const usePublicBooking = (
         if (!clientError && newClient) {
           clientId = newClient.id
         }
-      } catch (_err) {
-        // Ignore client creation error
-      }
+      } catch (_err) {}
 
       const description = `Agendamento Online\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${selectedService.name}`
 

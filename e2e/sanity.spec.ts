@@ -5,7 +5,7 @@ test('sanity check: homepage loads', async ({ page }) => {
   await page.goto('/')
 
   // 2. Verifica se o título da página está correto
-  await expect(page).toHaveTitle(/KONTROL | Industrial Noir Management/i)
+  await expect(page).toHaveTitle(/KHAOS KONTROL/i)
 
   // 3. Verifica se existe algum botão ou input de Login (supondo que a home seja login ou dashboard)
   // O usuário mencionou "Khaos Kontrol" no prompt, mas o projeto parece ser "LumiHub".

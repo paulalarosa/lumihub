@@ -25,7 +25,6 @@ export const useNotifications = (userId: string | undefined) => {
       const newNotifications: NotificationItem[] = []
 
       try {
-        // 1. Upcoming Events (Next 7 days)
         const today = new Date()
         const nextWeek = addDays(today, 7)
 
@@ -50,7 +49,6 @@ export const useNotifications = (userId: string | undefined) => {
           })
         }
 
-        // 2. Pending Payments (Invoices)
         const { data: pendingInvoices } = await supabase
           .from('invoices')
           .select(
@@ -66,18 +64,7 @@ export const useNotifications = (userId: string | undefined) => {
           .eq('status', 'pending')
 
         if (pendingInvoices) {
-          interface InvoiceWithProject {
-            id: string
-            amount: number
-            due_date: string
-            status: string
-            projects?: {
-              id: string
-              name: string
-              client?: { name: string }
-            }
-          }
-          pendingInvoices.forEach((inv) => {
+          pendingInvoices.forEach((inv: any) => {
             const clientName = inv.projects?.client?.name || 'Cliente'
             newNotifications.push({
               id: `pay-${inv.id}`,
@@ -91,8 +78,6 @@ export const useNotifications = (userId: string | undefined) => {
           })
         }
 
-        // 3. Unpaid Commissions (Events with commission > 0 in current month)
-        // Since we don't have a specific "paid" status for commissions, we'll just show recent ones
         const startOfMonth = new Date(
           today.getFullYear(),
           today.getMonth(),
@@ -112,13 +97,12 @@ export const useNotifications = (userId: string | undefined) => {
               title: 'Comissão de Equipe',
               description: `Confirmar pgto: ${evt.title} (R$ ${evt.assistant_commission})`,
               date: evt.event_date,
-              read: false, // In reality, check local storage
+              read: false,
               link: '/admin/financials',
             })
           })
         }
 
-        // Filter out read notifications from LocalStorage
         const readIds = JSON.parse(
           localStorage.getItem('read_notifications') || '[]',
         )

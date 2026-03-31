@@ -1,8 +1,8 @@
 import { supabase } from '@/integrations/supabase/client'
 import { Database, Json } from '@/integrations/supabase/types'
 import * as Sentry from '@sentry/react'
+import { SupabaseClient } from '@supabase/supabase-js'
 
-// Safe console fallback for environments where console might be stripped
 const safeConsole = {
   log: console.log ? console.log.bind(console) : () => {},
   error: console.error ? console.error.bind(console) : () => {},
@@ -15,9 +15,6 @@ interface LogMetadata {
   [key: string]: unknown
 }
 
-// Extend the Database definition to include system_logs if it's missing from the generated types
-// or use it directly if it exists.
-// For now, we assume it might be missing or we want to be explicit.
 type LocalDatabase = Database & {
   public: {
     Tables: {
@@ -100,17 +97,12 @@ type LocalDatabase = Database & {
 export class Logger {
   private static isDev = import.meta.env.DEV
 
-  /**
-   * Set the audit source for the current session at the database level.
-   * Use this when performing specific operations like 'API_SYNC' or 'MIGRATION'.
-   */
   static async setSessionSource(source: string) {
     if (this.isDev) {
       safeConsole.log(`[LOGGER] Setting session audit source: ${source}`)
     }
 
-    // Use the custom RPC helper from Phase 20
-    const typedSupabase = supabase
+    const typedSupabase = supabase as unknown as SupabaseClient<LocalDatabase>
     const { error } = await typedSupabase.rpc('set_audit_source', {
       source_text: source,
     })
@@ -120,20 +112,12 @@ export class Logger {
     }
   }
 
-  /**
-   * Log debug messages.
-   * ONLY logs to console in DEV. Never persists or reports.
-   */
   static debug(message: string, ...args: unknown[]) {
     if (this.isDev) {
       safeConsole.log(`[DEBUG] ${message}`, ...args)
     }
   }
 
-  /**
-   * Log informational messages.
-   * In prod, sends to Supabase 'system_logs' with severity 'info'.
-   */
   static async info(
     message: string,
     userId: string = 'SYSTEM',
@@ -146,10 +130,6 @@ export class Logger {
     this.persistLog('info', message, userId, metadata)
   }
 
-  /**
-   * Log success messages.
-   * In prod, sends to Supabase 'system_logs' with severity 'info'.
-   */
   static async success(
     message: string,
     userId: string = 'SYSTEM',
@@ -162,10 +142,6 @@ export class Logger {
     this.persistLog('info', message, userId, { ...metadata, success: true })
   }
 
-  /**
-   * Log warnings.
-   * In prod, sends to Supabase 'system_logs' with severity 'warning'.
-   */
   static async warning(
     message: string,
     userId: string = 'SYSTEM',
@@ -177,11 +153,6 @@ export class Logger {
     this.persistLog('warning', message, userId, metadata)
   }
 
-  /**
-   * Log errors.
-   * In prod, sends to Supabase 'system_logs' with severity 'error'.
-   * Tries to capture stack trace if errorObj is provided.
-   */
   static async error(
     arg1: unknown,
     arg2?: unknown,
@@ -193,22 +164,18 @@ export class Logger {
     let userId = 'SYSTEM'
     let metadata: LogMetadata = {}
 
-    // Detect if first argument is an Error or unknown object
     if (typeof arg1 !== 'string') {
       errorObj = arg1
 
       if (typeof arg2 === 'string') {
-        // logger.error(error, 'Message', ...)
         message = arg2
         if (typeof arg3 === 'object' && arg3 !== null) {
           metadata = arg3 as LogMetadata
-          // userId defaults to SYSTEM
         } else if (typeof arg3 === 'string') {
           userId = arg3
           metadata = (arg4 as LogMetadata) || {}
         }
       } else if (typeof arg2 === 'object' && arg2 !== null) {
-        // logger.error(error, { message: '...', ...meta })
         const arg2Record = arg2 as Record<string, unknown>
         message =
           (typeof arg2Record.message === 'string'
@@ -220,14 +187,12 @@ export class Logger {
         message = arg1 instanceof Error ? arg1.message : 'Unknown Error'
       }
     } else {
-      // Standard signature: message, errorObj, userId, metadata
       message = arg1
       errorObj = arg2
       if (typeof arg3 === 'string') {
         userId = arg3
         metadata = (arg4 as LogMetadata) || {}
       } else if (typeof arg3 === 'object' && arg3 !== null) {
-        // logger.error('Msg', error, { meta })
         userId = 'SYSTEM'
         metadata = arg3 as LogMetadata
       }
@@ -245,7 +210,6 @@ export class Logger {
       environment: this.isDev ? 'development' : 'production',
     }
 
-    // Report to Sentry if available
     if (errorObj instanceof Error) {
       Sentry.captureException(errorObj, {
         extra: { message, ...metadata },
@@ -258,14 +222,9 @@ export class Logger {
       })
     }
 
-    // Enforce CRITICAL level for errors in persistLog
     this.persistLog('error', message, userId, effectiveMetadata)
   }
 
-  /**
-   * Log audit actions (critical user operations).
-   * Directly persists to 'audit_logs' table.
-   */
   static async action(
     actionName: string,
     userId: string,
@@ -283,7 +242,6 @@ export class Logger {
 
     const typedSupabase = supabase
 
-    // Validate recordId is a valid UUID to avoid PostgREST 22P02 error
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
     const isValidUUID = uuidRegex.test(recordId)
@@ -318,10 +276,6 @@ export class Logger {
       })
   }
 
-  /**
-   * Specialized audit log for security-critical events.
-   * Prepend SECURITY_ to the action name.
-   */
   static async security(
     event: string,
     userId: string,
@@ -340,20 +294,14 @@ export class Logger {
     )
   }
 
-  /**
-   * Internal method to write to Supabase.
-   * Fire-and-forget approach to avoid blocking UI.
-   */
   private static async persistLog(
     severity: LogLevel,
     message: string,
     userId: string,
     metadata?: LogMetadata,
   ) {
-    // Enforce KONTROL branding on all messages
     const brandedMessage = `KONTROL: ${message}`
 
-    // Don't await this in the main flow to avoid blocking
     const typedSupabase = supabase
     const jsonMetadata = metadata ? JSON.parse(JSON.stringify(metadata)) : null
 

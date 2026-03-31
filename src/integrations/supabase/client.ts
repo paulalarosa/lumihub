@@ -5,13 +5,10 @@ import { env } from '@/config/env'
 const supabaseUrl = env.supabase.url
 const supabaseKey = env.supabase.anonKey
 
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(
-    'Supabase credentials are missing. Check your environment variables.',
-  )
-}
-
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey)
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseKey || 'placeholder',
+)
 
 interface SupabaseError {
   message?: string
@@ -34,7 +31,6 @@ export const handleSupabaseError = (
   return 'Ocorreu um erro inesperado no banco de dados.'
 }
 
-// Tipos úteis para usar no projeto:
 export type Tables<T extends keyof Database['public']['Tables']> =
   Database['public']['Tables'][T]['Row']
 

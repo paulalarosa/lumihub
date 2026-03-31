@@ -64,8 +64,14 @@ export default function Resources() {
   return (
     <>
       <SEOHead
-        title="Recursos & Funcionalidades | KHAOS KONTROL"
-        description="Explore todas as ferramentas de gestão do KHAOS KONTROL. De agenda inteligente a contratos digitais, tudo em um só lugar."
+        title="Recursos | Tudo que o Khaos Kontrol Oferece"
+        description="Agenda inteligente, contratos digitais, portal da noiva, gestão financeira, equipe de assistentes e muito mais. Conheça todos os recursos."
+        keywords="recursos sistema maquiadora, funcionalidades CRM beauty, agenda maquiadora, contrato digital"
+        url="https://khaoskontrol.com.br/recursos"
+        breadcrumbs={[
+          { name: 'Início', url: 'https://khaoskontrol.com.br/' },
+          { name: 'Recursos', url: 'https://khaoskontrol.com.br/recursos' },
+        ]}
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
         {/* Ambient Glows */}

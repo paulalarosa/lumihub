@@ -115,7 +115,7 @@ export function useProjectMutations() {
 
   const addServiceMutation = useMutation({
     mutationFn: async (serviceData: any) => {
-      const { data, error } =
+      const { data: _data, error } =
         await ProjectService.addProjectService(serviceData)
       if (error) throw error
       return serviceData

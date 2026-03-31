@@ -60,8 +60,11 @@ export default function BlogPage() {
   return (
     <>
       <SEOHead
-        title="Journal | KHAOS KONTROL"
-        description="Novidades, tendências e insights sobre o mercado de luxo e gestão para profissionais de beleza."
+        title="Blog | Dicas para Maquiadoras Profissionais"
+        description="Artigos sobre gestão, tendências de maquiagem, dicas de negócio e organização para profissionais de beleza."
+        keywords="blog maquiadora profissional, dicas gestão beauty, tendências maquiagem noiva, negócio maquiagem"
+        url="https://khaoskontrol.com.br/blog"
+        type="website"
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
         {/* Textured Overlay Image */}

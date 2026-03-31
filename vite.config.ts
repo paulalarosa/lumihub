@@ -1,4 +1,3 @@
-/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
@@ -6,7 +5,6 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { compression } from 'vite-plugin-compression2'
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: '::',
@@ -81,7 +79,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'supabase-api',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24, // 24 horas
+                maxAgeSeconds: 60 * 60 * 24,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -95,7 +93,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 ano
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -109,7 +107,7 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'gstatic-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 ano
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
               cacheableResponse: {
                 statuses: [0, 200],
@@ -122,19 +120,16 @@ export default defineConfig(({ mode }) => ({
         enabled: false,
       },
     }),
-    // Gzip compression
     compression({
       algorithm: 'gzip',
       exclude: [/\.(br)$/, /\.(gz)$/],
-    }),
+    } as any),
 
-    // Brotli compression
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br)$/, /\.(gz)$/],
-    }),
+    } as any),
 
-    // Bundle analyzer (only in build mode if ANALYZE is set)
     ...(process.env.ANALYZE
       ? [
           visualizer({
@@ -155,16 +150,9 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: mode !== 'production',
     minify: 'esbuild',
-    // terserOptions: {
-    //   compress: {
-    //     drop_console: true,
-    //     drop_debugger: true,
-    //   },
-    // },
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core libs, UI, and Query consolidated to avoid circularities
           'vendor-core': [
             'react',
             'react-dom',
@@ -180,17 +168,13 @@ export default defineConfig(({ mode }) => ({
             'tailwind-merge',
           ],
 
-          // Data Layer
           'vendor-supabase': ['@supabase/supabase-js'],
 
-          // Utilities
           'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
 
-          // AI ecosystem (lazy)
           'ai-engine': ['@mlc-ai/web-llm'],
           'ai-markdown': ['react-markdown', 'remark-gfm'],
 
-          // Calendar & Forms (heavy features)
           'feature-calendar': ['react-big-calendar'],
           'feature-forms': ['react-hook-form', '@hookform/resolvers'],
         },
@@ -199,9 +183,7 @@ export default defineConfig(({ mode }) => ({
     chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
-    exclude: [
-      '@mlc-ai/web-llm', // Don't pre-bundle large local AI engine
-    ],
+    exclude: ['@mlc-ai/web-llm'],
   },
   test: {
     globals: true,

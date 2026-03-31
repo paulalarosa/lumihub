@@ -13,13 +13,11 @@ export function useClientMutations() {
     mutationFn: async (clientData: any) => {
       const newClient = await ClientService.create(clientData)
 
-      // Portal link logic
       if (clientData.is_bride && newClient && 'id' in newClient) {
         const link = `https://khaoskontrol.com.br/portal/${newClient.id}`
         await ClientService.update(newClient.id, { portal_link: link })
       }
 
-      // Welcome email logic
       if (clientData.is_bride && clientData.email && newClient?.id) {
         try {
           await supabase.functions.invoke('send-welcome-email', {
@@ -59,7 +57,6 @@ export function useClientMutations() {
 
       const result = await ClientService.update(id, data)
 
-      // Sync wedding date with projects
       if (data.is_bride && data.wedding_date) {
         await supabase
           .from('projects')

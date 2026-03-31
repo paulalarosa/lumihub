@@ -1,12 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { Database } from '@/integrations/supabase/types'
 import { useAuth } from '@/hooks/useAuth'
 import { startOfMonth } from 'date-fns/startOfMonth'
 import { endOfMonth } from 'date-fns/endOfMonth'
 import { format } from 'date-fns/format'
 
-// Define manual type since Supabase types seem mismatched
 export interface Assistant {
   id: string
   assistant_user_id: string | null
@@ -22,24 +20,10 @@ export interface Assistant {
   updated_at: string
 }
 
-type LocalDatabase = Database & {
-  public: {
-    Tables: {
-      assistants: {
-        Row: Assistant
-        Insert: Partial<Assistant>
-        Update: Partial<Assistant>
-        Relationships: []
-      }
-    }
-  }
-}
-
 export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  // 1. Fetch Assistants Records
   const assistantsQuery = useQuery({
     queryKey: ['portal-assistants', user?.id],
     queryFn: async () => {
@@ -50,7 +34,6 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
         .or(`assistant_user_id.eq.${user.id},email.eq.${user.email}`)
 
       if (error) throw error
-      // Force cast to correct type
       return data || []
     },
     enabled: !!user,
@@ -58,7 +41,6 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
 
   const assistantsList = assistantsQuery.data || []
 
-  // 2. Fetch Employers (Profiles)
   const employersQuery = useQuery({
     queryKey: [
       'portal-employers',
@@ -82,7 +64,6 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
     enabled: assistantsList.length > 0,
   })
 
-  // 3. Fetch Events & Tasks
   const activeRecords = assistantsList.filter(
     (r) =>
       (r.status === 'accepted' || r.is_registered) &&
@@ -124,9 +105,7 @@ export const usePortal = (currentMonth: Date, selectedAssistantId: string) => {
     enabled: activeRecords.length > 0,
   })
 
-  // Actions
   const acceptInvite = async (assistantRecordId: string) => {
-    // Use typed client with LocalDatabase
     const typedSupabase = supabase
 
     const { error } = await typedSupabase

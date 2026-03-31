@@ -22,7 +22,7 @@ export interface ErrorDetails {
 }
 
 export function getErrorMessage(
-  error: any,
+  error: Error | { message?: string; code?: string; status?: number } | any,
   defaultTitle = 'Erro',
 ): ErrorDetails {
   if (!error)
@@ -32,19 +32,14 @@ export function getErrorMessage(
   const message = error.message?.toLowerCase() || ''
   const code = error.code || error.status
 
-  // 1. Handle explicit Supabase/PostgREST codes
   if (code && SUPABASE_ERROR_CODES[code as keyof typeof SUPABASE_ERROR_CODES]) {
     description =
       SUPABASE_ERROR_CODES[code as keyof typeof SUPABASE_ERROR_CODES]
-  }
-  // 2. Handle Auth specific messages
-  else if (message.includes('invalid login credentials')) {
+  } else if (message.includes('invalid login credentials')) {
     description = ERROR_MESSAGES.AUTH_INVALID_CREDENTIALS
   } else if (message.includes('user already exists')) {
     description = ERROR_MESSAGES.AUTH_USER_EXISTS
-  }
-  // 3. Handle patterns
-  else if (
+  } else if (
     message.includes('network') ||
     message.includes('fetch') ||
     message.includes('failed to fetch')

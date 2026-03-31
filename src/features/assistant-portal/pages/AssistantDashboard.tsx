@@ -29,12 +29,6 @@ interface AssistantConnection {
   phone: string
 }
 
-interface EarningsResult {
-  total_events: number
-  gross_amount: number
-  commission_amount: number
-}
-
 export default function AssistantDashboard() {
   const { user } = useAuth()
   const { isAssistant, loading: roleLoading } = useRole()

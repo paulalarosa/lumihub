@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/hooks/useLanguage'
-import { Button } from '@/components/ui/button'
 import {
   Users,
   Calendar,
@@ -14,13 +13,7 @@ import { AssistantsPanelCard } from '@/features/dashboard/components/AssistantsP
 import { motion } from 'framer-motion'
 import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-} from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { SetupChecklist } from '@/components/onboarding/SetupChecklist'
 import { PageLoader } from '@/components/ui/PageLoader'
@@ -57,8 +50,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#030303] text-white selection:bg-white selection:text-black">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Header */}
         <motion.div {...fadeUp} className="mb-10">
           <p className="text-xs font-mono text-white/40 uppercase tracking-[0.2em] mb-1">
             {t('dashboard.control_center')}
@@ -70,7 +61,6 @@ export default function Dashboard() {
 
         <SetupChecklist />
 
-        {/* Quick Status */}
         {nextEventValid && (
           <motion.div
             {...fadeUp}
@@ -83,13 +73,15 @@ export default function Dashboard() {
               <span className="text-white font-medium">{nextEvent.title}</span>
               {' — '}
               <span className="text-white/80">
-                {formatDistanceToNow(nextEventDate, { addSuffix: true, locale: ptBR })}
+                {formatDistanceToNow(nextEventDate, {
+                  addSuffix: true,
+                  locale: ptBR,
+                })}
               </span>
             </p>
           </motion.div>
         )}
 
-        {/* Metric Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           {d.isOwner && (
             <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
@@ -124,10 +116,7 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-          {/* Agenda */}
           <motion.div
             {...fadeUp}
             transition={{ delay: 0.25 }}
@@ -149,7 +138,9 @@ export default function Dashboard() {
             <div className="flex-1 space-y-2 overflow-y-auto max-h-[380px] scrollbar-thin">
               {d.upcomingEvents.length > 0 ? (
                 d.upcomingEvents.map((event, i) => {
-                  const startTime = (event as { start_time?: string; event_date?: string }).start_time || event.event_date
+                  const startTime =
+                    (event as { start_time?: string; event_date?: string })
+                      .start_time || event.event_date
                   const dateObj = startTime ? new Date(startTime) : null
                   const isValid = dateObj && !isNaN(dateObj.getTime())
 
@@ -160,7 +151,9 @@ export default function Dashboard() {
                     >
                       <div className="text-center w-11 flex-shrink-0">
                         <span className="block text-[10px] text-white/30 uppercase leading-none">
-                          {isValid ? format(dateObj, 'MMM', { locale: ptBR }) : ''}
+                          {isValid
+                            ? format(dateObj, 'MMM', { locale: ptBR })
+                            : ''}
                         </span>
                         <span className="block text-lg font-mono text-white/90 leading-tight">
                           {isValid ? dateObj.getDate() : '--'}
@@ -172,7 +165,9 @@ export default function Dashboard() {
                           {event.title}
                         </h4>
                         <p className="text-xs text-white/30 font-mono">
-                          {isValid ? format(dateObj, 'HH:mm', { locale: ptBR }) : ''}
+                          {isValid
+                            ? format(dateObj, 'HH:mm', { locale: ptBR })
+                            : ''}
                         </p>
                       </div>
                     </div>
@@ -181,13 +176,14 @@ export default function Dashboard() {
               ) : (
                 <div className="h-48 flex flex-col items-center justify-center">
                   <Calendar className="w-8 h-8 text-white/10 mb-3" />
-                  <p className="text-sm text-white/20">{t('dashboard.no_events')}</p>
+                  <p className="text-sm text-white/20">
+                    {t('dashboard.no_events')}
+                  </p>
                 </div>
               )}
             </div>
           </motion.div>
 
-          {/* Team */}
           <motion.div
             {...fadeUp}
             transition={{ delay: 0.3 }}
@@ -199,7 +195,6 @@ export default function Dashboard() {
             <AssistantsPanelCard />
           </motion.div>
 
-          {/* Lead Origin Chart */}
           {d.originStats.length > 0 && (
             <motion.div
               {...fadeUp}
@@ -248,7 +243,9 @@ export default function Dashboard() {
                     <div key={i} className="flex items-center gap-2">
                       <div
                         className="w-2 h-2"
-                        style={{ backgroundColor: ['#ffffff', '#555555'][i % 2] }}
+                        style={{
+                          backgroundColor: ['#ffffff', '#555555'][i % 2],
+                        }}
                       />
                       <span className="text-xs text-white/50 uppercase tracking-wide">
                         {stat.name}: {stat.value}
@@ -265,9 +262,6 @@ export default function Dashboard() {
   )
 }
 
-/* ================================================================
-   MetricCard — Componente extraído para clareza
-   ================================================================ */
 function MetricCard({
   icon: Icon,
   label,

@@ -1,14 +1,15 @@
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 export const CTASection = () => {
   const navigate = useNavigate()
+  const { trackCTAClick } = useAnalytics()
 
   return (
     <section className="py-32 bg-black relative overflow-hidden">
       <div className="container mx-auto px-6 max-w-3xl">
-
         {/* StoryBrand: Fracasso (o que acontece se NÃO agir) */}
         <p className="text-white/30 text-xs font-mono uppercase tracking-[0.2em] mb-6 text-center">
           A cada semana sem sistema
@@ -21,8 +22,8 @@ export const CTASection = () => {
 
         {/* StoryBrand: Sucesso (o que acontece se agir) */}
         <p className="text-white/40 text-center text-base md:text-lg mb-12 max-w-xl mx-auto leading-relaxed">
-          Profissionais que usam o Khaos Kontrol fecham mais contratos,
-          nunca esquecem um follow-up, e têm clientes que indicam.
+          Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca
+          esquecem um follow-up, e têm clientes que indicam.
         </p>
 
         {/* CTA direto */}
@@ -31,7 +32,10 @@ export const CTASection = () => {
             variant="primary"
             size="lg"
             className="px-12 group"
-            onClick={() => navigate('/cadastro')}
+            onClick={() => {
+              trackCTAClick('cta_bottom_signup', 'cta_section', '/cadastro')
+              navigate('/cadastro')
+            }}
           >
             Começar grátis por 14 dias
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

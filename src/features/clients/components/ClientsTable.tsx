@@ -19,7 +19,6 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { CreateClientDialog } from './CreateClientDialog'
 import { ActionsMenu } from '@/components/ui/ActionsMenu'
 
-// Extração do componente de linha com memo para evitar re-renders desnecessários
 const ClientRow = memo(
   ({
     client,
@@ -149,15 +148,13 @@ export const ClientsTable = () => {
     )
   })
 
-  // Virtualizer setup
   const rowVirtualizer = useVirtualizer({
     count: filteredClients.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 64, // Approximate row height
+    estimateSize: () => 64,
     overscan: 10,
   })
 
-  // Memoized delete handler to pass to ClientRow
   const handleDelete = useCallback(
     (id: string, name: string) => {
       if (window.confirm(`CONFIRM DELETION OF TARGET: ${name}?`)) {

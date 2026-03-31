@@ -16,14 +16,12 @@ export const useContracts = () => {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Dialog & Form States
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newClient, setNewClient] = useState('')
   const [newContent, setNewContent] = useState('')
   const [clients, setClients] = useState<Client[]>([])
 
-  // Signature State
   const [signatureOpen, setSignatureOpen] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null,
@@ -38,7 +36,7 @@ export const useContracts = () => {
   const fetchClients = async () => {
     const { data } = await supabase
       .from('wedding_clients')
-      .select('id, name:full_name') // Fixed name mapping
+      .select('id, name:full_name')
       .order('full_name')
     if (data) setClients(data)
   }
@@ -61,9 +59,7 @@ export const useContracts = () => {
       setNewTitle('')
       setNewClient('')
       setNewContent('')
-    } catch (error) {
-      // Handled by mutation
-    }
+    } catch (_error) {}
   }
 
   const handleSignatureSave = async (dataUrl: string) => {
@@ -75,14 +71,12 @@ export const useContracts = () => {
       const blob = await fetch(dataUrl).then((res) => res.blob())
       const file = new File([blob], fileName, { type: 'image/png' })
 
-      // 1. Upload PRIMEIRO
       publicUrl = await uploadImageSafely(
         file,
         'contract-signatures',
         'signatures',
       )
 
-      // 2. Transação COM url pronta
       await signMutation.mutateAsync({
         id: selectedContract.id,
         signature_url: publicUrl,

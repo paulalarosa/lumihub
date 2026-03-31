@@ -18,7 +18,6 @@ export function useEventMutations() {
 
       if (error) throw error
 
-      // Sync logic
       try {
         await supabase.functions.invoke('sync-event-to-google', {
           body: { event_id: event.id, action: 'create' },
@@ -56,7 +55,6 @@ export function useEventMutations() {
 
       if (error) throw error
 
-      // Sync logic
       try {
         await supabase.functions.invoke('sync-event-to-google', {
           body: { event_id: id, action: 'update' },
@@ -93,7 +91,6 @@ export function useEventMutations() {
 
       if (error) throw error
 
-      // Sync logic
       try {
         await supabase.functions.invoke('sync-event-to-google', {
           body: { event_id: id, action: 'delete' },

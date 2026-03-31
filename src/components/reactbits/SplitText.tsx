@@ -4,9 +4,9 @@ import { motion, Variants } from 'framer-motion'
 export interface SplitTextProps {
   text: string
   className?: string
-  delay?: number // ms
-  duration?: number // s
-  ease?: string | number[] // framer-motion transition ease
+  delay?: number
+  duration?: number
+  ease?: string | number[]
   splitType?: 'chars' | 'words' | 'lines'
   from?: Record<string, any>
   to?: Record<string, any>
@@ -88,8 +88,6 @@ const SplitText: React.FC<SplitTextProps> = ({
       ))
     }
 
-    // Default to 'lines' if not handled or splitType === 'lines'
-    // Simple line split by \n for now as actual layout-based line splitting is very complex in React
     return text.split('\n').map((line, i) => (
       <motion.span
         key={i}

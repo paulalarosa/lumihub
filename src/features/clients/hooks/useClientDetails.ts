@@ -27,45 +27,6 @@ export interface EventWithServices {
   }>
 }
 
-import { Database } from '@/integrations/supabase/types'
-
-// Local interface for the missing table
-interface TreatmentRecordTable {
-  Row: {
-    id: string
-    client_id: string
-    service_name: string
-    date: string
-    description: string | null
-    created_at: string
-  }
-  Insert: {
-    id?: string
-    client_id: string
-    service_name: string
-    date: string
-    description?: string | null
-    created_at?: string
-  }
-  Update: {
-    id?: string
-    client_id?: string
-    service_name?: string
-    date?: string
-    description?: string | null
-    created_at?: string
-  }
-  Relationships: []
-}
-
-type LocalDatabase = Database & {
-  public: {
-    Tables: {
-      treatment_records: TreatmentRecordTable
-    }
-  }
-}
-
 export function useClientDetails(id: string | undefined) {
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -78,7 +39,6 @@ export function useClientDetails(id: string | undefined) {
     if (id) {
       fetchData()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const fetchData = async () => {
@@ -86,7 +46,6 @@ export function useClientDetails(id: string | undefined) {
     setLoadingData(true)
 
     try {
-      // Fetch client
       const { data: clientData, error: clientError } =
         await ClientService.get(id)
 
@@ -98,11 +57,9 @@ export function useClientDetails(id: string | undefined) {
 
       setClient(clientData as Client)
 
-      // Fetch records
       const { data: recordsData } = await ClientService.getTreatmentRecords(id)
       setRecords(recordsData || [])
 
-      // Fetch events for PDF
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
         .select(
@@ -128,7 +85,6 @@ export function useClientDetails(id: string | undefined) {
       if (eventsError) throw eventsError
 
       if (eventsData) {
-        // Supabase types for joined queries can be tricky, safe cast here
         setEvents(eventsData)
       }
     } catch (error) {
@@ -172,7 +128,7 @@ export function useClientDetails(id: string | undefined) {
     try {
       const typedSupabase = supabase
       const { error } = await typedSupabase
-        .from('treatment_records')
+        .from('treatment_records' as never)
         .delete()
         .eq('id', recordId)
 
