@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
@@ -80,6 +81,7 @@ export default function Clientes() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-mono selection:bg-white selection:text-black">
+      <SEOHead title="Clientes" noindex={true} />
       <header className="border-b border-white/20 bg-black">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -101,9 +103,7 @@ export default function Clientes() {
                   <h1 className="font-serif text-2xl text-white tracking-tight">
                     MEUS CLIENTES
                   </h1>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">
-                    /// DATABASE ACCESS
-                  </div>
+                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono"></div>
                 </div>
               </div>
             </div>
@@ -210,7 +210,7 @@ export default function Clientes() {
             />
           ) : (
             <div className="space-y-6">
-              {/* Desktop Table */}
+              {}
               <div className="hidden md:block">
                 <Table>
                   <TableHeader>
@@ -324,7 +324,7 @@ export default function Clientes() {
                 </Table>
               </div>
 
-              {/* Mobile Cards */}
+              {}
               <div className="grid grid-cols-1 gap-4 md:hidden">
                 {filteredClients.map((client) => (
                   <div

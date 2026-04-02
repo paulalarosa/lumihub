@@ -18,7 +18,6 @@ export const getOptimizedStorageUrl = (
 ) => {
   if (!path) return ''
 
-  // If it's already a full URL, return as is
   if (path.startsWith('http')) return path
 
   const { data } = supabase.storage.from(bucket).getPublicUrl(path, {

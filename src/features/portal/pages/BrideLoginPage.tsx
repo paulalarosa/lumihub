@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
@@ -60,7 +61,6 @@ export default function BrideLoginPage() {
         return
       }
 
-      // PIN válido — gerar token real de acesso
       const { data: tokenData, error: tokenError } = await supabase.rpc(
         'generate_bride_token',
         { p_client_id: clientId },
@@ -72,11 +72,9 @@ export default function BrideLoginPage() {
 
       const token = tokenData as unknown as string
 
-      // Salvar token real (NÃO o client_id)
       localStorage.setItem('bride_access_token', token)
       localStorage.setItem('bride_client_id', clientId)
 
-      // Limpar chaves antigas inseguras
       localStorage.removeItem('bride_auth_id')
       localStorage.removeItem('bride_portal_session')
       localStorage.removeItem('is_bride_authenticated')
@@ -102,6 +100,7 @@ export default function BrideLoginPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col items-center justify-center p-6 relative overflow-hidden selection:bg-white selection:text-black">
+      <SEOHead title="Acesso Portal" noindex={true} />
       <div className="w-full max-w-sm relative">
         <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-white" />
         <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-white" />
@@ -117,7 +116,7 @@ export default function BrideLoginPage() {
               Bem-vinda ao
             </p>
             <h1 className="text-4xl font-serif text-white tracking-tight italic">
-              KONTROL // Client
+              KONTROL
             </h1>
           </div>
         </div>

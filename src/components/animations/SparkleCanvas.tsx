@@ -24,7 +24,6 @@ export const SparkleCanvas = () => {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    // Resize canvas
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
@@ -32,16 +31,14 @@ export const SparkleCanvas = () => {
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Mouse move handler
     const handleMouseMove = (e: MouseEvent) => {
       mouseRef.current = { x: e.clientX, y: e.clientY }
-      // Criar sparkles ao mover o mouse
+
       for (let i = 0; i < 3; i++) {
         createParticle(e.clientX, e.clientY)
       }
     }
 
-    // Criar partícula
     const createParticle = (x: number, y: number) => {
       const colors = ['#8B5CF6', '#EC4899', '#3B82F6', '#F59E0B']
       particlesRef.current.push({
@@ -56,27 +53,23 @@ export const SparkleCanvas = () => {
       })
     }
 
-    // Animation loop
     const animate = () => {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      // Update e desenhar partículas
       particlesRef.current = particlesRef.current.filter((p) => {
         p.x += p.vx
         p.y += p.vy
-        p.vy += 0.05 // Gravidade
+        p.vy += 0.05
         p.life++
 
         const opacity = 1 - p.life / p.maxLife
 
         if (opacity > 0) {
-          // Sparkle drawing (star)
           ctx.save()
           ctx.globalAlpha = opacity
           ctx.fillStyle = p.color
 
-          // 4-pointed star
           ctx.beginPath()
           for (let i = 0; i < 4; i++) {
             const angle = (Math.PI / 2) * i
@@ -97,7 +90,6 @@ export const SparkleCanvas = () => {
           ctx.closePath()
           ctx.fill()
 
-          // Efficient Glow (multi-layer fill)
           ctx.globalAlpha = opacity * 0.4
           ctx.beginPath()
           ctx.arc(p.x, p.y, p.size * 2, 0, Math.PI * 2)
@@ -115,7 +107,6 @@ export const SparkleCanvas = () => {
     window.addEventListener('mousemove', handleMouseMove)
     animate()
 
-    // Criar sparkles aleatórios periodicamente
     const intervalId = setInterval(() => {
       if (canvasRef.current && particlesRef.current.length < 20) {
         const x = Math.random() * canvasRef.current.width

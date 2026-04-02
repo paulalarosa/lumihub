@@ -9,20 +9,16 @@ import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { useOrganization } from './useOrganization'
 
-// Hook para tracking automático de page views e tempo na página
 export function usePageTracking() {
   const location = useLocation()
   const prevPathRef = useRef<string>('')
 
   useEffect(() => {
-    // Track page view quando a rota muda
     if (prevPathRef.current !== location.pathname) {
-      // Track time on previous page if exists
       if (prevPathRef.current) {
         analyticsService.trackTimeOnPage(prevPathRef.current)
       }
 
-      // Track new page view
       analyticsService.trackPageView({
         page_path: location.pathname,
         page_title: document.title,
@@ -32,20 +28,17 @@ export function usePageTracking() {
       prevPathRef.current = location.pathname
     }
 
-    // Track time on page when user leaves
     return () => {
       analyticsService.trackTimeOnPage(location.pathname)
     }
   }, [location.pathname])
 }
 
-// Hook para tracking de scroll depth
 export function useScrollTracking() {
   const location = useLocation()
   const trackedDepthsRef = useRef<Set<number>>(new Set())
 
   useEffect(() => {
-    // Reset tracked depths on page change
     trackedDepthsRef.current.clear()
 
     const handleScroll = () => {
@@ -72,7 +65,6 @@ export function useScrollTracking() {
   }, [location.pathname])
 }
 
-// Hook principal para tracking de eventos
 export function useAnalytics() {
   const { organizationId } = useOrganization()
 
@@ -143,10 +135,8 @@ export function useAnalytics() {
     try {
       if (!organizationId) return null
 
-      // 1. Get stored events (Local)
       const storedEvents = analyticsService.getStoredEvents()
 
-      // 2. Get Real DB Stats
       const { data: clients, count: clientsCount } = await supabase
         .from('wedding_clients')
         .select('created_at, last_visit', { count: 'exact' })
@@ -162,7 +152,6 @@ export function useAnalytics() {
         eventsData?.reduce((acc, curr) => acc + (curr.total_value || 0), 0) || 0
       const newLeads = clientsCount || 0
 
-      // Process Revenue Over Time (Last 6 months)
       const revenueByMonth =
         eventsData?.reduce((acc: Record<string, number>, curr) => {
           const date = new Date(curr.start_time || curr.created_at)
@@ -178,7 +167,6 @@ export function useAnalytics() {
         ([name, value]) => ({ name, value }),
       )
 
-      // Process Client Growth (Last 6 months)
       const clientsByMonth =
         clients?.reduce((acc: Record<string, number>, curr) => {
           const date = new Date(curr.created_at)
@@ -233,6 +221,3 @@ export function useAnalytics() {
     fetchDashboardStats,
   }
 }
-
-// Componente HOC para tracking automático - Removido devido a limitações de JSX em arquivo .ts
-// Use AnalyticsProvider ao invés de HOC

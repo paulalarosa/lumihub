@@ -5,7 +5,7 @@ export const emailSchema = z.string().email('Email inválido')
 export const phoneSchema = z
   .string()
   .min(10, 'Telefone muito curto')
-  // Brazilian format: (11) 99999-9999 or 11999999999
+
   .regex(/^[\d\s()+-]+$/, 'Formato de telefone inválido')
 
 export const pinSchema = z
@@ -68,7 +68,6 @@ export const assistantSchema = z.object({
     .or(z.literal('')),
 })
 
-// Legacy helpers (can be upgraded later)
 export function validateEmail(email: string): boolean {
   return emailSchema.safeParse(email).success
 }

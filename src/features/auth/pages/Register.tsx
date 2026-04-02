@@ -10,6 +10,7 @@ import { z } from 'zod'
 import { Loader2, ArrowRight, Check } from 'lucide-react'
 import { getErrorMessage } from '@/utils/error-handler'
 import SEOHead from '@/components/seo/SEOHead'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 const registerSchema = z.object({
   fullName: z
@@ -26,6 +27,7 @@ export default function Register() {
   const navigate = useNavigate()
   const { signUp, signInWithGoogle } = useAuth()
   const { toast } = useToast()
+  const { trackAuth, trackConversion, trackFormSubmit } = useAnalytics()
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -49,18 +51,25 @@ export default function Register() {
 
     setIsSubmitting(true)
 
-    // CRO: businessName será coletado no onboarding (menos friction aqui)
     const { error } = await signUp(
       formData.email,
       formData.password,
       formData.fullName,
-      '', // businessName coletado depois no OnboardingWizard
+      '',
     )
 
     if (error) {
       const { title, description } = getErrorMessage(error, 'Erro no cadastro')
       toast({ title, description, variant: 'destructive' })
+      trackFormSubmit('register', false, error.message)
     } else {
+      trackAuth('signup', 'email')
+      trackConversion({
+        conversion_id: 'signup_complete',
+        value: 0,
+        currency: 'BRL',
+      })
+      trackFormSubmit('register', true)
       toast({
         title: 'Conta criada!',
         description: 'Verifique seu email para confirmar.',
@@ -75,6 +84,8 @@ export default function Register() {
     if (error) {
       const { title, description } = getErrorMessage(error, 'Erro ao conectar')
       toast({ title, description, variant: 'destructive' })
+    } else {
+      trackAuth('signup', 'google')
     }
   }
 
@@ -95,7 +106,7 @@ export default function Register() {
         subtitle="14 dias para testar tudo. Sem cartão de crédito."
       >
         <div className="space-y-6 text-left">
-          {/* CRO: Google primeiro — menor friction possível */}
+          {}
           <Button
             type="button"
             variant="outline"
@@ -126,8 +137,8 @@ export default function Register() {
             </div>
           </div>
 
-          {/* CRO: Apenas 3 campos — nome, email, senha */}
-          {/* businessName movido para o OnboardingWizard */}
+          {}
+          {}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label
@@ -201,7 +212,7 @@ export default function Register() {
             </Button>
           </form>
 
-          {/* CRO: Social proof + redução de risco */}
+          {}
           <div className="space-y-3 pt-2">
             <div className="flex items-center gap-4 justify-center">
               {['Sem cartão de crédito', 'Cancele quando quiser'].map(

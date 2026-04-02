@@ -37,7 +37,6 @@ export function AppSidebar() {
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
 
-  // Menu items.
   const items = [
     {
       title: t('sidebar.dashboard'),
@@ -60,7 +59,7 @@ export function AppSidebar() {
       icon: Briefcase,
     },
     {
-      title: 'FUNIL', // t("sidebar.pipeline")
+      title: 'FUNIL',
       url: '/funil',
       icon: Filter,
     },
@@ -86,7 +85,6 @@ export function AppSidebar() {
     },
   ]
 
-  // Highlight active
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/')
 
@@ -108,7 +106,7 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-background">
-        {/* WORKSPACE GROUP */}
+        {}
         <SidebarGroup>
           <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">
             {t('SIDEBAR_MENU_MAIN') || 'WORKSPACE'}
@@ -137,14 +135,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* SYSTEM GROUP */}
+        {}
         <SidebarGroup className="mt-auto">
           <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">
             SYSTEM
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {/* Admin Link (Protected) */}
+              {}
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
@@ -162,7 +160,7 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               )}
 
-              {/* Settings Link */}
+              {}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -182,9 +180,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-auto pb-4">
-          <SidebarGroupContent>
-            {/* Help link removed for new onboarding system */}
-          </SidebarGroupContent>
+          <SidebarGroupContent>{}</SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
@@ -214,7 +210,7 @@ export function AppSidebar() {
           {t('sidebar.logout') || 'SAIR'}
         </Button>
 
-        {/* Language Switcher */}
+        {}
         <div className="flex gap-2 px-2 mt-4 justify-center">
           <button
             onClick={() => setLanguage('pt')}

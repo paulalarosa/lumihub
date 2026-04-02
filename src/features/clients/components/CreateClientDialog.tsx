@@ -23,8 +23,6 @@ import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 
-// Local formSchema removed in favor of centralized clientSchema
-
 export function CreateClientDialog() {
   const [open, setOpen] = useState(false)
   const { user } = useAuth()
@@ -48,7 +46,6 @@ export function CreateClientDialog() {
     let uploadedPublicUrl: string | null = null
 
     try {
-      // 1. Upload File FIRST (if exists)
       if (contractFile) {
         const result = await uploadFile(contractFile)
         if (!result) {
@@ -60,7 +57,6 @@ export function CreateClientDialog() {
         uploadedFilePath = result.filePath
       }
 
-      // 2. Create Client with URL
       const { data: _client, error } = await supabase
         .from('wedding_clients')
         .insert({
@@ -77,7 +73,6 @@ export function CreateClientDialog() {
         .single()
 
       if (error) {
-        // CLEANUP: Delete file if DB insert fails
         if (uploadedFilePath) {
           await deleteFile(uploadedFilePath)
         }

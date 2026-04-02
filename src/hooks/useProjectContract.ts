@@ -81,9 +81,7 @@ export function useProjectContract({
                     ? JSON.parse(contractData.signature_data)
                     : contractData.signature_data
                 if (parsed?.pdf_url) setFinalPdfUrl(parsed.pdf_url)
-              } catch (_) {
-                /* ignore parse errors */
-              }
+              } catch (_) {}
             }
           }
         }
@@ -307,9 +305,7 @@ export function useProjectContract({
         width: 190,
         windowWidth: 800,
       })
-    } catch (_) {
-      /* ignore */
-    }
+    } catch (_) {}
   }
 
   return {

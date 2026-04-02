@@ -6,19 +6,14 @@ export const usePerformance = () => {
   const [isLowEnd, setIsLowEnd] = useState(false)
 
   useEffect(() => {
-    // Check reduced motion preference
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     setShouldReduceMotion(mediaQuery.matches)
 
-    // Check if mobile
     setIsMobile(window.innerWidth < 768)
 
-    // Check device performance
     const checkPerformance = () => {
-      // Check CPU cores (low-end if < 4 cores)
       const cores = navigator.hardwareConcurrency || 2
 
-      // Check memory (low-end if < 4GB)
       const memory =
         (navigator as Navigator & { deviceMemory?: number }).deviceMemory || 4
 

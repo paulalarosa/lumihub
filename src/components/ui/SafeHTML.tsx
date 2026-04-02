@@ -6,11 +6,6 @@ interface SafeHTMLProps extends React.HTMLAttributes<HTMLDivElement> {
   as?: React.ElementType
 }
 
-/**
- * Universal Wrapper for rendering raw HTML.
- * Uses sanitizeHTML to strip XSS injecting vectors (<script>, malicious handlers)
- * before passing it to dangerouslySetInnerHTML.
- */
 export const SafeHTML: React.FC<SafeHTMLProps> = ({
   html,
   as: Component = 'div',

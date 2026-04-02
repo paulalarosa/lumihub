@@ -13,7 +13,6 @@ export const InstagramConnect = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  // Buscar conexão existente
   const { data: connection, isLoading } = useQuery({
     queryKey: ['instagram-connection'],
     queryFn: async () => {
@@ -29,7 +28,6 @@ export const InstagramConnect = () => {
     enabled: !!user,
   })
 
-  // Desconectar
   const disconnectMutation = useMutation({
     mutationFn: async () => {
       if (!connection?.id) return
@@ -47,7 +45,6 @@ export const InstagramConnect = () => {
   })
 
   const handleConnect = () => {
-    // OAuth flow
     const authUrl = `https://api.instagram.com/oauth/authorize?client_id=${INSTAGRAM_APP_ID}&redirect_uri=${encodeURIComponent(
       REDIRECT_URI,
     )}&scope=instagram_basic,instagram_content_publish&response_type=code&state=${user?.id}`

@@ -95,7 +95,6 @@ export const ProjectService = {
     }
   },
 
-  /* [NEW] Metodo solicitado pelo usuário para Kanban de Projetos */
   async updateProjectStatus(id: string, status: string) {
     try {
       const { error } = await supabase
@@ -117,7 +116,6 @@ export const ProjectService = {
     }
   },
 
-  /* [NEW] Metodo para Kanban de Tarefas (ProjectKanban.tsx) */
   async updateTaskStatus(id: string, status: string) {
     try {
       const { error } = await supabase
@@ -159,10 +157,6 @@ export const ProjectService = {
     return count || 0
   },
 
-  // --- Sub-resources (Tasks, Briefings, Contracts, Services) ---
-  // Mantendo métodos existentes mas adicionando try/catch básico onde crítico
-
-  // Tasks
   async getTasks(projectId: string) {
     return await supabase
       .from('tasks')
@@ -174,7 +168,6 @@ export const ProjectService = {
     return await supabase.from('tasks').insert(task).select().single()
   },
 
-  // Refactored Task Methods (Boolean Return)
   async updateTask(
     id: string,
     updates: Database['public']['Tables']['tasks']['Update'],
@@ -202,7 +195,6 @@ export const ProjectService = {
     }
   },
 
-  // Project CRUD (Expanded)
   async updateProject(id: string, updates: ProjectUpdate) {
     try {
       const { data, error } = await supabase
@@ -240,7 +232,6 @@ export const ProjectService = {
     }
   },
 
-  // Briefings
   async getBriefing(projectId: string) {
     return await supabase
       .from('briefings')
@@ -254,7 +245,6 @@ export const ProjectService = {
     return await supabase.from('briefings').insert(briefing).select().single()
   },
 
-  // Contracts
   async getContracts(projectId: string) {
     return await supabase
       .from('contracts')
@@ -268,12 +258,10 @@ export const ProjectService = {
     return await supabase.from('contracts').insert(contract).select().single()
   },
 
-  // Services (Catalog)
   async getCatalogServices() {
     return await supabase.from('services').select('*').order('sort_order')
   },
 
-  // Project Services (Financial)
   async getProjectServices(projectId: string) {
     return await supabase
       .from('project_services')

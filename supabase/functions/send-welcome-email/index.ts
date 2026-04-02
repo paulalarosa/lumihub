@@ -1,11 +1,11 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-// @ts-ignore
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
-// @ts-ignore
+
 import { Resend } from 'https://esm.sh/resend@2.0.0'
-// @ts-ignore
+
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@0.4.3'
-// @ts-ignore
+
 import { Redis } from 'https://esm.sh/@upstash/redis@1.22.0'
 
 const corsHeaders = {
@@ -15,11 +15,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
-// Initialize Upstash Redis
 const redisUrl = Deno.env.get('UPSTASH_REDIS_REST_URL')
 const redisToken = Deno.env.get('UPSTASH_REDIS_REST_TOKEN')
 
-// fallback if not configured, though it should be in production
 const redis =
   redisUrl && redisToken
     ? new Redis({
@@ -28,7 +26,6 @@ const redis =
       })
     : null
 
-// Allow 5 requests per 10 seconds per IP
 const ratelimit = redis
   ? new Ratelimit({
       redis: redis,
@@ -102,7 +99,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // 0. Apply rate limiting if configured
     if (ratelimit) {
       const ip = req.headers.get('x-forwarded-for') ?? 'anonymous'
       const { success } = await ratelimit.limit(`send-welcome-email_${ip}`)
@@ -130,7 +126,6 @@ serve(async (req: Request) => {
       throw new Error('Missing clientId')
     }
 
-    // 1. Fetch Client
     const { data: client, error: clientError } = await supabaseClient
       .from('wedding_clients')
       .select('*')
@@ -143,7 +138,6 @@ serve(async (req: Request) => {
 
     let accessPin = client.access_pin
 
-    // 2. Generate PIN if missing
     if (!accessPin) {
       accessPin = Math.floor(1000 + Math.random() * 9000).toString()
 
@@ -153,17 +147,13 @@ serve(async (req: Request) => {
         .eq('id', clientId)
 
       if (updateError) {
-        console.error('Error updating PIN:', updateError)
         throw new Error('Failed to generate PIN')
       }
     }
 
-    // 3. Send Email
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
-    // Safety check just in case email is missing (though unlikely for a registered client)
     if (!client.email) {
-      console.log('Client has no email, skipping send.')
       return new Response(
         JSON.stringify({ message: 'Client has no email, skipped.' }),
         {
@@ -185,7 +175,6 @@ serve(async (req: Request) => {
     })
 
     if (emailError) {
-      console.error('Error sending email:', emailError)
       throw new Error('Failed to send email')
     }
 

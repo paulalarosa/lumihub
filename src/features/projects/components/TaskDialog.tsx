@@ -35,7 +35,6 @@ export function TaskDialog({
   const [priority, setPriority] = useState<TaskPriority>('medium')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Load task data when editing
   useEffect(() => {
     if (taskToEdit) {
       setTitle(taskToEdit.title)
@@ -60,7 +59,6 @@ export function TaskDialog({
 
     try {
       if (taskToEdit) {
-        // Edit Mode
         const success = await ProjectService.updateTask(taskToEdit.id, {
           title: title.trim(),
           priority,
@@ -69,9 +67,8 @@ export function TaskDialog({
         if (!success) throw new Error('Falha ao atualizar tarefa')
 
         toast({ title: 'Sucesso', description: 'Tarefa atualizada.' })
-        onTaskSaved({ ...taskToEdit, title: title.trim(), priority }) // Optimistic return
+        onTaskSaved({ ...taskToEdit, title: title.trim(), priority })
       } else {
-        // Create Mode
         const {
           data: { user },
         } = await supabase.auth.getUser()
@@ -89,8 +86,7 @@ export function TaskDialog({
         if (error) throw error
 
         toast({ title: 'Sucesso', description: 'Tarefa criada.' })
-        // Need to cast data to Task because createTask returns DB type, but Task type might have extra fields?
-        // Actually Task matches DB type mostly.
+
         onTaskSaved(data)
       }
 
@@ -144,7 +140,7 @@ export function TaskDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Title Input */}
+          {}
           <div>
             <label
               htmlFor="title"
@@ -164,7 +160,7 @@ export function TaskDialog({
             />
           </div>
 
-          {/* Priority Select */}
+          {}
           <div>
             <label
               htmlFor="priority"
@@ -185,7 +181,7 @@ export function TaskDialog({
           </div>
         </div>
 
-        {/* Actions */}
+        {}
         <div className="flex gap-3 justify-end">
           <button
             onClick={() => onOpenChange(false)}

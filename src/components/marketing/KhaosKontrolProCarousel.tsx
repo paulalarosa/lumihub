@@ -84,13 +84,13 @@ export const KhaosKontrolProCarousel = () => {
                 className="p-4"
               >
                 <div className="relative bg-black border border-white/20 p-12 aspect-[16/9] flex flex-col justify-center items-center text-center group">
-                  {/* Corner Markers - Viewfinder Effect */}
+                  {}
                   <div className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-white" />
                   <div className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-white" />
                   <div className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-white" />
                   <div className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-white" />
 
-                  {/* Icon / Play Button Placeholder */}
+                  {}
                   <div className="mb-8 relative">
                     <div className="w-20 h-20 rounded-full border border-white flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
                       <slide.icon className="h-8 w-8 text-white stroke-[1]" />
@@ -120,9 +120,9 @@ export const KhaosKontrolProCarousel = () => {
                     </div>
                   )}
 
-                  {/* Technical Label */}
+                  {}
                   <div className="absolute bottom-4 right-4 font-mono text-[10px] text-white/30">
-                    SEQ.0{index + 1} // KONTROL_PRO_MODULE
+                    SEQ.0{index + 1}
                   </div>
                 </div>
               </motion.div>
@@ -133,7 +133,7 @@ export const KhaosKontrolProCarousel = () => {
         <div className="flex items-center justify-center mt-12 gap-8">
           <CarouselPrevious className="static translate-y-0 bg-transparent border border-white/20 text-white hover:bg-white hover:text-black rounded-none h-10 w-10" />
 
-          {/* Technical Progress Bar */}
+          {}
           <div className="flex items-center gap-1">
             {slides.map((_, index) => (
               <div

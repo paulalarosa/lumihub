@@ -4,19 +4,28 @@ import { cn } from '@/lib/utils'
 import { Check, Copy } from 'lucide-react'
 import React, { memo, useMemo, useState } from 'react'
 
-import { tokenize, type TokenizeContext } from '@/components/infsh/code-block/tokenizer'
+import {
+  tokenize,
+  type TokenizeContext,
+} from '@/components/infsh/code-block/tokenizer'
 import { tokenStyles } from '@/components/infsh/code-block/styles'
 import { normalizeLanguage } from '@/components/infsh/code-block/languages'
-import { getTextContent, splitLines, copyToClipboard } from '@/components/infsh/code-block/utils'
+import {
+  getTextContent,
+  splitLines,
+  copyToClipboard,
+} from '@/components/infsh/code-block/utils'
 
-// Re-export types for consumers
-export type { Token, TokenType, LanguageDefinition } from '@/components/infsh/code-block/types'
-export { getLanguage, normalizeLanguage } from '@/components/infsh/code-block/languages'
+export type {
+  Token,
+  TokenType,
+  LanguageDefinition,
+} from '@/components/infsh/code-block/types'
+export {
+  getLanguage,
+  normalizeLanguage,
+} from '@/components/infsh/code-block/languages'
 
-/**
- * Tokenize all lines with context passing between lines
- * This handles multiline constructs like template literals
- */
 function tokenizeLines(lines: string[], language: string) {
   const tokenizedLines: { tokens: ReturnType<typeof tokenize>['tokens'] }[] = []
   let context: TokenizeContext = {}
@@ -30,9 +39,6 @@ function tokenizeLines(lines: string[], language: string) {
   return tokenizedLines
 }
 
-/**
- * Renders a single line with pre-computed tokens
- */
 const HighlightedLine = memo(function HighlightedLine({
   tokens,
 }: {
@@ -47,7 +53,7 @@ const HighlightedLine = memo(function HighlightedLine({
           </span>
         ) : (
           <span key={i}>{token.content}</span>
-        )
+        ),
       )}
     </>
   )
@@ -57,21 +63,18 @@ export interface CodeBlockProps {
   children: React.ReactNode
   language?: string
   className?: string
-  /** Show line numbers (default: true) */
+
   showLineNumbers?: boolean
-  /** Show copy button (default: true) */
+
   showCopyButton?: boolean
-  /** Show language header (default: true) */
+
   showHeader?: boolean
-  /** Enable syntax highlighting (default: true) */
+
   enableHighlighting?: boolean
-  /** Custom text size class */
+
   textSize?: string
 }
 
-/**
- * Full-featured code block with syntax highlighting, line numbers, and copy button
- */
 export const CodeBlock = memo(function CodeBlock({
   children,
   language,
@@ -88,10 +91,9 @@ export const CodeBlock = memo(function CodeBlock({
   const lines = splitLines(text)
   const normalizedLang = normalizeLanguage(language)
 
-  // Pre-tokenize all lines with context passing for multiline support
   const tokenizedLines = useMemo(
-    () => enableHighlighting ? tokenizeLines(lines, normalizedLang) : null,
-    [lines, normalizedLang, enableHighlighting]
+    () => (enableHighlighting ? tokenizeLines(lines, normalizedLang) : null),
+    [lines, normalizedLang, enableHighlighting],
   )
 
   const handleCopy = async () => {
@@ -106,10 +108,10 @@ export const CodeBlock = memo(function CodeBlock({
     <div
       className={cn(
         'relative group/codeblock my-6 rounded-xl border border-border overflow-hidden bg-zinc-950 min-h-0 h-full flex flex-col',
-        className
+        className,
       )}
     >
-      {/* Header bar */}
+      {}
       {showHeader && (
         <div className="flex-none flex items-center justify-between px-4 py-2 border-b border-white/5 bg-zinc-900/50">
           <span className="text-xs text-zinc-500 font-mono">
@@ -137,7 +139,7 @@ export const CodeBlock = memo(function CodeBlock({
         </div>
       )}
 
-      {/* Code content */}
+      {}
       <pre className="flex-1 min-h-0 overflow-auto p-4">
         <code className={cn('grid font-mono', textSize || 'text-sm')}>
           {lines.map((line, i) => (
@@ -145,7 +147,7 @@ export const CodeBlock = memo(function CodeBlock({
               key={i}
               className={cn(
                 'grid gap-6',
-                showLineNumbers ? 'grid-cols-[auto_1fr]' : 'grid-cols-1'
+                showLineNumbers ? 'grid-cols-[auto_1fr]' : 'grid-cols-1',
               )}
             >
               {showLineNumbers && (
@@ -155,7 +157,13 @@ export const CodeBlock = memo(function CodeBlock({
               )}
               <span className="whitespace-pre-wrap break-all leading-6">
                 {tokenizedLines ? (
-                  <HighlightedLine tokens={tokenizedLines[i]?.tokens ?? [{ type: null, content: line || ' ' }]} />
+                  <HighlightedLine
+                    tokens={
+                      tokenizedLines[i]?.tokens ?? [
+                        { type: null, content: line || ' ' },
+                      ]
+                    }
+                  />
                 ) : (
                   line || ' '
                 )}
@@ -172,14 +180,10 @@ export interface CompactCodeBlockProps {
   children: React.ReactNode
   className?: string
   textSize?: string
-  /** Optional language for syntax highlighting */
+
   language?: string
 }
 
-/**
- * Simpler code block for compact/chat contexts
- * Optional syntax highlighting, minimal styling
- */
 export const CompactCodeBlock = memo(function CompactCodeBlock({
   children,
   className,
@@ -192,10 +196,9 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
   const lines = splitLines(text)
   const normalizedLang = language ? normalizeLanguage(language) : null
 
-  // Pre-tokenize if language is provided
   const tokenizedLines = useMemo(
-    () => normalizedLang ? tokenizeLines(lines, normalizedLang) : null,
-    [lines, normalizedLang]
+    () => (normalizedLang ? tokenizeLines(lines, normalizedLang) : null),
+    [lines, normalizedLang],
   )
 
   const handleCopy = async () => {
@@ -210,7 +213,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
     <div
       className={cn(
         'relative group/codeblock block bg-muted/30 rounded-lg max-w-full min-w-0 p-2',
-        className
+        className,
       )}
     >
       <button
@@ -231,7 +234,7 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
               <span
                 className={cn(
                   textSize,
-                  'text-muted-foreground/30 select-none text-right min-w-[2ch]'
+                  'text-muted-foreground/30 select-none text-right min-w-[2ch]',
                 )}
               >
                 {i + 1}
@@ -240,11 +243,17 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
                 className={cn(
                   textSize,
                   'whitespace-pre-wrap break-all',
-                  !tokenizedLines && 'text-muted-foreground'
+                  !tokenizedLines && 'text-muted-foreground',
                 )}
               >
                 {tokenizedLines ? (
-                  <HighlightedLine tokens={tokenizedLines[i]?.tokens ?? [{ type: null, content: line || ' ' }]} />
+                  <HighlightedLine
+                    tokens={
+                      tokenizedLines[i]?.tokens ?? [
+                        { type: null, content: line || ' ' },
+                      ]
+                    }
+                  />
                 ) : (
                   line || ' '
                 )}

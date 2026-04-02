@@ -22,8 +22,6 @@ export function ContractSignatureHistory({ projectId }: { projectId: string }) {
   useEffect(() => {
     const fetchSignatures = async () => {
       try {
-        // Note: This table may not exist yet - will need to be created via migration
-        // For now, we'll handle the error gracefully
         const { data, error } = await supabase
           .from('contracts')
           .select(

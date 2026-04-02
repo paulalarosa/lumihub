@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -46,7 +47,8 @@ export default function ClientDetailsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
-      {/* Header */}
+      <SEOHead title="Detalhes da Cliente" noindex={true} />
+      {}
       <header className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-white/20">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -68,14 +70,12 @@ export default function ClientDetailsPage() {
                   <h1 className="font-serif text-2xl text-white tracking-tight uppercase">
                     {client.name}
                   </h1>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.3em]">
-                    /// CLIENT_PROFILE
-                  </div>
+                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.3em]"></div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {}
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -247,7 +247,7 @@ export default function ClientDetailsPage() {
                     transition={{ delay: index * 0.1 }}
                     className="relative pl-16 pb-12 group last:pb-0"
                   >
-                    {/* Timeline Node */}
+                    {}
                     <div className="absolute left-[15px] top-6 w-[9px] h-[9px] bg-black border border-white z-10 group-hover:bg-white transition-colors" />
 
                     <Card className="bg-black border border-white/20 rounded-none hover:bg-white hover:text-black group-hover:border-white transition-all duration-300">

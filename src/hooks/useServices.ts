@@ -9,7 +9,7 @@ export const useServices = (userId?: string) => {
   const [error, setError] = useState<Error | null>(null)
 
   const fetchServices = useCallback(async () => {
-    if (!userId) return // Wait for auth
+    if (!userId) return
     setLoading(true)
     setError(null)
     try {

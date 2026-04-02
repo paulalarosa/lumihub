@@ -44,7 +44,6 @@ export const FollowUpManager = () => {
   const [selectedTemplate, setSelectedTemplate] =
     useState<MessageTemplate | null>(null)
 
-  // Fetch templates
   const { data: templates } = useQuery({
     queryKey: ['message-templates'],
     queryFn: async () => {
@@ -58,7 +57,6 @@ export const FollowUpManager = () => {
     },
   })
 
-  // Update template
   const updateMutation = useMutation({
     mutationFn: async (template: MessageTemplate) => {
       const { error } = await supabase
@@ -96,7 +94,7 @@ export const FollowUpManager = () => {
       </h1>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Lista de Templates */}
+        {}
         <div>
           <h2 className="text-xl font-semibold mb-4 text-white">Templates</h2>
           <div className="space-y-2">
@@ -125,9 +123,8 @@ export const FollowUpManager = () => {
                   <Switch
                     checked={template.is_active}
                     onCheckedChange={(checked) => {
-                      // Optimistic update logic could go here, but for now we just mutate
                       const updated = { ...template, is_active: checked }
-                      // We need to update local state if it's selected
+
                       if (selectedTemplate?.id === template.id) {
                         setSelectedTemplate(updated)
                       }
@@ -144,7 +141,7 @@ export const FollowUpManager = () => {
           </div>
         </div>
 
-        {/* Editor de Template */}
+        {}
         {selectedTemplate ? (
           <div className="bg-neutral-900 border border-neutral-700 rounded-lg p-6">
             <h2 className="text-xl font-semibold mb-4 text-white">
@@ -259,8 +256,6 @@ export const FollowUpManager = () => {
                       onClick={() => {
                         const textarea = document.querySelector('textarea')
                         if (textarea) {
-                          // This is a bit of a hack to insert at cursor, seeing as we don't have a ref
-                          // Ideally we would use a ref, but for this quick impl it works if the textarea is focused or we append
                           const newBody =
                             selectedTemplate.body + `{${variable}}`
                           setSelectedTemplate({
@@ -301,7 +296,7 @@ export const FollowUpManager = () => {
         )}
       </div>
 
-      {/* Histórico de Envios */}
+      {}
       <div className="mt-12">
         <h2 className="text-xl font-semibold mb-4 text-white">
           Próximos Envios Agendados
@@ -366,11 +361,11 @@ const ScheduledFollowupsTable = () => {
               className="hover:bg-neutral-800/50 transition-colors"
             >
               <td className="p-4 text-white">
-                {/* @ts-expect-error - nested join types are dynamic */}
+                {}
                 {item.project?.client?.name || 'Cliente Desconhecido'}
               </td>
               <td className="p-4 text-white">
-                {/* @ts-expect-error - nested join types are dynamic */}
+                {}
                 {item.template?.name || 'Template Removido'}
               </td>
               <td className="p-4 text-neutral-300">

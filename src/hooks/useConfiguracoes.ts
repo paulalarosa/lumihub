@@ -36,7 +36,6 @@ export function useConfiguracoes() {
   const [digitalWalletAccount, setDigitalWalletAccount] = useState('')
   const [preferredMethod, setPreferredMethod] = useState('pix')
 
-  // AI BYOK Settings
   const [aiProvider, setAiProvider] = useState<string>('google')
   const [aiKey, setAiKey] = useState<string>('')
   const [aiModel, setAiModel] = useState<string>('gemini-1.5-pro')
@@ -52,7 +51,6 @@ export function useConfiguracoes() {
       fetchData()
       setFullName(user.user_metadata?.full_name || '')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const fetchData = async () => {

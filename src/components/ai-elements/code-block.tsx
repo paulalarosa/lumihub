@@ -28,20 +28,12 @@ import {
   type KeyedLine,
 } from './code-block.utils'
 
-// Shiki uses bitflags for font styles: 1=italic, 2=bold, 4=underline
-// biome-ignore lint/suspicious/noBitwiseOperators: shiki bitflag check
-
 const isItalic = (fontStyle: number | undefined) => fontStyle && fontStyle & 1
-// biome-ignore lint/suspicious/noBitwiseOperators: shiki bitflag check
 
-// oxlint-disable-next-line eslint(no-bitwise)
 const isBold = (fontStyle: number | undefined) => fontStyle && fontStyle & 2
 const isUnderline = (fontStyle: number | undefined) =>
-  // biome-ignore lint/suspicious/noBitwiseOperators: shiki bitflag check
-  // oxlint-disable-next-line eslint(no-bitwise)
   fontStyle && fontStyle & 4
 
-// Token rendering component
 const TokenSpan = ({ token }: { token: ThemedToken }) => (
   <span
     className="dark:!bg-[var(--shiki-dark-bg)] dark:!text-[var(--shiki-dark)]"
@@ -60,7 +52,6 @@ const TokenSpan = ({ token }: { token: ThemedToken }) => (
   </span>
 )
 
-// Line rendering component
 const LineSpan = ({
   keyedLine,
   showLineNumbers,
@@ -77,7 +68,6 @@ const LineSpan = ({
   </span>
 )
 
-// Types
 type CodeBlockProps = HTMLAttributes<HTMLDivElement> & {
   code: string
   language: BundledLanguage
@@ -88,12 +78,10 @@ interface CodeBlockContextType {
   code: string
 }
 
-// Context
 const CodeBlockContext = createContext<CodeBlockContextType>({
   code: '',
 })
 
-// Line number styles using CSS counters
 const LINE_NUMBER_CLASSES = cn(
   'block',
   'before:content-[counter(line)]',
@@ -243,10 +231,8 @@ export const CodeBlockContent = ({
   language: BundledLanguage
   showLineNumbers?: boolean
 }) => {
-  // Memoized raw tokens for immediate display
   const rawTokens = useMemo(() => createRawTokens(code), [code])
 
-  // Try to get cached result synchronously, otherwise use raw tokens
   const [tokenized, setTokenized] = useState<TokenizedCode>(
     () => highlightCode(code, language) ?? rawTokens,
   )
@@ -254,10 +240,8 @@ export const CodeBlockContent = ({
   useEffect(() => {
     let cancelled = false
 
-    // Reset to raw tokens when code changes (shows current code, not stale tokens)
     setTokenized(highlightCode(code, language) ?? rawTokens)
 
-    // Subscribe to async highlighting result
     highlightCode(code, language, (result) => {
       if (!cancelled) {
         setTokenized(result)

@@ -1,6 +1,7 @@
 import { AutomationTabNoir } from '@/components/settings/AutomationTabNoir'
 import AISettings from '@/components/settings/AISettings'
 import IntegrationsTab from '@/components/settings/IntegrationsTab'
+import PrivacySettings from '@/features/privacy/components/PrivacySettings'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -47,7 +48,7 @@ export default function Settings() {
               SYSTEM CONFIG
             </h1>
             <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-              Control Panel // v2.0
+              Control Panel
             </p>
           </div>
         </div>
@@ -104,6 +105,12 @@ export default function Settings() {
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
             >
               ASSINATURA
+            </TabsTrigger>
+            <TabsTrigger
+              value="privacidade"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"
+            >
+              PRIVACIDADE
             </TabsTrigger>
           </TabsList>
 
@@ -493,6 +500,13 @@ export default function Settings() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent
+            value="privacidade"
+            className="space-y-6 focus-visible:outline-none"
+          >
+            <PrivacySettings />
           </TabsContent>
         </Tabs>
       </main>

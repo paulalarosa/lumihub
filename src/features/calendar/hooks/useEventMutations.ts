@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { sanitizeFormData } from '@/lib/security'
 
 export function useEventMutations() {
   const queryClient = useQueryClient()
@@ -10,9 +11,10 @@ export function useEventMutations() {
 
   const createMutation = useMutation({
     mutationFn: async (eventData: any) => {
+      const cleanData = sanitizeFormData(eventData)
       const { data: event, error } = await supabase
         .from('calendar_events')
-        .insert(eventData)
+        .insert(cleanData)
         .select()
         .single()
 
@@ -46,9 +48,10 @@ export function useEventMutations() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const cleanData = sanitizeFormData(data)
       const { data: event, error } = await supabase
         .from('calendar_events')
-        .update(data)
+        .update(cleanData)
         .eq('id', id)
         .select()
         .single()

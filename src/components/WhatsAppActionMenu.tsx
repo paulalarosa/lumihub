@@ -60,7 +60,6 @@ export const WhatsAppActionMenu = ({
     setLoading(true)
 
     try {
-      // 1. Fetch Template
       if (!organizationId) {
         setLoading(false)
         return
@@ -73,7 +72,6 @@ export const WhatsAppActionMenu = ({
         .eq('type', templateType)
         .maybeSingle()
 
-      // Fallback content
       let rawText = template?.content
       if (!rawText) {
         switch (templateType) {
@@ -92,7 +90,6 @@ export const WhatsAppActionMenu = ({
         }
       }
 
-      // 2. Fetch Professional Name
       let professionalName = 'KONTROL'
       if (user) {
         const { data: profData } = await supabase
@@ -104,7 +101,6 @@ export const WhatsAppActionMenu = ({
         if (profData?.full_name) professionalName = profData.full_name
       }
 
-      // 3. Generate Link
       const link = generateWhatsAppLink(rawText, {
         client_name: client.full_name || client.name || 'Cliente',
         professional_name: professionalName,
@@ -121,7 +117,6 @@ export const WhatsAppActionMenu = ({
         phone: client.phone,
       })
 
-      // 4. Open WhatsApp
       window.open(link, '_blank')
     } catch (error) {
       logger.error(error, { message: 'Erro ao gerar link.', showToast: false })

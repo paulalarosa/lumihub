@@ -119,9 +119,7 @@ serve(async (req) => {
             .getPublicUrl(fileName)
           signatureImageUrl = urlData.publicUrl
         }
-      } catch (uploadErr) {
-        console.error('Signature image upload failed:', uploadErr)
-      }
+      } catch (uploadErr) {}
     }
 
     const placeholderCertHash = signatureHash + '-cert'
@@ -199,7 +197,7 @@ serve(async (req) => {
     )
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error'
-    console.error('Process signature error:', message)
+
     return new Response(JSON.stringify({ error: message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -1,6 +1,5 @@
-// @ts-ignore
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-// @ts-ignore
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -15,7 +14,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // 1. JWT Verification
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       throw new Error('Missing Authorization header')
@@ -39,7 +37,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // 2. Proxy Logic
     const { input } = (await req.json()) as { input?: string }
     if (!input) {
       return new Response(JSON.stringify({ error: 'Missing input' }), {
@@ -55,7 +52,6 @@ serve(async (req: Request) => {
       throw new Error('Server configuration error: Google Maps API Key missing')
     }
 
-    // Call Google Places Autocomplete API
     const response = await fetch(
       `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
         input,
@@ -68,7 +64,6 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error('Error:', error)
     return new Response(
       JSON.stringify({
         error: error instanceof Error ? error.message : 'Internal Server Error',

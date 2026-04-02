@@ -55,7 +55,6 @@ export const SalesPipeline = () => {
     }),
   )
 
-  // Buscar estágios
   const { data: stages } = useQuery({
     queryKey: ['pipeline-stages'],
     queryFn: async () => {
@@ -71,7 +70,6 @@ export const SalesPipeline = () => {
     enabled: !!user,
   })
 
-  // Buscar leads
   const { data: leads } = useQuery({
     queryKey: ['pipeline-leads', searchQuery],
     queryFn: async () => {
@@ -95,7 +93,6 @@ export const SalesPipeline = () => {
     enabled: !!user,
   })
 
-  // Mutation: Mover lead entre estágios
   const moveMutation = useMutation({
     mutationFn: async ({
       leadId,
@@ -129,7 +126,6 @@ export const SalesPipeline = () => {
       const leadId = active.id as string
       const newStageId = over.id as string
 
-      // Find the current lead's stage
       const lead = leads?.find((l) => l.id === leadId)
       if (!lead || lead.current_stage_id === newStageId) return
 
@@ -138,7 +134,6 @@ export const SalesPipeline = () => {
     [leads, moveMutation],
   )
 
-  // Agrupar leads por estágio
   const leadsByStage =
     stages?.reduce(
       (acc: Record<string, PipelineLead[]>, stage: PipelineStage) => {
@@ -153,7 +148,7 @@ export const SalesPipeline = () => {
 
   return (
     <div className="container mx-auto p-4 md:p-8 h-[calc(100vh-4rem)] flex flex-col">
-      {/* Header */}
+      {}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Funil de Vendas</h1>
@@ -201,7 +196,7 @@ export const SalesPipeline = () => {
         </div>
       </div>
 
-      {/* Filtros */}
+      {}
       <div className="flex gap-2 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -221,7 +216,7 @@ export const SalesPipeline = () => {
         </Button>
       </div>
 
-      {/* Kanban Board */}
+      {}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -242,7 +237,7 @@ export const SalesPipeline = () => {
         </div>
       </DndContext>
 
-      {/* Dialogs */}
+      {}
       <CreateLeadDialog
         isOpen={isCreating}
         onClose={() => setIsCreating(false)}

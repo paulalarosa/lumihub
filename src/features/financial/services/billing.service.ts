@@ -14,7 +14,6 @@ export const BillingService = {
   async createCheckoutSession(
     priceId: string,
   ): Promise<{ sessionId: string; url: string }> {
-    // In a real app, this calls a Supabase Edge Function which talks to Stripe
     const { data, error } = await supabase.functions.invoke(
       'create-checkout-session',
       {
@@ -23,7 +22,7 @@ export const BillingService = {
     )
 
     if (error) throw error
-    return data // { sessionId: 'cs_test_...', url: 'https://checkout.stripe.com/...' }
+    return data
   },
 
   async cancelSubscription(subscriptionId: string): Promise<void> {
@@ -35,7 +34,6 @@ export const BillingService = {
   },
 
   async getBillingHistory(): Promise<BillingHistoryItem[]> {
-    // Fetch invoices from Supabase Function acting as proxy to Stripe
     const { data, error } = await supabase.functions.invoke('get-invoices')
 
     if (error) {

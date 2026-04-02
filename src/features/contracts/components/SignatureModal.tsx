@@ -28,7 +28,6 @@ export function SignatureModal({
 
   const confirm = () => {
     if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
-      // Get signature as base64 image (transparent PNG with white ink)
       const dataURL = sigCanvas.current
         .getTrimmedCanvas()
         .toDataURL('image/png')
@@ -43,7 +42,7 @@ export function SignatureModal({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="bg-[#050505] border border-neutral-800 text-white p-0 sm:max-w-xl shadow-2xl overflow-hidden rounded-none">
-        {/* Header */}
+        {}
         <div className="p-6 border-b border-neutral-800 bg-[#0a0a0a]">
           <DialogTitle className="text-xl font-serif italic text-white flex items-center justify-between">
             <span>Assinatura Digital</span>
@@ -56,7 +55,7 @@ export function SignatureModal({
           </p>
         </div>
 
-        {/* Canvas Area */}
+        {}
         <div className="p-1 bg-[#151515] relative group">
           <div className="absolute top-4 left-4 z-10 pointer-events-none opacity-50">
             <span className="text-[10px] font-mono text-neutral-600 uppercase tracking-widest">
@@ -80,7 +79,7 @@ export function SignatureModal({
           </div>
         </div>
 
-        {/* Footer */}
+        {}
         <div className="p-6 bg-[#0a0a0a] border-t border-neutral-800 flex justify-between items-center">
           <Button
             variant="ghost"

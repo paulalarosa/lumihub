@@ -19,7 +19,7 @@ interface SEOHeadProps {
   type?: 'website' | 'article' | 'product' | 'service'
   noindex?: boolean
   jsonLd?: object
-  // Enhanced SEO props
+
   breadcrumbs?: BreadcrumbItem[]
   faq?: FAQItem[]
   publishedTime?: string
@@ -28,12 +28,12 @@ interface SEOHeadProps {
   section?: string
   tags?: string[]
   priceRange?: string
-  // Local business
+
   businessName?: string
   businessPhone?: string
   businessAddress?: string
   businessHours?: string
-  // Product/Service specific
+
   productPrice?: number
   productCurrency?: string
   productAvailability?: 'InStock' | 'OutOfStock' | 'PreOrder'
@@ -69,7 +69,6 @@ const SEOHead = ({
   productAvailability = 'InStock',
 }: SEOHeadProps) => {
   useEffect(() => {
-    // Sanitize and truncate title/description
     const sanitizedTitle =
       title.length > 60 ? title.slice(0, 57) + '...' : title
     const fullTitle = title
@@ -78,10 +77,8 @@ const SEOHead = ({
     const sanitizedDescription =
       description.length > 160 ? description.slice(0, 157) + '...' : description
 
-    // Update document title
     document.title = fullTitle
 
-    // Helper function to update meta tags
     const updateMetaTag = (
       name: string,
       content: string,
@@ -99,7 +96,6 @@ const SEOHead = ({
       meta.content = content
     }
 
-    // Helper function to update link tags
     const updateLinkTag = (
       rel: string,
       href: string,
@@ -119,7 +115,6 @@ const SEOHead = ({
       }
     }
 
-    // Primary Meta Tags
     updateMetaTag('description', sanitizedDescription)
     updateMetaTag('keywords', keywords)
     updateMetaTag(
@@ -134,7 +129,6 @@ const SEOHead = ({
     updateMetaTag('language', 'Portuguese')
     updateMetaTag('revisit-after', '7 days')
 
-    // Open Graph
     updateMetaTag('og:title', fullTitle, true)
     updateMetaTag('og:description', sanitizedDescription, true)
     updateMetaTag('og:image', image, true)
@@ -146,7 +140,6 @@ const SEOHead = ({
     updateMetaTag('og:site_name', SITE_NAME, true)
     updateMetaTag('og:locale', 'pt_BR', true)
 
-    // Article specific OG tags
     if (type === 'article') {
       if (publishedTime)
         updateMetaTag('article:published_time', publishedTime, true)
@@ -158,7 +151,6 @@ const SEOHead = ({
         tags.forEach((tag, i) => updateMetaTag(`article:tag:${i}`, tag, true))
     }
 
-    // Twitter Cards
     updateMetaTag('twitter:card', 'summary_large_image')
     updateMetaTag('twitter:title', fullTitle)
     updateMetaTag('twitter:description', sanitizedDescription)
@@ -167,10 +159,8 @@ const SEOHead = ({
     updateMetaTag('twitter:site', '@khaoskontrol')
     updateMetaTag('twitter:creator', '@khaoskontrol')
 
-    // Canonical link
     updateLinkTag('canonical', url)
 
-    // Preconnect for performance (critical resources)
     const preconnects = [
       'https://fonts.googleapis.com',
       'https://fonts.gstatic.com',
@@ -190,7 +180,6 @@ const SEOHead = ({
       }
     })
 
-    // DNS prefetch for additional performance
     const dnsPrefetch = [
       'https://rhvmczcwtfjodrocesaa.supabase.co',
       'https://maps.googleapis.com',
@@ -207,10 +196,8 @@ const SEOHead = ({
       }
     })
 
-    // Build JSON-LD schemas
     const schemas: object[] = []
 
-    // WebSite schema (for sitelinks search box)
     schemas.push({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
@@ -223,7 +210,6 @@ const SEOHead = ({
       },
     })
 
-    // Breadcrumb schema
     if (breadcrumbs && breadcrumbs.length > 0) {
       schemas.push({
         '@context': 'https://schema.org',
@@ -237,7 +223,6 @@ const SEOHead = ({
       })
     }
 
-    // FAQ schema
     if (faq && faq.length > 0) {
       schemas.push({
         '@context': 'https://schema.org',
@@ -253,7 +238,6 @@ const SEOHead = ({
       })
     }
 
-    // LocalBusiness schema
     if (businessName) {
       schemas.push({
         '@context': 'https://schema.org',
@@ -272,7 +256,6 @@ const SEOHead = ({
       })
     }
 
-    // Product/Service schema
     if (productPrice) {
       schemas.push({
         '@context': 'https://schema.org',
@@ -290,12 +273,10 @@ const SEOHead = ({
       })
     }
 
-    // Custom JSON-LD
     if (jsonLd) {
       schemas.push(jsonLd)
     }
 
-    // Clear existing dynamic schemas and add new ones
     document
       .querySelectorAll('script[data-seo="dynamic"]')
       .forEach((el) => el.remove())

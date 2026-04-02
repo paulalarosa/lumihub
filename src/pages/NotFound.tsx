@@ -25,7 +25,7 @@ const NotFound = () => {
       </div>
 
       <div className="fixed bottom-8 text-[10px] font-mono uppercase tracking-[0.3em] text-white/20">
-        KONTROL // SYSTEM
+        KONTROL
       </div>
     </div>
   )

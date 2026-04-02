@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 
 export type TemplateType = 'confirmation' | 'reminder_24h' | 'thanks'
 
-// --- ANIMAÇÕES (Framer Motion) ---
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -161,7 +160,7 @@ export function AutomationTabNoir() {
 
   return (
     <div className="w-full bg-[#000000] text-gray-300 rounded-2xl border border-white/5 p-8 shadow-2xl flex flex-col gap-10">
-      {/* CABEÇALHO DA ABA: Status do WhatsApp */}
+      {}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center pb-6 border-b border-white/10 gap-4">
         <div>
           <h2 className="text-xl font-light text-white tracking-wide">
@@ -172,7 +171,7 @@ export function AutomationTabNoir() {
           </p>
         </div>
 
-        {/* Indicador Neon Cyberpunk */}
+        {}
         <div className="flex items-center gap-3 bg-[#0A0A0A] border border-[#25D366]/20 px-4 py-2 rounded-full shadow-[0_0_15px_rgba(37,211,102,0.05)]">
           <div className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-75"></span>
@@ -184,7 +183,7 @@ export function AutomationTabNoir() {
         </div>
       </div>
 
-      {/* ÁREA DOS CARDS DE MENSAGEM */}
+      {}
       <motion.div
         variants={staggerContainer}
         initial="hidden"
@@ -197,11 +196,11 @@ export function AutomationTabNoir() {
             variants={fadeUp}
             className="group relative bg-[#0A0A0A] border border-white/10 rounded-xl p-6 transition-all duration-500 hover:border-white/20 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]"
           >
-            {/* Efeito Spotlight Oculto no Hover */}
+            {}
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/[0.03] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded-xl" />
 
             <div className="relative z-10 flex flex-col xl:flex-row gap-8">
-              {/* Coluna Esquerda: Info da Mensagem */}
+              {}
               <div className="xl:w-1/3">
                 <div className="flex items-center gap-2 mb-2">
                   <MessageSquare size={16} className="text-gray-500" />
@@ -213,7 +212,7 @@ export function AutomationTabNoir() {
                   {tpl.description}
                 </p>
 
-                {/* Tags Monospace (Variáveis) */}
+                {}
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">
                     Variáveis Disponíveis
@@ -235,7 +234,7 @@ export function AutomationTabNoir() {
                 </div>
               </div>
 
-              {/* Coluna Direita: Input Magnético */}
+              {}
               <div className="xl:w-2/3 flex flex-col">
                 <textarea
                   value={templates[tpl.id]}
@@ -248,7 +247,7 @@ export function AutomationTabNoir() {
                   className="w-full h-32 bg-[#050505] border border-white/10 rounded-lg p-4 text-sm text-gray-300 font-mono focus:outline-none focus:border-white/30 focus:ring-1 focus:ring-white/30 focus:bg-[#0A0A0A] transition-all resize-none shadow-inner"
                 />
 
-                {/* Botão Salvar com Micro-interação */}
+                {}
                 <div className="mt-4 self-end flex items-center gap-4">
                   <button
                     onClick={() =>
@@ -290,7 +289,7 @@ export function AutomationTabNoir() {
         ))}
       </motion.div>
 
-      {/* ÁREA DE TESTE (Mantida da v5.0) */}
+      {}
       <div className="bg-zinc-900/30 p-6 rounded-lg border border-white/5 mt-4">
         <h3 className="text-sm font-bold text-white tracking-wider mb-2">
           MÓDULO DE INTEGRAÇÃO

@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
@@ -20,22 +21,12 @@ import { format } from 'date-fns/format'
 
 interface UserProfile {
   id: string
-  email: string // We might need to join with auth.users if email is not in profiles, but usually it is replicated or we use a view.
-  // Wait, profiles table might not have email if it's strictly linked.
-  // However, usually we put email in profiles for ease.
-  // Let's check what we have. If not, we rely on what we can get.
-  // If profiles table doesn't have email, we might need a different approach.
-  // Assuming profiles has basic info. If not, we'll see IDs.
+  email: string
   full_name: string
   role: 'admin' | 'user'
   plan: 'free' | 'pro' | 'empire'
   created_at: string
 }
-
-// NOTE: Since we cannot access auth.users directly from client without an admin function,
-// we assume 'profiles' has a view or we added email to it, OR we are using a secure view.
-// For this task, assuming 'profiles' is accessible and has what we need or we can at least show name/role.
-// If email is missing in profiles, we might only see names.
 
 export default function AdminUsers() {
   const [users, setUsers] = useState<UserProfile[]>([])
@@ -49,29 +40,12 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     setLoading(true)
     try {
-      // Fetch profiles.
-      // Note: RLS must allow admins to see all profiles.
-      const { _data, error } = await supabase
-        .from('profiles')
-        .select('id, full_name, role, plan, created_at, email') // Try to fetch email if it exists in profiles, otherwise we'll have to deal with it.
-
-      // Note: If 'email' does not exist on profiles, this select might fail if we don't handle it.
-      // But per previous tasks, we might not have added email to profiles.
-      // Let's assume for now we might not get email, but try.
-
-      // Actually, best practice is to handle the error or check schema.
-      // Since we don't have time to check schema, let's select * and see.
-      // If email is missing, we just show "N/A"
-
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
         .select('*')
 
       if (profilesError) throw profilesError
 
-      if (error) throw error
-
-      // Sort by created_at desc
       const sorted = (profilesData || []).sort(
         (a, b) =>
           new Date(b.created_at || 0).getTime() -
@@ -97,7 +71,6 @@ export default function AdminUsers() {
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
     try {
-      // Cast to any to bypass strict type checking if columns are missing in generated types
       const { error } = await supabase
         .from('profiles')
         .update({ role: newRole })
@@ -145,7 +118,6 @@ export default function AdminUsers() {
       (user.full_name?.toLowerCase() || '').includes(
         searchTerm.toLowerCase(),
       ) || (user.id || '').includes(searchTerm.toLowerCase()),
-    // Email check would go here if we had it
   )
 
   const stats = {
@@ -156,6 +128,7 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
+      <SEOHead title="Usuários" noindex={true} />
       <div>
         <h1 className="font-serif text-3xl text-white">Gestão de Usuários</h1>
         <p className="text-white/60">
@@ -163,7 +136,7 @@ export default function AdminUsers() {
         </p>
       </div>
 
-      {/* Stats */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-white/5 border-white/10 backdrop-blur-xl rounded-none">
           <CardHeader className="pb-2">
@@ -197,7 +170,7 @@ export default function AdminUsers() {
         </Card>
       </div>
 
-      {/* Actions & Filters */}
+      {}
       <div className="flex items-center gap-4 bg-black p-4 border border-white/20">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
@@ -213,7 +186,7 @@ export default function AdminUsers() {
         </OutlineButton>
       </div>
 
-      {/* Table */}
+      {}
       <div className="border border-white/20 bg-black overflow-hidden">
         <Table>
           <TableHeader className="bg-white/5">

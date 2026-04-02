@@ -11,31 +11,6 @@ interface ChatMessagesProps {
   scrollToTopPadding?: boolean
 }
 
-/**
- * ChatMessages - Scrollable message container with render prop
- *
- * @example
- * ```tsx
- * <ChatMessages>
- *   {({ messages }) => (
- *     <div className="space-y-4">
- *       {messages.map(msg => (
- *         <MessageBubble key={msg.id} message={msg}>
- *           <MessageContent message={msg} />
- *         </MessageBubble>
- *       ))}
- *     </div>
- *   )}
- * </ChatMessages>
- * ```
- *
- * @example With scroll-to-top padding (allows first message to scroll to top)
- * ```tsx
- * <ChatMessages scrollToTopPadding>
- *   {({ messages }) => <MessageList messages={messages} />}
- * </ChatMessages>
- * ```
- */
 export const ChatMessages = memo(function ChatMessages({
   children,
   className,
@@ -52,7 +27,6 @@ export const ChatMessages = memo(function ChatMessages({
     handleTouchStart,
   } = useAutoScroll([messages])
 
-  // Measure container height for the scroll-to-top spacer
   useLayoutEffect(() => {
     if (!scrollToTopPadding || !containerRef.current) return
 
@@ -88,7 +62,7 @@ export const ChatMessages = memo(function ChatMessages({
         )}
       </div>
 
-      {/* Scroll to bottom button */}
+      {}
       {!shouldAutoScroll && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
           <Button

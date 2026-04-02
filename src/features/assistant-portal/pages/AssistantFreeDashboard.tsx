@@ -333,7 +333,7 @@ export default function AssistantFreeDashboard() {
       <footer className="border-t border-white/[0.03] mt-16">
         <div className="max-w-4xl mx-auto px-4 md:px-8 py-6 flex items-center justify-between">
           <span className="text-[9px] font-mono text-white/15 uppercase tracking-[0.2em]">
-            Khaos Kontrol // Free Tier
+            Khaos Kontrol
           </span>
           <div className="flex items-center gap-2">
             <div className="w-1 h-1 bg-green-500/40 rounded-full animate-pulse" />

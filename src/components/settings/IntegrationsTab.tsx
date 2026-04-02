@@ -55,7 +55,7 @@ export default function IntegrationsTab() {
 
   return (
     <div className="space-y-6">
-      {/* Redes Sociais */}
+      {}
       <Card className="border-border bg-card rounded-none shadow-none">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>

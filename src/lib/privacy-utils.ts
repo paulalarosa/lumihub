@@ -1,23 +1,13 @@
-/**
- * Khaos Kontrol Privacy Utilities
- * UUID v4 Encrypted IDs for Contracts and Briefings
- * January 8, 2026
- */
-
 import { v4 as uuidv4 } from 'uuid'
 
-// Generate a cryptographically secure UUID v4
 export function generateSecureUUID(): string {
   return uuidv4()
 }
 
-// Generate an encrypted UUID using Web Crypto API
 export async function generateEncryptedUUID(): Promise<string> {
   try {
-    // Generate a random UUID v4
     const uuid = generateSecureUUID()
 
-    // Create a hash of the UUID for additional entropy
     const encoder = new TextEncoder()
     const data = encoder.encode(uuid)
     const hashBuffer = await crypto.subtle.digest('SHA-256', data)
@@ -26,20 +16,17 @@ export async function generateEncryptedUUID(): Promise<string> {
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('')
 
-    // Combine UUID with hash for maximum entropy
     return `${uuid}-${hashHex.substring(0, 8)}`
   } catch (_error) {
     return generateSecureUUID()
   }
 }
 
-// Encrypt sensitive contract data
 export async function encryptContractData(data: string): Promise<string> {
   try {
     const encoder = new TextEncoder()
     const dataBuffer = encoder.encode(data)
 
-    // Generate a random key for this session
     const key = await crypto.subtle.generateKey(
       {
         name: 'AES-GCM',
@@ -60,10 +47,8 @@ export async function encryptContractData(data: string): Promise<string> {
       dataBuffer,
     )
 
-    // Export key for storage (in production, this should be properly managed)
     const exportedKey = await crypto.subtle.exportKey('raw', key)
 
-    // Combine IV, key, and encrypted data
     const combined = new Uint8Array(
       iv.length + exportedKey.byteLength + encrypted.byteLength,
     )
@@ -77,7 +62,6 @@ export async function encryptContractData(data: string): Promise<string> {
   }
 }
 
-// Decrypt contract data
 export async function decryptContractData(
   encryptedData: string,
 ): Promise<string> {
@@ -87,7 +71,7 @@ export async function decryptContractData(
     )
 
     const iv = combined.slice(0, 12)
-    const keyData = combined.slice(12, 12 + 32) // AES-256 key is 32 bytes
+    const keyData = combined.slice(12, 12 + 32)
     const encrypted = combined.slice(12 + 32)
 
     const key = await crypto.subtle.importKey(
@@ -117,7 +101,6 @@ export async function decryptContractData(
   }
 }
 
-// Generate privacy-compliant IDs for contracts
 export class ContractPrivacyManager {
   private static instance: ContractPrivacyManager
 
@@ -146,7 +129,6 @@ export class ContractPrivacyManager {
     return await decryptContractData(encryptedBriefing)
   }
 
-  // Validate if an ID follows our encrypted UUID format
   validateEncryptedId(id: string): boolean {
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}-[0-9a-f]{8}$/i
@@ -154,10 +136,8 @@ export class ContractPrivacyManager {
   }
 }
 
-// Export singleton instance
 export const contractPrivacy = ContractPrivacyManager.getInstance()
 
-// Utility function for generating secure random strings
 export function generateSecureRandomString(length: number = 32): string {
   const array = new Uint8Array(length)
   crypto.getRandomValues(array)
@@ -166,7 +146,6 @@ export function generateSecureRandomString(length: number = 32): string {
   )
 }
 
-// Rate limiting utility to prevent information harvesting
 export class RateLimiter {
   private attempts: Map<string, number[]> = new Map()
   private readonly maxAttempts: number
@@ -181,7 +160,6 @@ export class RateLimiter {
     const now = Date.now()
     const attempts = this.attempts.get(key) || []
 
-    // Remove old attempts outside the window
     const validAttempts = attempts.filter((time) => now - time < this.windowMs)
 
     if (validAttempts.length >= this.maxAttempts) {
@@ -198,5 +176,4 @@ export class RateLimiter {
   }
 }
 
-// Export rate limiter instance for API calls
-export const apiRateLimiter = new RateLimiter(50, 60000) // 50 requests per minute
+export const apiRateLimiter = new RateLimiter(50, 60000)

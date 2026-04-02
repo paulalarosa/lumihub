@@ -91,7 +91,7 @@ export const PricingCards = ({
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
               >
-                {/* Highlighted Badge */}
+                {}
                 {plan.highlighted && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
                     <div className="px-5 py-1.5 bg-white text-black text-[10px] font-bold rounded-full shadow-2xl uppercase tracking-widest font-mono">
@@ -100,12 +100,12 @@ export const PricingCards = ({
                   </div>
                 )}
 
-                {/* Icon */}
+                {}
                 <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-8">
                   <plan.icon className="w-7 h-7 text-white opacity-80" />
                 </div>
 
-                {/* Header */}
+                {}
                 <h3 className="text-2xl font-bold text-white mb-2 tracking-tight">
                   {plan.name}
                 </h3>
@@ -113,7 +113,7 @@ export const PricingCards = ({
                   {plan.subtitle}
                 </p>
 
-                {/* Price */}
+                {}
                 <div className="mb-10">
                   <div className="flex items-baseline gap-1 mb-2">
                     <span className="text-white/30 text-base font-serif italic">
@@ -147,7 +147,7 @@ export const PricingCards = ({
                   )}
                 </div>
 
-                {/* Features */}
+                {}
                 <ul className="space-y-4 mb-12 border-t border-white/5 pt-10">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-4">
@@ -159,7 +159,7 @@ export const PricingCards = ({
                   ))}
                 </ul>
 
-                {/* CTA Button */}
+                {}
                 <Button
                   variant={plan.highlighted ? 'primary' : 'glass'}
                   size="lg"

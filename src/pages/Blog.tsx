@@ -25,7 +25,7 @@ const blogPosts = [
     date: '10 Mar 2025',
     readTime: '6 min',
     featured: false,
-    image: '/blog/bridal-2025.png', // Bride portrait
+    image: '/blog/bridal-2025.png',
   },
   {
     slug: 'contratos-digitais-luxo',
@@ -49,7 +49,7 @@ const blogPosts = [
     readTime: '12 min',
     featured: false,
     image:
-      'https://images.unsplash.com/photo-1595476108010-b4d1f10d5e43?q=80&w=2000&auto=format&fit=crop', // Makeup artist applying makeup
+      'https://images.unsplash.com/photo-1595476108010-b4d1f10d5e43?q=80&w=2000&auto=format&fit=crop',
   },
 ]
 
@@ -67,7 +67,7 @@ export default function BlogPage() {
         type="website"
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
-        {/* Textured Overlay Image */}
+        {}
         <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
           <img
             src="/khaos-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png"
@@ -75,11 +75,11 @@ export default function BlogPage() {
             className="w-full h-full object-cover grayscale brightness-50"
           />
         </div>
-        {/* Ambient Glow */}
+        {}
         <div className="fixed top-[-20%] right-[-10%] w-[40%] h-[40%] bg-white/[0.015] blur-[180px] rounded-full pointer-events-none" />
 
         <main className="container mx-auto px-6 lg:px-10 pt-40 pb-24 relative z-10 text-left">
-          {/* Header */}
+          {}
           <div className="max-w-4xl mb-20 space-y-6 text-left">
             <SectionHeader
               eyebrow="DEPARTAMENTO EDITORIAL"
@@ -89,7 +89,7 @@ export default function BlogPage() {
             />
           </div>
 
-          {/* Featured Post */}
+          {}
           {featuredPost && (
             <motion.article
               initial={{ opacity: 0, y: 30 }}
@@ -136,7 +136,7 @@ export default function BlogPage() {
             </motion.article>
           )}
 
-          {/* Post Grid */}
+          {}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {otherPosts.map((post, index) => (
               <motion.article
@@ -149,7 +149,7 @@ export default function BlogPage() {
               >
                 <Link to={`/blog/${post.slug}`} className="block h-full">
                   <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden h-full flex flex-col">
-                    {/* Image placeholder */}
+                    {}
                     <div className="aspect-[4/3] bg-white/[0.03] relative overflow-hidden">
                       <img
                         src={post.image}

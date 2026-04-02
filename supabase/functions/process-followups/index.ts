@@ -8,7 +8,6 @@ const supabase = createClient(
 
 serve(async (req) => {
   try {
-    // Buscar follow-ups pendentes para enviar (próximos 5 minutos)
     const { data: followups, error } = await supabase
       .from('scheduled_followups')
       .select(
@@ -20,15 +19,12 @@ serve(async (req) => {
       )
       .eq('status', 'pending')
       .lte('scheduled_for', new Date(Date.now() + 5 * 60 * 1000).toISOString())
-      .limit(50) // Processar 50 por vez
+      .limit(50)
 
     if (error) throw error
 
-    console.log(`Processing ${followups?.length || 0} follow-ups`)
-
     for (const followup of followups || []) {
       try {
-        // Substituir variáveis no template
         let message = followup.template.body
         const variables = {
           client_name: followup.project.client?.name || 'Cliente',
@@ -44,12 +40,10 @@ serve(async (req) => {
           current_promotion: '20% OFF em makes para o próximo mês! 🎉',
         }
 
-        // Replace variables
         Object.entries(variables).forEach(([key, value]) => {
           message = message.replace(new RegExp(`{${key}}`, 'g'), value)
         })
 
-        // Enviar baseado no canal
         if (followup.template.channel === 'whatsapp') {
           await sendWhatsApp(followup.project.client?.phone, message)
         } else if (followup.template.channel === 'email') {
@@ -60,7 +54,6 @@ serve(async (req) => {
           )
         }
 
-        // Marcar como enviado
         await supabase
           .from('scheduled_followups')
           .update({
@@ -68,10 +61,7 @@ serve(async (req) => {
             sent_at: new Date().toISOString(),
           })
           .eq('id', followup.id)
-
-        console.log(`✅ Sent followup ${followup.id}`)
       } catch (error: any) {
-        // Marcar como falho
         await supabase
           .from('scheduled_followups')
           .update({
@@ -79,8 +69,6 @@ serve(async (req) => {
             error_message: error.message,
           })
           .eq('id', followup.id)
-
-        console.error(`❌ Failed followup ${followup.id}:`, error)
       }
     }
 
@@ -88,7 +76,6 @@ serve(async (req) => {
       headers: { 'Content-Type': 'application/json' },
     })
   } catch (error: any) {
-    console.error('Process followups error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -102,7 +89,6 @@ async function sendWhatsApp(phone: string, message: string) {
   const EVOLUTION_INSTANCE = Deno.env.get('EVOLUTION_INSTANCE')
 
   if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
-    console.error('Evolution API not configured, skipping WhatsApp')
     return { success: false, error: 'WhatsApp not configured' }
   }
 
@@ -115,7 +101,7 @@ async function sendWhatsApp(phone: string, message: string) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // @ts-ignore custom header for API
+
         apikey: EVOLUTION_API_KEY,
       },
       body: JSON.stringify({
@@ -127,7 +113,7 @@ async function sendWhatsApp(phone: string, message: string) {
 
   if (!response.ok) {
     const err = await response.text()
-    console.error('WhatsApp send failed:', err)
+
     return { success: false, error: err }
   }
 
@@ -135,7 +121,6 @@ async function sendWhatsApp(phone: string, message: string) {
 }
 
 async function sendEmail(to: string, subject: string, body: string) {
-  // Usar Resend (já configurado no projeto)
   const { data, error } = await supabase.functions.invoke('send-ses-email', {
     body: { to, subject, html: body.replace(/\n/g, '<br>') },
   })

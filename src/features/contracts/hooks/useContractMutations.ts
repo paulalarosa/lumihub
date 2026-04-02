@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { sanitizeFormData } from '@/lib/security'
 
 export function useContractMutations() {
   const queryClient = useQueryClient()
@@ -9,9 +10,10 @@ export function useContractMutations() {
 
   const createMutation = useMutation({
     mutationFn: async (contractData: any) => {
+      const cleanData = sanitizeFormData(contractData)
       const { data, error } = await supabase
         .from('contracts')
-        .insert(contractData)
+        .insert(cleanData)
         .select()
         .single()
 
@@ -38,9 +40,10 @@ export function useContractMutations() {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const cleanData = sanitizeFormData(data)
       const { data: result, error } = await supabase
         .from('contracts')
-        .update(data)
+        .update(cleanData)
         .eq('id', id)
         .select()
         .single()

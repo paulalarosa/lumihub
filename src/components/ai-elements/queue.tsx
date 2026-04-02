@@ -194,7 +194,6 @@ export const QueueList = ({
   </ScrollArea>
 )
 
-// QueueSection - collapsible section container
 export type QueueSectionProps = ComponentProps<typeof Collapsible>
 
 export const QueueSection = ({
@@ -205,7 +204,6 @@ export const QueueSection = ({
   <Collapsible className={cn(className)} defaultOpen={defaultOpen} {...props} />
 )
 
-// QueueSectionTrigger - section header/trigger
 export type QueueSectionTriggerProps = ComponentProps<'button'>
 
 export const QueueSectionTrigger = ({
@@ -227,7 +225,6 @@ export const QueueSectionTrigger = ({
   </CollapsibleTrigger>
 )
 
-// QueueSectionLabel - label content with icon and count
 export type QueueSectionLabelProps = ComponentProps<'span'> & {
   count?: number
   label: string
@@ -250,7 +247,6 @@ export const QueueSectionLabel = ({
   </span>
 )
 
-// QueueSectionContent - collapsible content area
 export type QueueSectionContentProps = ComponentProps<typeof CollapsibleContent>
 
 export const QueueSectionContent = ({

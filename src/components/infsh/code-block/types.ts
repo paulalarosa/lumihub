@@ -1,19 +1,19 @@
 export type TokenType =
   | 'comment'
   | 'string'
-  | 'keyword-import'      // import, export, from, as
-  | 'keyword-declaration' // const, let, var, function, class, type, interface
-  | 'keyword-control'     // if, else, return, for, while
-  | 'keyword-value'       // true, false, null, undefined
-  | 'keyword-other'       // new, this, typeof, etc.
+  | 'keyword-import'
+  | 'keyword-declaration'
+  | 'keyword-control'
+  | 'keyword-value'
+  | 'keyword-other'
   | 'number'
   | 'function'
   | 'property'
   | 'operator'
   | 'punctuation'
-  | 'type'                // type annotations in TS
-  | 'tag'                 // JSX/HTML tag names
-  | 'attribute'           // JSX/HTML attributes
+  | 'type'
+  | 'tag'
+  | 'attribute'
 
 export interface Token {
   type: TokenType | null

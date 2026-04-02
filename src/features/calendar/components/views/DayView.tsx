@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { formatDate } from '@/lib/date-utils'
-// format removed (handled by formatDate)
+
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { MapPin, User, Clock } from 'lucide-react'
@@ -78,7 +78,7 @@ export function DayView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
+      {}
       <div
         className={cn(
           'py-4 px-6 border-b text-center',
@@ -101,7 +101,7 @@ export function DayView({
         </div>
       </div>
 
-      {/* All-day events */}
+      {}
       {allDayEvents.length > 0 && (
         <div className="border-b p-3 space-y-2">
           <div className="text-xs font-medium text-muted-foreground uppercase">
@@ -135,10 +135,10 @@ export function DayView({
         </div>
       )}
 
-      {/* Time grid */}
+      {}
       <ScrollArea className="flex-1">
         <div className="flex min-h-full">
-          {/* Time labels */}
+          {}
           <div className="w-20 shrink-0 border-r">
             {hours.map((hour) => (
               <div
@@ -151,9 +151,9 @@ export function DayView({
             ))}
           </div>
 
-          {/* Main column */}
+          {}
           <div className={cn('flex-1 relative', isTodayDate && 'bg-primary/5')}>
-            {/* Hour slots */}
+            {}
             {hours.map((hour) => (
               <div
                 key={hour}
@@ -170,12 +170,12 @@ export function DayView({
                 tabIndex={0}
                 aria-label={`Select time slot ${hour}:00`}
               >
-                {/* Half-hour line */}
+                {}
                 <div className="h-1/2 border-b border-dashed border-muted/50" />
               </div>
             ))}
 
-            {/* Events */}
+            {}
             {timedEvents.map((event) => {
               const position = getEventPosition(event)
               if (!position) return null

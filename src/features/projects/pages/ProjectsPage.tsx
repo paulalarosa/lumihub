@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { Link } from 'react-router-dom'
 import { useLanguage } from '@/hooks/useLanguage'
 import { Button } from '@/components/ui/button'
@@ -53,6 +54,7 @@ export default function Projetos() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
+      <SEOHead title="Projetos" noindex={true} />
       <header className="border-b border-white/20 bg-black">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">

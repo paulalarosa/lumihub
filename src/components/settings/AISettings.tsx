@@ -171,7 +171,7 @@ export default function AISettings({
       <Card className="border-border bg-black/40 rounded-none shadow-none">
         <CardContent className="py-4">
           <p className="text-[9px] text-muted-foreground font-mono uppercase text-center">
-            SISTEMA_AGNOSTICO_V2.0 // KHAOS_KONTROL_PROTOCOL
+            SISTEMA_AGNOSTICO_V2.0
           </p>
         </CardContent>
       </Card>

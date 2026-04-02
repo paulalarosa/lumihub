@@ -29,18 +29,14 @@ const AuthCallbackHandler = () => {
     if (code) {
       handleOAuthCallback()
     } else {
-      // No code, usually implies we are already authenticated or just visiting the URL.
-      // Redirect to dashboard.
       setTimeout(() => navigate('/dashboard'), 1000)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams])
 
   const handleOAuthCallback = async () => {
     try {
       setLoadingText('Validando conexão com Google...')
 
-      // 1. Get Session
       const { data, error } = await supabase.auth.getSession()
 
       if (error) {
@@ -50,7 +46,6 @@ const AuthCallbackHandler = () => {
       const session = data.session
 
       if (!session) {
-        // Retry once after a short delay in case of race condition
         setTimeout(async () => {
           const { data: retryData } = await supabase.auth.getSession()
           if (retryData.session) {
@@ -77,8 +72,6 @@ const AuthCallbackHandler = () => {
     provider_refresh_token?: string
     user: { id: string }
   }) => {
-    // 2. Verify Token Exists
-    // This ensures we actually got a provider token from the Google flow
     if (!session.provider_token && !session.provider_refresh_token) {
       setStatus('error')
       setErrorMessage(
@@ -87,25 +80,21 @@ const AuthCallbackHandler = () => {
       return
     }
 
-    // 3. Update Database (Only on Success)
-    // Note: 'google_calendar_connected' column does not exist in 'profiles' schema, so we only update 'onboarding_completed'.
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ onboarding_completed: true })
       .eq('id', session.user.id)
 
     if (updateError) {
-      // We don't block login on profile update error, but we log it.
     }
 
-    // 4. Success State
     setStatus('success')
     setTimeout(() => navigate('/dashboard'), 1500)
   }
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 font-sans selection:bg-black selection:text-white relative overflow-hidden">
-      {/* Background Effects - Concrete Texture */}
+      {}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-40 mix-blend-multiply" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#000000_1px,transparent_1px),linear-gradient(to_bottom,#000000_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.03]" />
 

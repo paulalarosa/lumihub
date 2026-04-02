@@ -64,7 +64,6 @@ export const WhatsAppButtons = ({
       return
     }
 
-    // Audit Log
     try {
       await Logger.action(
         actionType,

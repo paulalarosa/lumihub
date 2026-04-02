@@ -28,7 +28,6 @@ export function useContractForm({
   const [content, setContent] = useState('')
   const [file, setFile] = useState<File | null>(null)
 
-  // Reset form when dialog opens
   useEffect(() => {
     if (open) {
       setProjectId(defaultProjectId || '')

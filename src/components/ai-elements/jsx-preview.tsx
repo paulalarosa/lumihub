@@ -52,13 +52,11 @@ const completeJsxTag = (code: string) => {
   while (currentPosition < code.length) {
     const match = matchJsxTag(code.slice(currentPosition))
     if (!match) {
-      // No more tags found, append remaining content
       result += code.slice(currentPosition)
       break
     }
     const { tagName, type, endIndex } = match
 
-    // Include any text content before this tag
     result += code.slice(currentPosition, currentPosition + endIndex)
 
     if (type === 'opening') {
@@ -101,7 +99,6 @@ export const JSXPreview = memo(
     const [prevJsx, setPrevJsx] = useState(jsx)
     const [error, setError] = useState<Error | null>(null)
 
-    // Clear error when jsx changes (derived state pattern)
     if (jsx !== prevJsx) {
       setPrevJsx(jsx)
       setError(null)
@@ -142,15 +139,12 @@ export const JSXPreviewContent = memo(
       useJSXPreview()
     const errorReportedRef = useRef<string | null>(null)
 
-    // Reset error tracking when jsx changes
-    // biome-ignore lint/correctness/useExhaustiveDependencies: processedJsx change should reset tracking
     useEffect(() => {
       errorReportedRef.current = null
     }, [processedJsx])
 
     const handleError = useCallback(
       (err: Error) => {
-        // Prevent duplicate error reports for the same jsx
         if (errorReportedRef.current === processedJsx) {
           return
         }

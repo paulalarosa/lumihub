@@ -23,7 +23,6 @@ export default function AIAssistantFAB() {
   const [isLoading, setIsLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to latest message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -32,7 +31,6 @@ export default function AIAssistantFAB() {
     e.preventDefault()
     if (!input.trim()) return
 
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       text: input,
@@ -43,7 +41,6 @@ export default function AIAssistantFAB() {
     setInput('')
     setIsLoading(true)
 
-    // Simulate AI response delay
     setTimeout(() => {
       const responses = [
         'QUERY_RECEIVED. PLEASE_CONTACT_SUPPORT_VIA_WHATSAPP.',
@@ -78,7 +75,7 @@ export default function AIAssistantFAB() {
             transition={{ duration: 0.2 }}
             className="absolute bottom-20 right-0 w-80 h-96 bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] border border-white flex flex-col overflow-hidden"
           >
-            {/* Header */}
+            {}
             <div className="bg-black border-b border-white p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-white animate-pulse" />
@@ -94,7 +91,7 @@ export default function AIAssistantFAB() {
               </button>
             </div>
 
-            {/* Messages */}
+            {}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black">
               {messages.map((message) => (
                 <div
@@ -118,16 +115,14 @@ export default function AIAssistantFAB() {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="text-[10px] text-white/50 uppercase tracking-widest animate-pulse">
-                    /// ANALYZING_INPUT...
-                  </div>
+                  <div className="text-[10px] text-white/50 uppercase tracking-widest animate-pulse"></div>
                 </div>
               )}
 
               <div ref={messagesEndRef} />
             </div>
 
-            {/* WhatsApp Fallback Button */}
+            {}
             <div className="p-0 border-t border-white/20">
               <button
                 onClick={handleWhatsAppFallback}
@@ -138,7 +133,7 @@ export default function AIAssistantFAB() {
               </button>
             </div>
 
-            {/* Input */}
+            {}
             <form onSubmit={handleSendMessage} className="bg-black">
               <div className="flex gap-0 border-t border-white/20">
                 <span className="flex items-center pl-3 text-white font-mono text-xs select-none">
@@ -164,7 +159,7 @@ export default function AIAssistantFAB() {
         )}
       </AnimatePresence>
 
-      {/* FAB Button */}
+      {}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}

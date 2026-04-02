@@ -246,7 +246,7 @@ export function LogDetailDialog({
 
           <div className="flex justify-between items-center pt-6 border-t border-white/10">
             <p className="text-[8px] font-mono text-gray-600 uppercase">
-              CONFIDENTIAL: ACCESS_RESTRICTED_TO_KONTROL_ADMINS // LOG_ID:{' '}
+              CONFIDENTIAL: ACCESS_RESTRICTED_TO_KONTROL_ADMINS
               {selectedAudit?.id}
             </p>
             <Button

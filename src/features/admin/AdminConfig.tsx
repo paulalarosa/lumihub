@@ -72,7 +72,6 @@ export default function AdminConfig() {
     try {
       setSaving(true)
 
-      // Optimistic update
       setConfigs((prev) => ({ ...prev, [key]: value }))
 
       const { error } = await supabase
@@ -85,7 +84,7 @@ export default function AdminConfig() {
     } catch (error) {
       logger.error(error, 'AdminConfig.handleSave', { showToast: false })
       toast.error('Falha ao atualizar parâmetros do sistema.')
-      fetchConfigs() // Revert
+      fetchConfigs()
     } finally {
       setSaving(false)
     }
@@ -105,7 +104,7 @@ export default function AdminConfig() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Maintenance Mode */}
+        {}
         <Card className="bg-black border border-red-900/30 rounded-none relative overflow-hidden group">
           <div
             className={`absolute inset-0 bg-red-900/5 transition-opacity duration-300 ${configs.maintenance_mode ? 'opacity-100' : 'opacity-0'}`}
@@ -148,7 +147,7 @@ export default function AdminConfig() {
           </CardContent>
         </Card>
 
-        {/* New Registrations */}
+        {}
         <Card className="bg-black border border-white/20 rounded-none">
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -178,7 +177,7 @@ export default function AdminConfig() {
         </Card>
       </div>
 
-      {/* Global Alert */}
+      {}
       <Card className="bg-black border border-white/20 rounded-none">
         <CardHeader>
           <div className="flex items-center gap-2">

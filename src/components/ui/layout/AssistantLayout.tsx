@@ -9,12 +9,9 @@ export default function AssistantLayout() {
   const { signOut } = useAuth()
   const { isAssistant, loading } = useRole()
 
-  // If checking role, show loader
   if (loading) return <PageLoader />
 
-  // If not assistant, redirect or show error?
-  // ProtectedRoute usually handles this, but layout can enforce too.
-  if (!isAssistant) return <Navigate to="/" replace /> // Or to a specific error page.
+  if (!isAssistant) return <Navigate to="/" replace />
 
   return (
     <div className="min-h-screen bg-background text-foreground">

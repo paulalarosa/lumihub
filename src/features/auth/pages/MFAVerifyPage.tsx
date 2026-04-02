@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import MFAVerification from '@/components/auth/MFAVerification'
 import { useAuth } from '@/hooks/useAuth'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
@@ -14,6 +15,7 @@ export default function MFAVerifyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <SEOHead title="Verificação" noindex={true} />
       <MFAVerification
         onSuccess={() => navigate(redirectTo, { replace: true })}
       />

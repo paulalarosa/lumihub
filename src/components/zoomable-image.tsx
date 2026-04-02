@@ -1,18 +1,19 @@
-"use client"
+'use client'
 
-import Zoom from "react-medium-image-zoom"
-import "react-medium-image-zoom/dist/styles.css"
-import "./zoomable-image.css"
-import { ImageOff } from "lucide-react"
-import { DetailedHTMLProps, ImgHTMLAttributes, useState } from "react"
+import Zoom from 'react-medium-image-zoom'
+import 'react-medium-image-zoom/dist/styles.css'
+import './zoomable-image.css'
+import { ImageOff } from 'lucide-react'
+import { DetailedHTMLProps, ImgHTMLAttributes, useState } from 'react'
 
-export interface ZoomableImageProps
-  extends DetailedHTMLProps<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement> {
-  /** Disable zoom behavior */
+export interface ZoomableImageProps extends DetailedHTMLProps<
+  ImgHTMLAttributes<HTMLImageElement>,
+  HTMLImageElement
+> {
   disabled?: boolean
-  /** Higher quality image src to load when zoomed */
+
   zoomSrc?: string
-  /** Offset in pixels from window boundaries when zoomed */
+
   zoomMargin?: number
 }
 
@@ -49,7 +50,7 @@ export default function ZoomableImage({
   const image = (
     <img
       src={src}
-      alt={alt || ""}
+      alt={alt || ''}
       className={className}
       onLoad={onLoad}
       onError={handleError}

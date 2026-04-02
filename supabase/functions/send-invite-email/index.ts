@@ -1,42 +1,46 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
 interface InviteEmailRequest {
-    to: string;
-    makeup_artist_name: string;
-    invite_link: string;
-    invite_id: string;
+  to: string
+  makeup_artist_name: string
+  invite_link: string
+  invite_id: string
 }
 
 serve(async (req) => {
-    // CORS headers
-    if (req.method === "OPTIONS") {
-        return new Response(null, {
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Methods": "POST, OPTIONS",
-                "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-            },
-        });
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers':
+          'authorization, x-client-info, apikey, content-type',
+      },
+    })
+  }
+
+  try {
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY not configured')
     }
 
-    try {
-        if (!RESEND_API_KEY) {
-            throw new Error("RESEND_API_KEY not configured");
-        }
+    const {
+      to,
+      makeup_artist_name,
+      invite_link,
+      invite_id,
+    }: InviteEmailRequest = await req.json()
 
-        const { to, makeup_artist_name, invite_link, invite_id }: InviteEmailRequest = await req.json();
+    if (!to || !makeup_artist_name || !invite_link || !invite_id) {
+      throw new Error('Missing required fields')
+    }
 
-        if (!to || !makeup_artist_name || !invite_link || !invite_id) {
-            throw new Error("Missing required fields");
-        }
-
-        // Professional email template with Industrial Noir aesthetic
-        const emailHtml = `
+    const emailHtml = `
       <!DOCTYPE html>
       <html lang="pt-BR">
         <head>
@@ -211,88 +215,81 @@ serve(async (req) => {
           </div>
         </body>
       </html>
-    `;
+    `
 
-        // Send email via Resend
-        const resendResponse = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${RESEND_API_KEY}`,
-            },
-            body: JSON.stringify({
-                from: "Khaos Kontrol <convites@khaoskontrol.com.br>",
-                to: [to],
-                subject: `${makeup_artist_name} te convidou para ser Assistente 🎨`,
-                html: emailHtml,
-            }),
-        });
+    const resendResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'Khaos Kontrol <convites@khaoskontrol.com.br>',
+        to: [to],
+        subject: `${makeup_artist_name} te convidou para ser Assistente 🎨`,
+        html: emailHtml,
+      }),
+    })
 
-        const resendData = await resendResponse.json();
+    const resendData = await resendResponse.json()
 
-        if (!resendResponse.ok) {
-            throw new Error(resendData.message || "Failed to send email via Resend");
-        }
-
-        // Log notification in database
-        if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
-            const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-
-            await supabase.from("notification_logs").insert({
-                invite_id,
-                type: "email",
-                recipient: to,
-                status: "sent",
-                provider_id: resendData.id,
-            });
-        }
-
-        return new Response(
-            JSON.stringify({
-                success: true,
-                email_id: resendData.id,
-                message: "Email sent successfully"
-            }),
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                }
-            }
-        );
-    } catch (error: any) {
-        console.error("Email sending error:", error);
-
-        // Log failed notification
-        if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
-            try {
-                const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-                const body = await req.json();
-
-                await supabase.from("notification_logs").insert({
-                    invite_id: body.invite_id,
-                    type: "email",
-                    recipient: body.to,
-                    status: "failed",
-                    error_message: error.message,
-                });
-            } catch (logError) {
-                console.error("Failed to log error:", logError);
-            }
-        }
-
-        return new Response(
-            JSON.stringify({
-                success: false,
-                error: error.message
-            }),
-            {
-                status: 500,
-                headers: {
-                    "Content-Type": "application/json",
-                    "Access-Control-Allow-Origin": "*",
-                }
-            }
-        );
+    if (!resendResponse.ok) {
+      throw new Error(resendData.message || 'Failed to send email via Resend')
     }
-});
+
+    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+      await supabase.from('notification_logs').insert({
+        invite_id,
+        type: 'email',
+        recipient: to,
+        status: 'sent',
+        provider_id: resendData.id,
+      })
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        email_id: resendData.id,
+        message: 'Email sent successfully',
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      },
+    )
+  } catch (error: any) {
+    if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
+      try {
+        const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+        const body = await req.json()
+
+        await supabase.from('notification_logs').insert({
+          invite_id: body.invite_id,
+          type: 'email',
+          recipient: body.to,
+          status: 'failed',
+          error_message: error.message,
+        })
+      } catch (logError) {}
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+      }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      },
+    )
+  }
+})

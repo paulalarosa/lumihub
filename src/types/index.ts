@@ -1,13 +1,7 @@
-// Type Definitions - Barrel Export
-// Central export point for all type definitions
-
-// API and data types
 export * from './api.types'
 
-// Component props types
 export * from './components.types'
 
-// Re-export Supabase types for convenience
 export type {
   Database,
   Tables,
@@ -16,7 +10,6 @@ export type {
   Enums,
 } from '@/integrations/supabase/types'
 
-// Re-export commonly used types for convenience
 export type {
   Profile,
   Client,

@@ -24,6 +24,7 @@ import { CalendarIcon, Gem } from 'lucide-react'
 import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
+import { sanitizeFormData } from '@/lib/security'
 
 export type ClientFormData = z.infer<typeof clientSchema>
 
@@ -53,11 +54,19 @@ export function ClientForm({
     },
   })
 
+  const handleFormSubmit = (data: ClientFormData) => {
+    const cleanData = sanitizeFormData(data)
+    onSubmit(cleanData)
+  }
+
   const isBride = form.watch('is_bride')
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+      <form
+        onSubmit={form.handleSubmit(handleFormSubmit)}
+        className="space-y-6 mt-4"
+      >
         <FormField
           control={form.control}
           name="name"

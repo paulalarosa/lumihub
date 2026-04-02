@@ -38,7 +38,6 @@ export function useAdminSubscriptions() {
 
   useEffect(() => {
     fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const calculateStats = (profiles: SubscriptionUser[]) => {
@@ -57,8 +56,8 @@ export function useAdminSubscriptions() {
     setStats({
       mrr,
       activeSubscribers: subscribers,
-      churnRate: '2.4%', // Placeholder
-      growth: '+12.5%', // Placeholder
+      churnRate: '2.4%',
+      growth: '+12.5%',
     })
   }
 

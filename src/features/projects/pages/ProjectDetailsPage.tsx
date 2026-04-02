@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
@@ -135,6 +136,7 @@ export default function ProjectDetailsPage() {
 
   return (
     <div className="min-h-screen bg-black text-white font-mono selection:bg-white selection:text-black">
+      <SEOHead title="Detalhes do Projeto" noindex={true} />
       <ProjectHeader
         project={project}
         viewMode={viewMode}
@@ -253,7 +255,7 @@ export default function ProjectDetailsPage() {
           </div>
         ) : (
           <>
-            {/* Client Communication Card */}
+            {}
             <Card className="mb-6 bg-black border border-white/20 rounded-none">
               <CardHeader className="border-b border-white/10 pb-3">
                 <CardTitle className="flex items-center gap-2 text-white font-serif uppercase tracking-wide text-lg">

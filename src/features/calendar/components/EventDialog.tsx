@@ -1,5 +1,5 @@
 import { formatDate, toZonedTime } from '@/lib/date-utils'
-// format removed (handled by formatDate)
+
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -87,13 +87,13 @@ export default function EventDialog({
           </DialogHeader>
 
           <form onSubmit={form.handleSubmit} className="space-y-6 mt-4">
-            {/* Event Type Pills */}
+            {}
             <EventTypeSelector
               currentType={form.eventType}
               onTypeChange={form.setEventType}
             />
 
-            {/* Service Selection */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <EventServiceSelector
                 selectedServiceId={form.selectedServiceId}
@@ -102,7 +102,7 @@ export default function EventDialog({
               />
             </div>
 
-            {/* Title */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-gray-300">
                 Título do Evento *
@@ -121,7 +121,7 @@ export default function EventDialog({
               />
             </div>
 
-            {/* Date & Client Grid */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label
@@ -146,7 +146,7 @@ export default function EventDialog({
                 />
               </div>
 
-              {/* Client Select */}
+              {}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-gray-300">Cliente</Label>
@@ -181,7 +181,7 @@ export default function EventDialog({
               </div>
             </div>
 
-            {/* Description */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="description" className="text-gray-300">
                 Descrição
@@ -196,7 +196,7 @@ export default function EventDialog({
               />
             </div>
 
-            {/* Conditional Times */}
+            {}
             <div className="p-4 rounded-none bg-white/[0.03] border border-white/5 space-y-4">
               <Label className="flex items-center gap-2 text-white font-medium">
                 <Clock className="h-4 w-4" />
@@ -298,7 +298,7 @@ export default function EventDialog({
               )}
             </div>
 
-            {/* Address */}
+            {}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-gray-300">
                 <MapPin className="h-4 w-4 text-white" />
@@ -307,7 +307,6 @@ export default function EventDialog({
               <div
                 onClick={(e) => e.stopPropagation()}
                 onKeyDown={(e) => {
-                  // Allow typing in input but stop propagation for div wrapper
                   e.stopPropagation()
                 }}
                 role="none"
@@ -329,7 +328,7 @@ export default function EventDialog({
               </div>
             </div>
 
-            {/* Project & Reminders */}
+            {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -403,7 +402,7 @@ export default function EventDialog({
               </div>
             </div>
 
-            {/* Assistants */}
+            {}
             <div className="space-y-3">
               <Label className="flex items-center gap-2 text-gray-300">
                 <Users className="h-4 w-4 text-white" />
@@ -442,7 +441,7 @@ export default function EventDialog({
               )}
             </div>
 
-            {/* Color Palette */}
+            {}
             <div className="space-y-2 pt-2 border-t border-white/5">
               <Label className="flex items-center gap-2 text-gray-300 text-xs uppercase tracking-wide">
                 <Palette className="h-3 w-3" />
@@ -461,7 +460,7 @@ export default function EventDialog({
               </div>
             </div>
 
-            {/* Actions */}
+            {}
             <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/10">
               {event && (
                 <Button

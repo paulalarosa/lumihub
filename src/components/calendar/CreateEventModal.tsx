@@ -91,7 +91,7 @@ export const CreateEventModal = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Título */}
+          {}
           <div>
             <Label htmlFor="title" className="text-white">
               Título *
@@ -108,7 +108,7 @@ export const CreateEventModal = ({
             />
           </div>
 
-          {/* Tipo */}
+          {}
           <div>
             <Label htmlFor="eventType" className="text-white">
               Tipo de Evento *
@@ -134,7 +134,7 @@ export const CreateEventModal = ({
             </Select>
           </div>
 
-          {/* Data e Horário */}
+          {}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="startDate" className="text-white">
@@ -183,7 +183,7 @@ export const CreateEventModal = ({
             </div>
           </div>
 
-          {/* Local */}
+          {}
           <div>
             <Label htmlFor="location" className="text-white">
               Local
@@ -199,7 +199,7 @@ export const CreateEventModal = ({
             />
           </div>
 
-          {/* Descrição */}
+          {}
           <div>
             <Label htmlFor="description" className="text-white">
               Descrição
@@ -216,7 +216,7 @@ export const CreateEventModal = ({
             />
           </div>
 
-          {/* Actions */}
+          {}
           <div className="flex gap-2 justify-end pt-4">
             <Button
               type="button"

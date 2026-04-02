@@ -55,7 +55,7 @@ const AssistantDashboard = ({
         </p>
       </div>
 
-      {/* Stats Cards */}
+      {}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -98,7 +98,7 @@ const AssistantDashboard = ({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Meus Ganhos - Seção Privada */}
+        {}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -118,7 +118,7 @@ const AssistantDashboard = ({
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Earnings Overview */}
+              {}
               <div className="grid grid-cols-2 gap-4">
                 <div className="text-center p-4 bg-white/50 rounded-lg">
                   <div className="text-2xl font-bold text-primary">
@@ -139,7 +139,7 @@ const AssistantDashboard = ({
                 </div>
               </div>
 
-              {/* Progress to Target */}
+              {}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Meta do mês</span>
@@ -151,7 +151,7 @@ const AssistantDashboard = ({
                 <Progress value={progressToTarget} className="h-3" />
               </div>
 
-              {/* Next Milestone */}
+              {}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span>Próximo marco</span>
@@ -165,7 +165,7 @@ const AssistantDashboard = ({
                 </div>
               </div>
 
-              {/* Quick Stats */}
+              {}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t">
                 <div className="text-center">
                   <div className="text-lg font-bold text-primary">
@@ -190,7 +190,7 @@ const AssistantDashboard = ({
           </Card>
         </motion.div>
 
-        {/* Upcoming Events */}
+        {}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -256,7 +256,7 @@ const AssistantDashboard = ({
         </Card>
       </div>
 
-      {/* Pending Tasks */}
+      {}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -297,7 +297,7 @@ const AssistantDashboard = ({
         </CardContent>
       </Card>
 
-      {/* Locked Features */}
+      {}
       <div>
         <h3 className="text-lg font-semibold mb-4">Recursos Premium</h3>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -10,7 +10,7 @@ export const CTASection = () => {
   return (
     <section className="py-32 bg-black relative overflow-hidden">
       <div className="container mx-auto px-6 max-w-3xl">
-        {/* StoryBrand: Fracasso (o que acontece se NÃO agir) */}
+        {}
         <p className="text-white/30 text-xs font-mono uppercase tracking-[0.2em] mb-6 text-center">
           A cada semana sem sistema
         </p>
@@ -20,13 +20,13 @@ export const CTASection = () => {
           <span className="italic text-white/60">nunca mais voltam.</span>
         </h2>
 
-        {/* StoryBrand: Sucesso (o que acontece se agir) */}
+        {}
         <p className="text-white/40 text-center text-base md:text-lg mb-12 max-w-xl mx-auto leading-relaxed">
           Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca
           esquecem um follow-up, e têm clientes que indicam.
         </p>
 
-        {/* CTA direto */}
+        {}
         <div className="flex flex-col items-center gap-4">
           <Button
             variant="primary"

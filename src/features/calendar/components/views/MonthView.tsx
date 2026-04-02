@@ -60,7 +60,7 @@ export function MonthView({
       }
       map.get(dateKey)!.push(event)
     })
-    // Sort events by start_time
+
     map.forEach((dayEvents) => {
       dayEvents.sort((a, b) => {
         if (!a.start_time) return 1
@@ -75,7 +75,7 @@ export function MonthView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Week day headers */}
+      {}
       <div className="grid grid-cols-7 border-b">
         {weekDays.map((day) => (
           <div
@@ -87,7 +87,7 @@ export function MonthView({
         ))}
       </div>
 
-      {/* Calendar grid */}
+      {}
       <div className="grid grid-cols-7 flex-1 auto-rows-fr">
         {days.map((day, index) => {
           const dateKey = formatDate(day, 'yyyy-MM-dd')

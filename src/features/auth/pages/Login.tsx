@@ -10,11 +10,13 @@ import { Loader2, ArrowRight } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { getErrorMessage } from '@/utils/error-handler'
 import SEOHead from '@/components/seo/SEOHead'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 export default function Login() {
   const navigate = useNavigate()
   const { signIn, signInWithGoogle } = useAuth()
   const { toast } = useToast()
+  const { trackAuth, trackFormSubmit } = useAnalytics()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,7 +30,10 @@ export default function Login() {
     if (error) {
       const { title, description } = getErrorMessage(error, 'Erro no login')
       toast({ title, description, variant: 'destructive' })
+      trackFormSubmit('login', false, error.message)
     } else {
+      trackAuth('login', 'email')
+      trackFormSubmit('login', true)
       toast({
         title: 'Bem-vinda de volta!',
         description: 'Sessão iniciada com sucesso.',
@@ -57,6 +62,8 @@ export default function Login() {
     if (error) {
       const { title, description } = getErrorMessage(error, 'Erro ao conectar')
       toast({ title, description, variant: 'destructive' })
+    } else {
+      trackAuth('login', 'google')
     }
   }
 

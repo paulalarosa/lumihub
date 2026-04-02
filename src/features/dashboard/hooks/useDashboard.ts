@@ -10,7 +10,6 @@ export function useDashboard() {
   const { organizationId, isOwner, loading: orgLoading } = useOrganization()
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
 
-  // 1. Profile Name
   const { data: profileName = '', isLoading: profileLoading } = useQuery({
     queryKey: ['dashboard-profile', organizationId],
     queryFn: async () => {
@@ -25,7 +24,6 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  // 2. Clients Count
   const { data: clientsCount = 0, isLoading: clientsLoading } = useQuery({
     queryKey: ['dashboard-clients-count', organizationId],
     queryFn: async () => {
@@ -39,7 +37,6 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  // 3. Projects Count
   const { data: projectsCount = 0, isLoading: projectsLoading } = useQuery({
     queryKey: ['dashboard-projects-count', organizationId],
     queryFn: async () => {
@@ -53,7 +50,6 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  // 4. Upcoming Events
   const { data: upcomingEvents = [], isLoading: eventsLoading } = useQuery({
     queryKey: ['dashboard-upcoming-events', organizationId],
     queryFn: async () => {
@@ -70,11 +66,9 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  // 5. Marketing Triggers (Feature disabled - table does not exist)
   const marketingTriggers: { clientName: string; details: string }[] = []
   const triggersLoading = false
 
-  // 6. Financials (Owner Only)
   const {
     data: financials = { totalRevenue: 0 },
     isLoading: financialsLoading,

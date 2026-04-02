@@ -15,12 +15,10 @@ export const useRole = () => {
       return
     }
 
-    // Verificar role
     const checkRole = async () => {
       setLoading(true)
 
       try {
-        // Verificar se é maquiadora
         const { data: makeup } = await supabase
           .from('makeup_artists')
           .select('id')
@@ -32,7 +30,6 @@ export const useRole = () => {
           return
         }
 
-        // Verificar se é assistente
         const { data: assistant } = await supabase
           .from('assistants')
           .select('id')

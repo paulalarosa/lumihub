@@ -192,7 +192,6 @@ serve(async (req: Request) => {
       continue
     }
 
-    // Cancelar emails de trial se já assinou
     if (email.template.startsWith('trial_')) {
       const { data: profile } = await supabase
         .from('profiles')

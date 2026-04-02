@@ -23,23 +23,10 @@ export default function Return() {
   useEffect(() => {
     if (!sessionId || hasFetched.current) return
 
-    hasFetched.current = true // Prevent double fetch in React Strict Mode
+    hasFetched.current = true
 
     const fetchSession = async () => {
-      // We can optionally verify here via usage of stripe.checkout.sessions.retrieve
-      // But usually for valid session_id we just trust the redirect state provided the webhook handles the rest.
-      // Ideally calls a "verify" endpoint if we want immediate feedback.
-      // Given the prompt requirement: "Exibir um estado de 'Processando' enquanto verifica o status da sessão."
-
       try {
-        // Let's call our verify-payment edge function again, or just wait.
-        // Re-using verify-payment logic is good for immediate UI feedback.
-        // Assuming verify-payment is still relevant or we should fetch session status from Stripe directly?
-        // The prompt says "Mostrar mensagem de sucesso ou erro baseada no retorno da Stripe."
-
-        // Let's use verify-payment logic if it exists, otherwise just show success.
-        // I will use verify-payment as it is robust.
-
         const { data, error } = await supabase.functions.invoke(
           'verify-payment',
           {

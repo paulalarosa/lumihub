@@ -30,7 +30,6 @@ export function useContractsQuery() {
 
       if (error) throw error
 
-      // Fetch client names
       const clientIds = contractsData
         .map((c) => c.client_id)
         .filter((id): id is string => !!id)

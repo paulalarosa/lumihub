@@ -1,13 +1,53 @@
-import { motion } from 'framer-motion';
+import { motion } from 'framer-motion'
 
 export const FloatingGlassShapes = () => {
   const shapes = [
-    { id: 1, size: 350, top: '5%', right: '10%', duration: 8, delay: 0, type: 'circle' },
-    { id: 2, size: 250, top: '40%', left: '5%', duration: 10, delay: 1, type: 'circle' },
-    { id: 3, size: 300, bottom: '15%', right: '20%', duration: 9, delay: 0.5, type: 'circle' },
-    { id: 4, size: 180, top: '60%', right: '5%', duration: 7, delay: 2, type: 'hexagon' },
-    { id: 5, size: 220, bottom: '30%', left: '15%', duration: 11, delay: 1.5, type: 'circle' },
-  ];
+    {
+      id: 1,
+      size: 350,
+      top: '5%',
+      right: '10%',
+      duration: 8,
+      delay: 0,
+      type: 'circle',
+    },
+    {
+      id: 2,
+      size: 250,
+      top: '40%',
+      left: '5%',
+      duration: 10,
+      delay: 1,
+      type: 'circle',
+    },
+    {
+      id: 3,
+      size: 300,
+      bottom: '15%',
+      right: '20%',
+      duration: 9,
+      delay: 0.5,
+      type: 'circle',
+    },
+    {
+      id: 4,
+      size: 180,
+      top: '60%',
+      right: '5%',
+      duration: 7,
+      delay: 2,
+      type: 'hexagon',
+    },
+    {
+      id: 5,
+      size: 220,
+      bottom: '30%',
+      left: '15%',
+      duration: 11,
+      delay: 1.5,
+      type: 'circle',
+    },
+  ]
 
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -35,8 +75,8 @@ export const FloatingGlassShapes = () => {
             ease: 'easeInOut',
           }}
         >
-          {/* Glass Effect Shape */}
-          <div 
+          {}
+          <div
             className="w-full h-full rounded-full"
             style={{
               background: `
@@ -56,19 +96,20 @@ export const FloatingGlassShapes = () => {
               `,
             }}
           />
-          
-          {/* Inner Reflection */}
-          <div 
+
+          {}
+          <div
             className="absolute top-[10%] left-[10%] w-[40%] h-[30%] rounded-full"
             style={{
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
               filter: 'blur(10px)',
             }}
           />
         </motion.div>
       ))}
-      
-      {/* Subtle Particle Effect */}
+
+      {}
       {[...Array(8)].map((_, i) => (
         <motion.div
           key={`particle-${i}`}
@@ -90,5 +131,5 @@ export const FloatingGlassShapes = () => {
         />
       ))}
     </div>
-  );
-};
+  )
+}

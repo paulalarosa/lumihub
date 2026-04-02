@@ -18,7 +18,7 @@ export const PricingHeader = ({
           PLANOS
         </motion.h1>
 
-        {/* Billing Toggle - GLASSMORPHISM */}
+        {}
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 p-2 bg-white/5 border border-white/10 rounded-full backdrop-blur-2xl shadow-2xl">
             <button

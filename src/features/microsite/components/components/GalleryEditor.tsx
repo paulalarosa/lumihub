@@ -63,7 +63,6 @@ export function GalleryEditor({ micrositeId }: { micrositeId?: string }) {
 
         if (error) throw error
       } catch (dbError) {
-        // CLEANUP: Delete file from storage if DB insertion fails
         await supabase.storage.from('microsite-assets').remove([path])
         throw dbError
       }

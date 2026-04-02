@@ -40,7 +40,7 @@ export default function Header() {
       )}
     >
       <div className="container mx-auto px-6 lg:px-10 flex items-center justify-between">
-        {/* Logo — Portfolite style: icon + wordmark */}
+        {}
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
             src="/favicon-khaoskontrol.webp"
@@ -52,9 +52,9 @@ export default function Header() {
           </span>
         </Link>
 
-        {/* Desktop Nav & Controls */}
+        {}
         <div className="hidden md:flex items-center gap-8">
-          {/* Navigation Links */}
+          {}
           <nav className="flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path
@@ -86,9 +86,9 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Controls & CTAs */}
+          {}
           <div className="flex items-center gap-6 border-l border-border/50 pl-6">
-            {/* PT | EN Toggle */}
+            {}
             <div className="flex items-center border border-border rounded-sm overflow-hidden text-xs font-medium tracking-widest uppercase">
               <button
                 onClick={() => setLanguage('pt')}
@@ -114,7 +114,7 @@ export default function Header() {
               </button>
             </div>
 
-            {/* Dark Mode Toggle */}
+            {}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="text-foreground hover:text-muted-foreground transition-colors p-2 rounded-full hover:bg-foreground/5"
@@ -128,7 +128,7 @@ export default function Header() {
               )}
             </button>
 
-            {/* ACESSO KONTROL Button */}
+            {}
             <Link
               to="/planos"
               className="px-6 py-2.5 bg-white/10 text-white backdrop-blur-md rounded-[2rem] border border-white/20 text-xs font-bold hover:bg-white/20 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] uppercase tracking-[0.2em]"
@@ -138,7 +138,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Mobile Toggle */}
+        {}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors"
@@ -151,7 +151,7 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div

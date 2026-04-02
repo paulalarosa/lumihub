@@ -54,7 +54,7 @@ export const LocalAISettings = () => {
 
   return (
     <div className="space-y-6 font-mono">
-      {/* Information Header */}
+      {}
       <Alert className="bg-zinc-900/50 border-white/5 rounded-none">
         <Shield className="w-4 h-4 text-emerald-500/50" />
         <AlertDescription className="text-[10px] uppercase tracking-widest leading-relaxed">
@@ -69,7 +69,7 @@ export const LocalAISettings = () => {
         </AlertDescription>
       </Alert>
 
-      {/* Model Selector */}
+      {}
       <div className="space-y-3">
         <label className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-500">
           Neural_Model_Selection
@@ -103,7 +103,7 @@ export const LocalAISettings = () => {
         </Select>
       </div>
 
-      {/* Loading Progress */}
+      {}
       {isLoading && (
         <div className="space-y-3 p-4 bg-zinc-900/30 border border-white/5">
           <div className="flex items-center justify-between text-[10px] uppercase tracking-widest">
@@ -117,7 +117,7 @@ export const LocalAISettings = () => {
         </div>
       )}
 
-      {/* Success Notification */}
+      {}
       {isInitialized && (
         <div className="flex items-center gap-3 p-4 border border-emerald-500/20 bg-emerald-500/5">
           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -127,7 +127,7 @@ export const LocalAISettings = () => {
         </div>
       )}
 
-      {/* Primary Actions */}
+      {}
       <div className="flex gap-2">
         {!isInitialized ? (
           <Button
@@ -159,7 +159,7 @@ export const LocalAISettings = () => {
         )}
       </div>
 
-      {/* Hardware Specifications */}
+      {}
       <div className="p-4 bg-black/40 border border-white/5 space-y-3">
         <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest border-b border-white/5 pb-2">
           Hardware_Manifest

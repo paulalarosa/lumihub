@@ -9,9 +9,9 @@ export interface Microsite {
   primary_color?: string
   secondary_color?: string
   about_text?: string
-  services?: unknown[] // JSONB
+  services?: unknown[]
   portfolio_images?: string[]
-  testimonials?: unknown[] // JSONB
+  testimonials?: unknown[]
   phone?: string
   email?: string
   instagram_handle?: string

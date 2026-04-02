@@ -1,15 +1,15 @@
-import { motion } from 'framer-motion';
-import { useRef, useState } from 'react';
-import { ReactNode } from 'react';
+import { motion } from 'framer-motion'
+import { useRef, useState } from 'react'
+import { ReactNode } from 'react'
 
 interface MagneticButtonProps {
-  children: ReactNode;
-  onClick?: () => void;
-  className?: string;
-  strength?: number;
-  href?: string;
-  target?: string;
-  rel?: string;
+  children: ReactNode
+  onClick?: () => void
+  className?: string
+  strength?: number
+  href?: string
+  target?: string
+  rel?: string
 }
 
 export const MagneticButton = ({
@@ -21,37 +21,37 @@ export const MagneticButton = ({
   target,
   rel,
 }: MagneticButtonProps) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const ref = useRef<HTMLDivElement>(null)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
+    if (!ref.current) return
 
-    const button = ref.current.getBoundingClientRect();
+    const button = ref.current.getBoundingClientRect()
     const center = {
       x: button.left + button.width / 2,
       y: button.top + button.height / 2,
-    };
+    }
 
     const distance = {
       x: e.clientX - center.x,
       y: e.clientY - center.y,
-    };
+    }
 
-    const magnitude = Math.sqrt(distance.x ** 2 + distance.y ** 2);
-    const maxDistance = 100; // Magnetic pull range
+    const magnitude = Math.sqrt(distance.x ** 2 + distance.y ** 2)
+    const maxDistance = 100
 
     if (magnitude < maxDistance) {
       setPosition({
         x: distance.x * strength,
         y: distance.y * strength,
-      });
+      })
     }
-  };
+  }
 
   const handleMouseLeave = () => {
-    setPosition({ x: 0, y: 0 });
-  };
+    setPosition({ x: 0, y: 0 })
+  }
 
   const motionElement = (
     <motion.div
@@ -67,15 +67,15 @@ export const MagneticButton = ({
     >
       {children}
     </motion.div>
-  );
+  )
 
   if (href) {
     return (
       <a href={href} target={target} rel={rel} className="inline-block">
         {motionElement}
       </a>
-    );
+    )
   }
 
-  return motionElement;
-};
+  return motionElement
+}

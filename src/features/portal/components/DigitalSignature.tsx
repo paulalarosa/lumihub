@@ -58,16 +58,13 @@ export function DigitalSignature({
 
     setIsSaving(true)
     try {
-      // 1. Get Signature Image
       const dataUrl = sigCanvas.current
         ?.getTrimmedCanvas()
         .toDataURL('image/png')
       if (!dataUrl) throw new Error('Failed to generate signature image')
 
-      // 2. Generate PDF with Signature
       const doc = new jsPDF()
 
-      // Header
       doc.setFontSize(20)
       doc.setFont('helvetica', 'bold')
       doc.text('KHAOS KONTROL', 105, 20, { align: 'center' })
@@ -87,17 +84,12 @@ export function DigitalSignature({
       doc.setLineWidth(0.5)
       doc.line(20, 40, 190, 40)
 
-      // Content
       doc.setFontSize(11)
       const content = contract.content || 'Conteúdo do contrato não disponível.'
       const splitText = doc.splitTextToSize(content, 170)
       doc.text(splitText, 20, 50)
 
-      // Add Signature Image at the bottom
-      // Calculate Y position based on text length, or just put it at the end/new page
-      // For simplicity, we'll maintain simple flow or add page if needed.
-      // Here we just put it somewhat below the text.
-      let finalY = 50 + splitText.length * 5 // Approx height
+      let finalY = 50 + splitText.length * 5
 
       if (finalY > 250) {
         doc.addPage()
@@ -109,7 +101,6 @@ export function DigitalSignature({
 
       const pdfBlob = doc.output('blob')
 
-      // 3. Upload Signed PDF
       const fileName = `signed_contracts/${contract.project_id}_${contract.id}_${Date.now()}.pdf`
       const { error: uploadError } = await supabase.storage
         .from('contracts')
@@ -124,7 +115,6 @@ export function DigitalSignature({
         data: { publicUrl },
       } = supabase.storage.from('contracts').getPublicUrl(fileName)
 
-      // 4. Update Contract Status
       try {
         const { error: updateError } = await supabase
           .from('contracts')
@@ -140,7 +130,6 @@ export function DigitalSignature({
 
         if (updateError) throw updateError
       } catch (updateError) {
-        // Cleanup: remove uploaded file if DB update fails
         await supabase.storage.from('contracts').remove([fileName])
         throw updateError
       }

@@ -29,10 +29,9 @@ export function BottomNav() {
     },
     {
       icon: Star,
-      label: 'Projetos', // Or Services? Let's go with Projects/Pro for now
+      label: 'Projetos',
       path: '/projetos',
     },
-    // We could add a 'Menu' item for setting/profile if 5 items fit better
   ]
 
   return (

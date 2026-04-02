@@ -39,7 +39,7 @@ export const LeadDetailsDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl h-[80vh] flex flex-col p-0 gap-0 bg-neutral-900 border-neutral-800 text-white">
-        {/* Header */}
+        {}
         <DialogHeader className="p-6 pb-4 border-b border-neutral-800">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
@@ -76,10 +76,10 @@ export const LeadDetailsDialog = ({
         </DialogHeader>
 
         <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar Info */}
+          {}
           <ScrollArea className="w-1/3 border-r border-neutral-800 p-6 bg-neutral-900/50">
             <div className="space-y-6">
-              {/* Contact Info */}
+              {}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
                   Contato
@@ -106,7 +106,7 @@ export const LeadDetailsDialog = ({
 
               <Separator className="bg-neutral-800" />
 
-              {/* Event Info */}
+              {}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
                   Evento
@@ -143,7 +143,7 @@ export const LeadDetailsDialog = ({
 
               <Separator className="bg-neutral-800" />
 
-              {/* Source */}
+              {}
               <div className="space-y-3">
                 <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider">
                   Origem
@@ -157,9 +157,9 @@ export const LeadDetailsDialog = ({
             </div>
           </ScrollArea>
 
-          {/* Main Content (History & Actions) */}
+          {}
           <div className="flex-1 flex flex-col bg-neutral-950">
-            {/* Tabs or Action Bar could go here */}
+            {}
             <div className="p-4 border-b border-neutral-800 flex gap-2">
               <Button
                 variant="outline"
@@ -181,7 +181,7 @@ export const LeadDetailsDialog = ({
 
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-6">
-                {/* Timeline Placeholder */}
+                {}
                 <div className="flex gap-4">
                   <div className="w-8 flex flex-col items-center">
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center border border-blue-500/30">

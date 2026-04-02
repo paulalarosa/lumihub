@@ -24,7 +24,7 @@ interface EmailRequest {
   to: string[]
   template: string
   templateData: Record<string, any>
-  userId?: string // Optional: used for logging
+  userId?: string
 }
 
 serve(async (req) => {
@@ -54,7 +54,6 @@ serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_KEY!)
 
-    // Filter out invalid/unsubscribed recipients across all relevant tables
     const [
       { data: profileStatus },
       { data: clientStatus },
@@ -125,14 +124,11 @@ serve(async (req) => {
 
     const response = await sesClient.send(command)
 
-    // Log to Supabase if configured
     if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-      // We iterate over recipients to log individual entries, or just log once request
-      // Ideally notifications log should be per recipient
       const logEntries = to.map((recipient) => ({
-        user_id: userId || null, // Best effort linkage
+        user_id: userId || null,
         type: 'email',
         recipient: recipient,
         status: 'sent',
@@ -157,22 +153,13 @@ serve(async (req) => {
       },
     )
   } catch (error: any) {
-    console.error('SES Error:', error)
-
     try {
       const {
         to: errorTo,
         template: errorTemplate,
         userId: errorUserId,
       } = await reqClone.json()
-      console.error('Email send failed:', {
-        to: errorTo,
-        template: errorTemplate,
-        userId: errorUserId,
-        error: error.message,
-      })
 
-      // Log failure to Supabase if configured
       if (SUPABASE_URL && SUPABASE_SERVICE_KEY) {
         const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
         if (Array.isArray(errorTo)) {
@@ -190,9 +177,7 @@ serve(async (req) => {
           await supabase.from('notification_logs').insert(logEntries)
         }
       }
-    } catch (_) {
-      console.error('Email send failed (could not parse body):', error.message)
-    }
+    } catch (_) {}
 
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

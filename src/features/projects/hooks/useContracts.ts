@@ -90,7 +90,7 @@ export function useContracts({
       setIsContractDialogOpen(false)
       setContractTitle('')
       setContractContent('')
-      // Refresh contracts
+
       const { data } = await ProjectServiceAPI.getContracts(projectId)
       setContracts(data || [])
     }
@@ -133,7 +133,6 @@ export function useContracts({
   const handleArchitectMode = async () => {
     if (!project || !user) return
 
-    // Safety Check:
     if (!project?.client) {
       toast({
         variant: 'destructive',
@@ -176,7 +175,7 @@ export function useContracts({
           services: servicesList,
           total: totalValueFormatted,
         },
-        mode: 'creation', // Architect Mode
+        mode: 'creation',
       }
 
       const { data, error } = await supabase.functions.invoke(

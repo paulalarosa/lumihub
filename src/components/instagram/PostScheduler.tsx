@@ -27,12 +27,10 @@ export const PostScheduler = () => {
   const [scheduledFor, setScheduledFor] = useState('')
   const [isGeneratingHashtags, setIsGeneratingHashtags] = useState(false)
 
-  // Mutation: Agendar post
   const scheduleMutation = useMutation({
     mutationFn: async () => {
       if (!user?.id) throw new Error('Usuário não autenticado')
 
-      // Upload de mídias
       const mediaUrls: string[] = []
 
       for (const file of mediaFiles) {
@@ -41,7 +39,7 @@ export const PostScheduler = () => {
         const filePath = `instagram-posts/${fileName}`
 
         const { error: uploadError } = await supabase.storage
-          .from('public') // Assuming a public bucket exists or needs to be created
+          .from('public')
           .upload(filePath, file)
 
         if (uploadError) throw uploadError
@@ -50,7 +48,6 @@ export const PostScheduler = () => {
         mediaUrls.push(data.publicUrl)
       }
 
-      // Buscar conexão
       const { data: connection } = await supabase
         .from('instagram_connections')
         .select('id')
@@ -59,7 +56,6 @@ export const PostScheduler = () => {
 
       if (!connection) throw new Error('Instagram não conectado')
 
-      // Criar post agendado
       const finalCaption =
         caption +
         '\n\n' +
@@ -72,7 +68,7 @@ export const PostScheduler = () => {
           instagram_connection_id: connection.id,
           caption: finalCaption,
           media_urls: mediaUrls,
-          media_type: mediaFiles.length > 1 ? 'carousel' : 'image', // simplified logic
+          media_type: mediaFiles.length > 1 ? 'carousel' : 'image',
           hashtags,
           scheduled_for: new Date(scheduledFor).toISOString(),
         })
@@ -94,7 +90,6 @@ export const PostScheduler = () => {
     },
   })
 
-  // Gerar hashtags com IA
   const generateHashtags = async () => {
     setIsGeneratingHashtags(true)
 
@@ -135,7 +130,7 @@ export const PostScheduler = () => {
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Upload de mídia */}
+            {}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Fotos/Vídeos *
@@ -182,7 +177,7 @@ export const PostScheduler = () => {
               </p>
             </div>
 
-            {/* Legenda */}
+            {}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Legenda *
@@ -200,7 +195,7 @@ export const PostScheduler = () => {
               </p>
             </div>
 
-            {/* Hashtags */}
+            {}
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-sm font-medium text-white">
@@ -248,7 +243,7 @@ export const PostScheduler = () => {
               />
             </div>
 
-            {/* Data/hora */}
+            {}
             <div>
               <label className="block text-sm font-medium mb-2 text-white">
                 Agendar para *
@@ -262,7 +257,7 @@ export const PostScheduler = () => {
               />
             </div>
 
-            {/* Ações */}
+            {}
             <div className="flex gap-2 mt-4">
               <Button
                 variant="outline"

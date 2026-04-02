@@ -37,7 +37,6 @@ export function useInviteLanding() {
       return
     }
     checkInvite()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   const checkInvite = async () => {

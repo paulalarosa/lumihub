@@ -32,7 +32,6 @@ export interface NotificationLog {
   metadata: Json | null
 }
 
-// Extended Database type to include tables that might be missing from codegen
 export type AuditDatabase = Database & {
   public: {
     Tables: {

@@ -15,13 +15,9 @@ interface MessageContentProps {
   message: ChatMessageDTO
   className?: string
   truncate?: boolean
-  /** Custom markdown renderer - defaults to built-in MarkdownRenderer */
+
   renderMarkdown?: (content: string) => React.ReactNode
 }
-
-// =============================================================================
-// Helper functions
-// =============================================================================
 
 function getTextContent(message: ChatMessageDTO): string {
   const textContent = message.content.find(
@@ -43,10 +39,9 @@ function getFileUrls(message: ChatMessageDTO): string[] {
 }
 
 function getFileName(url: string): string {
-  // Try to extract filename from URL
   const parts = url.split('/')
   const lastPart = parts[parts.length - 1]
-  // Remove query params
+
   return lastPart.split('?')[0] || 'file'
 }
 
@@ -64,10 +59,6 @@ function isVideoUrl(url: string): boolean {
   const ext = url.split('?')[0].split('.').pop()?.toLowerCase() || ''
   return ['mp4', 'webm', 'mov', 'avi', 'mkv'].includes(ext)
 }
-
-// =============================================================================
-// File Attachment Component
-// =============================================================================
 
 interface FileAttachmentProps {
   url: string
@@ -95,7 +86,7 @@ const FileAttachment = memo(function FileAttachment({
         className,
       )}
     >
-      {/* Thumbnail */}
+      {}
       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-md border bg-muted">
         {isImage ? (
           <img
@@ -127,7 +118,7 @@ const FileAttachment = memo(function FileAttachment({
         )}
       </div>
 
-      {/* File info */}
+      {}
       <div className="flex-1 min-w-0">
         <p className="truncate text-xs font-medium">{fileName}</p>
         <p className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -138,10 +129,6 @@ const FileAttachment = memo(function FileAttachment({
     </a>
   )
 })
-
-// =============================================================================
-// Image Attachment Component
-// =============================================================================
 
 interface ImageAttachmentProps {
   url: string
@@ -172,18 +159,6 @@ const ImageAttachment = memo(function ImageAttachment({
   )
 })
 
-// =============================================================================
-// Component
-// =============================================================================
-
-/**
- * MessageContent - Renders message text with markdown
- *
- * @example
- * ```tsx
- * <MessageContent message={message} />
- * ```
- */
 export const MessageContent = memo(function MessageContent({
   message,
   className,
@@ -203,14 +178,13 @@ export const MessageContent = memo(function MessageContent({
       ? textContent.slice(0, MAX_LENGTH) + '...'
       : textContent
 
-  // Don't render if no content
   if (!textContent && imageUrls.length === 0 && fileUrls.length === 0) {
     return null
   }
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Images */}
+      {}
       {imageUrls.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {imageUrls.map((url, index) => (
@@ -219,7 +193,7 @@ export const MessageContent = memo(function MessageContent({
         </div>
       )}
 
-      {/* Files */}
+      {}
       {fileUrls.length > 0 && (
         <div className="mb-3 flex flex-wrap gap-2">
           {fileUrls.map((url, index) => (
@@ -228,7 +202,7 @@ export const MessageContent = memo(function MessageContent({
         </div>
       )}
 
-      {/* Text content */}
+      {}
       {textContent && (
         <div className="w-full">
           {isUser ? (

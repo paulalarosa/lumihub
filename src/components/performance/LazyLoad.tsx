@@ -8,7 +8,6 @@ import {
 } from 'react'
 import { motion } from 'framer-motion'
 
-// Loading Skeleton
 const LoadingSkeleton = ({
   type = 'default',
 }: {
@@ -44,15 +43,12 @@ const LoadingSkeleton = ({
   )
 }
 
-// Lazy Load Component Wrapper
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const lazyLoadComponent = <T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>,
   fallbackType: 'default' | 'card' | 'hero' = 'default',
 ) => {
   const LazyComponent = lazy(importFunc)
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (props: any) => (
     <Suspense fallback={<LoadingSkeleton type={fallbackType} />}>
       <LazyComponent {...props} />
@@ -60,7 +56,6 @@ export const lazyLoadComponent = <T extends ComponentType<any>>(
   )
 }
 
-// Lazy Load com Intersection Observer
 export const LazySection = ({
   children,
   threshold = 0.1,

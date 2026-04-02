@@ -46,7 +46,7 @@ export const ClientService = {
     try {
       const { data, error } = await supabase
         .from('wedding_clients')
-        .select('*') // Using * to get all fields including new ones
+        .select('*')
         .eq('id', id)
         .maybeSingle()
 

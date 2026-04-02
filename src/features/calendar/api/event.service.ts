@@ -4,7 +4,7 @@ import { ProjectDB } from '@/types/calendar'
 export interface DashboardEvent {
   id: string
   title: string
-  date: string // ISO string
+  date: string
   time?: string
   type: 'google' | 'project' | 'internal'
   clientName?: string
@@ -16,10 +16,8 @@ export const EventService = {
     userId: string,
     _role?: string,
   ) {
-    // Cast supabase client to use our extended database types
     const typedSupabase = supabase
 
-    // 1. Check Google Connection (using new table)
     const { data: tokenData } = await typedSupabase
       .from('google_calendar_tokens')
       .select('id')
@@ -33,9 +31,6 @@ export const EventService = {
     today.setHours(0, 0, 0, 0)
 
     try {
-      // 2. Fetch Projects (Internal)
-      // Fetch projects where the user is the makeup artist
-
       const { data: projectsData } = await supabase
         .from('projects')
         .select('*, client:wedding_clients(full_name)')
@@ -44,7 +39,6 @@ export const EventService = {
         .order('event_date', { ascending: true })
         .limit(5)
 
-      // Cast to unknown first to avoid "excessively deep" error, then to our shape
       const projects = projectsData as (ProjectDB & {
         client: { full_name: string } | { full_name: string }[] | null
       })[]
@@ -63,8 +57,6 @@ export const EventService = {
         }
       })
 
-      // 3. Fetch Google Events (from local sync table)
-      // We rely on the sync mechanism to have populated this
       const { data: googleEventsData } = await typedSupabase
         .from('calendar_events')
         .select('*')
@@ -80,7 +72,7 @@ export const EventService = {
         (e) => ({
           id: e.id,
           title: e.title,
-          date: e.start_time, // ISO
+          date: e.start_time,
           time: new Date(e.start_time).toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit',
@@ -89,7 +81,6 @@ export const EventService = {
         }),
       )
 
-      // Merge and Sort
       dashboardEvents = [...projectEvents, ...externalEvents]
         .sort((a, b) => {
           const dateA = new Date(a.date + (a.time ? 'T' + a.time : ''))

@@ -13,16 +13,12 @@ interface AnalyticsProviderProps {
 export function AnalyticsProvider({ children }: AnalyticsProviderProps) {
   const analytics = useAnalytics()
 
-  // Ativar tracking automático
   usePageTracking()
   useScrollTracking()
 
-  // Track quando usuário sai da página
   useEffect(() => {
     const handleBeforeUnload = () => {
-      // Enviar último evento de tempo na página
       const _summary = analytics.getSessionSummary()
-      // No-op for now
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload)

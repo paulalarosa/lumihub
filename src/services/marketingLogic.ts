@@ -1,5 +1,3 @@
-// Marketing logic - simplified (some columns don't exist)
-
 import { supabase } from '@/integrations/supabase/client'
 import { subMonths } from 'date-fns/subMonths'
 import { format } from 'date-fns/format'
@@ -24,14 +22,12 @@ export class MarketingLogic {
       const today = new Date()
       const sixMonthsAgo = subMonths(today, 6)
 
-      // Re-engagement based on created_at (simplified - birth_date doesn't exist)
       const { data: clients } = await supabase
         .from('wedding_clients')
         .select('id, name, created_at')
         .eq('user_id', organizationId)
 
       if (clients) {
-        // Check for old clients without recent activity
         clients.forEach((c) => {
           const createdDate = new Date(c.created_at)
           if (createdDate < sixMonthsAgo) {

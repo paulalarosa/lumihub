@@ -10,7 +10,7 @@ export interface Contract {
   project_id: string
   title: string
   content?: string
-  status: string // Supabase returns string, not enum
+  status: string
   created_at: string
   signature_url?: string
   signed_at?: string
@@ -73,7 +73,6 @@ export function useContracts() {
       throw error
     }
 
-    // Audit the action
     Logger.action('CONTRACT_CREATE', user.id, 'contracts', data.id, {
       title: data.title,
       project_id: data.project_id,
@@ -99,7 +98,6 @@ export function useContracts() {
       throw uploadError
     }
 
-    // Audit the action
     Logger.action('CONTRACT_UPLOAD', user.id, 'storage.contracts', filePath, {
       fileName: file.name,
     })
@@ -110,7 +108,7 @@ export function useContracts() {
   const getFileUrl = async (path: string) => {
     const { data, error } = await supabase.storage
       .from('contracts')
-      .createSignedUrl(path, 3600) // 1 hour
+      .createSignedUrl(path, 3600)
 
     if (error) throw error
     return data.signedUrl

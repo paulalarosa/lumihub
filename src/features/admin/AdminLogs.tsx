@@ -24,7 +24,6 @@ export default function AdminLogs() {
   const [emailLogs, setEmailLogs] = useState<NotificationLog[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Filters State
   const [filterUser, setFilterUser] = useState<string>('all')
   const [filterTable, setFilterTable] = useState<string>('all')
   const [filterAction, setFilterAction] = useState<string>('all')
@@ -33,7 +32,6 @@ export default function AdminLogs() {
 
   useEffect(() => {
     fetchData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, filterUser, filterTable, filterAction])
 
   useEffect(() => {
@@ -48,7 +46,6 @@ export default function AdminLogs() {
       if (data) setAvailableTables(data as string[])
 
       if (error) {
-        // Fallback for types if RPC not generated yet, safely cast to unknown first
         const { data: fallbackData } = await (
           supabase.from(
             'audit_logs',
@@ -127,7 +124,6 @@ export default function AdminLogs() {
 
     const headers = Object.keys(dataToExport[0]).join(',')
     const csvRows = dataToExport.map((row) => {
-      // Create a record from the row to access by key safely
       const _record = row as Record<string, unknown>
       return Object.values(row)
         .map((value) => {
@@ -257,10 +253,7 @@ export default function AdminLogs() {
       </Card>
 
       <div className="p-4 border border-white/10 bg-white/5 font-mono text-[10px] uppercase text-gray-500 leading-relaxed flex justify-between items-center">
-        <div>
-          STATUS_OK: AUDIT_SYSTEM_ONLINE // ENCRYPTION_ACTIVE: AES_256 //
-          PROTOCOL: KONTROL_PRO
-        </div>
+        <div>STATUS_OK: AUDIT_SYSTEM_ONLINE PROTOCOL: KONTROL_PRO</div>
         <div className="flex gap-4">
           <span>UPTIME: 99.99%</span>
           <span className="text-white animate-pulse">● LIVE</span>

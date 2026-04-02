@@ -40,7 +40,7 @@ export const Canvas = memo(function Canvas({
         isMaximized ? 'left-0' : 'w-full md:w-[600px] lg:w-[800px]',
       )}
     >
-      {/* Canvas Header */}
+      {}
       <div className="h-14 border-b border-white/5 bg-zinc-950/80 backdrop-blur-md px-4 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 bg-white/5 border border-white/10 flex items-center justify-center rounded-none">
@@ -55,7 +55,7 @@ export const Canvas = memo(function Canvas({
               {title || 'PROCESSED_ARTIFACT'}
             </h3>
             <p className="text-[8px] font-mono text-zinc-500 uppercase tracking-tighter">
-              {type} // {language || 'standard'} // SHA-256 VALIDATED
+              {type}
             </p>
           </div>
         </div>
@@ -84,14 +84,14 @@ export const Canvas = memo(function Canvas({
         </div>
       </div>
 
-      {/* Canvas Content */}
+      {}
       <div className="flex-1 overflow-y-auto p-8 custom-scrollbar bg-black">
         <div className="max-w-3xl mx-auto">
           <MarkdownRenderer content={content} />
         </div>
       </div>
 
-      {/* Canvas Footer */}
+      {}
       <div className="h-12 border-t border-white/5 bg-zinc-950/50 px-4 flex items-center justify-between">
         <div className="flex gap-4">
           <button className="flex items-center gap-2 text-[9px] font-mono uppercase tracking-widest text-zinc-500 hover:text-white transition-colors">

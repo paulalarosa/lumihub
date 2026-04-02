@@ -6,7 +6,7 @@ import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
-// format and ptBR removed
+
 import {
   Loader2,
   MapPin,
@@ -70,9 +70,9 @@ export default function PublicBooking() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-[#C0C0C0] pb-24 font-sans selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
-      {/* 1. Header Profile */}
+      {}
       <div className="relative bg-[#111] pb-12 pt-8 px-6 rounded-b-[40px] border-b border-white/5 shadow-2xl overflow-hidden">
-        {/* Ambient Bg */}
+        {}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#00e5ff]/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
 
         <div className="relative z-10 flex flex-col items-center text-center">
@@ -109,7 +109,7 @@ export default function PublicBooking() {
 
       <div className="container max-w-md mx-auto px-4 -mt-6 relative z-20 space-y-6">
         <AnimatePresence mode="wait">
-          {/* STEP 1: SELECT SERVICE */}
+          {}
           {step === 1 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -166,7 +166,7 @@ export default function PublicBooking() {
             </motion.div>
           )}
 
-          {/* STEP 2: SELECT DATE & TIME */}
+          {}
           {step === 2 && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -251,7 +251,7 @@ export default function PublicBooking() {
             </motion.div>
           )}
 
-          {/* STEP 3: INFO */}
+          {}
           {step === 3 && (
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -332,7 +332,7 @@ export default function PublicBooking() {
             </motion.div>
           )}
 
-          {/* STEP 4: SUCCESS */}
+          {}
           {step === 4 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}

@@ -1,5 +1,4 @@
 import { formatDate } from '@/lib/date-utils'
-// format and ptBR removed
 
 interface WhatsAppMessageParams {
   phone: string
@@ -11,21 +10,13 @@ interface WhatsAppMessageParams {
 }
 
 export const whatsappUtils = {
-  /**
-   * Formata número de telefone para WhatsApp (remove caracteres especiais)
-   * Exemplo: (11) 99999-9999 → 5511999999999
-   * Retorna string vazia se o número for inválido (< 10 dígitos)
-   */
   formatPhone(phone: string): string {
-    // Remove tudo exceto números
     const digits = phone.replace(/\D/g, '')
 
-    // Validação básica de tamanho (DDD + número = min 10 dígitos)
     if (digits.length < 10) {
       return ''
     }
 
-    // Adiciona código do Brasil se não tiver
     if (!digits.startsWith('55')) {
       return '55' + digits
     }
@@ -33,9 +24,6 @@ export const whatsappUtils = {
     return digits
   },
 
-  /**
-   * Gera link do WhatsApp com mensagem pré-preenchida
-   */
   generateWhatsAppLink(params: WhatsAppMessageParams): string {
     const {
       phone,
@@ -71,9 +59,6 @@ Se tiver alguma dúvida ou precisar de algum ajuste, estou à disposição!`
     return `https://wa.me/${formattedPhone}?text=${encodedMessage}`
   },
 
-  /**
-   * Lembrete 24h antes do evento
-   */
   generateReminderLink(params: WhatsAppMessageParams): string {
     const { phone, clientName, eventDate, eventTime } = params
 
@@ -101,9 +86,6 @@ Nos vemos amanhã! 💄✨`
     return `https://wa.me/${formattedPhone}?text=${encodedMessage}`
   },
 
-  /**
-   * Solicitar feedback pós-evento
-   */
   generateFeedbackLink(params: { phone: string; clientName: string }): string {
     const { phone, clientName } = params
 
@@ -125,9 +107,6 @@ Um abraço!`
     return `https://wa.me/${formattedPhone}?text=${encodedMessage}`
   },
 
-  /**
-   * Convite para assistente
-   */
   generateAssistantInviteLink(params: {
     phone: string
     assistantName: string

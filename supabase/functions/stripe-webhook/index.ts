@@ -22,11 +22,8 @@ serve(async (req) => {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message)
     return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
-
-  console.log('Event type:', event.type)
 
   try {
     switch (event.type) {
@@ -64,7 +61,6 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ received: true }), { status: 200 })
   } catch (error: any) {
-    console.error('Webhook handler error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
     })
@@ -76,15 +72,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const userId = clientReferenceId || session.metadata?.user_id
 
   if (!userId) {
-    console.error('No user ID found in session', session.id)
     return
   }
 
   const planType = session.metadata?.plan_type || 'profissional'
 
-  console.log(`Processing checkout for user ${userId}, plan: ${planType}`)
-
-  // Update profiles table (Primary Request)
   const { error: profileError } = await supabase
     .from('profiles')
     .update({
@@ -94,10 +86,8 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq('id', userId)
 
   if (profileError) {
-    console.error('Error updating profile:', profileError)
   }
 
-  // Update makeup_artists table (Legacy/Backward Compatibility)
   const { error: artistError } = await supabase
     .from('makeup_artists')
     .update({
@@ -110,17 +100,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     .eq('user_id', userId)
 
   if (artistError) {
-    console.warn('Error updating makeup_artists:', artistError)
   }
-
-  console.log(`Subscription activated for user ${userId}`)
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
   const userId = subscription.metadata?.user_id
 
   if (!userId) {
-    // Buscar pelo subscription_id
     const { data: artist } = await supabase
       .from('makeup_artists')
       .select('user_id')
@@ -129,7 +115,6 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
 
     if (!artist) return
 
-    // update status
     const status = mapStripeStatus(subscription.status)
 
     await supabase
@@ -185,7 +170,6 @@ async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const customerId = invoice.customer as string
 
-  // Buscar user_id pelo customer_id
   const { data: artist } = await supabase
     .from('makeup_artists')
     .select('user_id')
@@ -194,7 +178,6 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 
   if (!artist) return
 
-  // Registrar pagamento
   await supabase.from('payment_history').insert({
     user_id: artist.user_id,
     stripe_payment_intent_id: invoice.payment_intent as string,
@@ -218,7 +201,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
 
   if (!artist) return
 
-  // Registrar falha
   await supabase.from('payment_history').insert({
     user_id: artist.user_id,
     stripe_invoice_id: invoice.id,
@@ -228,7 +210,6 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     description: `Falha no pagamento: ${invoice.billing_reason}`,
   })
 
-  // Atualizar status do plano
   await supabase
     .from('makeup_artists')
     .update({ plan_status: 'past_due' })

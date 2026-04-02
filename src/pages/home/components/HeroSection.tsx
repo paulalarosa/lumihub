@@ -22,7 +22,7 @@ export const HeroSection = () => {
       ref={heroRef}
       className="relative min-h-screen flex items-center bg-black overflow-hidden"
     >
-      {/* Background image */}
+      {}
       <div className="absolute inset-0 z-0">
         <motion.div
           className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-15 pointer-events-none"
@@ -42,7 +42,7 @@ export const HeroSection = () => {
         className="container mx-auto px-6 md:px-16 relative z-30 max-w-6xl pt-20"
         style={{ y, opacity }}
       >
-        {/* Social proof badge */}
+        {}
         <motion.div
           className="inline-flex items-center gap-2 mb-10 px-4 py-2 border border-white/10 bg-white/[0.03]"
           initial={{ opacity: 0, y: 10 }}
@@ -63,7 +63,7 @@ export const HeroSection = () => {
           </span>
         </motion.div>
 
-        {/* Headline — StoryBrand: problema + solução em 1 frase */}
+        {}
         <motion.div
           className="mb-8"
           initial={{ opacity: 0, y: 30 }}
@@ -78,7 +78,7 @@ export const HeroSection = () => {
           </h1>
         </motion.div>
 
-        {/* Subheadline — StoryBrand: o guia + o plano */}
+        {}
         <motion.p
           className="text-white/45 text-base md:text-lg max-w-xl mb-10 leading-relaxed"
           initial={{ opacity: 0, y: 15 }}
@@ -89,7 +89,7 @@ export const HeroSection = () => {
           em um só lugar — para você focar no que faz de melhor.
         </motion.p>
 
-        {/* Value props — 3 benefícios rápidos */}
+        {}
         <motion.div
           className="flex flex-col sm:flex-row gap-6 mb-12 text-sm text-white/40"
           initial={{ opacity: 0 }}
@@ -110,7 +110,7 @@ export const HeroSection = () => {
           </span>
         </motion.div>
 
-        {/* CTA — StoryBrand: chamada direta + alternativa */}
+        {}
         <motion.div
           className="flex flex-col sm:flex-row gap-4"
           initial={{ opacity: 0, y: 15 }}
@@ -121,7 +121,10 @@ export const HeroSection = () => {
             variant="primary"
             size="lg"
             className="group"
-            onClick={() => navigate('/cadastro')}
+            onClick={() => {
+              trackCTAClick('hero_signup', 'hero_section', '/cadastro')
+              navigate('/cadastro')
+            }}
           >
             Começar grátis por 14 dias
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -131,6 +134,11 @@ export const HeroSection = () => {
             variant="glass"
             size="lg"
             onClick={() => {
+              trackCTAClick(
+                'hero_how_it_works',
+                'hero_section',
+                '#como-funciona',
+              )
               const el = document.getElementById('como-funciona')
               el?.scrollIntoView({ behavior: 'smooth' })
             }}
@@ -141,7 +149,7 @@ export const HeroSection = () => {
         </motion.div>
       </motion.div>
 
-      {/* Scroll indicator */}
+      {}
       <motion.div
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30"
         initial={{ opacity: 0 }}

@@ -55,14 +55,12 @@ export const useInactiveClients = () => {
   const fetchInactiveClients = useCallback(async () => {
     setLoading(true)
     try {
-      // Enhanced query to check for active projects
       const { data, error: clientError } = await supabase
         .from('wedding_clients')
         .select('id, name:full_name, phone, created_at, projects(status)')
 
       if (clientError) throw clientError
 
-      // Cast to bypass complex join typing
       const allClients = data as {
         id: string
         name: string
@@ -78,16 +76,14 @@ export const useInactiveClients = () => {
         const createdDate = new Date(client.created_at)
         const daysDiff = differenceInDays(now, createdDate)
 
-        // Check for ANY active project
         const hasActiveProject = client.projects?.some(
           (p) => p.status === 'active' || p.status === 'ongoing',
         )
 
-        // Logic: Created > 45 days AND NO active project
         if (daysDiff > 45 && !hasActiveProject) {
           processedClients.push({
             id: client.id,
-            name: client.name, // mapped from full_name
+            name: client.name,
             phone: client.phone,
             created_at: client.created_at,
             days_since_created: daysDiff,

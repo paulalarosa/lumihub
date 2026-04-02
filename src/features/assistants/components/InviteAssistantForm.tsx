@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle, Copy, Send } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { useQuery } from '@tanstack/react-query'
 import { getErrorMessage } from '@/utils/error-handler'
+import { sanitizeUserInput } from '@/lib/security'
 
 export const InviteAssistantForm = () => {
   const { user } = useAuth()
@@ -71,7 +72,9 @@ export const InviteAssistantForm = () => {
     setGeneratedLink(null)
 
     try {
+      const cleanName = sanitizeUserInput(assistantName)
       const normalizedEmail = assistantEmail.trim().toLowerCase()
+      const cleanPin = assistantPin.trim()
 
       const { data: existing } = await supabase
         .from('assistants')
@@ -84,15 +87,15 @@ export const InviteAssistantForm = () => {
       if (existing) {
         await supabase
           .from('assistants')
-          .update({ full_name: assistantName, pin: assistantPin })
+          .update({ full_name: cleanName, pin: cleanPin })
           .eq('id', existing.id)
       } else {
         const { data: newAssistant, error: insertError } = await supabase
           .from('assistants')
           .insert({
-            full_name: assistantName,
+            full_name: cleanName,
             email: normalizedEmail,
-            pin: assistantPin,
+            pin: cleanPin,
             user_id: null,
           })
           .select('id')

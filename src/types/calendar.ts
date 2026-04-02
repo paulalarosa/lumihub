@@ -34,15 +34,14 @@ export interface ProjectDB {
   event_time?: string | null
   status: string
   user_id?: string
-  // Relations
+
   client?: {
     full_name: string
   } | null
-  // Add other known fields if needed
+
   service_type?: string
 }
 
-// Extended Database type to include tables that might be missing from codegen
 export type CalendarDatabase = Database & {
   public: {
     Tables: {

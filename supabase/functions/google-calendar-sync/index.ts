@@ -1,6 +1,5 @@
-// @ts-ignore
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-// @ts-ignore
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { fetchWithRetry } from '../_shared/retry.ts'
 import { Logger } from '../_shared/logger.ts'
@@ -13,11 +12,9 @@ const corsHeaders = {
 
 const logger = new Logger('google-calendar-sync')
 
-// Utility to safely get env vars without crashing
 function getEnv(key: string): string | null {
   const val = Deno.env.get(key)
   if (!val) {
-    console.error(`Missing environment variable: ${key}`)
     return null
   }
   return val
@@ -106,18 +103,17 @@ function formatEventForGoogle(event: EventData) {
 }
 
 function getGoogleColorId(hexColor: string): string {
-  // Map hex colors to Google Calendar color IDs (1-11)
   const colorMap: Record<string, string> = {
-    '#5A7D7C': '7', // Peacock (teal)
-    '#D4A574': '6', // Tangerine
-    '#8B7355': '5', // Banana
-    '#FF6B6B': '11', // Tomato
-    '#4ECDC4': '7', // Peacock
-    '#45B7D1': '9', // Blueberry
-    '#96CEB4': '2', // Sage
-    '#FFEAA7': '5', // Banana
-    '#DDA0DD': '3', // Grape
-    '#98D8C8': '10', // Basil
+    '#5A7D7C': '7',
+    '#D4A574': '6',
+    '#8B7355': '5',
+    '#FF6B6B': '11',
+    '#4ECDC4': '7',
+    '#45B7D1': '9',
+    '#96CEB4': '2',
+    '#FFEAA7': '5',
+    '#DDA0DD': '3',
+    '#98D8C8': '10',
   }
   return colorMap[hexColor?.toUpperCase()] || '1'
 }
@@ -136,7 +132,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // CRITICAL: Check configuration before proceeding
     if (
       !SUPABASE_URL ||
       !SUPABASE_SERVICE_ROLE_KEY ||
@@ -160,7 +155,7 @@ serve(async (req: Request) => {
           missing_keys: missing,
         }),
         {
-          status: 503, // Service Unavailable
+          status: 503,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         },
       )
@@ -186,7 +181,6 @@ serve(async (req: Request) => {
       event_data?: Partial<EventData>
     }
 
-    // Get user's Google integration via Secure RPC
     const { data: integration, error: integrationError } = await supabase.rpc(
       'get_google_integration',
       { p_user_id: user.id },
@@ -202,10 +196,8 @@ serve(async (req: Request) => {
       )
     }
 
-    // Check if token needs refresh
     let accessToken = integration.access_token
     if (new Date(integration.token_expires_at) <= new Date()) {
-      console.log('Token expired, refreshing...')
       accessToken = await refreshAccessToken(integration.refresh_token)
 
       if (!accessToken) {
@@ -218,7 +210,6 @@ serve(async (req: Request) => {
         )
       }
 
-      // Update stored token secure via RPC
       await supabase.rpc('update_google_token', {
         p_integration_id: integration.id,
         p_access_token: accessToken,
@@ -229,7 +220,6 @@ serve(async (req: Request) => {
     const calendarId = integration.calendar_id || 'primary'
     const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
 
-    // CREATE event in Google Calendar
     if (action === 'create') {
       const googleEvent = formatEventForGoogle(event_data as EventData)
       await logger.info('Creating Google Calendar event', { googleEvent })
@@ -253,9 +243,6 @@ serve(async (req: Request) => {
         })
       }
 
-      console.log('Google event created:', result.id)
-
-      // Update local event with Google event ID
       if (event_id) {
         await supabase
           .from('events')
@@ -271,7 +258,6 @@ serve(async (req: Request) => {
       )
     }
 
-    // UPDATE event in Google Calendar
     if (action === 'update') {
       const { data: localEvent } = await supabase
         .from('events')
@@ -280,7 +266,6 @@ serve(async (req: Request) => {
         .single()
 
       if (!localEvent?.google_calendar_event_id) {
-        // Event doesn't exist in Google, create it instead
         const googleEvent = formatEventForGoogle(event_data as EventData)
         const response = await fetchWithRetry(baseUrl, {
           method: 'POST',
@@ -327,7 +312,6 @@ serve(async (req: Request) => {
       const result = (await response.json()) as any
 
       if (result.error) {
-        console.error('Error updating Google event:', result)
         return new Response(JSON.stringify({ error: result.error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -339,7 +323,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // DELETE event from Google Calendar
     if (action === 'delete') {
       const { data: localEvent } = await supabase
         .from('events')
@@ -359,11 +342,6 @@ serve(async (req: Request) => {
         )
       }
 
-      console.log(
-        'Deleting Google Calendar event:',
-        localEvent.google_calendar_event_id,
-      )
-
       const response = await fetchWithRetry(
         `${baseUrl}/${localEvent.google_calendar_event_id}`,
         {
@@ -374,7 +352,6 @@ serve(async (req: Request) => {
 
       if (!response.ok && response.status !== 404) {
         const result = (await response.json()) as any
-        console.error('Error deleting Google event:', result)
       }
 
       return new Response(JSON.stringify({ success: true }), {
@@ -382,11 +359,7 @@ serve(async (req: Request) => {
       })
     }
 
-    // SYNC - Full sync from Google to local
     if (action === 'sync-from-google') {
-      console.log('Syncing events from Google Calendar...')
-
-      // Get events from next 6 months
       const timeMin = new Date().toISOString()
       const timeMax = new Date(
         Date.now() + 180 * 24 * 60 * 60 * 1000,
@@ -400,7 +373,6 @@ serve(async (req: Request) => {
       const result = (await response.json()) as any
 
       if (result.error) {
-        console.error('Error fetching Google events:', result)
         return new Response(JSON.stringify({ error: result.error.message }), {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -412,7 +384,6 @@ serve(async (req: Request) => {
       let updated = 0
 
       for (const gEvent of googleEvents) {
-        // Check if event already exists
         const { data: existingEvent } = await supabase
           .from('events')
           .select('id')
@@ -451,13 +422,10 @@ serve(async (req: Request) => {
         }
       }
 
-      // Update last sync time
       await supabase
         .from('user_integrations')
         .update({ last_sync_at: new Date().toISOString() })
         .eq('id', integration.id)
-
-      console.log(`Sync complete: ${imported} imported, ${updated} updated`)
 
       return new Response(
         JSON.stringify({ success: true, imported, updated }),
@@ -467,11 +435,7 @@ serve(async (req: Request) => {
       )
     }
 
-    // SYNC - Full sync from local to Google
     if (action === 'sync-to-google') {
-      console.log('Syncing events to Google Calendar...')
-
-      // Get all user events that don't have a Google ID yet
       const { data: localEvents } = await supabase
         .from('events')
         .select('*')
@@ -503,13 +467,10 @@ serve(async (req: Request) => {
         }
       }
 
-      // Update last sync time
       await supabase
         .from('user_integrations')
         .update({ last_sync_at: new Date().toISOString() })
         .eq('id', integration.id)
-
-      console.log(`Sync complete: ${synced} events sent to Google`)
 
       return new Response(JSON.stringify({ success: true, synced }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -521,7 +482,6 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error('Error in google-calendar-sync:', error)
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
     return new Response(JSON.stringify({ error: errorMessage }), {

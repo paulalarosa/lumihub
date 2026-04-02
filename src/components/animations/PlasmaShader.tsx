@@ -12,7 +12,6 @@ export const PlasmaShader = () => {
     const gl = canvas.getContext('webgl')
     if (!gl) return
 
-    // Resize canvas
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
@@ -21,17 +20,15 @@ export const PlasmaShader = () => {
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
 
-    // Track mouse
     let mouseX = canvas.width / 2
     let mouseY = canvas.height / 2
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX
-      mouseY = window.innerHeight - e.clientY // Invert Y for WebGL
+      mouseY = window.innerHeight - e.clientY
     }
     window.addEventListener('mousemove', handleMouseMove)
 
-    // Vertex Shader
     const vertexShaderSource = `
       attribute vec2 a_position;
       void main() {
@@ -39,7 +36,6 @@ export const PlasmaShader = () => {
       }
     `
 
-    // Fragment Shader para efeito Plasma
     const plasmaShaderSource = `
       precision mediump float;
       uniform float u_time;
@@ -76,7 +72,6 @@ export const PlasmaShader = () => {
       }
     `
 
-    // Compile shaders
     const compileShader = (source: string, type: number) => {
       const shader = gl.createShader(type)!
       gl.shaderSource(shader, source)
@@ -87,14 +82,12 @@ export const PlasmaShader = () => {
     const vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER)
     const fragmentShader = compileShader(plasmaShaderSource, gl.FRAGMENT_SHADER)
 
-    // Create program
     const program = gl.createProgram()!
     gl.attachShader(program, vertexShader)
     gl.attachShader(program, fragmentShader)
     gl.linkProgram(program)
     gl.useProgram(program)
 
-    // Setup geometry (full screen quad)
     const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1])
 
     const positionBuffer = gl.createBuffer()
@@ -105,12 +98,10 @@ export const PlasmaShader = () => {
     gl.enableVertexAttribArray(positionLocation)
     gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0)
 
-    // Get uniform locations
     const timeLocation = gl.getUniformLocation(program, 'u_time')
     const resolutionLocation = gl.getUniformLocation(program, 'u_resolution')
     const mouseLocation = gl.getUniformLocation(program, 'u_mouse')
 
-    // Animation loop
     const startTime = Date.now()
     let animationFrameId: number
 

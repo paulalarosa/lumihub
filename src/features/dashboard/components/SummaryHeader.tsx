@@ -3,8 +3,8 @@ import { TrendingUp } from 'lucide-react'
 interface MetricItem {
   label: string
   value: string
-  subtext?: string // For "Trend" or "Description"
-  trend?: 'up' | 'down' | 'neutral' // Optional visual indicator
+  subtext?: string
+  trend?: 'up' | 'down' | 'neutral'
 }
 
 interface SummaryHeaderProps {

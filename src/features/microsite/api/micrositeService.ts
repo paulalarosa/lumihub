@@ -2,11 +2,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { Microsite, Service } from '@/types'
 import { logger } from '@/services/logger'
 
-// Domain Types
-// Domain Types
-// export interface MicrositeService extends Service {}
-// Removed empty interface causing lint error
-
 export interface MicrositeTestimonial {
   id: string
   client_name: string
@@ -29,27 +24,20 @@ export interface MicrositeGalleryItem {
 }
 
 export interface MicrositeData extends Microsite {
-  // Fields potentially missing from generated types but likely in DB
   enable_reviews?: boolean
   enable_gallery?: boolean
   enable_services?: boolean
   enable_about?: boolean
   enable_contact?: boolean
 
-  // Virtual or Joined fields
   services: Service[]
   gallery: MicrositeGalleryItem[]
   testimonials: MicrositeTestimonial[]
 
-  // Frontend aliases (if needed compatibility)
-  bio?: string | null // Mapped from about_text?
+  bio?: string | null
 }
 
 export const MicrositeService = {
-  /**
-   * Fetches public microsite data by slug
-   * Uses strict typing from database.types.ts
-   */
   async getBySlug(slug: string) {
     const { data, error } = await supabase
       .from('microsites')
@@ -73,10 +61,6 @@ export const MicrositeService = {
     return data
   },
 
-  /**
-   * Increments the view count for a microsite
-   * Uses RPC to be atomic/safe
-   */
   async incrementViews(id: string) {
     const { error } = await supabase.rpc('increment_microsite_views', {
       p_microsite_id: id,

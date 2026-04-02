@@ -54,7 +54,7 @@ export const TaskCard = memo(
         } ${isActive ? 'ring-2 ring-blue-300' : ''}`}
       >
         <div className="flex gap-2">
-          {/* Drag Handle */}
+          {}
           <div
             {...attributes}
             {...listeners}
@@ -63,13 +63,13 @@ export const TaskCard = memo(
             <GripVertical className="w-4 h-4" />
           </div>
 
-          {/* Content */}
+          {}
           <div className="flex-1 min-w-0">
             <h4 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2">
               {task.title}
             </h4>
 
-            {/* Priority Badge */}
+            {}
             <div className="flex items-start">
               <span
                 className={`inline-block px-2 py-1 rounded text-xs font-semibold ${priorityColor}`}
@@ -79,7 +79,7 @@ export const TaskCard = memo(
             </div>
           </div>
 
-          {/* Actions Menu */}
+          {}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button className="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600 transition-colors">

@@ -1,6 +1,3 @@
-// Analytics Service - Tracking de eventos customizados
-// Integra com Google Analytics 4 (gtag)
-
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void
@@ -62,11 +59,9 @@ class AnalyticsService {
     }
   }
 
-  // Track custom event
   trackEvent(event: AnalyticsEvent) {
     const { category, action, label, value, customParameters } = event
 
-    // Enviar para Google Analytics
     if (window.gtag) {
       window.gtag('event', action, {
         event_category: category,
@@ -77,7 +72,6 @@ class AnalyticsService {
       })
     }
 
-    // Armazenar localmente para análise
     this.storeLocalEvent({
       type: 'event',
       category,
@@ -89,7 +83,6 @@ class AnalyticsService {
     })
   }
 
-  // Track CTA clicks
   trackCTAClick(ctaName: string, location: string, destination?: string) {
     this.trackEvent({
       category: 'cta_click',
@@ -102,7 +95,6 @@ class AnalyticsService {
     })
   }
 
-  // Track page view
   trackPageView(pageView: PageViewEvent) {
     if (window.gtag) {
       window.gtag('event', 'page_view', {
@@ -113,7 +105,6 @@ class AnalyticsService {
       })
     }
 
-    // Reset page timer
     this.pageStartTime = Date.now()
 
     this.storeLocalEvent({
@@ -124,7 +115,6 @@ class AnalyticsService {
     })
   }
 
-  // Track time on page
   trackTimeOnPage(pagePath: string) {
     const timeSpent = Math.round((Date.now() - this.pageStartTime) / 1000)
 
@@ -148,7 +138,6 @@ class AnalyticsService {
     return timeSpent
   }
 
-  // Track conversions
   trackConversion(conversion: ConversionEvent) {
     if (window.gtag) {
       window.gtag('event', 'conversion', {
@@ -168,7 +157,6 @@ class AnalyticsService {
     })
   }
 
-  // Track form submissions
   trackFormSubmit(formName: string, success: boolean, errorMessage?: string) {
     this.trackEvent({
       category: 'form',
@@ -180,7 +168,6 @@ class AnalyticsService {
     })
   }
 
-  // Track auth events
   trackAuth(
     action: 'login' | 'signup' | 'logout' | 'password_reset',
     method?: string,
@@ -192,7 +179,6 @@ class AnalyticsService {
     })
   }
 
-  // Track booking events
   trackBooking(
     action: 'started' | 'completed' | 'cancelled',
     serviceId?: string,
@@ -206,7 +192,6 @@ class AnalyticsService {
     })
   }
 
-  // Track subscription events
   trackSubscription(
     action:
       | 'view_plans'
@@ -225,7 +210,6 @@ class AnalyticsService {
     })
   }
 
-  // Track scroll depth
   trackScrollDepth(percentage: number, pagePath: string) {
     if (
       percentage === 25 ||
@@ -242,7 +226,6 @@ class AnalyticsService {
     }
   }
 
-  // Store events locally for analysis
   private storeLocalEvent(event: Record<string, unknown>) {
     try {
       const events = JSON.parse(
@@ -250,7 +233,6 @@ class AnalyticsService {
       )
       events.push(event)
 
-      // Keep only last 100 events
       if (events.length > 100) {
         events.shift()
       }
@@ -264,7 +246,6 @@ class AnalyticsService {
     }
   }
 
-  // Get stored events
   getStoredEvents(): Record<string, unknown>[] {
     try {
       return JSON.parse(localStorage.getItem('kontrol_analytics') || '[]')
@@ -273,12 +254,10 @@ class AnalyticsService {
     }
   }
 
-  // Clear stored events
   clearStoredEvents() {
     localStorage.removeItem('kontrol_analytics')
   }
 
-  // Get session analytics summary
   getSessionSummary() {
     const events = this.getStoredEvents()
     const sessionEvents = events.filter((e) => e.sessionId === this.sessionId)
@@ -294,5 +273,4 @@ class AnalyticsService {
   }
 }
 
-// Singleton instance
 export const analyticsService = new AnalyticsService()

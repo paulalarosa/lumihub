@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button'
 import { X, Download } from 'lucide-react'
 
 export const InstallPrompt = () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showPrompt, setShowPrompt] = useState(false)
 
@@ -12,7 +11,6 @@ export const InstallPrompt = () => {
       e.preventDefault()
       setDeferredPrompt(e)
 
-      // Mostrar banner apenas se não foi instalado
       const isInstalled = window.matchMedia(
         '(display-mode: standalone)',
       ).matches

@@ -18,7 +18,6 @@ const FloatingShape = ({
     if (!meshRef.current) return
     const time = state.clock.getElapsedTime()
 
-    // Rotação suave
     meshRef.current.rotation.x = Math.sin(time * speed) * 0.3
     meshRef.current.rotation.y = Math.cos(time * speed * 0.8) * 0.3
   })
@@ -52,7 +51,7 @@ export const FloatingShapes3D = () => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} />
 
-        {/* Múltiplas shapes flutuantes */}
+        {}
         <FloatingShape position={[-2, 1, 0]} color="#8B5CF6" speed={1.2} />
         <FloatingShape position={[2, -1, -1]} color="#EC4899" speed={0.8} />
         <FloatingShape position={[0, 2, -2]} color="#3B82F6" speed={1.5} />

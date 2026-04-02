@@ -15,7 +15,7 @@ interface RevenueChartProps {
   overrideMetrics?: {
     activeContracts: number
     leads: number
-    subtitle?: string // e.g. "ESTIMATED SaaS REVENUE"
+    subtitle?: string
   }
 }
 
@@ -25,15 +25,11 @@ export const RevenueChart = ({
 }: RevenueChartProps) => {
   const { data: metrics } = useDashboardMetrics()
 
-  // Use override if provided, otherwise fallback to hook
   const activeContracts = overrideMetrics
     ? overrideMetrics.activeContracts
     : metrics?.activeContracts || 0
   const leads = overrideMetrics ? overrideMetrics.leads : metrics?.leads || 0
 
-  // Simulation:
-  // Average Ticket = R$ 1500 (CRM) or R$ 59.90 (SaaS)
-  // If override is present, we assume SaaS pricing (approx R$ 89.90 avg)
   const TICKET = overrideMetrics ? 89.9 : 1500
 
   const guaranteed = activeContracts * TICKET

@@ -40,7 +40,6 @@ export function CalendarSidebar({
   calendarSize = 'small',
   onCalendarSizeChange,
 }: CalendarSidebarProps) {
-  // Create a map of dates with events for highlighting
   const eventDates = events.reduce(
     (acc, event) => {
       const dateStr = event.event_date
@@ -77,9 +76,9 @@ export function CalendarSidebar({
 
   return (
     <div className="flex flex-col h-full font-mono">
-      {/* Mini Calendar */}
+      {}
       <div className="border border-white/20 rounded-none p-3 bg-black">
-        {/* Size controls */}
+        {}
         {onCalendarSizeChange && (
           <div className="flex items-center justify-between mb-2 border-b border-white/10 pb-2">
             <button
@@ -142,7 +141,7 @@ export function CalendarSidebar({
         />
       </div>
 
-      {/* Assistants List */}
+      {}
       <div className="mt-4 border border-white/20 rounded-none bg-black flex-1 min-h-0">
         <div className="p-3 border-b border-white/20">
           <h3 className="font-mono text-xs uppercase tracking-widest flex items-center gap-2 text-white">
@@ -183,7 +182,7 @@ export function CalendarSidebar({
         </ScrollArea>
       </div>
 
-      {/* Legend */}
+      {}
       <div className="mt-4 border border-white/20 rounded-none p-3 bg-black">
         <h3 className="font-mono text-xs uppercase tracking-widest mb-2 text-white">
           EVENT_TYPES

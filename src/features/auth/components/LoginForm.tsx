@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
+import { sanitizeFormData } from '@/lib/security'
 
-// 1. Definir o Schema com Zod
 const loginSchema = z.object({
   email: z
     .string()
@@ -15,16 +15,13 @@ const loginSchema = z.object({
   password: z.string().min(6, 'A senha deve ter pelo menos 6 caracteres'),
 })
 
-// Inferir o tipo do formulário a partir do schema
 type LoginFormData = z.infer<typeof loginSchema>
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormData) => Promise<void>
-  // isLoading removido em favor de isSubmitting nativo
 }
 
 export function LoginForm({ onSubmit }: LoginFormProps) {
-  // 2. Usar o hook useForm com o zodResolver
   const {
     register,
     handleSubmit,
@@ -37,8 +34,13 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
     },
   })
 
+  const handleLoginSubmit = async (data: LoginFormData) => {
+    const cleanData = sanitizeFormData(data)
+    await onSubmit(cleanData)
+  }
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleLoginSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -46,12 +48,12 @@ export function LoginForm({ onSubmit }: LoginFormProps) {
           type="email"
           placeholder="seu@email.com"
           {...register('email')}
-          disabled={isSubmitting} // Desabilitado enquanto envia
+          disabled={isSubmitting}
           className={
             errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''
           }
         />
-        {/* Renderizar mensagens de erro automaticamente */}
+        {}
         {errors.email && (
           <span className="text-sm text-red-500 animate-in fade-in slide-in-from-top-1">
             {errors.email.message}

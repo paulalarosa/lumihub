@@ -18,7 +18,7 @@ import {
   Users,
 } from 'lucide-react'
 import { formatDate } from '@/lib/date-utils'
-// format and ptBR removed (handled by formatDate)
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -89,7 +89,7 @@ const EventCard = memo(function EventCard({
     <Card className="group border border-white/20 bg-black rounded-none hover:border-white transition-all duration-300">
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
-          {/* Status Bar instead of Color dot */}
+          {}
           <div
             className="w-1 h-full min-h-[80px] flex-shrink-0"
             style={{
@@ -131,7 +131,7 @@ const EventCard = memo(function EventCard({
               <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <WhatsAppSmartButton />
 
-                {/* Calendar export dropdown */}
+                {}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
@@ -182,7 +182,7 @@ const EventCard = memo(function EventCard({
               </div>
             </div>
 
-            {/* Date and basic info */}
+            {}
             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-white/60 font-mono uppercase">
               {showDate && (
                 <span className="flex items-center gap-1">
@@ -206,7 +206,7 @@ const EventCard = memo(function EventCard({
               )}
             </div>
 
-            {/* Noivas - Specific times */}
+            {}
             {isNoivas && hasNoivasTimes && (
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3 text-[10px] font-mono text-white/50 uppercase border-t border-white/10 pt-2 border-dashed">
                 {event.arrival_time && (
@@ -236,7 +236,7 @@ const EventCard = memo(function EventCard({
               </div>
             )}
 
-            {/* Pre Wedding / Produções Sociais - Start and End times */}
+            {}
             {!isNoivas && hasRegularTimes && (
               <div className="flex items-center gap-3 mt-3 text-xs text-white/50 font-mono border-t border-white/10 pt-2 border-dashed">
                 <span className="flex items-center gap-1">
@@ -247,7 +247,7 @@ const EventCard = memo(function EventCard({
               </div>
             )}
 
-            {/* Address with GPS link */}
+            {}
             {displayAddress && (
               <button
                 onClick={(e) => {

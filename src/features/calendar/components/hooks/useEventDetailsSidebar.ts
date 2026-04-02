@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { toZonedTime, formatDate } from '@/lib/date-utils'
-// format and parseISO removed
 
 interface Event {
   id: string
@@ -83,10 +82,7 @@ export function useEventDetailsSidebar({
     setSelectedAssistants([])
   }, [])
 
-  const fetchLists = useCallback(async () => {
-    // Current implementation uses empty states for clients/assistants
-    // This stub maintains compatibility with the existing logic
-  }, [])
+  const fetchLists = useCallback(async () => {}, [])
 
   const fetchEventDetails = useCallback(
     async (id: string) => {

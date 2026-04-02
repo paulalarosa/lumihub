@@ -77,7 +77,7 @@ export const ProjectHeader = ({
             {viewMode === 'internal' && (
               <GenerateContractButton projectId={project.id} />
             )}
-            {/* View mode toggle */}
+            {}
             <div className="flex items-center border border-white/20 bg-black">
               <Button
                 variant={viewMode === 'internal' ? 'default' : 'ghost'}

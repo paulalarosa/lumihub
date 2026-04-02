@@ -146,7 +146,7 @@ export function ContractsTab({
               </form>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-                {/* SECTION A: CRIAR DO ZERO */}
+                {}
                 <div className="space-y-3 p-4 border border-white/10 bg-white/5">
                   <div className="flex items-center gap-2 text-white">
                     <Sparkles className="w-4 h-4 text-[#D4AF37]" />
@@ -176,7 +176,7 @@ export function ContractsTab({
                   )}
                 </div>
 
-                {/* SECTION B: REFINAR */}
+                {}
                 <div className="space-y-3 p-4 border border-white/10 bg-white/5">
                   <div className="flex items-center gap-2 text-white justify-between">
                     <div className="flex items-center gap-2">

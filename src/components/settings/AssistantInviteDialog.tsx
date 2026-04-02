@@ -34,7 +34,6 @@ export function AssistantInviteDialog() {
     const newInvite = await sendInvite(email)
     if (newInvite) {
       setEmail('')
-      // Optionally auto-copy or show success, currently handled by toast in hook.
     }
   }
 

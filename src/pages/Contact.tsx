@@ -72,7 +72,7 @@ export default function Contact() {
         priceRange="$$"
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
-        {/* Textured Overlay Image */}
+        {}
         <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
           <img
             src="/khaos-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png"
@@ -80,20 +80,20 @@ export default function Contact() {
             className="w-full h-full object-cover grayscale brightness-50"
           />
         </div>
-        {/* Ambient Glows */}
+        {}
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-white/[0.015] blur-[150px] rounded-full pointer-events-none" />
 
         <main className="container mx-auto px-6 lg:px-10 pt-20 pb-24 relative z-10">
           <div className="max-w-6xl mx-auto space-y-24">
-            {/* Hero Split */}
+            {}
             <motion.section
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start"
             >
-              {/* Left */}
+              {}
               <div className="flex flex-col justify-center space-y-6 lg:sticky lg:top-40 text-left">
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
                   Contato
@@ -116,7 +116,7 @@ export default function Contact() {
                 </Link>
               </div>
 
-              {/* Right — Form */}
+              {}
               <div className="p-8 md:p-12 rounded-[2.5rem] border border-white/5 bg-white/[0.02] relative overflow-hidden text-left">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] blur-[100px] rounded-full pointer-events-none" />
 
@@ -206,7 +206,7 @@ export default function Contact() {
               </div>
             </motion.section>
 
-            {/* Contact Channels */}
+            {}
             <section>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <motion.a

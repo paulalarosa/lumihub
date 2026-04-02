@@ -89,12 +89,10 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
         <h2 className="text-xl font-serif text-white uppercase tracking-widest flex items-center gap-2">
           <ListTodo className="h-5 w-5" /> Operations_List
         </h2>
-        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1">
-          /// TASK_MANAGEMENT_SYSTEM
-        </p>
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1"></p>
       </div>
 
-      {/* Stats */}
+      {}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card className="bg-black border border-white/20 rounded-none">
           <CardContent className="pt-6">
@@ -147,7 +145,7 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
         </Card>
       </div>
 
-      {/* Filter Buttons */}
+      {}
       <div className="flex gap-2 bg-black border border-white/20 p-1 w-fit">
         <Button
           variant={filter === 'all' ? 'secondary' : 'ghost'}
@@ -177,7 +175,7 @@ const AssistantTasks = ({ tasks, onTaskUpdate }: AssistantTasksProps) => {
         </Button>
       </div>
 
-      {/* Tasks List */}
+      {}
       {filteredTasks.length === 0 ? (
         <div className="border border-white/10 bg-white/5 border-dashed p-12 text-center">
           <CheckSquare className="h-12 w-12 mx-auto text-white/20 mb-4" />

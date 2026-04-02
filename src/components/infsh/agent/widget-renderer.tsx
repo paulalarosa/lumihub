@@ -21,10 +21,8 @@ import type {
 import { cn } from '@/lib/utils'
 import React, { createContext, useContext, useState } from 'react'
 
-// Use the shared form data type
 type FormData = WidgetFormData
 
-// Local variant types (shadcn doesn't export the Props types)
 type ButtonVariant =
   | 'default'
   | 'secondary'
@@ -60,7 +58,6 @@ const toBadgeVariant = (v?: string): BadgeVariant => {
   return 'default'
 }
 
-// Context for handling widget actions
 type WidgetContextValue = {
   onAction: (action: WidgetAction, formData?: FormData) => void
   formData: FormData
@@ -78,7 +75,6 @@ const useWidgetContext = () => {
   return ctx
 }
 
-// Helper to map text variant to CSS classes
 const toTextClasses = (variant?: string): string => {
   switch (variant) {
     case 'muted':
@@ -94,7 +90,6 @@ const toTextClasses = (variant?: string): string => {
   }
 }
 
-// Helper to map size to font size classes
 const toSizeClasses = (size?: string): string => {
   switch (size) {
     case 'xs':
@@ -116,7 +111,6 @@ const toSizeClasses = (size?: string): string => {
   }
 }
 
-// Helper to map weight to font weight classes
 const toWeightClasses = (weight?: string): string => {
   switch (weight) {
     case 'normal':
@@ -132,7 +126,6 @@ const toWeightClasses = (weight?: string): string => {
   }
 }
 
-// Helper to map align to flex classes
 const toAlignClasses = (align?: string): string => {
   switch (align) {
     case 'start':
@@ -150,7 +143,6 @@ const toAlignClasses = (align?: string): string => {
   }
 }
 
-// Helper to map justify to flex classes
 const toJustifyClasses = (justify?: string): string => {
   switch (justify) {
     case 'start':
@@ -170,7 +162,6 @@ const toJustifyClasses = (justify?: string): string => {
   }
 }
 
-// Helper to map radius to border radius classes
 const toRadiusClasses = (radius?: string): string => {
   switch (radius) {
     case 'none':
@@ -192,7 +183,6 @@ const toRadiusClasses = (radius?: string): string => {
   }
 }
 
-// Helper to map background to CSS classes or inline styles
 type BackgroundResult = { className?: string; style?: React.CSSProperties }
 
 const toBackgroundStyles = (
@@ -206,14 +196,12 @@ const toBackgroundStyles = (
     return toBackgroundStyles(value)
   }
 
-  // Semantic tokens
   switch (background) {
     case 'surface-secondary':
       return { className: 'bg-muted' }
     case 'surface-tertiary':
       return { className: 'bg-muted/50' }
 
-    // Preset gradients
     case 'gradient-blue':
       return {
         className: 'bg-gradient-to-br from-blue-500/60 to-indigo-500/60',
@@ -241,7 +229,6 @@ const toBackgroundStyles = (
         className: 'bg-gradient-to-br from-slate-700/60 to-purple-900/60',
       }
 
-    // Alpha tokens
     case 'alpha-5':
       return { style: { background: 'rgba(255, 255, 255, 0.05)' } }
     case 'alpha-10':
@@ -255,7 +242,6 @@ const toBackgroundStyles = (
     case 'alpha-50':
       return { style: { background: 'rgba(255, 255, 255, 0.50)' } }
 
-    // Basic color tokens
     case 'white':
       return { className: 'bg-white' }
     case 'black':
@@ -268,7 +254,6 @@ const toBackgroundStyles = (
       return { className: 'bg-accent' }
   }
 
-  // Raw CSS value
   if (
     background.startsWith('#') ||
     background.startsWith('rgb') ||
@@ -282,12 +267,10 @@ const toBackgroundStyles = (
   return {}
 }
 
-// Recursive node renderer
 const NodeRenderer = React.memo(({ node }: { node: WidgetNode }) => {
   const { onAction, formData, setFormValue, isDisabled, loadingActionType } =
     useWidgetContext()
 
-  // Get the effective action (onClickAction or deprecated action)
   const getClickAction = (n: WidgetNode): WidgetAction | undefined =>
     n.onClickAction || n.action
 
@@ -637,12 +620,10 @@ const NodeRenderer = React.memo(({ node }: { node: WidgetNode }) => {
 })
 NodeRenderer.displayName = 'NodeRenderer'
 
-// Helper to extract default form values from widget nodes
 const extractDefaultFormValues = (nodes: WidgetNode[]): FormData => {
   const defaults: FormData = {}
 
   const processNode = (node: WidgetNode) => {
-    // Extract default values from form fields
     if (node.name) {
       switch (node.type) {
         case 'checkbox':
@@ -654,12 +635,11 @@ const extractDefaultFormValues = (nodes: WidgetNode[]): FormData => {
           break
         case 'select':
         case 'radio-group':
-          defaults[node.name] = '' // Empty string means no selection
+          defaults[node.name] = ''
           break
       }
     }
 
-    // Recursively process children
     if (node.children) {
       node.children.forEach(processNode)
     }
@@ -669,19 +649,17 @@ const extractDefaultFormValues = (nodes: WidgetNode[]): FormData => {
   return defaults
 }
 
-// Main widget renderer
 export interface WidgetRendererProps {
   widget: Widget | string
   onAction?: (action: WidgetAction, formData?: FormData) => void | Promise<void>
   className?: string
   disabled?: boolean
-  /** Wrap content in a Card (default: only when title exists) */
+
   asCard?: boolean
 }
 
 export const WidgetRenderer = React.memo(
   ({ widget, onAction, className, disabled, asCard }: WidgetRendererProps) => {
-    // Initialize form data with default values from widget nodes
     const [formData, setFormData] = useState<FormData>(() => {
       if (typeof widget === 'string') return {}
       return extractDefaultFormValues(widget.children ?? [])
@@ -701,7 +679,6 @@ export const WidgetRenderer = React.memo(
     ) => {
       if (disabled || isSubmitting) return
 
-      // Merge form data with action payload (payload values override form data)
       const mergedFormData: FormData = { ...actionFormData }
       if (action.payload) {
         for (const [key, value] of Object.entries(action.payload)) {
@@ -715,7 +692,6 @@ export const WidgetRenderer = React.memo(
         }
       }
 
-      // Set loading state based on loadingBehavior
       if (action.loadingBehavior !== 'none') {
         setIsSubmitting(true)
         if (
@@ -737,7 +713,6 @@ export const WidgetRenderer = React.memo(
     const isContainerLoading = isSubmitting && loadingActionType === null
     const isDisabled = disabled || isContainerLoading
 
-    // Handle string widget (fallback)
     if (typeof widget === 'string') {
       return (
         <Card className={cn('w-full', className)}>
@@ -746,7 +721,6 @@ export const WidgetRenderer = React.memo(
       )
     }
 
-    // Determine if we should use Card wrapper
     const shouldUseCard = asCard ?? !!widget.title
 
     const content = (
@@ -785,7 +759,6 @@ export const WidgetRenderer = React.memo(
       )
     }
 
-    // No Card wrapper - just render content directly
     return (
       <WidgetContext.Provider
         value={{

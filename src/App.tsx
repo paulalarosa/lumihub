@@ -38,7 +38,6 @@ const AchievementNotifications = lazy(() =>
   })),
 )
 
-// Lazy AI Components
 const ModernAIChat = lazy(() =>
   import('./components/ai/ModernAIChat').then((m) => ({
     default: m.ModernAIChat,
@@ -50,7 +49,6 @@ const CanvasPanel = lazy(() =>
   })),
 )
 
-// Lazy Imports (Code Splitting)
 const Index = lazy(() => import('./pages/HomePage'))
 const Login = lazy(() => import('@/features/auth/pages/Login'))
 const Register = lazy(() => import('@/features/auth/pages/Register'))
@@ -150,7 +148,6 @@ const AssistantFreeDashboard = lazy(
   () => import('@/features/assistant-portal/pages/AssistantFreeDashboard'),
 )
 
-// Custom styles
 import '@/styles/calendar.css'
 
 const queryClient = new QueryClient({
@@ -214,7 +211,7 @@ const App = () => {
                   <ErrorBoundary>
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
-                        {/* Public Marketing Pages */}
+                        {}
                         <Route
                           path="/"
                           element={<LazyPage component={Index} />}
@@ -250,7 +247,7 @@ const App = () => {
                           />
                         </Route>
 
-                        {/* Auth */}
+                        {}
                         <Route
                           path="/login"
                           element={<LazyPage component={Login} />}
@@ -290,7 +287,7 @@ const App = () => {
                           element={<LazyPage component={UpdatePassword} />}
                         />
 
-                        {/* Protected App Pages with Layout */}
+                        {}
                         <Route element={<AppLayout />}>
                           <Route element={<ProtectedRoute />}>
                             <Route
@@ -449,7 +446,7 @@ const App = () => {
                           element={<LazyPage component={PublicBooking} />}
                         />
 
-                        {/* Assistant Portal Free (Shadow Accounts) */}
+                        {}
                         <Route
                           path="/agenda-equipa/:professionalId"
                           element={<LazyPage component={AssistantQuickLogin} />}

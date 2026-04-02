@@ -137,7 +137,7 @@ export function useBrideDashboard() {
         }) as ServiceItem[],
         contracts: (contractsData || []) as Contract[],
         daysLeft,
-        events: [] as Event[], // Placeholder for now or fetch if needed
+        events: [] as Event[],
         bride: {
           id: typedProject.client_id,
           name: typedProject.client?.full_name || 'Noiva',
@@ -146,7 +146,7 @@ export function useBrideDashboard() {
       }
     },
     enabled: !!clientId,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   })
 
   const handleLogout = () => {

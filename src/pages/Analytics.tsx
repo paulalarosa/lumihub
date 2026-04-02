@@ -25,7 +25,7 @@ export default function Analytics() {
 
   return (
     <div className="min-h-screen bg-black font-mono selection:bg-white selection:text-black">
-      {/* Header */}
+      {}
       <header className="border-b border-neutral-800 bg-black sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
@@ -47,9 +47,7 @@ export default function Analytics() {
                   <h1 className="font-serif text-2xl text-white tracking-tight">
                     ANALYTICS
                   </h1>
-                  <div className="text-[10px] text-neutral-500 uppercase tracking-[0.2em] font-mono">
-                    /// CLIENT INTELLIGENCE
-                  </div>
+                  <div className="text-[10px] text-neutral-500 uppercase tracking-[0.2em] font-mono"></div>
                 </div>
               </div>
             </div>
@@ -58,7 +56,7 @@ export default function Analytics() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* KPI Cards */}
+        {}
         <section className="mb-8">
           <h2 className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-4">
             Métricas Principais
@@ -97,7 +95,7 @@ export default function Analytics() {
           </div>
         </section>
 
-        {/* Charts Grid */}
+        {}
         <section>
           <h2 className="text-[10px] font-mono uppercase tracking-widest text-neutral-500 mb-4">
             Visualizações
@@ -118,7 +116,7 @@ export default function Analytics() {
           </div>
         </section>
 
-        {/* Refresh Info */}
+        {}
         <div className="mt-8 text-center">
           <span className="text-[10px] font-mono uppercase tracking-widest text-neutral-600">
             Auto-refresh: 5 min

@@ -7,9 +7,7 @@ import {
   Font,
 } from '@react-pdf/renderer'
 import { formatDate, DATE_FORMATS } from '@/lib/date-utils'
-// ptBR removed as it is handled by date-utils
 
-// Registrar fontes (opcional - deixa mais profissional)
 Font.register({
   family: 'Roboto',
   src: 'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Me5Q.ttf',
@@ -136,7 +134,7 @@ export interface ContractData {
 export const ContractTemplate = ({ data }: { data: ContractData }) => (
   <Document>
     <Page size="A4" style={styles.page}>
-      {/* Header */}
+      {}
       <View style={styles.header}>
         <Text style={styles.title}>
           CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE MAQUIAGEM
@@ -144,7 +142,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         <Text style={styles.subtitle}>Contrato Nº {data.contractNumber}</Text>
       </View>
 
-      {/* Partes */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>1. Das Partes</Text>
 
@@ -168,7 +166,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         </View>
       </View>
 
-      {/* Objeto */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>2. Do Objeto</Text>
         <View style={styles.clause}>
@@ -181,7 +179,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         </View>
       </View>
 
-      {/* Serviços */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>3. Dos Serviços Contratados</Text>
 
@@ -210,7 +208,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         </View>
       </View>
 
-      {/* Pagamento */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>
           4. Do Valor e Forma de Pagamento
@@ -239,7 +237,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         </View>
       </View>
 
-      {/* Cláusulas Padrão */}
+      {}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>5. Das Obrigações da Contratada</Text>
         <Text style={styles.clause}>
@@ -284,7 +282,7 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
         </Text>
       </View>
 
-      {/* Footer */}
+      {}
       <View style={styles.footer}>
         <Text style={{ textAlign: 'center', marginBottom: 15, fontSize: 10 }}>
           E, por estarem assim justas e contratadas, assinam o presente
@@ -322,16 +320,14 @@ export const ContractTemplate = ({ data }: { data: ContractData }) => (
           }}
         >
           Este contrato possui validade jurídica conforme MP 2.200-2/2001.
-          Aceite registrado eletronicamente via logs de sistema Khaos Kontrol sob o
-          ID: {data.contractNumber}.
+          Aceite registrado eletronicamente via logs de sistema Khaos Kontrol
+          sob o ID: {data.contractNumber}.
         </Text>
       </View>
     </Page>
   </Document>
 )
 
-// Helper function (implementar ou usar biblioteca)
 function extenso(valor: number): string {
-  // Implementação simplificada - use biblioteca como 'numero-por-extenso' em produção
   return `${Math.floor(valor)} reais`
 }

@@ -13,26 +13,24 @@ const GoogleCalendarCallback = () => {
 
   useEffect(() => {
     handleCallback()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleCallback = async () => {
     try {
       const code = searchParams.get('code')
-      const state = searchParams.get('state') // user_id
+      const state = searchParams.get('state')
 
       if (!code) {
         throw new Error('No authorization code received')
       }
 
-      // Exchange code for tokens via Edge Function
       const { data, error } = await supabase.functions.invoke(
         'exchange-google-code',
         {
           body: {
             code,
             user_id: state,
-            redirect_uri: window.location.href.split('?')[0], // passing current clean URL as redirect_uri
+            redirect_uri: window.location.href.split('?')[0],
           },
         },
       )

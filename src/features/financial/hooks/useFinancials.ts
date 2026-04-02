@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { subMonths } from 'date-fns/subMonths'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
-// format, parseISO, and ptBR removed
 
 export interface Transaction {
   id: string
@@ -38,7 +37,6 @@ export const useFinancials = () => {
 
   const transactions = query.data || []
 
-  // Calculate Metrics
   const income = transactions
     .filter((t) => t.type === 'income')
     .reduce((acc, curr) => acc + Number(curr.amount), 0)
@@ -49,7 +47,6 @@ export const useFinancials = () => {
 
   const profit = income - expense
 
-  // Prepare Chart Data (Last 6 Months)
   const chartData = Array.from({ length: 6 }, (_, i) => {
     const d = subMonths(toZonedTime(new Date()), i)
     return {

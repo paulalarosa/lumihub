@@ -41,12 +41,10 @@ import {
 } from '@/components/infsh/agent/widget-types'
 import { TaskOutputWrapper } from '@/components/infsh/task/task-output-wrapper'
 
-// Tool finish constants
 const ToolFinishStatusSucceeded = 'succeeded'
 const ToolFinishStatusFailed = 'failed'
 const ToolFinishStatusCancelled = 'cancelled'
 
-// Types
 interface ToolFinish {
   status: string
   result?: unknown
@@ -58,10 +56,6 @@ interface ToolInvocationProps {
   className?: string
   defaultOpen?: boolean
 }
-
-// ============================================================================
-// Finish Block - Special display for finish tool marking end of chat
-// ============================================================================
 
 const FinishBlock = memo(function FinishBlock({
   finish,
@@ -140,42 +134,27 @@ const FinishBlock = memo(function FinishBlock({
   )
 })
 
-/**
- * ToolInvocation - Single tool call display with widget and task output support
- *
- * @example
- * ```tsx
- * <ToolInvocation invocation={toolInvocation} />
- * ```
- */
 export const ToolInvocation = memo(function ToolInvocation({
   invocation,
   className,
   defaultOpen = false,
 }: ToolInvocationProps) {
-  // Parse widget from result or data - moved up to check for auto-open
   const widget = useMemo(() => {
-    // Try to parse from widget field first
     if (invocation.widget) {
       return parseWidget(invocation.widget)
     }
-    // Try to parse from result
     if (invocation.result) {
       return parseWidget(invocation.result)
     }
     return null
   }, [invocation.widget, invocation.result])
 
-  // Default to open for awaiting approval so users can see what they're approving
-  // Also default to open for widgets so users can see them immediately
   const isAwaitingApprovalStatus =
     invocation.status === ToolInvocationStatusAwaitingApproval
   const [isOpen, setIsOpen] = useState(
     defaultOpen || isAwaitingApprovalStatus || !!widget,
   )
 
-  // Get actions: submitToolResult for widgets, approveTool/rejectTool/alwaysAllowTool for HIL approval
-  // sendMessage for completed widget actions (e.g., "Create Variation" on finished images)
   const {
     submitToolResult,
     approveTool,
@@ -183,10 +162,8 @@ export const ToolInvocation = memo(function ToolInvocation({
     alwaysAllowTool,
     sendMessage,
   } = useAgentActions()
-  // Get client for TaskOutputWrapper
   const client = useAgentClient()
 
-  // Tool names are now direct (no type prefix) - use as-is
   const functionName = invocation.function?.name || 'tool'
 
   const status = invocation.status
@@ -195,17 +172,13 @@ export const ToolInvocation = memo(function ToolInvocation({
     status === ToolInvocationStatusAwaitingInput ||
     status === ToolInvocationStatusPending
 
-  // Check if this is an app tool with an execution_id (task)
   const isAppTool = invocation.type === ToolTypeApp
 
-  // Try to get task ID from execution_id, or parse from result as fallback
   const taskId = useMemo(() => {
-    // First try the execution_id field
     if (invocation.execution_id) {
       return invocation.execution_id
     }
-    // Fallback: try to parse task ID from result text
-    // Result format: "Task {task_id} {app_name} completed with output: ..."
+
     if (isAppTool && typeof invocation.result === 'string') {
       const match = invocation.result.match(/^Task\s+([a-z0-9]+)\s+/)
       if (match) {
@@ -217,31 +190,23 @@ export const ToolInvocation = memo(function ToolInvocation({
 
   const hasTaskOutput = isAppTool && taskId
 
-  // Check if this is a finish tool - render with special FinishBlock component
   const isFinishTool = functionName === 'finish'
 
-  // Parse finish data from invocation.data (where backend stores ToolFinish)
   const finishData = useMemo((): ToolFinish | null => {
     if (!isFinishTool) return null
 
-    // Try to parse from data field (where backend stores structured ToolFinish)
     if (invocation.data) {
       try {
-        // data might be a string or already parsed object
         const data =
           typeof invocation.data === 'string'
             ? JSON.parse(invocation.data)
             : invocation.data
-        // Check if it looks like a ToolFinish (has status field)
         if (data && typeof data.status === 'string') {
           return data as ToolFinish
         }
-      } catch {
-        // Not valid JSON or not a ToolFinish
-      }
+      } catch {}
     }
 
-    // Fallback: try to parse from arguments (for in-progress invocations)
     if (invocation.function?.arguments) {
       const args = invocation.function.arguments
       if (args.status && typeof args.status === 'string') {
@@ -295,15 +260,11 @@ export const ToolInvocation = memo(function ToolInvocation({
     }
   }, [status])
 
-  // Handle widget actions
-  // - For awaiting_input: Submit tool result to continue current turn
-  // - For completed: Send new message with action context (e.g., "Create Variation" on finished images)
   const handleWidgetAction = useCallback(
     async (action: WidgetAction, formData?: WidgetFormData) => {
       const isAwaitingInput = status === ToolInvocationStatusAwaitingInput
 
       if (isAwaitingInput) {
-        // Awaiting input: submit tool result to continue current turn
         if (!submitToolResult) return
         try {
           await submitToolResult(
@@ -317,13 +278,11 @@ export const ToolInvocation = memo(function ToolInvocation({
           )
         }
       } else {
-        // Completed/other: send as new message to start a new turn
         if (!sendMessage) return
         try {
-          // Build message text from action
           const actionText =
             action.payload?.message || action.payload?.text || action.type
-          // Include image URI if present in payload (for image variations)
+
           const files: UploadedFile[] = []
           if (action.payload?.image_uri) {
             files.push({
@@ -346,7 +305,6 @@ export const ToolInvocation = memo(function ToolInvocation({
     [invocation.id, status, submitToolResult, sendMessage],
   )
 
-  // Handle approve/reject for HIL approval (separate from widget submission)
   const handleApprove = useCallback(async () => {
     try {
       await approveTool(invocation.id)
@@ -374,23 +332,17 @@ export const ToolInvocation = memo(function ToolInvocation({
   const hasArgs =
     invocation.function?.arguments &&
     Object.keys(invocation.function.arguments).length > 0
-  // Note: hasResult only applies when there's no widget (widgets are handled separately)
   const hasResult = !!invocation.result && !widget && !hasTaskOutput
 
-  // Widget is interactive when awaiting input OR completed (for actions like "Create Variation")
   const isWidgetInteractive =
     status === ToolInvocationStatusAwaitingInput ||
     status === ToolInvocationStatusCompleted
 
-  // For finish tool with standard schema (has status field), use custom FinishBlock
-  // For custom output schemas, fall through to widget rendering
   if (isFinishTool && (finishData || isActive)) {
     return <FinishBlock finish={finishData} isActive={isActive} />
   }
 
-  // For awaiting approval, show approval UI
   if (isAwaitingApprovalStatus) {
-    // If there's a widget, use it
     if (widget) {
       return (
         <div className={cn('flex flex-col items-start', className)}>
@@ -403,11 +355,9 @@ export const ToolInvocation = memo(function ToolInvocation({
       )
     }
 
-    // Otherwise show default approval UI with buttons in footer
     return (
       <div className={cn('flex flex-col items-start', className)}>
         <div className="overflow-hidden rounded border bg-muted/10">
-          {/* Header */}
           <div className="flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground">
             {statusIcon}
             <span className="lowercase">
@@ -415,7 +365,6 @@ export const ToolInvocation = memo(function ToolInvocation({
             </span>
           </div>
 
-          {/* Arguments */}
           {hasArgs && (
             <div className="border-t px-2 py-1.5 text-xs">
               <div className="text-muted-foreground/50 mb-1">arguments:</div>
@@ -425,7 +374,6 @@ export const ToolInvocation = memo(function ToolInvocation({
             </div>
           )}
 
-          {/* Footer with action buttons */}
           <div className="flex items-center justify-end gap-2 border-t px-2 py-1.5">
             <Button
               size="sm"
@@ -457,7 +405,6 @@ export const ToolInvocation = memo(function ToolInvocation({
     )
   }
 
-  // For app tools with task output, show the TaskOutputWrapper
   if (hasTaskOutput) {
     return (
       <div className={cn('flex flex-col items-start', className)}>
@@ -493,7 +440,6 @@ export const ToolInvocation = memo(function ToolInvocation({
     )
   }
 
-  // Render widget if present
   if (widget) {
     return (
       <div className={cn('flex flex-col items-start flex-grow-0', className)}>
@@ -536,7 +482,6 @@ export const ToolInvocation = memo(function ToolInvocation({
                 </pre>
               </div>
             )}
-            {/* Render raw result (widgets are handled separately above) */}
             {hasResult && (
               <div>
                 <div className="text-muted-foreground/50 mb-1">result:</div>

@@ -26,8 +26,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { ptBR } from 'date-fns/locale'
 
-// Local bookingSchema removed in favor of centralized schema
-
 interface PublicBookingFormProps {
   micrositeId: string
 }
@@ -48,7 +46,6 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
   const onSubmit = async (values: z.infer<typeof bookingSchema>) => {
     setIsSubmitting(true)
     try {
-      // 1. Get the owner of the microsite
       const { data, error: micrositeError } = await supabase
         .from('microsites')
         .select('user_id, business_name')
@@ -58,11 +55,6 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       const microsite = data as unknown as Record<string, unknown>
 
       if (micrositeError) throw micrositeError
-
-      // 2. Create the lead/booking
-      // Note: In a real scenario, this should probably integrate with the 'leads' or 'events' table.
-      // For now, we'll insert into 'leads' if it exists, or just log/toast for the prototype.
-      // Assuming 'leads' table exists based on useLeads hook presence.
 
       const { error: leadError } = await supabase.from('leads').insert({
         user_id: microsite.user_id as string,
@@ -74,7 +66,6 @@ export const PublicBookingForm = ({ micrositeId }: PublicBookingFormProps) => {
       })
 
       if (leadError) {
-        // Fallback if leads table has different schema or issues, just show success for demo
         logger.error(
           'Lead insertion error (might be schema mismatch):',
           leadError,

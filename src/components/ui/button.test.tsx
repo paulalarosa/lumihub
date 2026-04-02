@@ -7,7 +7,7 @@ describe('Button', () => {
     render(<Button>Click me</Button>)
     const button = screen.getByRole('button', { name: /click me/i })
     expect(button).toBeInTheDocument()
-    expect(button.className).toContain('bg-white') // Default variant
+    expect(button.className).toContain('bg-white')
   })
 
   it('handles click events', () => {
@@ -35,7 +35,7 @@ describe('Button', () => {
     const link = screen.getByRole('link', { name: /link button/i })
     expect(link).toBeInTheDocument()
     expect(link).toHaveAttribute('href', '/link')
-    expect(link).toHaveClass('inline-flex') // Should still have button classes
+    expect(link).toHaveClass('inline-flex')
   })
 
   it('applies custom className', () => {

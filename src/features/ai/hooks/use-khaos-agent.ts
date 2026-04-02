@@ -8,10 +8,6 @@ import {
 import { useAI } from '@/hooks/useAI'
 import { createWebLLM } from '../services/web-llm-provider'
 
-/**
- * useKhaosAgent - Bridge hook between Vercel AI SDK and Inference UI
- * Supports Hybrid Engine (Cloud/Local) and Reasoning
- */
 export function useKhaosAgent() {
   const { mode, byokSettings } = useAI()
   const [localInput, setLocalInput] = useState('')
@@ -26,7 +22,6 @@ export function useKhaosAgent() {
     text: string
   } | null>(null)
 
-  // 1. Contextual Model Selection
   const localModel = useMemo(() => {
     if (mode === 'local') {
       return createWebLLM('Llama-3-8B-q4f16_1-MLC', (report) => {
@@ -36,7 +31,6 @@ export function useKhaosAgent() {
     return undefined
   }, [mode])
 
-  // 2. Setup Vercel useChat
   const chatHelpers = useChat({
     api:
       mode === 'cloud'
@@ -52,7 +46,6 @@ export function useKhaosAgent() {
     },
     model: mode === 'local' ? localModel : undefined,
     onFinish: ({ message }: { message: { content: string } }) => {
-      // Artifact detection logic - looking for <artifact title="...">...</artifact>
       const artifactMatch = message.content.match(
         /<artifact\s+title="([^"]+)"(?:\s+type="([^"]+)")?>([\s\S]*?)<\/artifact>/i,
       )
@@ -67,16 +60,13 @@ export function useKhaosAgent() {
     },
   })
 
-  // 3. Map Vercel Messages to Inference UI DTOs
   const chatMessages = useMemo((): ChatMessageDTO[] => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (chatHelpers.messages || []).map((m: any) => {
-      // Extract reasoning if available (Vercel AI SDK 3.x parts)
       const reasoning =
         (m.parts as Record<string, unknown>[])?.find(
           (p) => p.type === 'reasoning',
         )?.reasoning ||
-        m.reasoning || // Backup for older versions or custom implementation
+        m.reasoning ||
         null
 
       return {
@@ -85,7 +75,7 @@ export function useKhaosAgent() {
         content: [
           {
             type: ChatMessageContentTypeText,
-            // Clean content for chat bubble (strip artifact tags)
+
             text: m.content
               .replace(/<artifact[\s\S]*?<\/artifact>/gi, '')
               .trim(),
@@ -107,7 +97,6 @@ export function useKhaosAgent() {
         ),
       }
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatHelpers.messages, chatHelpers.status])
 
   const handleSubmit = (e?: React.FormEvent) => {

@@ -21,7 +21,6 @@ export const GenerateContractButton = ({
     setIsGenerating(true)
 
     try {
-      // 1. Buscar dados do projeto
       const { data: project, error } = await supabase
         .from('projects')
         .select(
@@ -37,7 +36,6 @@ export const GenerateContractButton = ({
       if (error) throw error
       if (!project) throw new Error('Projeto não encontrado')
 
-      // 2. Buscar dados da maquiadora
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -47,7 +45,6 @@ export const GenerateContractButton = ({
         .eq('user_id', user?.id)
         .single()
 
-      // 3. Montar dados do contrato
       const contractData = {
         contractNumber: `KHAOS-${project.id.substring(0, 8).toUpperCase()}`,
         makeupArtist: {
@@ -88,19 +85,16 @@ export const GenerateContractButton = ({
         },
       }
 
-      // 4. Gerar PDF
       const doc = <ContractTemplate data={contractData} />
       const asPdf = pdf(doc)
       const blob = await asPdf.toBlob()
 
-      // 5. Download
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
       link.download = `contrato-${((project.client as Record<string, unknown>).full_name as string).toLowerCase().replace(/\s/g, '-')}.pdf`
       link.click()
 
-      // 6. Log e Update
       await supabase
         .from('projects')
         .update({ contract_generated_at: new Date().toISOString() })

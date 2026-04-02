@@ -93,7 +93,7 @@ const ConfigErrorPage: React.FC<ConfigErrorPageProps> = ({ missing }) => {
           opacity: 0.5,
         }}
       >
-        Khaos Kontrol // Industrial Noir Management
+        Khaos Kontrol
       </p>
     </div>
   )

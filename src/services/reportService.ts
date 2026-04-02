@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf'
-// ExcelJS will be dynamically imported when needed
+
 import { saveAs } from 'file-saver'
 import { format } from 'date-fns/format'
 
@@ -11,11 +11,8 @@ interface Client {
   full_name: string
   phone: string | null
   email: string | null
-  // Add other relevant fields
 }
 
-// Premium Bridal Report Generation
-// Premium Bridal Report Generation
 interface _AutoTableDoc extends jsPDF {
   lastAutoTable: { finalY: number }
 }
@@ -26,20 +23,17 @@ export const generateClientPDF = (
 ) => {
   const doc = new jsPDF()
 
-  // -- CONFIGURATION & STYLES --
   const colors = {
-    primary: '#D4AF37', // Gold
-    secondary: '#000000', // Black
+    primary: '#D4AF37',
+    secondary: '#000000',
     text: '#333333',
     textLight: '#808080',
     bgLight: '#F9F9F9',
   }
 
-  // -- HEADER --
   doc.setFillColor(colors.secondary)
-  doc.rect(0, 0, 210, 50, 'F') // Dark Header Background
+  doc.rect(0, 0, 210, 50, 'F')
 
-  // Logo / Brand Name
   doc.setTextColor(colors.primary)
   doc.setFontSize(28)
   doc.setFont('helvetica', 'bold')
@@ -49,7 +43,6 @@ export const generateClientPDF = (
   doc.setTextColor(255, 255, 255)
   doc.text('EXCELLENCE IN BEAUTY MANAGEMENT // KHAOS STUDIO', 20, 32)
 
-  // Report Title
   doc.setFontSize(16)
   doc.setTextColor(colors.primary)
   doc.text('FICHA TÉCNICA DA NOIVA', 130, 25)
@@ -62,10 +55,7 @@ export const generateClientPDF = (
     32,
   )
 
-  // -- CLIENT INFO SECTION --
   let yPos = 65
-
-  // Avatar Placeholder (Optional logic could go here)
 
   doc.setFontSize(12)
   doc.setTextColor(colors.primary)
@@ -88,12 +78,10 @@ export const generateClientPDF = (
   doc.text(`Telefone: ${client.phone || 'N/A'}`, 110, yPos)
 
   yPos += 6
-  doc.text(`Cadastrada em: ${format(new Date(), 'dd/MM/yyyy')}`, 20, yPos) // Using current date or specific if passed
-  // doc.text(`Instagram: ${client.instagram || 'N/A'}`, 110, yPos);
+  doc.text(`Cadastrada em: ${format(new Date(), 'dd/MM/yyyy')}`, 20, yPos)
 
   yPos += 20
 
-  // -- PROJECTS & EVENTS --
   if (!projects || projects.length === 0) {
     doc.setFontSize(10)
     doc.setTextColor(colors.textLight)
@@ -105,9 +93,8 @@ export const generateClientPDF = (
         yPos = 30
       }
 
-      // Project Header
       doc.setFillColor(colors.primary)
-      doc.rect(20, yPos, 2, 18, 'F') // Accent Bar
+      doc.rect(20, yPos, 2, 18, 'F')
 
       doc.setFontSize(14)
       doc.setTextColor(colors.secondary)
@@ -122,7 +109,6 @@ export const generateClientPDF = (
         : 'A definir'
       doc.text(`Data: ${eventDate}`, 26, yPos + 16)
 
-      // Financial Status Badge-ish
       doc.setFontSize(10)
       doc.setTextColor(colors.secondary)
       const totalValue = project.total_value || 0
@@ -130,15 +116,12 @@ export const generateClientPDF = (
 
       yPos += 25
 
-      // Details Grid
       doc.setFontSize(9)
       doc.setTextColor(colors.text)
       doc.text(`Local: ${project.location || 'Não informado'}`, 20, yPos)
-      // doc.text(`Cerimonial: ${'N/A'}`, 110, yPos); // Add if available
 
       yPos += 10
 
-      // SERVICES TABLE
       const services = project.project_services || []
       if (services.length > 0) {
         const tableData = services.map((s) => [
@@ -178,7 +161,6 @@ export const generateClientPDF = (
         yPos += 15
       }
 
-      // Separator if not last
       if (index < projects.length - 1) {
         doc.setDrawColor(230, 230, 230)
         doc.line(20, yPos, 190, yPos)
@@ -187,7 +169,6 @@ export const generateClientPDF = (
     })
   }
 
-  // -- FOOTER --
   const pageCount = doc.getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i)
@@ -265,7 +246,6 @@ export const exportMonthlyClosing = async (events: MonthlyClosingEvent[]) => {
   const workbook = new ExcelJS.Workbook()
   const worksheet = workbook.addWorksheet('Fechamento Mensal')
 
-  // Define columns with custom widths
   worksheet.columns = [
     { header: 'Data', key: 'Data', width: 15 },
     { header: 'Cliente', key: 'Cliente', width: 30 },

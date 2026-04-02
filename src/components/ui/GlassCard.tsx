@@ -2,7 +2,6 @@ import { motion, HTMLMotionProps } from 'framer-motion'
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
-// We specify that 'children' is explicitly required or omit complex ref passing types from the spread to keep TS happy.
 interface GlassCardProps extends Omit<HTMLMotionProps<'div'>, 'ref'> {
   children: ReactNode
   hover?: boolean
@@ -30,10 +29,10 @@ export const GlassCard = ({
       viewport={{ once: true }}
       {...props}
     >
-      {/* Inner glow */}
+      {}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent rounded-2xl pointer-events-none" />
 
-      {/* Content */}
+      {}
       <div className="relative z-10">{children}</div>
     </motion.div>
   )

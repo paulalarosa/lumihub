@@ -1,23 +1,11 @@
-import React, { forwardRef, type ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import React, { forwardRef, type ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 interface ChatContainerProps {
-  children: ReactNode;
-  className?: string;
+  children: ReactNode
+  className?: string
 }
 
-/**
- * ChatContainer - Grid layout wrapper for chat components
- * 
- * @example
- * ```tsx
- * <ChatContainer className="h-screen">
- *   <Header />
- *   <ChatMessages>...</ChatMessages>
- *   <ChatInput />
- * </ChatContainer>
- * ```
- */
 export const ChatContainer = forwardRef<HTMLDivElement, ChatContainerProps>(
   ({ children, className }, ref) => {
     return (
@@ -25,14 +13,13 @@ export const ChatContainer = forwardRef<HTMLDivElement, ChatContainerProps>(
         ref={ref}
         className={cn(
           'grid max-h-full w-full grid-rows-[auto_1fr_auto]',
-          className
+          className,
         )}
       >
         {children}
       </div>
-    );
-  }
-);
+    )
+  },
+)
 
-ChatContainer.displayName = 'ChatContainer';
-
+ChatContainer.displayName = 'ChatContainer'

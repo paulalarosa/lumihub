@@ -1,10 +1,3 @@
-// ⚡️ Edge Function: Gemini 2.0 Flash (Novo Padrão)
-// 1. Usa Deno.serve (Estável no Supabase Edge Runtime)
-/// <reference no-default-lib="true" />
-/// <reference lib="deno.ns" />
-
-// 2. Importa SDK Google (v0.21.0 como solicitado)
-// @ts-ignore
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
 
 const corsHeaders = {
@@ -15,22 +8,18 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req: Request) => {
-  // 3. Tratamento de Preflight (CORS)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // 4. Autenticação (Tenta ambas as chaves para garantir funcionamento)
     const apiKey =
       Deno.env.get('GOOGLE_API_KEY') ||
       Deno.env.get('GOOGLE_GENERATIVE_AI_API_KEY')
     if (!apiKey) {
-      console.error('❌ Erro: API Key do Google não encontrada.')
       throw new Error('Configuração de API Key ausente no servidor.')
     }
 
-    // 5. Parse Payload (IMPORTANTE: Mantém lógica do Frontend Atual)
     const body = (await req.json()) as {
       mode?: string
       actors?: {
@@ -51,14 +40,10 @@ Deno.serve(async (req: Request) => {
     }
     const { mode, actors, terms, current_text, instruction, prompt } = body
 
-    console.log(
-      `⚡️ Processando com Gemini 2.0 Flash: Mode=${mode || 'Prompt Direto'}`,
-    )
-
     let finalPrompt = ''
 
     if (prompt) {
-      finalPrompt = prompt // Se o frontend mandar prompt direto, usa.
+      finalPrompt = prompt
     } else if (mode === 'ARCHITECT') {
       finalPrompt = `
                 CONTEXTO:
@@ -105,9 +90,6 @@ Deno.serve(async (req: Request) => {
       finalPrompt = 'Escreva um contrato genérico de prestação de serviços.'
     }
 
-    // 6. Chama o Gemini (Modelo: gemini-2.0-flash)
-    // INFO: Gemini 1.5 parece ter sido descontinuado/renomeado em Jan 2025.
-    // Gemini 2.0 Flash é o novo padrão rápido.
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
 
@@ -117,16 +99,11 @@ Deno.serve(async (req: Request) => {
 
     if (!text) throw new Error('Gemini retornou resposta vazia.')
 
-    console.log('✅ Sucesso! Texto gerado.')
-
-    // 7. Retorna Sucesso
     return new Response(JSON.stringify({ text }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     })
   } catch (error) {
-    console.error('🚨 Erro na Edge Function:', error)
-
     const errorMsg = error instanceof Error ? error.message : String(error)
 
     return new Response(

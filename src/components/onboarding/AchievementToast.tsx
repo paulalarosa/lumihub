@@ -19,7 +19,6 @@ export const AchievementNotifications = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
 
-  // Buscar conquistas novas
   const { data: newAchievements } = useQuery({
     queryKey: ['new-achievements'],
     queryFn: async () => {
@@ -31,16 +30,14 @@ export const AchievementNotifications = () => {
         .order('unlocked_at', { ascending: false })
 
       if (error) {
-        // Ignore missing table (404) on uninitialized databases
         return []
       }
       return data
     },
-    refetchInterval: 5000, // Check every 5s
+    refetchInterval: 5000,
     enabled: !!user,
   })
 
-  // Marcar como visto
   const markSeenMutation = useMutation({
     mutationFn: async (achievementId: string) => {
       const { error } = await supabase
@@ -58,14 +55,12 @@ export const AchievementNotifications = () => {
   useEffect(() => {
     if (newAchievements && newAchievements.length > 0) {
       newAchievements.forEach((achievement: AchievementData) => {
-        // Confetti
         confetti({
           particleCount: 50,
           spread: 60,
           origin: { y: 0.8 },
         })
 
-        // Toast customizado
         toast.custom(
           (t) => (
             <div className="bg-gradient-to-r from-purple-900 to-pink-900 border border-purple-500 rounded-lg p-4 shadow-2xl max-w-md w-full relative overflow-hidden">
@@ -106,12 +101,10 @@ export const AchievementNotifications = () => {
           },
         )
 
-        // Marcar como visto
         markSeenMutation.mutate(achievement.id)
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [newAchievements])
 
-  return null // Componente invisível
+  return null
 }

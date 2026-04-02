@@ -17,7 +17,7 @@ import { SignatureModal } from '@/features/contracts/components/SignatureModal'
 import SEOHead from '@/components/seo/SEOHead'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-// format and ptBR removed (handled by formatDate)
+
 import { useProjectContract } from '@/hooks/useProjectContract'
 
 export default function ProjectContract() {

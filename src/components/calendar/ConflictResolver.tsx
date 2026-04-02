@@ -24,15 +24,13 @@ export const ConflictResolver = () => {
       }
       return data
     },
-    refetchInterval: 30000, // Check a cada 30s
+    refetchInterval: 30000,
   })
 
   const _handleResolve = async (
     conflictId: string,
     _resolution: 'khaos' | 'google',
   ) => {
-    // Placeholder for manual resolution logic
-    // For now, we just mark as resolved manually
     const { error } = await supabase
       .from('sync_conflicts')
       .update({

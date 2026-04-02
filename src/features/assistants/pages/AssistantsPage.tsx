@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
@@ -33,6 +34,7 @@ export default function AssistantsPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white selection:text-black">
+      <SEOHead title="Assistentes" noindex={true} />
       <header className="border-b border-white/10 bg-[#050505] sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

@@ -22,7 +22,7 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
 
-  const bucketName = 'event-gallery' // Using a dedicated bucket
+  const bucketName = 'event-gallery'
 
   const fetchImages = useCallback(async () => {
     try {
@@ -36,7 +36,6 @@ export function EventGallery({ eventId, readOnly = false }: EventGalleryProps) {
         })
 
       if (error) {
-        // If bucket doesn't exist or other error
         logger.error(error, {
           message: 'Erro ao buscar imagens.',
           showToast: false,

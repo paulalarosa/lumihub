@@ -1,6 +1,5 @@
-// @ts-ignore
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-// @ts-ignore
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -22,7 +21,6 @@ serve(async (req: Request) => {
   try {
     const url = new URL(req.url)
 
-    // Support action from query params OR body
     let action = url.searchParams.get('action')
     let bodyData: {
       action?: string
@@ -31,22 +29,16 @@ serve(async (req: Request) => {
       state?: string
     } = {}
 
-    // Try to parse body for POST requests
     if (req.method === 'POST') {
       try {
         bodyData = (await req.json()) as typeof bodyData
-        // If action not in query params, get from body
+
         if (!action && bodyData.action) {
           action = bodyData.action
         }
-      } catch (e) {
-        // Body might be empty or invalid JSON
-      }
+      } catch (e) {}
     }
 
-    console.log('Action received:', action)
-
-    // Get auth URL for OAuth flow
     if (action === 'get-auth-url') {
       const authHeader = req.headers.get('Authorization')
       if (!authHeader) {
@@ -89,7 +81,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // Handle OAuth callback
     if (action === 'callback') {
       const { code, state: userId, redirect_uri } = bodyData
 
@@ -103,9 +94,6 @@ serve(async (req: Request) => {
         )
       }
 
-      console.log('Exchanging code for tokens...')
-
-      // Exchange code for tokens
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -127,7 +115,6 @@ serve(async (req: Request) => {
       }
 
       if (tokenData.error) {
-        console.error('Token exchange error:', tokenData)
         return new Response(
           JSON.stringify({
             error: tokenData.error_description || tokenData.error,
@@ -139,9 +126,6 @@ serve(async (req: Request) => {
         )
       }
 
-      console.log('Tokens received, fetching primary calendar...')
-
-      // Get user's primary calendar
       const calendarResponse = await fetch(
         'https://www.googleapis.com/calendar/v3/calendars/primary',
         {
@@ -151,8 +135,6 @@ serve(async (req: Request) => {
 
       const calendarData = (await calendarResponse.json()) as { id?: string }
       const calendarId = calendarData.id || 'primary'
-
-      console.log('Calendar ID:', calendarId)
 
       const supabaseClient = createClient(
         SUPABASE_URL,
@@ -171,7 +153,6 @@ serve(async (req: Request) => {
       )
 
       if (rpcError) {
-        console.error('Error saving integration:', rpcError)
         return new Response(
           JSON.stringify({ error: 'Failed to save integration' }),
           {
@@ -181,14 +162,11 @@ serve(async (req: Request) => {
         )
       }
 
-      console.log('Integration saved successfully')
-
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Disconnect integration
     if (action === 'disconnect') {
       const authHeader = req.headers.get('Authorization')
       if (!authHeader) {
@@ -212,7 +190,6 @@ serve(async (req: Request) => {
         })
       }
 
-      // Get current integration to revoke token
       const { data: integration } = await supabase
         .from('user_integrations')
         .select('access_token')
@@ -221,7 +198,6 @@ serve(async (req: Request) => {
         .single()
 
       if (integration?.access_token) {
-        // Revoke token
         await fetch(
           `https://oauth2.googleapis.com/revoke?token=${integration.access_token}`,
           {
@@ -230,7 +206,6 @@ serve(async (req: Request) => {
         )
       }
 
-      // Delete integration
       const { error: deleteError } = await supabase
         .from('user_integrations')
         .delete()
@@ -238,14 +213,12 @@ serve(async (req: Request) => {
         .eq('provider', 'google')
 
       if (deleteError) {
-        console.error('Error deleting integration:', deleteError)
         return new Response(JSON.stringify({ error: 'Failed to disconnect' }), {
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
 
-      // Clear google_calendar_event_id from user's events
       await supabase
         .from('events')
         .update({ google_calendar_event_id: null })
@@ -261,7 +234,6 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
-    console.error('Error in google-calendar-auth:', error)
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
     return new Response(JSON.stringify({ error: errorMessage }), {

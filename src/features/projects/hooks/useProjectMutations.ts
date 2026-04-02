@@ -4,6 +4,7 @@ import { ProjectService } from '../api/projectService'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { sanitizeFormData } from '@/lib/security'
 
 export function useProjectMutations() {
   const queryClient = useQueryClient()
@@ -11,9 +12,10 @@ export function useProjectMutations() {
 
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
+      const cleanData = sanitizeFormData(projectData)
       const { data, error } = await supabase
         .from('projects')
-        .insert(projectData)
+        .insert(cleanData)
         .select()
         .single()
       if (error) throw error
@@ -32,9 +34,10 @@ export function useProjectMutations() {
 
   const updateProjectMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
+      const cleanData = sanitizeFormData(data)
       const { data: result, error } = await supabase
         .from('projects')
-        .update(data)
+        .update(cleanData)
         .eq('id', id)
         .select()
         .single()
@@ -156,9 +159,8 @@ export function useProjectMutations() {
 
   const registerPaymentMutation = useMutation({
     mutationFn: async (paymentData: any) => {
-      const { error } = await supabase
-        .from('transactions')
-        .insert([paymentData])
+      const cleanData = sanitizeFormData(paymentData)
+      const { error } = await supabase.from('transactions').insert([cleanData])
       if (error) throw error
       return paymentData
     },

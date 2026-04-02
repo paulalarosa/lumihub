@@ -38,7 +38,6 @@ export default function AdminSecurity() {
   const fetchLogs = async () => {
     setLoadingLogs(true)
     try {
-      // Fetch security events from the new audit_logs table
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -80,7 +79,7 @@ export default function AdminSecurity() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header / Status */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-black border border-white/20 rounded-none">
           <CardHeader className="flex flex-row items-center justify-between pb-2">

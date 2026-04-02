@@ -14,7 +14,7 @@ export const AISettingsModal = ({ isOpen, onClose }: AISettingsModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="bg-black border border-white/10 max-w-3xl h-[600px] overflow-hidden flex flex-col p-0 rounded-none shadow-2xl">
-        {/* Superior Header - Serialized */}
+        {}
         <div className="flex items-center justify-between p-6 border-b border-white/5 bg-zinc-950/50">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 bg-white/5 border border-white/10 flex items-center justify-center rounded-none rotate-45">
@@ -43,7 +43,7 @@ export const AISettingsModal = ({ isOpen, onClose }: AISettingsModalProps) => {
           </button>
         </div>
 
-        {/* Configuration Core */}
+        {}
         <Tabs
           defaultValue="general"
           className="flex-1 overflow-hidden flex flex-col"
@@ -87,7 +87,7 @@ export const AISettingsModal = ({ isOpen, onClose }: AISettingsModalProps) => {
           </div>
         </Tabs>
 
-        {/* Serialized Footer */}
+        {}
         <div className="p-4 bg-zinc-950 border-t border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4 opacity-30">
             <div className="flex gap-1">

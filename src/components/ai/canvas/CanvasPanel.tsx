@@ -76,7 +76,7 @@ export const CanvasPanel = () => {
         activeCanvasId ? 'translate-x-0' : 'translate-x-full',
       )}
     >
-      {/* Header - Industrial Noir */}
+      {}
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-black/50 backdrop-blur-md">
         <div className="flex items-center gap-3 flex-1">
           <div className="w-9 h-9 bg-white/5 border border-white/10 flex items-center justify-center rounded-none rotate-45">
@@ -112,7 +112,7 @@ export const CanvasPanel = () => {
         </button>
       </div>
 
-      {/* Toolbar */}
+      {}
       <div className="flex items-center flex-wrap gap-2 p-3 border-b border-white/5 bg-zinc-900/30">
         <div className="flex gap-1 bg-black p-1 border border-white/5">
           <Button
@@ -182,7 +182,7 @@ export const CanvasPanel = () => {
         </div>
       </div>
 
-      {/* Content Engine */}
+      {}
       <div className="flex-1 overflow-hidden relative flex flex-col">
         {viewMode === 'edit' ? (
           <Textarea
@@ -206,7 +206,7 @@ export const CanvasPanel = () => {
         )}
       </div>
 
-      {/* Footer Status - Brutalist */}
+      {}
       <div className="p-3 border-t border-white/5 bg-black text-[8px] font-mono uppercase tracking-[0.3em] font-bold text-zinc-400 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <span className="text-emerald-500/50 flex items-center gap-2">

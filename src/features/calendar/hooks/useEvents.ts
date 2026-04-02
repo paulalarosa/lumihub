@@ -2,7 +2,6 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { formatDate } from '@/lib/date-utils'
-// format removed (handled by formatDate)
 
 export interface Event {
   id: string
@@ -104,6 +103,6 @@ export const useEvents = (start: Date, end: Date) => {
         longitude: event.longitude ? parseFloat(event.longitude) : null,
       })) as Event[]
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   })
 }

@@ -25,7 +25,6 @@ export const PerformanceMonitor = ({
         frames = 0
         lastTime = currentTime
 
-        // Measure memory (if available)
         if (performance.memory) {
           const memoryMB = performance.memory.usedJSHeapSize / 1048576
           setMemory(Math.round(memoryMB))

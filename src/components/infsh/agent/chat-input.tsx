@@ -40,10 +40,6 @@ interface ChatInputProps {
   onFilesChange?: (files: File[]) => void
 }
 
-// =============================================================================
-// Drag Overlay Component (CSS transitions)
-// =============================================================================
-
 interface DragOverlayProps {
   isDragging: boolean
 }
@@ -63,18 +59,6 @@ const DragOverlay = memo(function DragOverlay({
   )
 })
 
-// =============================================================================
-// ChatInput Component
-// =============================================================================
-
-/**
- * ChatInput - Self-contained input with file upload and auto-resize
- *
- * @example
- * ```tsx
- * <ChatInput placeholder="Ask me anything..." allowAttachments />
- * ```
- */
 export const ChatInput = memo(function ChatInput({
   placeholder = 'ask a question...',
   className,
@@ -82,7 +66,6 @@ export const ChatInput = memo(function ChatInput({
   allowFiles = true,
   allowImages = true,
 }: ChatInputProps) {
-  // Backwards compatibility: if allowAttachments is explicitly false, disable both
   const showFileButton = allowAttachments !== false && allowFiles
   const showImageButton = allowAttachments !== false && allowImages
   const enableAttachments = showFileButton || showImageButton
@@ -96,7 +79,6 @@ export const ChatInput = memo(function ChatInput({
   const containerRef = useRef<HTMLDivElement>(null)
   const dragCounterRef = useRef(0)
 
-  // File upload manager - uploads files on select
   const {
     uploads,
     addFiles,
@@ -109,7 +91,6 @@ export const ChatInput = memo(function ChatInput({
 
   const completedUploads = uploads.filter((u) => u.status === 'completed')
 
-  // Auto-resize textarea
   useEffect(() => {
     const textarea = textareaRef.current
     if (!textarea) return
@@ -119,7 +100,6 @@ export const ChatInput = memo(function ChatInput({
     textarea.style.height = `${newHeight}px`
   }, [value])
 
-  // Add @filename reference to text
   const addFileReferenceToText = useCallback((upload: FileUpload) => {
     const fileName = upload.file.name
     const text = `@${fileName} `
@@ -128,7 +108,6 @@ export const ChatInput = memo(function ChatInput({
       return `${prev}${needsSpace ? ' ' : ''}${text}`
     })
 
-    // Focus textarea and move cursor to end
     if (textareaRef.current) {
       textareaRef.current.focus()
       setTimeout(() => {
@@ -140,25 +119,18 @@ export const ChatInput = memo(function ChatInput({
     }
   }, [])
 
-  // Handle send
   const handleSend = useCallback(async () => {
     const messageText = value.trim()
 
-    // Need either text or completed uploads
     if (!messageText && !hasCompletedUploads) return
-
-    // Don't send while uploads are in progress
     if (hasPendingUploads) return
-
     if (isGenerating) return
 
-    // Get already-uploaded files
     const uploadedFiles = getUploadedFiles()
 
     setValue('')
     clearAll()
 
-    // Send message with pre-uploaded files
     await sendMessage(
       messageText,
       uploadedFiles.length > 0 ? uploadedFiles : undefined,
@@ -173,21 +145,17 @@ export const ChatInput = memo(function ChatInput({
     sendMessage,
   ])
 
-  // Handle key down
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      // Show command menu when @ is typed (and we have completed uploads)
       if (e.key === '@' && completedUploads.length > 0) {
         e.preventDefault()
         setShowCommandMenu(true)
       }
 
-      // Hide command menu on Escape
       if (e.key === 'Escape') {
         setShowCommandMenu(false)
       }
 
-      // Submit on Enter (without Shift)
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
         handleSend()
@@ -196,7 +164,6 @@ export const ChatInput = memo(function ChatInput({
     [handleSend, completedUploads.length],
   )
 
-  // Handle paste
   const handlePaste = useCallback(
     (e: React.ClipboardEvent) => {
       if (!enableAttachments) return
@@ -219,7 +186,6 @@ export const ChatInput = memo(function ChatInput({
     [enableAttachments, addFiles],
   )
 
-  // Drag and drop handlers
   const handleDragEnter = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
@@ -260,7 +226,6 @@ export const ChatInput = memo(function ChatInput({
     [enableAttachments, addFiles],
   )
 
-  // Handle attachment button click
   const handleAttachmentClick = async () => {
     const files = await showFileUploadDialog()
     if (files) {
@@ -268,7 +233,6 @@ export const ChatInput = memo(function ChatInput({
     }
   }
 
-  // Handle image button click
   const handleImageClick = async () => {
     const files = await showFileUploadDialog('image/*')
     if (files) {
@@ -283,7 +247,7 @@ export const ChatInput = memo(function ChatInput({
 
   return (
     <div className="relative">
-      {/* Error notification - floats above input */}
+      {}
       {error && (
         <div className="absolute -top-10 left-0 right-0 flex items-center justify-center animate-in fade-in slide-in-from-bottom-2 duration-200">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20 text-destructive text-xs">
@@ -311,7 +275,6 @@ export const ChatInput = memo(function ChatInput({
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        {/* File uploads */}
         {uploads.length > 0 && (
           <FileUploadList
             uploads={uploads}
@@ -320,10 +283,10 @@ export const ChatInput = memo(function ChatInput({
           />
         )}
 
-        {/* Text area with @ file reference popover */}
+        {}
         <div className="relative">
           <Popover open={showCommandMenu} onOpenChange={setShowCommandMenu}>
-            {/* Hidden trigger for popover positioning */}
+            {}
             <PopoverTrigger asChild>
               <div className="w-0 h-0 absolute" />
             </PopoverTrigger>
@@ -377,9 +340,7 @@ export const ChatInput = memo(function ChatInput({
           />
         </div>
 
-        {/* Toolbar */}
         <div className="flex items-center justify-between">
-          {/* Left side - action buttons */}
           <div className="flex items-center gap-1">
             {showFileButton && (
               <Button
@@ -409,7 +370,6 @@ export const ChatInput = memo(function ChatInput({
             )}
           </div>
 
-          {/* Right side - send/stop button */}
           <div className="flex items-center gap-2">
             {isGenerating ? (
               <Button
@@ -437,7 +397,6 @@ export const ChatInput = memo(function ChatInput({
           </div>
         </div>
 
-        {/* Drag overlay */}
         <DragOverlay isDragging={isDragging} />
       </div>
     </div>

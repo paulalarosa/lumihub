@@ -18,10 +18,6 @@ import {
 import { cn } from '@/lib/utils'
 import { ImageIcon, XIcon } from 'lucide-react'
 
-// ============================================================================
-// Types
-// ============================================================================
-
 import type { AttachmentData, AttachmentVariant } from './attachments.types'
 
 import {
@@ -29,12 +25,6 @@ import {
   getMediaCategory,
   mediaCategoryIcons,
 } from './attachments.utils'
-
-// ... (Rest of imports are fine, but ensure icons are not duplicated if used only in utils)
-
-// ============================================================================
-// Helpers
-// ============================================================================
 
 const renderAttachmentImage = (
   url: string,
@@ -50,10 +40,6 @@ const renderAttachmentImage = (
     )}
   />
 )
-
-// ============================================================================
-// Attachments - Container
-// ============================================================================
 
 export type AttachmentsProps = HTMLAttributes<HTMLDivElement> & {
   variant?: AttachmentVariant
@@ -83,10 +69,6 @@ export const Attachments = ({
     </AttachmentsContext.Provider>
   )
 }
-
-// ============================================================================
-// Attachment - Item
-// ============================================================================
 
 export type AttachmentProps = HTMLAttributes<HTMLDivElement> & {
   data: AttachmentData
@@ -135,10 +117,6 @@ export const Attachment = ({
   )
 }
 
-// ============================================================================
-// AttachmentPreview - Media preview
-// ============================================================================
-
 export type AttachmentPreviewProps = HTMLAttributes<HTMLDivElement> & {
   fallbackIcon?: ReactNode
 }
@@ -185,10 +163,6 @@ export const AttachmentPreview = ({
   )
 }
 
-// ============================================================================
-// AttachmentInfo - Name and type display
-// ============================================================================
-
 export type AttachmentInfoProps = HTMLAttributes<HTMLDivElement> & {
   showMediaType?: boolean
 }
@@ -216,10 +190,6 @@ export const AttachmentInfo = ({
     </div>
   )
 }
-
-// ============================================================================
-// AttachmentRemove - Remove button
-// ============================================================================
 
 export type AttachmentRemoveProps = ComponentProps<typeof Button> & {
   label?: string
@@ -275,10 +245,6 @@ export const AttachmentRemove = ({
   )
 }
 
-// ============================================================================
-// AttachmentHoverCard - Hover preview
-// ============================================================================
-
 export type AttachmentHoverCardProps = ComponentProps<typeof HoverCard>
 
 export const AttachmentHoverCard = ({
@@ -312,10 +278,6 @@ export const AttachmentHoverCardContent = ({
     {...props}
   />
 )
-
-// ============================================================================
-// AttachmentEmpty - Empty state
-// ============================================================================
 
 export type AttachmentEmptyProps = HTMLAttributes<HTMLDivElement>
 

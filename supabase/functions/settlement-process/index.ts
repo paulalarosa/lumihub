@@ -1,6 +1,5 @@
-// @ts-ignore
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-// @ts-ignore
+
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -65,8 +64,6 @@ serve(async (req: Request) => {
 
     const { days_pending = 7 } = (await req.json()) as { days_pending?: number }
 
-    // Find all wallets with pending balance older than X days
-    // In production, you'd check transaction timestamps
     const { data: wallets, error: walletsError } = await supabaseClient
       .from('wallets')
       .select('id, user_id, pending_balance, available_balance')
@@ -84,7 +81,6 @@ serve(async (req: Request) => {
       )
     }
 
-    // For each wallet, move pending to available (settlement simulation)
     let settledCount = 0
     let totalSettled = 0n
     const errors: string[] = []

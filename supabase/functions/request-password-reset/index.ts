@@ -44,7 +44,6 @@ serve(async (req) => {
 
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
-    // 1. Generate Recovery Link
     const { data, error } = await supabaseAdmin.auth.admin.generateLink({
       type: 'recovery',
       email: email,
@@ -56,7 +55,6 @@ serve(async (req) => {
 
     const recoveryLink = data.properties.action_link
 
-    // 2. Send Email via SES
     if (!AWS_ACCESS_KEY_ID || !AWS_SECRET_ACCESS_KEY) {
       throw new Error('AWS credentials not configured')
     }
@@ -86,10 +84,9 @@ serve(async (req) => {
       status: 200,
     })
   } catch (error: any) {
-    console.error('Reset Password Error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400, // Client error mostly (bad email or bad config)
+      status: 400,
     })
   }
 })

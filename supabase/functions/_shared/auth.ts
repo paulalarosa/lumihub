@@ -11,7 +11,6 @@ export async function validateAdmin(req: Request) {
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!
   const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-  // Check if it's the service role itself (internal call)
   if (token === supabaseServiceRoleKey) {
     return { isServiceRole: true }
   }

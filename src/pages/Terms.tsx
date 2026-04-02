@@ -18,7 +18,6 @@ const Terms = () => {
               </h1>
               <div className="flex items-center space-x-4 font-mono text-xs uppercase tracking-widest text-white/40">
                 <span>LAST_UPDATE: 2026.01.20</span>
-                <span>//</span>
                 <span>PROTOCOL_V3</span>
               </div>
             </header>
@@ -97,9 +96,7 @@ const Terms = () => {
               </section>
 
               <section className="border-t border-white/10 pt-12 mt-20">
-                <p className="font-mono text-xs text-white/30 uppercase tracking-widest text-center">
-                  /// END_OF_FILE
-                </p>
+                <p className="font-mono text-xs text-white/30 uppercase tracking-widest text-center"></p>
               </section>
             </div>
           </div>

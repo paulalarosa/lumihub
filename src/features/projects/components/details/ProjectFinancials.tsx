@@ -29,7 +29,6 @@ interface ProjectFinancialsProps {
   services: ServiceUI[]
   t: (key: string) => string
 
-  // Add Service Form
   isServiceDialogOpen: boolean
   setIsServiceDialogOpen: (open: boolean) => void
   selectedServiceId: string
@@ -41,7 +40,6 @@ interface ProjectFinancialsProps {
   addServiceToProject: (e: React.FormEvent) => void
   removeServiceFromProject: (id: string) => void
 
-  // Payment Form
   isPaymentDialogOpen: boolean
   setIsPaymentDialogOpen: (open: boolean) => void
   paymentServiceId: string
@@ -81,7 +79,7 @@ export const ProjectFinancials = ({
 }: ProjectFinancialsProps) => {
   return (
     <div className="space-y-6">
-      {/* Payment Progress */}
+      {}
       <Card className="bg-black border border-white/20 rounded-none">
         <CardHeader className="border-b border-white/10">
           <CardTitle className="text-white font-serif uppercase tracking-wide">
@@ -127,7 +125,7 @@ export const ProjectFinancials = ({
         </CardContent>
       </Card>
 
-      {/* Services List */}
+      {}
       <Card className="bg-black border border-white/20 rounded-none">
         <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
           <div>
@@ -136,7 +134,7 @@ export const ProjectFinancials = ({
             </CardTitle>
           </div>
           <div className="flex gap-2">
-            {/* Add Service Dialog */}
+            {}
             <Dialog
               open={isServiceDialogOpen}
               onOpenChange={setIsServiceDialogOpen}
@@ -226,7 +224,7 @@ export const ProjectFinancials = ({
               </DialogContent>
             </Dialog>
 
-            {/* Add Payment Dialog */}
+            {}
             <Dialog
               open={isPaymentDialogOpen}
               onOpenChange={setIsPaymentDialogOpen}

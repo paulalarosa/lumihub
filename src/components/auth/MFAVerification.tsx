@@ -28,9 +28,6 @@ export default function MFAVerification({
       if (totpFactor) {
         setFactorId(totpFactor.id)
       } else {
-        // If no factors but we are here, it might be an error or user fell into a trap.
-        // But let's not error out immediately, maybe they are enrolling?
-        // Actually this component is for VERIFICATION.
         toast.error(
           'Nenhum método MFA encontrado. Entre em contato com o suporte.',
         )

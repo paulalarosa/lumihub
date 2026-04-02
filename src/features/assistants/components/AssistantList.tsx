@@ -19,7 +19,6 @@ export const AssistantList = () => {
   const { user } = useAuth()
   const { toast } = useToast()
 
-  // Fetch Makeup Artist ID
   const { data: makeupArtist, isLoading: maLoading } = useQuery({
     queryKey: ['makeup-artist-profile', user?.id],
     queryFn: async () => {
@@ -36,8 +35,6 @@ export const AssistantList = () => {
         .select('full_name')
         .eq('id', user.id)
         .maybeSingle()
-
-      // Fetch Makeup Artist ID
 
       const { data: created } = await supabase
         .from('makeup_artists')

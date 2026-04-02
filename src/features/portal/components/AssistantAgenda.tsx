@@ -111,13 +111,11 @@ const AssistantAgenda = ({
         <h2 className="text-xl font-serif text-white uppercase tracking-widest flex items-center gap-2">
           <CalendarDays className="h-5 w-5" /> Mission_Timeline
         </h2>
-        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1">
-          /// SCHEDULED_OPERATIONS
-        </p>
+        <p className="text-[10px] text-white/40 uppercase tracking-[0.2em] font-mono mt-1"></p>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[300px_1fr]">
-        {/* Calendar Sidebar */}
+        {}
         <div className="space-y-4">
           <Card className="bg-black border border-white/20 rounded-none">
             <CardHeader className="pb-2 border-b border-white/10">
@@ -191,9 +189,7 @@ const AssistantAgenda = ({
                   calendarSizeClasses[calendarSize],
                 )}
               >
-                {/* Invert filter is a hack to make standard shadcn calendar dark mode compatible if it isn't already, but assuming global styles handle it. 
-                     Better to rely on global styles. Removing invert check if global css handles it. 
-                     Actually, forcing dark theme classes on Calendar container might be safer. */}
+                {}
                 <div className="calendar-container-noir">
                   <Calendar
                     mode="single"
@@ -237,7 +233,7 @@ const AssistantAgenda = ({
           )}
         </div>
 
-        {/* Events List */}
+        {}
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-white/20 pb-2">
             <h3 className="font-mono text-sm text-white uppercase tracking-wider">

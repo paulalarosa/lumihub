@@ -46,7 +46,6 @@ export default function AdminAssistants() {
   useEffect(() => {
     fetchAssistants()
 
-    // Real-time listener for both profiles and assistants connections
     const channel = supabase
       .channel('admin-assistants-channel')
       .on(
@@ -75,13 +74,11 @@ export default function AdminAssistants() {
     return () => {
       supabase.removeChannel(channel)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchAssistants = async () => {
     setLoading(true)
     try {
-      // 1. Get all profiles with role 'assistant'
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -89,7 +86,6 @@ export default function AdminAssistants() {
 
       if (profileError) throw profileError
 
-      // 2. For each assistant, get their connections
       const enriched = await Promise.all(
         profiles.map(async (p) => {
           const { data: connections } = await supabase
@@ -97,7 +93,6 @@ export default function AdminAssistants() {
             .select('makeup_artist_id')
             .eq('assistant_id', p.id)
 
-          // Fetch professional details if connection exists
           const connectedPros = []
           if (connections && connections.length > 0) {
             const proIds = connections.map((c) => c.makeup_artist_id)
@@ -139,7 +134,6 @@ export default function AdminAssistants() {
     if (!deleteId) return
 
     try {
-      // 1. Delete all connections in 'assistant_access' table
       const { error: connError } = await supabase
         .from('assistant_access')
         .delete()
@@ -147,7 +141,6 @@ export default function AdminAssistants() {
 
       if (connError) throw connError
 
-      // 2. Delete the profile
       const { error: profError } = await supabase
         .from('profiles')
         .delete()
@@ -155,7 +148,6 @@ export default function AdminAssistants() {
 
       if (profError) throw profError
 
-      // 3. UI Update
       setAssistants((prev) => prev.filter((a) => a.id !== deleteId))
       toast({
         title: 'Assistente removida',

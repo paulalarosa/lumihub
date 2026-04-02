@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ArrowRight, Shield, Clock, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
 import SEOHead from '@/components/seo/SEOHead'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 const plans = [
   {
@@ -67,6 +68,11 @@ export default function Plans() {
     'monthly',
   )
   const navigate = useNavigate()
+  const { trackSubscription, trackCTAClick } = useAnalytics()
+
+  useEffect(() => {
+    trackSubscription('view_plans')
+  }, [trackSubscription])
 
   return (
     <>
@@ -242,11 +248,21 @@ export default function Plans() {
                       variant={plan.highlighted ? 'primary' : 'glass'}
                       size="lg"
                       className="w-full group"
-                      onClick={() =>
+                      onClick={() => {
+                        const price =
+                          billingCycle === 'monthly'
+                            ? plan.monthlyPrice
+                            : plan.annualPrice
+                        trackSubscription('select_plan', plan.name, price)
+                        trackCTAClick(
+                          'plan_select',
+                          'pricing_page',
+                          `/cadastro?plan=${plan.id}`,
+                        )
                         navigate(
                           `/cadastro?plan=${plan.id}&cycle=${billingCycle}`,
                         )
-                      }
+                      }}
                     >
                       Começar 14 dias grátis
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

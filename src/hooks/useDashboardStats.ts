@@ -58,8 +58,6 @@ export function useDashboardStats() {
           table: 'project_services',
         },
         () => {
-          // Note: Cannot filter by userId easily here because it's a join.
-          // Invalidation is relatively cheap as it's just a mark.
           queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
         },
       )
@@ -77,7 +75,6 @@ export function useDashboardStats() {
         throw new Error('User not authenticated')
       }
 
-      // 1. Fetch Clients (Leads vs Converted)
       const { data: clients, error: clientsError } = await supabase
         .from('wedding_clients')
         .select('id, is_bride, projects(id)')
@@ -90,8 +87,6 @@ export function useDashboardStats() {
         clients?.filter((c) => c.projects && c.projects.length > 0).length || 0
       const pending = totalClients - converted
 
-      // 2. Fetch Projects + Services (Financials)
-      // We filter project_services by user_id of the linked project
       const { data: projectServices, error: financeError } = await supabase
         .from('project_services')
         .select('*, project:projects!inner(user_id), service:services(price)')
@@ -107,7 +102,6 @@ export function useDashboardStats() {
 
       const avgValue = converted > 0 ? totalBudget / converted : 0
 
-      // 3. Events (Next 90 Days)
       const now = startOfDay(new Date())
       const ninetyDaysFromNow = addDays(now, 90)
 
@@ -130,6 +124,6 @@ export function useDashboardStats() {
       }
     },
     enabled: !!userId,
-    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    staleTime: 1000 * 60 * 5,
   })
 }

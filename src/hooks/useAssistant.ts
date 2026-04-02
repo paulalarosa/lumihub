@@ -14,7 +14,6 @@ export const useAssistant = () => {
     if (!user) return
     setLoading(true)
     try {
-      // 1. Get the Makeup Artist Profile ID for this user
       const { data: maData } = await supabase
         .from('makeup_artists')
         .select('id')
@@ -52,7 +51,6 @@ export const useAssistant = () => {
 
     setLoading(true)
     try {
-      // 1. Check if already invited
       const { data: existing } = await supabase
         .from('assistant_invites')
         .select('id')
@@ -73,7 +71,6 @@ export const useAssistant = () => {
       const randomPart = Math.random().toString(36).substring(2, 6)
       const inviteCode = `${namePart}-${randomPart}`
 
-      // 1. Get the Makeup Artist Profile ID
       const { data: maData } = await supabase
         .from('makeup_artists')
         .select('id')

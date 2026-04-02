@@ -57,8 +57,6 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
   const handleConfirmUpload = async () => {
     if (selectedFile) {
       await onUpload(selectedFile)
-      // Optionally clear file after success? Keeping it for now to show "Sent" state if needed,
-      // but usually valid to clear or show success state.
     }
   }
 

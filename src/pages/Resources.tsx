@@ -74,13 +74,13 @@ export default function Resources() {
         ]}
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
-        {/* Ambient Glows */}
+        {}
         <div className="fixed top-[-15%] left-[-10%] w-[45%] h-[45%] bg-white/[0.015] blur-[180px] rounded-full pointer-events-none" />
         <div className="fixed bottom-[-15%] right-[-10%] w-[40%] h-[40%] bg-white/[0.02] blur-[180px] rounded-full pointer-events-none" />
 
-        {/* Hero */}
+        {}
         <section className="relative pt-40 pb-24 border-b border-white/5">
-          {/* Textured Overlay Image */}
+          {}
           <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
             <img
               src="/khaos-uploads/734febb0-c2fc-4623-98e2-bbe5a386408f.png"
@@ -121,7 +121,7 @@ export default function Resources() {
               </motion.div>
             </div>
 
-            {/* Stats */}
+            {}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -146,7 +146,7 @@ export default function Resources() {
           </div>
         </section>
 
-        {/* About */}
+        {}
         <section className="py-24 border-b border-white/5 relative bg-transparent">
           <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
             <img
@@ -182,7 +182,7 @@ export default function Resources() {
           </div>
         </section>
 
-        {/* Services Grid */}
+        {}
         <section className="py-24 border-t border-white/5">
           <div className="container mx-auto px-6 lg:px-10">
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8 text-left">
@@ -237,7 +237,7 @@ export default function Resources() {
           </div>
         </section>
 
-        {/* CTA */}
+        {}
         <section className="py-32 border-t border-white/5">
           <div className="container mx-auto px-6 lg:px-10 text-center">
             <motion.div

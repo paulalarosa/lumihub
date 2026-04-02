@@ -1,6 +1,6 @@
 import { isSameDay } from 'date-fns'
 import { formatDate } from '@/lib/date-utils'
-// format and parseISO removed
+
 import { CalendarX2 } from 'lucide-react'
 import EventCard from '@/features/calendar/components/EventCard'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -23,14 +23,12 @@ export function EventListView({
   onEditEvent,
   onDeleteEvent,
 }: EventListViewProps) {
-  // Filter events based on selected date or show all month events
   const filteredEvents = selectedDate
     ? events.filter((event) =>
         isSameDay(new Date(event.event_date + 'T12:00:00'), selectedDate),
       )
     : events
 
-  // Group events by date
   const groupedEvents = filteredEvents.reduce(
     (acc, event) => {
       const dateStr = event.event_date
@@ -43,7 +41,6 @@ export function EventListView({
     {} as Record<string, Event[]>,
   )
 
-  // Sort dates
   const sortedDates = Object.keys(groupedEvents).sort()
 
   const getHeaderText = () => {
@@ -55,7 +52,7 @@ export function EventListView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
+      {}
       <div className="p-4 border-b bg-muted/30">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold capitalize">
@@ -73,7 +70,7 @@ export function EventListView({
         )}
       </div>
 
-      {/* Events List */}
+      {}
       <ScrollArea className="flex-1">
         <div className="p-4">
           {sortedDates.length === 0 ? (
@@ -91,7 +88,7 @@ export function EventListView({
             <div className="space-y-6">
               {sortedDates.map((dateStr) => (
                 <div key={dateStr}>
-                  {/* Date header - only show if not filtering by single date */}
+                  {}
                   {!selectedDate && (
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex items-center gap-2">
@@ -111,7 +108,7 @@ export function EventListView({
                     </div>
                   )}
 
-                  {/* Events for this date */}
+                  {}
                   <div className="space-y-3">
                     {groupedEvents[dateStr].map((event) => (
                       <EventCard

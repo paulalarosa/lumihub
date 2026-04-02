@@ -4,7 +4,6 @@ import { usePlanAccess } from '@/hooks/usePlanAccess'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
 
-// Modelos disponíveis (otimizados para navegador)
 const AVAILABLE_MODELS = [
   {
     id: 'Llama-3.2-3B-Instruct-q4f16_1-MLC',
@@ -89,18 +88,15 @@ export const useWebLLM = () => {
     }
   }, [engine])
 
-  // Cleanup ao desmontar
   useEffect(() => {
     return () => {
       if (engine) {
-        engine
-          .unload()
-          .catch((err: unknown) =>
-            logger.error(err, {
-              message: 'Erro ao descarregar IA local.',
-              showToast: false,
-            }),
-          )
+        engine.unload().catch((err: unknown) =>
+          logger.error(err, {
+            message: 'Erro ao descarregar IA local.',
+            showToast: false,
+          }),
+        )
       }
     }
   }, [engine])

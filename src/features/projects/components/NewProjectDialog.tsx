@@ -81,7 +81,7 @@ export function NewProjectDialog({
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Nome */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-gray-300">
                 Nome do Projeto <span className="text-red-500">*</span>
@@ -96,7 +96,7 @@ export function NewProjectDialog({
               )}
             </div>
 
-            {/* Cliente */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="client_id" className="text-gray-300">
                 Cliente <span className="text-red-500">*</span>
@@ -128,7 +128,7 @@ export function NewProjectDialog({
                 </p>
               )}
 
-              {/* Hidden Email Validation Feedback */}
+              {}
               <input type="hidden" {...control.register('client_email')} />
               {errors.client_email && (
                 <p className="text-xs text-amber-400 flex items-center gap-1">
@@ -138,7 +138,7 @@ export function NewProjectDialog({
               )}
             </div>
 
-            {/* Tipo de Evento */}
+            {}
             <div className="space-y-2">
               <Label className="text-gray-300">Tipo de Evento</Label>
               <Controller
@@ -165,7 +165,7 @@ export function NewProjectDialog({
               />
             </div>
 
-            {/* Grid de 2 colunas para Data e Local */}
+            {}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-gray-300">Data do Evento</Label>
@@ -186,7 +186,7 @@ export function NewProjectDialog({
               </div>
             </div>
 
-            {/* Notas */}
+            {}
             <div className="space-y-2">
               <Label className="text-gray-300">Notas</Label>
               <textarea
@@ -197,7 +197,7 @@ export function NewProjectDialog({
               />
             </div>
 
-            {/* Buttons */}
+            {}
             <div className="flex justify-end gap-2 pt-4">
               <Button
                 type="button"

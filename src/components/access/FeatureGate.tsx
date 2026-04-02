@@ -23,20 +23,16 @@ export const FeatureGate = ({
 
   const hasAccess = hasFeature(feature)
 
-  // If already has access, render children
   if (hasAccess) {
     return <>{children}</>
   }
 
-  // If a custom fallback is provided, render it
   if (fallback) {
     return <>{fallback}</>
   }
 
-  // Determine needed plan if not provided
   const likelyRequiredPlan = requiredPlan || 'profissional'
 
-  // Default Upgrade Alert
   return (
     <Alert className="bg-neutral-900 border-yellow-500/50">
       <Lock className="w-4 h-4 text-yellow-500" />

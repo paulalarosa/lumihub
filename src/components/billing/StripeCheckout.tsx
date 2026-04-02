@@ -12,7 +12,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { handleError } from '@/lib/error-handling'
 
-// Make sure to add VITE_STRIPE_PUBLISHABLE_KEY to your .env
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 interface StripeCheckoutProps {

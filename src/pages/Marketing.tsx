@@ -123,13 +123,12 @@ export default function Marketing() {
     const whatsappUrl = `https://wa.me/55${selectedClient.phone.replace(/\D/g, '')}?text=${encodedMessage}`
 
     toast.success('Abrindo WhatsApp...')
-    
-    // Trigger confetti
+
     confetti({
       particleCount: 150,
       spread: 70,
       origin: { y: 0.6 },
-      colors: ['#ffffff', '#888888', '#000000']
+      colors: ['#ffffff', '#888888', '#000000'],
     })
 
     window.open(whatsappUrl, '_blank')
@@ -142,7 +141,6 @@ export default function Marketing() {
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500 relative min-h-screen bg-black p-6 md:p-10 font-mono">
-
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/20 pb-6">
         <div>
           <h1 className="font-serif text-4xl text-white uppercase tracking-tighter">

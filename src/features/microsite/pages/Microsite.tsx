@@ -33,7 +33,6 @@ export default function Microsite() {
     enabled: !!slug,
   })
 
-  // Use about_text as bio if bio is missing (handling type divergence)
   const displayBio = microsite?.about_text || microsite?.bio
 
   const trackView = useCallback(async (micrositeId: string) => {
@@ -117,7 +116,7 @@ export default function Microsite() {
           name="description"
           content={microsite.meta_description || microsite.tagline || ''}
         />
-        {/* @ts-expect-error - meta_keywords array vs string issue */}
+        {}
         {microsite.meta_keywords && Array.isArray(microsite.meta_keywords) && (
           <meta name="keywords" content={microsite.meta_keywords.join(', ')} />
         )}
@@ -250,7 +249,7 @@ export default function Microsite() {
                       border: `1px solid ${microsite.text_color}15`,
                     }}
                   >
-                    {/* @ts-expect-error - service.image_url might be missing in type */}
+                    {}
                     {service.image_url && (
                       <img
                         src={service.image_url}

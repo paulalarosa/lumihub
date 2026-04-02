@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useEffect, useState } from 'react'
 import { useContracts } from '@/hooks/useContracts'
 import {
@@ -10,7 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Plus, FileText, Download, Eye, Calendar, User } from 'lucide-react'
 import { ContractDialog } from '@/features/contracts/components/ContractDialog'
-// Remove unused import of format if possible, but keep other imports
+
 import { Badge } from '@/components/ui/badge'
 import { useLanguage } from '@/hooks/useLanguage'
 import { formatDate, DATE_FORMATS } from '@/lib/date-utils'
@@ -22,7 +23,6 @@ export default function ContractsPage() {
 
   useEffect(() => {
     fetchContracts()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getStatusBadge = (status: string) => {
@@ -50,6 +50,7 @@ export default function ContractsPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
+      <SEOHead title="Contratos" noindex={true} />
       <div className="flex justify-between items-center border-b border-white/10 pb-6">
         <div>
           <h1 className="text-3xl font-serif font-light text-white mb-2 tracking-wide uppercase">
@@ -132,8 +133,6 @@ export default function ContractsPage() {
                         variant="outline"
                         className="border-white/10 hover:bg-white hover:text-black text-white rounded-none w-9 h-9 p-0 bg-transparent transition-all flex items-center justify-center"
                         onClick={() => {
-                          // If we implement PDF download logic here
-                          // For now view is enough
                           window.open(
                             `/projects/${contract.project_id}/contract`,
                             '_blank',
@@ -164,7 +163,7 @@ export default function ContractsPage() {
         open={isDialogOpen}
         onOpenChange={(open) => {
           setIsDialogOpen(open)
-          if (!open) fetchContracts() // Refresh list on close
+          if (!open) fetchContracts()
         }}
       />
     </div>

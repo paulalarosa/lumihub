@@ -1,119 +1,106 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react'
 
-// How many pixels from the bottom of the container to enable auto-scroll
-const ACTIVATION_THRESHOLD = 50;
-// Minimum pixels of scroll-up movement required to disable auto-scroll
-const MIN_SCROLL_UP_THRESHOLD = 10;
+const ACTIVATION_THRESHOLD = 50
+
+const MIN_SCROLL_UP_THRESHOLD = 10
 
 export function useAutoScroll(dependencies: React.DependencyList) {
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const previousScrollTop = useRef<number | null>(null);
-    const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
-    // Use a ref to track current value for ResizeObserver callback (avoids re-subscribing)
-    const shouldAutoScrollRef = useRef(shouldAutoScroll);
-    shouldAutoScrollRef.current = shouldAutoScroll;
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const previousScrollTop = useRef<number | null>(null)
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
 
-    const scrollToBottom = useCallback(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    }, []);
+  const shouldAutoScrollRef = useRef(shouldAutoScroll)
+  shouldAutoScrollRef.current = shouldAutoScroll
 
-    const handleScroll = useCallback(() => {
-        if (containerRef.current) {
-            const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+  const scrollToBottom = useCallback(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    }
+  }, [])
 
-            // Detect Safari's rubber-band/bounce scrolling at edges.
-            // When bouncing, scrollTop can go negative (top) or exceed max (bottom).
-            // Ignore these events to avoid false "deliberate scroll up" detection.
-            const isOverscrolling =
-                scrollTop < 0 || scrollTop + clientHeight > scrollHeight + 1;
+  const handleScroll = useCallback(() => {
+    if (containerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = containerRef.current
 
-            if (isOverscrolling) {
-                // Don't update previousScrollTop during overscroll to avoid
-                // detecting the bounce-back as intentional scrolling
-                return;
-            }
+      const isOverscrolling =
+        scrollTop < 0 || scrollTop + clientHeight > scrollHeight + 1
 
-            const distanceFromBottom = Math.abs(
-                scrollHeight - scrollTop - clientHeight
-            );
+      if (isOverscrolling) {
+        return
+      }
 
-            const isScrollingUp = previousScrollTop.current !== null
-                ? scrollTop < previousScrollTop.current
-                : false;
+      const distanceFromBottom = Math.abs(
+        scrollHeight - scrollTop - clientHeight,
+      )
 
-            const scrollUpDistance = previousScrollTop.current !== null
-                ? previousScrollTop.current - scrollTop
-                : 0;
+      const isScrollingUp =
+        previousScrollTop.current !== null
+          ? scrollTop < previousScrollTop.current
+          : false
 
-            const isDeliberateScrollUp =
-                isScrollingUp && scrollUpDistance > MIN_SCROLL_UP_THRESHOLD;
+      const scrollUpDistance =
+        previousScrollTop.current !== null
+          ? previousScrollTop.current - scrollTop
+          : 0
 
-            // Check if we're at the bottom
-            const isScrolledToBottom = distanceFromBottom < ACTIVATION_THRESHOLD;
+      const isDeliberateScrollUp =
+        isScrollingUp && scrollUpDistance > MIN_SCROLL_UP_THRESHOLD
 
-            if (isDeliberateScrollUp && !isScrolledToBottom) {
-                // User deliberately scrolled up AND is not at bottom - disable auto-scroll
-                setShouldAutoScroll(false);
-            } else if (!isScrollingUp || isScrolledToBottom) {
-                // Either scrolling down, or content changed, or at bottom
-                setShouldAutoScroll(isScrolledToBottom);
-            }
-            // When scrolling up but not deliberately (small amounts), do nothing
-            // to avoid toggling shouldAutoScroll and causing feedback loops
+      const isScrolledToBottom = distanceFromBottom < ACTIVATION_THRESHOLD
 
-            previousScrollTop.current = scrollTop;
-        }
-    }, []);
+      if (isDeliberateScrollUp && !isScrolledToBottom) {
+        setShouldAutoScroll(false)
+      } else if (!isScrollingUp || isScrolledToBottom) {
+        setShouldAutoScroll(isScrolledToBottom)
+      }
 
-    const handleTouchStart = useCallback(() => {
-        setShouldAutoScroll(false);
-    }, []);
+      previousScrollTop.current = scrollTop
+    }
+  }, [])
 
-    useEffect(() => {
-        if (containerRef.current) {
-            previousScrollTop.current = containerRef.current.scrollTop;
-        }
-    }, []);
+  const handleTouchStart = useCallback(() => {
+    setShouldAutoScroll(false)
+  }, [])
 
-    // Observe content height changes and auto-scroll if needed
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
+  useEffect(() => {
+    if (containerRef.current) {
+      previousScrollTop.current = containerRef.current.scrollTop
+    }
+  }, [])
 
-        let previousHeight = container.scrollHeight;
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
 
-        const resizeObserver = new ResizeObserver(() => {
-            const currentHeight = container.scrollHeight;
-            // Only auto-scroll when content grows, not when it shrinks
-            // (e.g., when generating indicator disappears)
-            if (shouldAutoScrollRef.current && currentHeight > previousHeight) {
-                scrollToBottom();
-            }
-            previousHeight = currentHeight;
-        });
+    let previousHeight = container.scrollHeight
 
-        // Observe the container itself for size changes
-        resizeObserver.observe(container);
+    const resizeObserver = new ResizeObserver(() => {
+      const currentHeight = container.scrollHeight
 
-        return () => {
-            resizeObserver.disconnect();
-        };
-    }, [scrollToBottom]);
+      if (shouldAutoScrollRef.current && currentHeight > previousHeight) {
+        scrollToBottom()
+      }
+      previousHeight = currentHeight
+    })
 
-    useEffect(() => {
-        if (shouldAutoScroll) {
-            scrollToBottom();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, dependencies);
+    resizeObserver.observe(container)
 
-    return {
-        containerRef,
-        scrollToBottom,
-        handleScroll,
-        shouldAutoScroll,
-        handleTouchStart,
-    };
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [scrollToBottom])
+
+  useEffect(() => {
+    if (shouldAutoScroll) {
+      scrollToBottom()
+    }
+  }, dependencies)
+
+  return {
+    containerRef,
+    scrollToBottom,
+    handleScroll,
+    shouldAutoScroll,
+    handleTouchStart,
+  }
 }

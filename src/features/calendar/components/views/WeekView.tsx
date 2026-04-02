@@ -30,7 +30,7 @@ interface WeekViewProps {
   onCreateEvent: (date: Date, time?: string) => void
 }
 
-const HOUR_HEIGHT = 60 // pixels per hour
+const HOUR_HEIGHT = 60
 const START_HOUR = 6
 const END_HOUR = 22
 
@@ -75,12 +75,12 @@ export function WeekView({
     const top =
       (hours - START_HOUR) * HOUR_HEIGHT + (minutes / 60) * HOUR_HEIGHT
 
-    let height = HOUR_HEIGHT // default 1 hour
+    let height = HOUR_HEIGHT
     if (event.end_time) {
       const [endHours, endMinutes] = event.end_time.split(':').map(Number)
       const endTop =
         (endHours - START_HOUR) * HOUR_HEIGHT + (endMinutes / 60) * HOUR_HEIGHT
-      height = Math.max(endTop - top, 30) // minimum 30px
+      height = Math.max(endTop - top, 30)
     }
 
     return { top, height }
@@ -93,9 +93,9 @@ export function WeekView({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header with day names */}
+      {}
       <div className="flex border-b sticky top-0 bg-background z-10">
-        <div className="w-16 shrink-0 border-r" /> {/* Time column spacer */}
+        <div className="w-16 shrink-0 border-r" /> {}
         {days.map((day) => {
           const isTodayDate =
             formatDate(day, 'yyyy-MM-dd') ===
@@ -134,10 +134,10 @@ export function WeekView({
         })}
       </div>
 
-      {/* Time grid */}
+      {}
       <ScrollArea className="flex-1">
         <div className="flex min-h-full">
-          {/* Time labels */}
+          {}
           <div className="w-16 shrink-0 border-r">
             {hours.map((hour) => (
               <div
@@ -150,7 +150,7 @@ export function WeekView({
             ))}
           </div>
 
-          {/* Day columns */}
+          {}
           {days.map((day) => {
             const dateKey = formatDate(day, 'yyyy-MM-dd')
             const dayEvents = eventsByDate.get(dateKey) || []
@@ -166,7 +166,7 @@ export function WeekView({
                   isTodayDate && 'bg-primary/5',
                 )}
               >
-                {/* Hour slots */}
+                {}
                 {hours.map((hour) => (
                   <div
                     key={hour}
@@ -176,7 +176,7 @@ export function WeekView({
                   />
                 ))}
 
-                {/* Events */}
+                {}
                 {dayEvents.map((event) => {
                   const position = getEventPosition(event)
                   if (!position) return null
@@ -223,7 +223,7 @@ export function WeekView({
                   )
                 })}
 
-                {/* All-day events without time */}
+                {}
                 {dayEvents
                   .filter((e) => !e.start_time)
                   .map((event, idx) => {

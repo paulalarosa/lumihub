@@ -1,5 +1,3 @@
-// Custom Button com framer-motion — usar para CTAs, landing, hero sections
-// Para forms e UI base, usar @/components/ui/button (shadcn)
 import { motion } from 'framer-motion'
 import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'

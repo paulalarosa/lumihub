@@ -11,7 +11,6 @@ export default function AIController() {
   const { user } = useAuth()
   const path = location.pathname
 
-  // Define routes
   const isDashboardRoute =
     path.startsWith('/dashboard') ||
     path.startsWith('/admin') ||
@@ -23,12 +22,10 @@ export default function AIController() {
     path.startsWith('/servicos') ||
     path.startsWith('/contratos') ||
     path.startsWith('/marketing') ||
-    path.startsWith('/assistente') // Portal assistente
+    path.startsWith('/assistente')
 
   const isPublicRoute = !isDashboardRoute
 
-  // 1. Internal AI (Khaos IA)
-  // Render if authenticated and inside the internal area/dashboard
   if (user && isDashboardRoute) {
     return (
       <Sheet>
@@ -47,20 +44,12 @@ export default function AIController() {
     )
   }
 
-  // 2. Sales AI (Khaos Assistant)
-  // Render only on public routes.
-  // If user is logged in but on public page (e.g. Home), we could still show it,
-  // or hide it. The requirement says: "If the user is logged in and inside the dashboard, this assistant should be hidden."
-  // It implies if logged in and on Home, it might be visible, OR we can hide it if logged in generally to avoid confusion.
-  // However, "Only render this component if the current path is public" is the primary rule.
   if (
     isPublicRoute &&
     !path.startsWith('/auth') &&
     !path.startsWith('/portal') &&
     !path.startsWith('/b/')
   ) {
-    // Exclude Auth pages, Client Portal and Public Booking from Sales Bot to avoid clutter?
-    // Requirement: "e.g., '/', '/login', '/pricing'"
     return <AIAssistantFAB />
   }
 

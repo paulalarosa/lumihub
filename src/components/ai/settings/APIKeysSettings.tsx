@@ -56,7 +56,7 @@ export const APIKeysSettings = () => {
 
   return (
     <div className="space-y-8 font-mono">
-      {/* Information Header */}
+      {}
       <Alert className="bg-blue-500/5 border-blue-500/20 rounded-none">
         <Info className="w-4 h-4 text-blue-400" />
         <AlertDescription className="text-[10px] uppercase tracking-widest leading-relaxed">
@@ -71,7 +71,7 @@ export const APIKeysSettings = () => {
         </AlertDescription>
       </Alert>
 
-      {/* Gemini API Key */}
+      {}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400">
@@ -136,10 +136,10 @@ export const APIKeysSettings = () => {
         </a>
       </div>
 
-      {/* Divider */}
+      {}
       <div className="h-px bg-white/5" />
 
-      {/* OpenAI API Key */}
+      {}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <Label className="text-[10px] uppercase font-bold tracking-[0.2em] text-zinc-400">
@@ -204,7 +204,7 @@ export const APIKeysSettings = () => {
         </a>
       </div>
 
-      {/* Security Protocol Footer */}
+      {}
       <div className="p-4 bg-zinc-950 border border-white/5 space-y-3">
         <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
           Security_Parameters 🔒

@@ -19,7 +19,6 @@ export const useIntersectionObserver = ({
     const element = ref.current
     if (!element) return
 
-    // Se já foi visível e deve congelar, não fazer nada
     if (freezeOnceVisible && hasBeenVisible) return
 
     const observer = new IntersectionObserver(
@@ -31,7 +30,6 @@ export const useIntersectionObserver = ({
           setHasBeenVisible(true)
         }
 
-        // Se deve congelar uma vez visível, desconectar
         if (visible && freezeOnceVisible) {
           observer.disconnect()
         }
@@ -47,7 +45,6 @@ export const useIntersectionObserver = ({
   return { ref, isVisible, hasBeenVisible }
 }
 
-// Hook para animações on-scroll
 export const useScrollAnimation = (options?: UseIntersectionObserverProps) => {
   const { ref, isVisible } = useIntersectionObserver({
     threshold: 0.1,

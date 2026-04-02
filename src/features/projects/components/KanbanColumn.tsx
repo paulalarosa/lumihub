@@ -40,7 +40,7 @@ export const KanbanColumn = memo(
         ref={setNodeRef}
         className="bg-gray-50 rounded-lg p-4 min-h-96 flex flex-col border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
       >
-        {/* Column Header */}
+        {}
         <div className="mb-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900">{statusLabel}</h3>
@@ -50,7 +50,7 @@ export const KanbanColumn = memo(
           </div>
         </div>
 
-        {/* Tasks Container */}
+        {}
         <SortableContext
           items={tasks.map((t) => t.id)}
           strategy={verticalListSortingStrategy}
@@ -76,7 +76,7 @@ export const KanbanColumn = memo(
           </div>
         </SortableContext>
 
-        {/* Add Task Button - Only in first column */}
+        {}
         {isFirstColumn && (
           <button
             onClick={onNewTask}

@@ -36,7 +36,6 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
 
-    // 1. Fetch Plan Config
     const { data: planConfig, error: planError } = await supabase
       .from('plan_configs')
       .select('*')
@@ -47,14 +46,12 @@ serve(async (req) => {
       throw new Error('Plan not found')
     }
 
-    // 2. Fetch or Create Customer
     const { data: profile } = await supabase
       .from('profiles')
       .select('email, stripe_customer_id')
       .eq('id', user_id)
       .single()
 
-    // Also check makeup_artists for backward compatibility if not found in profile
     let email = profile?.email
     let customerId = profile?.stripe_customer_id
 
@@ -67,7 +64,7 @@ serve(async (req) => {
 
       if (artist) {
         customerId = artist.stripe_customer_id
-        // If profiles email is null, try to use artist email
+
         if (!email) email = artist.email
       }
     }
@@ -81,20 +78,17 @@ serve(async (req) => {
       })
       customerId = customer.id
 
-      // Save customer_id to profiles
       await supabase
         .from('profiles')
         .update({ stripe_customer_id: customerId })
         .eq('id', user_id)
 
-      // Also update legacy table for consistency
       await supabase
         .from('makeup_artists')
         .update({ stripe_customer_id: customerId })
         .eq('user_id', user_id)
     }
 
-    // 3. Create Checkout Session (Embedded)
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       customer: customerId,
@@ -115,7 +109,7 @@ serve(async (req) => {
           user_id,
           plan_type,
         },
-        trial_period_days: 14, // Default trial
+        trial_period_days: 14,
       },
     })
 
@@ -124,7 +118,6 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (error: any) {
-    console.error('Checkout error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

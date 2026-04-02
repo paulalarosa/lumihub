@@ -65,7 +65,6 @@ export const SetupChecklist = () => {
 
   const progress = (completedCount / CHECKLIST_ITEMS.length) * 100
 
-  // Encontrar próximo step não completado
   const nextItem = CHECKLIST_ITEMS.find(
     (item) => onboarding[item.id as keyof typeof onboarding] !== true,
   )
@@ -76,7 +75,7 @@ export const SetupChecklist = () => {
       animate={{ opacity: 1, y: 0 }}
       className="mb-8 border border-white/10 bg-white/[0.02] overflow-hidden"
     >
-      {/* Progress bar */}
+      {}
       <div className="h-0.5 bg-white/5">
         <motion.div
           className="h-full bg-white"
@@ -112,7 +111,8 @@ export const SetupChecklist = () => {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
           {CHECKLIST_ITEMS.map((item) => {
-            const isCompleted = onboarding[item.id as keyof typeof onboarding] === true
+            const isCompleted =
+              onboarding[item.id as keyof typeof onboarding] === true
             const isNext = item.id === nextItem?.id
 
             return (
@@ -134,9 +134,11 @@ export const SetupChecklist = () => {
                   <Circle className="w-4 h-4 text-white/20 flex-shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className={`text-xs font-medium ${
-                    isCompleted ? 'text-white/40 line-through' : 'text-white'
-                  }`}>
+                  <p
+                    className={`text-xs font-medium ${
+                      isCompleted ? 'text-white/40 line-through' : 'text-white'
+                    }`}
+                  >
                     {item.title}
                   </p>
                   <p className="text-[10px] text-white/25 mt-0.5 hidden sm:block">

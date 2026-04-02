@@ -49,23 +49,18 @@ interface AISettings {
 }
 
 interface AIStore {
-  // Conversas
   conversations: Record<string, Message[]>
   currentConversationId: string | null
 
-  // Canvas/Artifacts
   canvases: Canvas[]
   activeCanvasId: string | null
 
-  // Settings
   settings: AISettings
   userAPIKeys: UserAPIKeys
 
-  // UI State
   isChatOpen: boolean
   isCanvasOpen: boolean
 
-  // Actions
   addMessage: (conversationId: string, message: Message) => void
   updateMessage: (
     conversationId: string,

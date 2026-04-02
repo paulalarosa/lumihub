@@ -31,7 +31,6 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
     opacity: isDragging ? 0.5 : 1,
   }
 
-  // Score color
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-500'
     if (score >= 60) return 'text-yellow-500'
@@ -50,7 +49,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
         }`}
         onClick={() => setIsOpen(true)}
       >
-        {/* Header */}
+        {}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <Avatar className="w-10 h-10 border border-neutral-600">
@@ -70,7 +69,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
             </div>
           </div>
 
-          {/* Score Badge */}
+          {}
           <div className="flex items-center gap-1 bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
             <TrendingUp
               className={`w-3 h-3 ${getScoreColor(lead.lead_score)}`}
@@ -83,7 +82,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
           </div>
         </div>
 
-        {/* Info */}
+        {}
         <div className="space-y-2 text-xs">
           {lead.email && (
             <div className="flex items-center gap-2 text-neutral-400">
@@ -121,7 +120,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
           )}
         </div>
 
-        {/* Tags */}
+        {}
         <div className="mt-3 flex flex-wrap gap-1">
           {lead.source && (
             <Badge
@@ -140,7 +139,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
         </div>
       </Card>
 
-      {/* Details Dialog */}
+      {}
       <LeadDetailsDialog
         lead={lead}
         isOpen={isOpen}

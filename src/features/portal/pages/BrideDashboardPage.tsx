@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
@@ -38,11 +39,12 @@ export default function BrideDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white selection:text-black flex flex-col">
+      <SEOHead title="Portal da Noiva" noindex={true} />
       <header className="border-b border-neutral-800 bg-[#050505]">
         <div className="container mx-auto px-6 h-20 flex items-center justify-between">
           <div>
             <span className="font-serif italic text-xl tracking-tight text-white">
-              KONTROL // Client Access
+              KONTROL
             </span>
           </div>
           <Button

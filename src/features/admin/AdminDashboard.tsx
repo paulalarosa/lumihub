@@ -13,12 +13,15 @@ import {
   X,
   CreditCard,
   Megaphone,
+  Shield,
   ShieldCheck,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
+import NotificationBell from '@/features/admin/components/NotificationBell'
 
 import AdminOverview from '@/features/admin/AdminOverview'
 import AdminUsers from '@/features/admin/AdminUsers'
+import AdminMarketing from '@/features/admin/AdminMarketing'
 import AdminConfig from '@/features/admin/AdminConfig'
 import AdminLogs from '@/features/admin/AdminLogs'
 import AdminSubscriptions from '@/features/admin/AdminSubscriptions'
@@ -26,6 +29,7 @@ import AdminSecurity from '@/features/admin/AdminSecurity'
 import AdminAnalytics from '@/features/admin/AdminAnalytics'
 import AdminIntegrations from '@/features/admin/AdminIntegrations'
 import AdminAssistants from '@/features/admin/AdminAssistants'
+import AdminLGPD from '@/features/admin/AdminLGPD'
 
 type AdminTab =
   | 'overview'
@@ -33,11 +37,13 @@ type AdminTab =
   | 'assistants'
   | 'subscriptions'
   | 'marketing'
+  | 'lgpd'
   | 'config'
   | 'logs'
   | 'security'
   | 'analytics'
   | 'integrations'
+  | 'lgpd'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -102,8 +108,10 @@ export default function AdminDashboard() {
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
     { id: 'config' as AdminTab, label: 'Configurações', icon: Settings },
     { id: 'security' as AdminTab, label: 'Segurança', icon: ShieldCheck },
+    { id: 'lgpd' as AdminTab, label: 'LGPD', icon: Shield },
     { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3 },
     { id: 'logs' as AdminTab, label: 'Logs de Erro', icon: AlertCircle },
+    { id: 'lgpd' as AdminTab, label: 'Solicitações LGPD', icon: ShieldCheck },
   ]
 
   const handleLogout = async () => {
@@ -113,7 +121,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {/* Internal Sidebar */}
+      {}
       <motion.div
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -181,9 +189,9 @@ export default function AdminDashboard() {
         </div>
       </motion.div>
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 flex flex-col overflow-hidden bg-background">
-        {/* Header */}
+        {}
         <div className="bg-background border-b border-border px-8 py-6 flex items-center justify-between">
           <div>
             <h2 className="text-foreground font-serif text-3xl font-light tracking-tight">
@@ -193,34 +201,28 @@ export default function AdminDashboard() {
               Terminal Access: {user?.email}
             </p>
           </div>
-          <div className="h-8 w-8 border border-border flex items-center justify-center bg-background">
-            <ShieldCheck className="h-4 w-4 text-foreground" />
+          <div className="flex items-center gap-3">
+            <NotificationBell />
+            <div className="h-8 w-8 border border-border flex items-center justify-center bg-background">
+              <ShieldCheck className="h-4 w-4 text-foreground" />
+            </div>
           </div>
         </div>
 
-        {/* Content Area */}
+        {}
         <div className="flex-1 overflow-auto bg-muted/20 p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'overview' && <AdminOverview />}
             {activeTab === 'users' && <AdminUsers />}
             {activeTab === 'assistants' && <AdminAssistants />}
             {activeTab === 'subscriptions' && <AdminSubscriptions />}
-            {activeTab === 'marketing' && (
-              <div className="text-muted-foreground text-center py-20 border border-border bg-card p-12">
-                <Megaphone className="w-12 h-12 mx-auto mb-4 opacity-20" />
-                <h3 className="text-lg font-serif text-foreground mb-2">
-                  Marketing Global
-                </h3>
-                <p className="font-mono text-xs uppercase tracking-widest">
-                  Module_Under_Construction...
-                </p>
-              </div>
-            )}
+            {activeTab === 'marketing' && <AdminMarketing />}
             {activeTab === 'config' && <AdminConfig />}
             {activeTab === 'security' && <AdminSecurity />}
             {activeTab === 'analytics' && <AdminAnalytics />}
             {activeTab === 'logs' && <AdminLogs />}
             {activeTab === 'integrations' && <AdminIntegrations />}
+            {activeTab === 'lgpd' && <AdminLGPD />}
           </div>
         </div>
       </div>

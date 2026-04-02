@@ -70,7 +70,6 @@ export default function AdminIntegrations() {
     setLoading(true)
     const newStatuses = [...statuses]
 
-    // 1. Check Supabase DB & Auth
     try {
       const { error } = await supabase
         .from('profiles')
@@ -101,7 +100,6 @@ export default function AdminIntegrations() {
       })
     }
 
-    // 2. Check Google Calendar
     try {
       const { data, error } = await supabase.functions.invoke(
         'google-calendar-sync',
@@ -136,11 +134,8 @@ export default function AdminIntegrations() {
       }
     } catch (_e) {
       updateStatus(newStatuses, 'Google Calendar Sync', 'down', 'Unreachable')
-      // Google Calendar might be optional, but logging it as warning
-      // logger.error(e, 'Health Check Failed', { context: { service: 'Google Calendar Sync' } });
     }
 
-    // 3. Check Stripe
     try {
       const { data, error } = await supabase.functions.invoke(
         'check-stripe-status',
@@ -165,7 +160,6 @@ export default function AdminIntegrations() {
       logger.error(e, 'Health Check Failed', { context: { service: 'Stripe' } })
     }
 
-    // 4. Check Google Maps
     const mapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     if (mapsKey) {
       updateStatus(
@@ -183,7 +177,6 @@ export default function AdminIntegrations() {
       )
     }
 
-    // 5. Check Resend (SES)
     try {
       const { data, error } =
         await supabase.functions.invoke('check-ses-status')
@@ -223,7 +216,6 @@ export default function AdminIntegrations() {
 
   useEffect(() => {
     checkStatus()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const getIcon = (service: string) => {

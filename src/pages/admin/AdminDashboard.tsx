@@ -34,10 +34,9 @@ const ExampleMutationButton = () => {
         email: `test${randomId}@example.com`,
         phone: '11999999999',
         wedding_date: new Date().toISOString(),
-        status: 'lead', // Default to lead for test
+        status: 'lead',
       })
 
-      // Invalidate queries
       queryClient.invalidateQueries({ queryKey: ['clients'] })
       queryClient.invalidateQueries({ queryKey: ['admin-metrics'] })
     } catch (error) {
@@ -70,11 +69,11 @@ export default function AdminDashboard() {
           </span>
         </div>
         <h1 className="font-serif text-5xl tracking-tight text-white mb-4">
-          COMMAND CENTER // ADMIN
+          COMMAND CENTER
         </h1>
       </div>
 
-      {/* Phase 3: HUD Grid */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <MetricCard
           title="TOTAL CLIENTS"
@@ -94,12 +93,12 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* FINANCIAL PROJECTION CHART */}
+      {}
       <div className="border border-white/10 bg-white/5 mb-12">
         <div className="bg-black/40 p-3 flex justify-between items-center border-b border-white/10">
           <span className="text-white font-mono text-xs uppercase tracking-[0.2em] flex items-center gap-2">
             <div className="w-2 h-2 bg-yellow-500 rounded-full" />
-            Financial Projection // Q1
+            Financial Projection
           </span>
           <span className="text-white/40 font-mono text-[10px]">
             ESTIMATED REVENUE

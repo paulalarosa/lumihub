@@ -8,7 +8,7 @@ interface ScrambleNumberProps {
 }
 
 const CHARS = 'X#09AF_!@%&'
-const SCRAMBLE_DURATION = 1500 // 1.5s
+const SCRAMBLE_DURATION = 1500
 const INTERVAL_MS = 50
 
 export const ScrambleNumber = ({
@@ -48,10 +48,7 @@ export const ScrambleNumber = ({
     return () => clearInterval(intervalId)
   }, [isInView, value, isDone])
 
-  useEffect(() => {
-    // If value updates after initial load, reset?
-    // For now, assume static data or handled by parent remount
-  }, [value])
+  useEffect(() => {}, [value])
 
   return (
     <span ref={ref} className={`font-mono ${className}`}>

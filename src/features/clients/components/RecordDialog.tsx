@@ -37,7 +37,7 @@ export function RecordDialog({
     if (!clientId) return
 
     setLoading(true)
-    // Mock submission for now
+
     setTimeout(() => {
       toast({
         title: 'RECORD_LOGGED',
@@ -48,7 +48,6 @@ export function RecordDialog({
       onOpenChange(false)
       setLoading(false)
 
-      // Reset form
       setTitle('')
       setNotes('')
       setDate(new Date().toISOString().split('T')[0])
@@ -59,9 +58,7 @@ export function RecordDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-black border border-white/20 rounded-none text-white sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-mono uppercase tracking-widest text-white flex items-center gap-2">
-            /// NEW_CLINICAL_RECORD
-          </DialogTitle>
+          <DialogTitle className="font-mono uppercase tracking-widest text-white flex items-center gap-2"></DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">

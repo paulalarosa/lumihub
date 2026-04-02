@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Minus } from 'lucide-react'
@@ -14,7 +15,6 @@ export default function FinancialPage() {
   const { metrics, chartData, transactions, isLoading, refetch } =
     useFinancials()
 
-  // Dialog State
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [transactionType, setTransactionType] = useState<'income' | 'expense'>(
     'income',
@@ -31,7 +31,8 @@ export default function FinancialPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 lg:p-10 space-y-10 selection:bg-white selection:text-black">
-      {/* Page Header */}
+      <SEOHead title="Financeiro" noindex={true} />
+      {}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/20 pb-6">
         <div>
           <h1 className="font-serif text-3xl md:text-5xl text-white tracking-tighter uppercase mb-2">
@@ -60,10 +61,10 @@ export default function FinancialPage() {
         </div>
       </div>
 
-      {/* Metrics */}
+      {}
       <FinancialMetrics {...metrics} />
 
-      {/* Charts Section */}
+      {}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CashFlowChart data={chartData} />
         <TransactionList transactions={transactions} />

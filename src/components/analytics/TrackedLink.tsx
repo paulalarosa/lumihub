@@ -1,21 +1,32 @@
-import { forwardRef, MouseEvent, AnchorHTMLAttributes } from 'react';
-import { Link, LinkProps } from 'react-router-dom';
-import { useAnalytics } from '@/hooks/useAnalytics';
-import { cn } from '@/lib/utils';
+import { forwardRef, MouseEvent, AnchorHTMLAttributes } from 'react'
+import { Link, LinkProps } from 'react-router-dom'
+import { useAnalytics } from '@/hooks/useAnalytics'
+import { cn } from '@/lib/utils'
 
 interface TrackedLinkProps extends LinkProps {
-  trackingName: string;
-  trackingLocation: string;
+  trackingName: string
+  trackingLocation: string
 }
 
 export const TrackedLink = forwardRef<HTMLAnchorElement, TrackedLinkProps>(
-  ({ trackingName, trackingLocation, to, onClick, children, className, ...props }, ref) => {
-    const { trackCTAClick } = useAnalytics();
+  (
+    {
+      trackingName,
+      trackingLocation,
+      to,
+      onClick,
+      children,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const { trackCTAClick } = useAnalytics()
 
     const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-      trackCTAClick(trackingName, trackingLocation, String(to));
-      onClick?.(e);
-    };
+      trackCTAClick(trackingName, trackingLocation, String(to))
+      onClick?.(e)
+    }
 
     return (
       <Link
@@ -27,26 +38,39 @@ export const TrackedLink = forwardRef<HTMLAnchorElement, TrackedLinkProps>(
       >
         {children}
       </Link>
-    );
-  }
-);
+    )
+  },
+)
 
-TrackedLink.displayName = 'TrackedLink';
+TrackedLink.displayName = 'TrackedLink'
 
-// Para links externos
 interface TrackedExternalLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  trackingName: string;
-  trackingLocation: string;
+  trackingName: string
+  trackingLocation: string
 }
 
-export const TrackedExternalLink = forwardRef<HTMLAnchorElement, TrackedExternalLinkProps>(
-  ({ trackingName, trackingLocation, href, onClick, children, className, ...props }, ref) => {
-    const { trackCTAClick } = useAnalytics();
+export const TrackedExternalLink = forwardRef<
+  HTMLAnchorElement,
+  TrackedExternalLinkProps
+>(
+  (
+    {
+      trackingName,
+      trackingLocation,
+      href,
+      onClick,
+      children,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
+    const { trackCTAClick } = useAnalytics()
 
     const handleClick = (e: MouseEvent<HTMLAnchorElement>) => {
-      trackCTAClick(trackingName, trackingLocation, href);
-      onClick?.(e);
-    };
+      trackCTAClick(trackingName, trackingLocation, href)
+      onClick?.(e)
+    }
 
     return (
       <a
@@ -58,8 +82,8 @@ export const TrackedExternalLink = forwardRef<HTMLAnchorElement, TrackedExternal
       >
         {children}
       </a>
-    );
-  }
-);
+    )
+  },
+)
 
-TrackedExternalLink.displayName = 'TrackedExternalLink';
+TrackedExternalLink.displayName = 'TrackedExternalLink'

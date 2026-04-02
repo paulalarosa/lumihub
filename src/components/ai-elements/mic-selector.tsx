@@ -117,7 +117,6 @@ export const MicSelectorTrigger = ({
   const ref = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    // Create a ResizeObserver to detect width changes
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const newWidth = (entry.target as HTMLElement).offsetWidth
@@ -131,7 +130,6 @@ export const MicSelectorTrigger = ({
       resizeObserver.observe(ref.current)
     }
 
-    // Clean up the observer when component unmounts
     return () => {
       resizeObserver.disconnect()
     }

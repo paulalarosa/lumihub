@@ -5,22 +5,19 @@ import * as THREE from 'three'
 
 function AnimatedGlassShape() {
   const meshRef = useRef<THREE.Mesh>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const materialRef = useRef<any>(null)
 
   useFrame((state) => {
     if (!meshRef.current) return
     const t = state.clock.getElapsedTime()
 
-    // Slow organic rotation
     meshRef.current.rotation.x = Math.sin(t / 4) / 2
     meshRef.current.rotation.y = t / 4
     meshRef.current.rotation.z = Math.cos(t / 4) / 2
 
-    // Gentle floating
     meshRef.current.position.y = Math.sin(t / 2) * 0.2
 
-    // Mouse interaction (smooth parallax)
     const mouseX = (state.pointer.x * Math.PI) / 10
     const mouseY = (state.pointer.y * Math.PI) / 10
 

@@ -9,7 +9,6 @@ export const useGoogleCalendar = () => {
 
   useEffect(() => {
     checkConnection()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const checkConnection = async () => {
@@ -59,10 +58,6 @@ export const useGoogleCalendar = () => {
       .delete()
       .eq('user_id', user.id)
 
-    // Also clear synced events to reset state?
-    // Usually better to keep events but mark as unsynced or just leave them.
-    // For now, we just remove the token.
-
     setIsConnected(false)
   }
 
@@ -71,6 +66,6 @@ export const useGoogleCalendar = () => {
     isLoading,
     connectGoogleCalendar,
     disconnectGoogleCalendar,
-    checkConnection, // verification function
+    checkConnection,
   }
 }

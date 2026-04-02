@@ -16,16 +16,12 @@ export const ModernAIChat = ({
   const { isChatOpen, toggleChat, currentConversationId } = useAIStore()
   const activeId = propId || currentConversationId || undefined
 
-  // Fallback/Default handling could be done in hook or store, but generic ID helps query.
-  // If no ID, hook enabled=false.
-
   const [inputValue, setInputValue] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const { data: messages, sendMessage } = useChatHistory(activeId)
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
-  // Auto-scroll para a última mensagem
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -43,7 +39,7 @@ export const ModernAIChat = ({
 
   return (
     <>
-      {/* FAB */}
+      {}
       <button
         onClick={toggleChat}
         className={cn(
@@ -56,7 +52,7 @@ export const ModernAIChat = ({
         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-emerald-500/50 animate-pulse" />
       </button>
 
-      {/* Main Chat Panel */}
+      {}
       <div
         className={cn(
           'fixed bottom-6 right-6 w-full max-w-[450px] h-[700px] bg-black border border-white/10 shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] z-50 flex flex-col transition-all duration-500 transform rounded-none overflow-hidden',
@@ -65,7 +61,7 @@ export const ModernAIChat = ({
             : 'translate-y-12 opacity-0 pointer-events-none',
         )}
       >
-        {/* Header */}
+        {}
         <div className="p-4 border-b border-white/5 bg-zinc-950/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="h-9 w-9 bg-white/5 border border-white/10 flex items-center justify-center rounded-none rotate-45">
@@ -99,7 +95,7 @@ export const ModernAIChat = ({
           </div>
         </div>
 
-        {/* Messages Area */}
+        {}
         <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar"
@@ -141,7 +137,7 @@ export const ModernAIChat = ({
           )}
         </div>
 
-        {/* Input Area */}
+        {}
         <div className="p-6 bg-zinc-950/80 border-t border-white/5 backdrop-blur-md">
           <form onSubmit={handleSend} className="relative group">
             <div className="relative flex flex-col bg-zinc-900/50 border border-white/10 rounded-none focus-within:border-white/30 transition-all duration-300">

@@ -1,17 +1,10 @@
-// API Response Types
-// Centralized type definitions for API responses and external data
-
 import { Database } from '@/integrations/supabase/types'
 
-// Supabase Table Types (shortcuts)
-// Supabase Table Types (shortcuts)
 export type Profile = Database['public']['Tables']['profiles']['Row']
-export type Client = Database['public']['Tables']['wedding_clients']['Row'] // Table is wedding_clients
+export type Client = Database['public']['Tables']['wedding_clients']['Row']
 export type Project = Database['public']['Tables']['projects']['Row']
 export type Event = Database['public']['Tables']['events']['Row']
 export type Service = Database['public']['Tables']['services']['Row']
-// export type Payment = Database['public']['Tables']['payments']['Row']; // Table missing in types
-// export type Subscription = Database['public']['Tables']['subscriptions']['Row']; // Table missing in types
 export type Assistant = Database['public']['Tables']['assistants']['Row']
 export type AssistantInvite =
   Database['public']['Tables']['assistant_invites']['Row']
@@ -24,7 +17,6 @@ export type ProjectService =
 export type Briefing = Database['public']['Tables']['briefings']['Row']
 export type Transaction = Database['public']['Tables']['transactions']['Row']
 
-// Domain Types previously in database.ts
 export type TaskStatus = 'todo' | 'in_progress' | 'review' | 'done'
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
 export type ProjectStatus =
@@ -90,17 +82,13 @@ export const TASK_PRIORITY_COLORS: Record<TaskPriority, string> = {
   urgent: 'bg-red-100 text-red-800',
 }
 
-// Insert Types
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
 export type ClientInsert =
   Database['public']['Tables']['wedding_clients']['Insert']
 export type ProjectInsert = Database['public']['Tables']['projects']['Insert']
 export type EventInsert = Database['public']['Tables']['events']['Insert']
 export type ServiceInsert = Database['public']['Tables']['services']['Insert']
-// export type PaymentInsert = Database['public']['Tables']['payments']['Insert'];
-// export type SubscriptionInsert = Database['public']['Tables']['subscriptions']['Insert'];
 
-// Update Types
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
 export type ClientUpdate =
   Database['public']['Tables']['wedding_clients']['Update']
@@ -108,7 +96,6 @@ export type ProjectUpdate = Database['public']['Tables']['projects']['Update']
 export type EventUpdate = Database['public']['Tables']['events']['Update']
 export type ServiceUpdate = Database['public']['Tables']['services']['Update']
 
-// Extended Types with Relations
 export interface ProjectWithRelations extends Project {
   client?: Client & {
     full_name?: string
@@ -116,7 +103,6 @@ export interface ProjectWithRelations extends Project {
     email?: string
     phone?: string
   }
-  // Relations attached to the project object itself (if any)
   events?: Event[]
 }
 
@@ -138,8 +124,8 @@ export interface BriefingContent {
 
 export interface BriefingWithContent extends Omit<Briefing, 'content'> {
   content?: BriefingContent | null
-  questions?: unknown[] // Legacy support
-  answers?: Record<string, unknown> // Legacy support
+  questions?: unknown[]
+  answers?: Record<string, unknown>
 }
 
 export interface EventWithRelations extends Event {
@@ -161,11 +147,11 @@ export type ProjectServiceItem = Omit<
   ProjectService,
   'quantity' | 'total_price' | 'unit_price'
 > & {
-  quantity: number // Cast from string in DB
+  quantity: number
   total_price: number
   unit_price: number
-  paid_amount?: number // UI specific / potentially calculated
-  notes?: string | null // UI specific
+  paid_amount?: number
+  notes?: string | null
   service?: ServiceUI
 }
 
@@ -178,7 +164,6 @@ export interface ClientWithRelations extends Client {
   events?: Event[]
 }
 
-// API Response Wrappers
 export interface ApiResponse<T> {
   data: T | null
   error: Error | null
@@ -193,7 +178,6 @@ export interface PaginatedResponse<T> {
   hasMore: boolean
 }
 
-// Form Data Types
 export interface EventFormData {
   title: string
   description?: string
@@ -225,7 +209,6 @@ export interface ProjectFormData {
   status: 'planning' | 'confirmed' | 'completed' | 'cancelled'
 }
 
-// Filter Types
 export interface EventFilters {
   status?: string
   client_id?: string
@@ -241,11 +224,6 @@ export interface ClientFilters {
   created_after?: string
 }
 
-// Mercado Pago Types - REMOVED
-// export interface MercadoPagoPreference { ... }
-// export interface MercadoPagoPayment { ... }
-
-// Resend Types
 export interface ResendEmailRequest {
   to: string
   makeup_artist_name: string
@@ -259,7 +237,6 @@ export interface ResendEmailResponse {
   error?: string
 }
 
-// Chart/Analytics Types
 export interface ChartDataPoint {
   label: string
   value: number

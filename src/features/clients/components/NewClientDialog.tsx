@@ -36,7 +36,6 @@ export default function NewClientDialog({
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
 
-  // Estados do Formulário
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -53,7 +52,6 @@ export default function NewClientDialog({
     if (open && user?.id) {
       loadClients()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user])
 
   const loadClients = async () => {
@@ -92,7 +90,6 @@ export default function NewClientDialog({
     setLoading(true)
 
     try {
-      // 1. Prepare Payload
       const payload: Record<string, string | boolean | null> = {
         full_name: formData.name,
         name: formData.name,
@@ -105,10 +102,8 @@ export default function NewClientDialog({
         access_pin: formData.access_pin || null,
       }
 
-      // 2. Create Client
       const newClient = await ClientService.create(payload)
 
-      // 3. Generate Portal Link if Bride
       if (formData.is_bride && newClient && 'id' in newClient) {
         const clientId = newClient.id as string
         const portalLink = `https://khaoskontrol.com.br/portal/${clientId}`
@@ -136,7 +131,6 @@ export default function NewClientDialog({
         access_pin: '',
       })
 
-      // Atualiza a lista na tela de trás
       if (onSuccess) onSuccess()
     } catch (error) {
       handleError(error, 'NewClientDialog:handleSave')

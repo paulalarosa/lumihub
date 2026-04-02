@@ -10,7 +10,7 @@ import {
 import { generateWhatsAppLink } from '@/utils/whatsappGenerator'
 import { differenceInDays } from 'date-fns/differenceInDays'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
-// format removed
+
 import { MessageCircle, Clock, Check, Heart } from 'lucide-react'
 import { Event } from '@/features/calendar/hooks/useEvents'
 import { logger } from '@/services/logger'
@@ -93,7 +93,6 @@ export function useEventCard(event: Event) {
 
   const handleSendWhatsApp = async (recommendedAction: string) => {
     try {
-      // 1. Fetch Template
       if (!organizationId) return
 
       const { data: template } = await supabase
@@ -103,7 +102,6 @@ export function useEventCard(event: Event) {
         .eq('type', recommendedAction)
         .maybeSingle()
 
-      // Fallback
       let rawText = template?.content
       if (!rawText) {
         switch (recommendedAction) {
@@ -123,7 +121,6 @@ export function useEventCard(event: Event) {
         }
       }
 
-      // 2. Professional Name
       let professionalName = 'KONTROL'
       if (user) {
         const { data: profData } = await supabase
@@ -134,7 +131,6 @@ export function useEventCard(event: Event) {
         if (profData?.full_name) professionalName = profData.full_name
       }
 
-      // 3. Generate Link
       const link = generateWhatsAppLink(rawText, {
         client_name: event.client?.name || 'Cliente',
         professional_name: professionalName,

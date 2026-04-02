@@ -31,7 +31,6 @@ import { MessageReasoning } from '@/components/infsh/agent/message-reasoning'
 import { MessageStatusIndicator } from '@/components/infsh/agent/message-status-indicator'
 import { ToolInvocations } from '@/components/infsh/agent/tool-invocations'
 
-// Component props
 interface AgentProps {
   proxyUrl?: string
   apiKey?: string
@@ -48,7 +47,6 @@ interface AgentProps {
   examplePrompts?: string[]
 }
 
-// Check if message status is terminal (generation complete)
 function isTerminalStatus(status: string | undefined): boolean {
   return (
     status === ChatMessageStatusReady ||
@@ -56,10 +54,6 @@ function isTerminalStatus(status: string | undefined): boolean {
     status === ChatMessageStatusCancelled
   )
 }
-
-// =============================================================================
-// Helper functions
-// =============================================================================
 
 function _getTextContent(message: ChatMessageDTO): string {
   const textContent = message.content.find(
@@ -80,10 +74,6 @@ function hasTextContent(message: ChatMessageDTO): boolean {
     (c) => c.type === ChatMessageContentTypeText && c.text?.trim(),
   )
 }
-
-// =============================================================================
-// Internal Components
-// =============================================================================
 
 const DefaultHeader = memo(function DefaultHeader() {
   return (
@@ -186,7 +176,6 @@ const MessageList = memo(function MessageList({
   messages: ChatMessageDTO[]
   isGenerating: boolean
 }) {
-  // Show typing indicator when generating and last message is user or has no content yet
   const lastMessage = messages[messages.length - 1]
   const showTyping =
     isGenerating &&
@@ -243,10 +232,6 @@ const AgentContent = memo(function AgentContent({
   )
 })
 
-// =============================================================================
-// Main Component
-// =============================================================================
-
 export function Agent({
   proxyUrl,
   apiKey,
@@ -262,7 +247,6 @@ export function Agent({
   description,
   examplePrompts,
 }: AgentProps) {
-  // Create client internally - memoized to prevent re-creation
   const client = useMemo(() => {
     if (!proxyUrl && !apiKey) {
       logger.error('[Agent] Either proxyUrl or apiKey is required')
@@ -276,7 +260,6 @@ export function Agent({
     return null
   }
 
-  // Extract description and example prompts from ad-hoc config, or use props
   const effectiveDescription =
     description ?? (isAdHocConfig(config) ? config.description : undefined)
   const effectiveExamplePrompts =

@@ -101,9 +101,9 @@ export function ClientFilters({
 
   return (
     <div className="space-y-4">
-      {/* Main Filter Row */}
+      {}
       <div className="flex flex-col lg:flex-row gap-3">
-        {/* Search Input */}
+        {}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-3 h-4 w-4 text-white/40" />
           <Input
@@ -124,7 +124,7 @@ export function ClientFilters({
           )}
         </div>
 
-        {/* Status Filter */}
+        {}
         <Select value={status} onValueChange={handleStatusChange}>
           <SelectTrigger className="w-[140px] bg-black border-white/20 text-white rounded-none h-10 font-mono text-xs uppercase">
             <SelectValue placeholder="Status" />
@@ -151,7 +151,7 @@ export function ClientFilters({
           </SelectContent>
         </Select>
 
-        {/* Date Range Picker */}
+        {}
         <Popover>
           <PopoverTrigger asChild>
             <Button
@@ -198,7 +198,7 @@ export function ClientFilters({
           </PopoverContent>
         </Popover>
 
-        {/* Company Filter */}
+        {}
         {companies.length > 0 && (
           <Select value={company || 'all'} onValueChange={handleCompanyChange}>
             <SelectTrigger className="w-[160px] bg-black border-white/20 text-white rounded-none h-10 font-mono text-xs uppercase">
@@ -224,7 +224,7 @@ export function ClientFilters({
           </Select>
         )}
 
-        {/* Sort By */}
+        {}
         <Select value={sortBy} onValueChange={handleSortChange}>
           <SelectTrigger className="w-[160px] bg-black border-white/20 text-white rounded-none h-10 font-mono text-xs uppercase">
             <ArrowUpDown className="mr-2 h-3 w-3" />
@@ -258,7 +258,7 @@ export function ClientFilters({
           </SelectContent>
         </Select>
 
-        {/* Clear Filters Button */}
+        {}
         {activeCount > 0 && (
           <Button
             variant="outline"
@@ -277,7 +277,7 @@ export function ClientFilters({
         )}
       </div>
 
-      {/* Active Filters Summary (Mobile) */}
+      {}
       {activeCount > 0 && (
         <div className="flex items-center gap-2 lg:hidden">
           <Filter className="h-3 w-3 text-white/40" />

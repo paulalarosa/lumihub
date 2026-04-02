@@ -11,10 +11,6 @@ interface CountUpProps {
   format?: (value: number) => string
 }
 
-/**
- * Safe CountUp Component with error handling
- * Uses frame-by-frame animation instead of motion values for stability
- */
 export const CountUp = ({
   from = 0,
   to = 0,
@@ -31,7 +27,6 @@ export const CountUp = ({
     if (!isInView) return
 
     try {
-      // Validate inputs
       const validTo = typeof to === 'number' && !isNaN(to) ? to : 0
       const validFrom = typeof from === 'number' && !isNaN(from) ? from : 0
       const validDuration =
@@ -44,7 +39,7 @@ export const CountUp = ({
       const animate = () => {
         currentFrame++
         const progress = Math.min(currentFrame / frameCount, 1)
-        // easeOut cubic
+
         const easeProgress = 1 - Math.pow(1 - progress, 3)
         const current = validFrom + (validTo - validFrom) * easeProgress
 
@@ -76,7 +71,7 @@ export const CountUp = ({
       }
     } catch (error) {
       logger.error(error, { message: 'Erro na animação.', showToast: false })
-      // Fallback: show final value
+
       setDisplayValue(to ?? 0)
     }
   }, [isInView, from, to, duration, decimals, format])

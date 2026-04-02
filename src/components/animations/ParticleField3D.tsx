@@ -6,13 +6,11 @@ const Particles = ({ count = 5000 }) => {
   const mesh = useRef<THREE.Points>(null)
   const light = useRef<THREE.PointLight>(null)
 
-  // Gerar posições das partículas
   const [positions, colors] = useMemo(() => {
     const positions = new Float32Array(count * 3)
     const colors = new Float32Array(count * 3)
 
     for (let i = 0; i < count; i++) {
-      // Posições aleatórias em esfera
       const theta = Math.random() * Math.PI * 2
       const phi = Math.acos(Math.random() * 2 - 1)
       const radius = 5 + Math.random() * 15
@@ -21,41 +19,36 @@ const Particles = ({ count = 5000 }) => {
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta)
       positions[i * 3 + 2] = radius * Math.cos(phi)
 
-      // Cores (roxo/rosa/azul)
       const colorChoice = Math.random()
       if (colorChoice < 0.33) {
-        colors[i * 3] = 0.54 // R (roxo)
-        colors[i * 3 + 1] = 0.36 // G
-        colors[i * 3 + 2] = 0.96 // B
+        colors[i * 3] = 0.54
+        colors[i * 3 + 1] = 0.36
+        colors[i * 3 + 2] = 0.96
       } else if (colorChoice < 0.66) {
-        colors[i * 3] = 0.92 // R (rosa)
-        colors[i * 3 + 1] = 0.36 // G
-        colors[i * 3 + 2] = 0.6 // B
+        colors[i * 3] = 0.92
+        colors[i * 3 + 1] = 0.36
+        colors[i * 3 + 2] = 0.6
       } else {
-        colors[i * 3] = 0.23 // R (azul)
-        colors[i * 3 + 1] = 0.51 // G
-        colors[i * 3 + 2] = 0.96 // B
+        colors[i * 3] = 0.23
+        colors[i * 3 + 1] = 0.51
+        colors[i * 3 + 2] = 0.96
       }
     }
 
     return [positions, colors]
   }, [count])
 
-  // Animação
   useFrame((state) => {
     if (!mesh.current) return
 
     const time = state.clock.getElapsedTime()
 
-    // Rotação suave
     mesh.current.rotation.x = time * 0.05
     mesh.current.rotation.y = time * 0.075
 
-    // Pulsação das partículas
     const scale = 1 + Math.sin(time * 0.5) * 0.1
     mesh.current.scale.set(scale, scale, scale)
 
-    // Luz seguindo o mouse (simulado pelo tempo neste caso)
     if (light.current) {
       light.current.position.x = Math.sin(time * 0.5) * 10
       light.current.position.y = Math.cos(time * 0.3) * 10

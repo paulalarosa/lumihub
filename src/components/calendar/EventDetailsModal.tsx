@@ -48,7 +48,6 @@ export const EventDetailsModal = ({
     if (event.resource.projectId) {
       navigate(`/projects/${event.resource.projectId}`)
     } else {
-      // For Google events, maybe open Google Calendar?
       window.open(
         `https://calendar.google.com/calendar/r/eventedit/${event.resource.googleEventId}`,
         '_blank',
@@ -68,7 +67,7 @@ export const EventDetailsModal = ({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Data e Hora */}
+          {}
           <div className="flex items-start gap-4 text-neutral-300">
             <div className="bg-neutral-800 p-2 rounded-lg">
               <Calendar className="w-5 h-5 text-neutral-400" />
@@ -86,7 +85,7 @@ export const EventDetailsModal = ({
             </div>
           </div>
 
-          {/* Location if exists */}
+          {}
           {event.resource.location && (
             <div className="flex items-start gap-4 text-neutral-300">
               <div className="bg-neutral-800 p-2 rounded-lg">
@@ -101,7 +100,7 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          {/* Description if exists */}
+          {}
           {event.resource.description && (
             <div className="flex items-start gap-4 text-neutral-300">
               <div className="bg-neutral-800 p-2 rounded-lg">
@@ -118,7 +117,7 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          {/* Tipo de Serviço Badge */}
+          {}
           <div className="flex items-center gap-3 pt-2">
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
@@ -145,7 +144,7 @@ export const EventDetailsModal = ({
             </span>
           </div>
 
-          {/* WhatsApp Actions (Internal Events only) */}
+          {}
           {!isGoogleEvent && event.resource.clientPhone && (
             <div className="pt-4 border-t border-neutral-800">
               <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-2">
@@ -162,7 +161,7 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          {/* Ações */}
+          {}
           <div className="flex gap-3 pt-6 border-t border-neutral-800">
             <Button
               onClick={handleViewDetails}

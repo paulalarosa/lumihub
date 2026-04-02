@@ -15,7 +15,6 @@ const formatValue = (value: unknown): string => {
   }
 
   if (typeof value === 'string') {
-    // Check if it's an ISO date string
     const isoDateRegex = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/
     if (isoDateRegex.test(value)) {
       try {
@@ -24,7 +23,7 @@ const formatValue = (value: unknown): string => {
         return value as string
       }
     }
-    // Escape quotes and wrap in quotes if contains comma
+
     if (value.includes(',') || value.includes('"') || value.includes('\n')) {
       return `"${value.replace(/"/g, '""')}"`
     }
@@ -48,7 +47,6 @@ export function exportToCSV<T extends Record<string, unknown>>(
   }
 
   try {
-    // Determine columns to export
     const exportColumns: ExportColumn<T>[] =
       columns ||
       (Object.keys(data[0]) as (keyof T)[]).map((key) => ({
@@ -56,10 +54,8 @@ export function exportToCSV<T extends Record<string, unknown>>(
         label: String(key),
       }))
 
-    // Create header row
     const headers = exportColumns.map((col) => col.label).join(',')
 
-    // Create data rows
     const rows = data.map((item) =>
       exportColumns
         .map((col) => {
@@ -72,17 +68,14 @@ export function exportToCSV<T extends Record<string, unknown>>(
         .join(','),
     )
 
-    // Combine header and rows
     const csvContent = [headers, ...rows].join('\n')
 
-    // Create blob and download
     const blob = new Blob(['\uFEFF' + csvContent], {
       type: 'text/csv;charset=utf-8;',
     })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
 
-    // Generate filename with date
     const dateStr = formatDate(new Date(), 'yyyy-MM-dd')
     const finalFilename = filename.includes('.csv')
       ? filename
@@ -109,7 +102,6 @@ export function exportToCSV<T extends Record<string, unknown>>(
   }
 }
 
-// Pre-configured export for clients
 export function exportClientsToCSV(
   clients: Array<{
     name: string

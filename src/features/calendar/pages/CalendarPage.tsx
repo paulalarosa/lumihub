@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 import { format } from 'date-fns/format'
@@ -61,7 +62,6 @@ export const CalendarPage = () => {
   const [createEventDate, setCreateEventDate] = useState<Date | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
-  // Fetch events from Supabase
   const {
     data: events,
     isLoading,
@@ -98,7 +98,6 @@ export const CalendarPage = () => {
     enabled: !!user,
   })
 
-  // Force sync with Google Calendar
   const syncMutation = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke(
@@ -122,7 +121,6 @@ export const CalendarPage = () => {
     },
   })
 
-  // Event style based on type and sync status
   const eventStyleGetter = (event: CalendarEvent) => {
     const colors: Record<string, { bg: string; text: string }> = {
       wedding: { bg: '#FFD700', text: '#000' },
@@ -149,9 +147,7 @@ export const CalendarPage = () => {
         fontSize: '13px',
         fontWeight: 500,
         position: 'relative' as const,
-        // Indicador de sync - handled via css classes better but simple object works
       },
-      // Adding sync indicator via title modification if needed or custom component
     }
   }
 
@@ -167,8 +163,9 @@ export const CalendarPage = () => {
 
   return (
     <div className="min-h-screen bg-neutral-950 p-4 md:p-8">
+      <SEOHead title="Agenda" noindex={true} />
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-2">
@@ -220,10 +217,10 @@ export const CalendarPage = () => {
           </div>
         </div>
 
-        {/* Conflict Resolver */}
+        {}
         <ConflictResolver />
 
-        {/* Google Calendar Connection Warning */}
+        {}
         {!isConnected && !isGoogleLoading && (
           <div className="mb-4 p-4 bg-yellow-900/20 border border-yellow-500 rounded-lg">
             <p className="text-yellow-400 text-sm">
@@ -238,7 +235,7 @@ export const CalendarPage = () => {
           </div>
         )}
 
-        {/* Legend */}
+        {}
         <div className="flex flex-wrap gap-4 mb-4 p-4 bg-neutral-900 rounded-lg border border-neutral-800">
           <div className="flex items-center gap-2">
             <div
@@ -280,7 +277,7 @@ export const CalendarPage = () => {
           </div>
         </div>
 
-        {/* Calendar */}
+        {}
         <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 calendar-dark">
           {isLoading ? (
             <div className="h-[700px] flex items-center justify-center">
@@ -327,7 +324,7 @@ export const CalendarPage = () => {
           )}
         </div>
 
-        {/* Modals */}
+        {}
         <EventDetailsModal
           event={selectedEvent}
           isOpen={isDetailsModalOpen}

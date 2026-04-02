@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
@@ -100,6 +101,7 @@ export default function AcceptInvitePage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+        <SEOHead title="Aceitar Convite" noindex={true} />
         <div className="bg-destructive/10 border border-destructive/20 text-destructive p-8 rounded-lg max-w-md w-full text-center shadow-lg">
           <h3 className="text-xl font-bold mb-4">Erro no Convite</h3>
           <p className="mb-6">{error}</p>

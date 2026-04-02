@@ -8,11 +8,6 @@ interface ActionButtonProps extends ButtonProps {
   fullWidth?: boolean
 }
 
-/**
- * Primary Industrial Button
- * Style: Cyan background, black text, sharp corners, uppercase, tracking-wider
- * Used for: Save actions, Confirmations, Primary CTAs
- */
 export const ActionButton = React.forwardRef<
   HTMLButtonElement,
   ActionButtonProps
@@ -37,11 +32,6 @@ export const ActionButton = React.forwardRef<
 })
 ActionButton.displayName = 'ActionButton'
 
-/**
- * Secondary Industrial Button
- * Style: Transparent/Black background, White text, White border (low opacity), hover flip to White/Black
- * Used for: Cancel, Back, Secondary actions
- */
 export const OutlineButton = React.forwardRef<
   HTMLButtonElement,
   ActionButtonProps

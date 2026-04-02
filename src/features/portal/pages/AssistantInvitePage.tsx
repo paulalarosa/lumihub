@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -67,6 +68,7 @@ const AssistantInvite = () => {
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 selection:bg-white selection:text-black font-mono">
+      <SEOHead title="Convite" noindex={true} />
       <div className="w-full max-w-2xl">
         <div className="flex justify-start mb-12 border-b border-white/20 pb-4">
           <div className="flex space-x-1">

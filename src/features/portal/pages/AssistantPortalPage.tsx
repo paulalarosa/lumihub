@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { parseISO } from 'date-fns/parseISO'
 import { format } from 'date-fns/format'
 
@@ -65,6 +66,7 @@ const AssistantPortalPage = () => {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-mono selection:bg-white selection:text-black pb-24">
+      <SEOHead title="Portal da Assistente" noindex={true} />
       <header className="fixed top-0 left-0 right-0 bg-[#050505] border-b border-neutral-800 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex flex-col">
@@ -145,7 +147,6 @@ const AssistantPortalPage = () => {
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-[10px] text-neutral-600 uppercase tracking-[0.3em] mb-2">
-                  /// CONTEXT:{' '}
                   {p.selectedAssistantId === 'all'
                     ? 'GLOBAL'
                     : p.activeAssistants.find(

@@ -13,7 +13,6 @@ serve(async (req) => {
     const body = await req.json()
     scheduled_post_id = body.scheduled_post_id
 
-    // Buscar post agendado
     const { data: post, error: postError } = await supabase
       .from('instagram_scheduled_posts')
       .select('*, connection:instagram_connections(*)')
@@ -25,20 +24,17 @@ serve(async (req) => {
     const accessToken = post.connection.access_token
     const instagramUserId = post.connection.instagram_user_id
 
-    // Atualizar status
     await supabase
       .from('instagram_scheduled_posts')
       .update({ status: 'publishing' })
       .eq('id', scheduled_post_id)
 
-    // 1. Upload de mídia(s)
     const containerIds: string[] = []
 
     for (const mediaUrl of post.media_urls) {
       let containerUrl = ''
 
       if (post.media_type === 'image' || post.media_type === 'carousel') {
-        // Upload image container
         const containerResponse = await fetch(
           `https://graph.instagram.com/v21.0/${instagramUserId}/media`,
           {
@@ -46,7 +42,7 @@ serve(async (req) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image_url: mediaUrl,
-              caption: containerIds.length === 0 ? post.caption : undefined, // Only on first
+              caption: containerIds.length === 0 ? post.caption : undefined,
               access_token: accessToken,
             }),
           },
@@ -57,7 +53,6 @@ serve(async (req) => {
 
         containerIds.push(containerData.id)
       } else if (post.media_type === 'video') {
-        // Upload video container
         const containerResponse = await fetch(
           `https://graph.instagram.com/v21.0/${instagramUserId}/media`,
           {
@@ -79,12 +74,10 @@ serve(async (req) => {
       }
     }
 
-    // 2. Publicar
     let publishEndpoint = ''
     let publishBody: any = {}
 
     if (post.media_type === 'carousel' && containerIds.length > 1) {
-      // Carousel
       publishEndpoint = `https://graph.instagram.com/v21.0/${instagramUserId}/media`
       publishBody = {
         media_type: 'CAROUSEL',
@@ -93,7 +86,6 @@ serve(async (req) => {
         access_token: accessToken,
       }
     } else {
-      // Single image/video
       publishEndpoint = `https://graph.instagram.com/v21.0/${instagramUserId}/media_publish`
       publishBody = {
         creation_id: containerIds[0],
@@ -115,14 +107,12 @@ serve(async (req) => {
 
     const mediaId = publishData.id
 
-    // 3. Buscar permalink
     const permalinkResponse = await fetch(
       `https://graph.instagram.com/v21.0/${mediaId}?fields=permalink&access_token=${accessToken}`,
     )
 
     const permalinkData = await permalinkResponse.json()
 
-    // 4. Atualizar post como publicado
     await supabase
       .from('instagram_scheduled_posts')
       .update({
@@ -133,7 +123,6 @@ serve(async (req) => {
       })
       .eq('id', scheduled_post_id)
 
-    // 5. Salvar em instagram_posts para analytics
     await supabase.from('instagram_posts').insert({
       user_id: post.user_id,
       instagram_connection_id: post.instagram_connection_id,
@@ -150,16 +139,13 @@ serve(async (req) => {
       { headers: { 'Content-Type': 'application/json' } },
     )
   } catch (error: any) {
-    console.error('Publish post error:', error)
-
-    // Atualizar como falho
     if (scheduled_post_id) {
       await supabase
         .from('instagram_scheduled_posts')
         .update({
           status: 'failed',
           error_message: error.message,
-          retry_count: 0, // Should be incremented by trigger or logic
+          retry_count: 0,
         })
         .eq('id', scheduled_post_id)
     }

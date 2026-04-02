@@ -1,12 +1,5 @@
 'use client'
 
-/**
- * TaskOutput Component
- *
- * Displays task output with status, logs, and output fields.
- * Supports streaming updates for real-time progress.
- */
-
 import React, { memo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { TaskDTO as Task } from '@inferencesh/sdk'
@@ -26,23 +19,21 @@ import { OutputFields } from './output-fields'
 type OutputView = 'output' | 'logs' | 'json'
 
 export interface TaskOutputProps {
-  /** The task to display */
   task: Task | null
-  /** Whether the initial fetch is loading */
+
   isLoading?: boolean
-  /** Whether streaming is active */
+
   isStreaming?: boolean
-  /** Additional CSS classes */
+
   className?: string
-  /** Compact mode (no card wrapper) */
+
   compact?: boolean
-  /** Show error details */
+
   showError?: boolean
-  /** Optional cancel handler */
+
   onCancel?: () => void
 }
 
-/** Check if task status is terminal */
 function isTerminalStatus(status: number | undefined): boolean {
   return (
     status !== undefined &&
@@ -52,7 +43,6 @@ function isTerminalStatus(status: number | undefined): boolean {
   )
 }
 
-/** Loading state display */
 const LoadingContent = memo(function LoadingContent({
   task,
   compact,
@@ -78,7 +68,6 @@ const LoadingContent = memo(function LoadingContent({
   return content
 })
 
-/** Empty state display */
 const EmptyContent = memo(function EmptyContent({
   compact,
 }: {
@@ -104,7 +93,6 @@ const EmptyContent = memo(function EmptyContent({
   return content
 })
 
-/** Error state display */
 const ErrorContent = memo(function ErrorContent({
   error,
   compact,
@@ -141,7 +129,6 @@ const ErrorContent = memo(function ErrorContent({
   return content
 })
 
-/** Cancelled state display */
 const CancelledContent = memo(function CancelledContent({
   message,
   compact,
@@ -178,7 +165,6 @@ const CancelledContent = memo(function CancelledContent({
   return content
 })
 
-/** Output view toggle */
 const OutputToggle = memo(function OutputToggle({
   output,
   setOutput,
@@ -216,7 +202,6 @@ const OutputToggle = memo(function OutputToggle({
   )
 })
 
-/** Header section with status and controls */
 const HeaderSection = memo(function HeaderSection({
   task,
   output,
@@ -262,7 +247,6 @@ const HeaderSection = memo(function HeaderSection({
   )
 })
 
-/** JSON output view */
 const JsonContent = memo(function JsonContent({ task }: { task: Task }) {
   const [copied, setCopied] = useState(false)
 
@@ -297,7 +281,6 @@ const JsonContent = memo(function JsonContent({ task }: { task: Task }) {
   )
 })
 
-/** Output content - renders task output fields */
 const OutputContent = memo(function OutputContent({ task }: { task: Task }) {
   const output = task.output
 
@@ -321,7 +304,6 @@ const OutputContent = memo(function OutputContent({ task }: { task: Task }) {
   )
 })
 
-/** Main TaskOutput component */
 export const TaskOutput = memo(function TaskOutput({
   task,
   isLoading = false,

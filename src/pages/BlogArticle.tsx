@@ -85,7 +85,7 @@ export default function BlogArticle() {
   return (
     <div className="bg-[#FAFAFA] text-[#050505]">
       <main className="container mx-auto px-6 py-12">
-        {/* Sticky Back Link */}
+        {}
         <div className="sticky top-20 bg-[#FAFAFA] z-40 py-4 mb-8">
           <Link
             to="/blog"
@@ -96,9 +96,9 @@ export default function BlogArticle() {
           </Link>
         </div>
 
-        {/* Article Content */}
+        {}
         <article className="max-w-2xl mx-auto">
-          {/* Header */}
+          {}
           <header className="mb-12">
             {article.image && (
               <div className="mb-12 aspect-[21/9] overflow-hidden rounded-[2.5rem] border border-black/5">
@@ -118,7 +118,7 @@ export default function BlogArticle() {
             </div>
           </header>
 
-          {/* Body */}
+          {}
           <div className="article-body text-lg text-[#374151] leading-8 space-y-6">
             {article.content
               .split('\n')
@@ -130,7 +130,7 @@ export default function BlogArticle() {
               ))}
           </div>
 
-          {/* Footer CTA */}
+          {}
           <div className="mt-16 pt-8 border-t border-[#E5E7EB]">
             <p className="text-sm text-[#374151] mb-4">
               Ready to scale your creative business?

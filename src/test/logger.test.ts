@@ -42,7 +42,5 @@ describe('Logger', () => {
     )
   })
 
-  it('should call console logs in environment', () => {
-    // Manual verification logic if needed
-  })
+  it('should call console logs in environment', () => {})
 })

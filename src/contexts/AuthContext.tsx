@@ -6,6 +6,7 @@ import { Logger } from '@/services/logger'
 import { handleError } from '@/lib/error-handling'
 
 import { AuthContext } from '@/contexts/AuthContextDefinition'
+import { setSentryUser, clearSentryUser } from '@/lib/sentry'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
@@ -13,12 +14,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
-  const [role, setRole] = useState<string | null>('professional') // Default to professional to prevent redirects
+  const [role, setRole] = useState<string | null>('professional')
 
-  // Use ref to track internal state changes and avoid dependency loops
   const lastUserId = useRef<string | null>(null)
 
-  // Helper: Fetch Role with Fallback
   const fetchRole = async (userId: string) => {
     try {
       const { data, error } = await supabase
@@ -31,7 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return 'professional'
       }
 
-      // Default to professional to be safe if column is null
       const safeData = data as { role?: string }
       return safeData?.role || 'professional'
     } catch (err) {
@@ -40,7 +38,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // Standard Functions exposed - Memoized to prevent effect loops
   const signIn = useCallback(
     (email: string, pass: string) =>
       supabase.auth.signInWithPassword({ email, password: pass }),
@@ -62,7 +59,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user])
 
   const getRedirectUrl = () => {
-    // Handle localhost development
     if (
       window.location.hostname === 'localhost' ||
       window.location.hostname === '127.0.0.1'
@@ -70,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return `${window.location.origin}/auth/callback`
     }
 
-    // Handle specific production domain or fallback to current origin for staging/previews
     const domain = window.location.hostname.endsWith('khaoskontrol.com.br')
       ? 'https://khaoskontrol.com.br'
       : window.location.origin
@@ -119,20 +114,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const currentId = currentSession?.user?.id ?? null
 
-      // OPTIMIZATION: If user ID hasn't changed, don't trigger full reload logic
-      // But ensure loading is resolved
       if (currentId === lastUserId.current) {
         setSession(currentSession)
         if (loading) setLoading(false)
         return
       }
 
-      // START LOADING
       setLoading(true)
       lastUserId.current = currentId
 
       if (currentSession?.user) {
-        // Audit Sign In
         Logger.action(
           'USER_SIGN_IN',
           currentSession.user.id,
@@ -140,32 +131,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           currentSession.user.id,
         )
 
-        // 1. Update basic auth
         setSession(currentSession)
         setUser(currentSession.user)
 
-        // 2. Fetch Role
         const userRole = await fetchRole(currentSession.user.id)
 
-        // 3. FINISH
         if (mounted) {
           setRole(userRole)
+          setSentryUser({
+            id: currentSession.user.id,
+            email: currentSession.user.email,
+            role: userRole,
+          })
           setLoading(false)
         }
       } else {
-        // 1. Clear everything
         setSession(null)
         setUser(null)
         setRole(null)
+        clearSentryUser()
 
-        // 2. FINISH
         if (mounted) {
           setLoading(false)
         }
       }
     }
 
-    // Initialize
     supabase.auth
       .getSession()
       .then(({ data: { session }, error }) => {
@@ -183,11 +174,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         signOut()
       })
 
-    // Subscribe
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      // CRITICAL: Handle invalid refresh token automatically
       if ((event as string) === 'TOKEN_REFRESH_ERROR') {
         await signOut()
         navigate('/login')
@@ -197,7 +186,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       handleSession(session)
 
       if (event === 'SIGNED_IN' && session) {
-        // Remove hash from URL to clean access_token
         if (
           window.location.hash &&
           window.location.hash.includes('access_token')
@@ -209,13 +197,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           )
         }
 
-        // Redirect if on public pages
         if (
           window.location.pathname === '/login' ||
           window.location.pathname === '/auth/login' ||
           window.location.pathname === '/register'
         ) {
-          // Check callback logic or default to dashboard
           navigate('/dashboard')
         }
       }
@@ -225,7 +211,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate])
 
   return (

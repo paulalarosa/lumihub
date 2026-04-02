@@ -33,7 +33,6 @@ serve(async (req: Request) => {
 
     const token = authHeader.replace('Bearer ', '')
 
-    // Verificar quem está chamando
     const {
       data: { user: callerUser },
       error: callerError,
@@ -46,7 +45,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // FIX 2: Validar admin via profiles.role no banco (NÃO via user_metadata)
     const { data: callerProfile } = await supabaseAdmin
       .from('profiles')
       .select('role')
@@ -72,7 +70,6 @@ serve(async (req: Request) => {
       )
     }
 
-    // FIX 1: Usar auth.admin em vez de from('auth.users')
     const {
       data: { user: targetUser },
       error: targetError,
@@ -85,7 +82,6 @@ serve(async (req: Request) => {
       })
     }
 
-    // Gerar magic link ou token para ghost login
     const { data: linkData, error: linkError } =
       await supabaseAdmin.auth.admin.generateLink({
         type: 'magiclink',
@@ -105,7 +101,6 @@ serve(async (req: Request) => {
       )
     }
 
-    // Log do ghost login no audit
     await supabaseAdmin.from('audit_logs').insert({
       user_id: callerUser.id,
       action: 'GHOST_LOGIN',

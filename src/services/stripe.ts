@@ -14,9 +14,9 @@ const stripePromise = loadStripe(STRIPE_PUBLISHABLE_KEY)
 
 interface CheckoutOptions {
   priceId: string
-  projectId?: string // Used as client_reference_id
-  successUrl?: string // Optional override
-  cancelUrl?: string // Optional override
+  projectId?: string
+  successUrl?: string
+  cancelUrl?: string
 }
 
 export const StripeService = {
@@ -40,7 +40,7 @@ export const StripeService = {
         cancelUrl:
           cancelUrl ||
           'https://khaoskontrol.com.br/dashboard?payment=cancelled',
-        clientReferenceId: projectId, // This ties the checkout to our internal project/user
+        clientReferenceId: projectId,
       })
 
       if (error) {

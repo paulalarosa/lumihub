@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { formatDate } from '@/lib/date-utils'
-// format and ptBR removed (handled by formatDate)
+
 import { Calendar as CalendarIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'

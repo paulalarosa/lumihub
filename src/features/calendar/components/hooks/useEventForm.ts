@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { addMinutes } from 'date-fns'
 import { formatDate } from '@/lib/date-utils'
-// format removed
+
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'

@@ -29,7 +29,6 @@ serve(async (req) => {
       throw new Error('Session ID is required')
     }
 
-    // 1. Retrieve the session from Stripe
     const session = await stripe.checkout.sessions.retrieve(sessionId)
 
     if (session.payment_status !== 'paid') {
@@ -52,27 +51,20 @@ serve(async (req) => {
       throw new Error('No user linked to this reference')
     }
 
-    // 2. Determine Plan Type
-    // If we passed plan_name in metadata, use use it.
-    // Otherwise fallback logic (not recommended for production but good for MVP)
-
-    let planType = 'professional' // Default
+    let planType = 'professional'
     if (planName === 'Essencial') planType = 'essential'
     if (planName === 'Studio') planType = 'studio'
 
-    // 3. Update User in Supabase
     const { error: updateError } = await supabase
       .from('makeup_artists')
       .update({
         plan_type: planType,
         plan_status: 'active',
         stripe_subscription_id: (session.subscription as string) || null,
-        // updated_at: new Date().toISOString() // removed if column doesnt exist, harmless to remove for now
       })
       .eq('user_id', userId)
 
     if (updateError) {
-      console.error('Error updating profile:', updateError)
       throw new Error('Failed to update user profile')
     }
 
@@ -95,8 +87,6 @@ serve(async (req) => {
       .eq('id', userId)
 
     if (profileUpdateError) {
-      console.error('Error updating base profile plan:', profileUpdateError)
-      // Non-blocking error for now
     }
 
     return new Response(
@@ -111,7 +101,6 @@ serve(async (req) => {
       },
     )
   } catch (error) {
-    console.error('Verification error:', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

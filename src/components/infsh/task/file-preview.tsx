@@ -1,12 +1,5 @@
 'use client'
 
-/**
- * FilePreview Component
- *
- * Renders file previews based on content type: images, videos, audio, text, and generic files.
- * Supports zoomable images, copy URL, open in new tab, and download actions.
- */
-
 import { Button } from '@/components/ui/button'
 import {
   DownloadIcon,
@@ -18,7 +11,6 @@ import {
 import { useCallback, useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
-/** Partial file structure from SDK */
 export interface PartialFile {
   uri: string
   path?: string
@@ -32,26 +24,24 @@ export interface FilePreviewProps {
   index?: number
   onLoad?: () => void
   onError?: () => void
-  /** Show action buttons on hover */
+
   buttons?: boolean
-  /** Allow clicking to interact */
+
   clickable?: boolean
-  /** Auto-play videos */
+
   autoplay?: boolean
-  /** Object fit mode */
+
   objectFit?: 'contain' | 'cover'
-  /** Show card border */
+
   card?: boolean
-  /** Allow dragging */
+
   draggable?: boolean
   className?: string
 }
 
-/** Guess content type from URL extension */
 function guessContentType(uri: string): string | null {
   const ext = uri.split('.').pop()?.toLowerCase().split('?')[0]
   const mimeTypes: Record<string, string> = {
-    // Images
     jpg: 'image/jpeg',
     jpeg: 'image/jpeg',
     png: 'image/png',
@@ -61,19 +51,19 @@ function guessContentType(uri: string): string | null {
     avif: 'image/avif',
     bmp: 'image/bmp',
     ico: 'image/x-icon',
-    // Video
+
     mp4: 'video/mp4',
     webm: 'video/webm',
     mov: 'video/quicktime',
     avi: 'video/x-msvideo',
     mkv: 'video/x-matroska',
-    // Audio
+
     mp3: 'audio/mpeg',
     wav: 'audio/wav',
     ogg: 'audio/ogg',
     m4a: 'audio/mp4',
     flac: 'audio/flac',
-    // Text
+
     txt: 'text/plain',
     md: 'text/markdown',
     json: 'application/json',
@@ -81,13 +71,12 @@ function guessContentType(uri: string): string | null {
     html: 'text/html',
     css: 'text/css',
     js: 'text/javascript',
-    // Documents
+
     pdf: 'application/pdf',
   }
   return ext ? mimeTypes[ext] || null : null
 }
 
-/** Get friendly type name from MIME type */
 function getFriendlyType(mime: string | undefined): string | null {
   if (!mime) return null
 
@@ -109,7 +98,6 @@ function getFriendlyType(mime: string | undefined): string | null {
 
   if (friendlyNames[mime]) return friendlyNames[mime]
 
-  // Fallback: extract subtype
   const parts = mime.split('/')
   if (parts.length === 2) {
     const subtype = parts[1]
@@ -121,7 +109,6 @@ function getFriendlyType(mime: string | undefined): string | null {
   return null
 }
 
-/** Get content category for rendering */
 function getContentCategory(
   contentType: string | undefined,
   _uri: string,
@@ -325,7 +312,6 @@ export function FilePreview({
   )
 }
 
-/** Simple text preview that fetches and displays text content */
 function TextPreview({
   url,
   onLoad,

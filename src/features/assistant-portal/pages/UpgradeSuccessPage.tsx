@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
@@ -20,8 +21,9 @@ export default function UpgradeSuccessPage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
+      <SEOHead title="Pagamento Confirmado" noindex={true} />
       <Card className="bg-neutral-900 border-neutral-800 p-12 text-center max-w-md w-full">
-        {/* Success Icon */}
+        {}
         <div className="relative inline-block mb-6">
           <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center">
             <CheckCircle className="w-12 h-12 text-black" />
@@ -31,18 +33,18 @@ export default function UpgradeSuccessPage() {
           </div>
         </div>
 
-        {/* Title */}
+        {}
         <h1 className="text-3xl font-bold text-white mb-4">
           Pagamento Aprovado!
         </h1>
 
-        {/* Message */}
+        {}
         <p className="text-neutral-400 mb-8">
           Sua conta foi ativada com sucesso. Agora você tem acesso completo a
           todas as funcionalidades da plataforma Khaos Kontrol PRO.
         </p>
 
-        {/* Features Unlocked */}
+        {}
         <div className="bg-neutral-950 border border-neutral-800 rounded-lg p-6 mb-8 text-left">
           <h3 className="text-white font-semibold mb-4 text-center">
             ✨ Recursos Desbloqueados
@@ -71,7 +73,7 @@ export default function UpgradeSuccessPage() {
           </ul>
         </div>
 
-        {/* CTA */}
+        {}
         <Button
           size="lg"
           onClick={handleContinue}

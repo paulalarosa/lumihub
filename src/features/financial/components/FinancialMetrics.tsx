@@ -15,7 +15,6 @@ export function FinancialMetrics({
   profit,
   _loading,
 }: FinancialMetricsProps) {
-  // Helper to allow skeleton loading if we wanted, but simple fallback is fine
   const formatCurrency = (val: number) =>
     val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
 

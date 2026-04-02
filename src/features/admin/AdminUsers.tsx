@@ -1,4 +1,3 @@
-// Admin Users Management Component
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { logger } from '@/services/logger'
@@ -15,6 +14,8 @@ import {
   Lock,
   RefreshCw,
   Search,
+  ShieldOff,
+  CreditCard,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -24,19 +25,45 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { useLanguage } from '@/hooks/useLanguage'
 import { useAdminUsers } from './hooks/useAdminUsers'
 import { Skeleton } from '@/components/ui/skeleton'
 
+const PLAN_OPTIONS = [
+  { value: 'free', label: 'Free' },
+  { value: 'starter', label: 'Starter' },
+  { value: 'pro', label: 'Pro' },
+  { value: 'premium', label: 'Premium' },
+]
+
 export default function AdminUsers() {
-  const { user: _adminUser } = useAuth()
-  const { t } = useLanguage()
+  const { user: adminUser } = useAuth()
   const { toast } = useToast()
   const { data: users, isLoading, isError, refetch } = useAdminUsers()
 
   const [searchQuery, setSearchQuery] = useState('')
-  const [_impersonating, setImpersonating] = useState<string | null>(null)
+  const [impersonating, setImpersonating] = useState<string | null>(null)
+  const [planDialog, setPlanDialog] = useState<{
+    open: boolean
+    userId: string
+    userName: string
+    currentPlan: string
+  }>({ open: false, userId: '', userName: '', currentPlan: '' })
+  const [selectedPlan, setSelectedPlan] = useState('')
 
   const filteredUsers =
     users?.filter((u) => {
@@ -45,66 +72,128 @@ export default function AdminUsers() {
       return (
         (u.full_name?.toLowerCase() || '').includes(lowerQuery) ||
         (u.email?.toLowerCase() || '').includes(lowerQuery) ||
-        (u.id?.toLowerCase() || '').includes(lowerQuery)
+        (u.id?.toLowerCase() || '').includes(lowerQuery) ||
+        (u.plan?.toLowerCase() || '').includes(lowerQuery)
       )
     }) || []
 
   const handleImpersonate = async (targetUserId: string) => {
     try {
       setImpersonating(targetUserId)
-      // Mock implementation for now as per previous code
-      // Call Edge Function to generate session would go here
+
+      const { data, error } = await supabase.functions.invoke(
+        'admin-ghost-login',
+        {
+          body: { target_user_id: targetUserId },
+        },
+      )
+
+      if (error) throw error
+
+      if (data?.session_url) {
+        window.open(data.session_url, '_blank')
+      }
 
       toast({
-        title: t('admin_ghost_login'),
-        description: `Initiating session override for ${targetUserId}...`,
+        title: 'Ghost Login',
+        description: `Sessão iniciada para ${targetUserId.slice(-8)}`,
       })
-
-      // Simulate delay
-      await new Promise((resolve) => setTimeout(resolve, 1500))
-
-      // Redirect (Mock)
-      // window.location.href = '/dashboard';
-
-      setImpersonating(null)
     } catch (error) {
-      logger.error('AdminUsers.handleImpersonate', error, 'SYSTEM', {
-        showToast: false,
-      })
+      logger.error('AdminUsers.handleImpersonate', error)
       toast({
-        title: 'Error',
-        description: 'Failed to initiate ghost session.',
+        title: 'Erro',
+        description:
+          'Falha ao iniciar ghost session. Verifique a Edge Function.',
         variant: 'destructive',
       })
+    } finally {
       setImpersonating(null)
     }
   }
 
   const handleResetPassword = async (email: string) => {
-    toast({
-      title: t('admin_reset_pass'),
-      description: `Recovery email sent to ${email}`,
-    })
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
 
-    // Actually, supabase.auth.resetPasswordForEmail is valid v1, but v2 uses resetPasswordForEmail or similar.
-    // If it errors, we can fix it. For now keeping original logic but wrapped.
-    await supabase.auth.resetPasswordForEmail(email)
+      if (error) throw error
+
+      toast({
+        title: 'Email enviado',
+        description: `Link de recuperação enviado para ${email}`,
+      })
+    } catch (error) {
+      logger.error('AdminUsers.handleResetPassword', error)
+      toast({
+        title: 'Erro',
+        description: 'Falha ao enviar email de recuperação.',
+        variant: 'destructive',
+      })
+    }
   }
 
-  const handleBlockUser = async (userId: string) => {
-    toast({
-      title: t('admin_block_user'),
-      description: `User ${userId} has been suspended inside the mainframe.`,
-      variant: 'destructive',
-    })
-    // Implementation would involve updating a status column
+  const handleBlockUser = async (userId: string, block: boolean) => {
+    try {
+      const { data, error } = await (supabase.rpc as any)('admin_block_user', {
+        p_user_id: userId,
+        p_blocked: block,
+      })
+
+      if (error) throw error
+
+      toast({
+        title: block ? 'Usuário bloqueado' : 'Usuário desbloqueado',
+        description: data?.user_name || userId.slice(-8),
+      })
+
+      refetch()
+    } catch (error) {
+      logger.error('AdminUsers.handleBlockUser', error)
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar status do usuário.',
+        variant: 'destructive',
+      })
+    }
   }
+
+  const handleChangePlan = async () => {
+    try {
+      const { data, error } = await (supabase.rpc as any)(
+        'admin_update_user_plan',
+        {
+          p_user_id: planDialog.userId,
+          p_new_plan: selectedPlan,
+        },
+      )
+
+      if (error) throw error
+
+      toast({
+        title: 'Plano atualizado',
+        description: `${data?.user_name}: ${data?.old_plan} → ${data?.new_plan}`,
+      })
+
+      setPlanDialog({ open: false, userId: '', userName: '', currentPlan: '' })
+      refetch()
+    } catch (error) {
+      logger.error('AdminUsers.handleChangePlan', error)
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar plano.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const isBlocked = (u: any) => u.subscription_status === 'blocked'
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center p-12 space-y-4">
         <Skeleton className="h-12 w-12 rounded-full" />
-        <p className="text-gray-500 font-mono text-xs uppercase animate-pulse">
+        <p className="text-muted-foreground font-mono text-xs uppercase animate-pulse">
           Scanning_User_Database...
         </p>
       </div>
@@ -113,15 +202,15 @@ export default function AdminUsers() {
 
   if (isError) {
     return (
-      <div className="p-8 text-center text-red-500 font-mono">
+      <div className="p-8 text-center text-destructive font-mono border border-destructive/20 bg-destructive/5">
         <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
         Failed to load user database.
         <Button
           variant="link"
           onClick={() => refetch()}
-          className="text-red-400 block mx-auto mt-2"
+          className="text-destructive block mx-auto mt-2 font-bold"
         >
-          Retry Connection
+          &gt; Retry Connection
         </Button>
       </div>
     )
@@ -130,49 +219,54 @@ export default function AdminUsers() {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <div className="relative w-full md:w-96 group">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-white transition-colors" />
           <Input
-            className="pl-9 bg-white/5 border-white/10 text-white rounded-none focus:border-white focus:ring-0 font-mono text-xs h-10"
-            placeholder="SEARCH_DB [NAME, EMAIL, ID]..."
+            className="pl-9 bg-zinc-900/50 border-zinc-800 text-white rounded-none focus:border-white focus:ring-0 font-mono text-xs h-10 tracking-tight"
+            placeholder="SEARCH [NAME, EMAIL, ID, PLAN]..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <span className="font-mono text-[9px] text-zinc-600 uppercase tracking-[0.3em] font-bold">
+            {filteredUsers.length} telemetry_records
+          </span>
           <Button
             variant="outline"
             size="sm"
             onClick={() => refetch()}
-            className="rounded-none border-white/20 hover:bg-white hover:text-black"
+            className="rounded-none border-zinc-800 bg-zinc-900/50 hover:bg-white hover:text-black font-mono text-[10px] tracking-widest transition-all"
           >
             <RefreshCw className="h-3 w-3 mr-2" />
-            SYNC
+            SYNC_DB
           </Button>
         </div>
       </div>
 
-      <Card className="bg-black border border-white/10 rounded-none overflow-hidden">
+      <Card className="bg-black/40 border border-zinc-800 rounded-none overflow-hidden backdrop-blur-sm shadow-2xl">
         <CardContent className="p-0">
-          {/* Desktop Table View */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto custom-scrollbar">
+            <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-white/10 bg-white/5">
-                  <th className="text-left py-3 px-6 text-gray-500 font-mono text-[10px] uppercase tracking-widest font-normal">
-                    User / ID
+                <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                  <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    User
                   </th>
-                  <th className="text-left py-3 px-6 text-gray-500 font-mono text-[10px] uppercase tracking-widest font-normal">
-                    Role
+                  <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    Access_Level
                   </th>
-                  <th className="text-left py-3 px-6 text-gray-500 font-mono text-[10px] uppercase tracking-widest font-normal">
-                    {t('header_plans')}
+                  <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    SaaS_Tier
                   </th>
-                  <th className="text-left py-3 px-6 text-gray-500 font-mono text-[10px] uppercase tracking-widest font-normal">
-                    Reg_Date
+                  <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    State
                   </th>
-                  <th className="text-right py-3 px-6 text-gray-500 font-mono text-[10px] uppercase tracking-widest font-normal">
-                    Actions
+                  <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    Registered
+                  </th>
+                  <th className="text-right py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                    Operations
                   </th>
                 </tr>
               </thead>
@@ -180,86 +274,139 @@ export default function AdminUsers() {
                 {filteredUsers.map((u) => (
                   <tr
                     key={u.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors group"
+                    className={`border-b border-zinc-900 hover:bg-white/[0.02] transition-colors group ${
+                      isBlocked(u) ? 'bg-red-900/5' : ''
+                    }`}
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-5 px-6">
                       <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center text-[10px] font-bold text-white">
+                        <div className="flex items-center gap-3">
+                          <div className="w-7 h-7 bg-zinc-900 border border-zinc-800 rounded-full flex items-center justify-center text-[10px] font-bold text-zinc-400 group-hover:text-white transition-colors">
                             {(u.full_name || '?').charAt(0)}
                           </div>
-                          <span className="font-serif text-white text-sm">
+                          <span className="font-serif text-white text-sm tracking-tight group-hover:text-yellow-500 transition-colors">
                             {u.full_name || 'Anonymous User'}
                           </span>
                         </div>
-                        <span className="text-xs text-gray-500 pl-8">
+                        <span className="text-[10px] font-mono text-zinc-600 pl-10 tracking-tighter">
                           {u.email}
                         </span>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-5 px-6">
                       <Badge
                         variant="outline"
-                        className={`rounded-none font-mono text-[10px] uppercase tracking-wider border-white/20 ${u.role === 'admin' ? 'bg-white text-black' : 'text-gray-400'}`}
+                        className={`rounded-none font-mono text-[9px] uppercase tracking-widest border-zinc-800 ${
+                          u.role === 'admin'
+                            ? 'bg-white text-black font-bold'
+                            : 'text-zinc-500'
+                        }`}
                       >
                         {u.role === 'admin' ? (
-                          <Shield className="h-3 w-3 mr-1" />
+                          <Shield className="h-2.5 w-2.5 mr-1.5" />
                         ) : (
-                          <User className="h-3 w-3 mr-1" />
+                          <User className="h-2.5 w-2.5 mr-1.5" />
                         )}
                         {u.role || 'user'}
                       </Badge>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className="font-mono text-xs text-white/70 uppercase">
+                    <td className="py-5 px-6">
+                      <span className="font-mono text-[11px] text-zinc-400 uppercase tracking-tight">
                         {u.plan || 'Free'}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-gray-500 text-xs font-mono">
+                    <td className="py-5 px-6">
+                      <Badge
+                        variant="outline"
+                        className={`rounded-none font-mono text-[9px] uppercase tracking-[0.15em] ${
+                          isBlocked(u)
+                            ? 'bg-red-950/30 border-red-900 text-red-500 animate-pulse'
+                            : u.subscription_status === 'active'
+                              ? 'border-green-900/50 text-green-500'
+                              : 'border-zinc-800 text-zinc-600'
+                        }`}
+                      >
+                        {isBlocked(u)
+                          ? 'SUSPENDED'
+                          : u.subscription_status || 'offline'}
+                      </Badge>
+                    </td>
+                    <td className="py-5 px-6 text-zinc-600 text-[10px] font-mono uppercase">
                       {u.created_at
                         ? new Date(u.created_at).toLocaleDateString('pt-BR')
                         : '-'}
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-5 px-6 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
-                            className="h-8 w-8 p-0 hover:bg-white hover:text-black rounded-none"
+                            className="h-8 w-8 p-0 hover:bg-zinc-800 rounded-none text-zinc-500 hover:text-white transition-all"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-black border border-white/20 rounded-none text-white w-48"
+                          className="bg-zinc-950 border border-zinc-800 rounded-none w-56 p-1 shadow-2xl backdrop-blur-xl"
                         >
-                          <DropdownMenuLabel className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
-                            Operations
+                          <DropdownMenuLabel className="font-mono text-[9px] uppercase tracking-[0.3em] text-zinc-600 px-3 py-2">
+                            User Operations
                           </DropdownMenuLabel>
-                          <DropdownMenuSeparator className="bg-white/10" />
+                          <DropdownMenuSeparator className="bg-zinc-900" />
                           <DropdownMenuItem
-                            className="cursor-pointer hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none font-mono text-xs"
+                            className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-zinc-400 focus:bg-white focus:text-black py-2"
                             onClick={() => handleImpersonate(u.id)}
+                            disabled={
+                              impersonating === u.id || u.id === adminUser?.id
+                            }
                           >
                             <LogIn className="mr-2 h-3 w-3" />
-                            {t('admin_ghost_login')}
+                            {impersonating === u.id
+                              ? 'STABLISHING_LINK...'
+                              : 'GHOST_LOGIN'}
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            className="cursor-pointer hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-none font-mono text-xs"
+                            className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-zinc-400 focus:bg-white focus:text-black py-2"
+                            onClick={() => {
+                              setPlanDialog({
+                                open: true,
+                                userId: u.id,
+                                userName: u.full_name || u.email || '',
+                                currentPlan: u.plan || 'free',
+                              })
+                              setSelectedPlan(u.plan || 'free')
+                            }}
+                          >
+                            <CreditCard className="mr-2 h-3 w-3" />
+                            UPGRADE_TIER
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-zinc-400 focus:bg-white focus:text-black py-2"
                             onClick={() => handleResetPassword(u.email || '')}
                           >
                             <Lock className="mr-2 h-3 w-3" />
-                            {t('admin_reset_pass')}
+                            RESET_ACCESS
                           </DropdownMenuItem>
-                          <DropdownMenuSeparator className="bg-white/10" />
-                          <DropdownMenuItem
-                            className="cursor-pointer hover:bg-red-900/50 text-red-500 focus:bg-red-900/50 focus:text-red-500 rounded-none font-mono text-xs"
-                            onClick={() => handleBlockUser(u.id)}
-                          >
-                            <Shield className="mr-2 h-3 w-3" />
-                            {t('admin_block_user')}
-                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="bg-zinc-900" />
+                          {isBlocked(u) ? (
+                            <DropdownMenuItem
+                              className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-green-500 focus:bg-green-500 focus:text-black py-2"
+                              onClick={() => handleBlockUser(u.id, false)}
+                            >
+                              <ShieldOff className="mr-2 h-3 w-3" />
+                              RESTORE_LINK
+                            </DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem
+                              className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-red-500 focus:bg-red-500 focus:text-black py-2"
+                              onClick={() => handleBlockUser(u.id, true)}
+                              disabled={u.id === adminUser?.id}
+                            >
+                              <Shield className="mr-2 h-3 w-3" />
+                              SEVER_LINK
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -268,95 +415,79 @@ export default function AdminUsers() {
               </tbody>
             </table>
           </div>
-
-          {/* Mobile Card View */}
-          <div className="md:hidden flex flex-col gap-4 p-4">
-            {filteredUsers.map((u) => (
-              <div
-                key={u.id}
-                className="bg-black border border-white/20 p-4 rounded-none flex flex-col gap-4"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-xs font-bold text-white">
-                      {(u.full_name || '?').charAt(0)}
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="font-serif text-white text-base">
-                        {u.full_name || 'Anonymous User'}
-                      </span>
-                      <span className="text-xs text-gray-500">{u.email}</span>
-                    </div>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className={`rounded-none font-mono text-[10px] uppercase tracking-wider border-white/20 ${u.role === 'admin' ? 'bg-white text-black' : 'text-gray-400'}`}
-                  >
-                    {u.role === 'admin' ? (
-                      <Shield className="h-3 w-3" />
-                    ) : (
-                      <User className="h-3 w-3" />
-                    )}
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 border-t border-white/10 pt-4">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">
-                      Plan
-                    </span>
-                    <span className="text-xs text-white uppercase font-mono">
-                      {u.plan || 'Free'}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">
-                      Registered
-                    </span>
-                    <span className="text-xs text-white font-mono">
-                      {u.created_at
-                        ? new Date(u.created_at).toLocaleDateString('pt-BR')
-                        : '-'}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 mt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full rounded-none border-white/20 hover:bg-white hover:text-black font-mono text-xs uppercase"
-                    onClick={() => handleImpersonate(u.id)}
-                  >
-                    <LogIn className="mr-2 h-3 w-3" />
-                    {t('admin_ghost_login')}
-                  </Button>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-none border-white/20 hover:bg-white hover:text-black font-mono text-xs uppercase"
-                      onClick={() => handleResetPassword(u.email || '')}
-                    >
-                      <Lock className="mr-2 h-3 w-3" />
-                      Reset
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-none border-red-900/50 text-red-500 hover:bg-red-900/80 hover:text-red-400 font-mono text-xs uppercase"
-                      onClick={() => handleBlockUser(u.id)}
-                    >
-                      <Shield className="mr-2 h-3 w-3" />
-                      Block
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
         </CardContent>
       </Card>
+
+      {}
+      <Dialog
+        open={planDialog.open}
+        onOpenChange={(open) => setPlanDialog((prev) => ({ ...prev, open }))}
+      >
+        <DialogContent className="bg-zinc-950 border-zinc-800 rounded-none max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.8)] border-t-2 border-t-white/10">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl tracking-tight text-white mb-2">
+              Modify Subscription Tier
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 py-4 border-y border-zinc-900 my-2">
+            <div className="space-y-1">
+              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest font-bold">
+                TARGET_USER
+              </p>
+              <p className="text-sm font-serif text-white">
+                {planDialog.userName}
+              </p>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest font-bold">
+                CURRENT_TIER
+              </p>
+              <p className="text-xs font-mono text-yellow-500 uppercase font-bold tracking-tight">
+                {planDialog.currentPlan}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-[10px] font-mono text-zinc-600 uppercase tracking-widest font-bold">
+                NEW_ASSIGNMENT
+              </p>
+              <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                <SelectTrigger className="rounded-none border-zinc-800 bg-zinc-900 text-white font-mono text-xs uppercase h-10 ring-offset-zinc-950 focus:ring-1 focus:ring-white">
+                  <SelectValue placeholder="Select new tier" />
+                </SelectTrigger>
+                <SelectContent className="rounded-none border-zinc-800 bg-zinc-950 text-white">
+                  {PLAN_OPTIONS.map((p) => (
+                    <SelectItem
+                      key={p.value}
+                      value={p.value}
+                      className="font-mono text-xs uppercase focus:bg-white focus:text-black rounded-none py-2"
+                    >
+                      {p.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+            <Button
+              variant="outline"
+              className="rounded-none border-zinc-800 font-mono text-[10px] h-10 px-6 tracking-widest uppercase hover:bg-zinc-900 hover:text-white"
+              onClick={() =>
+                setPlanDialog((prev) => ({ ...prev, open: false }))
+              }
+            >
+              Abort
+            </Button>
+            <Button
+              className="rounded-none bg-white text-black font-mono text-[10px] h-10 px-6 tracking-widest uppercase hover:bg-zinc-300 font-bold"
+              onClick={handleChangePlan}
+              disabled={selectedPlan === planDialog.currentPlan}
+            >
+              Commit_Change
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

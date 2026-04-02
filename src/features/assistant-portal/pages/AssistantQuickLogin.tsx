@@ -232,7 +232,7 @@ export default function AssistantQuickLogin() {
 
         <motion.div variants={fadeUp} className="mt-14 text-center space-y-3">
           <p className="text-[10px] text-neutral-600 uppercase tracking-widest font-mono">
-            Secure Access // Shadow Protocol
+            Secure Access
           </p>
           <div className="flex items-center justify-center gap-2">
             <div className="w-1 h-1 bg-green-500/50 rounded-full animate-pulse" />

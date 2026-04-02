@@ -7,13 +7,68 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: '14.1'
   }
   public: {
     Tables: {
+      user_privacy_consents: {
+        Row: {
+          consent_type: string
+          granted: boolean
+          granted_at: string | null
+          id: string
+          revoked_at: string | null
+          user_id: string
+          version: string | null
+        }
+        Insert: {
+          consent_type: string
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          revoked_at?: string | null
+          user_id: string
+          version?: string | null
+        }
+        Update: {
+          consent_type?: string
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          revoked_at?: string | null
+          user_id?: string
+          version?: string | null
+        }
+        Relationships: []
+      }
+      data_deletion_requests: {
+        Row: {
+          created_at: string | null
+          id: string
+          request_reason: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          request_reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          request_reason?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           badge_id: string
@@ -4283,6 +4338,56 @@ export type Database = {
       }
     }
     Functions: {
+      get_lgpd_requests: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          user_id: string
+          user_email: string | null
+          user_name: string | null
+          request_type: string
+          status: string
+          requested_at: string
+          completed_at: string | null
+          notes: string | null
+        }[]
+      }
+      admin_process_deletion: {
+        Args: {
+          p_request_id: string
+          p_action: string
+        }
+        Returns: Json
+      }
+      get_my_consents: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          consent_type: string
+          granted: boolean
+          granted_at: string | null
+          revoked_at: string | null
+          version: string
+        }[]
+      }
+      record_user_consent: {
+        Args: {
+          p_consent_type: string
+          p_granted: boolean
+        }
+        Returns: undefined
+      }
+      export_my_personal_data: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
+      request_data_deletion: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          success: boolean
+          message: string
+          request_id: string | null
+        }
+      }
       accept_assistant_invite: {
         Args: { p_invite_token: string; p_user_id: string }
         Returns: Json

@@ -47,7 +47,7 @@ export function KhaosAgent() {
   return (
     <div className="flex flex-row h-full bg-black text-white overflow-hidden border-l border-white/5 relative">
       <div className="flex flex-col flex-1 h-full overflow-hidden">
-        {/* Header - Minimalist & Serialized */}
+        {}
         <div className="p-4 border-b border-white/5 bg-zinc-950/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -94,7 +94,7 @@ export function KhaosAgent() {
           </div>
         </div>
 
-        {/* Main Chat Area */}
+        {}
         <ChatContainer className="flex-1 min-h-0 bg-transparent relative">
           <div
             className="flex flex-col flex-1 p-6 space-y-8 overflow-y-auto custom-scrollbar scroll-smooth"
@@ -120,7 +120,7 @@ export function KhaosAgent() {
                       key={idx}
                       onClick={() => {
                         setInput(s.prompt)
-                        // Auto-submit after small delay
+
                         setTimeout(() => formRef.current?.requestSubmit(), 100)
                       }}
                       className="flex items-center gap-3 p-3 bg-zinc-950 border border-white/5 hover:border-white/20 hover:bg-zinc-900 transition-all text-left rounded-none group"
@@ -152,7 +152,7 @@ export function KhaosAgent() {
                     )}
                   </div>
                   <div className="flex-1 space-y-4 min-w-0">
-                    {/* Reasoning - High-end thinking experience */}
+                    {}
                     {m.reasoning && (
                       <MessageReasoning
                         reasoning={m.reasoning}
@@ -162,7 +162,7 @@ export function KhaosAgent() {
                       />
                     )}
 
-                    {/* Content - Elements Protocol Renderer */}
+                    {}
                     <MessageContent
                       message={m}
                       className={cn(
@@ -171,7 +171,7 @@ export function KhaosAgent() {
                       )}
                     />
 
-                    {/* Tool Invocations - Serialized widgets */}
+                    {}
                     {m.tool_invocations && m.tool_invocations.length > 0 && (
                       <div className="space-y-3 pt-2">
                         {m.tool_invocations.map((ti) => {
@@ -205,7 +205,7 @@ export function KhaosAgent() {
           </div>
         </ChatContainer>
 
-        {/* Footer / Input - Command Line Inspired */}
+        {}
         <div className="p-6 bg-zinc-950/80 border-t border-white/5 backdrop-blur-md">
           <form
             ref={formRef}
@@ -264,7 +264,7 @@ export function KhaosAgent() {
         </div>
       </div>
 
-      {/* Canvas Panel */}
+      {}
       {artifact && (
         <Canvas
           isOpen={artifact.isOpen}

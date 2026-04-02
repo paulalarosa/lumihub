@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/ui/PageLoader'
 
 import { useNavigate } from 'react-router-dom'
 import { getErrorMessage } from '@/utils/error-handler'
+import { sanitizeUserInput } from '@/lib/security'
 
 interface AssistantSignupFormProps {
   token: string
@@ -38,13 +39,16 @@ export const AssistantSignupForm = ({
         })
         if (error) throw error
       } else {
+        const cleanName = sanitizeUserInput(fullName)
+        const cleanPhone = sanitizeUserInput(phone)
+
         const { error } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              full_name: fullName,
-              phone: phone,
+              full_name: cleanName,
+              phone: cleanPhone,
             },
           },
         })

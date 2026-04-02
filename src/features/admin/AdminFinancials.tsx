@@ -52,7 +52,6 @@ export default function AdminFinancials({
       const end = endOfMonth(now).toISOString()
 
       try {
-        // Fetch events for the current month with related data
         const { data: eventsData, error } = await supabase
           .from('events')
           .select(
@@ -87,7 +86,6 @@ export default function AdminFinancials({
     }
 
     fetchMonthlyData()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const calculateCommissions = (eventsData: EventWithAssistants[]) => {
@@ -98,8 +96,6 @@ export default function AdminFinancials({
       const assistants = event.event_assistants || []
 
       if (assistants.length > 0 && totalCommission > 0) {
-        // Split commission equally among assistants for now
-        // In a real scenario, we might have individual commission fields per assistant
         const splitCommission = totalCommission / assistants.length
 
         assistants.forEach((ea) => {
@@ -155,7 +151,7 @@ export default function AdminFinancials({
 
   return (
     <div className="space-y-8">
-      {/* KPI Cards */}
+      {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-[#1A1A1A] border-white/10">
           <CardContent className="pt-6">
@@ -209,7 +205,7 @@ export default function AdminFinancials({
         </Card>
       </div>
 
-      {/* Monthly Closing & Commissions */}
+      {}
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>

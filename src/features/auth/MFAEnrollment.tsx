@@ -41,7 +41,6 @@ export default function MFAEnrollment() {
 
   useEffect(() => {
     fetchFactors()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleEnroll = async () => {

@@ -26,7 +26,7 @@ import { Loader2 } from 'lucide-react'
 interface Service {
   id: string
   name: string
-  title?: string // backward compat
+  title?: string
   price: number | null
   duration_minutes: number | null
   description: string | null
@@ -91,7 +91,6 @@ export default function ServiceDialog({
     e.preventDefault()
     if (!user) return
 
-    // Validation: Name is required
     if (!title.trim()) {
       toast({
         title: t('service.error.name_required') || 'Nome obrigatório',
@@ -105,8 +104,8 @@ export default function ServiceDialog({
     const serviceData = {
       user_id: user.id,
       name: title.trim(),
-      price: price.replace(',', '.'), // DB expects string or numeric, let's try string if type says so, or keep number if only duration failed
-      duration_minutes: duration, // DB type expects string for duration_minutes
+      price: price.replace(',', '.'),
+      duration_minutes: duration,
       description: description || null,
     }
 
@@ -164,7 +163,7 @@ export default function ServiceDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          {/* Title */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="title" className="text-gray-300">
               {t('service.name.label')} *
@@ -180,7 +179,7 @@ export default function ServiceDialog({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Price */}
+            {}
             <div className="space-y-2">
               <Label htmlFor="price" className="text-gray-300">
                 {t('service.price.label')} *
@@ -197,7 +196,7 @@ export default function ServiceDialog({
               />
             </div>
 
-            {/* Duration */}
+            {}
             <div className="space-y-2">
               <Label className="text-gray-300">
                 {t('service.duration.label')} *
@@ -217,7 +216,7 @@ export default function ServiceDialog({
             </div>
           </div>
 
-          {/* Description */}
+          {}
           <div className="space-y-2">
             <Label htmlFor="description" className="text-gray-300">
               {t('service.description.label')}
@@ -232,7 +231,7 @@ export default function ServiceDialog({
             />
           </div>
 
-          {/* Actions */}
+          {}
           <div className="flex justify-end gap-3 pt-2">
             <Button
               type="button"

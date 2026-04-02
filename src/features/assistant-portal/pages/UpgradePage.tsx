@@ -1,3 +1,4 @@
+import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
@@ -73,12 +74,11 @@ export default function UpgradePage() {
         return
       }
 
-      // Call Stripe Service directly
       const successUrl = `${window.location.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`
 
       await StripeService.checkout({
         priceId: plan.stripePriceId,
-        projectId: user.id, // Used as client_reference_id
+        projectId: user.id,
         successUrl,
       })
     } catch (error) {
@@ -90,12 +90,13 @@ export default function UpgradePage() {
 
   return (
     <div className="min-h-screen bg-neutral-950 p-4 sm:p-8">
+      <SEOHead title="Upgrade" noindex={true} />
       <div className="max-w-5xl mx-auto">
-        {/* Header */}
+        {}
         <div className="text-center mb-12">
           <div className="inline-block px-4 py-1 bg-white/5 border border-white/10 rounded-full mb-4">
             <span className="text-xs uppercase tracking-wider text-neutral-400">
-              UPGRADE // SISTEMA_COMPLETO
+              UPGRADE
             </span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
@@ -107,7 +108,7 @@ export default function UpgradePage() {
           </p>
         </div>
 
-        {/* Plan Card */}
+        {}
         <div className="grid gap-8">
           {PLANS.map((plan) => (
             <Card
@@ -156,7 +157,7 @@ export default function UpgradePage() {
                 </Button>
               </div>
 
-              {/* Features Grid */}
+              {}
               <div className="grid sm:grid-cols-2 gap-4">
                 {plan.features.map((feature, i) => (
                   <div key={i} className="flex items-start gap-3">
@@ -171,7 +172,7 @@ export default function UpgradePage() {
           ))}
         </div>
 
-        {/* Payment Methods */}
+        {}
         <div className="mt-12 text-center space-y-4">
           <div className="flex items-center justify-center gap-6 flex-wrap">
             <div className="flex items-center gap-2 text-neutral-400">
@@ -196,7 +197,7 @@ export default function UpgradePage() {
           </p>
         </div>
 
-        {/* FAQ */}
+        {}
         <div className="mt-16 border-t border-neutral-800 pt-12">
           <h2 className="text-2xl font-bold text-white mb-8 text-center">
             Perguntas Frequentes

@@ -45,11 +45,11 @@ export default function InviteLanding() {
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4 selection:bg-white selection:text-black">
       <div className="max-w-lg w-full relative group">
-        {/* Decorative border effect */}
+        {}
         <div className="absolute -inset-0.5 bg-gradient-to-r from-neutral-800 to-neutral-900 opacity-50 group-hover:opacity-75 transition duration-1000 blur-sm"></div>
 
         <div className="relative bg-black border border-neutral-800 p-8 md:p-12">
-          {/* Header */}
+          {}
           <div className="text-center mb-12">
             <div className="flex justify-center mb-6">
               <div className="h-16 w-16 bg-white/5 border border-white/10 flex items-center justify-center rounded-none">
@@ -76,9 +76,9 @@ export default function InviteLanding() {
             </p>
           </div>
 
-          {/* Registration Form */}
+          {}
           <form onSubmit={handleRegister} className="space-y-6">
-            {/* Invitation Info (Read-only) */}
+            {}
             <div className="bg-neutral-900/30 border border-neutral-800 p-4 mb-6">
               <p className="text-[10px] text-neutral-500 uppercase tracking-widest mb-1">
                 Email Convidado

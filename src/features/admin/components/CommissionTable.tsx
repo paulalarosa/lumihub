@@ -17,7 +17,6 @@ export interface AssistantCommission {
   assistant_name: string
   total_events: number
   total_commission: number
-  // status: 'paid' | 'pending'; // In future we can track this in DB
 }
 
 interface CommissionTableProps {
@@ -32,7 +31,6 @@ export function CommissionTable({ data }: CommissionTableProps) {
       title: 'Pagamento Registrado',
       description: `As comissões de ${assistantName} foram marcadas como pagas.`,
     })
-    // Here we would call an API Update in the future
   }
 
   if (data.length === 0) {

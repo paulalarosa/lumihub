@@ -5,7 +5,6 @@ import { logger } from '@/services/logger'
 export const useChatHistory = (conversationId?: string) => {
   const queryClient = useQueryClient()
 
-  // 1. Busca o histórico com cache inteligente
   const chatQuery = useQuery({
     queryKey: ['chat-history', conversationId],
     queryFn: async () => {

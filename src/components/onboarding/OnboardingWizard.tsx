@@ -6,18 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import {
-  ArrowRight,
-  CheckCircle,
-  User,
-  Sparkles,
-  Heart,
-} from 'lucide-react'
+import { ArrowRight, CheckCircle, User, Sparkles, Heart } from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { useNavigate } from 'react-router-dom'
 
-// Hooked UX: Cada step deve ter ACTION + IMMEDIATE REWARD
 const STEPS = [
   {
     id: 'welcome',
@@ -49,6 +42,7 @@ export const OnboardingWizard = () => {
   const { user } = useAuth()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
+  const { trackEvent, trackConversion } = useAnalytics()
   const [step, setStep] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
 
@@ -120,7 +114,6 @@ export const OnboardingWizard = () => {
         return
       }
 
-      // Salvar perfil — INVESTMENT: dados que a usuária não quer perder
       await supabase
         .from('profiles')
         .update({
@@ -132,7 +125,12 @@ export const OnboardingWizard = () => {
 
       await updateMutation.mutateAsync({ profile_customized: true })
 
-      // VARIABLE REWARD: mostrar feedback imediato
+      trackEvent({
+        category: 'engagement',
+        action: 'onboarding_profile_complete',
+        label: 'profile',
+      })
+
       toast.success('Perfil salvo! Suas clientes já podem te encontrar.')
     }
 
@@ -142,7 +140,6 @@ export const OnboardingWizard = () => {
         return
       }
 
-      // Criar cliente real — INVESTMENT: dados reais no sistema
       const { error } = await supabase.from('wedding_clients').insert({
         user_id: user?.id,
         name: clientData.name,
@@ -157,8 +154,16 @@ export const OnboardingWizard = () => {
 
       await updateMutation.mutateAsync({ first_client_added: true })
 
-      // VARIABLE REWARD
-      toast.success(`${clientData.name} cadastrada! Sua primeira cliente no sistema.`)
+      trackConversion({ conversion_id: 'first_client_added', value: 0 })
+      trackEvent({
+        category: 'engagement',
+        action: 'onboarding_first_client',
+        label: clientData.name,
+      })
+
+      toast.success(
+        `${clientData.name} cadastrada! Sua primeira cliente no sistema.`,
+      )
     }
 
     if (currentStep.id === 'complete') {
@@ -168,12 +173,12 @@ export const OnboardingWizard = () => {
         has_seen_tour: true,
       })
 
+      trackConversion({ conversion_id: 'onboarding_complete', value: 0 })
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.7 } })
       setIsOpen(false)
       return
     }
 
-    // Avançar
     const nextStep = step + 1
     await updateMutation.mutateAsync({
       current_step: STEPS[nextStep].id,
@@ -195,8 +200,7 @@ export const OnboardingWizard = () => {
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent className="bg-[#0a0a0a] border border-white/10 max-w-lg text-white p-0 overflow-hidden">
-
-        {/* Progress — minimal */}
+        {}
         <div className="h-1 bg-white/5">
           <div
             className="h-full bg-white transition-all duration-500"
@@ -205,20 +209,18 @@ export const OnboardingWizard = () => {
         </div>
 
         <div className="p-8">
-          {/* Step indicator */}
+          {}
           <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-6">
             {step + 1} de {STEPS.length}
           </p>
 
-          {/* Title */}
+          {}
           <h2 className="text-2xl font-serif text-white mb-1 tracking-tight">
             {currentStep.title}
           </h2>
-          <p className="text-sm text-white/40 mb-8">
-            {currentStep.subtitle}
-          </p>
+          <p className="text-sm text-white/40 mb-8">{currentStep.subtitle}</p>
 
-          {/* STEP: Welcome */}
+          {}
           {currentStep.id === 'welcome' && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
@@ -227,9 +229,14 @@ export const OnboardingWizard = () => {
                   { emoji: '💍', label: 'Cliente', desc: '30 segundos' },
                   { emoji: '🎉', label: 'Pronta!', desc: 'Imediato' },
                 ].map((item, i) => (
-                  <div key={i} className="text-center p-4 border border-white/[0.06] bg-white/[0.02]">
+                  <div
+                    key={i}
+                    className="text-center p-4 border border-white/[0.06] bg-white/[0.02]"
+                  >
                     <span className="text-xl block mb-2">{item.emoji}</span>
-                    <p className="text-xs text-white font-medium">{item.label}</p>
+                    <p className="text-xs text-white font-medium">
+                      {item.label}
+                    </p>
                     <p className="text-[10px] text-white/30">{item.desc}</p>
                   </div>
                 ))}
@@ -240,7 +247,7 @@ export const OnboardingWizard = () => {
             </div>
           )}
 
-          {/* STEP: Profile — ACTION: preencher dados reais */}
+          {}
           {currentStep.id === 'profile' && (
             <div className="space-y-4">
               <div>
@@ -249,7 +256,12 @@ export const OnboardingWizard = () => {
                 </label>
                 <Input
                   value={profileData.business_name}
-                  onChange={(e) => setProfileData({ ...profileData, business_name: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({
+                      ...profileData,
+                      business_name: e.target.value,
+                    })
+                  }
                   placeholder="Ex: Studio Glam, Maria Makeup..."
                   className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                 />
@@ -261,7 +273,9 @@ export const OnboardingWizard = () => {
                 </label>
                 <Textarea
                   value={profileData.bio}
-                  onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, bio: e.target.value })
+                  }
                   rows={3}
                   placeholder="Maquiadora profissional especializada em..."
                   className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 resize-none"
@@ -275,7 +289,9 @@ export const OnboardingWizard = () => {
                   </label>
                   <Input
                     value={profileData.phone}
-                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, phone: e.target.value })
+                    }
                     placeholder="(11) 99999-9999"
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
@@ -286,7 +302,12 @@ export const OnboardingWizard = () => {
                   </label>
                   <Input
                     value={profileData.instagram}
-                    onChange={(e) => setProfileData({ ...profileData, instagram: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        instagram: e.target.value,
+                      })
+                    }
                     placeholder="@seu.perfil"
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
@@ -295,11 +316,12 @@ export const OnboardingWizard = () => {
             </div>
           )}
 
-          {/* STEP: First Client — ACTION: criar algo real no sistema */}
+          {}
           {currentStep.id === 'first_client' && (
             <div className="space-y-4">
               <p className="text-xs text-white/30 mb-2">
-                Cadastrar uma cliente real faz você sentir o sistema funcionando de verdade.
+                Cadastrar uma cliente real faz você sentir o sistema funcionando
+                de verdade.
               </p>
 
               <div>
@@ -308,7 +330,9 @@ export const OnboardingWizard = () => {
                 </label>
                 <Input
                   value={clientData.name}
-                  onChange={(e) => setClientData({ ...clientData, name: e.target.value })}
+                  onChange={(e) =>
+                    setClientData({ ...clientData, name: e.target.value })
+                  }
                   placeholder="Ex: Ana Silva"
                   className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                 />
@@ -321,7 +345,9 @@ export const OnboardingWizard = () => {
                   </label>
                   <Input
                     value={clientData.phone}
-                    onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
+                    onChange={(e) =>
+                      setClientData({ ...clientData, phone: e.target.value })
+                    }
                     placeholder="(11) 99999-9999"
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
@@ -333,7 +359,12 @@ export const OnboardingWizard = () => {
                   <Input
                     type="date"
                     value={clientData.event_date}
-                    onChange={(e) => setClientData({ ...clientData, event_date: e.target.value })}
+                    onChange={(e) =>
+                      setClientData({
+                        ...clientData,
+                        event_date: e.target.value,
+                      })
+                    }
                     className="bg-white/[0.04] border-white/10 text-white h-11"
                   />
                 </div>
@@ -341,13 +372,14 @@ export const OnboardingWizard = () => {
 
               <div className="p-3 border border-white/[0.06] bg-white/[0.02]">
                 <p className="text-xs text-white/40">
-                  💡 Depois de cadastrar, você pode gerar um contrato e enviar o portal exclusivo para ela.
+                  💡 Depois de cadastrar, você pode gerar um contrato e enviar o
+                  portal exclusivo para ela.
                 </p>
               </div>
             </div>
           )}
 
-          {/* STEP: Complete — VARIABLE REWARD */}
+          {}
           {currentStep.id === 'complete' && (
             <div className="space-y-6 text-center">
               <div className="w-16 h-16 mx-auto border border-white/20 flex items-center justify-center">
@@ -356,7 +388,8 @@ export const OnboardingWizard = () => {
 
               <div>
                 <p className="text-white/60 text-sm mb-6">
-                  Seu sistema está configurado. Aqui está o que você já pode fazer:
+                  Seu sistema está configurado. Aqui está o que você já pode
+                  fazer:
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 text-left">
@@ -375,7 +408,9 @@ export const OnboardingWizard = () => {
                       className="p-3 border border-white/[0.06] bg-white/[0.02] hover:border-white/20 transition-colors text-left"
                     >
                       <p className="text-xs text-white">{item.action}</p>
-                      <p className="text-[10px] text-white/25 mt-0.5">→ Ir agora</p>
+                      <p className="text-[10px] text-white/25 mt-0.5">
+                        → Ir agora
+                      </p>
                     </button>
                   ))}
                 </div>
@@ -383,7 +418,7 @@ export const OnboardingWizard = () => {
             </div>
           )}
 
-          {/* Actions */}
+          {}
           <div className="flex gap-3 mt-8">
             {currentStep.id !== 'complete' && (
               <button

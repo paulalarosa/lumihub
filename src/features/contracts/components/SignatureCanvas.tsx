@@ -41,7 +41,7 @@ export function SignatureCanvas({ onSave, _onCancel }: SignatureCanvasProps) {
           }}
           onEnd={handleEnd}
           penColor="#ffffff"
-          backgroundColor="rgba(0,0,0,0)" // Transparent
+          backgroundColor="rgba(0,0,0,0)"
         />
       </div>
 

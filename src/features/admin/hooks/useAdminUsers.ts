@@ -7,7 +7,6 @@ import { useEffect } from 'react'
 export const useAdminUsers = () => {
   const queryClient = useQueryClient()
 
-  // Busca de usuários com Cache
   const usersQuery = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
@@ -24,7 +23,6 @@ export const useAdminUsers = () => {
     },
   })
 
-  // Real-time Subscription para atualizar a tabela "ao vivo"
   useEffect(() => {
     const channel = supabase
       .channel('admin-users-channel')
@@ -44,7 +42,6 @@ export const useAdminUsers = () => {
     }
   }, [queryClient])
 
-  // Mutação para deletar (Exemplo)
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {
       const { error } = await supabase

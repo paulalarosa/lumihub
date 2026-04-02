@@ -1,16 +1,13 @@
-/**
- * Email templates for KONTROL Studio Pro applications
- * Used by the send-application Supabase Edge Function
- */
-
 interface EmailTemplateProps {
-  userName: string;
-  userEmail: string;
-  userInstagram?: string;
-  userChallenge?: string;
+  userName: string
+  userEmail: string
+  userInstagram?: string
+  userChallenge?: string
 }
 
-export const adminNotificationTemplate = (props: EmailTemplateProps): string => `
+export const adminNotificationTemplate = (
+  props: EmailTemplateProps,
+): string => `
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
@@ -133,19 +130,27 @@ export const adminNotificationTemplate = (props: EmailTemplateProps): string => 
           <div class="info-value"><a href="mailto:${props.userEmail}" style="color: #fff; text-decoration: none;">${props.userEmail}</a></div>
         </div>
 
-        ${props.userInstagram ? `
+        ${
+          props.userInstagram
+            ? `
         <div class="info-box">
           <div class="info-label">Instagram</div>
           <div class="info-value"><a href="https://instagram.com/${props.userInstagram.replace('@', '')}" style="color: #fff; text-decoration: none;">@${props.userInstagram.replace('@', '')}</a></div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${props.userChallenge ? `
+        ${
+          props.userChallenge
+            ? `
         <div class="info-box">
           <div class="info-label">Desafio Principal</div>
           <div class="info-value">${props.userChallenge}</div>
         </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <div class="button-container">
           <a href="https://khaoskontrol.com.br/admin" class="button">ACESSAR PAINEL</a>
@@ -158,7 +163,7 @@ export const adminNotificationTemplate = (props: EmailTemplateProps): string => 
     </div>
   </body>
 </html>
-`;
+`
 
 export const userConfirmationTemplate = (props: EmailTemplateProps): string => `
 <!DOCTYPE html>
@@ -344,4 +349,4 @@ export const userConfirmationTemplate = (props: EmailTemplateProps): string => `
     </div>
   </body>
 </html>
-`;
+`

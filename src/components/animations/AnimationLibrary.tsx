@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion'
 import { ReactNode, useEffect, useState } from 'react'
 
-// 1. FLOATING ANIMATION (Loop suave)
 export const FloatingElement = ({
   children,
   delay = 0,
@@ -27,7 +26,6 @@ export const FloatingElement = ({
   </motion.div>
 )
 
-// 2. ROTATING ANIMATION (Loop contínuo)
 export const RotatingElement = ({
   children,
   speed = 20,
@@ -51,7 +49,6 @@ export const RotatingElement = ({
   </motion.div>
 )
 
-// 3. PULSING ANIMATION (Loop de escala)
 export const PulsingElement = ({
   children,
   scale = 1.05,
@@ -75,7 +72,6 @@ export const PulsingElement = ({
   </motion.div>
 )
 
-// 4. WAVE ANIMATION (Onda horizontal)
 export const WaveElement = ({
   children,
   amplitude = 20,
@@ -99,7 +95,6 @@ export const WaveElement = ({
   </motion.div>
 )
 
-// 5. MORPHING SHAPE (Forma que muda)
 export const MorphingBlob = ({
   className = '',
   color = '#8B5CF6',
@@ -128,7 +123,6 @@ export const MorphingBlob = ({
   />
 )
 
-// 6. PARALLAX SCROLL
 export const ParallaxSection = ({
   children,
   speed = 0.5,
@@ -140,7 +134,6 @@ export const ParallaxSection = ({
 
   useEffect(() => {
     const handleScroll = () => {
-      // Usando window.scrollY em vez de pageYOffset (deprecated)
       setOffsetY(window.scrollY)
     }
     window.addEventListener('scroll', handleScroll)
@@ -159,7 +152,6 @@ export const ParallaxSection = ({
   )
 }
 
-// 7. STAGGER CONTAINER (Animação em cascata)
 export const StaggerContainer = ({
   children,
   staggerDelay = 0.1,

@@ -1,11 +1,5 @@
 'use client'
 
-/**
- * Task Logs Components
- *
- * Display task logs with auto-scroll and copy functionality.
- */
-
 import React, {
   memo,
   useMemo,
@@ -33,7 +27,6 @@ import { Check, Copy } from 'lucide-react'
 
 type TaskLogType = number
 
-// Base64 encoding/decoding utilities
 function utf8ToBase64(str: string): string {
   return btoa(
     encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) =>
@@ -120,7 +113,6 @@ export interface TaskLogsProps {
   className?: string
 }
 
-/** Full task logs with tabs for different log types */
 export const TaskLogs = memo(function TaskLogs({
   task,
   className,
@@ -133,7 +125,6 @@ export const TaskLogs = memo(function TaskLogs({
 
   useEffect(() => {
     if (logs) {
-      // If current selection is not available, find the next available log
       if (!logs[selectedTab]) {
         const availableLogs = LOG_TYPES.filter(
           (type) => logs[type.key] !== undefined,
@@ -245,7 +236,6 @@ export interface SimpleLogsProps {
   onlyLastLine?: boolean
 }
 
-/** Simple merged logs view */
 export const SimpleLogs = memo(function SimpleLogs({
   task,
   className,
@@ -321,7 +311,6 @@ interface LogViewerProps {
   content: string
 }
 
-/** Base log viewer with auto-scroll */
 export const LogViewer = memo(function LogViewer({ content }: LogViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [autoScroll, setAutoScroll] = useState(true)

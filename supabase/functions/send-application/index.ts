@@ -68,7 +68,6 @@ serve(async (req) => {
 
     const resend = new Resend(RESEND_API_KEY)
 
-    // Send admin notification
     const adminSend = await resend.emails.send({
       from: 'KONTROL <no-reply@khaoskontrol.com.br>',
       to: RESEND_TO,
@@ -81,7 +80,6 @@ serve(async (req) => {
       }),
     })
 
-    // Send user confirmation
     const userSend = await resend.emails.send({
       from: 'KONTROL <no-reply@khaoskontrol.com.br>',
       to: email,

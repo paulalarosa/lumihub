@@ -1,5 +1,3 @@
-// Marketing service - stubbed (table doesn't exist)
-
 export interface MarketingCampaign {
   id: string
   user_id: string

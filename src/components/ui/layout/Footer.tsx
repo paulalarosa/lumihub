@@ -62,7 +62,7 @@ export default function Footer() {
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[50%] h-[200px] bg-foreground/[0.015] blur-[120px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-6 lg:px-10 relative z-10">
-        {/* CTA Band — Portfolite style large heading */}
+        {}
         <div className="py-24 flex flex-col md:flex-row items-start md:items-center justify-between gap-10 border-b border-border/20">
           <div className="space-y-4 max-w-lg text-left">
             <h3 className="font-serif text-3xl md:text-5xl text-foreground tracking-tight leading-[1.1] text-left">
@@ -83,9 +83,9 @@ export default function Footer() {
           </Link>
         </div>
 
-        {/* Links */}
+        {}
         <div className="py-16 grid grid-cols-2 md:grid-cols-5 gap-10 text-left">
-          {/* Brand */}
+          {}
           <div className="col-span-2 flex flex-col gap-6 text-left">
             <Link to="/" className="flex items-center gap-2.5 group w-fit">
               <img
@@ -117,7 +117,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Link columns */}
+          {}
           {footerLinks.map((group) => (
             <div key={group.title} className="space-y-4 text-left">
               <h4 className="text-xs font-medium text-foreground tracking-wide uppercase">
@@ -153,7 +153,7 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Bottom */}
+        {}
         <div className="py-6 border-t border-border/20 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/50">
             © {new Date().getFullYear()} Khaos Kontrol · Todos os direitos

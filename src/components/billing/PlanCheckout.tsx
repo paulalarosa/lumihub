@@ -9,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { toast } from 'sonner'
 
-// Make sure to add this key to your .env file
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!)
 
 interface PlanCheckoutProps {
@@ -19,7 +18,7 @@ interface PlanCheckoutProps {
 export const PlanCheckout = ({ priceId }: PlanCheckoutProps) => {
   const [error, setError] = useState<string | null>(null)
 
-  const { user } = useAuth() // Assuming useAuth exists and returns user
+  const { user } = useAuth()
   const fetchClientSecret = useCallback(async () => {
     try {
       if (!user) throw new Error('Usuário não autenticado')
@@ -30,7 +29,7 @@ export const PlanCheckout = ({ priceId }: PlanCheckoutProps) => {
           body: {
             priceId,
             userId: user.id,
-            planName: 'make_plan_dynamic_later', // We can prop drill this if needed
+            planName: 'make_plan_dynamic_later',
           },
         },
       )
@@ -49,14 +48,7 @@ export const PlanCheckout = ({ priceId }: PlanCheckoutProps) => {
     }
   }, [priceId, user])
 
-  useEffect(() => {
-    // Determine if we should fetch immediately or let the provider handle it?
-    // The EmbeddedCheckoutProvider expects a fetchClientSecret function OR a clientSecret string.
-    // If we pass a function, it calls it.
-    // However, to handle errors better in our UI state before mounting, we might want to fetch first?
-    // Actually, the provider handles the loading state well. Let's pass the function reference but wrapped.
-    // But the official docs say: options={{ fetchClientSecret }}
-  }, [])
+  useEffect(() => {}, [])
 
   if (error) {
     return (

@@ -12,7 +12,7 @@ export type PlanType = 'free' | 'pro' | 'empire' | 'studio'
 export interface SubscriptionState {
   plan: PlanType
   status: SubscriptionStatus
-  daysRemaining: number // For trial
+  daysRemaining: number
   isLoading: boolean
 }
 
@@ -33,36 +33,30 @@ export const useSubscription = () => {
 
     const checkSubscription = async () => {
       try {
-        // Safely select only guaranteed columns. If 'plan' is missing in DB, we default to 'free' below.
-        // We do NOT select 'plan' here to avoid 400 error if column is missing.
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('created_at, role, subscription_tier')
           .eq('id', user.id)
-          .maybeSingle() // Prevent PGRST116 (406) error if no rows found
+          .maybeSingle()
 
         if (error) {
           handleSupabaseError(error)
           throw error
         }
 
-        // If no profile found (e.g. very early auth state), return safe defaults without crashing
         if (!profile) {
           setState((prev) => ({ ...prev, isLoading: false }))
           return
         }
 
         const p = profile
-        const plan = (p.subscription_tier as PlanType) || 'free' // Use subscription_tier if available
+        const plan = (p.subscription_tier as PlanType) || 'free'
         const createdAt = p.created_at ? parseISO(p.created_at) : new Date()
         const daysActive = differenceInDays(new Date(), createdAt)
         const TRIAL_DAYS = 7
         const daysRemaining = Math.max(0, TRIAL_DAYS - daysActive)
 
         let status: SubscriptionStatus = 'trialing'
-
-        // Priority 1: Admin or Paid Plan
-        // Removed hardcoded email bypasses as per Security Enforcement Protocol
 
         if (
           p.role === 'admin' ||
@@ -72,7 +66,6 @@ export const useSubscription = () => {
         ) {
           status = 'active'
         } else {
-          // Priority 2: Free Plan (Trial Logic)
           if (daysActive > TRIAL_DAYS) {
             status = 'expired'
           } else {

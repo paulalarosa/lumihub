@@ -28,7 +28,6 @@ interface SystemLog {
 export const ApiStatusDashboard = () => {
   const [_logs, _setLogs] = useState<SystemLog[]>([])
 
-  // Fetch system logs
   const { data: systemLogs, isLoading } = useQuery({
     queryKey: ['system-logs'],
     queryFn: async () => {
@@ -41,10 +40,9 @@ export const ApiStatusDashboard = () => {
       if (error) throw error
       return data
     },
-    refetchInterval: 30000, // Refresh every 30s
+    refetchInterval: 30000,
   })
 
-  // Mock status checks for integrations (In real app, we'd have an edge function to ping them)
   const integrations = [
     {
       name: 'Google Calendar',

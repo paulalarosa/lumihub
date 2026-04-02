@@ -18,7 +18,6 @@ interface ProjectTabsProps {
   setActiveTab: (tab: string) => void
   t: (key: string) => string
 
-  // Tasks Props
   tasks: Task[]
   newTaskTitle: string
   setNewTaskTitle: (value: string) => void
@@ -26,19 +25,16 @@ interface ProjectTabsProps {
   toggleTask: (id: string, currentStatus: string | null) => void
   deleteTask: (id: string) => void
 
-  // Briefing Props
   briefing: (BriefingWithContent & { is_submitted: boolean }) | null
   createDefaultBriefing: () => void
   copyPortalLink: () => void
 
-  // Contracts Props
   projectId: string
   contracts: Contract[]
   setContracts: (val: Contract[]) => void
   project: ProjectWithRelations | null
   projectServices: ProjectServiceItem[]
 
-  // Financials Props
   totalServiceAmount: number
   totalPaidAmount: number
   services: ServiceUI[]
@@ -63,29 +59,28 @@ interface ProjectTabsProps {
   registerPayment: (e: React.FormEvent) => void
 }
 
-// Update component signature and remove visibility props
 export const ProjectTabs = ({
   activeTab,
   setActiveTab,
   t,
-  // Tasks
+
   tasks,
   newTaskTitle,
   setNewTaskTitle,
   addTask,
   toggleTask,
   deleteTask,
-  // Briefing
+
   briefing,
   createDefaultBriefing,
   copyPortalLink,
-  // Contracts
+
   projectId,
   contracts,
   setContracts,
   project,
   projectServices,
-  // Financials
+
   totalServiceAmount,
   totalPaidAmount,
   services,
