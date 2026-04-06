@@ -52,3 +52,7 @@ build_log*.txt
 structure_log.txt
 estrutura.txt
 
+.env
+.env.local
+supabase/local_status.json
+full_lint_results.json
