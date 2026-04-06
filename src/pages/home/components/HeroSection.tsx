@@ -71,10 +71,10 @@ export const HeroSection = () => {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight">
-            Pare de perder clientes
+            Gestão profissional
           </h1>
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-tight italic mt-1">
-            por falta de organização.
+            para quem transforma beleza em negócio.
           </h1>
         </motion.div>
 

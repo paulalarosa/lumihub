@@ -28,49 +28,47 @@ export function useAssistantEarnings(assistantId?: string) {
     queryKey: ['assistant-earnings-metrics', assistantId],
     queryFn: async () => {
       if (!assistantId) return null
-      const { data: assignments, error } = await supabase
-        .from('event_assistants')
-        .select(
-          `
-          events (
-            assistant_commission,
-            start_time
-          )
-        `,
-        )
-        .eq('assistant_id', assistantId)
-
-      if (error) throw error
-
-      let thisMonth = 0
-      let lastMonth = 0
-      let totalEarned = 0
-      let eventsCompleted = 0
 
       const now = new Date()
-      const currentMonth = now.getMonth()
-      const currentYear = now.getFullYear()
+      const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+        .toISOString()
+        .split('T')[0]
+      const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+        .toISOString()
+        .split('T')[0]
+      const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
+        .toISOString()
+        .split('T')[0]
+      const today = now.toISOString().split('T')[0]
 
-      assignments?.forEach((assignment) => {
-        const e = assignment.events
-        const comm = Number(e?.assistant_commission) || 0
-        const startTime = e?.start_time ? new Date(e.start_time) : null
+      const [thisMonthRes, lastMonthRes, totalRes] = await Promise.all([
+        supabase.rpc('calculate_assistant_earnings', {
+          p_assistant_id: assistantId,
+          p_start_date: thisMonthStart,
+          p_end_date: today,
+        }),
+        supabase.rpc('calculate_assistant_earnings', {
+          p_assistant_id: assistantId,
+          p_start_date: lastMonthStart,
+          p_end_date: lastMonthEnd,
+        }),
+        supabase.rpc('calculate_assistant_earnings', {
+          p_assistant_id: assistantId,
+          p_start_date: '2020-01-01',
+          p_end_date: today,
+        }),
+      ])
 
-        totalEarned += comm
-        if (startTime) {
-          eventsCompleted += 1
-          const month = startTime.getMonth()
-          const year = startTime.getFullYear()
-          if (year === currentYear && month === currentMonth) {
-            thisMonth += comm
-          } else if (
-            (month === currentMonth - 1 && year === currentYear) ||
-            (currentMonth === 0 && month === 11 && year === currentYear - 1)
-          ) {
-            lastMonth += comm
-          }
-        }
-      })
+      type EarningsRow = { commission_amount: number; total_events: number }
+
+      const thisMonth =
+        (thisMonthRes.data as EarningsRow[] | null)?.[0]?.commission_amount ?? 0
+      const lastMonth =
+        (lastMonthRes.data as EarningsRow[] | null)?.[0]?.commission_amount ?? 0
+      const totalEarned =
+        (totalRes.data as EarningsRow[] | null)?.[0]?.commission_amount ?? 0
+      const eventsCompleted =
+        (totalRes.data as EarningsRow[] | null)?.[0]?.total_events ?? 0
 
       return {
         thisMonth,
@@ -79,10 +77,11 @@ export function useAssistantEarnings(assistantId?: string) {
         commissionRate: 15,
         eventsCompleted,
         targetThisMonth: 4000.0,
-        nextMilestone: 18000.0,
+        nextMilestone: Math.ceil(totalEarned / 5000) * 5000 + 5000,
       }
     },
     enabled: !!assistantId,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -109,13 +108,13 @@ export function useAssistantDashboard(
   const { data: earningsDataDb } = useAssistantEarnings(assistantId)
 
   const earningsData = earningsDataDb || {
-    thisMonth: 2850.0,
-    lastMonth: 2200.0,
-    totalEarned: 15250.0,
+    thisMonth: 0,
+    lastMonth: 0,
+    totalEarned: 0,
     commissionRate: 15,
-    eventsCompleted: 8,
+    eventsCompleted: 0,
     targetThisMonth: 4000.0,
-    nextMilestone: 18000.0,
+    nextMilestone: 5000,
   }
 
   const progressToTarget =
