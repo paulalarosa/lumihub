@@ -4,7 +4,7 @@ test.describe('Auth Flows', () => {
   test('landing page loads correctly', async ({ page }) => {
     await page.goto('/')
     await expect(page).toHaveTitle(/Khaos Kontrol/i)
-    await expect(page.locator('text=Gestão-profissional').first()).toBeVisible()
+    await expect(page.locator('text=Gestão profissional').first()).toBeVisible()
     await expect(
       page.getByRole('button', { name: /Começar grátis/i }).first(),
     ).toBeVisible()

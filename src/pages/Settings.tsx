@@ -1,4 +1,5 @@
 import { AutomationTabNoir } from '@/components/settings/AutomationTabNoir'
+import PushNotificationToggle from '@/components/settings/PushNotificationToggle'
 import AISettings from '@/components/settings/AISettings'
 import IntegrationsTab from '@/components/settings/IntegrationsTab'
 import PrivacySettings from '@/features/privacy/components/PrivacySettings'
@@ -118,6 +119,7 @@ export default function Settings() {
             value="perfil"
             className="space-y-6 focus-visible:outline-none"
           >
+            <PushNotificationToggle />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="col-span-1 border-border bg-card rounded-none shadow-none">
                 <CardHeader>
