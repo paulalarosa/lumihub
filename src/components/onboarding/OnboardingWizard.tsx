@@ -10,6 +10,7 @@ import { ArrowRight, CheckCircle, User, Sparkles, Heart } from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { useNavigate } from 'react-router-dom'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 const STEPS = [
   {
