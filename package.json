@@ -21,15 +21,15 @@
     "coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "type-gen": "supabase gen types typescript --local > src/integrations/supabase/types.ts",
+    "type-gen": "npx supabase gen types typescript --project-id nqufpfpqtycxxqtnkkfh > src/integrations/supabase/types.ts",
     "db:link:dev": "npx supabase link --project-ref nqufpfpqtycxxqtnkkfh",
     "db:link:prod": "npx supabase link --project-ref pymdkngcpbmcnayxieod",
     "db:push:dev": "npm run db:link:dev && npx supabase db push",
     "db:push:prod": "npm run db:link:prod && npx supabase db push",
     "functions:deploy:dev": "npm run db:link:dev && npx supabase functions deploy",
     "functions:deploy:prod": "npm run db:link:prod && npx supabase functions deploy",
-    "types:generate": "supabase gen types typescript --local > src/integrations/supabase/types.ts",
-    "types:prod": "supabase gen types typescript --project-id pymdkngcpbmcnayxieod > src/integrations/supabase/types.ts"
+    "types:generate": "npx supabase gen types typescript --project-id nqufpfpqtycxxqtnkkfh > src/integrations/supabase/types.ts",
+    "types:prod": "npx supabase gen types typescript --project-id pymdkngcpbmcnayxieod > src/integrations/supabase/types.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.29",
