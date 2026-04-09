@@ -199,8 +199,8 @@ export const OnboardingWizard = () => {
   if (!isOpen) return null
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="bg-[#0a0a0a] border border-white/10 max-w-lg text-white p-0 overflow-hidden">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleSkip()}>
+      <DialogContent className="bg-[#050505] border border-white/10 max-w-xl text-white p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)]">
         {}
         <div className="h-1 bg-white/5">
           <div
@@ -210,16 +210,19 @@ export const OnboardingWizard = () => {
         </div>
 
         <div className="p-8">
-          {}
-          <p className="text-[10px] text-white/30 uppercase tracking-[0.2em] mb-6">
-            {step + 1} de {STEPS.length}
-          </p>
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-bold">
+              {step + 1} de {STEPS.length}
+            </p>
+          </div>
 
           {}
-          <h2 className="text-2xl font-serif text-white mb-1 tracking-tight">
+          <h2 className="text-3xl font-serif text-white mb-2 tracking-tight italic">
             {currentStep.title}
           </h2>
-          <p className="text-sm text-white/40 mb-8">{currentStep.subtitle}</p>
+          <p className="text-sm text-white/45 mb-10 leading-relaxed font-sans font-light">
+            {currentStep.subtitle}
+          </p>
 
           {}
           {currentStep.id === 'welcome' && (
@@ -424,9 +427,9 @@ export const OnboardingWizard = () => {
             {currentStep.id !== 'complete' && (
               <button
                 onClick={handleSkip}
-                className="text-xs text-white/20 hover:text-white/40 transition-colors"
+                className="text-[10px] uppercase tracking-widest text-white/20 hover:text-white transition-colors py-2 px-1"
               >
-                Pular setup
+                Pular Configuração
               </button>
             )}
             <div className="flex-1" />

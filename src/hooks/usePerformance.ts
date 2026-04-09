@@ -39,6 +39,5 @@ export const usePerformance = () => {
     isMobile,
     isLowEnd,
     canUseHeavyAnimations: !shouldReduceMotion && !isLowEnd,
-    canUse3D: !isMobile && !isLowEnd && !shouldReduceMotion,
   }
 }

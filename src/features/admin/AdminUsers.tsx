@@ -10,12 +10,15 @@ import {
   LogIn,
   Shield,
   User,
+  Users,
+  AlertCircle,
   MoreHorizontal,
   Lock,
   RefreshCw,
   Search,
   ShieldOff,
   CreditCard,
+  Building2,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -44,10 +47,10 @@ import { useAdminUsers } from './hooks/useAdminUsers'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const PLAN_OPTIONS = [
-  { value: 'free', label: 'Free' },
-  { value: 'starter', label: 'Starter' },
-  { value: 'pro', label: 'Pro' },
-  { value: 'premium', label: 'Premium' },
+  { value: 'free', label: 'Gratuito' },
+  { value: 'essencial', label: 'Essencial' },
+  { value: 'profissional', label: 'Profissional' },
+  { value: 'studio', label: 'Studio' },
 ]
 
 export default function AdminUsers() {
@@ -65,16 +68,20 @@ export default function AdminUsers() {
   }>({ open: false, userId: '', userName: '', currentPlan: '' })
   const [selectedPlan, setSelectedPlan] = useState('')
 
+  const [planFilter, setPlanFilter] = useState<string>('all')
+
   const filteredUsers =
     users?.filter((u) => {
-      if (searchQuery.trim() === '') return true
-      const lowerQuery = searchQuery.toLowerCase()
-      return (
+      const lowerQuery = searchQuery.toLowerCase().trim()
+      const matchesSearch = lowerQuery === '' || 
         (u.full_name?.toLowerCase() || '').includes(lowerQuery) ||
         (u.email?.toLowerCase() || '').includes(lowerQuery) ||
-        (u.id?.toLowerCase() || '').includes(lowerQuery) ||
-        (u.plan?.toLowerCase() || '').includes(lowerQuery)
-      )
+        (u.id?.toLowerCase() || '').includes(lowerQuery)
+
+      const matchesPlan = planFilter === 'all' || 
+        (u.plan?.toLowerCase() || 'free') === planFilter.toLowerCase()
+
+      return matchesSearch && matchesPlan
     }) || []
 
   const handleImpersonate = async (targetUserId: string) => {
@@ -186,6 +193,28 @@ export default function AdminUsers() {
       })
     }
   }
+ 
+  const handleStudioTag = async (userId: string, isStudio: boolean) => {
+    try {
+      const { data, error } = await (supabase.rpc as any)('admin_set_studio_tag', {
+        p_user_id: userId,
+        p_is_studio: isStudio,
+      })
+      if (error) throw error
+      toast({
+        title: isStudio ? 'Acesso KAOS ativado' : 'Acesso KAOS removido',
+        description: `O terminal de agenda KAOS foi ${(data as any)?.is_studio ? 'habilitado' : 'desabilitado'}.`,
+      })
+      refetch()
+    } catch (error) {
+      logger.error('AdminUsers.handleStudioTag', error)
+      toast({ title: 'Erro ao alterar modo KAOS', variant: 'destructive' })
+    }
+  }
+
+  const getPlanLabel = (plan: string) => {
+    return PLAN_OPTIONS.find((p) => p.value === plan.toLowerCase())?.label || plan
+  }
 
   const isBlocked = (u: any) => u.subscription_status === 'blocked'
 
@@ -205,6 +234,9 @@ export default function AdminUsers() {
       <div className="p-8 text-center text-destructive font-mono border border-destructive/20 bg-destructive/5">
         <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
         Failed to load user database.
+        <p className="text-[10px] mt-2 text-destructive/70 max-w-sm mx-auto">
+          NOTE: If you are seeing "Unauthorized" in logs, your user ID might not have 'admin' role in the profiles table.
+        </p>
         <Button
           variant="link"
           onClick={() => refetch()}
@@ -216,17 +248,54 @@ export default function AdminUsers() {
     )
   }
 
+  if (filteredUsers.length === 0 && searchQuery === '' && planFilter === 'all') {
+    return (
+      <div className="p-12 text-center font-mono border border-zinc-800 bg-zinc-900/10">
+        <Users className="h-12 w-12 mx-auto mb-4 opacity-20" />
+        <p className="text-zinc-500 uppercase tracking-widest text-xs">User Database Empty or Access Restricted</p>
+        <div className="mt-8 p-4 border border-yellow-900/30 bg-yellow-900/5 text-yellow-500/80 text-left max-w-2xl mx-auto">
+          <p className="text-sm font-bold mb-2 flex items-center gap-2">
+            <AlertCircle className="h-4 w-4" /> RECOMENDAÇÃO:
+          </p>
+          <p className="text-xs leading-relaxed">
+            Se você sabe que existem usuários mas não os vê, isso indica que sua conta não tem o cargo (role) 'admin' na tabela 'profiles' do banco de dados oficial.
+            <br /><br />
+            Para resolver, execute este SQL no painel SQL do Supabase:
+            <code className="block bg-black p-2 mt-2 border border-white/5 text-white select-all">
+              UPDATE profiles SET role = 'admin' WHERE email = '{adminUser?.email}';
+            </code>
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="relative w-full md:w-96 group">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-white transition-colors" />
-          <Input
-            className="pl-9 bg-zinc-900/50 border-zinc-800 text-white rounded-none focus:border-white focus:ring-0 font-mono text-xs h-10 tracking-tight"
-            placeholder="SEARCH [NAME, EMAIL, ID, PLAN]..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+          <div className="relative w-full md:w-80 group">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-zinc-600 group-focus-within:text-white transition-colors" />
+            <Input
+              className="pl-9 bg-zinc-900/50 border-zinc-800 text-white rounded-none focus:border-white focus:ring-0 font-mono text-xs h-10 tracking-tight"
+              placeholder="SEARCH USER..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Select value={planFilter} onValueChange={setPlanFilter}>
+            <SelectTrigger className="w-full md:w-48 h-10 rounded-none border-zinc-800 bg-zinc-900/50 text-white font-mono text-[10px] uppercase tracking-widest focus:ring-1 focus:ring-white">
+              <SelectValue placeholder="FILTER_BY_PLAN" />
+            </SelectTrigger>
+            <SelectContent className="rounded-none border-zinc-800 bg-zinc-950 text-white">
+              <SelectItem value="all" className="font-mono text-[10px] uppercase focus:bg-white focus:text-black rounded-none">ALL_PLANS</SelectItem>
+              {PLAN_OPTIONS.map((p) => (
+                <SelectItem key={p.value} value={p.value} className="font-mono text-[10px] uppercase focus:bg-white focus:text-black rounded-none">
+                  {p.label.toUpperCase()}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
         <div className="flex items-center gap-4">
           <span className="font-mono text-[9px] text-zinc-600 uppercase tracking-[0.3em] font-bold">
@@ -311,9 +380,56 @@ export default function AdminUsers() {
                       </Badge>
                     </td>
                     <td className="py-5 px-6">
-                      <span className="font-mono text-[11px] text-zinc-400 uppercase tracking-tight">
-                        {u.plan || 'Free'}
-                      </span>
+                      <Select
+                        value={u.plan?.toLowerCase() || 'free'}
+                        onValueChange={(newPlan) => {
+                          setPlanDialog({
+                            open: false,
+                            userId: u.id,
+                            userName: u.full_name || u.email || '',
+                            currentPlan: u.plan || 'free',
+                          })
+                          setSelectedPlan(newPlan)
+                          // Trigger update directly if confirmed or just use the handle change logic
+                          // For simplicity and matching user request for "dropmenu", let's make it direct
+                          const updatePlan = async () => {
+                            try {
+                              const { data, error } = await (supabase.rpc as any)(
+                                'admin_update_user_plan',
+                                {
+                                  p_user_id: u.id,
+                                  p_new_plan: newPlan,
+                                },
+                              )
+                              if (error) throw error
+                              toast({
+                                title: 'Plano atualizado',
+                                description: `${data?.user_name || u.email}: ${getPlanLabel(data?.old_plan || 'free')} → ${getPlanLabel(data?.new_plan || newPlan)}`,
+                              })
+                              refetch()
+                            } catch (error) {
+                              logger.error('AdminUsers.directUpdate', error)
+                              toast({ title: 'Erro ao atualizar plano', variant: 'destructive' })
+                            }
+                          }
+                          updatePlan()
+                        }}
+                      >
+                        <SelectTrigger className="h-8 rounded-none border-zinc-800 bg-zinc-900/50 text-[11px] font-mono uppercase tracking-tight w-[140px] focus:ring-1 focus:ring-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-none border-zinc-800 bg-zinc-950 text-white">
+                          {PLAN_OPTIONS.map((p) => (
+                            <SelectItem
+                              key={p.value}
+                              value={p.value}
+                              className="font-mono text-[10px] uppercase focus:bg-white focus:text-black rounded-none py-1.5"
+                            >
+                              {p.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </td>
                     <td className="py-5 px-6">
                       <Badge
@@ -388,6 +504,13 @@ export default function AdminUsers() {
                             <Lock className="mr-2 h-3 w-3" />
                             RESET_ACCESS
                           </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-zinc-400 focus:bg-white focus:text-black py-2"
+                            onClick={() => handleStudioTag(u.id, u.subscription_tier !== 'studio')}
+                          >
+                            <Building2 className="mr-2 h-3 w-3" />
+                            {u.subscription_tier === 'studio' ? 'REMOVE_KAOS_MODE' : 'GIVE_KAOS_MODE'}
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-zinc-900" />
                           {isBlocked(u) ? (
                             <DropdownMenuItem
@@ -418,7 +541,6 @@ export default function AdminUsers() {
         </CardContent>
       </Card>
 
-      {}
       <Dialog
         open={planDialog.open}
         onOpenChange={(open) => setPlanDialog((prev) => ({ ...prev, open }))}
@@ -443,7 +565,7 @@ export default function AdminUsers() {
                 CURRENT_TIER
               </p>
               <p className="text-xs font-mono text-yellow-500 uppercase font-bold tracking-tight">
-                {planDialog.currentPlan}
+                {getPlanLabel(planDialog.currentPlan)}
               </p>
             </div>
             <div className="space-y-2">

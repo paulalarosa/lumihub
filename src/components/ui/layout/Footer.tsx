@@ -1,3 +1,4 @@
+import { useLanguage } from '@/hooks/useLanguage'
 import { Link } from 'react-router-dom'
 import {
   Instagram,
@@ -8,55 +9,57 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-const footerLinks = [
-  {
-    title: 'Plataforma',
-    links: [
-      { label: 'Recursos', href: '/recursos' },
-      { label: 'Planos', href: '/planos' },
-      { label: 'Blog', href: '/blog' },
-      { label: 'Contato', href: '/contato' },
-    ],
-  },
-  {
-    title: 'Ferramentas',
-    links: [
-      { label: 'Agenda Inteligente', href: '/recursos' },
-      { label: 'Gestão de Clientes', href: '/recursos' },
-      { label: 'Contratos Digitais', href: '/recursos' },
-      { label: 'Dashboard', href: '/recursos' },
-    ],
-  },
-  {
-    title: 'Suporte',
-    links: [
-      { label: 'Central de Ajuda', href: '/contato' },
-      {
-        label: 'WhatsApp',
-        href: 'https://wa.me/5521983604870',
-        external: true,
-      },
-      {
-        label: 'E-mail',
-        href: 'mailto:khaoskontrol07@gmail.com',
-        external: true,
-      },
-    ],
-  },
-]
-
-const socials = [
-  { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-  { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
-  {
-    icon: MessageCircle,
-    href: 'https://wa.me/5521983604870',
-    label: 'WhatsApp',
-  },
-  { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com', label: 'E-mail' },
-]
-
 export default function Footer() {
+  const { t } = useLanguage()
+
+  const footerLinks = [
+    {
+      title: t('SIDEBAR_MENU_MAIN'),
+      links: [
+        { label: t('header_features'), href: '/recursos' },
+        { label: t('header_plans'), href: '/planos' },
+        { label: t('header_blog'), href: '/blog' },
+        { label: t('header_contact'), href: '/contato' },
+      ],
+    },
+    {
+      title: t('header_features'),
+      links: [
+        { label: t('home.hero.features.google'), href: '/recursos' },
+        { label: t('SIDEBAR_CLIENTS'), href: '/recursos' },
+        { label: t('home.hero.features.contracts'), href: '/recursos' },
+        { label: t('SIDEBAR_DASHBOARD'), href: '/recursos' },
+      ],
+    },
+    {
+      title: t('admin.config'),
+      links: [
+        { label: t('admin.logs'), href: '/contato' },
+        {
+          label: 'WhatsApp',
+          href: 'https://wa.me/5521983604870',
+          external: true,
+        },
+        {
+          label: 'E-mail',
+          href: 'mailto:khaoskontrol07@gmail.com',
+          external: true,
+        },
+      ],
+    },
+  ]
+
+  const socials = [
+    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
+    { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
+    {
+      icon: MessageCircle,
+      href: 'https://wa.me/5521983604870',
+      label: 'WhatsApp',
+    },
+    { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com', label: 'E-mail' },
+  ]
+
   return (
     <footer className="relative border-t border-border/30 bg-background text-foreground">
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[50%] h-[200px] bg-foreground/[0.015] blur-[120px] rounded-full pointer-events-none" />
@@ -66,11 +69,10 @@ export default function Footer() {
         <div className="py-24 flex flex-col md:flex-row items-start md:items-center justify-between gap-10 border-b border-border/20">
           <div className="space-y-4 max-w-lg text-left">
             <h3 className="font-serif text-3xl md:text-5xl text-foreground tracking-tight leading-[1.1] text-left">
-              Pronto para <span className="italic">começar</span>?
+              {t('footer.start_title')}
             </h3>
             <p className="text-sm text-muted-foreground leading-relaxed text-left">
-              Junte-se a profissionais que já transformaram suas operações com o
-              KONTROL.
+              {t('footer.start_subtitle')}
             </p>
           </div>
           <Link
@@ -78,7 +80,7 @@ export default function Footer() {
             className="inline-flex items-center gap-2.5 px-7 py-3.5 bg-foreground text-background rounded-full text-sm font-medium hover:bg-foreground/90 transition-all group uppercase tracking-wide"
           >
             <Sparkles className="w-4 h-4" />
-            Ver Planos
+            {t('footer.cta_plans')}
             <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
           </Link>
         </div>
@@ -98,8 +100,7 @@ export default function Footer() {
               </span>
             </Link>
             <p className="text-xs text-muted-foreground leading-relaxed max-w-[240px]">
-              Gestão de alta performance para profissionais que buscam o
-              extraordinário.
+              {t('footer.desc')}
             </p>
             <div className="flex items-center gap-2.5">
               {socials.map((social) => (
@@ -156,11 +157,10 @@ export default function Footer() {
         {}
         <div className="py-6 border-t border-border/20 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-muted-foreground/50">
-            © {new Date().getFullYear()} Khaos Kontrol · Todos os direitos
-            reservados
+            {t('footer.copyright', { year: new Date().getFullYear() })}
           </p>
           <p className="text-xs text-muted-foreground/30 uppercase tracking-[0.2em]">
-            Operações Globais
+            {t('footer.global_ops')}
           </p>
         </div>
       </div>

@@ -294,5 +294,163 @@
     "cta_bottom_subtitle": "ELEVANDO O PADRÃO",
     "cta_bottom_start": "INICIAR TESTE GRÁTIS",
     "cta_bottom_plans": "VER PLANOS",
-    "cta_secure": "AMBIENTE SEGURO"
+    "cta_secure": "AMBIENTE SEGURO",
+    "home": {
+        "hero": {
+            "eyebrow": "Usado por {{count}} profissionais de beleza",
+            "title_1": "Gestão profissional",
+            "title_2": "para quem transforma beleza em negócio.",
+            "subtitle": "O Khaos Kontrol organiza seus clientes, contratos, agenda e financeiro em um só lugar — para você focar no que faz de melhor.",
+            "features": {
+                "google": "Agenda integrada com Google",
+                "contracts": "Contratos com assinatura digital",
+                "portal": "Portal exclusivo para noivas"
+            },
+            "cta_start": "Começar grátis por 14 dias",
+            "cta_how_it_works": "Ver como funciona"
+        },
+        "stats": {
+            "clients": "CLIENTES ATIVOS",
+            "contracts": "CONTRATOS GERADOS",
+            "uptime": "UPTIME SISTEMA",
+            "projects": "PROJETOS GERIDOS"
+        },
+        "process": {
+            "title": "Processos simples para impérios reais",
+            "subtitle": "Automatizamos o que é mecânico para que você foque no que é artístico.",
+            "save_time": {
+                "title": "Economize 15h+ semanais",
+                "desc": "Elimine tarefas repetitivas com nossa IA operativa e automações inteligentes de contrato."
+            },
+            "features": {
+                "analytics": {
+                    "title": "Analytics Noir",
+                    "desc": "Dashboard em alto contraste com métricas vitais da sua carreira em tempo real."
+                },
+                "legal": {
+                    "title": "Legal Kontrol",
+                    "desc": "Gerador de contratos com validade jurídica e assinatura digital integrada."
+                },
+                "sales": {
+                    "title": "Vendas Pro",
+                    "desc": "CRM minimalista focado em converter leads em faturamento recorrente."
+                }
+            }
+        },
+        "cta_section": {
+            "eyebrow": "A cada semana sem sistema",
+            "title": "Você perde clientes que nunca mais voltam.",
+            "subtitle": "Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca esquecem um follow-up, e têm clientes que indicam.",
+            "cta": "Começar grátis por 14 dias",
+            "disclaimer": "Sem cartão de crédito. Cancele quando quiser."
+        }
+    },
+    "plans": {
+        "seo_title": "Planos e Preços | Khaos Kontrol",
+        "seo_description": "Escolha o plano ideal para organizar sua carreira de maquiagem. A partir de R$31,92/mês. 14 dias grátis.",
+        "eyebrow": "Quanto custa continuar desorganizada?",
+        "title": "Sua arte merece uma gestão à altura da sua excelência",
+        "subtitle": "Cada cliente esquecido, cada contrato perdido, cada follow-up não enviado custa mais do que qualquer plano abaixo.",
+        "monthly": "Mensal",
+        "annual": "Anual",
+        "most_chosen": "Mais escolhido",
+        "start_free": "Começar grátis",
+        "save": "Você economiza R${{savings}} por ano",
+        "social_proof": "+200 profissionais já escolheram o KONTROL para gerir suas carreiras.",
+        "footer": {
+            "trial": "14 dias grátis",
+            "trial_desc": "Teste todas as ferramentas sem compromisso.",
+            "cancel": "Cancele a qualquer momento",
+            "cancel_desc": "Sem taxas de rescisão ou letras miúdas.",
+            "support": "Suporte Premium",
+            "support_desc": "Atendimento humano e especializado."
+        }
+    },
+    "resources": {
+        "seo_title": "Recursos | Tudo que o Khaos Kontrol Oferece",
+        "seo_description": "Agenda inteligente, contratos digitais, portal da noiva e muito mais.",
+        "header": {
+            "eyebrow": "CAPACIDADES DO SISTEMA",
+            "title": "PROJETADO PARA ALTA PERFORMANCE",
+            "subtitle": "Desbloqueie seu potencial digital com o KHAOS KONTROL. Oferecemos soluções completas em gestão, agendamento, contratos e analytics para elevar sua presença profissional."
+        },
+        "about": {
+            "eyebrow": "Sobre",
+            "title": "Sobre a plataforma",
+            "desc": "O KHAOS KONTROL é uma plataforma de gestão de alta performance dedicada a transformar suas operações digitais em realidade."
+        },
+        "cta": {
+            "choose_plan": "Escolher Plano",
+            "contact": "Fale Conosco"
+        },
+        "services": {
+            "calendar": {
+                "title": "Agenda Inteligente",
+                "desc": "Gerencie seus agendamentos com visão completa de calendário. Sincronize com Google Calendar e receba lembretes automáticos."
+            },
+            "clients": {
+                "title": "Gestão de Clientes",
+                "desc": "CRM completo para profissionais de beleza. Histórico, anamnese, preferências e portal exclusivo para cada cliente."
+            },
+            "contracts": {
+                "title": "Contratos Digitais",
+                "desc": "Crie, envie e colete assinaturas digitais dos seus contratos. Tudo automatizado e juridicamente válido."
+            },
+            "finance": {
+                "title": "Dashboard Financeiro",
+                "desc": "Acompanhe receitas, despesas, comissões e projeções. Relatórios detalhados para tomar decisões inteligentes."
+            },
+            "moodboard": {
+                "title": "Moodboard & Briefing",
+                "desc": "Colete referências visuais e informações detalhadas de cada projeto. Compartilhe com o cliente pelo portal."
+            },
+            "portal": {
+                "title": "Portal do Cliente",
+                "desc": "Área exclusiva para suas clientes acompanharem contratos, agenda e briefings. Experiência premium e profissional."
+            }
+        },
+        "stats": {
+            "projects": "Projetos Realizados",
+            "partners": "Parceiros Globais",
+            "offices": "Escritórios"
+        }
+    },
+    "blog": {
+        "seo_title": "Blog | Dicas para Maquiadoras Profissionais",
+        "editorial": "DEPARTAMENTO EDITORIAL",
+        "subtitle": "Insights, tendências e guias para profissionais de beleza que buscam excelência.",
+        "read_more": "Ler mais",
+        "featured": "Featured"
+    },
+    "contact": {
+        "seo_title": "Contato | Khaos Kontrol",
+        "title_1": "Fale",
+        "title_2": "Conosco",
+        "subtitle": "Conecte-se com nossa equipe. Suporte premium, parcerias e consultoria personalizada.",
+        "form": {
+            "title": "Envie uma mensagem",
+            "response_time": "Resposta em até 24 horas",
+            "name": "Nome Completo",
+            "email": "E-mail",
+            "subject": "Assunto",
+            "message": "Mensagem",
+            "placeholder_message": "Conte-nos como podemos ajudar...",
+            "submit": "Enviar Mensagem",
+            "sending": "Enviando...",
+            "success": "Mensagem preparada",
+            "success_desc": "Abrindo cliente de e-mail...",
+            "error_fields": "Campos obrigatórios",
+            "error_fields_desc": "Por favor preencha todos os campos.",
+            "support_whatsapp": "Atendimento rápido e direto",
+            "support_email": "Enviar mensagem para suporte"
+        }
+    },
+    "footer": {
+        "start_title": "Pronto para começar?",
+        "start_subtitle": "Junte-se a profissionais que já transformaram suas operações com o KONTROL.",
+        "cta_plans": "Ver Planos",
+        "desc": "Gestão de alta performance para profissionais que buscam o extraordinário.",
+        "copyright": "© {{year}} Khaos Kontrol · Todos os direitos reservados",
+        "global_ops": "Operações Globais"
+    }
 }

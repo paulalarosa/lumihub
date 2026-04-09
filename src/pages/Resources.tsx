@@ -14,63 +14,61 @@ import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
 import { AnimatedCounter } from '@/components/ui/animated-counter'
 import { SectionHeader } from '@/components/ui/SectionHeader'
+import { useLanguage } from '@/hooks/useLanguage'
 
-const services = [
+const services = (t: any) => [
   {
     icon: Calendar,
-    title: 'Agenda Inteligente',
-    description:
-      'Gerencie seus agendamentos com visão completa de calendário. Sincronize com Google Calendar e receba lembretes automáticos.',
+    title: t('resources.services.calendar.title'),
+    description: t('resources.services.calendar.desc'),
   },
   {
     icon: Users,
-    title: 'Gestão de Clientes',
-    description:
-      'CRM completo para profissionais de beleza. Histórico, anamnese, preferências e portal exclusivo para cada cliente.',
+    title: t('resources.services.clients.title'),
+    description: t('resources.services.clients.desc'),
   },
   {
     icon: FileText,
-    title: 'Contratos Digitais',
-    description:
-      'Crie, envie e colete assinaturas digitais dos seus contratos. Tudo automatizado e juridicamente válido.',
+    title: t('resources.services.contracts.title'),
+    description: t('resources.services.contracts.desc'),
   },
   {
     icon: BarChart3,
-    title: 'Dashboard Financeiro',
-    description:
-      'Acompanhe receitas, despesas, comissões e projeções. Relatórios detalhados para tomar decisões inteligentes.',
+    title: t('resources.services.finance.title'),
+    description: t('resources.services.finance.desc'),
   },
   {
     icon: Palette,
-    title: 'Moodboard & Briefing',
-    description:
-      'Colete referências visuais e informações detalhadas de cada projeto. Compartilhe com o cliente pelo portal.',
+    title: t('resources.services.moodboard.title'),
+    description: t('resources.services.moodboard.desc'),
   },
   {
     icon: Shield,
-    title: 'Portal do Cliente',
-    description:
-      'Área exclusiva para suas clientes acompanharem contratos, agenda e briefings. Experiência premium e profissional.',
+    title: t('resources.services.portal.title'),
+    description: t('resources.services.portal.desc'),
   },
 ]
 
-const stats = [
-  { value: 100, suffix: '+', label: 'Projetos Realizados' },
-  { value: 32, suffix: '', label: 'Parceiros Globais' },
-  { value: 3, suffix: '', label: 'Escritórios' },
+const statsData = (t: any) => [
+  { value: 100, suffix: '+', label: t('resources.stats.projects') },
+  { value: 32, suffix: '', label: t('resources.stats.partners') },
+  { value: 3, suffix: '', label: t('resources.stats.offices') },
 ]
 
 export default function Resources() {
+  const { t } = useLanguage()
+  const resourceServices = services(t)
+  const resourceStats = statsData(t)
   return (
     <>
       <SEOHead
-        title="Recursos | Tudo que o Khaos Kontrol Oferece"
-        description="Agenda inteligente, contratos digitais, portal da noiva, gestão financeira, equipe de assistentes e muito mais. Conheça todos os recursos."
+        title={t('resources.seo_title')}
+        description={t('resources.seo_description')}
         keywords="recursos sistema maquiadora, funcionalidades CRM beauty, agenda maquiadora, contrato digital"
         url="https://khaoskontrol.com.br/recursos"
         breadcrumbs={[
-          { name: 'Início', url: 'https://khaoskontrol.com.br/' },
-          { name: 'Recursos', url: 'https://khaoskontrol.com.br/recursos' },
+          { name: t('SIDEBAR_MENU_MAIN'), url: 'https://khaoskontrol.com.br/' },
+          { name: t('header_features'), url: 'https://khaoskontrol.com.br/recursos' },
         ]}
       />
       <div className="min-h-screen bg-black text-white relative overflow-hidden">
@@ -92,9 +90,9 @@ export default function Resources() {
           <div className="container mx-auto px-6 lg:px-10 relative z-10 text-center">
             <div className="max-w-4xl mx-auto space-y-8">
               <SectionHeader
-                eyebrow="CAPACIDADES DO SISTEMA"
-                title="PROJETADO PARA ALTA PERFORMANCE"
-                subtitle="Desbloqueie seu potencial digital com o KHAOS KONTROL. Oferecemos soluções completas em gestão, agendamento, contratos e analytics para elevar sua presença profissional."
+                eyebrow={t('resources.header.eyebrow')}
+                title={t('resources.header.title')}
+                subtitle={t('resources.header.subtitle')}
                 centered={false}
               />
 
@@ -106,7 +104,7 @@ export default function Resources() {
               >
                 <Link to="/planos">
                   <Button className="h-11 px-7 rounded-full text-sm font-medium group">
-                    Escolher Plano
+                    {t('resources.cta.choose_plan')}
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
@@ -115,7 +113,7 @@ export default function Resources() {
                     variant="outline"
                     className="h-11 px-7 rounded-full border-white/10 text-white hover:bg-white/5 text-sm font-medium"
                   >
-                    Fale Conosco
+                    {t('resources.cta.contact')}
                   </Button>
                 </Link>
               </motion.div>
@@ -129,7 +127,7 @@ export default function Resources() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-col md:flex-row gap-12 md:gap-16 mt-24 justify-center"
             >
-              {stats.map((stat, i) => (
+              {resourceStats.map((stat, i) => (
                 <div
                   key={i}
                   className="text-center md:text-left flex flex-col items-center md:items-start"
@@ -158,25 +156,13 @@ export default function Resources() {
           <div className="container mx-auto px-6 lg:px-10 text-center relative z-10">
             <div className="max-w-3xl mx-auto space-y-6">
               <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                Sobre
+                {t('resources.about.eyebrow')}
               </span>
               <h2 className="font-serif text-4xl md:text-6xl text-white tracking-tight leading-[1.05]">
-                Sobre a <span className="italic font-serif">plataforma</span>
+                {t('resources.about.title').split('plataforma')[0]}<span className="italic font-serif">plataforma</span>
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                O KHAOS KONTROL é uma plataforma de gestão de alta performance
-                dedicada a transformar suas operações digitais em realidade. Com
-                foco em criatividade e inovação, nos especializamos em criar
-                soluções que captam audiências e geram resultados tangíveis em
-                um mercado extremamente competitivo.
-                <br />
-                <br />
-                Nosso ecossistema foi desenhado meticulosamente para
-                profissionais da beleza que não abrem mão de uma estética
-                luxuosa e uma performance implacável. Desde o momento do
-                agendamento à gestão analítica de lucros, nossa interface fluida
-                e intuitiva garante que você permaneça focado exclusivamente na
-                sua arte.
+                {t('resources.about.desc')}
               </p>
             </div>
           </div>
@@ -188,14 +174,13 @@ export default function Resources() {
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-16 gap-8 text-left">
               <div className="space-y-4">
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                  Recursos
+                  {t('header_features')}
                 </span>
                 <h2 className="font-serif text-4xl md:text-6xl text-white tracking-tight leading-[1.05]">
-                  Nossos <span className="italic font-serif">Recursos</span>
+                  {t('header_features').split(' ')[0]} <span className="italic font-serif">{t('header_features').split(' ')[1] || 'Recursos'}</span>
                 </h2>
                 <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                  Explore nosso arsenal de ferramentas, projetadas para elevar
-                  sua presença digital e impulsionar resultados.
+                  {t('blog.subtitle')}
                 </p>
               </div>
               <Link to="/contato">
@@ -203,14 +188,14 @@ export default function Resources() {
                   variant="outline"
                   className="h-11 px-7 rounded-full border-white/10 text-white hover:bg-white hover:text-black text-sm font-medium group transition-all"
                 >
-                  Fale Conosco
+                  {t('resources.cta.contact')}
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {services.map((service, index) => (
+              {resourceServices.map((service, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, y: 30 }}
@@ -248,21 +233,20 @@ export default function Resources() {
               className="max-w-3xl mx-auto space-y-8"
             >
               <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                Oferta Especial
+                {t('blog.category', { category: 'Oferta Especial' }) || 'Oferta Especial'}
               </span>
               <h2 className="font-serif text-4xl md:text-6xl lg:text-7xl text-white tracking-tight leading-[1.05]">
-                Oferta Especial
+                {t('plans.social_proof').split(' ')[0]}
                 <br />
-                <span className="italic font-serif">para Novos Clientes</span>
+                <span className="italic font-serif">{t('plans.social_proof').split(' ').slice(1).join(' ')}</span>
               </h2>
               <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                Estamos oferecendo condições especiais para novos profissionais.
-                Eleve seu negócio com nossas soluções personalizadas.
+                {t('cta_bottom_subtitle')}
               </p>
               <div className="flex items-center justify-center gap-4 pt-4">
                 <Link to="/planos">
                   <Button className="h-12 px-8 rounded-full text-sm font-medium group">
-                    Começar
+                    {t('cta_bottom_start')}
                     <Sparkles className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>

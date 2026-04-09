@@ -78,7 +78,7 @@ export default function AssistantFreeDashboard() {
             `
             event_id,
             event:events(
-              id, title, event_date, start_time, end_time, location, event_type,
+              id, title, event_date, start_time, end_time, location, event_type, user_id,
               client:wedding_clients(name)
             )
           `,

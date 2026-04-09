@@ -125,17 +125,45 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang)
   }
 
-  const t = (key: string): string => {
+  const t = (key: string, options?: Record<string, string | number>): string => {
     const lang = (i18n.language as Language) || 'pt'
+    
+    // 1. Try i18next first (JSON files)
+    const i18nResult = i18nextT(key, options) as string
+    if (i18nResult && i18nResult !== key) {
+      return i18nResult
+    }
 
-    const externalValue =
-      externalTranslations[lang]?.[key as keyof typeof externalTranslations.pt]
-    if (externalValue) return externalValue
+    // 2. Try externalTranslations (translations.ts) as fallback
+    const source = externalTranslations[lang]
+    let externalValue: any = source
+    const keys = key.split('.')
+    
+    for (const k of keys) {
+      if (externalValue && typeof externalValue === 'object' && k in externalValue) {
+        externalValue = externalValue[k]
+      } else {
+        externalValue = undefined
+        break
+      }
+    }
+    
+    if (externalValue && typeof externalValue === 'string') {
+      if (options) {
+        let result = externalValue
+        Object.keys(options).forEach(optKey => {
+          result = result.replace(`{{${optKey}}}`, String(options[optKey]))
+        })
+        return result
+      }
+      return externalValue
+    }
 
+    // 3. Try inlineTranslations
     const inlineValue = inlineTranslations[lang]?.[key]
     if (inlineValue) return inlineValue
 
-    return i18nextT(key) || key
+    return i18nResult || key
   }
 
   return (

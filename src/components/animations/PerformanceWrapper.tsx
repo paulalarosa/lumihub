@@ -4,19 +4,13 @@ import { usePerformance } from '@/hooks/usePerformance'
 interface PerformanceWrapperProps {
   children: ReactNode
   fallback?: ReactNode
-  require3D?: boolean
 }
 
 export const PerformanceWrapper = ({
   children,
   fallback,
-  require3D = false,
 }: PerformanceWrapperProps) => {
-  const { canUse3D, canUseHeavyAnimations } = usePerformance()
-
-  if (require3D && !canUse3D) {
-    return <>{fallback || null}</>
-  }
+  const { canUseHeavyAnimations } = usePerformance()
 
   if (!canUseHeavyAnimations) {
     return <>{fallback || null}</>

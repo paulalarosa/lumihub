@@ -13,8 +13,10 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export default function Contact() {
+  const { t } = useLanguage()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -37,8 +39,8 @@ export default function Contact() {
 
     if (!formData.name || !formData.email || !formData.message) {
       toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor preencha todos os campos.',
+        title: t('contact.form.error_fields'),
+        description: t('contact.form.error_fields_desc'),
         variant: 'destructive',
       })
       setLoading(false)
@@ -47,8 +49,8 @@ export default function Contact() {
 
     setTimeout(() => {
       toast({
-        title: 'Mensagem preparada',
-        description: 'Abrindo cliente de e-mail...',
+        title: t('contact.form.success'),
+        description: t('contact.form.success_desc'),
       })
       const subject = encodeURIComponent(
         `[KONTROL CONTATO] ${formData.subject || 'Nova Mensagem'}`,
@@ -65,8 +67,8 @@ export default function Contact() {
   return (
     <>
       <SEOHead
-        title="Contato"
-        description="Entre em contato com a equipe Khaos Kontrol. Suporte para maquiadoras profissionais."
+        title={t('contact.seo_title')}
+        description={t('contact.subtitle')}
         url="https://khaoskontrol.com.br/contato"
         businessName="Khaos Kontrol"
         priceRange="$$"
@@ -96,22 +98,21 @@ export default function Contact() {
               {}
               <div className="flex flex-col justify-center space-y-6 lg:sticky lg:top-40 text-left">
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                  Contato
+                  {t('header_contact')}
                 </span>
                 <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[1.05] tracking-tight">
-                  Fale
+                  {t('contact.title_1')}
                   <br />
-                  <span className="italic font-serif">Conosco</span>
+                  <span className="italic font-serif">{t('contact.title_2')}</span>
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                  Conecte-se com nossa equipe. Suporte premium, parcerias e
-                  consultoria personalizada.
+                  {t('contact.subtitle')}
                 </p>
                 <Link
                   to="/planos"
                   className="inline-flex items-center gap-2.5 px-6 py-3 border border-white/10 bg-white/[0.03] rounded-full text-sm text-white transition-all group w-fit hover:bg-white/[0.06] hover:border-white/20"
                 >
-                  Ver Planos
+                  {t('footer.cta_plans')}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -122,10 +123,10 @@ export default function Contact() {
 
                 <div className="space-y-3 relative z-10 mb-8">
                   <h2 className="font-serif text-3xl md:text-4xl text-white">
-                    Envie uma mensagem
+                    {t('contact.form.title')}
                   </h2>
                   <p className="text-xs text-muted-foreground tracking-wide">
-                    Resposta em até 24 horas
+                    {t('contact.form.response_time')}
                   </p>
                 </div>
 
@@ -135,7 +136,7 @@ export default function Contact() {
                 >
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-muted-foreground ml-3">
-                      Nome Completo
+                      {t('contact.form.name')}
                     </label>
                     <Input
                       name="name"
@@ -149,7 +150,7 @@ export default function Contact() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground ml-3">
-                        E-mail
+                        {t('contact.form.email')}
                       </label>
                       <Input
                         name="email"
@@ -162,7 +163,7 @@ export default function Contact() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground ml-3">
-                        Assunto
+                        {t('contact.form.subject')}
                       </label>
                       <Input
                         name="subject"
@@ -176,13 +177,13 @@ export default function Contact() {
 
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-muted-foreground ml-3">
-                      Mensagem
+                      {t('contact.form.message')}
                     </label>
                     <Textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Conte-nos como podemos ajudar..."
+                      placeholder={t('contact.form.placeholder_message')}
                       className="min-h-[140px] bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 resize-none text-sm"
                     />
                   </div>
@@ -194,10 +195,10 @@ export default function Contact() {
                       className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-full text-sm font-medium"
                     >
                       {loading ? (
-                        <span>Enviando...</span>
+                        <span>{t('contact.form.sending')}</span>
                       ) : (
                         <span className="flex items-center gap-2">
-                          Enviar Mensagem <Send className="w-4 h-4" />
+                          {t('contact.form.submit')} <Send className="w-4 h-4" />
                         </span>
                       )}
                     </Button>
@@ -225,7 +226,7 @@ export default function Contact() {
                         WhatsApp
                       </h4>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Atendimento rápido e direto
+                        {t('contact.form.support_whatsapp')}
                       </p>
                     </div>
                     <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />
@@ -242,9 +243,9 @@ export default function Contact() {
                       <Mail className="w-8 h-8" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-white">E-mail</h4>
+                      <h4 className="text-sm font-medium text-white">{t('contact.form.email')}</h4>
                       <p className="text-sm text-muted-foreground mt-1">
-                        Enviar mensagem para suporte
+                        {t('contact.form.support_email')}
                       </p>
                     </div>
                     <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />

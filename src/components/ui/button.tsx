@@ -11,9 +11,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'bg-white text-black font-bold hover:bg-white/90 shadow-lg shadow-black/20 rounded-full',
+          'bg-white text-black font-bold hover:bg-white/90 shadow-lg shadow-black/20 rounded-full overflow-hidden relative',
         secondary:
-          'bg-white/5 text-white hover:bg-white/10 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg shadow-black/10 rounded-full',
+          'bg-white/5 text-white hover:bg-white/10 backdrop-blur-xl border border-white/10 hover:border-white/20 shadow-lg shadow-black/10 rounded-full hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]',
         glass:
           'bg-white/10 text-white hover:bg-white/15 backdrop-blur-2xl border border-white/20 hover:border-white/30 shadow-2xl shadow-black/20 rounded-full',
         ghost:
@@ -86,7 +86,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
             initial={{ x: '-100%' }}
             whileHover={{ x: '100%' }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 1, ease: 'easeInOut' }}
           />
         )}
         <span className="relative z-10 flex items-center gap-2">

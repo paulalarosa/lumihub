@@ -4,8 +4,10 @@ import { useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export const HeroSection = () => {
+  const { t } = useLanguage()
   const navigate = useNavigate()
   const { trackCTAClick } = useAnalytics()
   const heroRef = useRef(null)
@@ -58,8 +60,7 @@ export const HeroSection = () => {
             ))}
           </div>
           <span className="text-white/60 text-xs">
-            Usado por <span className="text-white">+200 profissionais</span> de
-            beleza
+            {t('home.hero.eyebrow', { count: 200 })}
           </span>
         </motion.div>
 
@@ -71,10 +72,10 @@ export const HeroSection = () => {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight">
-            Gestão profissional
+            {t('home.hero.title_1')}
           </h1>
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-tight italic mt-1">
-            para quem transforma beleza em negócio.
+            {t('home.hero.title_2')}
           </h1>
         </motion.div>
 
@@ -85,8 +86,7 @@ export const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
         >
-          O Khaos Kontrol organiza seus clientes, contratos, agenda e financeiro
-          em um só lugar — para você focar no que faz de melhor.
+          {t('home.hero.subtitle')}
         </motion.p>
 
         {}
@@ -98,15 +98,15 @@ export const HeroSection = () => {
         >
           <span className="flex items-center gap-2">
             <div className="w-1 h-1 bg-white/60" />
-            Agenda integrada com Google
+            {t('home.hero.features.google')}
           </span>
           <span className="flex items-center gap-2">
             <div className="w-1 h-1 bg-white/60" />
-            Contratos com assinatura digital
+            {t('home.hero.features.contracts')}
           </span>
           <span className="flex items-center gap-2">
             <div className="w-1 h-1 bg-white/60" />
-            Portal exclusivo para noivas
+            {t('home.hero.features.portal')}
           </span>
         </motion.div>
 
@@ -126,7 +126,7 @@ export const HeroSection = () => {
               navigate('/cadastro')
             }}
           >
-            Começar grátis por 14 dias
+            {t('home.hero.cta_start')}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </Button>
 
@@ -144,7 +144,7 @@ export const HeroSection = () => {
             }}
           >
             <Play className="w-4 h-4 mr-1" />
-            Ver como funciona
+            {t('home.hero.cta_how_it_works')}
           </Button>
         </motion.div>
       </motion.div>

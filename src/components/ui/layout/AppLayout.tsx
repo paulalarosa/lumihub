@@ -11,6 +11,13 @@ import { PageTransition } from '../animation/PageTransition'
 import { NotificationBell } from './NotificationBell'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { useSessionSecurity } from '@/hooks/useSessionSecurity'
+import { lazy, Suspense } from 'react'
+
+const OnboardingWizard = lazy(() =>
+  import('@/components/onboarding/OnboardingWizard').then((m) => ({
+    default: m.OnboardingWizard,
+  })),
+)
 
 export default function AppLayout() {
   useSessionSecurity()
@@ -56,6 +63,9 @@ export default function AppLayout() {
 
       {}
       <BottomNav />
+      <Suspense fallback={null}>
+        <OnboardingWizard />
+      </Suspense>
     </SidebarProvider>
   )
 }

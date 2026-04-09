@@ -6,12 +6,15 @@ import { ProcessSection } from '@/pages/home/components/ProcessSection'
 import { CTASection } from '@/pages/home/components/CTASection'
 import SEOHead from '@/components/seo/SEOHead'
 
+import { useLanguage } from '@/hooks/useLanguage'
+
 export default function HomePage() {
+  const { t } = useLanguage()
   return (
     <div className="min-h-screen bg-black overflow-hidden font-inter selection:bg-white/20 selection:text-white">
       <SEOHead
-        title="Sistema de Gestão para Maquiadoras Profissionais"
-        description="Organize clientes, contratos, agenda e financeiro em um só lugar. Portal exclusivo para noivas, assinatura digital e follow-up automático. Teste grátis por 14 dias."
+        title={t('home.hero.title_1') + ' ' + t('home.hero.title_2')}
+        description={t('home.hero.subtitle')}
         keywords="sistema gestão maquiadora, CRM maquiadora, agenda maquiadora profissional, contrato digital maquiagem, portal noiva, gestão beauty, software maquiadora"
         url="https://khaoskontrol.com.br/"
         faq={[

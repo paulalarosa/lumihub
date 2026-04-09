@@ -19,26 +19,26 @@ export default function Plans() {
     {
       id: 'essencial',
       name: 'Essencial',
-      tagline: 'Para quem está começando a profissionalizar',
+      tagline: 'Para quem est├í come├ºando a profissionalizar',
       monthlyPrice: 39.9,
       annualPrice: 31.92,
-      valueAnchor: 'Menos que um almoço por semana',
+      valueAnchor: 'Menos que um almo├ºo por semana',
       features: [
-        { text: 'Até 10 clientes ativos', highlight: false },
+        { text: 'At├® 10 clientes ativos', highlight: false },
         { text: 'Agenda integrada com Google Calendar', highlight: false },
         { text: 'Contratos digitais com assinatura', highlight: true },
         { text: 'Portal exclusivo para cada noiva', highlight: true },
-        { text: 'Relatório financeiro básico', highlight: false },
+        { text: 'Relat├│rio financeiro b├ísico', highlight: false },
       ],
-      idealFor: 'Ideal se você atende até 10 noivas por mês',
+      idealFor: 'Ideal se voc├¬ atende at├® 10 noivas por m├¬s',
     },
     {
       id: 'profissional',
       name: 'Profissional',
-      tagline: 'Para quem já vive de maquiagem e quer escalar',
+      tagline: 'Para quem j├í vive de maquiagem e quer escalar',
       monthlyPrice: 89.9,
       annualPrice: 71.92,
-      valueAnchor: 'Paga-se com 1 cliente extra por mês',
+      valueAnchor: 'Paga-se com 1 cliente extra por m├¬s',
       highlighted: true,
       features: [
         { text: 'Clientes ilimitados', highlight: true },
@@ -47,9 +47,9 @@ export default function Plans() {
         { text: 'Portal da noiva personalizado', highlight: true },
         { text: 'Moodboard interativo', highlight: false },
         { text: 'Fichas de anamnese digital', highlight: false },
-        { text: 'Follow-up automático por WhatsApp', highlight: true },
+        { text: 'Follow-up autom├ítico por WhatsApp', highlight: true },
       ],
-      idealFor: 'Ideal se você fatura acima de R$5k/mês',
+      idealFor: 'Ideal se voc├¬ fatura acima de R$5k/m├¬s',
     },
     {
       id: 'studio',
@@ -57,18 +57,18 @@ export default function Plans() {
       tagline: 'Para equipes e quem tem assistentes',
       monthlyPrice: 149.9,
       annualPrice: 119.92,
-      valueAnchor: 'O custo de 1 hora de trabalho por mês',
+      valueAnchor: 'O custo de 1 hora de trabalho por m├¬s',
       features: [
         { text: 'Tudo do Profissional +', highlight: false },
-        { text: 'Gestão de equipe completa', highlight: true },
-        { text: 'Comissões automáticas por evento', highlight: true },
+        { text: 'Gest├úo de equipe completa', highlight: true },
+        { text: 'Comiss├Áes autom├íticas por evento', highlight: true },
         { text: 'Dashboard de performance por artista', highlight: false },
-        { text: 'Acesso multi-usuário', highlight: true },
-        { text: 'IA para sugestões operacionais', highlight: false },
-        { text: 'Suporte prioritário', highlight: false },
-        { text: 'Integração via API', highlight: false },
+        { text: 'Acesso multi-usu├írio', highlight: true },
+        { text: 'IA para sugest├Áes operacionais', highlight: false },
+        { text: 'Suporte priorit├írio', highlight: false },
+        { text: 'Integra├º├úo via API', highlight: false },
       ],
-      idealFor: 'Ideal se você tem 2+ assistentes ou é studio',
+      idealFor: 'Ideal se voc├¬ tem 2+ assistentes ou ├® studio',
     },
   ]
 
@@ -79,9 +79,9 @@ export default function Plans() {
   return (
     <>
       <SEOHead
-        title={t('plans.seo_title')}
-        description={t('plans.seo_description')}
-        keywords="preço sistema maquiadora, plano CRM beauty, quanto custa sistema gestão maquiagem, software maquiadora preço"
+        title={t('landing.plans.seo_title')}
+        description={t('landing.plans.seo_description')}
+        keywords="pre├ºo sistema maquiadora, plano CRM beauty, quanto custa sistema gest├úo maquiagem, software maquiadora pre├ºo"
         url="https://khaoskontrol.com.br/planos"
         type="product"
         productPrice={31.92}
@@ -101,7 +101,7 @@ export default function Plans() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              {t('plans.eyebrow')}
+              {t('landing.plans.eyebrow')}
             </motion.p>
 
             <motion.h1
@@ -109,7 +109,8 @@ export default function Plans() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
             >
-              {t('plans.title')}
+              Invista menos que um{' '}
+              <span className="italic text-foreground/70">jantar por m├¬s</span>
             </motion.h1>
 
             <motion.p
@@ -118,7 +119,7 @@ export default function Plans() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              {t('plans.subtitle')}
+              {t('landing.plans.subtitle')}
             </motion.p>
 
             <div className="inline-flex items-center gap-1 p-1 bg-accent/50 border border-border">
@@ -130,7 +131,7 @@ export default function Plans() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {t('plans.monthly')}
+                {t('landing.plans.monthly')}
               </button>
               <button
                 onClick={() => setBillingCycle('annual')}
@@ -140,7 +141,7 @@ export default function Plans() {
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {t('plans.annual')}
+                {t('landing.plans.annual')}
                 <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 font-bold uppercase tracking-wider">
                   -20%
                 </span>
@@ -178,7 +179,7 @@ export default function Plans() {
                     {plan.highlighted && (
                       <div className="absolute -top-3 left-6">
                         <span className="px-3 py-1 bg-foreground text-background text-[10px] font-bold uppercase tracking-widest">
-                          {t('plans.most_chosen')}
+                          Mais escolhido
                         </span>
                       </div>
                     )}
@@ -204,7 +205,7 @@ export default function Plans() {
                             {price.toFixed(2).replace('.', ',')}
                           </motion.span>
                         </AnimatePresence>
-                        <span className="text-xs text-muted-foreground">/mês</span>
+                        <span className="text-xs text-muted-foreground">/m├¬s</span>
                       </div>
                     </div>
 
@@ -214,7 +215,7 @@ export default function Plans() {
 
                     {billingCycle === 'annual' && (
                       <p className="text-xs text-emerald-500 font-medium mb-6">
-                        {t('plans.save', { savings: savingsCount })}
+                        {t('landing.plans.save', { savings: savingsCount })}
                       </p>
                     )}
                     {billingCycle === 'monthly' && <div className="mb-6" />}
@@ -264,7 +265,7 @@ export default function Plans() {
                         )
                       }}
                     >
-                      {t('plans.start_free')}
+                      {t('landing.plans.start_free')}
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </motion.div>
@@ -281,10 +282,10 @@ export default function Plans() {
                 <Shield className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-foreground font-medium mb-1">
-                    {t('plans.footer.trial')}
+                    {t('landing.plans.footer.trial')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('plans.footer.trial_desc')}
+                    {t('landing.plans.footer.trial_desc')}
                   </p>
                 </div>
               </div>
@@ -292,10 +293,10 @@ export default function Plans() {
                 <Clock className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-foreground font-medium mb-1">
-                    {t('plans.footer.cancel')}
+                    {t('landing.plans.footer.cancel')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('plans.footer.cancel_desc')}
+                    {t('landing.plans.footer.cancel_desc')}
                   </p>
                 </div>
               </div>
@@ -303,10 +304,10 @@ export default function Plans() {
                 <Star className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm text-foreground font-medium mb-1">
-                    {t('plans.footer.support')}
+                    {t('landing.plans.footer.support')}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {t('plans.footer.support_desc')}
+                    {t('landing.plans.footer.support_desc')}
                   </p>
                 </div>
               </div>
@@ -314,7 +315,7 @@ export default function Plans() {
 
             <div className="mt-12 text-center">
               <p className="text-xs text-muted-foreground">
-                {t('plans.social_proof')}
+                {t('landing.plans.social_proof')}
               </p>
             </div>
           </div>

@@ -3,7 +3,6 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { SplashScreen } from './components/ui/layout/SplashScreen'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -98,6 +97,9 @@ const ProjectContract = lazy(
   () => import('@/features/contracts/pages/ProjectContract'),
 )
 const NotFound = lazy(() => import('./pages/NotFound'))
+const StudioCalendarPage = lazy(
+  () => import('@/features/calendar/pages/StudioCalendarPage'),
+)
 const PublicBooking = lazy(
   () => import('@/features/public-booking/pages/PublicBooking'),
 )
@@ -146,6 +148,9 @@ const AssistantQuickLogin = lazy(
 )
 const AssistantFreeDashboard = lazy(
   () => import('@/features/assistant-portal/pages/AssistantFreeDashboard'),
+)
+const StudioAvailabilityPage = lazy(
+  () => import('@/features/calendar/pages/StudioAvailabilityPage'),
 )
 
 import '@/styles/calendar.css'
@@ -211,7 +216,6 @@ const App = () => {
                   <ErrorBoundary>
                     <Suspense fallback={<PageLoader />}>
                       <Routes>
-                        {}
                         <Route
                           path="/"
                           element={<LazyPage component={Index} />}
@@ -247,7 +251,6 @@ const App = () => {
                           />
                         </Route>
 
-                        {}
                         <Route
                           path="/login"
                           element={<LazyPage component={Login} />}
@@ -287,7 +290,6 @@ const App = () => {
                           element={<LazyPage component={UpdatePassword} />}
                         />
 
-                        {}
                         <Route element={<AppLayout />}>
                           <Route element={<ProtectedRoute />}>
                             <Route
@@ -333,6 +335,10 @@ const App = () => {
                               element={
                                 <LazyPage component={GoogleCalendarCallback} />
                               }
+                            />
+                            <Route
+                              path="/studio"
+                              element={<LazyPage component={StudioCalendarPage} />}
                             />
 
                             <Route
@@ -446,7 +452,6 @@ const App = () => {
                           element={<LazyPage component={PublicBooking} />}
                         />
 
-                        {}
                         <Route
                           path="/agenda-equipa/:professionalId"
                           element={<LazyPage component={AssistantQuickLogin} />}
@@ -455,6 +460,12 @@ const App = () => {
                           path="/agenda-equipa/:professionalId/dashboard"
                           element={
                             <LazyPage component={AssistantFreeDashboard} />
+                          }
+                        />
+                        <Route
+                          path="/agenda-equipa/:professionalId/disponibilidade"
+                          element={
+                            <LazyPage component={StudioAvailabilityPage} />
                           }
                         />
 
@@ -490,7 +501,7 @@ const App = () => {
                         </Route>
                         <Route
                           path="*"
-                          element={<LazyPage component={Dashboard} />}
+                          element={<LazyPage component={NotFound} />}
                         />
                         <Route
                           path="/404"
@@ -503,12 +514,10 @@ const App = () => {
               </div>
               <Suspense fallback={null}>
                 <AIController />
-                <OnboardingWizard />
                 <AchievementNotifications />
               </Suspense>
             </AIProvider>
           </AnalyticsProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
@@ -13,7 +13,6 @@ import {
   X,
   CreditCard,
   Megaphone,
-  Shield,
   ShieldCheck,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -35,49 +34,29 @@ type AdminTab =
   | 'overview'
   | 'users'
   | 'assistants'
-  | 'subscriptions'
+  | 'financial'
   | 'marketing'
-  | 'lgpd'
   | 'config'
-  | 'logs'
   | 'security'
+  | 'lgpd'
   | 'analytics'
   | 'integrations'
-  | 'lgpd'
+  | 'logs'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user, loading: authLoading, signOut } = useAuth()
-  const isAuthorizedAdmin = useIsAdmin()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { isAdmin: isAuthorizedAdmin, isLoading: adminLoading } = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const activeTab = (searchParams.get('tab') as AdminTab) || 'overview'
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        navigate('/auth')
-        return
-      }
-
-      if (!isAuthorizedAdmin) {
-        navigate('/')
-        return
-      }
-
-      setIsAdmin(true)
-      setLoading(false)
-    }
-  }, [user, authLoading, navigate, isAuthorizedAdmin])
 
   const setTab = (tab: AdminTab) => {
     setSearchParams({ tab })
   }
 
-  if (authLoading || loading) {
+  if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-foreground font-mono uppercase tracking-widest text-xs">
@@ -87,7 +66,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!isAdmin) {
+  if (!isAuthorizedAdmin) {
     return null
   }
 
@@ -101,17 +80,16 @@ export default function AdminDashboard() {
       icon: Settings,
     },
     {
-      id: 'subscriptions' as AdminTab,
-      label: 'Assinaturas & Planos',
+      id: 'financial' as AdminTab,
+      label: 'Financeiro & Comissões',
       icon: CreditCard,
     },
     { id: 'marketing' as AdminTab, label: 'Marketing Global', icon: Megaphone },
     { id: 'config' as AdminTab, label: 'Configurações', icon: Settings },
     { id: 'security' as AdminTab, label: 'Segurança', icon: ShieldCheck },
-    { id: 'lgpd' as AdminTab, label: 'LGPD', icon: Shield },
     { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3 },
-    { id: 'logs' as AdminTab, label: 'Logs de Erro', icon: AlertCircle },
     { id: 'lgpd' as AdminTab, label: 'Solicitações LGPD', icon: ShieldCheck },
+    { id: 'logs' as AdminTab, label: 'Logs de Erro', icon: AlertCircle },
   ]
 
   const handleLogout = async () => {
@@ -121,7 +99,6 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {}
       <motion.div
         initial={{ x: -20, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
@@ -189,9 +166,7 @@ export default function AdminDashboard() {
         </div>
       </motion.div>
 
-      {}
       <div className="flex-1 flex flex-col overflow-hidden bg-background">
-        {}
         <div className="bg-background border-b border-border px-8 py-6 flex items-center justify-between">
           <div>
             <h2 className="text-foreground font-serif text-3xl font-light tracking-tight">
@@ -209,13 +184,12 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {}
         <div className="flex-1 overflow-auto bg-muted/20 p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'overview' && <AdminOverview />}
             {activeTab === 'users' && <AdminUsers />}
             {activeTab === 'assistants' && <AdminAssistants />}
-            {activeTab === 'subscriptions' && <AdminSubscriptions />}
+            {activeTab === 'financial' && <AdminSubscriptions />}
             {activeTab === 'marketing' && <AdminMarketing />}
             {activeTab === 'config' && <AdminConfig />}
             {activeTab === 'security' && <AdminSecurity />}

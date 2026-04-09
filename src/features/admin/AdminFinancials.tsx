@@ -14,7 +14,7 @@ import {
   AssistantCommission,
 } from './components/CommissionTable'
 import { useToast } from '@/hooks/use-toast'
-import type { Database } from '@/integrations/supabase/types'
+import type { Database } from '@/types/supabase'
 
 type EventWithAssistants = Database['public']['Tables']['events']['Row'] & {
   wedding_clients: { name: string | null } | null
@@ -153,52 +153,55 @@ export default function AdminFinancials({
     <div className="space-y-8">
       {}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-[#1A1A1A] border-white/10">
+        <Card className="bg-black border border-white/10 rounded-none hover:border-white/30 transition-all group">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-gray-400 text-sm">MRR (Receita Mensal)</p>
-                <h3 className="text-2xl font-bold text-white mt-2">
+                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">MRR (Receita Mensal)</p>
+                <h3 className="text-3xl font-serif text-white mt-2 tracking-tighter">
                   {new Intl.NumberFormat('pt-BR', {
                     style: 'currency',
                     currency: 'BRL',
                   }).format(stats.mrr)}
                 </h3>
               </div>
-              <div className="p-2 bg-[#00e5ff]/10 rounded-lg">
-                <CreditCard className="w-5 h-5 text-[#00e5ff]" />
+              <div className="p-2 bg-white/5 border border-white/10 group-hover:border-white/30 transition-colors">
+                <CreditCard className="w-5 h-5 text-white/50" />
               </div>
+            </div>
+            <div className="mt-4 h-1 bg-zinc-900 overflow-hidden">
+                <div className="h-full bg-white/40 w-full animate-pulse shadow-[0_0_10px_rgba(255,255,255,0.2)]" />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1A1A1A] border-white/10">
+        <Card className="bg-black border border-white/10 rounded-none hover:border-white/30 transition-all group">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-gray-400 text-sm">Assinantes Ativos</p>
-                <h3 className="text-2xl font-bold text-white mt-2">
+                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Assinantes Ativos</p>
+                <h3 className="text-3xl font-serif text-white mt-2 tracking-tighter">
                   {stats.activeSubscribers}
                 </h3>
               </div>
-              <div className="p-2 bg-purple-500/10 rounded-lg">
-                <Users className="w-5 h-5 text-purple-400" />
+              <div className="p-2 bg-white/5 border border-white/10 group-hover:border-white/30 transition-colors">
+                <Users className="w-5 h-5 text-white/50" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-[#1A1A1A] border-white/10">
+        <Card className="bg-black border border-white/10 rounded-none hover:border-white/30 transition-all group">
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-gray-400 text-sm">Churn Rate</p>
-                <h3 className="text-2xl font-bold text-red-400 mt-2">
+                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Churn Rate</p>
+                <h3 className="text-3xl font-serif text-white mt-2 tracking-tighter">
                   {stats.churnRate}
                 </h3>
               </div>
-              <div className="p-2 bg-red-500/10 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-red-400" />
+              <div className="p-2 bg-white/5 border border-white/10 group-hover:border-white/30 transition-colors">
+                <TrendingUp className="w-5 h-5 text-white/50" />
               </div>
             </div>
           </CardContent>
@@ -207,26 +210,26 @@ export default function AdminFinancials({
 
       {}
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
           <div>
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-2xl font-serif text-white tracking-tight">
               Gestão Financeira e Comissões
             </h2>
-            <p className="text-gray-400 text-sm">
-              Fechamento de {format(new Date(), 'MMMM yyyy', { locale: ptBR })}
+            <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] mt-1">
+              Terminal: {format(new Date(), 'MMMM yyyy', { locale: ptBR })}
             </p>
           </div>
           <Button
             onClick={handleExport}
             disabled={dataLoading}
-            className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90"
+            className="rounded-none bg-white text-black hover:bg-zinc-200 font-mono text-[11px] uppercase tracking-widest font-bold h-11 px-8"
           >
             {dataLoading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
               <Download className="w-4 h-4 mr-2" />
             )}
-            Exportar Fechamento Mensal
+            EXPORT_CLOSING_REPORT
           </Button>
         </div>
 

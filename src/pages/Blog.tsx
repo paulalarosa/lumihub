@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
 import { SectionHeader } from '@/components/ui/SectionHeader'
+import { useLanguage } from '@/hooks/useLanguage'
 
 const blogPosts = [
   {
@@ -54,14 +55,15 @@ const blogPosts = [
 ]
 
 export default function BlogPage() {
+  const { t } = useLanguage()
   const featuredPost = blogPosts.find((p) => p.featured)
   const otherPosts = blogPosts.filter((p) => !p.featured)
 
   return (
     <>
       <SEOHead
-        title="Blog | Dicas para Maquiadoras Profissionais"
-        description="Artigos sobre gestão, tendências de maquiagem, dicas de negócio e organização para profissionais de beleza."
+        title={t('blog.seo_title')}
+        description={t('blog.subtitle')}
         keywords="blog maquiadora profissional, dicas gestão beauty, tendências maquiagem noiva, negócio maquiagem"
         url="https://khaoskontrol.com.br/blog"
         type="website"
@@ -82,9 +84,9 @@ export default function BlogPage() {
           {}
           <div className="max-w-4xl mb-20 space-y-6 text-left">
             <SectionHeader
-              eyebrow="DEPARTAMENTO EDITORIAL"
+              eyebrow={t('blog.editorial')}
               title="JOURNAL"
-              subtitle="Insights, tendências e guias para profissionais de beleza que buscam excelência."
+              subtitle={t('blog.subtitle')}
               centered={false}
             />
           </div>
@@ -107,7 +109,7 @@ export default function BlogPage() {
                     />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <span className="font-serif text-[8rem] md:text-[12rem] text-white/10 italic select-none mix-blend-overlay">
-                        Featured
+                        {t('blog.featured')}
                       </span>
                     </div>
                   </div>
@@ -127,7 +129,7 @@ export default function BlogPage() {
                       {featuredPost.excerpt}
                     </p>
                     <div className="flex items-center gap-2 text-white group-hover:gap-4 transition-all">
-                      <span className="text-xs font-medium">Ler mais</span>
+                      <span className="text-xs font-medium">{t('blog.read_more')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>

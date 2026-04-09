@@ -17,7 +17,7 @@ export const SplashScreen = () => {
         <div className="w-16 h-16 border border-white/20 flex items-center justify-center relative overflow-hidden">
           <div className="absolute inset-0 bg-white/5 animate-pulse" />
           <span className="text-3xl font-serif font-bold text-white relative z-10">
-            L
+            K
           </span>
         </div>
 
@@ -26,8 +26,8 @@ export const SplashScreen = () => {
           <div className="w-32 h-[1px] bg-white/20 overflow-hidden relative">
             <motion.div
               className="absolute inset-y-0 left-0 bg-white"
-              initial={{ width: '0%' }}
-              animate={{ width: '100%' }}
+              initial={{ x: '-100%' }}
+              animate={{ x: '100%' }}
               transition={{ duration: 2, ease: 'easeInOut' }}
             />
           </div>
@@ -37,13 +37,14 @@ export const SplashScreen = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{
-                repeat: Infinity,
+                delay: 0.5,
                 duration: 0.8,
+                repeat: Infinity,
                 repeatType: 'reverse',
               }}
               className="text-white text-[10px] tracking-[0.2em] font-mono uppercase"
             >
-              INITIALIZING_SYSTEM...
+              KHAOS_KONTROL...
             </motion.p>
           </div>
         </div>

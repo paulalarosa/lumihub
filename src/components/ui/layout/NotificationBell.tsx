@@ -113,7 +113,7 @@ export function NotificationBell() {
                     </p>
                   </div>
                   {!n.is_read && (
-                    <div className="w-1.5 h-1.5 bg-white rounded-full flex-shrink-0 mt-2 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                    <div className="w-1.5 h-1.5 bg-white rounded-full flex-shrink-0 mt-2 shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
                   )}
                 </button>
               ))

@@ -1,24 +1,24 @@
 import { useAuth } from '@/hooks/useAuth'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/integrations/supabase/client'
+
+// Emails com acesso admin garantido (fallback)
+const ADMIN_EMAILS = [
+  'prenata@gmail.com',
+]
 
 export function useIsAdmin() {
-  const { user } = useAuth()
+  const { isAdmin, loading, user } = useAuth()
+  
+  // Fallback: verificar email diretamente caso o role não esteja funcionando
+  const isAdminByEmail = ADMIN_EMAILS.includes(user?.email?.toLowerCase() || '')
+  
+  const isActuallyAdmin = !!isAdmin || isAdminByEmail
 
-  const { data: isAdmin, isLoading } = useQuery({
-    queryKey: ['isAdmin', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return false
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-      return data?.role === 'admin'
-    },
-    enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000,
-  })
-
-  return { isAdmin: !!isAdmin, isLoading }
+  if (!loading && user && !isAdmin && isAdminByEmail) {
+    console.warn(`[AdminAccess] User ${user.email} has no DB role but is in fallback list. Access granted.`)
+  }
+  
+  return { 
+    isAdmin: isActuallyAdmin, 
+    isLoading: loading 
+  }
 }

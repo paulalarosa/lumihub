@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
@@ -13,27 +13,35 @@ const AuthCallbackHandler = () => {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loadingText, setLoadingText] = useState('Processando autenticação...')
 
-  useEffect(() => {
-    const code = searchParams.get('code')
-    const error = searchParams.get('error')
-
-    if (error) {
+  // validateSession MUST be defined BEFORE handleOAuthCallback
+  const validateSession = useCallback(async (session: {
+    provider_token?: string
+    provider_refresh_token?: string
+    user: { id: string }
+  }) => {
+    if (!session.provider_token && !session.provider_refresh_token) {
       setStatus('error')
       setErrorMessage(
-        searchParams.get('error_description') ||
-          'Erro na autenticação com Google.',
+        'Falha na conexão: Token do Google não identificado. Tente novamente.',
       )
       return
     }
 
-    if (code) {
-      handleOAuthCallback()
-    } else {
-      setTimeout(() => navigate('/dashboard'), 1000)
-    }
-  }, [searchParams])
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ onboarding_completed: true })
+      .eq('id', session.user.id)
 
-  const handleOAuthCallback = async () => {
+    if (updateError) {
+      console.error('Error updating profile onboarding status:', updateError)
+    }
+
+    setStatus('success')
+    setTimeout(() => navigate('/dashboard'), 1500)
+  }, [navigate])
+
+  // handleOAuthCallback uses validateSession, so it comes AFTER
+  const handleOAuthCallback = useCallback(async () => {
     try {
       setLoadingText('Validando conexão com Google...')
 
@@ -65,32 +73,28 @@ const AuthCallbackHandler = () => {
       setStatus('error')
       setErrorMessage(err instanceof Error ? err.message : 'Erro de conexão.')
     }
-  }
+  }, [validateSession])
 
-  const validateSession = async (session: {
-    provider_token?: string
-    provider_refresh_token?: string
-    user: { id: string }
-  }) => {
-    if (!session.provider_token && !session.provider_refresh_token) {
+  // useEffect comes LAST, after all callbacks are defined
+  useEffect(() => {
+    const code = searchParams.get('code')
+    const error = searchParams.get('error')
+
+    if (error) {
       setStatus('error')
       setErrorMessage(
-        'Falha na conexão: Token do Google não identificado. Tente novamente.',
+        searchParams.get('error_description') ||
+          'Erro na autenticação com Google.',
       )
       return
     }
 
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ onboarding_completed: true })
-      .eq('id', session.user.id)
-
-    if (updateError) {
+    if (code) {
+      handleOAuthCallback()
+    } else {
+      setTimeout(() => navigate('/dashboard'), 1000)
     }
-
-    setStatus('success')
-    setTimeout(() => navigate('/dashboard'), 1500)
-  }
+  }, [searchParams, navigate, handleOAuthCallback])
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 font-sans selection:bg-black selection:text-white relative overflow-hidden">
@@ -145,7 +149,7 @@ const AuthCallbackHandler = () => {
               </p>
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate('/login')}
                   className="w-full h-12 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-sm uppercase tracking-wider"
                 >
                   Retry Connection

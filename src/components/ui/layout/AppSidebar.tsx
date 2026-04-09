@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Scissors,
   Filter,
+  Building2,
 } from 'lucide-react'
 
 import {
@@ -30,10 +31,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { useIsStudioMember } from '@/features/calendar/hooks/useStudioCalendar'
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
   const isAdmin = useIsAdmin()
+  const isStudio = useIsStudioMember()
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
 
@@ -48,6 +51,15 @@ export function AppSidebar() {
       url: '/calendar',
       icon: Calendar,
     },
+    ...(isStudio
+      ? [
+          {
+            title: 'AGENDA KAOS',
+            url: '/studio',
+            icon: Building2,
+          },
+        ]
+      : []),
     {
       title: t('sidebar.clients'),
       url: '/clientes',

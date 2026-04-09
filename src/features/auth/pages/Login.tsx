@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import AuthLayout from '@/components/ui/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
@@ -7,13 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, ArrowRight } from 'lucide-react'
-import { supabase } from '@/integrations/supabase/client'
 import { getErrorMessage } from '@/utils/error-handler'
 import SEOHead from '@/components/seo/SEOHead'
 import { useAnalytics } from '@/hooks/useAnalytics'
 
 export default function Login() {
-  const navigate = useNavigate()
   const { signIn, signInWithGoogle } = useAuth()
   const { toast } = useToast()
   const { trackAuth, trackFormSubmit } = useAnalytics()
@@ -31,6 +29,7 @@ export default function Login() {
       const { title, description } = getErrorMessage(error, 'Erro no login')
       toast({ title, description, variant: 'destructive' })
       trackFormSubmit('login', false, error.message)
+      setIsSubmitting(false)
     } else {
       trackAuth('login', 'email')
       trackFormSubmit('login', true)
@@ -38,23 +37,9 @@ export default function Login() {
         title: 'Bem-vinda de volta!',
         description: 'Sessão iniciada com sucesso.',
       })
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
-        const { data: assistant } = await supabase
-          .from('assistants')
-          .select('id')
-          .eq('user_id', user.id)
-          .maybeSingle()
-
-        navigate(assistant ? '/assistant/dashboard' : '/dashboard')
-      } else {
-        navigate('/dashboard')
-      }
+      // Navigation is handled by AuthContext onAuthStateChange SIGNED_IN event
+      // Do NOT navigate here — it causes a race condition with the auth state
     }
-    setIsSubmitting(false)
   }
 
   const handleGoogle = async () => {
