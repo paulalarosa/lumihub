@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Moon } from 'lucide-react'
+import { Menu, X, Moon, Sun } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -40,7 +40,6 @@ export default function Header() {
       )}
     >
       <div className="container mx-auto px-6 lg:px-10 flex items-center justify-between">
-        {}
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
             src="/favicon-khaoskontrol.webp"
@@ -52,9 +51,7 @@ export default function Header() {
           </span>
         </Link>
 
-        {}
         <div className="hidden md:flex items-center gap-8">
-          {}
           <nav className="flex items-center gap-8">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path
@@ -86,9 +83,7 @@ export default function Header() {
             })}
           </nav>
 
-          {}
           <div className="flex items-center gap-6 border-l border-border/50 pl-6">
-            {}
             <div className="flex items-center border border-border rounded-sm overflow-hidden text-xs font-medium tracking-widest uppercase">
               <button
                 onClick={() => setLanguage('pt')}
@@ -114,23 +109,19 @@ export default function Header() {
               </button>
             </div>
 
-            {}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="text-foreground hover:text-muted-foreground transition-colors p-2 rounded-full hover:bg-foreground/5"
             >
               {theme === 'dark' ? (
-                <Moon className="w-4 h-4" />
+                <Sun className="w-4 h-4" />
               ) : (
-                <div className="w-4 h-4 rounded-full border-2 border-foreground relative">
-                  <div className="absolute inset-0 bg-foreground/20 rounded-full" />
-                </div>
+                <Moon className="w-4 h-4" />
               )}
             </button>
 
-            {}
             <Link
-              to="/planos"
+              to="/login"
               className="px-6 py-2.5 bg-white/10 text-white backdrop-blur-md rounded-[2rem] border border-white/20 text-xs font-bold hover:bg-white/20 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] uppercase tracking-[0.2em]"
             >
               Acesso Kontrol
@@ -138,7 +129,6 @@ export default function Header() {
           </div>
         </div>
 
-        {}
         <button
           onClick={() => setMobileOpen(!mobileOpen)}
           className="md:hidden w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors"
@@ -151,7 +141,6 @@ export default function Header() {
         </button>
       </div>
 
-      {}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -191,7 +180,7 @@ export default function Header() {
                 )
               })}
               <Link
-                to="/planos"
+                to="/login"
                 className="mt-4 text-center px-6 py-3.5 bg-foreground text-background rounded-full text-sm font-medium flex items-center justify-center gap-2 uppercase tracking-[0.2em]"
               >
                 Acesso Kontrol

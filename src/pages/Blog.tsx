@@ -3,6 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
 import { SectionHeader } from '@/components/ui/SectionHeader'
+import { useLanguage } from '@/hooks/useLanguage'
 
 const blogPosts = [
   {
@@ -54,19 +55,20 @@ const blogPosts = [
 ]
 
 export default function BlogPage() {
+  const { t } = useLanguage()
   const featuredPost = blogPosts.find((p) => p.featured)
   const otherPosts = blogPosts.filter((p) => !p.featured)
 
   return (
     <>
       <SEOHead
-        title="Blog | Dicas para Maquiadoras Profissionais"
-        description="Artigos sobre gestão, tendências de maquiagem, dicas de negócio e organização para profissionais de beleza."
+        title={t('landing.blog.seo_title')}
+        description={t('landing.blog.seo_description')}
         keywords="blog maquiadora profissional, dicas gestão beauty, tendências maquiagem noiva, negócio maquiagem"
         url="https://khaoskontrol.com.br/blog"
         type="website"
       />
-      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
         {}
         <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
           <img
@@ -76,15 +78,15 @@ export default function BlogPage() {
           />
         </div>
         {}
-        <div className="fixed top-[-20%] right-[-10%] w-[40%] h-[40%] bg-white/[0.015] blur-[180px] rounded-full pointer-events-none" />
+        <div className="fixed top-[-20%] right-[-10%] w-[40%] h-[40%] bg-foreground/[0.015] blur-[180px] rounded-full pointer-events-none" />
 
         <main className="container mx-auto px-6 lg:px-10 pt-40 pb-24 relative z-10 text-left">
           {}
           <div className="max-w-4xl mb-20 space-y-6 text-left">
             <SectionHeader
-              eyebrow="DEPARTAMENTO EDITORIAL"
-              title="JOURNAL"
-              subtitle="Insights, tendências e guias para profissionais de beleza que buscam excelência."
+              eyebrow={t('landing.blog.eyebrow')}
+              title={t('landing.blog.title')}
+              subtitle={t('landing.blog.subtitle')}
               centered={false}
             />
           </div>
@@ -98,36 +100,36 @@ export default function BlogPage() {
               className="mb-16 group text-left"
             >
               <Link to={`/blog/${featuredPost.slug}`} className="block">
-                <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden">
-                  <div className="aspect-[21/9] bg-white/[0.03] relative overflow-hidden">
+                <div className="rounded-[2.5rem] border border-border bg-card/40 hover:bg-accent/10 hover:border-border/60 transition-all duration-500 overflow-hidden">
+                  <div className="aspect-[21/9] bg-accent/10 relative overflow-hidden">
                     <img
                       src={featuredPost.image}
                       alt={featuredPost.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale hover:grayscale-0 opacity-80"
                     />
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <span className="font-serif text-[8rem] md:text-[12rem] text-white/10 italic select-none mix-blend-overlay">
-                        Featured
+                      <span className="font-serif text-[8rem] md:text-[12rem] text-foreground/10 italic select-none mix-blend-overlay">
+                        {t('landing.blog.featured')}
                       </span>
                     </div>
                   </div>
                   <div className="p-10 md:p-14 space-y-6">
                     <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-medium text-white border border-white/10 px-3 py-1 rounded-full">
+                      <span className="text-[10px] font-medium text-foreground border border-border px-3 py-1 rounded-full">
                         {featuredPost.category}
                       </span>
-                      <span className="text-xs text-muted-foreground/50">
+                      <span className="text-xs text-muted-foreground">
                         {featuredPost.date} · {featuredPost.readTime}
                       </span>
                     </div>
-                    <h2 className="font-serif text-3xl md:text-5xl text-white italic group-hover:text-muted-foreground transition-colors leading-tight text-left">
+                    <h2 className="font-serif text-3xl md:text-5xl text-foreground italic group-hover:text-muted-foreground transition-colors leading-tight text-left">
                       {featuredPost.title}
                     </h2>
                     <p className="text-sm text-muted-foreground max-w-2xl leading-relaxed text-left">
                       {featuredPost.excerpt}
                     </p>
-                    <div className="flex items-center gap-2 text-white group-hover:gap-4 transition-all">
-                      <span className="text-xs font-medium">Ler mais</span>
+                    <div className="flex items-center gap-2 text-foreground group-hover:gap-4 transition-all">
+                      <span className="text-xs font-medium">{t('landing.blog.read_more')}</span>
                       <ArrowRight className="w-4 h-4" />
                     </div>
                   </div>
@@ -148,33 +150,33 @@ export default function BlogPage() {
                 className="group text-left"
               >
                 <Link to={`/blog/${post.slug}`} className="block h-full">
-                  <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden h-full flex flex-col">
+                  <div className="rounded-[2.5rem] border border-border bg-card/40 hover:bg-accent/10 hover:border-border/60 transition-all duration-500 overflow-hidden h-full flex flex-col">
                     {}
-                    <div className="aspect-[4/3] bg-white/[0.03] relative overflow-hidden">
+                    <div className="aspect-[4/3] bg-accent/10 relative overflow-hidden">
                       <img
                         src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 grayscale group-hover:grayscale-0 opacity-80"
                       />
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="font-serif text-6xl text-white/10 italic select-none mix-blend-overlay">
+                        <span className="font-serif text-6xl text-foreground/10 italic select-none mix-blend-overlay">
                           {String(index + 2).padStart(2, '0')}
                         </span>
                       </div>
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-500 pointer-events-none" />
+                      <div className="absolute inset-0 bg-background/20 group-hover:bg-transparent transition-colors duration-500 pointer-events-none" />
                     </div>
 
                     <div className="p-7 space-y-4 flex-1 flex flex-col">
                       <div className="flex items-center gap-3">
-                        <span className="text-[10px] font-medium text-white border border-white/10 px-2.5 py-1 rounded-full">
+                        <span className="text-[10px] font-medium text-foreground border border-border px-2.5 py-1 rounded-full">
                           {post.category}
                         </span>
-                        <span className="text-[10px] text-muted-foreground/40">
+                        <span className="text-[10px] text-muted-foreground">
                           {post.readTime}
                         </span>
                       </div>
 
-                      <h3 className="font-serif text-xl text-white italic group-hover:text-muted-foreground transition-colors leading-snug flex-1 text-left">
+                      <h3 className="font-serif text-xl text-foreground italic group-hover:text-muted-foreground transition-colors leading-snug flex-1 text-left">
                         {post.title}
                       </h3>
 
@@ -182,11 +184,11 @@ export default function BlogPage() {
                         {post.excerpt}
                       </p>
 
-                      <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                        <span className="text-[10px] text-muted-foreground/40">
+                      <div className="pt-4 border-t border-border flex items-center justify-between">
+                        <span className="text-[10px] text-muted-foreground">
                           {post.date}
                         </span>
-                        <ArrowRight className="w-4 h-4 text-muted-foreground/30 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                        <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
                       </div>
                     </div>
                   </div>
@@ -199,3 +201,4 @@ export default function BlogPage() {
     </>
   )
 }
+

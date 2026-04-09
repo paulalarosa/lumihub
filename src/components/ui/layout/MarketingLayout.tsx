@@ -5,7 +5,7 @@ import { SparkleCanvas } from '@/components/animations/SparkleCanvas'
 
 const MarketingLayout = () => {
   return (
-    <div className="relative min-h-screen bg-[#050505] selection:bg-white/20 selection:text-white overflow-hidden">
+    <div className="relative min-h-screen bg-background text-foreground selection:bg-foreground/20 selection:text-foreground overflow-hidden">
       {}
       <div
         className="pointer-events-none fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay"
@@ -15,7 +15,7 @@ const MarketingLayout = () => {
         }}
       />
       {}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-[#00e5ff]/5 blur-[120px] rounded-full pointer-events-none z-0" />
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] max-w-[800px] max-h-[800px] bg-foreground/5 blur-[120px] rounded-full pointer-events-none z-0" />
 
       <SparkleCanvas />
 

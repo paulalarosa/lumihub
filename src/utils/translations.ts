@@ -59,6 +59,59 @@ export const translations = {
     cta_bottom_plans: 'VER_PLANOS',
     cta_secure: '/// CONEXÃO_SEGURA • DADOS_CRIPTOGRAFADOS',
 
+    // LANDING PAGE REVAMP
+    'landing.hero.badge': 'KHAOS KONTROL System v.5.0',
+    'landing.hero.title_line1': 'O BACKSTAGE',
+    'landing.hero.title_line2': 'DO SEU IMPÉRIO.',
+    'landing.hero.subtitle':
+      'Gestão minimalista de alto nível para profissionais que não aceitam o básico. Controle total da sua carreira em preto e branco.',
+    'landing.hero.cta_primary': 'INICIALIZAR_SISTEMA',
+    'landing.hero.cta_secondary': 'VER_PLANOS',
+    'landing.hero.scroll': 'SCROLL',
+
+    'landing.cta.title': 'PRONTA PARA',
+    'landing.cta.title_highlight': 'INICIAR?',
+    'landing.cta.subtitle':
+      'Junte-se a mais de 1.000 profissionais que elevaram o padrão.',
+    'landing.cta.button': 'CRIAR_CONTA_AGORA',
+
+    'landing.stats.clients': 'CLIENTES_ATIVOS',
+    'landing.stats.contracts': 'CONTRATOS_GERADOS',
+    'landing.stats.uptime': 'DISPONIBILIDADE',
+    'landing.stats.projects': 'PROJETOS_CONCLUÍDOS',
+
+    'landing.process.title': 'EFICIÊNCIA',
+    'landing.process.title_highlight1': 'MODERNA',
+    'landing.process.title_line2': 'OPERAÇÃO',
+    'landing.process.title_highlight2': 'SILENCIOSA',
+    'landing.process.subtitle':
+      'FERRAMENTAS DE ALTO NÍVEL PARA PROFISSIONAIS QUE EXIGEM PRECISÃO.',
+    'landing.process.highlight_title': 'POUPE TEMPO',
+    'landing.process.highlight_desc':
+      'Automatize tarefas repetitivas e foque no que realmente importa: sua arte.',
+    'landing.process.feature1_title': 'GESTÃO DE IMPÉRIO',
+    'landing.process.feature1_desc':
+      'Gerencie clientes, histórico e anotações com a maestria de quem constrói um legado.',
+    'landing.process.feature2_title': 'SEGURANÇA JURÍDICA',
+    'landing.process.feature2_desc':
+      'Contratos inteligentes com assinatura digital integrada e validade jurídica total.',
+    'landing.process.feature3_title': 'AUTOMAÇÃO IA',
+    'landing.process.feature3_desc':
+      'Sua assistente virtual que trabalha enquanto você dorme, gerindo lembretes e confirmações.',
+
+    'landing.testimonials.role1': 'MAQUIADORA SÊNIOR',
+    'landing.testimonials.content1':
+      'O Khaos Kontrol mudou completamente como eu lido com minhas clientes. O portal da noiva é um diferencial absurdo.',
+    'landing.testimonials.role2': 'PENTEADISTA PROFISSIONAL',
+    'landing.testimonials.content2':
+      'Finalmente uma plataforma que entende a estética do nosso mercado sem ser colorida demais.',
+    'landing.testimonials.role3': 'ESTETICISTA & VISAGISTA',
+    'landing.testimonials.content3':
+      'Contratos automáticos me salvaram horas de burocracia. Melhor investimento do ano.',
+    'landing.testimonials.role4': 'ARTISTA DE MAKEUP',
+    'landing.testimonials.content4':
+      'Interface limpa, rápida e extremamente funcional. Exatamente o que eu precisava.',
+
     login_title: 'TERMINAL_DE_ACESSO',
     login_subtitle: 'AUTENTICAÇÃO//KONTROL_SYSTEM',
     login_google: 'ENTRAR_COM_GOOGLE',
@@ -286,6 +339,59 @@ export const translations = {
     cta_bottom_start: 'START_TRIAL',
     cta_bottom_plans: 'VIEW_PLANS',
     cta_secure: '/// SECURE_CONNECTION • ENCRYPTED_DATA',
+
+    // LANDING PAGE REVAMP
+    'landing.hero.badge': 'KHAOS KONTROL System v.5.0',
+    'landing.hero.title_line1': 'THE BACKSTAGE',
+    'landing.hero.title_line2': 'OF YOUR EMPIRE.',
+    'landing.hero.subtitle':
+      'High-level minimalist management for professionals who refuse the basic. Total control of your career in black and white.',
+    'landing.hero.cta_primary': 'INITIALIZE_SYSTEM',
+    'landing.hero.cta_secondary': 'VIEW_PLANS',
+    'landing.hero.scroll': 'SCROLL',
+
+    'landing.cta.title': 'READY TO',
+    'landing.cta.title_highlight': 'START?',
+    'landing.cta.subtitle':
+      'Join over 1,000 professionals who have raised the bar.',
+    'landing.cta.button': 'CREATE_ACCOUNT_NOW',
+
+    'landing.stats.clients': 'ACTIVE_CLIENTS',
+    'landing.stats.contracts': 'GENERATED_CONTRACTS',
+    'landing.stats.uptime': 'AVAILABILITY',
+    'landing.stats.projects': 'COMPLETED_PROJECTS',
+
+    'landing.process.title': 'MODERN',
+    'landing.process.title_highlight1': 'EFFICIENCY',
+    'landing.process.title_line2': 'SILENT',
+    'landing.process.title_highlight2': 'OPERATION',
+    'landing.process.subtitle':
+      'HIGH-LEVEL TOOLS FOR PROFESSIONALS WHO DEMAND PRECISION.',
+    'landing.process.highlight_title': 'SAVE TIME',
+    'landing.process.highlight_desc':
+      'Automate repetitive tasks and focus on what really matters: your art.',
+    'landing.process.feature1_title': 'EMPIRE MANAGEMENT',
+    'landing.process.feature1_desc':
+      'Manage clients, history, and notes with the mastery of one building a legacy.',
+    'landing.process.feature2_title': 'LEGAL SECURITY',
+    'landing.process.feature2_desc':
+      'Smart contracts with integrated digital signature and full legal validity.',
+    'landing.process.feature3_title': 'AI AUTOMATION',
+    'landing.process.feature3_desc':
+      'Your virtual assistant working while you sleep, managing reminders and confirmations.',
+
+    'landing.testimonials.role1': 'SENIOR MAKEUP ARTIST',
+    'landing.testimonials.content1':
+      'Khaos Kontrol completely changed how I deal with my clients. The bride portal is an incredible differentiator.',
+    'landing.testimonials.role2': 'PROFESSIONAL HAIRSTYLIST',
+    'landing.testimonials.content2':
+      "Finally a platform that understands our market's aesthetic without being too colorful.",
+    'landing.testimonials.role3': 'ESTHETICIAN & VISAGIST',
+    'landing.testimonials.content3':
+      'Automatic contracts saved me hours of bureaucracy. Best investment of the year.',
+    'landing.testimonials.role4': 'MAKEUP ARTIST',
+    'landing.testimonials.content4':
+      'Clean, fast, and extremely functional interface. Exactly what I needed.',
 
     login_title: 'ACCESS_TERMINAL',
     login_subtitle: 'AUTHENTICATION//KHAOS_KONTROL_SYSTEM',

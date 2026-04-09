@@ -10,30 +10,26 @@ export function TestimonialsSection() {
   const testimonials = [
     {
       name: 'Maria Silva',
-      role: 'Maquiadora Especialista em Noivas',
-      content:
-        'Consegui profissionalizar completamente meu negocio. Minhas clientes adoram o portal exclusivo!',
+      role: t('landing.testimonials.role1'),
+      content: t('landing.testimonials.content1'),
       rating: 5,
     },
     {
       name: 'Ana Costa',
-      role: 'Maquiadora & Beauty Artist',
-      content:
-        'O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicacao.',
+      role: t('landing.testimonials.role2'),
+      content: t('landing.testimonials.content2'),
       rating: 5,
     },
     {
       name: 'Juliana Mendes',
-      role: 'Hair Stylist',
-      content:
-        'A organizacao que o KHAOS KONTROL trouxe para minha rotina e indescritivel. Recomendo!',
+      role: t('landing.testimonials.role3'),
+      content: t('landing.testimonials.content3'),
       rating: 5,
     },
     {
       name: 'Camila Santos',
-      role: 'Nail Designer',
-      content:
-        'Finalmente tenho controle total das minhas financas e agenda em um so lugar.',
+      role: t('landing.testimonials.role4'),
+      content: t('landing.testimonials.content4'),
       rating: 5,
     },
   ]
@@ -47,11 +43,11 @@ export function TestimonialsSection() {
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="inline-block px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-[10px] shadow-[0_4px_20px_0_rgba(255,255,255,0.05)] uppercase tracking-[0.3em] text-white/60 mb-8 block w-fit"
+              className="inline-block px-4 py-2 rounded-full border border-border bg-foreground/5 backdrop-blur-xl text-[10px] shadow-[0_4px_20px_0_rgba(255,255,255,0.05)] uppercase tracking-[0.3em] text-muted-foreground mb-8 block w-fit"
             >
               {t('testimonials_subtitle')}
             </motion.div>
-            <h2 className="font-serif text-4xl md:text-6xl text-white tracking-tight">
+            <h2 className="font-serif text-4xl md:text-6xl text-foreground tracking-tight">
               {t('testimonials_title')}
             </h2>
           </div>
@@ -59,8 +55,8 @@ export function TestimonialsSection() {
       </div>
 
       <div className="relative z-10">
-        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-[#050505]/80 to-transparent z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-[#050505]/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background via-background/80 to-transparent z-10 pointer-events-none" />
 
         <motion.div
           ref={marqueeRef}
@@ -82,7 +78,7 @@ export function TestimonialsSection() {
             <motion.div
               key={index}
               whileHover={{ y: -5, scale: 1.02 }}
-              className="flex-shrink-0 w-[400px] border border-white/10 bg-white/5 backdrop-blur-3xl p-10 rounded-[2.5rem] hover:bg-white/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.02)] group transition-all duration-300"
+              className="flex-shrink-0 w-[400px] border border-border bg-foreground/5 backdrop-blur-3xl p-10 rounded-[2.5rem] hover:bg-foreground/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.02)] group transition-all duration-300"
             >
               <div className="flex flex-col justify-between h-full gap-8">
                 <div className="space-y-6">
@@ -90,19 +86,19 @@ export function TestimonialsSection() {
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star
                         key={i}
-                        className="h-3.5 w-3.5 fill-white/80 text-white/80 group-hover:fill-white group-hover:text-white transition-colors group-hover:shadow-[0_0_10px_white]"
+                        className="h-3.5 w-3.5 fill-foreground/80 text-foreground/80 group-hover:fill-foreground group-hover:text-foreground transition-colors"
                       />
                     ))}
                   </div>
-                  <blockquote className="text-lg text-white/70 italic leading-relaxed font-serif group-hover:text-white/90 transition-colors">
+                  <blockquote className="text-lg text-foreground/70 italic leading-relaxed font-serif group-hover:text-foreground/90 transition-colors">
                     &ldquo;{testimonial.content}&rdquo;
                   </blockquote>
                 </div>
-                <div className="border-t border-white/10 pt-6 group-hover:border-white/20 transition-colors">
-                  <div className="text-[10px] font-bold text-white uppercase tracking-widest">
+                <div className="border-t border-border pt-6 group-hover:border-foreground/20 transition-colors">
+                  <div className="text-[10px] font-bold text-foreground uppercase tracking-widest">
                     {testimonial.name}
                   </div>
-                  <div className="text-[10px] text-white/40 uppercase tracking-widest mt-1">
+                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
                     {testimonial.role}
                   </div>
                 </div>

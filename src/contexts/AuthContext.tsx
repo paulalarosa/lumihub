@@ -18,7 +18,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const lastUserId = useRef<string | null>(null)
 
-  const fetchRole = async (userId: string) => {
+  const fetchRole = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -36,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       handleError(err, 'AuthContext:fetchRole')
       return 'professional'
     }
-  }
+  }, [])
 
   const signIn = useCallback(
     (email: string, pass: string) =>
@@ -104,7 +104,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
-  const isAdmin = role === 'studio' || role === 'admin'
+  const isAdmin = role?.toLowerCase() === 'studio' || role?.toLowerCase() === 'admin'
+
+  useEffect(() => {
+    if (user && role) {
+      console.log(`[AuthContext] User: ${user.email}, Role: ${role}, isAdmin: ${isAdmin}`)
+    }
+  }, [user, role, isAdmin])
 
   useEffect(() => {
     let mounted = true
@@ -211,7 +217,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [navigate])
+  }, [navigate, fetchRole, loading, signOut])
 
   return (
     <AuthContext.Provider

@@ -1,49 +1,30 @@
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
-import { useAnalytics } from '@/hooks/useAnalytics'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export const CTASection = () => {
   const navigate = useNavigate()
-  const { trackCTAClick } = useAnalytics()
+  const { t } = useLanguage()
 
   return (
-    <section className="py-32 bg-black relative overflow-hidden">
-      <div className="container mx-auto px-6 max-w-3xl">
-        {}
-        <p className="text-white/30 text-xs font-mono uppercase tracking-[0.2em] mb-6 text-center">
-          A cada semana sem sistema
-        </p>
-
-        <h2 className="text-4xl md:text-6xl font-serif text-white text-center leading-tight mb-6 tracking-tight">
-          Você perde clientes que{' '}
-          <span className="italic text-white/60">nunca mais voltam.</span>
+    <section className="py-40 bg-background relative overflow-hidden">
+      <div className="absolute inset-0 bg-foreground/[0.02] backdrop-blur-3xl -z-10" />
+      <div className="container mx-auto px-6 text-center max-w-4xl">
+        <h2 className="text-5xl md:text-8xl font-bold text-foreground mb-8 tracking-tighter font-serif">
+          {t('landing.cta.title')}{' '}
+          <span className="italic font-normal text-foreground/70">{t('landing.cta.title_highlight')}</span>
         </h2>
-
-        {}
-        <p className="text-white/40 text-center text-base md:text-lg mb-12 max-w-xl mx-auto leading-relaxed">
-          Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca
-          esquecem um follow-up, e têm clientes que indicam.
+        <p className="text-muted-foreground text-lg mb-12 font-mono uppercase tracking-[0.2em] max-w-2xl mx-auto">
+          {t('landing.cta.subtitle')}
         </p>
-
-        {}
-        <div className="flex flex-col items-center gap-4">
-          <Button
-            variant="primary"
-            size="lg"
-            className="px-12 group"
-            onClick={() => {
-              trackCTAClick('cta_bottom_signup', 'cta_section', '/cadastro')
-              navigate('/cadastro')
-            }}
-          >
-            Começar grátis por 14 dias
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Button>
-          <p className="text-xs text-white/25">
-            Sem cartão de crédito. Cancele quando quiser.
-          </p>
-        </div>
+        <Button
+          variant="primary"
+          size="lg"
+          className="px-16"
+          onClick={() => navigate('/cadastro')}
+        >
+          {t('landing.cta.button')}
+        </Button>
       </div>
     </section>
   )

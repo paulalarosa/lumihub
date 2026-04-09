@@ -13,8 +13,10 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export default function Contact() {
+  const { t } = useLanguage()
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
@@ -37,8 +39,8 @@ export default function Contact() {
 
     if (!formData.name || !formData.email || !formData.message) {
       toast({
-        title: 'Campos obrigatórios',
-        description: 'Por favor preencha todos os campos.',
+        title: t('common.error'),
+        description: t('common.required'),
         variant: 'destructive',
       })
       setLoading(false)
@@ -47,11 +49,11 @@ export default function Contact() {
 
     setTimeout(() => {
       toast({
-        title: 'Mensagem preparada',
-        description: 'Abrindo cliente de e-mail...',
+        title: t('common.success'),
+        description: t('common.send'),
       })
       const subject = encodeURIComponent(
-        `[KONTROL CONTATO] ${formData.subject || 'Nova Mensagem'}`,
+        `[KHAOS KONTROL] ${formData.subject || 'Nova Mensagem'}`,
       )
       const body = encodeURIComponent(
         `Nome: ${formData.name}\nEmail: ${formData.email}\n\nMensagem:\n${formData.message}`,
@@ -65,13 +67,13 @@ export default function Contact() {
   return (
     <>
       <SEOHead
-        title="Contato"
-        description="Entre em contato com a equipe Khaos Kontrol. Suporte para maquiadoras profissionais."
+        title={t('landing.contact.seo_title')}
+        description={t('landing.contact.seo_description')}
         url="https://khaoskontrol.com.br/contato"
         businessName="Khaos Kontrol"
         priceRange="$$"
       />
-      <div className="min-h-screen bg-black text-white relative overflow-hidden">
+      <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
         {}
         <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
           <img
@@ -81,8 +83,8 @@ export default function Contact() {
           />
         </div>
         {}
-        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-white/[0.015] blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-foreground/[0.02] blur-[150px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-foreground/[0.015] blur-[150px] rounded-full pointer-events-none" />
 
         <main className="container mx-auto px-6 lg:px-10 pt-20 pb-24 relative z-10">
           <div className="max-w-6xl mx-auto space-y-24">
@@ -96,33 +98,32 @@ export default function Contact() {
               {}
               <div className="flex flex-col justify-center space-y-6 lg:sticky lg:top-40 text-left">
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
-                  Contato
+                  {t('landing.contact.eyebrow')}
                 </span>
-                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[1.05] tracking-tight">
-                  Fale
+                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-foreground leading-[1.05] tracking-tight">
+                  {t('landing.contact.title').split(' ')[0]}
                   <br />
-                  <span className="italic font-serif">Conosco</span>
+                  <span className="italic font-serif">{t('landing.contact.title').split(' ')[1]}</span>
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-md leading-relaxed">
-                  Conecte-se com nossa equipe. Suporte premium, parcerias e
-                  consultoria personalizada.
+                  {t('landing.contact.subtitle')}
                 </p>
                 <Link
                   to="/planos"
-                  className="inline-flex items-center gap-2.5 px-6 py-3 border border-white/10 bg-white/[0.03] rounded-full text-sm text-white transition-all group w-fit hover:bg-white/[0.06] hover:border-white/20"
+                  className="inline-flex items-center gap-2.5 px-6 py-3 border border-border bg-accent/30 rounded-full text-sm text-foreground transition-all group w-fit hover:bg-accent/60 hover:border-border/60"
                 >
-                  Ver Planos
+                  {t('header_plans')}
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
 
               {}
-              <div className="p-8 md:p-12 rounded-[2.5rem] border border-white/5 bg-white/[0.02] relative overflow-hidden text-left">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] blur-[100px] rounded-full pointer-events-none" />
+              <div className="p-8 md:p-12 rounded-[2.5rem] border border-border bg-card/40 relative overflow-hidden text-left">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-foreground/[0.02] blur-[100px] rounded-full pointer-events-none" />
 
                 <div className="space-y-3 relative z-10 mb-8">
-                  <h2 className="font-serif text-3xl md:text-4xl text-white">
-                    Envie uma mensagem
+                  <h2 className="font-serif text-3xl md:text-4xl text-foreground">
+                    {t('landing.contact.form.submit')}
                   </h2>
                   <p className="text-xs text-muted-foreground tracking-wide">
                     Resposta em até 24 horas
@@ -135,21 +136,21 @@ export default function Contact() {
                 >
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-muted-foreground ml-3">
-                      Nome Completo
+                      {t('landing.contact.form.name')}
                     </label>
                     <Input
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="Seu nome"
-                      className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                      placeholder={t('landing.contact.form.name')}
+                      className="bg-accent/20 border-border text-foreground placeholder:text-muted-foreground/40 focus:border-border/60 h-12 text-sm"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground ml-3">
-                        E-mail
+                        {t('auth.email')}
                       </label>
                       <Input
                         name="email"
@@ -157,33 +158,33 @@ export default function Contact() {
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="email@exemplo.com"
-                        className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                        className="bg-accent/20 border-border text-foreground placeholder:text-muted-foreground/40 focus:border-border/60 h-12 text-sm"
                       />
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-medium text-muted-foreground ml-3">
-                        Assunto
+                        {t('landing.contact.form.whatsapp')}
                       </label>
                       <Input
                         name="subject"
                         value={formData.subject}
                         onChange={handleChange}
-                        placeholder="Assunto da mensagem"
-                        className="bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 h-12 text-sm"
+                        placeholder={t('landing.contact.form.whatsapp')}
+                        className="bg-accent/20 border-border text-foreground placeholder:text-muted-foreground/40 focus:border-border/60 h-12 text-sm"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-muted-foreground ml-3">
-                      Mensagem
+                      {t('landing.contact.form.message')}
                     </label>
                     <Textarea
                       name="message"
                       value={formData.message}
                       onChange={handleChange}
-                      placeholder="Conte-nos como podemos ajudar..."
-                      className="min-h-[140px] bg-white/[0.03] border-white/5 text-white placeholder:text-white/20 focus:border-white/20 resize-none text-sm"
+                      placeholder={t('landing.contact.form.message')}
+                      className="min-h-[140px] bg-accent/20 border-border text-foreground placeholder:text-muted-foreground/40 focus:border-border/60 resize-none text-sm"
                     />
                   </div>
 
@@ -191,13 +192,13 @@ export default function Contact() {
                     <Button
                       type="submit"
                       disabled={loading}
-                      className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-full text-sm font-medium"
+                      className="w-full h-12 bg-foreground text-background hover:bg-foreground/90 rounded-full text-sm font-medium"
                     >
                       {loading ? (
-                        <span>Enviando...</span>
+                        <span>{t('common.loading')}</span>
                       ) : (
                         <span className="flex items-center gap-2">
-                          Enviar Mensagem <Send className="w-4 h-4" />
+                          {t('landing.contact.form.submit')} <Send className="w-4 h-4" />
                         </span>
                       )}
                     </Button>
@@ -216,19 +217,19 @@ export default function Contact() {
                   rel="noopener noreferrer"
                   className="block group"
                 >
-                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 flex items-center gap-6 text-left">
-                    <div className="w-12 h-12 flex items-center text-white/40 group-hover:text-white transition-colors duration-500">
+                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-border bg-card/40 hover:bg-accent/10 hover:border-border/60 transition-all duration-500 flex items-center gap-6 text-left">
+                    <div className="w-12 h-12 flex items-center text-muted-foreground group-hover:text-foreground transition-colors duration-500">
                       <MessageCircle className="w-8 h-8" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-white">
+                      <h4 className="text-sm font-medium text-foreground">
                         WhatsApp
                       </h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Atendimento rápido e direto
                       </p>
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
                   </div>
                 </motion.a>
 
@@ -237,17 +238,17 @@ export default function Contact() {
                   href="mailto:khaoskontrol07@gmail.com"
                   className="block group"
                 >
-                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 flex items-center gap-6 text-left">
-                    <div className="w-12 h-12 flex items-center text-white/40 group-hover:text-white transition-colors duration-500">
+                  <div className="p-8 md:p-10 rounded-[2.5rem] border border-border bg-card/40 hover:bg-accent/10 hover:border-border/60 transition-all duration-500 flex items-center gap-6 text-left">
+                    <div className="w-12 h-12 flex items-center text-muted-foreground group-hover:text-foreground transition-colors duration-500">
                       <Mail className="w-8 h-8" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="text-sm font-medium text-white">E-mail</h4>
+                      <h4 className="text-sm font-medium text-foreground">{t('landing.contact.info.email')}</h4>
                       <p className="text-sm text-muted-foreground mt-1">
                         Enviar mensagem para suporte
                       </p>
                     </div>
-                    <ArrowUpRight className="w-5 h-5 text-white/20 group-hover:text-white transition-colors" />
+                    <ArrowUpRight className="w-5 h-5 text-muted-foreground/40 group-hover:text-foreground transition-colors" />
                   </div>
                 </motion.a>
               </div>
@@ -258,3 +259,4 @@ export default function Contact() {
     </>
   )
 }
+

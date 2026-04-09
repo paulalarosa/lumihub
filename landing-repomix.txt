@@ -1,0 +1,2709 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: src/pages/home/**/*, src/components/layout/LandingLayout.tsx, src/components/ui/Hero3DBackground.tsx, src/index.css, tailwind.config.*, src/locales/*.json
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+src/components/layout/LandingLayout.tsx
+src/components/ui/Hero3DBackground.tsx
+src/index.css
+src/locales/en.json
+src/locales/pt.json
+src/pages/home/components/Counter.tsx
+src/pages/home/components/CTASection.tsx
+src/pages/home/components/HeroSection.tsx
+src/pages/home/components/KeyNumbersSection.tsx
+src/pages/home/components/ProcessSection.tsx
+src/pages/home/components/TestimonialsSection.tsx
+src/pages/home/components/TypewriterText.tsx
+tailwind.config.ts
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/pages/home/components/Counter.tsx">
+import { useState, useRef, useEffect } from 'react'
+
+export const Counter = ({
+  value,
+  duration = 2,
+}: {
+  value: string
+  duration?: number
+}) => {
+  const [count, setCount] = useState(0)
+  const countRef = useRef<HTMLSpanElement>(null)
+  const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''))
+  const suffix = value.replace(/[0-9.]/g, '')
+
+  useEffect(() => {
+    let startTimestamp: number | null = null
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp
+      const progress = Math.min(
+        (timestamp - startTimestamp) / (duration * 1000),
+        1,
+      )
+      setCount(progress * numericValue)
+      if (progress < 1) {
+        window.requestAnimationFrame(step)
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          window.requestAnimationFrame(step)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    if (countRef.current) observer.observe(countRef.current)
+    return () => observer.disconnect()
+  }, [numericValue, duration])
+
+  return (
+    <span ref={countRef}>
+      {value.startsWith('+') ? '+' : ''}
+      {numericValue % 1 === 0 ? Math.floor(count) : count.toFixed(1)}
+      {suffix}
+    </span>
+  )
+}
+</file>
+
+<file path="src/pages/home/components/KeyNumbersSection.tsx">
+import { Counter } from './Counter'
+
+export const KeyNumbersSection = () => {
+  return (
+    <section className="py-16 md:py-24 bg-black border-y border-white/5 relative z-20">
+      <div className="container mx-auto px-4 md:px-6 max-w-7xl">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 text-center md:text-left">
+          {[
+            { label: 'CLIENTES ATIVOS', value: '+5K' },
+            { label: 'CONTRATOS GERADOS', value: '12K' },
+            { label: 'UPTIME SISTEMA', value: '99.9%' },
+            { label: 'PROJETOS GERIDOS', value: '8.4K' },
+          ].map((stat, i) => (
+            <div key={i} className="group">
+              <p className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white group-hover:text-white transition-colors mb-1 md:mb-2">
+                <Counter value={stat.value} />
+              </p>
+              <p className="text-[8px] sm:text-[10px] font-mono text-white/40 tracking-[0.2em] md:tracking-[0.3em]">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="src/pages/home/components/ProcessSection.tsx">
+import { motion } from 'framer-motion'
+import { BarChart3, ShieldCheck, Rocket, Clock } from 'lucide-react'
+
+export const ProcessSection = () => {
+  return (
+    <section className="py-40 bg-black relative">
+      <div className="container mx-auto px-6 md:px-16 max-w-7xl">
+        <div className="grid lg:grid-cols-2 gap-20 items-end mb-32">
+          <div>
+            <h2 className="text-5xl md:text-7xl font-bold text-white mb-10 tracking-tight leading-tight font-serif capitalize">
+              Processos{' '}
+              <span className="italic font-normal text-white/70">simples</span>
+              <br />
+              para impérios{' '}
+              <span className="italic font-normal text-white/70">reais</span>
+            </h2>
+            <p className="text-white/50 text-lg md:text-xl max-w-md leading-relaxed font-mono uppercase tracking-wider">
+              Automatizamos o que é mecânico para que você foque no que é
+              artístico.
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <div className="p-8 glass-strong rounded-3xl max-w-sm">
+              <Clock className="w-12 h-12 text-white mb-6" />
+              <h3 className="text-xl font-bold text-white mb-4 font-serif">
+                Economize 15h+ semanais
+              </h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                Elimine tarefas repetitivas com nossa IA operativa e automações
+                inteligentes de contrato.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {[
+            {
+              icon: BarChart3,
+              title: 'Analytics Noir',
+              desc: 'Dashboard em alto contraste com métricas vitais da sua carreira em tempo real.',
+            },
+            {
+              icon: ShieldCheck,
+              title: 'Legal Kontrol',
+              desc: 'Gerador de contratos com validade jurídica e assinatura digital integrada.',
+            },
+            {
+              icon: Rocket,
+              title: 'Vendas Pro',
+              desc: 'CRM minimalista focado em converter leads em faturamento recorrente.',
+            },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              className="p-10 card group hover:scale-[1.02] transition-all"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+            >
+              <feature.icon className="w-10 h-10 text-white mb-8 opacity-40 group-hover:opacity-100 transition-opacity" />
+              <h3 className="text-2xl font-bold text-white mb-4 font-serif">
+                {feature.title}
+              </h3>
+              <p className="text-white/40 text-sm leading-relaxed">
+                {feature.desc}
+              </p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="src/pages/home/components/TypewriterText.tsx">
+import { motion } from 'framer-motion'
+
+export const TypewriterText = ({
+  text,
+  delayOffset = 0,
+}: {
+  text: string
+  delayOffset?: number
+}) => {
+  return (
+    <>
+      {text.split('').map((char, index) => (
+        <motion.span
+          key={index}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: delayOffset + index * 0.04, duration: 0.1 }}
+        >
+          {char === ' ' ? '\u00A0' : char}
+        </motion.span>
+      ))}
+    </>
+  )
+}
+</file>
+
+<file path="src/locales/en.json">
+{
+    "SIDEBAR_DASHBOARD": "DASHBOARD",
+    "SIDEBAR_AGENDA": "SCHEDULE",
+    "SIDEBAR_CLIENTS": "CLIENTS",
+    "SIDEBAR_PROJECTS": "PROJECTS",
+    "SIDEBAR_MARKETING": "MARKETING",
+    "SIDEBAR_CONTRACTS": "CONTRACTS",
+    "SIDEBAR_FINANCIAL": "FINANCIAL",
+    "SIDEBAR_SERVICES": "SERVICES",
+    "SIDEBAR_SETTINGS": "SETTINGS",
+    "SIDEBAR_MENU_MAIN": "MAIN MENU",
+    "SIDEBAR_MENU_ADMIN": "ADMINISTRATION",
+    "SIDEBAR_ADMIN": "ADMIN",
+    "SIDEBAR_LOGOUT": "LOGOUT",
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "projects": "Projects",
+        "schedule": "Schedule",
+        "clients": "Clients",
+        "contracts": "Contracts",
+        "services": "Services",
+        "assistants": "Assistants",
+        "financial": "Financial",
+        "marketing": "Marketing",
+        "settings": "Settings",
+        "logout": "Logout",
+        "team": "Team",
+        "subscription": "Subscription"
+    },
+    "dashboard": {
+        "welcome": "Welcome back",
+        "control_center": "Control Center",
+        "stats": {
+            "clients": "Clients",
+            "projects": "Projects",
+            "revenue": "Revenue",
+            "commissions": "Commissions"
+        },
+        "actions": {
+            "add_client": "Add",
+            "create_project": "Create",
+            "details": "Details"
+        },
+        "sections": {
+            "agenda": "Schedule",
+            "team": "Team",
+            "insights": "Insights",
+            "origin": "Client Sources"
+        },
+        "no_events": "No upcoming events",
+        "view_all": "VIEW ALL"
+    },
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "filter": "Filter",
+        "export": "Export",
+        "refresh": "Refresh",
+        "back": "Back",
+        "next": "Next",
+        "previous": "Previous",
+        "yes": "Yes",
+        "no": "No",
+        "close": "Close",
+        "send": "Send",
+        "copy": "Copy",
+        "download": "Download",
+        "upload": "Upload file",
+        "no_results": "No results found",
+        "required": "Required",
+        "optional": "Optional"
+    },
+    "pages": {
+        "projects": {
+            "title": "Projects",
+            "subtitle": "Workflow Management",
+            "new": "New Project"
+        },
+        "marketing": {
+            "title": "Marketing",
+            "subtitle": "Retention Protocols"
+        },
+        "contracts": {
+            "title": "Contracts",
+            "subtitle": "Document Management",
+            "new": "New Contract",
+            "all_processed": "All contracts processed",
+            "no_pending": "No pending documents"
+        },
+        "finance": {
+            "title": "Financial",
+            "subtitle": "Financial Control",
+            "income": "Income",
+            "expense": "Expense",
+            "add_income": "Add Income",
+            "log_expense": "Log Expense"
+        },
+        "services": {
+            "title": "Services",
+            "subtitle": "Service Catalog",
+            "new": "Create Service"
+        },
+        "clients": {
+            "title": "Clients",
+            "subtitle": "Client Base",
+            "new": "New Client",
+            "total": "Total clients",
+            "active": "Active",
+            "inactive": "Inactive"
+        },
+        "calendar": {
+            "title": "Schedule",
+            "subtitle": "Event Calendar",
+            "new_event": "New Event",
+            "today": "Today",
+            "week": "Week",
+            "month": "Month"
+        },
+        "settings": {
+            "title": "Settings",
+            "subtitle": "System Preferences",
+            "profile": "Profile",
+            "notifications": "Notifications",
+            "integrations": "Integrations",
+            "privacy": "Privacy",
+            "security": "Security"
+        }
+    },
+    "admin": {
+        "title": "KHAOS_CORE",
+        "subtitle": "System_Admin",
+        "overview": "Overview",
+        "users": "Users",
+        "assistants": "Assistants",
+        "subscriptions": "Subscriptions & Plans",
+        "marketing": "Global Marketing",
+        "config": "Settings",
+        "security": "Security",
+        "analytics": "Analytics",
+        "logs": "Error Logs",
+        "integrations": "Integrations (Status)",
+        "lgpd": "LGPD",
+        "live_feed": "Live Feed",
+        "ghost_login": "Ghost Login",
+        "reset_pass": "Reset Password",
+        "block_user": "Block User",
+        "unblock_user": "Unblock User",
+        "change_plan": "Change Plan",
+        "plan_updated": "Plan updated",
+        "user_blocked": "User blocked",
+        "user_unblocked": "User unblocked",
+        "backup_generate": "Generate Encrypted Backup",
+        "total_users": "Total Users",
+        "mrr": "MRR",
+        "active_subs": "Active Subscribers",
+        "churn_rate": "Churn Rate",
+        "new_today": "Today",
+        "new_week": "This week",
+        "new_month": "Last 30 days",
+        "plan_distribution": "Plan Distribution",
+        "recent_signups": "Recent Signups"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "forgot_password": "Forgot my password",
+        "reset_password": "Reset password",
+        "email": "Email",
+        "password": "Password",
+        "confirm_password": "Confirm password",
+        "full_name": "Full name",
+        "login_with_google": "Login with Google",
+        "no_account": "Don't have an account yet?",
+        "has_account": "Already have an account?",
+        "secure_connection": "Secure encrypted connection",
+        "access_denied": "Access denied",
+        "invalid_credentials": "Invalid credentials. Check your email and password.",
+        "session_started": "Session started successfully.",
+        "error_login": "Error trying to log in"
+    },
+    "lgpd": {
+        "title": "Privacy & Consent",
+        "subtitle": "LGPD // General Data Protection Law",
+        "your_rights": "Your Rights (LGPD)",
+        "export_data": "Export My Data",
+        "request_deletion": "Request Deletion",
+        "generating": "Generating file...",
+        "export_note": "Export generates a JSON file with all your data. Deletion is processed within 15 business days.",
+        "consent_terms": "Terms of Service",
+        "consent_privacy": "Privacy Policy",
+        "consent_marketing": "Marketing Emails",
+        "consent_analytics": "Analytics & Tracking",
+        "required": "REQUIRED",
+        "delete_confirm_title": "Request Data Deletion",
+        "delete_confirm_text": "Upon confirmation, a request will be sent to our team. Your personal data will be anonymized within 15 business days.",
+        "delete_irreversible": "This action is irreversible.",
+        "type_to_confirm": "Type DELETE to confirm"
+    },
+    "notifications": {
+        "title": "Notifications",
+        "mark_all_read": "Mark all read",
+        "no_notifications": "No notifications",
+        "push_title": "Push Notifications",
+        "push_description": "New events, reminders and important updates.",
+        "push_blocked": "Notifications blocked by browser. Check your browser settings to allow.",
+        "push_active": "Push active on this device"
+    },
+    "campaigns": {
+        "title": "Email Campaigns",
+        "subtitle": "Marketing // AWS SES",
+        "new": "New Campaign",
+        "name": "Campaign name",
+        "subject": "Email subject",
+        "segment": "Segment",
+        "body": "Email body (HTML)",
+        "all_users": "All users",
+        "active_subs": "Active subscribers",
+        "inactive": "Inactive users",
+        "free_plan": "Free plan",
+        "paid_plans": "Paid plans",
+        "confirm_send": "Confirm Send",
+        "recipients": "recipients",
+        "send_warning": "This action cannot be undone. Emails will be sent via AWS SES.",
+        "draft": "Draft",
+        "scheduled": "Scheduled",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed"
+    },
+    "hero_badge": "MANAGEMENT PLATFORM",
+    "hero_title": "Your art deserves management to match.",
+    "hero_subtitle": "Clients, contracts, schedule and finances — all in one place.",
+    "cta_start": "START NOW",
+    "hero_status_online": "SYSTEM: ONLINE",
+    "hero_loc": "LOC: BRAZIL",
+    "header_features": "Features",
+    "header_plans": "Plans",
+    "header_blog": "Blog",
+    "header_login": "Login",
+    "header_start": "Get Started",
+    "login_title": "Access your account",
+    "login_subtitle": "Enter your credentials to continue",
+    "login_toast_denied": "Access denied",
+    "login_toast_invalid": "Invalid credentials. Check your email and password.",
+    "login_toast_granted": "Access granted",
+    "login_toast_session": "Session started successfully.",
+    "login_toast_error": "Error trying to log in",
+    "login_google": "Login with Google",
+    "login_or": "OR CONTINUE WITH",
+    "login_email": "CORPORATE EMAIL",
+    "login_password": "ACCESS PASSWORD",
+    "login_secure_conn": "SECURE ENCRYPTED CONNECTION",
+    "login_forgot": "FORGOT PASSWORD?",
+    "login_submit": "ACCESS DASHBOARD",
+    "login_no_account": "NOT A MEMBER YET?",
+    "login_register": "REQUEST ACCESS",
+    "features_title": "FEATURES",
+    "features_subtitle": "HIGH PERFORMANCE TOOLS",
+    "feature_1_title": "ELITE MANAGEMENT",
+    "feature_1_desc": "Total business control.",
+    "feature_2_title": "SMART SCHEDULE",
+    "feature_2_desc": "Automatic synchronization.",
+    "feature_3_title": "INTEGRATED AI",
+    "feature_3_desc": "Automation via Lumi AI.",
+    "feature_4_title": "CONTRACTS",
+    "feature_4_desc": "Digital signature.",
+    "feature_5_title": "FINANCIAL",
+    "feature_5_desc": "Cash flow control.",
+    "feature_6_title": "INSIGHTS",
+    "feature_6_desc": "Data analysis.",
+    "benefits_title": "OPERATING SYSTEM",
+    "benefit_1": "Time Optimization",
+    "benefit_2": "Data Security",
+    "benefit_3": "Scalability",
+    "benefit_4": "Premium Support",
+    "view_all_features": "VIEW FEATURES",
+    "stat_hours_label": "HOURS/WEEK",
+    "stat_revenue_label": "REVENUE INCREASE",
+    "stat_satisfaction_label": "SATISFACTION",
+    "stat_support_label": "SUPPORT",
+    "testimonials_title": "TESTIMONIALS",
+    "testimonials_subtitle": "WHAT OUR PARTNERS SAY",
+    "lumipro_title": "LUMI PRO",
+    "lumipro_subtitle": "EXCELLENCE IN EVERY DETAIL",
+    "cta_bottom_title": "START NOW",
+    "cta_bottom_subtitle": "RAISING THE STANDARD",
+    "cta_bottom_start": "START FREE TRIAL",
+    "cta_bottom_plans": "VIEW PLANS",
+    "cta_secure": "SECURE ENVIRONMENT"
+}
+</file>
+
+<file path="src/locales/pt.json">
+{
+    "SIDEBAR_DASHBOARD": "PAINEL",
+    "SIDEBAR_AGENDA": "AGENDA",
+    "SIDEBAR_CLIENTS": "CLIENTES",
+    "SIDEBAR_PROJECTS": "PROJETOS",
+    "SIDEBAR_MARKETING": "MARKETING",
+    "SIDEBAR_CONTRACTS": "CONTRATOS",
+    "SIDEBAR_FINANCIAL": "FINANCEIRO",
+    "SIDEBAR_SERVICES": "SERVIÇOS",
+    "SIDEBAR_SETTINGS": "CONFIGURAÇÕES",
+    "SIDEBAR_MENU_MAIN": "MENU PRINCIPAL",
+    "SIDEBAR_MENU_ADMIN": "ADMINISTRAÇÃO",
+    "SIDEBAR_ADMIN": "ADMIN",
+    "SIDEBAR_LOGOUT": "SAIR",
+    "sidebar": {
+        "dashboard": "Painel",
+        "projects": "Projetos",
+        "schedule": "Agenda",
+        "clients": "Clientes",
+        "contracts": "Contratos",
+        "services": "Serviços",
+        "assistants": "Assistentes",
+        "financial": "Financeiro",
+        "marketing": "Marketing",
+        "settings": "Configurações",
+        "logout": "Sair",
+        "team": "Equipe",
+        "subscription": "Assinatura"
+    },
+    "dashboard": {
+        "welcome": "Bem-vinda de volta",
+        "control_center": "Central de Controle",
+        "stats": {
+            "clients": "Clientes",
+            "projects": "Projetos",
+            "revenue": "Faturamento",
+            "commissions": "Comissões"
+        },
+        "actions": {
+            "add_client": "Adicionar",
+            "create_project": "Criar",
+            "details": "Detalhes"
+        },
+        "sections": {
+            "agenda": "Agenda",
+            "team": "Equipe",
+            "insights": "Insights",
+            "origin": "Origem dos Clientes"
+        },
+        "no_events": "Sem eventos próximos",
+        "view_all": "VER TODA"
+    },
+    "common": {
+        "loading": "Carregando...",
+        "error": "Erro",
+        "success": "Sucesso",
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "confirm": "Confirmar",
+        "delete": "Excluir",
+        "edit": "Editar",
+        "search": "Buscar",
+        "filter": "Filtrar",
+        "export": "Exportar",
+        "refresh": "Atualizar",
+        "back": "Voltar",
+        "next": "Próximo",
+        "previous": "Anterior",
+        "yes": "Sim",
+        "no": "Não",
+        "close": "Fechar",
+        "send": "Enviar",
+        "copy": "Copiar",
+        "download": "Baixar",
+        "upload": "Enviar arquivo",
+        "no_results": "Nenhum resultado encontrado",
+        "required": "Obrigatório",
+        "optional": "Opcional"
+    },
+    "pages": {
+        "projects": {
+            "title": "Projetos",
+            "subtitle": "Gestão de Fluxo",
+            "new": "Novo Projeto"
+        },
+        "marketing": {
+            "title": "Marketing",
+            "subtitle": "Protocolos de Retenção"
+        },
+        "contracts": {
+            "title": "Contratos",
+            "subtitle": "Gestão de Documentos",
+            "new": "Novo Contrato",
+            "all_processed": "Todos os contratos processados",
+            "no_pending": "Nenhum documento pendente"
+        },
+        "finance": {
+            "title": "Financeiro",
+            "subtitle": "Controle Financeiro",
+            "income": "Receita",
+            "expense": "Despesa",
+            "add_income": "Adicionar Receita",
+            "log_expense": "Registrar Despesa"
+        },
+        "services": {
+            "title": "Serviços",
+            "subtitle": "Catálogo de Serviços",
+            "new": "Criar Serviço"
+        },
+        "clients": {
+            "title": "Clientes",
+            "subtitle": "Base de Clientes",
+            "new": "Nova Cliente",
+            "total": "Total de clientes",
+            "active": "Ativos",
+            "inactive": "Inativos"
+        },
+        "calendar": {
+            "title": "Agenda",
+            "subtitle": "Calendário de Eventos",
+            "new_event": "Novo Evento",
+            "today": "Hoje",
+            "week": "Semana",
+            "month": "Mês"
+        },
+        "settings": {
+            "title": "Configurações",
+            "subtitle": "Preferências do Sistema",
+            "profile": "Perfil",
+            "notifications": "Notificações",
+            "integrations": "Integrações",
+            "privacy": "Privacidade",
+            "security": "Segurança"
+        }
+    },
+    "admin": {
+        "title": "KHAOS_CORE",
+        "subtitle": "System_Admin",
+        "overview": "Visão Geral",
+        "users": "Usuários",
+        "assistants": "Assistentes",
+        "subscriptions": "Assinaturas & Planos",
+        "marketing": "Marketing Global",
+        "config": "Configurações",
+        "security": "Segurança",
+        "analytics": "Analytics",
+        "logs": "Logs de Erro",
+        "integrations": "Integrações (Status)",
+        "lgpd": "LGPD",
+        "live_feed": "Live Feed",
+        "ghost_login": "Ghost Login",
+        "reset_pass": "Resetar Senha",
+        "block_user": "Bloquear Usuário",
+        "unblock_user": "Desbloquear Usuário",
+        "change_plan": "Alterar Plano",
+        "plan_updated": "Plano atualizado",
+        "user_blocked": "Usuário bloqueado",
+        "user_unblocked": "Usuário desbloqueado",
+        "backup_generate": "Gerar Backup Criptografado",
+        "total_users": "Total Usuários",
+        "mrr": "MRR",
+        "active_subs": "Assinantes Ativos",
+        "churn_rate": "Taxa de Churn",
+        "new_today": "Hoje",
+        "new_week": "Esta semana",
+        "new_month": "Últimos 30 dias",
+        "plan_distribution": "Distribuição de Planos",
+        "recent_signups": "Últimos Cadastros"
+    },
+    "auth": {
+        "login": "Entrar",
+        "register": "Cadastrar",
+        "logout": "Sair",
+        "forgot_password": "Esqueci minha senha",
+        "reset_password": "Redefinir senha",
+        "email": "E-mail",
+        "password": "Senha",
+        "confirm_password": "Confirmar senha",
+        "full_name": "Nome completo",
+        "login_with_google": "Entrar com Google",
+        "no_account": "Ainda não tem conta?",
+        "has_account": "Já tem uma conta?",
+        "secure_connection": "Conexão segura e criptografada",
+        "access_denied": "Acesso negado",
+        "invalid_credentials": "Credenciais inválidas. Verifique seu e-mail e senha.",
+        "session_started": "Sessão iniciada com sucesso.",
+        "error_login": "Erro ao tentar entrar"
+    },
+    "lgpd": {
+        "title": "Privacidade e Consentimentos",
+        "subtitle": "LGPD // Lei Geral de Proteção de Dados",
+        "your_rights": "Seus Direitos (LGPD)",
+        "export_data": "Exportar Meus Dados",
+        "request_deletion": "Solicitar Exclusão",
+        "generating": "Gerando arquivo...",
+        "export_note": "A exportação gera um arquivo JSON com todos os seus dados. A exclusão é processada em até 15 dias úteis.",
+        "consent_terms": "Termos de Serviço",
+        "consent_privacy": "Política de Privacidade",
+        "consent_marketing": "Emails de Marketing",
+        "consent_analytics": "Analytics e Rastreamento",
+        "required": "OBRIGATÓRIO",
+        "delete_confirm_title": "Solicitar Exclusão de Dados",
+        "delete_confirm_text": "Ao confirmar, uma solicitação será enviada para nossa equipe. Seus dados pessoais serão anonimizados em até 15 dias úteis.",
+        "delete_irreversible": "Esta ação é irreversível.",
+        "type_to_confirm": "Digite EXCLUIR para confirmar"
+    },
+    "notifications": {
+        "title": "Notificações",
+        "mark_all_read": "Ler todas",
+        "no_notifications": "Nenhuma notificação",
+        "push_title": "Notificações Push",
+        "push_description": "Novos eventos, lembretes e atualizações importantes.",
+        "push_blocked": "Notificações bloqueadas pelo navegador. Acesse as configurações do navegador para permitir.",
+        "push_active": "Push ativo neste dispositivo"
+    },
+    "campaigns": {
+        "title": "Campanhas de Email",
+        "subtitle": "Marketing // AWS SES",
+        "new": "Nova Campanha",
+        "name": "Nome da campanha",
+        "subject": "Assunto do email",
+        "segment": "Segmento",
+        "body": "Corpo do email (HTML)",
+        "all_users": "Todos os usuários",
+        "active_subs": "Assinantes ativos",
+        "inactive": "Usuários inativos",
+        "free_plan": "Plano gratuito",
+        "paid_plans": "Planos pagos",
+        "confirm_send": "Confirmar Envio",
+        "recipients": "destinatários",
+        "send_warning": "Esta ação não pode ser desfeita. Os emails serão enviados via AWS SES.",
+        "draft": "Rascunho",
+        "scheduled": "Agendada",
+        "sending": "Enviando",
+        "sent": "Enviada",
+        "failed": "Falhou"
+    },
+    "hero_badge": "PLATAFORMA DE GESTÃO",
+    "hero_title": "Sua arte merece uma gestão à altura.",
+    "hero_subtitle": "Clientes, contratos, agenda e financeiro — tudo em um só lugar.",
+    "cta_start": "COMEÇAR AGORA",
+    "hero_status_online": "SISTEMA: ONLINE",
+    "hero_loc": "LOC: BRASIL",
+    "header_features": "Recursos",
+    "header_plans": "Planos",
+    "header_blog": "Blog",
+    "header_login": "Entrar",
+    "header_start": "Começar",
+    "login_title": "Acesse sua conta",
+    "login_subtitle": "Entre com suas credenciais para continuar",
+    "login_toast_denied": "Acesso negado",
+    "login_toast_invalid": "Credenciais inválidas. Verifique seu e-mail e senha.",
+    "login_toast_granted": "Acesso permitido",
+    "login_toast_session": "Sessão iniciada com sucesso.",
+    "login_toast_error": "Erro ao tentar entrar",
+    "login_google": "Entrar com Google",
+    "login_or": "OU CONTINUE COM",
+    "login_email": "E-MAIL CORPORATIVO",
+    "login_password": "SENHA DE ACESSO",
+    "login_secure_conn": "CONEXÃO SEGURA E CRIPTOGRAFADA",
+    "login_forgot": "ESQUECEU A SENHA?",
+    "login_submit": "ACESSAR PAINEL",
+    "login_no_account": "AINDA NÃO É MEMBRO?",
+    "login_register": "SOLICITAR ACESSO",
+    "features_title": "FUNCIONALIDADES",
+    "features_subtitle": "FERRAMENTAS DE ALTA PERFORMANCE",
+    "feature_1_title": "GESTÃO DE ELITE",
+    "feature_1_desc": "Controle total do negócio.",
+    "feature_2_title": "AGENDA INTELIGENTE",
+    "feature_2_desc": "Sincronização automática.",
+    "feature_3_title": "IA INTEGRADA",
+    "feature_3_desc": "Automação via Lumi IA.",
+    "feature_4_title": "CONTRATOS",
+    "feature_4_desc": "Assinatura digital.",
+    "feature_5_title": "FINANCEIRO",
+    "feature_5_desc": "Controle de fluxo de caixa.",
+    "feature_6_title": "INSIGHTS",
+    "feature_6_desc": "Análise de dados.",
+    "benefits_title": "SISTEMA OPERACIONAL",
+    "benefit_1": "Otimização de Tempo",
+    "benefit_2": "Segurança de Dados",
+    "benefit_3": "Escalabilidade",
+    "benefit_4": "Suporte Premium",
+    "view_all_features": "VER RECURSOS",
+    "stat_hours_label": "HORAS/SEMANA",
+    "stat_revenue_label": "AUMENTO RECEITA",
+    "stat_satisfaction_label": "SATISFAÇÃO",
+    "stat_support_label": "SUPORTE",
+    "testimonials_title": "DEPOIMENTOS",
+    "testimonials_subtitle": "O QUE DIZEM NOSSOS PARCEIROS",
+    "lumipro_title": "LUMI PRO",
+    "lumipro_subtitle": "EXCELÊNCIA EM CADA DETALHE",
+    "cta_bottom_title": "COMECE AGORA",
+    "cta_bottom_subtitle": "ELEVANDO O PADRÃO",
+    "cta_bottom_start": "INICIAR TESTE GRÁTIS",
+    "cta_bottom_plans": "VER PLANOS",
+    "cta_secure": "AMBIENTE SEGURO"
+}
+</file>
+
+<file path="src/pages/home/components/TestimonialsSection.tsx">
+import { useRef } from 'react'
+import { motion } from 'framer-motion'
+import { Star } from 'lucide-react'
+import { useLanguage } from '@/hooks/useLanguage'
+
+export function TestimonialsSection() {
+  const { t } = useLanguage()
+  const marqueeRef = useRef<HTMLDivElement>(null)
+
+  const testimonials = [
+    {
+      name: 'Maria Silva',
+      role: 'Maquiadora Especialista em Noivas',
+      content:
+        'Consegui profissionalizar completamente meu negocio. Minhas clientes adoram o portal exclusivo!',
+      rating: 5,
+    },
+    {
+      name: 'Ana Costa',
+      role: 'Maquiadora & Beauty Artist',
+      content:
+        'O sistema de pagamentos mudou tudo! Agora recebo na hora e sem complicacao.',
+      rating: 5,
+    },
+    {
+      name: 'Juliana Mendes',
+      role: 'Hair Stylist',
+      content:
+        'A organizacao que o KHAOS KONTROL trouxe para minha rotina e indescritivel. Recomendo!',
+      rating: 5,
+    },
+    {
+      name: 'Camila Santos',
+      role: 'Nail Designer',
+      content:
+        'Finalmente tenho controle total das minhas financas e agenda em um so lugar.',
+      rating: 5,
+    },
+  ]
+
+  return (
+    <section className="py-32 bg-transparent relative overflow-hidden">
+      <div className="container mx-auto px-6 lg:px-8 mb-16 relative z-10">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-block px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-xl text-[10px] shadow-[0_4px_20px_0_rgba(255,255,255,0.05)] uppercase tracking-[0.3em] text-white/60 mb-8 block w-fit"
+            >
+              {t('testimonials_subtitle')}
+            </motion.div>
+            <h2 className="font-serif text-4xl md:text-6xl text-white tracking-tight">
+              {t('testimonials_title')}
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      <div className="relative z-10">
+        <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-black via-[#050505]/80 to-transparent z-10 pointer-events-none" />
+        <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-black via-[#050505]/80 to-transparent z-10 pointer-events-none" />
+
+        <motion.div
+          ref={marqueeRef}
+          className="flex gap-8 py-8"
+          animate={{ x: [0, -1350] }}
+          transition={{
+            duration: 40,
+            repeat: Infinity,
+            ease: 'linear',
+            repeatType: 'loop',
+          }}
+        >
+          {[
+            ...testimonials,
+            ...testimonials,
+            ...testimonials,
+            ...testimonials,
+          ].map((testimonial, index) => (
+            <motion.div
+              key={index}
+              whileHover={{ y: -5, scale: 1.02 }}
+              className="flex-shrink-0 w-[400px] border border-white/10 bg-white/5 backdrop-blur-3xl p-10 rounded-[2.5rem] hover:bg-white/10 shadow-[0_8px_32px_0_rgba(255,255,255,0.02)] group transition-all duration-300"
+            >
+              <div className="flex flex-col justify-between h-full gap-8">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-1">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="h-3.5 w-3.5 fill-white/80 text-white/80 group-hover:fill-white group-hover:text-white transition-colors group-hover:shadow-[0_0_10px_white]"
+                      />
+                    ))}
+                  </div>
+                  <blockquote className="text-lg text-white/70 italic leading-relaxed font-serif group-hover:text-white/90 transition-colors">
+                    &ldquo;{testimonial.content}&rdquo;
+                  </blockquote>
+                </div>
+                <div className="border-t border-white/10 pt-6 group-hover:border-white/20 transition-colors">
+                  <div className="text-[10px] font-bold text-white uppercase tracking-widest">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-[10px] text-white/40 uppercase tracking-widest mt-1">
+                    {testimonial.role}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="src/components/layout/LandingLayout.tsx">
+import { ReactNode } from 'react'
+import Header from '@/components/ui/layout/Header'
+import Footer from '@/components/ui/layout/Footer'
+
+interface LandingLayoutProps {
+  children: ReactNode
+}
+
+export const LandingLayout = ({ children }: LandingLayoutProps) => {
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <Header />
+      <main className="relative z-10">{children}</main>
+      <Footer />
+    </div>
+  )
+}
+</file>
+
+<file path="src/components/ui/Hero3DBackground.tsx">
+import { useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { MeshTransmissionMaterial, TorusKnot } from '@react-three/drei'
+import * as THREE from 'three'
+
+function AnimatedGlassShape() {
+  const meshRef = useRef<THREE.Mesh>(null)
+
+  const materialRef = useRef<any>(null)
+
+  useFrame((state) => {
+    if (!meshRef.current) return
+    const t = state.clock.getElapsedTime()
+
+    meshRef.current.rotation.x = Math.sin(t / 4) / 2
+    meshRef.current.rotation.y = t / 4
+    meshRef.current.rotation.z = Math.cos(t / 4) / 2
+
+    meshRef.current.position.y = Math.sin(t / 2) * 0.2
+
+    const mouseX = (state.pointer.x * Math.PI) / 10
+    const mouseY = (state.pointer.y * Math.PI) / 10
+
+    meshRef.current.rotation.x += mouseY * 0.5
+    meshRef.current.rotation.y += mouseX * 0.5
+  })
+
+  return (
+    <TorusKnot ref={meshRef} args={[1, 0.4, 128, 32]}>
+      <MeshTransmissionMaterial
+        ref={materialRef}
+        samples={16}
+        resolution={512}
+        transmission={0.95}
+        roughness={0.1}
+        thickness={1.5}
+        ior={1.5}
+        chromaticAberration={0.06}
+        anisotropy={0.1}
+        distortion={0.5}
+        distortionScale={0.3}
+        temporalDistortion={0.1}
+        clearcoat={1}
+        attenuationDistance={0.5}
+        attenuationColor="#ffffff"
+        color="#ffffff"
+      />
+    </TorusKnot>
+  )
+}
+
+export function Hero3DBackground() {
+  return (
+    <div className="absolute inset-0 z-[-1] pointer-events-none opacity-60 mix-blend-screen">
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 45 }}
+        gl={{ antialias: true, alpha: true }}
+        dpr={[1, 2]}
+      >
+        <ambientLight intensity={0.5} />
+        <directionalLight
+          position={[10, 10, 10]}
+          intensity={1.5}
+          color="#c084fc"
+        />
+        <directionalLight
+          position={[-10, -10, -10]}
+          intensity={1}
+          color="#ffffff"
+        />
+        <pointLight
+          position={[0, 0, 0]}
+          intensity={2}
+          color="#8b5cf6"
+          distance={10}
+        />
+        <AnimatedGlassShape />
+      </Canvas>
+    </div>
+  )
+}
+
+export default Hero3DBackground
+</file>
+
+<file path="src/pages/home/components/CTASection.tsx">
+import { Button } from '@/components/ui/button'
+import { useNavigate } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
+import { useAnalytics } from '@/hooks/useAnalytics'
+
+export const CTASection = () => {
+  const navigate = useNavigate()
+  const { trackCTAClick } = useAnalytics()
+
+  return (
+    <section className="py-20 md:py-32 bg-black relative overflow-hidden">
+      <div className="container mx-auto px-5 md:px-6 max-w-3xl">
+        <p className="text-white/30 text-xs font-mono uppercase tracking-[0.2em] mb-4 md:mb-6 text-center">
+          A cada semana sem sistema
+        </p>
+
+        <h2 className="text-3xl sm:text-4xl md:text-6xl font-serif text-white text-center leading-tight mb-4 md:mb-6 tracking-tight">
+          Você perde clientes que{' '}
+          <span className="italic text-white/60">nunca mais voltam.</span>
+        </h2>
+
+        <p className="text-white/40 text-center text-sm md:text-lg mb-8 md:mb-12 max-w-xl mx-auto leading-relaxed">
+          Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca
+          esquecem um follow-up, e têm clientes que indicam.
+        </p>
+
+        <div className="flex flex-col items-center gap-4">
+          <Button
+            variant="primary"
+            size="lg"
+            className="px-8 md:px-12 group w-full sm:w-auto"
+            onClick={() => {
+              trackCTAClick('cta_bottom_signup', 'cta_section', '/cadastro')
+              navigate('/cadastro')
+            }}
+          >
+            Começar grátis por 14 dias
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+          <p className="text-xs text-white/25">
+            Sem cartão de crédito. Cancele quando quiser.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+</file>
+
+<file path="src/pages/home/components/HeroSection.tsx">
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { ArrowRight, Play } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { useRef } from 'react'
+import { Button } from '@/components/ui/button'
+import { useAnalytics } from '@/hooks/useAnalytics'
+
+export const HeroSection = () => {
+  const navigate = useNavigate()
+  const { trackCTAClick } = useAnalytics()
+  const heroRef = useRef(null)
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  })
+
+  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+
+  return (
+    <section
+      ref={heroRef}
+      className="relative min-h-[90vh] md:min-h-screen flex items-center bg-black overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0">
+        <motion.div
+          className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-10 md:opacity-15 pointer-events-none"
+          style={{ y }}
+        >
+          <img
+            src="/assets/hero-image-B5FCqZ87.png"
+            alt=""
+            className="w-full h-full object-cover grayscale contrast-125"
+            fetchPriority="high"
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 md:via-black/80 to-black/60 md:to-black/40 z-10" />
+      </div>
+
+      <motion.div
+        className="container mx-auto px-5 md:px-16 relative z-30 max-w-6xl pt-24 md:pt-20"
+        style={{ y, opacity }}
+      >
+        <motion.div
+          className="inline-flex items-center gap-2 mb-6 md:mb-10 px-3 md:px-4 py-1.5 md:py-2 border border-white/10 bg-white/[0.03]"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="flex -space-x-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white/20 border border-black"
+              />
+            ))}
+          </div>
+          <span className="text-white/60 text-[11px] md:text-xs">
+            Usado por <span className="text-white">+200 profissionais</span> de
+            beleza
+          </span>
+        </motion.div>
+
+        <motion.div
+          className="mb-6 md:mb-8"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h1 className="font-serif text-[2.5rem] sm:text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight">
+            Gestão profissional
+          </h1>
+          <h1 className="font-serif text-[2.5rem] sm:text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-tight italic mt-1">
+            para quem transforma beleza em negócio.
+          </h1>
+        </motion.div>
+
+        <motion.p
+          className="text-white/45 text-sm md:text-lg max-w-xl mb-8 md:mb-10 leading-relaxed"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          O Khaos Kontrol organiza seus clientes, contratos, agenda e financeiro
+          em um só lugar — para você focar no que faz de melhor.
+        </motion.p>
+
+        <motion.div
+          className="flex flex-col gap-3 md:flex-row md:gap-6 mb-8 md:mb-12 text-xs md:text-sm text-white/40"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          <span className="flex items-center gap-2">
+            <div className="w-1 h-1 bg-white/60 flex-shrink-0" />
+            Agenda integrada com Google
+          </span>
+          <span className="flex items-center gap-2">
+            <div className="w-1 h-1 bg-white/60 flex-shrink-0" />
+            Contratos com assinatura digital
+          </span>
+          <span className="flex items-center gap-2">
+            <div className="w-1 h-1 bg-white/60 flex-shrink-0" />
+            Portal exclusivo para noivas
+          </span>
+        </motion.div>
+
+        <motion.div
+          className="flex flex-col sm:flex-row gap-3 md:gap-4"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Button
+            variant="primary"
+            size="lg"
+            className="group w-full sm:w-auto"
+            onClick={() => {
+              trackCTAClick('hero_signup', 'hero_section', '/cadastro')
+              navigate('/cadastro')
+            }}
+          >
+            Começar grátis por 14 dias
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </Button>
+
+          <Button
+            variant="glass"
+            size="lg"
+            className="w-full sm:w-auto"
+            onClick={() => {
+              trackCTAClick(
+                'hero_how_it_works',
+                'hero_section',
+                '#como-funciona',
+              )
+              const el = document.getElementById('como-funciona')
+              el?.scrollIntoView({ behavior: 'smooth' })
+            }}
+          >
+            <Play className="w-4 h-4 mr-1" />
+            Ver como funciona
+          </Button>
+        </motion.div>
+      </motion.div>
+
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 hidden md:block"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5 }}
+      >
+        <motion.div
+          className="w-[1px] h-10 bg-gradient-to-b from-white/30 to-transparent"
+          animate={{ y: [0, 8, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        />
+      </motion.div>
+    </section>
+  )
+}
+</file>
+
+<file path="tailwind.config.ts">
+import type { Config } from 'tailwindcss'
+
+import animate from 'tailwindcss-animate'
+
+export default {
+  darkMode: ['class'],
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+  ],
+  prefix: '',
+  theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
+    extend: {
+      fontFamily: {
+        serif: [
+          'Playfair Display',
+          'Cormorant Garamond',
+          'ui-serif',
+          'Georgia',
+          'serif',
+        ],
+        inter: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['Inter', 'Roboto Mono', 'ui-monospace', 'monospace'],
+      },
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+          hover: 'hsl(var(--primary-hover))',
+          light: 'hsl(var(--primary-light))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+          hover: 'hsl(var(--accent-hover))',
+          light: 'hsl(var(--accent-light))',
+        },
+        success: {
+          DEFAULT: 'hsl(var(--success))',
+          foreground: 'hsl(var(--success-foreground))',
+        },
+        warning: {
+          DEFAULT: 'hsl(var(--warning))',
+          foreground: 'hsl(var(--warning-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          primary: 'hsl(var(--sidebar-primary))',
+          'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+          'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
+          border: 'hsl(var(--sidebar-border))',
+          ring: 'hsl(var(--sidebar-ring))',
+        },
+        neon: '#ffffff',
+        metallic: '#C0C0C0',
+        gold: '#D4AF37',
+        whatsapp: '#25D366',
+      },
+      lineHeight: {
+        relaxed: '1.75',
+        loose: '2',
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
+      keyframes: {
+        'accordion-down': {
+          from: {
+            height: '0',
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)',
+          },
+          to: {
+            height: '0',
+          },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
+        'marquee-reverse': {
+          '0%': { transform: 'translateX(-50%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+      },
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
+        marquee: 'marquee 25s linear infinite',
+        'marquee-reverse': 'marquee-reverse 30s linear infinite',
+      },
+      boxShadow: {
+        '2xs': 'var(--shadow-2xs)',
+        xs: 'var(--shadow-xs)',
+        sm: 'var(--shadow-sm)',
+        md: 'var(--shadow-md)',
+        lg: 'var(--shadow-lg)',
+        xl: 'var(--shadow-xl)',
+        '2xl': 'var(--shadow-2xl)',
+      },
+      backdropBlur: {
+        xs: '2px',
+        sm: '4px',
+        md: '12px',
+        lg: '20px',
+        xl: '40px',
+        '2xl': '80px',
+      },
+    },
+  },
+  plugins: [animate],
+} satisfies Config
+</file>
+
+<file path="src/index.css">
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.pac-container {
+  z-index: 9999 !important;
+  pointer-events: auto !important;
+  font-family: inherit;
+  border-radius: 0 !important;
+
+  background-color: #050505 !important;
+  border: 1px solid #333 !important;
+  color: #fff !important;
+}
+
+.pac-item {
+  cursor: pointer;
+  padding: 10px;
+  border-color: #333 !important;
+  color: #999 !important;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+}
+
+.pac-item-query {
+  color: #fff !important;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
+
+    --radius: 2rem;
+    --card-radius: 2.5rem;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 100%;
+
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-serif: 'Playfair Display', serif;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 80%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 10%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 100%;
+  }
+
+  :focus-visible {
+    outline: 2px solid #ef4444;
+
+    outline-offset: 2px;
+    box-shadow: 0 0 0 2px #09090b;
+
+  }
+
+  html,
+  body {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+
+  @media screen and (max-width: 768px) {
+
+    .kk-button,
+    button {
+      padding-top: 0.75rem !important;
+      padding-bottom: 0.75rem !important;
+    }
+  }
+
+  .bg-noise {
+    position: relative;
+  }
+
+  .bg-noise::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .kk-card {
+    @apply border border-white/20 bg-black p-0 shadow-none;
+    border-radius: 0 !important;
+  }
+
+  .tech-card {
+    @apply kk-card;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-card {
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 !important;
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: #FFFFFF;
+    box-shadow: none;
+  }
+
+  button:active {
+    transform: translateY(2px);
+    transition: transform 0.1s;
+  }
+
+  @media screen and (max-width: 768px) {
+
+    input,
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
+
+  .silver-gradient-text {
+
+    color: #FFFFFF;
+    background: none;
+    -webkit-text-fill-color: #FFFFFF;
+  }
+
+  .tech-border {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .bg-noise {
+    position: relative;
+  }
+
+  .bg-noise::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .noir-card {
+    @apply bg-black border border-white p-6 relative overflow-hidden;
+    border-radius: 0 !important;
+  }
+
+  .noir-button {
+    @apply uppercase tracking-widest text-xs font-bold border border-white bg-white text-black hover:bg-black hover:text-white transition-colors duration-300 px-8 py-4;
+    border-radius: 0 !important;
+  }
+
+  .noir-button-outline {
+    @apply uppercase tracking-widest text-xs font-bold border border-white bg-transparent text-white hover:bg-white hover:text-black transition-colors duration-300 px-8 py-4;
+    border-radius: 0 !important;
+  }
+
+  .noir-grid-lines {
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+    background-size: 100px 100px;
+  }
+
+  .text-chrome {
+    color: #ffffff;
+  }
+
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  .glass-card {
+    background: hsl(var(--glass) / 0.05);
+    backdrop-filter: blur(24px);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+    box-shadow: 0 8px 32px 0 hsl(var(--glass) / 0.02);
+  }
+
+  .glass-pill {
+    background: hsl(var(--glass) / 0.05);
+    backdrop-filter: blur(48px);
+    border: 1px solid hsl(var(--glass-border) / 0.1);
+  }
+
+  .glow-soft {
+    box-shadow: 0 0 15px hsl(var(--primary) / 0.1);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--muted-foreground)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+
+  @keyframes marquee-reverse {
+    0% {
+      transform: translateX(-33.333%);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+}
+
+.glow-hover {
+  transition: all 0.3s ease;
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.kk-title {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #FFFFFF;
+}
+
+.kk-text {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: #C0C0C0;
+}
+
+.kk-label {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.kk-button {
+  padding: 0.6rem 1.25rem;
+  border-radius: 0 !important;
+
+  font-family: var(--font-sans);
+  font-weight: 600;
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 200ms ease;
+  box-shadow: none;
+}
+
+.kk-button:hover {
+  border-color: #FFFFFF;
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: none;
+}
+
+.kk-button-ghost {
+  padding: 0.45rem 1rem;
+  border-radius: 0 !important;
+
+  font-weight: 600;
+  color: #C0C0C0;
+  border: 1px solid transparent;
+}
+
+.kk-button-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.glass-panel {
+  background: black;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metallic-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+input,
+textarea,
+.input,
+.textarea {
+  border-radius: 0 !important;
+
+  background: transparent;
+  color: #F3F4F6;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #000000 inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input[type="text"],
+input[type="email"],
+textarea {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 0.5rem;
+  outline: none;
+}
+
+input:focus,
+textarea:focus {
+  border-color: #FFFFFF;
+  box-shadow: none;
+}
+
+.dashboard-root .kk-button {
+  background: #000000;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: none;
+}
+
+.kk-badge {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-white/5 text-white/70 border border-white/20;
+  border-radius: 0 !important;
+}
+
+.kk-badge-pending {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-transparent text-white border border-white;
+  border-radius: 0 !important;
+}
+
+.kk-badge-active {
+  @apply inline-flex items-center px-3 py-1 text-xs font-medium bg-white text-black border border-white;
+  border-radius: 0 !important;
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.bento-item {
+  @apply overflow-hidden border border-white/20;
+  border-radius: 0 !important;
+}
+
+.bento-item-large {
+  grid-column: span 2;
+}
+
+.quick-nav-card {
+  @apply cursor-pointer;
+}
+
+.quick-nav-card-inner {
+  @apply kk-card p-6 h-full flex flex-col items-center justify-center gap-4 transition-all duration-300;
+
+}
+
+.quick-nav-card:hover .quick-nav-card-inner {
+  @apply border-white bg-white text-black;
+  box-shadow: none;
+}
+
+.metric-card {
+  @apply kk-card p-6 flex flex-col items-center justify-center;
+}
+
+@layer utilities {
+  .noise-texture {
+    position: relative;
+  }
+
+  .noise-texture::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.1;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+}
+
+
+.metric-value {
+  @apply kk-title text-4xl font-bold text-white;
+}
+
+.metric-label {
+  @apply kk-label mt-2;
+}
+
+.icon-thin {
+  @apply stroke-[1.5];
+}
+
+.icon-pastels {
+  @apply text-white;
+
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-title {
+  @apply font-serif font-light tracking-[-0.04em];
+}
+
+.hero-subtitle {
+  @apply font-sans font-light text-lg;
+}
+
+@keyframes glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
+  }
+}
+
+.button-glow {
+  animation: glow 3s ease-in-out infinite;
+}
+
+.button-glow:hover {
+  animation: none;
+  box-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes skeleton-wave {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 100%);
+  transform: translateX(-100%);
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.skeleton-wave {
+  background: linear-gradient(90deg,
+      rgba(38, 38, 38, 0.5) 0%,
+      rgba(64, 64, 64, 0.5) 50%,
+      rgba(38, 38, 38, 0.5) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-slide-up {
+  animation: fadeInSlideUp 0.6s ease-out forwards;
+}
+
+.journal-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 3.25rem;
+  color: #FFFFFF;
+}
+
+.masonry {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.masonry-item {
+  break-inside: avoid;
+}
+
+.journal-image-wrapper {
+  overflow: hidden;
+  height: 320px;
+  display: block;
+}
+
+.journal-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(100%) contrast(0.95) brightness(0.98);
+  transition: all 450ms ease;
+}
+
+.group:hover .journal-image {
+  filter: none;
+  transform: scale(1.03);
+}
+
+.journal-article-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #FFFFFF;
+}
+
+.article-body {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.875;
+  color: #C0C0C0;
+  max-width: 50rem;
+}
+
+.article-body p {
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+.pac-container {
+  z-index: 99999 !important;
+  background-color: #09090b !important;
+
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-family: var(--font-sans) !important;
+  pointer-events: auto !important;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5) !important;
+  margin-top: 8px !important;
+
+}
+
+.pac-item {
+  color: #e4e4e7 !important;
+
+  cursor: pointer !important;
+  padding: 12px 16px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.05) !important;
+  font-size: 0.875rem !important;
+
+  line-height: 1.5 !important;
+}
+
+.pac-item:hover,
+.pac-item-selected {
+  background-color: #27272a !important;
+
+  color: #fff !important;
+}
+
+.pac-item-query {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+}
+
+.pac-matched {
+  font-weight: 700 !important;
+  color: #ffffff !important;
+}
+
+.pac-icon {
+  display: none !important;
+
+}
+
+.pac-item-query {
+  color: #ffffff !important;
+  font-weight: 500;
+}
+
+::selection {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+::-moz-selection {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+.react-joyride__tooltip {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  border-radius: 0px !important;
+  font-family: var(--font-mono) !important;
+}
+
+.react-joyride__spotlight {
+  border-radius: 0px !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.react-joyride__tooltip button {
+  border-radius: 0px !important;
+  font-family: var(--font-mono) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.1em !important;
+}
+
+.react-joyride__tooltip button[data-action="primary"] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}
+
+.react-joyride__tooltip button[data-action="skip"] {
+  color: #888888 !important;
+}
+
+.rbc-calendar {
+  font-family: var(--font-mono) !important;
+  color: #ffffff !important;
+}
+
+.rbc-toolbar {
+  margin-bottom: 2rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.rbc-toolbar button {
+  @apply rounded-none border border-white/20 text-white uppercase tracking-widest text-[10px] font-bold py-2 px-4 transition-all duration-200;
+  background: transparent !important;
+}
+
+.rbc-toolbar button:hover {
+  @apply bg-white text-black border-white !important;
+}
+
+.rbc-toolbar button.rbc-active {
+  @apply bg-white text-black border-white !important;
+  box-shadow: none !important;
+}
+
+.rbc-toolbar-label {
+  @apply font-serif text-lg sm:text-2xl uppercase tracking-tighter text-white !important;
+}
+
+.rbc-header {
+  text-transform: uppercase !important;
+  font-size: 0.7rem !important;
+  letter-spacing: 0.15em !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
+  padding: 15px 10px !important;
+  background: #000 !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.rbc-today {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.rbc-off-range-bg {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.rbc-event {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border-radius: 0px !important;
+  border: 1px solid #ffffff !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important;
+  padding: 4px 8px !important;
+}
+
+.rbc-event.rbc-selected {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #ffffff !important;
+}
+
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rbc-time-header {
+  margin-right: 0 !important;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rbc-time-content {
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  min-height: 60px !important;
+
+}
+
+.rbc-time-slot {
+  border-top: 1px solid rgba(255, 255, 255, 0.02) !important;
+}
+
+.rbc-time-gutter .rbc-timeslot-group {
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-size: 0.7rem !important;
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+@layer utilities {
+  .text-responsive-xl {
+    @apply text-4xl md:text-6xl lg:text-8xl;
+  }
+
+  .text-responsive-lg {
+    @apply text-3xl md:text-4xl lg:text-6xl;
+  }
+
+  .text-responsive-md {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: max(0px, env(safe-area-inset-left));
+    padding-right: max(0px, env(safe-area-inset-right));
+  }
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+}
+
+.rounded-2xl {
+  border-radius: 1rem;
+
+}
+
+.rounded-3xl {
+  border-radius: 1.5rem;
+
+}
+
+.rounded-full {
+  border-radius: 9999px;
+}
+
+button {
+  border-radius: 9999px !important;
+
+  border: none;
+}
+
+button.glass {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.card {
+  border-radius: 1.5rem !important;
+
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.noise-texture {
+  position: relative;
+}
+
+.noise-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.text-left {
+  text-align: left !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+* {
+  border-radius: inherit;
+}
+
+input,
+textarea,
+select {
+  border-radius: 0.5rem !important;
+}
+/* ===== CORREÇÕES CRÍTICAS ===== */
+
+/* Forçar arredondamento em TODOS os botões do site */
+button:not(.no-round) {
+  border-radius: 9999px !important;
+}
+
+/* Exceção: botão do hero deve ser quadrado */
+button.hero-btn,
+button[class*="rounded-none"] {
+  border-radius: 0 !important;
+}
+
+/* ===== GLASSMORPHISM UTILITIES ===== */
+.glass {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37) !important;
+  border-radius: 9999px !important;
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5) !important;
+  border-radius: 9999px !important;
+}
+
+/* ===== CARD GLASSMORPHISM ===== */
+.card,
+[class*="glass-card"],
+[class*="GlassCard"] {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
+}
+
+.card:hover,
+[class*="glass-card"]:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* ===== NOISE TEXTURE OVERLAY ===== */
+.noise-overlay {
+  position: relative;
+}
+
+.noise-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='3' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.15;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 20;
+}
+
+/* ===== ROUNDED UTILITIES ===== */
+.rounded-2xl {
+  border-radius: 1rem !important;
+}
+
+.rounded-3xl {
+  border-radius: 1.5rem !important;
+}
+
+.rounded-full {
+  border-radius: 9999px !important;
+}
+
+.rounded-none {
+  border-radius: 0 !important;
+}
+
+/* ===== INPUT GLASSMORPHISM ===== */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  color: white !important;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  outline: none !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== BACKDROP BLUR SUPPORT ===== */
+@supports not (backdrop-filter: blur(20px)) {
+  .glass,
+  .glass-strong,
+  .card,
+  [class*="backdrop-blur"] {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+}
+
+/* ===== ANTI-ALIASING ===== */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== TEXT SELECTION ===== */
+::selection {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* ===== FOCUS VISIBLE ===== */
+*:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.4);
+  outline-offset: 2px;
+}
+
+/* ===== SMOOTH SCROLLING ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ===== PREVENT LAYOUT SHIFT ===== */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ===== MOBILE OPTIMIZATIONS ===== */
+@media (max-width: 768px) {
+  /* Touch targets mínimo de 44x44px */
+  button,
+  a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ===== TRANSITION PERFORMANCE ===== */
+* {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== REMOVE DEFAULT OUTLINES ===== */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ===== TAILWIND LAYER FIXES ===== */
+@layer components {
+  .btn-glass {
+    @apply bg-white/10 text-white border border-white/20;
+    @apply hover:bg-white/15 hover:border-white/30;
+    @apply backdrop-blur-2xl rounded-full;
+    @apply shadow-2xl shadow-black/20;
+    @apply transition-all duration-300;
+  }
+
+  .kk-button {
+    @apply bg-white text-black font-bold;
+    @apply hover:bg-white/90;
+    @apply shadow-lg shadow-black/20;
+    @apply rounded-none;
+    @apply transition-all duration-300;
+  }
+}
+
+/* --- Visual Overhaul v2.9 Globals --- */
+
+button:not(.no-round):not(.rounded-none):not([class*="rounded-none"]) {
+  border-radius: 9999px !important;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.03) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.glass-strong {
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: blur(40px) !important;
+  -webkit-backdrop-filter: blur(40px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.card {
+  background: rgba(5, 5, 5, 0.8) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1.5rem !important;
+}
+
+.noise-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* Form Inputs Glassmorphism */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.02) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 9999px !important;
+  color: #fff !important;
+  padding: 0.75rem 1.25rem !important;
+  transition: all 0.3s ease !important;
+}
+
+textarea {
+  border-radius: 1rem !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05) !important;
+  outline: none !important;
+}
+</file>
+
+</files>

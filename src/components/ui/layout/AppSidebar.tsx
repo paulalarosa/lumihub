@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Scissors,
   Filter,
+  Building2,
 } from 'lucide-react'
 
 import {
@@ -30,10 +31,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
+import { useIsStudioMember } from '@/features/calendar/hooks/useStudioCalendar'
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
-  const isAdmin = useIsAdmin()
+  const { isAdmin } = useIsAdmin()
+  const isStudio = useIsStudioMember()
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
 
@@ -131,6 +134,22 @@ export function AppSidebar() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+              {isStudio && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive('/studio')}
+                    className="data-[active=true]:bg-foreground data-[active=true]:text-background data-[active=true]:border-r-0 hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none border-l-2 border-transparent data-[active=true]:border-transparent"
+                  >
+                    <Link to="/studio">
+                      <Building2 className="h-4 w-4" />
+                      <span className="font-mono text-xs uppercase tracking-wider">
+                        Studio Kaos
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

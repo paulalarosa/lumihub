@@ -3,7 +3,6 @@ import { useEffect, useState, lazy, Suspense } from 'react'
 import { SplashScreen } from './components/ui/layout/SplashScreen'
 import { Toaster as Sonner } from '@/components/ui/sonner'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -98,6 +97,9 @@ const ProjectContract = lazy(
   () => import('@/features/contracts/pages/ProjectContract'),
 )
 const NotFound = lazy(() => import('./pages/NotFound'))
+const StudioCalendarPage = lazy(
+  () => import('@/features/calendar/pages/StudioCalendarPage'),
+)
 const PublicBooking = lazy(
   () => import('@/features/public-booking/pages/PublicBooking'),
 )
@@ -334,6 +336,10 @@ const App = () => {
                                 <LazyPage component={GoogleCalendarCallback} />
                               }
                             />
+                            <Route
+                              path="/studio"
+                              element={<LazyPage component={StudioCalendarPage} />}
+                            />
 
                             <Route
                               path="/clientes"
@@ -490,7 +496,7 @@ const App = () => {
                         </Route>
                         <Route
                           path="*"
-                          element={<LazyPage component={Dashboard} />}
+                          element={<LazyPage component={NotFound} />}
                         />
                         <Route
                           path="/404"
@@ -508,7 +514,6 @@ const App = () => {
               </Suspense>
             </AIProvider>
           </AnalyticsProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </AuthProvider>
     </BrowserRouter>

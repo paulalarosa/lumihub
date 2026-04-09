@@ -16,6 +16,7 @@ import {
   Search,
   ShieldOff,
   CreditCard,
+  Building2,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -184,6 +185,24 @@ export default function AdminUsers() {
         description: 'Falha ao atualizar plano.',
         variant: 'destructive',
       })
+    }
+  }
+ 
+  const handleStudioTag = async (userId: string, isStudio: boolean) => {
+    try {
+      const { data, error } = await (supabase.rpc as any)('admin_set_studio_tag', {
+        p_user_id: userId,
+        p_is_studio: isStudio,
+      })
+      if (error) throw error
+      toast({
+        title: isStudio ? 'Tag Studio adicionada' : 'Tag Studio removida',
+        description: (data as any)?.user_name || '',
+      })
+      refetch()
+    } catch (error) {
+      logger.error('AdminUsers.handleStudioTag', error)
+      toast({ title: 'Erro', variant: 'destructive' })
     }
   }
 
@@ -387,6 +406,13 @@ export default function AdminUsers() {
                           >
                             <Lock className="mr-2 h-3 w-3" />
                             RESET_ACCESS
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="cursor-pointer rounded-none font-mono text-[10px] uppercase tracking-widest text-zinc-400 focus:bg-white focus:text-black py-2"
+                            onClick={() => handleStudioTag(u.id, u.subscription_tier !== 'studio')}
+                          >
+                            <Building2 className="mr-2 h-3 w-3" />
+                            {u.subscription_tier === 'studio' ? 'REMOVER_STUDIO' : 'DAR_STUDIO'}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-zinc-900" />
                           {isBlocked(u) ? (

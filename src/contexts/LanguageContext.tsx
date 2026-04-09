@@ -125,17 +125,31 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang)
   }
 
-  const t = (key: string): string => {
+  const t = (key: string, options?: Record<string, string | number>): string => {
     const lang = (i18n.language as Language) || 'pt'
 
     const externalValue =
-      externalTranslations[lang]?.[key as keyof typeof externalTranslations.pt]
-    if (externalValue) return externalValue
+      externalTranslations[lang]?.[key as keyof typeof externalTranslations.pt] as string | undefined
+    
+    // If we have options (interpolation), we should probably use i18nextT 
+    // to handle the actual interpolation logic if the key exists there.
+    // If it's in externalTranslations, we'd need a simple search/replace tool.
+    
+    if (externalValue && typeof externalValue === 'string') {
+      if (options) {
+        let result = externalValue
+        Object.keys(options).forEach(optKey => {
+          result = result.replace(`{{${optKey}}}`, String(options[optKey]))
+        })
+        return result
+      }
+      return externalValue
+    }
 
     const inlineValue = inlineTranslations[lang]?.[key]
     if (inlineValue) return inlineValue
 
-    return i18nextT(key) || key
+    return (i18nextT(key, options) as string) || key
   }
 
   return (

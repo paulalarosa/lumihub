@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
@@ -49,35 +49,16 @@ export default function AdminDashboard() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const { user, loading: authLoading, signOut } = useAuth()
-  const isAuthorizedAdmin = useIsAdmin()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const { isAdmin: isAuthorizedAdmin, isLoading: adminLoading } = useIsAdmin()
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   const activeTab = (searchParams.get('tab') as AdminTab) || 'overview'
-
-  useEffect(() => {
-    if (!authLoading) {
-      if (!user) {
-        navigate('/auth')
-        return
-      }
-
-      if (!isAuthorizedAdmin) {
-        navigate('/')
-        return
-      }
-
-      setIsAdmin(true)
-      setLoading(false)
-    }
-  }, [user, authLoading, navigate, isAuthorizedAdmin])
 
   const setTab = (tab: AdminTab) => {
     setSearchParams({ tab })
   }
 
-  if (authLoading || loading) {
+  if (authLoading || adminLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <p className="text-foreground font-mono uppercase tracking-widest text-xs">
@@ -87,7 +68,7 @@ export default function AdminDashboard() {
     )
   }
 
-  if (!isAdmin) {
+  if (!isAuthorizedAdmin) {
     return null
   }
 

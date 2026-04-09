@@ -34,7 +34,7 @@ export const BackupService = {
     const key = await window.crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt: enc.encode('lumi-hub-salt'),
+        salt: enc.encode('khaos-kontrol-salt'),
         iterations: 100000,
         hash: 'SHA-256',
       },

@@ -60,18 +60,18 @@ export default function BlogArticle() {
 
   if (!article) {
     return (
-      <div className=" bg-[#FAFAFA] text-[#050505]">
+      <div className="bg-background text-foreground">
         <main className="container mx-auto px-6 py-20">
           <Link
             to="/blog"
-            className="inline-flex items-center gap-2 text-[#374151] hover:text-[#050505]"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Journal
           </Link>
           <div className="mt-12 text-center">
             <div className="text-center space-y-6">
-              <h1 className="font-serif text-6xl text-white italic">404</h1>
+              <h1 className="font-serif text-6xl italic">404</h1>
               <p className="text-muted-foreground tracking-widest uppercase text-xs">
                 Página não encontrada | KHAOS KONTROL
               </p>
@@ -83,13 +83,13 @@ export default function BlogArticle() {
   }
 
   return (
-    <div className="bg-[#FAFAFA] text-[#050505]">
+    <div className="bg-background text-foreground">
       <main className="container mx-auto px-6 py-12">
         {}
-        <div className="sticky top-20 bg-[#FAFAFA] z-40 py-4 mb-8">
+        <div className="sticky top-20 bg-background z-40 py-4 mb-8">
           <Link
             to="/blog"
-            className="inline-flex items-center gap-2 text-[#374151] hover:text-[#050505] transition-colors"
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Journal
@@ -101,7 +101,7 @@ export default function BlogArticle() {
           {}
           <header className="mb-12">
             {article.image && (
-              <div className="mb-12 aspect-[21/9] overflow-hidden rounded-[2.5rem] border border-black/5">
+              <div className="mb-12 aspect-[21/9] overflow-hidden rounded-[2.5rem] border border-border/5">
                 <img
                   src={article.image}
                   alt={article.title}
@@ -109,34 +109,34 @@ export default function BlogArticle() {
                 />
               </div>
             )}
-            <h1 className="journal-title text-5xl mb-6 leading-tight">
+            <h1 className="journal-title text-5xl mb-6 leading-tight text-foreground">
               {article.title}
             </h1>
-            <div className="text-sm text-[#374151] space-y-1">
+            <div className="text-sm text-muted-foreground space-y-1">
               <p className="font-semibold tracking-widest">{article.author}</p>
               <p>{article.date}</p>
             </div>
           </header>
 
           {}
-          <div className="article-body text-lg text-[#374151] leading-8 space-y-6">
+          <div className="article-body text-lg text-foreground/80 leading-8 space-y-6">
             {article.content
               .split('\n')
               .filter((p: string) => p.trim().startsWith('<p>'))
               .map((paragraph: string, idx: number) => (
-                <p key={idx} className="text-[#374151]">
+                <p key={idx} className="text-foreground/80">
                   {paragraph.replace(/<p>|<\/p>/g, '')}
                 </p>
               ))}
           </div>
 
           {}
-          <div className="mt-16 pt-8 border-t border-[#E5E7EB]">
-            <p className="text-sm text-[#374151] mb-4">
-              Ready to scale your creative business?
+          <div className="mt-16 pt-8 border-t border-border">
+            <p className="text-sm text-muted-foreground mb-4">
+              Ready to scale your business?
             </p>
             <a href="/contact" className="kk-button inline-block">
-              Apply for Studio Pro
+              Apply for KHAOS KONTROL Pro
             </a>
           </div>
         </article>

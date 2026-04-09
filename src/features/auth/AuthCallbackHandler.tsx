@@ -31,9 +31,9 @@ const AuthCallbackHandler = () => {
     } else {
       setTimeout(() => navigate('/dashboard'), 1000)
     }
-  }, [searchParams])
+  }, [searchParams, navigate, handleOAuthCallback])
 
-  const handleOAuthCallback = async () => {
+  const handleOAuthCallback = useCallback(async () => {
     try {
       setLoadingText('Validando conexão com Google...')
 
@@ -65,9 +65,9 @@ const AuthCallbackHandler = () => {
       setStatus('error')
       setErrorMessage(err instanceof Error ? err.message : 'Erro de conexão.')
     }
-  }
+  }, [navigate, validateSession])
 
-  const validateSession = async (session: {
+  const validateSession = useCallback(async (session: {
     provider_token?: string
     provider_refresh_token?: string
     user: { id: string }
@@ -86,11 +86,12 @@ const AuthCallbackHandler = () => {
       .eq('id', session.user.id)
 
     if (updateError) {
+      console.error('Error updating profile onboarding status:', updateError)
     }
 
     setStatus('success')
     setTimeout(() => navigate('/dashboard'), 1500)
-  }
+  }, [navigate])
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 font-sans selection:bg-black selection:text-white relative overflow-hidden">
