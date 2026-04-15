@@ -20,7 +20,6 @@ export interface StudioEvent {
 
 export function useStudioCalendar(startDate: string, endDate: string) {
   const queryClient = useQueryClient()
-  const { user } = useAuth()
   const { toast } = useToast()
 
   const eventsQuery = useQuery({

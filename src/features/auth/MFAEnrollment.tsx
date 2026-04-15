@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useMFA } from '@/hooks/useMFA'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,14 +34,14 @@ export default function MFAEnrollment() {
   const [enrolled, setEnrolled] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState<string | null>(null)
 
-  const fetchFactors = async () => {
+  const fetchFactors = useCallback(async () => {
     const facts = await listFactors()
     setFactors(facts || [])
-  }
+  }, [listFactors])
 
   useEffect(() => {
     fetchFactors()
-  }, [])
+  }, [fetchFactors])
 
   const handleEnroll = async () => {
     const response = await enroll()

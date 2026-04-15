@@ -26,11 +26,6 @@ import { PageLoader } from '@/components/ui/PageLoader'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
-const OnboardingWizard = lazy(() =>
-  import('@/components/onboarding/OnboardingWizard').then((m) => ({
-    default: m.OnboardingWizard,
-  })),
-)
 const AchievementNotifications = lazy(() =>
   import('@/components/onboarding/AchievementToast').then((m) => ({
     default: m.AchievementNotifications,
@@ -97,6 +92,10 @@ const ProjectContract = lazy(
   () => import('@/features/contracts/pages/ProjectContract'),
 )
 const NotFound = lazy(() => import('./pages/NotFound'))
+const Refund = lazy(() => import('@/pages/Refund'))
+const Security = lazy(() => import('@/pages/Security'))
+const Cookies = lazy(() => import('@/pages/Cookies'))
+const DPA = lazy(() => import('@/pages/DPA'))
 const StudioCalendarPage = lazy(
   () => import('@/features/calendar/pages/StudioCalendarPage'),
 )
@@ -248,6 +247,22 @@ const App = () => {
                           <Route
                             path="/termos"
                             element={<LazyPage component={Terms} />}
+                          />
+                          <Route
+                            path="/reembolso"
+                            element={<LazyPage component={Refund} />}
+                          />
+                          <Route
+                            path="/seguranca"
+                            element={<LazyPage component={Security} />}
+                          />
+                          <Route
+                            path="/cookies"
+                            element={<LazyPage component={Cookies} />}
+                          />
+                          <Route
+                            path="/dpa"
+                            element={<LazyPage component={DPA} />}
                           />
                         </Route>
 

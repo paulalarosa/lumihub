@@ -2,14 +2,20 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { X, Download } from 'lucide-react'
 
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[]
+  readonly userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+  prompt(): Promise<void>
+}
+
 export const InstallPrompt = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [showPrompt, setShowPrompt] = useState(false)
 
   useEffect(() => {
     const handler = (e: Event) => {
       e.preventDefault()
-      setDeferredPrompt(e)
+      setDeferredPrompt(e as BeforeInstallPromptEvent)
 
       const isInstalled = window.matchMedia(
         '(display-mode: standalone)',
@@ -19,16 +25,20 @@ export const InstallPrompt = () => {
       }
     }
 
-    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('beforeinstallprompt', handler as any)
 
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler as any)
   }, [])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
 
     deferredPrompt.prompt()
-    const { _outcome } = await deferredPrompt.userChoice
+    const { outcome } = await deferredPrompt.userChoice
+
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt')
+    }
 
     setDeferredPrompt(null)
     setShowPrompt(false)

@@ -27,7 +27,7 @@ export const Canvas = memo(function Canvas({
   title,
   content,
   type = 'document',
-  language,
+  language: _language,
 }: CanvasProps) {
   const [isMaximized, setIsMaximized] = React.useState(false)
 

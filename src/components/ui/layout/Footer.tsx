@@ -2,7 +2,6 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { Link } from 'react-router-dom'
 import {
   Instagram,
-  Youtube,
   MessageCircle,
   Mail,
   ArrowUpRight,
@@ -14,7 +13,7 @@ export default function Footer() {
 
   const footerLinks = [
     {
-      title: t('SIDEBAR_MENU_MAIN'),
+      title: 'Explorar',
       links: [
         { label: t('header_features'), href: '/recursos' },
         { label: t('header_plans'), href: '/planos' },
@@ -23,35 +22,35 @@ export default function Footer() {
       ],
     },
     {
-      title: t('header_features'),
+      title: 'Legal',
       links: [
-        { label: t('home.hero.features.google'), href: '/recursos' },
-        { label: t('SIDEBAR_CLIENTS'), href: '/recursos' },
-        { label: t('home.hero.features.contracts'), href: '/recursos' },
-        { label: t('SIDEBAR_DASHBOARD'), href: '/recursos' },
+        { label: t('lgpd.consent_terms'), href: '/termos' },
+        { label: t('lgpd.consent_privacy'), href: '/privacidade' },
+        { label: t('lgpd.consent_refund'), href: '/reembolso' },
+        { label: t('lgpd.consent_security'), href: '/seguranca' },
+        { label: t('lgpd.consent_cookies'), href: '/cookies' },
+        { label: t('lgpd.consent_dpa'), href: '/dpa' },
       ],
     },
     {
-      title: t('admin.config'),
+      title: 'Conectar',
       links: [
-        { label: t('admin.logs'), href: '/contato' },
         {
           label: 'WhatsApp',
           href: 'https://wa.me/5521983604870',
           external: true,
         },
         {
-          label: 'E-mail',
-          href: 'mailto:khaoskontrol07@gmail.com',
-          external: true,
+          label: 'Acesso Kontrol',
+          href: '/login',
+          isButton: true,
         },
       ],
     },
   ]
 
   const socials = [
-    { icon: Instagram, href: 'https://instagram.com', label: 'Instagram' },
-    { icon: Youtube, href: 'https://youtube.com', label: 'YouTube' },
+    { icon: Instagram, href: 'https://instagram.com/khaoskontrol_', label: 'Instagram' },
     {
       icon: MessageCircle,
       href: 'https://wa.me/5521983604870',
@@ -86,9 +85,9 @@ export default function Footer() {
         </div>
 
         {}
-        <div className="py-16 grid grid-cols-2 md:grid-cols-5 gap-10 text-left">
+        <div className="py-16 flex flex-col md:grid md:grid-cols-5 gap-10 text-left">
           {}
-          <div className="col-span-2 flex flex-col gap-6 text-left">
+          <div className="md:col-span-2 flex flex-col gap-6 text-left">
             <Link to="/" className="flex items-center gap-2.5 group w-fit">
               <img
                 src="/favicon-khaoskontrol.webp"
@@ -121,18 +120,31 @@ export default function Footer() {
           {}
           {footerLinks.map((group) => (
             <div key={group.title} className="space-y-4 text-left">
-              <h4 className="text-xs font-medium text-foreground tracking-wide uppercase">
+              <h4 className="text-[11px] font-bold text-foreground tracking-widest uppercase mb-6">
                 {group.title}
               </h4>
               <ul className="space-y-2.5">
-                {group.links.map((link) =>
-                  link.external ? (
+                {group.links.map((link) => {
+                  if (link.isButton) {
+                    return (
+                      <li key={link.label} className="pt-2">
+                        <Link
+                          to={link.href}
+                          className="inline-flex items-center px-4 py-2 bg-foreground text-background rounded-full text-[11px] font-bold hover:bg-foreground/90 transition-all uppercase tracking-widest"
+                        >
+                          {link.label}
+                        </Link>
+                      </li>
+                    )
+                  }
+
+                  return link.external ? (
                     <li key={link.label}>
                       <a
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
+                        className="text-[13px] text-muted-foreground hover:text-foreground transition-colors inline-flex items-center gap-1"
                       >
                         {link.label}
                         <ArrowUpRight className="w-3 h-3" />
@@ -142,13 +154,13 @@ export default function Footer() {
                     <li key={link.label}>
                       <Link
                         to={link.href}
-                        className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-[13px] text-muted-foreground hover:text-foreground transition-colors"
                       >
                         {link.label}
                       </Link>
                     </li>
-                  ),
-                )}
+                  )
+                })}
               </ul>
             </div>
           ))}

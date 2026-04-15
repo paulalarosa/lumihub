@@ -196,6 +196,10 @@
         "export_note": "Export generates a JSON file with all your data. Deletion is processed within 15 business days.",
         "consent_terms": "Terms of Service",
         "consent_privacy": "Privacy Policy",
+        "consent_refund": "Refund & Cancellation",
+        "consent_security": "Information Security",
+        "consent_cookies": "Cookie Policy",
+        "consent_dpa": "Data Processing Addendum (DPA)",
         "consent_marketing": "Marketing Emails",
         "consent_analytics": "Analytics & Tracking",
         "required": "REQUIRED",
@@ -318,22 +322,30 @@
         "process": {
             "title": "Simple processes for real empires",
             "subtitle": "We automate the mechanical so you can focus on the artistic.",
-            "save_time": {
-                "title": "Save 15h+ weekly",
-                "desc": "Eliminate repetitive tasks with our operative AI and smart contract automations."
-            },
             "features": {
-                "analytics": {
-                    "title": "Analytics Noir",
-                    "desc": "High contrast dashboard with vital career metrics in real-time."
+                "management": {
+                    "title": "Silent Management",
+                    "desc": "Cancel the noise of lost messages. We organize your schedule so your only focus is your art."
                 },
                 "legal": {
-                    "title": "Legal Kontrol",
-                    "desc": "Contract generator with legal validity and integrated digital signature."
+                    "title": "Unbreakable Contracts",
+                    "desc": "Protect your schedule and your revenue with instant digital signatures. Paperless, full legal validity."
                 },
-                "sales": {
-                    "title": "Sales Pro",
-                    "desc": "Minimalist CRM focused on converting leads into recurring revenue."
+                "financial": {
+                    "title": "Precision Billing",
+                    "desc": "Transform 'I think I earned' into real metrics. Track balances and net profit in real-time."
+                },
+                "experience": {
+                    "title": "Premium Experience",
+                    "desc": "Elevate your perceived value. An exclusive space for your client to track schedules and briefings."
+                },
+                "automation": {
+                    "title": "Operative Automation",
+                    "desc": "Save 15h+ weekly. Our AI handles scheduling and reminders while you handle what matters."
+                },
+                "growth": {
+                    "title": "Career Insights",
+                    "desc": "Don't just manage, grow. Analyze your client sources and discover where to invest your marketing."
                 }
             }
         },

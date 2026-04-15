@@ -75,7 +75,7 @@ export function useProjectActions({
       })
       setNewTaskTitle('')
       refetch()
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const toggleTask = async (taskId: string, currentStatus: string | null) => {
@@ -89,7 +89,7 @@ export function useProjectActions({
       setTasks(
         tasks.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
       )
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const deleteTask = async (taskId: string) => {
@@ -100,7 +100,7 @@ export function useProjectActions({
         project_id: projectId,
       })
       setTasks(tasks.filter((t) => t.id !== taskId))
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const copyPortalLink = async () => {
@@ -270,7 +270,7 @@ export function useProjectActions({
       setServiceQuantity('1')
       setServicePrice('')
       refetch()
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const removeServiceFromProject = async (projectServiceId: string) => {
@@ -281,7 +281,7 @@ export function useProjectActions({
         project_id: projectId,
       })
       refetch()
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const registerPayment = async (e: React.FormEvent) => {
@@ -336,7 +336,7 @@ export function useProjectActions({
       setPaymentAmount('')
       setPaymentDescription('')
       refetch()
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const handleSelectService = (serviceId: string) => {

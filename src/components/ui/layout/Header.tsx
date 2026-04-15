@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X, Moon, Sun } from 'lucide-react'
+import { Menu, X, Moon, Sun, Instagram, Youtube, MessageCircle, Mail } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -11,6 +11,13 @@ const navLinks = [
   { name: 'header_plans', path: '/planos' },
   { name: 'header_blog', path: '/blog' },
   { name: 'header_contact', path: '/contato' },
+]
+
+const socials = [
+  { icon: Instagram, href: 'https://instagram.com' },
+  { icon: Youtube, href: 'https://youtube.com' },
+  { icon: MessageCircle, href: 'https://wa.me/5521983604870' },
+  { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com' },
 ]
 
 export default function Header() {
@@ -141,36 +148,123 @@ export default function Header() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 right-0 bg-background border-b border-border shadow-2xl p-6 md:hidden flex flex-col gap-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] md:hidden flex flex-col"
+            style={{ backgroundColor: 'black', opacity: 1 }}
           >
-            <nav className="flex flex-col gap-4">
-              {navLinks.map((link) => {
+            <div className="flex items-center justify-between p-6 border-b border-border/10">
+              <Link
+                to="/"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2.5"
+              >
+                <img
+                  src="/favicon-khaoskontrol.webp"
+                  alt="Khaos Kontrol"
+                  className="w-8 h-8 object-contain"
+                />
+                <span className="font-serif text-xl font-bold tracking-tighter text-foreground decoration-foreground/0 group-hover:decoration-foreground/100 underline transition-all underline-offset-4">
+                  KHAOS_KONTROL
+                </span>
+              </Link>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:bg-foreground/5 transition-colors"
+                aria-label="Fechar menu"
+              >
+                <X className="w-5 h-5 text-foreground" />
+              </button>
+            </div>
+
+            <nav className="flex-1 flex flex-col items-center justify-center gap-6 px-10">
+              {navLinks.map((link, i) => {
                 const isActive = location.pathname === link.path
                 return (
-                  <Link
+                  <motion.div
                     key={link.path}
-                    to={link.path}
-                    className={cn(
-                      'px-4 py-3.5 rounded-xl text-sm transition-all uppercase tracking-wider',
-                      isActive
-                        ? 'bg-foreground/10 text-foreground font-medium'
-                        : 'text-muted-foreground hover:text-foreground',
-                    )}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + i * 0.1 }}
                   >
-                    {t(link.name)}
-                  </Link>
+                    <Link
+                      to={link.path}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        'text-4xl font-serif tracking-tight transition-all',
+                        isActive
+                          ? 'text-foreground'
+                          : 'text-foreground/40 hover:text-foreground',
+                      )}
+                    >
+                      {t(link.name)}
+                    </Link>
+                  </motion.div>
                 )
               })}
-              <Link
-                to="/planos"
-                className="mt-4 text-center px-6 py-3.5 bg-foreground text-background rounded-full text-sm font-medium flex items-center justify-center gap-2 uppercase tracking-[0.2em]"
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="w-full max-w-[280px] mt-8"
               >
-                Acesso Kontrol
-              </Link>
+                <Link
+                  to="/login"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center px-10 py-4 bg-foreground text-background rounded-full text-sm font-bold uppercase tracking-[0.2em] hover:bg-foreground/90 transition-all shadow-2xl"
+                >
+                  Acesso Kontrol
+                </Link>
+              </motion.div>
             </nav>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="p-10 border-t border-border/10 grid grid-cols-2 gap-8"
+            >
+              <div className="flex flex-col gap-4">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                  Idioma
+                </span>
+                <div className="flex gap-4 text-xs font-bold tracking-widest uppercase">
+                  <button
+                    onClick={() => setLanguage('pt')}
+                    className={cn(language === 'pt' ? 'text-foreground' : 'text-foreground/30')}
+                  >
+                    PT
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={cn(language === 'en' ? 'text-foreground' : 'text-foreground/30')}
+                  >
+                    EN
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-4 items-end">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                  Redes
+                </span>
+                <div className="flex gap-4">
+                  {socials.map((social, i) => (
+                    <a
+                      key={i}
+                      href={social.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-foreground/40 hover:text-foreground transition-colors"
+                    >
+                      <social.icon className="w-4 h-4" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import {
@@ -43,40 +43,7 @@ export default function AdminAssistants() {
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchAssistants()
-
-    const channel = supabase
-      .channel('admin-assistants-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: 'role=eq.assistant',
-        },
-        () => {
-          logger.info('Real-time event on assistant profiles')
-          fetchAssistants()
-        },
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'assistant_access' },
-        () => {
-          logger.info('Real-time event on assistant connections')
-          fetchAssistants()
-        },
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [])
-
-  const fetchAssistants = async () => {
+  const fetchAssistants = useCallback(async () => {
     setLoading(true)
     try {
       const { data: profiles, error: profileError } = await supabase
@@ -128,7 +95,40 @@ export default function AdminAssistants() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    fetchAssistants()
+
+    const channel = supabase
+      .channel('admin-assistants-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: 'role=eq.assistant',
+        },
+        () => {
+          logger.info('Real-time event on assistant profiles')
+          fetchAssistants()
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'assistant_access' },
+        () => {
+          logger.info('Real-time event on assistant connections')
+          fetchAssistants()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [fetchAssistants])
 
   const handleDelete = async () => {
     if (!deleteId) return

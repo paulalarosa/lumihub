@@ -26,11 +26,11 @@ import {
   ToolInvocationStatusFailed,
   ToolInvocationStatusCancelled,
   ToolTypeApp,
+  type ToolInvocationDTO,
 } from '@inferencesh/sdk'
 import {
   useAgentActions,
   useAgentClient,
-  type ToolInvocationDTO,
   type UploadedFile,
 } from '@inferencesh/sdk/agent'
 import { WidgetRenderer } from '@/components/infsh/agent/widget-renderer'
@@ -204,7 +204,9 @@ export const ToolInvocation = memo(function ToolInvocation({
         if (data && typeof data.status === 'string') {
           return data as ToolFinish
         }
-      } catch {}
+      } catch (_e) {
+        /* empty catch intended for non-parseable data */
+      }
     }
 
     if (invocation.function?.arguments) {

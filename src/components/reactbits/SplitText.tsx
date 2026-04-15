@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { ComponentType } from 'react'
 import { motion, Variants } from 'framer-motion'
 
 export interface SplitTextProps {
@@ -31,16 +31,16 @@ const SplitText: React.FC<SplitTextProps> = ({
   textAlign = 'center',
   onLetterAnimationComplete,
 }) => {
-  const Tag = motion[tag] as any
+  const Tag = motion[tag] as ComponentType<any>
 
   const variants: Variants = {
-    hidden: from,
+    hidden: from as any,
     visible: (i: number) => ({
       ...to,
       transition: {
         delay: (i * delay) / 1000,
         duration: duration,
-        ease: ease,
+        ease: ease as any,
       },
     }),
   }

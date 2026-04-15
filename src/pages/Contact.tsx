@@ -100,7 +100,7 @@ export default function Contact() {
                 <span className="text-xs text-muted-foreground tracking-widest uppercase">
                   {t('header_contact')}
                 </span>
-                <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[1.05] tracking-tight">
+                <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl text-white leading-[1.05] tracking-tight">
                   {t('contact.title_1')}
                   <br />
                   <span className="italic font-serif">{t('contact.title_2')}</span>
@@ -118,7 +118,7 @@ export default function Contact() {
               </div>
 
               {}
-              <div className="p-8 md:p-12 rounded-[2.5rem] border border-white/5 bg-white/[0.02] relative overflow-hidden text-left">
+              <div className="p-6 md:p-12 rounded-[2.5rem] border border-white/5 bg-white/[0.02] relative overflow-hidden text-left">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/[0.02] blur-[100px] rounded-full pointer-events-none" />
 
                 <div className="space-y-3 relative z-10 mb-8">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode } from 'react'
+import React, { useState, useEffect, ReactNode, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { useAuth } from '@/hooks/useAuth'
@@ -12,7 +12,7 @@ export function AIProvider({ children }: { children: ReactNode }) {
     useState<AIProviderContextType['byokSettings']>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     if (!user) {
       setByokSettings(null)
       setIsLoading(false)
@@ -42,11 +42,11 @@ export function AIProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
 
   useEffect(() => {
     fetchSettings()
-  }, [user])
+  }, [fetchSettings])
 
   const value = {
     mode,

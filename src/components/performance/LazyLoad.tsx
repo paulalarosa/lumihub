@@ -5,6 +5,7 @@ import {
   useState,
   useRef,
   useEffect,
+  ComponentProps,
 } from 'react'
 import { motion } from 'framer-motion'
 
@@ -49,7 +50,7 @@ export const lazyLoadComponent = <T extends ComponentType<any>>(
 ) => {
   const LazyComponent = lazy(importFunc)
 
-  return (props: any) => (
+  return (props: ComponentProps<T>) => (
     <Suspense fallback={<LoadingSkeleton type={fallbackType} />}>
       <LazyComponent {...props} />
     </Suspense>

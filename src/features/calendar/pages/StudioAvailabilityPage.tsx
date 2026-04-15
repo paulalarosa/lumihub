@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { useQuery } from '@tanstack/react-query'
@@ -24,7 +24,7 @@ export default function StudioAvailabilityPage() {
     if (weekParam) {
       try {
         return parseISO(weekParam)
-      } catch (e) {
+      } catch (_e) {
         return new Date()
       }
     }
@@ -73,11 +73,11 @@ export default function StudioAvailabilityPage() {
   }))
 
   const isSlotOccupied = (day: Date, hour: number) => {
-    return events?.some((e) => {
-      if (!isSameDay(parseISO(e.event_date), day)) return false
-      if (!e.start_time || !e.end_time) return false
-      const startH = parseInt(e.start_time.split(':')[0])
-      const endH = parseInt(e.end_time.split(':')[0])
+    return events?.some((ev) => {
+      if (!isSameDay(parseISO(ev.event_date), day)) return false
+      if (!ev.start_time || !ev.end_time) return false
+      const startH = parseInt(ev.start_time.split(':')[0])
+      const endH = parseInt(ev.end_time.split(':')[0])
       return hour >= startH && hour < endH
     })
   }

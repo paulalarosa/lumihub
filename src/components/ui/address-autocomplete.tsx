@@ -77,7 +77,7 @@ export function AddressAutocomplete({
     if (value !== inputValue) {
       setInputValue(value)
     }
-  }, [value])
+  }, [value, inputValue])
 
   useEffect(() => {
     if (latitude && longitude) setCoords({ lat: latitude, lng: longitude })

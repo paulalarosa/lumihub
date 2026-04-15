@@ -1,56 +1,82 @@
-import { motion, useScroll, useTransform } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useIsMobile } from '@/hooks/use-mobile'
+import gsap from 'gsap'
+import { useGSAP } from '@gsap/react'
 
 export const HeroSection = () => {
   const { t } = useLanguage()
   const navigate = useNavigate()
   const { trackCTAClick } = useAnalytics()
-  const heroRef = useRef(null)
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  })
+  const isMobile = useIsMobile()
+  const heroRef = useRef<HTMLDivElement>(null)
+  const bgRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
-  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
+  useGSAP(() => {
+    if (!heroRef.current || !bgRef.current || !contentRef.current) return
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: heroRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      },
+    })
+
+    // Parallax Zoom Effect
+    tl.to(bgRef.current, {
+      scale: 1.5,
+      ease: 'none',
+    }, 0)
+
+    tl.to(contentRef.current, {
+      y: 100,
+      opacity: 0,
+      scale: 0.9,
+      ease: 'none',
+    }, 0)
+
+    // Entrace Animation
+    gsap.from('.hero-reveal', {
+      y: 40,
+      opacity: 0,
+      stagger: 0.1,
+      duration: 1.2,
+      ease: 'power4.out',
+      delay: 0.2,
+    })
+  }, { scope: heroRef })
 
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen flex items-center bg-black overflow-hidden"
+      className="relative min-h-[120vh] flex items-center bg-black overflow-hidden parallax-container"
     >
       {}
-      <div className="absolute inset-0 z-0">
-        <motion.div
-          className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-15 pointer-events-none"
-          style={{ y }}
-        >
+      <div ref={bgRef} className="absolute inset-0 z-0">
+        <div className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-20 pointer-events-none">
           <img
             src="/assets/hero-image-B5FCqZ87.png"
             alt=""
-            className="w-full h-full object-cover grayscale contrast-125"
+            className="w-full h-full object-cover grayscale contrast-125 scale-110"
             fetchPriority="high"
           />
-        </motion.div>
+        </div>
         <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/40 z-10" />
       </div>
 
-      <motion.div
+      <div
+        ref={contentRef}
         className="container mx-auto px-6 md:px-16 relative z-30 max-w-6xl pt-20"
-        style={{ y, opacity }}
       >
         {}
-        <motion.div
-          className="inline-flex items-center gap-2 mb-10 px-4 py-2 border border-white/10 bg-white/[0.03]"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
+        <div className="hero-reveal inline-flex items-center gap-2 mb-10 px-4 py-2 border border-white/10 bg-white/[0.03]">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
               <div
@@ -62,40 +88,25 @@ export const HeroSection = () => {
           <span className="text-white/60 text-xs">
             {t('home.hero.eyebrow', { count: 200 })}
           </span>
-        </motion.div>
+        </div>
 
         {}
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
+        <div className="hero-reveal mb-8">
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight">
             {t('home.hero.title_1')}
           </h1>
           <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-tight italic mt-1">
             {t('home.hero.title_2')}
           </h1>
-        </motion.div>
+        </div>
 
         {}
-        <motion.p
-          className="text-white/45 text-base md:text-lg max-w-xl mb-10 leading-relaxed"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-        >
+        <p className="hero-reveal text-white/45 text-base md:text-lg max-w-xl mb-10 leading-relaxed">
           {t('home.hero.subtitle')}
-        </motion.p>
+        </p>
 
         {}
-        <motion.div
-          className="flex flex-col sm:flex-row gap-6 mb-12 text-sm text-white/40"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
+        <div className="hero-reveal flex flex-col sm:flex-row gap-6 mb-12 text-sm text-white/40">
           <span className="flex items-center gap-2">
             <div className="w-1 h-1 bg-white/60" />
             {t('home.hero.features.google')}
@@ -108,18 +119,13 @@ export const HeroSection = () => {
             <div className="w-1 h-1 bg-white/60" />
             {t('home.hero.features.portal')}
           </span>
-        </motion.div>
+        </div>
 
         {}
-        <motion.div
-          className="flex flex-col sm:flex-row gap-4"
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
+        <div className="hero-reveal flex flex-col sm:flex-row gap-4">
           <Button
             variant="primary"
-            size="lg"
+            size={isMobile ? 'default' : 'lg'}
             className="group"
             onClick={() => {
               trackCTAClick('hero_signup', 'hero_section', '/cadastro')
@@ -132,7 +138,7 @@ export const HeroSection = () => {
 
           <Button
             variant="glass"
-            size="lg"
+            size={isMobile ? 'default' : 'lg'}
             onClick={() => {
               trackCTAClick(
                 'hero_how_it_works',
@@ -140,28 +146,25 @@ export const HeroSection = () => {
                 '#como-funciona',
               )
               const el = document.getElementById('como-funciona')
-              el?.scrollIntoView({ behavior: 'smooth' })
+              if (el) {
+                // Smooth scroll using Lenis if possible
+                window.scrollTo({
+                  top: el.offsetTop,
+                  behavior: 'smooth'
+                })
+              }
             }}
           >
             <Play className="w-4 h-4 mr-1" />
             {t('home.hero.cta_how_it_works')}
           </Button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
 
       {}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-      >
-        <motion.div
-          className="w-[1px] h-10 bg-gradient-to-b from-white/30 to-transparent"
-          animate={{ y: [0, 8, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        />
-      </motion.div>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 opacity-50">
+        <div className="w-[1px] h-10 bg-gradient-to-b from-white/30 to-transparent animate-pulse" />
+      </div>
     </section>
   )
 }

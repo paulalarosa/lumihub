@@ -15,7 +15,7 @@ export const KeyNumbersSection = () => {
             { label: t('home.stats.projects'), value: '8.4K' },
           ].map((stat, i) => (
             <div key={i} className="group">
-              <p className="text-8xl font-bold text-white group-hover:text-white transition-colors mb-2">
+              <p className="text-4xl sm:text-5xl md:text-8xl font-bold text-white group-hover:text-white transition-colors mb-2">
                 <Counter value={stat.value} />
               </p>
               <p className="text-[10px] font-mono text-white/40 tracking-[0.3em]">

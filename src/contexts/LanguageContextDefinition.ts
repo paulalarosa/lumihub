@@ -5,7 +5,7 @@ export type Language = 'pt' | 'en';
 export interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string, options?: any) => string;
+    t: (key: string, options?: Record<string, string | number>) => string;
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

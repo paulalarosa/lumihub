@@ -100,7 +100,7 @@ export default function Resources() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="flex items-center gap-4 justify-center"
+                className="flex flex-col sm:flex-row items-center gap-4 justify-center"
               >
                 <Link to="/planos">
                   <Button className="h-11 px-7 rounded-full text-sm font-medium group">

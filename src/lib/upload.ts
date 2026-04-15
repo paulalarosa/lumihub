@@ -35,5 +35,7 @@ export async function deletePhotoSafely(
     const filePath = urlParts.slice(bucketIndex + 1).join('/')
 
     await supabase.storage.from(bucket).remove([filePath])
-  } catch (error) {}
+  } catch (_error) {
+    // Silently ignore delete failures — photo may already be removed
+  }
 }

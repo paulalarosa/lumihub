@@ -104,7 +104,7 @@ export const AchievementNotifications = () => {
         markSeenMutation.mutate(achievement.id)
       })
     }
-  }, [newAchievements])
+  }, [newAchievements, markSeenMutation])
 
   return null
 }

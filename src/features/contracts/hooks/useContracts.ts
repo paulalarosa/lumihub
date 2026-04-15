@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
@@ -27,19 +27,19 @@ export const useContracts = () => {
     null,
   )
 
-  useEffect(() => {
-    if (user) {
-      fetchClients()
-    }
-  }, [user])
-
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     const { data } = await supabase
       .from('wedding_clients')
       .select('id, name:full_name')
       .order('full_name')
     if (data) setClients(data)
-  }
+  }, [])
+
+  useEffect(() => {
+    if (user) {
+      fetchClients()
+    }
+  }, [user, fetchClients])
 
   const handleCreate = async () => {
     if (!newTitle || !newClient) {
@@ -59,7 +59,7 @@ export const useContracts = () => {
       setNewTitle('')
       setNewClient('')
       setNewContent('')
-    } catch (_error) {}
+    } catch (_error) { /* handled by mutation onError */ }
   }
 
   const handleSignatureSave = async (dataUrl: string) => {

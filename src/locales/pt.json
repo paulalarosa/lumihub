@@ -1,14 +1,14 @@
 {
-    "SIDEBAR_DASHBOARD": "PAINEL",
-    "SIDEBAR_AGENDA": "AGENDA",
-    "SIDEBAR_CLIENTS": "CLIENTES",
-    "SIDEBAR_PROJECTS": "PROJETOS",
-    "SIDEBAR_MARKETING": "MARKETING",
-    "SIDEBAR_CONTRACTS": "CONTRATOS",
-    "SIDEBAR_FINANCIAL": "FINANCEIRO",
-    "SIDEBAR_SERVICES": "SERVIÇOS",
-    "SIDEBAR_SETTINGS": "CONFIGURAÇÕES",
-    "SIDEBAR_MENU_MAIN": "MENU PRINCIPAL",
+    "SIDEBAR_DASHBOARD": "Painel",
+    "SIDEBAR_AGENDA": "Agenda",
+    "SIDEBAR_CLIENTS": "Clientes",
+    "SIDEBAR_PROJECTS": "Projetos",
+    "SIDEBAR_MARKETING": "Marketing",
+    "SIDEBAR_CONTRACTS": "Contratos",
+    "SIDEBAR_FINANCIAL": "Financeiro",
+    "SIDEBAR_SERVICES": "Serviços",
+    "SIDEBAR_SETTINGS": "Configurações",
+    "SIDEBAR_MENU_MAIN": "Menu Principal",
     "SIDEBAR_MENU_ADMIN": "ADMINISTRAÇÃO",
     "SIDEBAR_ADMIN": "ADMIN",
     "SIDEBAR_LOGOUT": "SAIR",
@@ -196,6 +196,10 @@
         "export_note": "A exportação gera um arquivo JSON com todos os seus dados. A exclusão é processada em até 15 dias úteis.",
         "consent_terms": "Termos de Serviço",
         "consent_privacy": "Política de Privacidade",
+        "consent_refund": "Reembolso e Cancelamento",
+        "consent_security": "Segurança da Informação",
+        "consent_cookies": "Política de Cookies",
+        "consent_dpa": "Acordo de Processamento (DPA)",
         "consent_marketing": "Emails de Marketing",
         "consent_analytics": "Analytics e Rastreamento",
         "required": "OBRIGATÓRIO",
@@ -259,7 +263,7 @@
     "login_password": "SENHA DE ACESSO",
     "login_secure_conn": "CONEXÃO SEGURA E CRIPTOGRAFADA",
     "login_forgot": "ESQUECEU A SENHA?",
-    "login_submit": "ACESSAR PAINEL",
+    "login_submit": "Acessar Painel",
     "login_no_account": "AINDA NÃO É MEMBRO?",
     "login_register": "SOLICITAR ACESSO",
     "features_title": "FUNCIONALIDADES",
@@ -310,30 +314,38 @@
             "cta_how_it_works": "Ver como funciona"
         },
         "stats": {
-            "clients": "CLIENTES ATIVOS",
-            "contracts": "CONTRATOS GERADOS",
-            "uptime": "UPTIME SISTEMA",
-            "projects": "PROJETOS GERIDOS"
+            "clients": "Clientes Ativos",
+            "contracts": "Contratos Gerados",
+            "uptime": "Uptime Sistema",
+            "projects": "Projetos Geridos"
         },
         "process": {
             "title": "Processos simples para impérios reais",
             "subtitle": "Automatizamos o que é mecânico para que você foque no que é artístico.",
-            "save_time": {
-                "title": "Economize 15h+ semanais",
-                "desc": "Elimine tarefas repetitivas com nossa IA operativa e automações inteligentes de contrato."
-            },
             "features": {
-                "analytics": {
-                    "title": "Analytics Noir",
-                    "desc": "Dashboard em alto contraste com métricas vitais da sua carreira em tempo real."
+                "management": {
+                    "title": "Gestão Silenciosa",
+                    "desc": "Cancele o ruído de mensagens perdidas. Organizamos sua agenda para que o único foco seja sua arte."
                 },
                 "legal": {
-                    "title": "Legal Kontrol",
-                    "desc": "Gerador de contratos com validade jurídica e assinatura digital integrada."
+                    "title": "Contratos Inquebráveis",
+                    "desc": "Proteja sua agenda e seu faturamento com assinaturas digitais instantâneas. Sem papel, total validade jurídica."
                 },
-                "sales": {
-                    "title": "Vendas Pro",
-                    "desc": "CRM minimalista focado em converter leads em faturamento recorrente."
+                "financial": {
+                    "title": "Faturamento de Precisão",
+                    "desc": "Transforme o 'acho que ganhei' em métricas reais. Controle de saldos e lucro líquido em tempo real."
+                },
+                "experience": {
+                    "title": "Experiência Premium",
+                    "desc": "Eleve sua percepção de valor. Um espaço exclusivo para sua cliente acompanhar cronogramas e briefings."
+                },
+                "automation": {
+                    "title": "Automação Operativa",
+                    "desc": "Economize 15h+ semanais. Nossa IA cuida do agendamento e lembretes enquanto você cuida do que importa."
+                },
+                "growth": {
+                    "title": "Insights de Carreira",
+                    "desc": "Não apenas gerencie, cresça. Analise a origem dos seus clientes e descubra onde investir seu marketing."
                 }
             }
         },

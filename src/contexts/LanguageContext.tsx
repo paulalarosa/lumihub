@@ -5,13 +5,13 @@ import { Language, LanguageContext } from './LanguageContextDefinition'
 
 const inlineTranslations: Record<Language, Record<string, string>> = {
   pt: {
-    'sidebar.dashboard': 'PAINEL',
-    'sidebar.calendar': 'AGENDA',
-    'sidebar.clients': 'CLIENTES',
-    'sidebar.projects': 'PROJETOS',
-    'sidebar.finance': 'FINANCEIRO',
-    'sidebar.services': 'SERVIÇOS',
-    'sidebar.settings': 'CONFIGURAÇÕES',
+    'sidebar.dashboard': 'Painel',
+    'sidebar.calendar': 'Agenda',
+    'sidebar.clients': 'Clientes',
+    'sidebar.projects': 'Projetos',
+    'sidebar.finance': 'Financeiro',
+    'sidebar.services': 'Serviços',
+    'sidebar.settings': 'Configurações',
 
     'dashboard.tasks': 'TAREFAS',
     'dashboard.total_value': 'VALOR TOTAL',
@@ -61,13 +61,13 @@ const inlineTranslations: Record<Language, Record<string, string>> = {
     'contract.none_available': 'Nenhum contrato disponível no momento.',
   },
   en: {
-    'sidebar.dashboard': 'DASHBOARD',
-    'sidebar.calendar': 'CALENDAR',
-    'sidebar.clients': 'CLIENTS',
-    'sidebar.projects': 'PROJECTS',
-    'sidebar.finance': 'FINANCE',
-    'sidebar.services': 'SERVICES',
-    'sidebar.settings': 'SETTINGS',
+    'sidebar.dashboard': 'Dashboard',
+    'sidebar.calendar': 'Calendar',
+    'sidebar.clients': 'Clients',
+    'sidebar.projects': 'Projects',
+    'sidebar.finance': 'Finance',
+    'sidebar.services': 'Services',
+    'sidebar.settings': 'Settings',
 
     'dashboard.tasks': 'TASKS',
     'dashboard.total_value': 'TOTAL VALUE',
@@ -136,7 +136,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     // 2. Try externalTranslations (translations.ts) as fallback
     const source = externalTranslations[lang]
-    let externalValue: any = source
+    let externalValue: unknown = source
     const keys = key.split('.')
     
     for (const k of keys) {

@@ -86,7 +86,7 @@ export function useClientActions({
       setIsDialogOpen(false)
       setEditingClient(null)
       fetchClients()
-    } catch (_error) {}
+    } catch (_error) { /* errors handled by mutation onError */ }
   }
 
   const handleDelete = async (id: string) => {
@@ -95,7 +95,7 @@ export function useClientActions({
     try {
       await deleteClient(id)
       fetchClients()
-    } catch (_error) {}
+    } catch (_error) { /* errors handled by mutation onError */ }
   }
 
   const copyPortalLink = async (clientId: string) => {
