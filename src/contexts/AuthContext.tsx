@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { User, Session } from '@supabase/supabase-js'
 import { Logger } from '@/services/logger'
@@ -10,7 +10,6 @@ import { setSentryUser, clearSentryUser } from '@/lib/sentry'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
-  const _location = useLocation()
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
@@ -104,13 +103,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
-  const isAdmin = role?.toLowerCase() === 'studio' || role?.toLowerCase() === 'admin'
-
-  useEffect(() => {
-    if (user && role) {
-      console.log(`[AuthContext] User: ${user.email}, Role: ${role}, isAdmin: ${isAdmin}`)
-    }
-  }, [user, role, isAdmin])
+  const isAdmin =
+    role?.toLowerCase() === 'studio' || role?.toLowerCase() === 'admin'
 
   useEffect(() => {
     let mounted = true
@@ -183,12 +177,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event as string) === 'TOKEN_REFRESH_ERROR') {
-        await signOut()
-        navigate('/login')
-        return
-      }
-
       handleSession(session)
 
       if (event === 'SIGNED_IN' && session) {
@@ -217,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [navigate, fetchRole, loading, signOut])
+  }, [navigate, fetchRole, signOut])
 
   return (
     <AuthContext.Provider

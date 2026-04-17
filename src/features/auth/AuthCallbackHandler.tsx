@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
@@ -13,74 +13,10 @@ const AuthCallbackHandler = () => {
   const [errorMessage, setErrorMessage] = useState<string>('')
   const [loadingText, setLoadingText] = useState('Processando autenticação...')
 
-  // validateSession MUST be defined BEFORE handleOAuthCallback
-  const validateSession = useCallback(async (session: {
-    provider_token?: string
-    provider_refresh_token?: string
-    user: { id: string }
-  }) => {
-    if (!session.provider_token && !session.provider_refresh_token) {
-      setStatus('error')
-      setErrorMessage(
-        'Falha na conexão: Token do Google não identificado. Tente novamente.',
-      )
-      return
-    }
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ onboarding_completed: true })
-      .eq('id', session.user.id)
-
-    if (updateError) {
-      console.error('Error updating profile onboarding status:', updateError)
-    }
-
-    setStatus('success')
-    setTimeout(() => navigate('/dashboard'), 1500)
-  }, [navigate])
-
-  // handleOAuthCallback uses validateSession, so it comes AFTER
-  const handleOAuthCallback = useCallback(async () => {
-    try {
-      setLoadingText('Validando conexão com Google...')
-
-      const { data, error } = await supabase.auth.getSession()
-
-      if (error) {
-        throw error
-      }
-
-      const session = data.session
-
-      if (!session) {
-        setTimeout(async () => {
-          const { data: retryData } = await supabase.auth.getSession()
-          if (retryData.session) {
-            await validateSession(retryData.session)
-          } else {
-            setStatus('error')
-            setErrorMessage(
-              'Sessão não encontrada. Por favor, tente novamente.',
-            )
-          }
-        }, 1000)
-        return
-      }
-
-      await validateSession(session)
-    } catch (err) {
-      setStatus('error')
-      setErrorMessage(err instanceof Error ? err.message : 'Erro de conexão.')
-    }
-  }, [validateSession])
-
-  // useEffect comes LAST, after all callbacks are defined
   useEffect(() => {
-    const code = searchParams.get('code')
-    const error = searchParams.get('error')
+    const urlError = searchParams.get('error')
 
-    if (error) {
+    if (urlError) {
       setStatus('error')
       setErrorMessage(
         searchParams.get('error_description') ||
@@ -89,16 +25,72 @@ const AuthCallbackHandler = () => {
       return
     }
 
-    if (code) {
-      handleOAuthCallback()
-    } else {
-      setTimeout(() => navigate('/dashboard'), 1000)
+    setLoadingText('Validando conexão com Google...')
+
+    const handleSessionReady = async (userId: string) => {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ onboarding_completed: true })
+          .eq('id', userId)
+      } catch {
+        // non-fatal: profile update failure should not block navigation
+      }
+      setStatus('success')
+      setTimeout(() => navigate('/dashboard'), 1500)
     }
-  }, [searchParams, navigate, handleOAuthCallback])
+
+    // Strategy 1: listen for the SIGNED_IN event emitted after Supabase
+    // exchanges the PKCE code server-side and sets the session.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (
+        (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') &&
+        session?.user
+      ) {
+        subscription.unsubscribe()
+        await handleSessionReady(session.user.id)
+      }
+    })
+
+    // Strategy 2: also check immediately in case the session already
+    // exists (e.g. page was refreshed on /auth/callback).
+    supabase.auth.getSession().then(async ({ data, error }) => {
+      if (error) {
+        subscription.unsubscribe()
+        setStatus('error')
+        setErrorMessage(error.message || 'Erro ao validar a sessão.')
+        return
+      }
+
+      if (data.session?.user) {
+        subscription.unsubscribe()
+        await handleSessionReady(data.session.user.id)
+        return
+      }
+
+      // No session yet — fall back to a hard timeout so the user isn't
+      // stuck forever if the auth event never fires.
+      const timeout = setTimeout(() => {
+        subscription.unsubscribe()
+        setStatus('error')
+        setErrorMessage(
+          'A sessão demorou demais para responder. Por favor, tente novamente.',
+        )
+      }, 15_000)
+
+      return () => clearTimeout(timeout)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="min-h-screen bg-neutral-50 flex items-center justify-center p-4 font-sans selection:bg-black selection:text-white relative overflow-hidden">
-      {}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/concrete-wall.png')] opacity-40 mix-blend-multiply" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#000000_1px,transparent_1px),linear-gradient(to_bottom,#000000_1px,transparent_1px)] bg-[size:6rem_6rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-[0.03]" />
 
@@ -127,9 +119,9 @@ const AuthCallbackHandler = () => {
                 Connected
               </h2>
               <p className="text-neutral-500 font-medium">
-                Google Calendar provider linked successfully.
+                Autenticação concluída com sucesso.
                 <br />
-                Return to base.
+                Redirecionando...
               </p>
             </div>
           </div>
@@ -152,14 +144,14 @@ const AuthCallbackHandler = () => {
                   onClick={() => navigate('/login')}
                   className="w-full h-12 text-sm font-bold bg-black text-white hover:bg-neutral-900 hover:text-[#D4AF37] rounded-sm transition-all duration-300 shadow-sm uppercase tracking-wider"
                 >
-                  Retry Connection
+                  Tentar novamente
                 </Button>
                 <Button
                   variant="ghost"
                   onClick={() => navigate('/dashboard')}
                   className="w-full h-12 text-neutral-400 hover:text-neutral-900 hover:bg-transparent text-xs font-semibold uppercase tracking-widest"
                 >
-                  Force Dashboard Entry
+                  Ir para o Dashboard
                 </Button>
               </div>
             </div>
