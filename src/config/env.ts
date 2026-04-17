@@ -16,8 +16,9 @@ export function validateEnv(): EnvValidationResult {
   }
 
   // Validação avançada para prevenir "Invalid API Key" por mix de chaves de dev/prod
-  const url = import.meta.env.VITE_SUPABASE_URL as string
-  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+  const url = (import.meta.env.VITE_SUPABASE_URL as string || '').trim().replace(/^["']|["']$/g, '')
+  const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string || '').trim()
+  const key = rawKey.replace(/^["']|["']$/g, '')
 
   if (url && key && import.meta.env.MODE !== 'test' && key !== 'mock-key' && key !== 'dummy') {
     try {
@@ -44,10 +45,10 @@ export function validateEnv(): EnvValidationResult {
           }
         }
       } else {
-        missing.push(`VITE_SUPABASE_ANON_KEY (Formato JWT Inválido. A chave não é um JWT válido. Valor lido: "${key.substring(0, 15)}...")`)
+        missing.push(`VITE_SUPABASE_ANON_KEY (Formato JWT Inválido. A chave deve ter 3 partes separadas por pontos. Encontradas: ${parts.length}. Valor: "${key.substring(0, 15)}...")`)
       }
     } catch (e) {
-      missing.push('VITE_SUPABASE_ANON_KEY (Chave Corrompida ou Inválida)')
+      missing.push(`VITE_SUPABASE_ANON_KEY (Erro na decodificação do JWT: ${e instanceof Error ? e.message : 'Chave inválida'})`)
     }
   }
 
