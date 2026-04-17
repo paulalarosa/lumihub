@@ -144,8 +144,9 @@ export const OnboardingWizard = () => {
       const { error } = await supabase.from('wedding_clients').insert({
         user_id: user?.id,
         name: clientData.name,
+        full_name: clientData.name,
         phone: clientData.phone || null,
-        event_date: clientData.event_date || null,
+        wedding_date: clientData.event_date || null,
       })
 
       if (error) {
