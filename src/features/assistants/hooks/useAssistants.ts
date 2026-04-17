@@ -43,7 +43,7 @@ export const useAssistants = () => {
 
       const token = crypto.randomUUID()
       const { error } = await supabase.from('assistants').insert({
-        user_id: userData.user.id,
+        user_id: null,
         full_name: vars.fullName,
         email: vars.email,
         phone: vars.phone,

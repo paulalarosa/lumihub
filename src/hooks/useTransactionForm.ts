@@ -76,11 +76,26 @@ export function useTransactionForm({
       const { data: s } = await supabase.from('services').select('id, name')
       if (s) setServices(s)
 
-      const { data: a } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('role', 'assistant')
-      if (a) setAssistants(a)
+      const { data: ma } = await supabase
+        .from('makeup_artists')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (ma) {
+        const { data: accessData } = await supabase
+          .from('assistant_access')
+          .select('assistant:assistants(id, full_name)')
+          .eq('makeup_artist_id', ma.id)
+          .eq('status', 'active')
+
+        if (accessData) {
+          const formattedAssistants = accessData
+            .map((item: any) => item.assistant)
+            .filter(Boolean)
+          setAssistants(formattedAssistants)
+        }
+      }
     } catch (error) {
       logger.error(error, {
         message: 'Erro ao carregar opções de formulário.',
