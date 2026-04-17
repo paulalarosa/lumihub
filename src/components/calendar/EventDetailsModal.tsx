@@ -5,12 +5,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Calendar, MapPin, AlignLeft, ExternalLink } from 'lucide-react'
+import { Calendar, MapPin, AlignLeft, ExternalLink, RefreshCw } from 'lucide-react'
 import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
 import { format } from 'date-fns/format'
 
 import { ptBR } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 interface CalendarEvent {
   id: string
@@ -22,15 +23,16 @@ interface CalendarEvent {
     googleEventId?: string
     description?: string
     location?: string
-    serviceType: string
+    eventType: string
     clientName?: string
     clientPhone?: string
     status: string
+    isSynced: boolean
   }
 }
 
 interface EventDetailsModalProps {
-  event: CalendarEvent
+  event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
 }
@@ -47,15 +49,19 @@ export const EventDetailsModal = ({
   const handleViewDetails = () => {
     if (event.resource.projectId) {
       navigate(`/projects/${event.resource.projectId}`)
-    } else {
+      onClose()
+    } else if (event.resource.googleEventId) {
       window.open(
         `https://calendar.google.com/calendar/r/eventedit/${event.resource.googleEventId}`,
         '_blank',
       )
+    } else {
+      toast.info('Este evento não está vinculado a um projeto ou Google Calendar.')
     }
   }
 
-  const isGoogleEvent = event.resource.serviceType === 'personal'
+  const isGoogleEvent = event.resource.eventType === 'personal' || event.resource.eventType === 'google'
+  const isProject = event.resource.eventType === 'project'
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -67,7 +73,6 @@ export const EventDetailsModal = ({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {}
           <div className="flex items-start gap-4 text-neutral-300">
             <div className="bg-neutral-800 p-2 rounded-lg">
               <Calendar className="w-5 h-5 text-neutral-400" />
@@ -85,7 +90,6 @@ export const EventDetailsModal = ({
             </div>
           </div>
 
-          {}
           {event.resource.location && (
             <div className="flex items-start gap-4 text-neutral-300">
               <div className="bg-neutral-800 p-2 rounded-lg">
@@ -100,7 +104,6 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          {}
           {event.resource.description && (
             <div className="flex items-start gap-4 text-neutral-300">
               <div className="bg-neutral-800 p-2 rounded-lg">
@@ -117,34 +120,37 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          {}
           <div className="flex items-center gap-3 pt-2">
             <span
               className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest ${
                 isGoogleEvent
                   ? 'bg-blue-900/30 text-blue-400 border border-blue-800'
-                  : event.resource.serviceType === 'wedding'
+                  : event.resource.eventType === 'wedding'
                     ? 'bg-[#FFD700]/10 text-[#FFD700] border border-[#FFD700]/30'
-                    : event.resource.serviceType === 'social'
+                    : event.resource.eventType === 'social'
                       ? 'bg-[#FF69B4]/10 text-[#FF69B4] border border-[#FF69B4]/30'
-                      : 'bg-gray-800 text-gray-300 border border-gray-700'
+                      : isProject
+                        ? 'bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30'
+                        : 'bg-gray-800 text-gray-300 border border-gray-700'
               }`}
             >
               {isGoogleEvent
-                ? 'Google Calendar'
-                : event.resource.serviceType === 'wedding'
+                ? 'Google'
+                : event.resource.eventType === 'wedding'
                   ? 'Noiva'
-                  : event.resource.serviceType === 'social'
+                  : event.resource.eventType === 'social'
                     ? 'Social'
-                    : 'Teste'}
+                    : isProject
+                      ? 'Projeto'
+                      : 'Evento'}
             </span>
 
-            <span className="text-xs text-neutral-500 uppercase">
+            <span className="text-xs text-neutral-500 uppercase flex items-center gap-1">
               {event.resource.status}
+              {event.resource.isSynced && <RefreshCw className="w-3 h-3 text-green-500" />}
             </span>
           </div>
 
-          {}
           {!isGoogleEvent && event.resource.clientPhone && (
             <div className="pt-4 border-t border-neutral-800">
               <p className="text-xs text-neutral-500 font-medium uppercase tracking-wider mb-2">
@@ -156,26 +162,28 @@ export const EventDetailsModal = ({
                 eventDate={event.start}
                 eventTime={format(event.start, 'HH:mm')}
                 eventLocation={event.resource.location}
-                serviceType={event.resource.serviceType}
+                serviceType={event.resource.eventType}
               />
             </div>
           )}
 
-          {}
           <div className="flex gap-3 pt-6 border-t border-neutral-800">
-            <Button
-              onClick={handleViewDetails}
-              className="flex-1 bg-white text-black hover:bg-neutral-200"
-            >
-              {isGoogleEvent ? (
-                <>
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  Abrir no Google
-                </>
-              ) : (
-                'Ver Projeto'
-              )}
-            </Button>
+            {event.resource.projectId ? (
+              <Button
+                onClick={handleViewDetails}
+                className="flex-1 bg-white text-black hover:bg-neutral-200"
+              >
+                Ver Projeto
+              </Button>
+            ) : event.resource.googleEventId ? (
+              <Button
+                onClick={handleViewDetails}
+                className="flex-1 bg-neutral-800 text-white hover:bg-neutral-700 border border-neutral-700"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Abrir no Google
+              </Button>
+            ) : null}
             <Button
               variant="outline"
               onClick={onClose}

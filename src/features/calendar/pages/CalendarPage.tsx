@@ -1,16 +1,17 @@
 import SEOHead from '@/components/seo/SEOHead'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Calendar, dateFnsLocalizer, View } from 'react-big-calendar'
 import { format } from 'date-fns/format'
 import { parse } from 'date-fns/parse'
 import { startOfWeek } from 'date-fns/startOfWeek'
 import { getDay } from 'date-fns/getDay'
+import { startOfMonth, endOfMonth, addMonths, subMonths, startOfDay, endOfDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { toZonedTime, formatDate } from '@/lib/date-utils'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarIcon, RefreshCw, Settings } from 'lucide-react'
 import { EventDetailsModal } from '@/components/calendar/EventDetailsModal'
@@ -22,6 +23,7 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/ui/empty-state'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { PageLoader } from '@/components/ui/PageLoader'
+import { useEvents } from '../hooks/useEvents'
 
 const locales = { 'pt-BR': ptBR }
 
@@ -40,12 +42,13 @@ interface CalendarEvent {
   end: Date
   resource: {
     eventId: string
-    eventType: 'wedding' | 'social' | 'test' | 'personal' | 'blocked'
+    eventType: string
     status: string
     projectId?: string
     isSynced: boolean
     googleEventId?: string
     serviceType: string
+    raw: any
   }
 }
 
@@ -62,48 +65,67 @@ export const CalendarPage = () => {
   const [createEventDate, setCreateEventDate] = useState<Date | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
+  const range = useMemo(() => {
+    const start = startOfMonth(date)
+    const end = endOfMonth(date)
+    return { start, end }
+  }, [date])
+
   const {
-    data: events,
+    data: unifiedEvents,
     isLoading,
     isError,
-  } = useQuery({
-    queryKey: ['calendar-events', user?.id],
-    queryFn: async () => {
-      if (!user) return []
+  } = useEvents(range.start, range.end)
 
-      const { data, error } = await supabase
-        .from('calendar_events')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('start_time', { ascending: true })
+  const events = useMemo(() => {
+    if (!unifiedEvents) return []
 
-      if (error) throw error
+    return unifiedEvents.map((event) => {
+      const eventDate = parse(event.event_date, 'yyyy-MM-dd', new Date())
+      let start = eventDate
+      let end = eventDate
 
-      return data.map((event) => ({
+      if (event.start_time) {
+        const [hours, minutes] = event.start_time.split(':').map(Number)
+        start = new Date(eventDate)
+        start.setHours(hours, minutes, 0)
+      } else {
+        start = startOfDay(eventDate)
+      }
+
+      if (event.end_time) {
+        const [hours, minutes] = event.end_time.split(':').map(Number)
+        end = new Date(eventDate)
+        end.setHours(hours, minutes, 0)
+      } else {
+        end = endOfDay(eventDate)
+      }
+
+      return {
         id: event.id,
         title: event.title,
-        start: toZonedTime(event.start_time),
-        end: toZonedTime(event.end_time),
+        start,
+        end,
         resource: {
           eventId: event.id,
-          eventType: event.event_type,
-          status: event.status,
+          eventType: event.event_type || 'wedding',
+          status: (event as any).status || 'confirmed',
           projectId: event.project_id,
-          isSynced: event.is_synced || false,
-          googleEventId: event.google_event_id,
+          isSynced: (event as any).is_synced || !!(event as any).google_calendar_event_id,
+          googleEventId: (event as any).google_calendar_event_id,
           serviceType: '',
+          raw: event
         },
-      })) as CalendarEvent[]
-    },
-    enabled: !!user,
-  })
+      }
+    })
+  }, [unifiedEvents])
 
   const syncMutation = useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke(
-        'force-calendar-sync',
+        'google-calendar-sync',
         {
-          body: { user_id: user?.id },
+          body: { action: 'sync-from-google', user_id: user?.id },
         },
       )
 
@@ -111,9 +133,9 @@ export const CalendarPage = () => {
       return data
     },
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CALENDAR_EVENTS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
       toast.success('Sincronização concluída!')
     },
     onError: (error: Error) => {
@@ -128,9 +150,10 @@ export const CalendarPage = () => {
       test: { bg: '#6B7280', text: '#fff' },
       personal: { bg: '#8B5CF6', text: '#fff' },
       blocked: { bg: '#EF4444', text: '#fff' },
+      project: { bg: '#00e5ff', text: '#000' },
     }
 
-    const color = colors[event.resource.eventType] || colors.personal
+    const color = colors[event.resource.eventType] || colors.wedding
     const isPast = event.end < new Date()
     const isToday =
       formatDate(event.start, 'yyyy-MM-dd') ===
@@ -143,8 +166,8 @@ export const CalendarPage = () => {
         opacity: isPast ? 0.5 : 1,
         border: isToday ? '2px solid #00ff00' : 'none',
         borderRadius: '4px',
-        padding: '4px 8px',
-        fontSize: '13px',
+        padding: '2px 6px',
+        fontSize: '12px',
         fontWeight: 500,
         position: 'relative' as const,
       },
@@ -165,7 +188,6 @@ export const CalendarPage = () => {
     <div className="min-h-screen bg-neutral-950 p-4 md:p-8">
       <SEOHead title="Agenda" noindex={true} />
       <div className="max-w-7xl mx-auto">
-        {}
         <div className="flex justify-between items-center mb-6">
           <div>
             <h1 className="text-3xl font-bold text-white flex items-center gap-2">
@@ -173,7 +195,7 @@ export const CalendarPage = () => {
               Agenda
             </h1>
             <p className="text-neutral-400 mt-1">
-              Visualização de eventos
+              Visualização de eventos e projetos
               {isConnected && (
                 <span className="ml-2 text-green-500 text-sm">
                   ☁ Sincronizado com Google Calendar
@@ -217,10 +239,8 @@ export const CalendarPage = () => {
           </div>
         </div>
 
-        {}
         <ConflictResolver />
 
-        {}
         {!isConnected && !isGoogleLoading && (
           <div className="mb-4 p-4 bg-yellow-900/20 border border-yellow-500 rounded-lg">
             <p className="text-yellow-400 text-sm">
@@ -235,7 +255,6 @@ export const CalendarPage = () => {
           </div>
         )}
 
-        {}
         <div className="flex flex-wrap gap-4 mb-4 p-4 bg-neutral-900 rounded-lg border border-neutral-800">
           <div className="flex items-center gap-2">
             <div
@@ -254,16 +273,16 @@ export const CalendarPage = () => {
           <div className="flex items-center gap-2">
             <div
               className="w-4 h-4 rounded"
-              style={{ backgroundColor: '#6B7280' }}
+              style={{ backgroundColor: '#00e5ff' }}
             />
-            <span className="text-sm text-neutral-300">Teste</span>
+            <span className="text-sm text-neutral-300">Projeto</span>
           </div>
           <div className="flex items-center gap-2">
             <div
               className="w-4 h-4 rounded"
               style={{ backgroundColor: '#8B5CF6' }}
             />
-            <span className="text-sm text-neutral-300">Pessoal (Google)</span>
+            <span className="text-sm text-neutral-300">Google</span>
           </div>
           <div className="flex items-center gap-2">
             <div
@@ -277,7 +296,6 @@ export const CalendarPage = () => {
           </div>
         </div>
 
-        {}
         <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-4 calendar-dark">
           {isLoading ? (
             <div className="h-[700px] flex items-center justify-center">
@@ -294,7 +312,7 @@ export const CalendarPage = () => {
           ) : (
             <Calendar
               localizer={localizer}
-              events={events || []}
+              events={events}
               startAccessor="start"
               endAccessor="end"
               style={{ height: 700 }}
@@ -324,7 +342,6 @@ export const CalendarPage = () => {
           )}
         </div>
 
-        {}
         <EventDetailsModal
           event={selectedEvent}
           isOpen={isDetailsModalOpen}
@@ -336,14 +353,9 @@ export const CalendarPage = () => {
           onClose={() => setIsCreateModalOpen(false)}
           initialDate={createEventDate}
           onSuccess={() => {
-            queryClient.invalidateQueries({
-              queryKey: [QUERY_KEYS.CALENDAR_EVENTS],
-            })
             queryClient.invalidateQueries({ queryKey: ['events'] })
-            queryClient.invalidateQueries({ queryKey: ['calendar'] })
-            queryClient.invalidateQueries({
-              queryKey: [QUERY_KEYS.DASHBOARD_STATS],
-            })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CALENDAR_EVENTS] })
+            queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
             setIsCreateModalOpen(false)
           }}
         />
