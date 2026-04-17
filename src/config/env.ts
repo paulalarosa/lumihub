@@ -9,7 +9,8 @@ export function validateEnv(): EnvValidationResult {
   const missing: string[] = []
 
   for (const varName of requiredEnvVars) {
-    if (!import.meta.env[varName]) {
+    const val = import.meta.env[varName] as string | undefined
+    if (!val || val === 'undefined' || val === 'null') {
       missing.push(varName)
     }
   }
@@ -43,7 +44,7 @@ export function validateEnv(): EnvValidationResult {
           }
         }
       } else {
-        missing.push('VITE_SUPABASE_ANON_KEY (Formato JWT Inválido. A chave não é um JWT válido.)')
+        missing.push(`VITE_SUPABASE_ANON_KEY (Formato JWT Inválido. A chave não é um JWT válido. Valor lido: "${key.substring(0, 15)}...")`)
       }
     } catch (e) {
       missing.push('VITE_SUPABASE_ANON_KEY (Chave Corrompida ou Inválida)')
