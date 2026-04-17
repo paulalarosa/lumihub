@@ -50,6 +50,17 @@ export const useEvents = (start: Date, end: Date) => {
           queryClient.invalidateQueries({ queryKey: ['events'] })
         },
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'projects',
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['events'] })
+        },
+      )
       .subscribe()
 
     return () => {
@@ -64,27 +75,42 @@ export const useEvents = (start: Date, end: Date) => {
       formatDate(end, 'yyyy-MM-dd'),
     ],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('events')
-        .select(
-          `
-          *,
-          project:projects(name),
-          client:wedding_clients(id, name, phone, email),
-          event_assistants(
-            assistant_id
+      const startDate = formatDate(start, 'yyyy-MM-dd')
+      const endDate = formatDate(end, 'yyyy-MM-dd')
+
+      const [eventsResponse, projectsResponse] = await Promise.all([
+        supabase
+          .from('events')
+          .select(
+            `
+            *,
+            project:projects(name),
+            client:wedding_clients(id, name, phone, email),
+            event_assistants(
+              assistant_id
+            )
+          `,
           )
-        `,
-        )
-        .gte('event_date', formatDate(start, 'yyyy-MM-dd'))
-        .lte('event_date', formatDate(end, 'yyyy-MM-dd'))
-        .order('event_date', { ascending: true })
+          .gte('event_date', startDate)
+          .lte('event_date', endDate)
+          .order('event_date', { ascending: true }),
+        supabase
+          .from('projects')
+          .select(
+            `
+            *,
+            client:wedding_clients(id, name, phone, email)
+          `,
+          )
+          .gte('event_date', startDate)
+          .lte('event_date', endDate)
+          .order('event_date', { ascending: true })
+      ])
 
-      if (error) {
-        throw error
-      }
+      if (eventsResponse.error) throw eventsResponse.error
+      if (projectsResponse.error) throw projectsResponse.error
 
-      return (data || []).map((event) => ({
+      const events = (eventsResponse.data || []).map((event) => ({
         ...event,
         client: Array.isArray(event.client) ? event.client[0] : event.client,
         project: Array.isArray(event.project)
@@ -101,7 +127,29 @@ export const useEvents = (start: Date, end: Date) => {
             : event.reminder_days || [],
         latitude: event.latitude ? parseFloat(event.latitude) : null,
         longitude: event.longitude ? parseFloat(event.longitude) : null,
-      })) as Event[]
+      }))
+
+      const projectEvents = (projectsResponse.data || []).map((project) => ({
+        id: project.id,
+        title: project.name,
+        description: project.notes || project.description,
+        event_date: project.event_date,
+        event_type: project.event_type || 'project',
+        start_time: project.event_time || null,
+        end_time: null,
+        location: project.event_location || project.location,
+        color: '#00e5ff', // Highlight projects in a different color or brand color
+        client_id: project.client_id,
+        project_id: project.id,
+        client: Array.isArray(project.client) ? project.client[0] : project.client,
+        project: { name: project.name },
+        assistants: [],
+        reminder_days: [],
+        latitude: null,
+        longitude: null,
+      }))
+
+      return [...events, ...projectEvents] as Event[]
     },
     staleTime: 1000 * 60 * 5,
   })

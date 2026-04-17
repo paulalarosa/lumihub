@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { useToast } from '@/hooks/use-toast'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
@@ -35,6 +36,7 @@ interface UseNewProjectDialogProps {
 
 export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [loadingClients, setLoadingClients] = useState(false)
@@ -88,13 +90,13 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
   }, [open, loadClients])
 
   const onSubmit = async (data: CreateProjectFormData) => {
-    if (!user) return
+    if (!user || !organizationId) return
 
     try {
       const newProject = {
         name: data.name.trim(),
         client_id: data.client_id,
-        user_id: user.id,
+        user_id: organizationId,
         event_date: data.event_date || null,
         event_location: data.event_location?.trim() || null,
         event_type: data.event_type || null,

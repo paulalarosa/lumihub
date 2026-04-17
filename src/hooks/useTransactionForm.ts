@@ -5,6 +5,7 @@ import { transactionSchema } from '@/lib/validators'
 import * as z from 'zod'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { toast } from 'sonner'
 import { format } from 'date-fns/format'
 
@@ -26,6 +27,7 @@ export function useTransactionForm({
   onOpenChange,
 }: UseTransactionFormProps) {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
 
   const form = useForm<TransactionFormData>({
     resolver: zodResolver(transactionSchema),
@@ -117,7 +119,7 @@ export function useTransactionForm({
   }
 
   const onSubmit = async (data: TransactionFormData) => {
-    if (!user) return
+    if (!user || !organizationId) return
 
     try {
       const amountValue = parseFloat(
@@ -127,7 +129,7 @@ export function useTransactionForm({
       const { data: transaction, error } = await supabase
         .from('transactions')
         .insert({
-          user_id: user.id,
+          user_id: organizationId,
           type: type,
           description: data.description,
           amount: amountValue,

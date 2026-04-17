@@ -54,14 +54,41 @@ export function useDashboard() {
     queryKey: ['dashboard-upcoming-events', organizationId],
     queryFn: async () => {
       if (!organizationId) return []
-      const { data } = await supabase
-        .from('events')
-        .select('*')
-        .eq('user_id', organizationId)
-        .gte('event_date', new Date().toISOString())
-        .order('event_date', { ascending: true })
-        .limit(5)
-      return data || []
+      
+      const now = new Date().toISOString()
+      
+      const [eventsResponse, projectsResponse] = await Promise.all([
+        supabase
+          .from('events')
+          .select('title, event_date, start_time')
+          .eq('user_id', organizationId)
+          .gte('event_date', now)
+          .order('event_date', { ascending: true })
+          .limit(5),
+        supabase
+          .from('projects')
+          .select('name, event_date')
+          .eq('user_id', organizationId)
+          .gte('event_date', now)
+          .order('event_date', { ascending: true })
+          .limit(5)
+      ])
+
+      const events = (eventsResponse.data || []).map(e => ({
+        title: e.title,
+        event_date: e.event_date,
+        start_time: e.start_time
+      }))
+
+      const projectEvents = (projectsResponse.data || []).map(p => ({
+        title: p.name,
+        event_date: p.event_date,
+        start_time: null
+      }))
+
+      return [...events, ...projectEvents]
+        .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
+        .slice(0, 5)
     },
     enabled: !!organizationId,
   })

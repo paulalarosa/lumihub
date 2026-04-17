@@ -55,6 +55,18 @@ export function useDashboardStats() {
         {
           event: '*',
           schema: 'public',
+          table: 'projects',
+          filter: `user_id=eq.${userId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
+        },
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
           table: 'project_services',
         },
         () => {
@@ -105,16 +117,22 @@ export function useDashboardStats() {
       const now = startOfDay(new Date())
       const ninetyDaysFromNow = addDays(now, 90)
 
-      const { data: events, error: eventsError } = await supabase
-        .from('events')
-        .select('event_date')
-        .eq('user_id', userId)
-        .gte('event_date', now.toISOString())
-        .lte('event_date', ninetyDaysFromNow.toISOString())
+      const [eventsResponse, projectsResponse] = await Promise.all([
+        supabase
+          .from('events')
+          .select('id')
+          .eq('user_id', userId)
+          .gte('event_date', now.toISOString())
+          .lte('event_date', ninetyDaysFromNow.toISOString()),
+        supabase
+          .from('projects')
+          .select('id')
+          .eq('user_id', userId)
+          .gte('event_date', now.toISOString())
+          .lte('event_date', ninetyDaysFromNow.toISOString())
+      ])
 
-      if (eventsError) throw eventsError
-
-      const upcomingCount = events?.length || 0
+      const upcomingCount = (eventsResponse.data?.length || 0) + (projectsResponse.data?.length || 0)
 
       return {
         totalBudgets: totalBudget,

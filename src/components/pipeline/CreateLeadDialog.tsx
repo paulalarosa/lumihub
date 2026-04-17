@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import {
   Dialog,
   DialogContent,
@@ -39,16 +40,19 @@ export const CreateLeadDialog = ({
   onClose,
 }: CreateLeadDialogProps) => {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
   const queryClient = useQueryClient()
   const { register, handleSubmit, reset } = useForm<LeadFormData>()
   const [isLoading, setIsLoading] = useState(false)
 
   const createLead = useMutation({
     mutationFn: async (data: LeadFormData) => {
+      if (!organizationId) throw new Error('Organização não encontrada')
+
       const { data: stages } = (await supabase
         .from('pipeline_stages')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', organizationId)
         .eq('is_default', true)
         .eq('stage_type', 'lead')
         .single()) as { data: { id: string } | null }
@@ -59,7 +63,7 @@ export const CreateLeadDialog = ({
         const { data: firstStage } = (await supabase
           .from('pipeline_stages')
           .select('id')
-          .eq('user_id', user?.id)
+          .eq('user_id', organizationId)
           .order('display_order', { ascending: true })
           .limit(1)
           .single()) as { data: { id: string } | null }
@@ -72,7 +76,7 @@ export const CreateLeadDialog = ({
         )
 
       const { error } = await supabase.from('leads').insert({
-        user_id: user?.id,
+        user_id: organizationId,
         client_name: data.name,
         email: data.email || null,
         phone: data.phone || null,
