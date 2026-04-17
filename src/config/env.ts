@@ -14,6 +14,42 @@ export function validateEnv(): EnvValidationResult {
     }
   }
 
+  // Validação avançada para prevenir "Invalid API Key" por mix de chaves de dev/prod
+  const url = import.meta.env.VITE_SUPABASE_URL as string
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+
+  if (url && key && import.meta.env.MODE !== 'test' && key !== 'mock-key' && key !== 'dummy') {
+    try {
+      const parts = key.split('.')
+      if (parts.length === 3) {
+        let base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+        while (base64.length % 4 !== 0) {
+          base64 += '='
+        }
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split('')
+            .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+            .join(''),
+        )
+        const payload = JSON.parse(jsonPayload)
+
+        const urlMatch = url.match(/https:\/\/([a-z0-9-]+)\.supabase\.co/i)
+        
+        if (urlMatch && payload.ref) {
+          const expectedRef = urlMatch[1]
+          if (expectedRef !== payload.ref) {
+            missing.push(`VITE_SUPABASE_ANON_KEY (Misto de Ambientes! A URL é do projeto '${expectedRef}', mas a chave pertence ao projeto '${payload.ref}'. Verifique seu .env ou secrets do pipeline.)`)
+          }
+        }
+      } else {
+        missing.push('VITE_SUPABASE_ANON_KEY (Formato JWT Inválido. A chave não é um JWT válido.)')
+      }
+    } catch (e) {
+      missing.push('VITE_SUPABASE_ANON_KEY (Chave Corrompida ou Inválida)')
+    }
+  }
+
   return {
     isValid: missing.length === 0,
     missing,
