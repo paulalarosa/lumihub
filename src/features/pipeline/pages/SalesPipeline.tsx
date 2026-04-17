@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Plus, Search, Filter, TrendingUp } from 'lucide-react'
@@ -43,6 +44,7 @@ export interface PipelineStage {
 
 export const SalesPipeline = () => {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)
@@ -61,7 +63,7 @@ export const SalesPipeline = () => {
       const { data, error } = await supabase
         .from('pipeline_stages')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', organizationId || user?.id)
         .order('display_order')
 
       if (error) throw error
@@ -76,7 +78,7 @@ export const SalesPipeline = () => {
       let query = supabase
         .from('leads')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', organizationId || user?.id)
         .eq('status', 'active')
         .order('lead_score', { ascending: false })
 
@@ -165,7 +167,7 @@ export const SalesPipeline = () => {
               onClick={async () => {
                 const { error } = await supabase.rpc(
                   'create_default_pipeline_stages',
-                  { p_user_id: user?.id },
+                  { p_user_id: organizationId || user?.id },
                 )
                 if (error) toast.error(error.message)
                 else {

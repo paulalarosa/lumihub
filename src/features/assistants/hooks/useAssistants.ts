@@ -41,15 +41,46 @@ export const useAssistants = () => {
       const { data: userData, error: userError } = await supabase.auth.getUser()
       if (userError || !userData.user) throw new Error('User not authenticated')
 
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, parent_user_id')
+        .eq('id', userData.user.id)
+        .maybeSingle()
+
+      const organizationId = profile?.parent_user_id || userData.user.id
+
+      const { data: professional } = await supabase
+        .from('makeup_artists')
+        .select('id')
+        .eq('user_id', organizationId)
+        .single()
+
+      if (!professional) throw new Error('Profissional não encontrado')
+
       const token = crypto.randomUUID()
-      const { error } = await supabase.from('assistants').insert({
-        user_id: null,
-        full_name: vars.fullName,
-        email: vars.email,
-        phone: vars.phone,
-        invite_token: token,
-      })
+      const { data: assistant, error } = await supabase
+        .from('assistants')
+        .insert({
+          user_id: null,
+          full_name: vars.fullName,
+          email: vars.email,
+          phone: vars.phone,
+          invite_token: token,
+        })
+        .select()
+        .single()
+
       if (error) throw error
+
+      const { error: accessError } = await supabase
+        .from('assistant_access')
+        .insert({
+          assistant_id: assistant.id,
+          makeup_artist_id: professional.id,
+          status: 'active',
+        })
+
+      if (accessError) throw accessError
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ASSISTANTS] })

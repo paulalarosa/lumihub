@@ -66,7 +66,7 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
       const { data, error } = await supabase
         .from('wedding_clients')
         .select('id, name, email')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId || user.id)
         .order('name', { ascending: true })
 
       if (error) throw error

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
-import { useAuth } from './useAuth'
+import { useOrganization } from './useOrganization'
 import { toast } from 'sonner'
 import { Logger } from '@/services/logger'
 import { logger } from '@/services/logger'
@@ -21,7 +21,7 @@ export interface Contract {
 }
 
 export function useContracts() {
-  const { user } = useAuth()
+  const { user, organizationId } = useOrganization()
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -36,6 +36,7 @@ export function useContracts() {
                 project:projects(name)
             `,
       )
+      .eq('user_id', organizationId || user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -60,7 +61,7 @@ export function useContracts() {
           content: contract.content || '',
           status: contract.status || 'draft',
           project_id: contract.project_id,
-          user_id: user.id,
+          user_id: organizationId || user.id,
         },
       ])
       .select()
@@ -87,7 +88,7 @@ export function useContracts() {
     if (!user) throw new Error('User not authenticated')
 
     const fileExt = file.name.split('.').pop()
-    const fileName = `${user.id}/${Math.random().toString(36).substring(2)}.${fileExt}`
+    const fileName = `${organizationId || user.id}/${Math.random().toString(36).substring(2)}.${fileExt}`
     const filePath = `${fileName}`
 
     const { error: uploadError } = await supabase.storage

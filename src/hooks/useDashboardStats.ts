@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from './useAuth'
+import { useOrganization } from './useOrganization'
 import { addDays } from 'date-fns/addDays'
 import { startOfDay } from 'date-fns/startOfDay'
 
@@ -18,7 +19,8 @@ export interface DashboardStats {
 
 export function useDashboardStats() {
   const { session } = useAuth()
-  const userId = session?.user?.id
+  const { organizationId } = useOrganization()
+  const userId = organizationId || session?.user?.id
   const queryClient = useQueryClient()
 
   useEffect(() => {

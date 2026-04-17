@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label'
 import { FileUploader } from '@/components/ui/FileUploader'
 import { useContractUpload } from '@/features/contracts/hooks/useContractUpload'
 import { supabase } from '@/integrations/supabase/client'
-import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { UserPlus } from 'lucide-react'
@@ -25,7 +25,7 @@ import { QUERY_KEYS } from '@/constants/queryKeys'
 
 export function CreateClientDialog() {
   const [open, setOpen] = useState(false)
-  const { user } = useAuth()
+  const { user, organizationId } = useOrganization()
   const queryClient = useQueryClient()
   const [contractFile, setContractFile] = useState<File | null>(null)
   const { uploadFile, deleteFile, isUploading } = useContractUpload()
@@ -60,7 +60,7 @@ export function CreateClientDialog() {
       const { data: _client, error } = await supabase
         .from('wedding_clients')
         .insert({
-          user_id: user.id,
+          user_id: organizationId || user.id,
           name: values.name,
           full_name: values.name,
           email: values.email,

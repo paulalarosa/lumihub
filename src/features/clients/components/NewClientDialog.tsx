@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { toast } from 'sonner'
 import { Plus } from 'lucide-react'
 import { ClientService } from '@/features/clients/api/clientService'
@@ -31,7 +31,7 @@ export default function NewClientDialog({
 }: {
   onSuccess?: () => void
 }) {
-  const { user } = useAuth()
+  const { user, organizationId } = useOrganization()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<{ id: string; name: string }[]>([])
@@ -55,8 +55,8 @@ export default function NewClientDialog({
   }, [open, user])
 
   const loadClients = async () => {
-    if (!user) return
-    const data = await ClientService.list(user.id)
+    if (!organizationId) return
+    const data = await ClientService.list(organizationId)
     if (data) {
       setClients(data)
     }
@@ -97,7 +97,7 @@ export default function NewClientDialog({
         phone: formData.phone || null,
         notes: formData.notes || null,
         origin: formData.origin || null,
-        user_id: user.id,
+        user_id: organizationId || user.id,
         is_bride: formData.is_bride,
         access_pin: formData.access_pin || null,
       }
