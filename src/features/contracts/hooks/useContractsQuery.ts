@@ -1,14 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 
 export function useContractsQuery() {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
 
   return useQuery({
-    queryKey: ['contracts', user?.id],
+    queryKey: ['contracts', organizationId],
     queryFn: async () => {
-      if (!user) return []
+      if (!organizationId) return []
 
       const { data: contractsData, error } = await supabase
         .from('contracts')
@@ -25,7 +27,7 @@ export function useContractsQuery() {
           project_id
         `,
         )
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .order('created_at', { ascending: false })
 
       if (error) throw error

@@ -70,15 +70,17 @@ const defaultFormData: MicrositeFormData = {
 
 export default function MicrositeEditor() {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
   const queryClient = useQueryClient()
 
   const { data: microsite, isLoading } = useQuery({
-    queryKey: ['my-microsite', user?.id],
+    queryKey: ['my-microsite', organizationId || user?.id],
     queryFn: async () => {
+      if (!organizationId && !user) return null
       const { data, error } = await supabase
         .from('microsites' as never)
         .select('*')
-        .eq('user_id', user!.id)
+        .eq('user_id', organizationId || user!.id)
         .maybeSingle()
 
       if (error) throw error
@@ -129,12 +131,12 @@ export default function MicrositeEditor() {
         const { data: artist } = await supabase
           .from('makeup_artists')
           .select('id')
-          .eq('user_id', user!.id)
+          .eq('user_id', organizationId || user!.id)
           .maybeSingle()
 
         const { error } = await supabase.from('microsites' as never).insert({
           ...data,
-          user_id: user!.id,
+          user_id: organizationId || user!.id,
           makeup_artist_id: artist?.id,
         } as never)
         if (error) throw error

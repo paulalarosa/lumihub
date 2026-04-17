@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { subMonths } from 'date-fns/subMonths'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
 
@@ -17,16 +18,17 @@ export interface Transaction {
 
 export const useFinancials = () => {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
 
   const query = useQuery({
-    queryKey: ['financial-transactions', user?.id],
+    queryKey: ['financial-transactions', organizationId],
     queryFn: async () => {
-      if (!user) return []
+      if (!organizationId) return []
 
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .order('date', { ascending: false })
 
       if (error) throw error

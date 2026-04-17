@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { useOrganization } from '@/hooks/useOrganization'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
@@ -14,6 +15,7 @@ import { sanitizeUserInput } from '@/lib/security'
 
 export const InviteAssistantForm = () => {
   const { user } = useAuth()
+  const { organizationId } = useOrganization()
   const { toast } = useToast()
   const [assistantName, setAssistantName] = useState('')
   const [assistantEmail, setAssistantEmail] = useState('')
@@ -23,28 +25,28 @@ export const InviteAssistantForm = () => {
   const [error, setError] = useState<string | null>(null)
 
   const { data: makeupArtistData } = useQuery({
-    queryKey: ['makeup-artist-profile', user?.id],
+    queryKey: ['makeup-artist-profile', organizationId],
     queryFn: async () => {
-      if (!user) return null
+      if (!organizationId) return null
       const { data } = await supabase
         .from('makeup_artists')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .maybeSingle()
       if (data) return data
 
       const { data: profile } = await supabase
         .from('profiles')
         .select('full_name')
-        .eq('id', user.id)
+        .eq('id', organizationId)
         .maybeSingle()
 
       const { data: created } = await supabase
         .from('makeup_artists')
         .insert({
-          user_id: user.id,
+          user_id: organizationId,
           business_name:
-            profile?.full_name || user.email?.split('@')[0] || 'Profissional',
+            profile?.full_name || 'Profissional',
         })
         .select('id')
         .single()
@@ -132,7 +134,7 @@ export const InviteAssistantForm = () => {
         }
       }
 
-      const portalLink = `${window.location.origin}/agenda-equipa/${user.id}`
+      const portalLink = `${window.location.origin}/agenda-equipa/${organizationId || user.id}`
       setGeneratedLink(portalLink)
 
       toast({ title: 'Assistente cadastrada com sucesso!' })

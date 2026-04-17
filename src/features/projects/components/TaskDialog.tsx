@@ -10,6 +10,7 @@ import {
 import { Plus } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { ProjectService } from '../api/projectService'
+import { useOrganization } from '@/hooks/useOrganization'
 
 import { useToast } from '@/hooks/use-toast'
 import type { Task, TaskPriority } from '@/types'
@@ -31,6 +32,7 @@ export function TaskDialog({
   onOpenChange,
 }: TaskDialogProps) {
   const { toast } = useToast()
+  const { organizationId } = useOrganization()
   const [title, setTitle] = useState('')
   const [priority, setPriority] = useState<TaskPriority>('medium')
   const [isLoading, setIsLoading] = useState(false)
@@ -78,7 +80,7 @@ export function TaskDialog({
           project_id: projectId,
           title: title.trim(),
           description: '',
-          user_id: user.id,
+          user_id: organizationId || user.id,
           priority: priority,
           status: 'todo',
         })

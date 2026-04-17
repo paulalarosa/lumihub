@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useOrganization } from '@/hooks/useOrganization'
 
 interface Project {
   id: string
@@ -31,6 +32,7 @@ export function useProjectsPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user, loading: authLoading } = useAuth()
+  const { organizationId } = useOrganization()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
@@ -57,11 +59,11 @@ export function useProjectsPage() {
   const { data: projects = [], isLoading: loadingProjects } = useQuery({
     queryKey: ['projects', user?.id],
     queryFn: async () => {
-      if (!user) return []
+      if (!organizationId) return []
       const { data, error } = await supabase
         .from('projects')
         .select('*, client:wedding_clients(id, full_name)')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -73,11 +75,11 @@ export function useProjectsPage() {
   const { data: clients = [] } = useQuery({
     queryKey: ['wedding_clients_list', user?.id],
     queryFn: async () => {
-      if (!user) return []
+      if (!organizationId) return []
       const { data, error } = await supabase
         .from('wedding_clients')
         .select('id, full_name')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .order('full_name')
 
       if (error) throw error
@@ -110,10 +112,9 @@ export function useProjectsPage() {
       .insert({
         name: name.trim(),
         client_id: clientId,
-        event_type: eventType || null,
         event_date: eventDate || null,
         event_location: eventLocation.trim() || null,
-        user_id: user!.id,
+        user_id: organizationId || user!.id,
       })
       .select()
       .single()

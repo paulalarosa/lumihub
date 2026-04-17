@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Users, Plus, Copy, Check, ArrowRight } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
+import { useOrganization } from '@/hooks/useOrganization'
 
 interface Assistant {
   id: string
@@ -22,6 +23,7 @@ interface Assistant {
 }
 
 export function AssistantsPanelCard() {
+  const { organizationId } = useOrganization()
   const [assistants, setAssistants] = useState<Assistant[]>([])
   const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState<string | null>(null)
@@ -32,15 +34,12 @@ export function AssistantsPanelCard() {
 
   const fetchAssistants = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (!user) return
+      if (!organizationId) return
 
       const { data, error } = await supabase
         .from('assistants')
         .select('id, full_name, phone, created_at')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .order('created_at', { ascending: false })
         .limit(5)
 

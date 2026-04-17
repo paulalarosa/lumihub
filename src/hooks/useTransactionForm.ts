@@ -72,16 +72,24 @@ export function useTransactionForm({
 
   const fetchOptions = async () => {
     try {
-      const { data: p } = await supabase.from('projects').select('id, name')
+      if (!organizationId) return
+
+      const { data: p } = await supabase
+        .from('projects')
+        .select('id, name')
+        .eq('user_id', organizationId)
       if (p) setProjects(p)
 
-      const { data: s } = await supabase.from('services').select('id, name')
+      const { data: s } = await supabase
+        .from('services')
+        .select('id, name')
+        .eq('user_id', organizationId)
       if (s) setServices(s)
 
       const { data: ma } = await supabase
         .from('makeup_artists')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', organizationId)
         .maybeSingle()
 
       if (ma) {
