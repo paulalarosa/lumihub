@@ -155,7 +155,7 @@ export default function EventDialog({
                     variant="ghost"
                     size="sm"
                     onClick={() => form.setShowQuickClient(true)}
-                    className="h-6 text-[10px] text-cyan-400 hover:text-cyan-300 px-2"
+                    className="h-6 text-[10px] text-white/50 hover:text-white/80 px-2"
                   >
                     + NOVO
                   </Button>
@@ -338,7 +338,7 @@ export default function EventDialog({
                     variant="ghost"
                     size="sm"
                     onClick={() => form.setShowQuickProject(true)}
-                    className="h-6 text-[10px] text-cyan-400 hover:text-cyan-300 px-2"
+                    className="h-6 text-[10px] text-white/50 hover:text-white/80 px-2"
                     disabled={form.clients.length === 0}
                   >
                     + NOVO

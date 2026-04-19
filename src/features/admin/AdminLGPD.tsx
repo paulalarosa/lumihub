@@ -114,7 +114,7 @@ export default function AdminLGPD() {
             LGPD — Solicitações
           </h2>
           <p className="text-muted-foreground font-mono text-xs uppercase tracking-widest mt-1">
-            Lei Geral de Proteção de Dados // Compliance
+            Lei Geral de Proteção de Dados
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -260,7 +260,6 @@ export default function AdminLGPD() {
         </CardContent>
       </Card>
 
-      {/* Confirm Dialog */}
       <Dialog
         open={!!confirmAction}
         onOpenChange={(open) => !open && setConfirmAction(null)}

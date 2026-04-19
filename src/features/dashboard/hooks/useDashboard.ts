@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
@@ -54,22 +55,22 @@ export function useDashboard() {
     queryKey: ['dashboard-upcoming-events', organizationId],
     queryFn: async () => {
       if (!organizationId) return []
-      
-      const now = new Date().toISOString()
-      
+
+      const today = format(new Date(), 'yyyy-MM-dd')
+
       const [eventsResponse, projectsResponse] = await Promise.all([
         supabase
           .from('events')
           .select('title, event_date, start_time')
           .eq('user_id', organizationId)
-          .gte('event_date', now)
+          .gte('event_date', today)
           .order('event_date', { ascending: true })
           .limit(5),
         supabase
           .from('projects')
           .select('name, event_date')
           .eq('user_id', organizationId)
-          .gte('event_date', now)
+          .gte('event_date', today)
           .order('event_date', { ascending: true })
           .limit(5)
       ])

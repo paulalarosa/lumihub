@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { logger } from '@/services/logger'
 import {
   Card,
@@ -66,141 +66,150 @@ export default function AdminIntegrations() {
     },
   ])
 
-  const checkStatus = async () => {
+  const checkStatus = useCallback(async () => {
     setLoading(true)
-    const newStatuses = [...statuses]
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1)
-        .maybeSingle()
-      updateStatus(
-        newStatuses,
-        'Supabase Database',
-        error ? 'degraded' : 'operational',
-        error?.message || 'Connected',
-      )
-      updateStatus(
-        newStatuses,
-        'Supabase Auth',
-        'operational',
-        'Session Active',
-      )
-    } catch (e) {
-      updateStatus(
-        newStatuses,
-        'Supabase Database',
-        'down',
-        'Connection Failed',
-      )
-      logger.error(e, 'Health Check Failed', {
-        context: { service: 'Supabase Database' },
-      })
-    }
+    setStatuses(current => {
+      const newStatuses = [...current]
 
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        'google-calendar-sync',
-        {
-          body: { action: 'check_config' },
-        },
-      )
+      const checkAll = async () => {
+        try {
+          const { error } = await supabase
+            .from('profiles')
+            .select('count')
+            .limit(1)
+            .maybeSingle()
+          updateStatus(
+            newStatuses,
+            'Supabase Database',
+            error ? 'degraded' : 'operational',
+            error?.message || 'Connected',
+          )
+          const { data: authData } = await supabase.auth.getUser()
+          updateStatus(
+            newStatuses,
+            'Supabase Auth',
+            authData?.user ? 'operational' : 'down',
+            authData?.user ? `Session: ${authData.user.email}` : 'No Active Session',
+          )
+        } catch (e) {
+          updateStatus(
+            newStatuses,
+            'Supabase Database',
+            'down',
+            'Connection Failed',
+          )
+          logger.error(e, 'Health Check Failed', {
+            context: { service: 'Supabase Database' },
+          })
+        }
 
-      if (error) throw error
+        try {
+          const { data, error } = await supabase.functions.invoke(
+            'google-calendar-sync',
+            {
+              body: { action: 'check_config' },
+            },
+          )
 
-      if (data?.error === 'Service configuration error') {
-        updateStatus(
-          newStatuses,
-          'Google Calendar Sync',
-          'not_configured',
-          `Missing: ${data.missing_keys?.join(', ')}`,
-        )
-      } else if (data?.error === 'Invalid action') {
-        updateStatus(
-          newStatuses,
-          'Google Calendar Sync',
-          'operational',
-          'Edge Function Configured',
-        )
-      } else {
-        updateStatus(
-          newStatuses,
-          'Google Calendar Sync',
-          'operational',
-          'Responding',
-        )
+          if (error) throw error
+
+          if (data?.error === 'Service configuration error') {
+            updateStatus(
+              newStatuses,
+              'Google Calendar Sync',
+              'not_configured',
+              `Missing: ${data.missing_keys?.join(', ')}`,
+            )
+          } else if (data?.error === 'Invalid action') {
+            updateStatus(
+              newStatuses,
+              'Google Calendar Sync',
+              'operational',
+              'Edge Function Configured',
+            )
+          } else {
+            updateStatus(
+              newStatuses,
+              'Google Calendar Sync',
+              'operational',
+              'Responding',
+            )
+          }
+        } catch (_e) {
+          updateStatus(newStatuses, 'Google Calendar Sync', 'down', 'Unreachable')
+        }
+
+        try {
+          const { data, error } = await supabase.functions.invoke(
+            'check-stripe-status',
+          )
+
+          if (error || data?.status === 'down') {
+            const msg = error?.message || data?.error || 'Unknown Error'
+            updateStatus(newStatuses, 'Stripe', 'down', msg)
+            logger.error(new Error(`Stripe Health Check Failed: ${msg}`), {
+              context: { service: 'Stripe', data, error },
+            })
+          } else {
+            updateStatus(
+              newStatuses,
+              'Stripe',
+              'operational',
+              `Latency: ${data?.latency || 'OK'}`,
+            )
+          }
+        } catch (e) {
+          updateStatus(newStatuses, 'Stripe', 'down', 'Invocation Failed')
+          logger.error(e, 'Health Check Failed', { context: { service: 'Stripe' } })
+        }
+
+        const mapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
+        if (mapsKey) {
+          updateStatus(
+            newStatuses,
+            'Google Maps',
+            'operational',
+            'Key Present in Client',
+          )
+        } else {
+          updateStatus(
+            newStatuses,
+            'Google Maps',
+            'not_configured',
+            'VITE_GOOGLE_MAPS_API_KEY Missing',
+          )
+        }
+
+        try {
+          const { data, error } =
+            await supabase.functions.invoke('check-ses-status')
+
+          if (error || data?.status === 'down') {
+            const msg = error?.message || data?.error || 'Unknown Error'
+            updateStatus(newStatuses, 'Resend Email', 'down', msg)
+            logger.error(new Error(`SES Health Check Failed: ${msg}`), {
+              context: { service: 'Resend Email', data, error },
+            })
+          } else {
+            updateStatus(newStatuses, 'Resend Email', 'operational', `Operational`)
+          }
+        } catch (e) {
+          updateStatus(newStatuses, 'Resend Email', 'down', 'Invocation Failed')
+          logger.error(e, 'Health Check Failed', {
+            context: { service: 'Resend Email' },
+          })
+        }
+
+        setStatuses([...newStatuses])
+        setLoading(false)
+        toast.success('System Status Updated')
       }
-    } catch (_e) {
-      updateStatus(newStatuses, 'Google Calendar Sync', 'down', 'Unreachable')
-    }
 
-    try {
-      const { data, error } = await supabase.functions.invoke(
-        'check-stripe-status',
-      )
-
-      if (error || data?.status === 'down') {
-        const msg = error?.message || data?.error || 'Unknown Error'
-        updateStatus(newStatuses, 'Stripe', 'down', msg)
-        logger.error(new Error(`Stripe Health Check Failed: ${msg}`), {
-          context: { service: 'Stripe', data, error },
-        })
-      } else {
-        updateStatus(
-          newStatuses,
-          'Stripe',
-          'operational',
-          `Latency: ${data?.latency || 'OK'}`,
-        )
-      }
-    } catch (e) {
-      updateStatus(newStatuses, 'Stripe', 'down', 'Invocation Failed')
-      logger.error(e, 'Health Check Failed', { context: { service: 'Stripe' } })
-    }
-
-    const mapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    if (mapsKey) {
-      updateStatus(
-        newStatuses,
-        'Google Maps',
-        'operational',
-        'Key Present in Client',
-      )
-    } else {
-      updateStatus(
-        newStatuses,
-        'Google Maps',
-        'not_configured',
-        'VITE_GOOGLE_MAPS_API_KEY Missing',
-      )
-    }
-
-    try {
-      const { data, error } =
-        await supabase.functions.invoke('check-ses-status')
-
-      if (error || data?.status === 'down') {
-        const msg = error?.message || data?.error || 'Unknown Error'
-        updateStatus(newStatuses, 'Resend Email', 'down', msg)
-        logger.error(new Error(`SES Health Check Failed: ${msg}`), {
-          context: { service: 'Resend Email', data, error },
-        })
-      } else {
-        updateStatus(newStatuses, 'Resend Email', 'operational', `Operational`)
-      }
-    } catch (e) {
-      updateStatus(newStatuses, 'Resend Email', 'down', 'Invocation Failed')
-      logger.error(e, 'Health Check Failed', {
-        context: { service: 'Resend Email' },
-      })
-    }
-
-    setStatuses(newStatuses)
-    setLoading(false)
-    toast.success('System Status Updated')
-  }
+      checkAll()
+      return newStatuses
+    })
+  }, [])
 
   const updateStatus = (
     list: IntegrationStatus[],
@@ -216,7 +225,7 @@ export default function AdminIntegrations() {
 
   useEffect(() => {
     checkStatus()
-  }, [])
+  }, [checkStatus])
 
   const getIcon = (service: string) => {
     switch (service) {

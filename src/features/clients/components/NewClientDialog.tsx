@@ -52,6 +52,7 @@ export default function NewClientDialog({
     if (open && user?.id) {
       loadClients()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user])
 
   const loadClients = async () => {
@@ -267,7 +268,7 @@ export default function NewClientDialog({
               name="is_bride"
               checked={formData.is_bride}
               onChange={handleChange}
-              className="h-4 w-4 rounded border-gray-300 bg-white/10 text-[#00e5ff] focus:ring-[#00e5ff]"
+              className="h-4 w-4 rounded border-gray-300 bg-white/10 text-white focus:ring-white/30"
             />
             <Label
               htmlFor="is_bride"

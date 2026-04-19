@@ -26,7 +26,7 @@ export function useAdminSubscriptions() {
   const statsQuery = useQuery({
     queryKey: ['admin-subscription-stats'],
     queryFn: async (): Promise<SubscriptionStats> => {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'get_admin_subscription_stats',
       )
       if (error) {
@@ -76,7 +76,7 @@ export function useAdminSubscriptions() {
       userId: string
       newPlan: string
     }) => {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'admin_update_user_plan',
         {
           p_user_id: userId,

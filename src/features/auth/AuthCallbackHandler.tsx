@@ -34,14 +34,12 @@ const AuthCallbackHandler = () => {
           .update({ onboarding_completed: true })
           .eq('id', userId)
       } catch {
-        // non-fatal: profile update failure should not block navigation
+
       }
       setStatus('success')
       setTimeout(() => navigate('/dashboard'), 1500)
     }
 
-    // Strategy 1: listen for the SIGNED_IN event emitted after Supabase
-    // exchanges the PKCE code server-side and sets the session.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -54,8 +52,6 @@ const AuthCallbackHandler = () => {
       }
     })
 
-    // Strategy 2: also check immediately in case the session already
-    // exists (e.g. page was refreshed on /auth/callback).
     supabase.auth.getSession().then(async ({ data, error }) => {
       if (error) {
         subscription.unsubscribe()
@@ -70,8 +66,6 @@ const AuthCallbackHandler = () => {
         return
       }
 
-      // No session yet — fall back to a hard timeout so the user isn't
-      // stuck forever if the auth event never fires.
       const timeout = setTimeout(() => {
         subscription.unsubscribe()
         setStatus('error')

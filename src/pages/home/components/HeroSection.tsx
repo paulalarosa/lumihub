@@ -29,20 +29,9 @@ export const HeroSection = () => {
       },
     })
 
-    // Parallax Zoom Effect
-    tl.to(bgRef.current, {
-      scale: 1.5,
-      ease: 'none',
-    }, 0)
+    tl.to(bgRef.current, { scale: 1.5, ease: 'none' }, 0)
+    tl.to(contentRef.current, { y: 100, opacity: 0, scale: 0.9, ease: 'none' }, 0)
 
-    tl.to(contentRef.current, {
-      y: 100,
-      opacity: 0,
-      scale: 0.9,
-      ease: 'none',
-    }, 0)
-
-    // Entrace Animation
     gsap.from('.hero-reveal', {
       y: 40,
       opacity: 0,
@@ -58,24 +47,43 @@ export const HeroSection = () => {
       ref={heroRef}
       className="relative min-h-[120vh] flex items-center bg-black overflow-hidden parallax-container"
     >
-      {}
       <div ref={bgRef} className="absolute inset-0 z-0">
-        <div className="absolute right-0 top-0 w-full md:w-1/2 h-full opacity-20 pointer-events-none">
+        <div className="absolute right-0 top-0 w-full md:w-[55%] h-full pointer-events-none">
           <img
             src="/assets/hero-image-B5FCqZ87.png"
             alt=""
-            className="w-full h-full object-cover grayscale contrast-125 scale-110"
+            className="w-full h-full object-cover grayscale contrast-125 scale-110 opacity-55"
             fetchPriority="high"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-transparent" />
+          <div
+            className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent"
+            style={{ width: '30%', left: 'auto', right: 0 }}
+          />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black from-20% via-black/70 to-transparent" />
       </div>
+
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black via-black/70 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
+
+      <svg
+        className="absolute inset-0 w-full h-full pointer-events-none z-10"
+        style={{ opacity: 0.12, mixBlendMode: 'overlay' }}
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+        <filter id="hero-grain">
+          <feTurbulence type="fractalNoise" baseFrequency="0.68" numOctaves="4" stitchTiles="stitch" result="noise" />
+          <feColorMatrix type="saturate" values="0" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#hero-grain)" />
+      </svg>
 
       <div
         ref={contentRef}
         className="container mx-auto px-6 md:px-16 relative z-30 max-w-6xl pt-20"
       >
-        {}
         <div className="hero-reveal inline-flex items-center gap-2 mb-10 px-4 py-2 border border-white/10 bg-white/[0.03]">
           <div className="flex -space-x-2">
             {[1, 2, 3].map((i) => (
@@ -90,22 +98,19 @@ export const HeroSection = () => {
           </span>
         </div>
 
-        {}
         <div className="hero-reveal mb-8">
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-tight">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-wide">
             {t('home.hero.title_1')}
           </h1>
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-tight italic mt-1">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-wide italic mt-1">
             {t('home.hero.title_2')}
           </h1>
         </div>
 
-        {}
         <p className="hero-reveal text-white/45 text-base md:text-lg max-w-xl mb-10 leading-relaxed">
           {t('home.hero.subtitle')}
         </p>
 
-        {}
         <div className="hero-reveal flex flex-col sm:flex-row gap-6 mb-12 text-sm text-white/40">
           <span className="flex items-center gap-2">
             <div className="w-1 h-1 bg-white/60" />
@@ -121,7 +126,6 @@ export const HeroSection = () => {
           </span>
         </div>
 
-        {}
         <div className="hero-reveal flex flex-col sm:flex-row gap-4">
           <Button
             variant="primary"
@@ -140,18 +144,10 @@ export const HeroSection = () => {
             variant="glass"
             size={isMobile ? 'default' : 'lg'}
             onClick={() => {
-              trackCTAClick(
-                'hero_how_it_works',
-                'hero_section',
-                '#como-funciona',
-              )
+              trackCTAClick('hero_how_it_works', 'hero_section', '#como-funciona')
               const el = document.getElementById('como-funciona')
               if (el) {
-                // Smooth scroll using Lenis if possible
-                window.scrollTo({
-                  top: el.offsetTop,
-                  behavior: 'smooth'
-                })
+                window.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
               }
             }}
           >
@@ -161,7 +157,6 @@ export const HeroSection = () => {
         </div>
       </div>
 
-      {}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 opacity-50">
         <div className="w-[1px] h-10 bg-gradient-to-b from-white/30 to-transparent animate-pulse" />
       </div>

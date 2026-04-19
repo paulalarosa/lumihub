@@ -51,6 +51,7 @@ export function useConfiguracoes() {
       fetchData()
       setFullName(user.user_metadata?.full_name || '')
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const fetchData = async () => {

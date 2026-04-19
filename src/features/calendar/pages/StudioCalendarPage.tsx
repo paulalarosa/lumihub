@@ -59,7 +59,7 @@ export default function StudioCalendarPage() {
   }
 
   const [form, setForm] = useState({
-// ... (lines 45-51 same)
+
     title: '',
     event_date: '',
     start_time: '09:00',
@@ -69,7 +69,7 @@ export default function StudioCalendarPage() {
   })
 
   const days = useMemo(
-// ... (lines 53-118 same)
+
     () =>
       eachDayOfInterval({
         start: startOfMonth(currentMonth),
@@ -138,7 +138,7 @@ export default function StudioCalendarPage() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-foreground font-serif text-2xl md:text-3xl tracking-tight">
@@ -170,7 +170,7 @@ export default function StudioCalendarPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar Grid */}
+
         <Card className="lg:col-span-2 bg-background border border-border rounded-none">
           <CardHeader className="border-b border-border flex flex-row items-center justify-between py-3 px-4">
             <Button
@@ -194,7 +194,7 @@ export default function StudioCalendarPage() {
             </Button>
           </CardHeader>
           <CardContent className="p-2 md:p-4">
-            {/* Day headers */}
+
             <div className="grid grid-cols-7 gap-1 mb-2">
               {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((d) => (
                 <div
@@ -206,9 +206,8 @@ export default function StudioCalendarPage() {
               ))}
             </div>
 
-            {/* Day grid */}
             <div className="grid grid-cols-7 gap-1">
-              {/* Empty cells for offset */}
+
               {Array.from({ length: startOfMonth(currentMonth).getDay() }).map(
                 (_, i) => (
                   <div key={`empty-${i}`} className="h-16 md:h-20" />
@@ -260,7 +259,6 @@ export default function StudioCalendarPage() {
           </CardContent>
         </Card>
 
-        {/* Selected Day Events */}
         <Card className="bg-background border border-border rounded-none">
           <CardHeader className="border-b border-border py-3 px-4">
             <div className="flex items-center justify-between">
@@ -371,7 +369,6 @@ export default function StudioCalendarPage() {
         </Card>
       </div>
 
-      {/* Create/Edit Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="bg-background border-border rounded-none max-w-md">
           <DialogHeader>
@@ -479,7 +476,7 @@ export default function StudioCalendarPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      {/* Share Dialog */}
+
       <Dialog open={showShare} onOpenChange={setShowShare}>
         <DialogContent className="bg-background border-border rounded-none max-w-md">
           <DialogHeader>
@@ -489,16 +486,16 @@ export default function StudioCalendarPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-xs text-muted-foreground font-sans">
-              Este link permite que interessados vejam seus horários disponíveis para a semana de{' '} 
+              Este link permite que interessados vejam seus horários disponíveis para a semana de{' '}
               <span className="text-foreground font-bold font-mono">
                 {selectedDate ? format(startOfWeek(selectedDate, { weekStartsOn: 0 }), 'dd/MM', { locale: ptBR }) : ''}
               </span>.
             </p>
-            
+
             <div className="flex gap-2">
-              <Input 
-                readOnly 
-                value={sharingLink} 
+              <Input
+                readOnly
+                value={sharingLink}
                 className="rounded-none border-border bg-muted/30 font-mono text-[10px]"
               />
               <Button size="sm" className="rounded-none px-3" onClick={copyLink}>

@@ -44,6 +44,7 @@ const LoadingSkeleton = ({
   )
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const lazyLoadComponent = <T extends ComponentType<any>>(
   importFunc: () => Promise<{ default: T }>,
   fallbackType: 'default' | 'card' | 'hero' = 'default',

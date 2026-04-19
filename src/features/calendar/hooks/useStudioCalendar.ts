@@ -127,7 +127,6 @@ export function useStudioCalendar(startDate: string, endDate: string) {
     },
   })
 
-  // Realtime updates
   useEffect(() => {
     const channel = supabase
       .channel('studio-calendar-realtime')

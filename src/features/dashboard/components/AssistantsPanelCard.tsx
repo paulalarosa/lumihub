@@ -1,188 +1,91 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Users, Plus, Copy, Check, ArrowRight } from 'lucide-react'
+import { Users, Plus, ArrowRight } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { toast } from 'sonner'
 import { useOrganization } from '@/hooks/useOrganization'
 
 interface Assistant {
   id: string
   full_name: string
-  email: string | null
-  is_registered: boolean
-  invite_token: string | null
+  phone: string | null
 }
 
 export function AssistantsPanelCard() {
   const { organizationId } = useOrganization()
-  const [assistants, setAssistants] = useState<Assistant[]>([])
-  const [loading, setLoading] = useState(true)
-  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  useEffect(() => {
-    fetchAssistants()
-  }, [])
-
-  const fetchAssistants = async () => {
-    try {
-      if (!organizationId) return
-
+  const { data: assistants = [], isLoading } = useQuery({
+    queryKey: ['dashboard-assistants', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return []
       const { data, error } = await supabase
         .from('assistants')
-        .select('id, full_name, phone, created_at')
+        .select('id, full_name, phone')
         .eq('user_id', organizationId)
         .order('created_at', { ascending: false })
-        .limit(5)
-
+        .limit(4)
       if (error) throw error
-      setAssistants(
-        ((data as any) || []).map((a: any) => ({
-          id: String(a.id),
-          full_name: String(a.full_name),
-          email: null,
-          is_registered: true,
-          invite_token: null,
-        })),
-      )
-    } catch (error) {
-      void error
-    } finally {
-      setLoading(false)
-    }
-  }
+      return (data || []) as Assistant[]
+    },
+    enabled: !!organizationId,
+  })
 
-  const copyInviteLink = async (assistant: Assistant) => {
-    if (!assistant.invite_token) return
-
-    const link = `${window.location.origin}/assistente/convite/${assistant.invite_token}`
-    await navigator.clipboard.writeText(link)
-    setCopiedId(assistant.id)
-    toast.success('Link copiado!')
-
-    setTimeout(() => setCopiedId(null), 2000)
-  }
-
-  const registeredCount = assistants.filter((a) => a.is_registered).length
-  const pendingCount = assistants.filter((a) => !a.is_registered).length
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Minhas Assistentes
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-12 bg-white/[0.03] animate-pulse" />
+        ))}
+      </div>
+    )
+  }
+
+  if (assistants.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-8 text-center">
+        <Users className="w-8 h-8 text-white/10 mb-3" />
+        <p className="text-sm text-white/20 mb-4">Nenhuma assistente cadastrada</p>
+        <Link to="/assistentes">
+          <span className="inline-flex items-center gap-1.5 text-xs font-mono text-white/40 hover:text-white transition-colors uppercase tracking-widest border border-white/10 hover:border-white/30 px-4 py-2">
+            <Plus className="w-3 h-3" />
+            Cadastrar Assistente
+          </span>
+        </Link>
+      </div>
     )
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Minhas Assistentes
-          </CardTitle>
-          <CardDescription>
-            {assistants.length === 0
-              ? 'Nenhuma assistente cadastrada'
-              : `${registeredCount} registrada${registeredCount !== 1 ? 's' : ''} • ${pendingCount} pendente${pendingCount !== 1 ? 's' : ''}`}
-          </CardDescription>
-        </div>
-        <Button asChild size="sm">
-          <Link to="/assistentes">
-            <Plus className="h-4 w-4 mr-1" />
-            Adicionar
-          </Link>
-        </Button>
-      </CardHeader>
-      <CardContent>
-        {assistants.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Users className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">
-              Cadastre assistentes para vincular a eventos
-            </p>
+    <div className="space-y-2">
+      {assistants.map((assistant) => (
+        <div
+          key={assistant.id}
+          className="flex items-center gap-3 p-3 border border-white/[0.06] hover:border-white/20 transition-colors group"
+        >
+          <div className="w-8 h-8 bg-white/[0.06] flex items-center justify-center text-xs font-mono text-white/60 flex-shrink-0 group-hover:bg-white/[0.1] transition-colors">
+            {assistant.full_name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')
+              .slice(0, 2)
+              .toUpperCase()}
           </div>
-        ) : (
-          <div className="space-y-3">
-            {assistants.map((assistant) => (
-              <div
-                key={assistant.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-9 w-9">
-                    <AvatarFallback className="text-xs">
-                      {assistant.full_name
-                        .split(' ')
-                        .map((n) => n[0])
-                        .join('')
-                        .slice(0, 2)
-                        .toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm font-medium">{assistant.full_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {assistant.email || 'Sem email'}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {assistant.is_registered ? (
-                    <span className="kk-badge-active">Ativa</span>
-                  ) : (
-                    <>
-                      <span className="kk-badge-pending">Pendente</span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]"
-                        onClick={() => copyInviteLink(assistant)}
-                      >
-                        {copiedId === assistant.id ? (
-                          <Check className="h-4 w-4 text-green-600" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
-                        )}
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {assistants.length >= 5 && (
-              <Button asChild variant="ghost" className="w-full mt-2">
-                <Link to="/assistentes">
-                  Ver todas
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Link>
-              </Button>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-white/90 truncate">{assistant.full_name}</p>
+            {assistant.phone && (
+              <p className="text-xs text-white/30 font-mono truncate">{assistant.phone}</p>
             )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+          <div className="w-1.5 h-1.5 bg-white/25 rounded-full flex-shrink-0" />
+        </div>
+      ))}
+
+      <Link
+        to="/assistentes"
+        className="flex items-center justify-center gap-1.5 py-2.5 text-[10px] font-mono text-white/30 hover:text-white/60 transition-colors uppercase tracking-widest border border-white/[0.04] hover:border-white/10 mt-1"
+      >
+        Ver todas
+        <ArrowRight className="w-3 h-3" />
+      </Link>
+    </div>
   )
 }

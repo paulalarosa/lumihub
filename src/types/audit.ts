@@ -1,4 +1,4 @@
-import { Database, Json } from '@/integrations/supabase/types'
+import { Json } from '@/integrations/supabase/types'
 
 export interface SystemLog {
   id: string
@@ -30,9 +30,10 @@ export interface NotificationLog {
   type: string | null
   provider_id: string | null
   metadata: Json | null
+  notification_id?: string | null
 }
 
-export type AuditDatabase = Database & {
+export type AuditDatabase = {
   public: {
     Tables: {
       system_logs: {
@@ -53,6 +54,21 @@ export type AuditDatabase = Database & {
         Update: Partial<Omit<NotificationLog, 'id'>>
         Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      get_audit_tables: {
+        Args: Record<PropertyKey, never>
+        Returns: string[]
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

@@ -138,7 +138,7 @@ export const useEvents = (start: Date, end: Date) => {
         start_time: project.event_time || null,
         end_time: null,
         location: project.event_location || project.location,
-        color: '#00e5ff', // Highlight projects in a different color or brand color
+        color: '#8b8b8b',
         client_id: project.client_id,
         project_id: project.id,
         client: Array.isArray(project.client) ? project.client[0] : project.client,

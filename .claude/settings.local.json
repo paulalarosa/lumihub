@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"{\\\\s*$\" /c/Users/paula/Desktop/\"Lumi codigo\"/lumihub/src --include=\"*.ts\" --include=\"*.tsx\" -A 3)",
+      "Bash(grep -E \"^[^-]*tsx?-\\\\s*\\(//|}\\\\s*$\\)\")"
+    ]
+  }
+}

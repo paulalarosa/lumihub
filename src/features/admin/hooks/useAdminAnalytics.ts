@@ -22,7 +22,7 @@ export function useAdminAnalytics() {
   const { data, isLoading: loading } = useQuery({
     queryKey: ['admin-analytics'],
     queryFn: async (): Promise<AnalyticsData> => {
-      const { data, error } = await (supabase.rpc as any)('get_admin_analytics')
+      const { data, error } = await (supabase.rpc as CallableFunction)('get_admin_analytics')
       if (error) {
         logger.error('useAdminAnalytics.fetch', error)
         throw error

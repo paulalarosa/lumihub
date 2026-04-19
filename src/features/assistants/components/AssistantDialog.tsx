@@ -53,7 +53,7 @@ export function AssistantDialog({
     if (open) {
       if (assistant) {
         form.reset({
-          name: assistant.name,
+          name: assistant.full_name,
           email: assistant.email || '',
           phone: assistant.phone || '',
         })
@@ -75,7 +75,9 @@ export function AssistantDialog({
         phone: data.phone || null,
       })
       onOpenChange(false)
-    } catch (_error) {}
+    } catch (_error) {
+
+    }
   }
 
   return (

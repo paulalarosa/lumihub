@@ -127,18 +127,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string, options?: Record<string, string | number>): string => {
     const lang = (i18n.language as Language) || 'pt'
-    
-    // 1. Try i18next first (JSON files)
+
     const i18nResult = i18nextT(key, options) as string
     if (i18nResult && i18nResult !== key) {
       return i18nResult
     }
 
-    // 2. Try externalTranslations (translations.ts) as fallback
     const source = externalTranslations[lang]
     let externalValue: unknown = source
     const keys = key.split('.')
-    
+
     for (const k of keys) {
       if (externalValue && typeof externalValue === 'object' && k in externalValue) {
         externalValue = externalValue[k]
@@ -147,7 +145,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         break
       }
     }
-    
+
     if (externalValue && typeof externalValue === 'string') {
       if (options) {
         let result = externalValue
@@ -159,7 +157,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       return externalValue
     }
 
-    // 3. Try inlineTranslations
     const inlineValue = inlineTranslations[lang]?.[key]
     if (inlineValue) return inlineValue
 

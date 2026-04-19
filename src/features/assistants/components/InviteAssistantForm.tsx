@@ -89,8 +89,8 @@ export const InviteAssistantForm = () => {
       if (existing) {
         await supabase
           .from('assistants')
-          .update({ 
-            full_name: cleanName, 
+          .update({
+            full_name: cleanName,
             pin: cleanPin,
             access_pin: cleanPin
           })

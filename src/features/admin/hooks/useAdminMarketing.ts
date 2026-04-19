@@ -26,7 +26,7 @@ export function useAdminMarketing() {
   const campaignsQuery = useQuery({
     queryKey: ['admin-marketing-campaigns'],
     queryFn: async (): Promise<Campaign[]> => {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'get_marketing_campaigns',
         {
           p_limit: 50,
@@ -50,7 +50,7 @@ export function useAdminMarketing() {
       target_segment: string
       target_plans?: string[]
     }) => {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'create_marketing_campaign',
         {
           p_name: params.name,
@@ -118,7 +118,7 @@ export function useAdminMarketing() {
 
   const deleteCampaign = useMutation({
     mutationFn: async (campaignId: string) => {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'delete_marketing_campaign',
         { p_campaign_id: campaignId },
       )

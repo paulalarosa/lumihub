@@ -13,7 +13,7 @@ export default function AuthLayout({
   subtitle,
 }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen w-full flex bg-[#050505] selection:bg-[#00e5ff]/30 selection:text-[#00e5ff]">
+    <div className="min-h-screen w-full flex bg-[#050505] selection:bg-white/20 selection:text-white">
       {}
       <div className="hidden lg:flex w-1/2 relative overflow-hidden bg-black">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#050505]/80 z-10" />
@@ -45,11 +45,11 @@ export default function AuthLayout({
           </div>
 
           <div className="space-y-6 max-w-lg">
-            <blockquote className="font-mono text-2xl leading-tight font-bold uppercase tracking-tight">
-              "SYSTEM_ONLINE. CONTROL_ESTABLISHED."
+            <blockquote className="font-serif text-3xl leading-snug tracking-tight italic text-white/90">
+              "A gestão que a sua arte sempre mereceu."
             </blockquote>
-            <p className="text-white/60 font-mono text-xs uppercase tracking-widest">
-              Operating System for High-Performance Professionals.
+            <p className="text-white/40 font-mono text-xs uppercase tracking-widest">
+              Plataforma exclusiva para profissionais de beleza de alto padrão.
             </p>
           </div>
 
@@ -65,7 +65,7 @@ export default function AuthLayout({
 
       {}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 lg:p-16 relative">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-[#00e5ff]/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent pointer-events-none" />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -73,12 +73,12 @@ export default function AdminUsers() {
   const filteredUsers =
     users?.filter((u) => {
       const lowerQuery = searchQuery.toLowerCase().trim()
-      const matchesSearch = lowerQuery === '' || 
+      const matchesSearch = lowerQuery === '' ||
         (u.full_name?.toLowerCase() || '').includes(lowerQuery) ||
         (u.email?.toLowerCase() || '').includes(lowerQuery) ||
         (u.id?.toLowerCase() || '').includes(lowerQuery)
 
-      const matchesPlan = planFilter === 'all' || 
+      const matchesPlan = planFilter === 'all' ||
         (u.plan?.toLowerCase() || 'free') === planFilter.toLowerCase()
 
       return matchesSearch && matchesPlan
@@ -142,7 +142,7 @@ export default function AdminUsers() {
 
   const handleBlockUser = async (userId: string, block: boolean) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('admin_block_user', {
+      const { data, error } = await (supabase.rpc as CallableFunction)('admin_block_user', {
         p_user_id: userId,
         p_blocked: block,
       })
@@ -167,7 +167,7 @@ export default function AdminUsers() {
 
   const handleChangePlan = async () => {
     try {
-      const { data, error } = await (supabase.rpc as any)(
+      const { data, error } = await (supabase.rpc as CallableFunction)(
         'admin_update_user_plan',
         {
           p_user_id: planDialog.userId,
@@ -193,17 +193,17 @@ export default function AdminUsers() {
       })
     }
   }
- 
+
   const handleStudioTag = async (userId: string, isStudio: boolean) => {
     try {
-      const { data, error } = await (supabase.rpc as any)('admin_set_studio_tag', {
+      const { data, error } = await (supabase.rpc as CallableFunction)('admin_set_studio_tag', {
         p_user_id: userId,
         p_is_studio: isStudio,
       })
       if (error) throw error
       toast({
         title: isStudio ? 'Acesso KAOS ativado' : 'Acesso KAOS removido',
-        description: `O terminal de agenda KAOS foi ${(data as any)?.is_studio ? 'habilitado' : 'desabilitado'}.`,
+        description: `O terminal de agenda KAOS foi ${(data as { is_studio?: boolean })?.is_studio ? 'habilitado' : 'desabilitado'}.`,
       })
       refetch()
     } catch (error) {
@@ -216,7 +216,7 @@ export default function AdminUsers() {
     return PLAN_OPTIONS.find((p) => p.value === plan.toLowerCase())?.label || plan
   }
 
-  const isBlocked = (u: any) => u.subscription_status === 'blocked'
+  const isBlocked = (u: { subscription_status?: string | null }) => u.subscription_status === 'blocked'
 
   if (isLoading) {
     return (
@@ -390,11 +390,10 @@ export default function AdminUsers() {
                             currentPlan: u.plan || 'free',
                           })
                           setSelectedPlan(newPlan)
-                          // Trigger update directly if confirmed or just use the handle change logic
-                          // For simplicity and matching user request for "dropmenu", let's make it direct
+
                           const updatePlan = async () => {
                             try {
-                              const { data, error } = await (supabase.rpc as any)(
+                              const { data, error } = await (supabase.rpc as CallableFunction)(
                                 'admin_update_user_plan',
                                 {
                                   p_user_id: u.id,

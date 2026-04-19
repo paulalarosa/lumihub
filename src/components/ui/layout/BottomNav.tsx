@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Home, Calendar, Users, Star } from 'lucide-react'
+import { Home, Calendar, Users, Filter } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function BottomNav() {
@@ -20,7 +20,7 @@ export function BottomNav() {
     {
       icon: Calendar,
       label: 'Agenda',
-      path: '/agenda',
+      path: '/calendar',
     },
     {
       icon: Users,
@@ -28,9 +28,9 @@ export function BottomNav() {
       path: '/clientes',
     },
     {
-      icon: Star,
-      label: 'Projetos',
-      path: '/projetos',
+      icon: Filter,
+      label: 'Funil',
+      path: '/funil',
     },
   ]
 
@@ -45,16 +45,16 @@ export function BottomNav() {
               to={item.path}
               className={cn(
                 'flex flex-col items-center justify-center gap-1 transition-colors relative',
-                active ? 'text-[#00e5ff]' : 'text-gray-400 hover:text-gray-200',
+                active ? 'text-white' : 'text-gray-500 hover:text-gray-200',
               )}
             >
               {active && (
-                <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[2px] bg-[#00e5ff] shadow-[0_0_10px_#00e5ff]" />
+                <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[2px] bg-white" />
               )}
               <item.icon
                 className={cn(
                   'h-5 w-5',
-                  active && 'drop-shadow-[0_0_5px_rgba(0,229,255,0.5)]',
+                  active && '',
                 )}
               />
               <span className="text-[10px] font-medium">{item.label}</span>

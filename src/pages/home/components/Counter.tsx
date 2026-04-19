@@ -10,7 +10,7 @@ export const Counter = ({
   const [count, setCount] = useState(0)
   const countRef = useRef<HTMLSpanElement>(null)
   const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''))
-  const suffix = value.replace(/[0-9.]/g, '')
+  const suffix = value.replace(/^[+]?[0-9.]+/, '')
 
   useEffect(() => {
     let startTimestamp: number | null = null
@@ -42,7 +42,6 @@ export const Counter = ({
 
   return (
     <span ref={countRef}>
-      {value.startsWith('+') ? '+' : ''}
       {numericValue % 1 === 0 ? Math.floor(count) : count.toFixed(1)}
       {suffix}
     </span>

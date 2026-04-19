@@ -15,7 +15,6 @@ export function validateEnv(): EnvValidationResult {
     }
   }
 
-  // Validação avançada para prevenir "Invalid API Key" por mix de chaves de dev/prod
   const url = (import.meta.env.VITE_SUPABASE_URL as string || '').trim().replace(/^["']|["']$/g, '')
   const rawKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string || '').trim()
   const key = rawKey.replace(/^["']|["']$/g, '')
@@ -37,7 +36,7 @@ export function validateEnv(): EnvValidationResult {
         const payload = JSON.parse(jsonPayload)
 
         const urlMatch = url.match(/https:\/\/([a-z0-9-]+)\.supabase\.co/i)
-        
+
         if (urlMatch && payload.ref) {
           const expectedRef = urlMatch[1]
           if (expectedRef !== payload.ref) {

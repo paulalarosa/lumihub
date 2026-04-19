@@ -19,6 +19,14 @@ export interface Client {
   portal_link?: string | null
 }
 
+export interface TreatmentRecord {
+  id: string
+  client_id: string
+  treatment_date: string
+  notes: string | null
+  created_at: string
+}
+
 export const ClientService = {
   async list(organizationId: string) {
     try {
@@ -50,11 +58,25 @@ export const ClientService = {
         .eq('id', id)
         .maybeSingle()
 
-      if (error) throw error
-      return data
+      return { data: data || null, error: error || null }
     } catch (error) {
       logger.error(error, { message: 'Erro ao buscar cliente.' })
-      throw error
+      return { data: null, error }
+    }
+  },
+
+  async getTreatmentRecords(clientId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('treatment_records' as never)
+        .select('*')
+        .eq('client_id' as never, clientId as never)
+        .order('treatment_date' as never, { ascending: false })
+
+      return { data: (data as TreatmentRecord[]) || [], error }
+    } catch (error) {
+      logger.error(error, { message: 'Erro ao buscar registros de prontuário.' })
+      return { data: [], error }
     }
   },
 

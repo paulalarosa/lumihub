@@ -36,6 +36,6 @@ export async function deletePhotoSafely(
 
     await supabase.storage.from(bucket).remove([filePath])
   } catch (_error) {
-    // Silently ignore delete failures — photo may already be removed
+
   }
 }

@@ -150,8 +150,8 @@ export default function BrideLoginPage() {
                     setPin(val)
                   }}
                   placeholder=""
-                  className="absolute inset-0 w-full h-full text-center text-3xl font-mono tracking-[0.5em] 
-                    bg-transparent border-none text-white focus:ring-0 
+                  className="absolute inset-0 w-full h-full text-center text-3xl font-mono tracking-[0.5em]
+                    bg-transparent border-none text-white focus:ring-0
                     placeholder:text-neutral-700 z-10 rounded-none"
                   autoComplete="off"
                 />
@@ -170,8 +170,8 @@ export default function BrideLoginPage() {
           <Button
             type="submit"
             disabled={loading || pin.length < 4}
-            className="w-full h-14 bg-white text-black hover:bg-neutral-200 
-              rounded-none transition-all duration-300 
+            className="w-full h-14 bg-white text-black hover:bg-neutral-200
+              rounded-none transition-all duration-300
               text-xs font-bold uppercase tracking-[0.2em] border border-transparent"
           >
             {loading ? <Loader2 className="animate-spin w-4 h-4" /> : 'Entrar'}

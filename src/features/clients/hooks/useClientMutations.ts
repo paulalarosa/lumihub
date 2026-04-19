@@ -10,6 +10,7 @@ export function useClientMutations() {
   const { toast } = useToast()
 
   const createMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (clientData: any) => {
       const newClient = await ClientService.create(clientData)
 
@@ -50,6 +51,7 @@ export function useClientMutations() {
   })
 
   const updateMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       if (data.is_bride) {
         data.portal_link = `https://khaoskontrol.com.br/portal/${id}`

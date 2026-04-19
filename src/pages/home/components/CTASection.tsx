@@ -10,7 +10,7 @@ export const CTASection = () => {
   const { trackCTAClick } = useAnalytics()
 
   return (
-    <section className="py-32 bg-black relative overflow-hidden">
+    <section className="py-24 bg-black relative overflow-hidden">
       <div className="container mx-auto px-6 max-w-3xl">
         {}
         <p className="text-white/30 text-xs font-mono uppercase tracking-[0.2em] mb-6 text-center">

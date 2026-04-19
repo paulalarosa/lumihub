@@ -193,7 +193,7 @@ export function CheckoutDialog({
               </SelectContent>
             </Select>
             {selectedAssistantId !== 'none' && (
-              <p className="text-xs text-[#00e5ff]">* Comissão estimada: 15%</p>
+              <p className="text-xs text-white/50">* Comissão estimada: 15%</p>
             )}
           </div>
         </div>

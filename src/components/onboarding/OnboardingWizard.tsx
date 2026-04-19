@@ -201,7 +201,7 @@ export const OnboardingWizard = () => {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleSkip()}>
-      <DialogContent className="bg-[#050505] border border-white/10 max-w-xl text-white p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)]">
+      <DialogContent className="bg-[#050505] border border-white/10 max-w-xl text-white p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)]" aria-describedby={undefined}>
         {}
         <div className="h-1 bg-white/5">
           <div

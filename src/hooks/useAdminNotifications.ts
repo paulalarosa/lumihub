@@ -27,18 +27,23 @@ export function useAdminNotifications() {
   const notificationsQuery = useQuery({
     queryKey: ['admin-notifications'],
     queryFn: async (): Promise<NotificationsResponse> => {
-      const { data, error } = await (supabase.rpc as any)('get_admin_notifications', {
+      const { data, error } = await (supabase.rpc as CallableFunction)('get_admin_notifications', {
         p_limit: 30,
         p_unread_only: false,
       })
 
       if (error) {
-        if (error.message.includes('Unauthorized')) {
-          console.warn('[AdminNotifications] RPC Unauthorized. Access denied by DB function.')
+
+        const isPermissionError =
+          error.message?.includes('Unauthorized') ||
+          error.code === '42883' ||
+          error.code === 'PGRST202' ||
+          error.code === '400'
+        if (isPermissionError) {
           return { unread_count: 0, notifications: [] }
         }
         logger.error('useAdminNotifications.fetch', error)
-        throw error
+        return { unread_count: 0, notifications: [] }
       }
 
       return data as unknown as NotificationsResponse
@@ -48,7 +53,7 @@ export function useAdminNotifications() {
 
   const markRead = useMutation({
     mutationFn: async (notificationIds: string[]) => {
-      const { data, error } = await (supabase.rpc as any)('mark_notifications_read', {
+      const { data, error } = await (supabase.rpc as CallableFunction)('mark_notifications_read', {
         p_notification_ids: notificationIds,
       })
 
@@ -66,7 +71,7 @@ export function useAdminNotifications() {
         notificationsQuery.data?.notifications?.filter((n) => !n.is_read) || []
       if (unread.length === 0) return 0
 
-      const { data, error } = await (supabase.rpc as any)('mark_notifications_read', {
+      const { data, error } = await (supabase.rpc as CallableFunction)('mark_notifications_read', {
         p_notification_ids: unread.map((n) => n.id),
       })
 

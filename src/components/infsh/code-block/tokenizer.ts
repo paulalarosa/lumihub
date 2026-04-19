@@ -64,16 +64,13 @@ function detectJsxContext(code: string): boolean {
   if (/^\s+[a-zA-Z_][a-zA-Z0-9_-]*\s*=\s*[{{"']/.test(code)) {
     return true
   }
-  // Check for: whitespace + { (JSX expression in attribute value on its own line)
+
   if (/^\s+\{\s*$/.test(code) || /^\s+\{[^}]*$/.test(code)) {
     return true
   }
   return false
 }
 
-/**
- * Tokenize a line of code with context for multiline constructs
- */
 export function tokenize(
   code: string,
   languageName: string,
@@ -150,7 +147,6 @@ export function tokenize(
           continue
         }
 
-        // JSX attribute: propName= or propName (boolean) or propName (before />)
         const jsxAttr = remaining.match(
           /^([a-zA-Z_][a-zA-Z0-9_-]*)(?=\s*=|\s*\/>|\s*>|\s+[a-zA-Z_]|\s*$)/,
         )
@@ -166,7 +162,7 @@ export function tokenize(
     if (lang?.patterns.string) {
       const str = tryMatch(remaining, lang.patterns.string)
       if (str) {
-        // In JSON, check if this string is a key (followed by :)
+
         const afterStr = remaining.slice(str.length)
         const isJsonKey = isJson && /^\s*:/.test(afterStr)
         tokens.push({ type: isJsonKey ? 'property' : 'string', content: str })
@@ -175,8 +171,6 @@ export function tokenize(
         continue
       }
 
-      // Check for template literal that starts but doesn't end (multiline)
-      // Only trigger if we're AT a backtick and it doesn't close on this line
       if (remaining[0] === '`') {
         tokens.push({ type: 'string', content: remaining })
         return { tokens, context: { inTemplateLiteral: true } }

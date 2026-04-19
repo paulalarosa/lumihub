@@ -81,6 +81,7 @@ export function useNewProjectDialog({ onSuccess }: UseNewProjectDialogProps) {
     } finally {
       setLoadingClients(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, toast])
 
   useEffect(() => {

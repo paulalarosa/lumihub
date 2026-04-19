@@ -53,7 +53,7 @@ export default function StudioAvailabilityPage() {
     queryFn: async () => {
       const startDate = format(weekStart, 'yyyy-MM-dd')
       const endDate = format(addDays(weekStart, 6), 'yyyy-MM-dd')
-      
+
       const { data, error } = await supabase
         .from('studio_events')
         .select('id, event_date, start_time, end_time')
@@ -98,8 +98,8 @@ export default function StudioAvailabilityPage() {
     )
   }
 
-  const professionalFirstName = professional.full_name 
-    ? professional.full_name.split(' ')[0] 
+  const professionalFirstName = professional.full_name
+    ? professional.full_name.split(' ')[0]
     : 'Profissional'
 
   return (
@@ -155,8 +155,8 @@ export default function StudioAvailabilityPage() {
                     <div
                       key={slot.label}
                       className={`p-3 border transition-all duration-300 flex flex-col items-center justify-center gap-1
-                        ${occupied 
-                          ? 'border-zinc-900 bg-zinc-900/10 text-zinc-700 opacity-40 grayscale' 
+                        ${occupied
+                          ? 'border-zinc-900 bg-zinc-900/10 text-zinc-700 opacity-40 grayscale'
                           : 'border-white/5 bg-white/[0.01] hover:border-white/20 hover:bg-white/[0.03] text-white/70'
                         }`}
                     >

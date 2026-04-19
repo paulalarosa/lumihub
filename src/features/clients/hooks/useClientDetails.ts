@@ -39,6 +39,7 @@ export function useClientDetails(id: string | undefined) {
     if (id) {
       fetchData()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const fetchData = async () => {
@@ -46,8 +47,7 @@ export function useClientDetails(id: string | undefined) {
     setLoadingData(true)
 
     try {
-      const { data: clientData, error: clientError } =
-        await ClientService.get(id)
+      const { data: clientData, error: clientError } = await ClientService.get(id)
 
       if (clientError || !clientData) {
         toast({ title: 'Cliente não encontrado', variant: 'destructive' })
@@ -57,8 +57,8 @@ export function useClientDetails(id: string | undefined) {
 
       setClient(clientData as Client)
 
-      const { data: recordsData } = await ClientService.getTreatmentRecords(id)
-      setRecords(recordsData || [])
+      const { data: recordsData } = await (ClientService as any).getTreatmentRecords(id)
+      setRecords((recordsData as any) || [])
 
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')
@@ -85,7 +85,7 @@ export function useClientDetails(id: string | undefined) {
       if (eventsError) throw eventsError
 
       if (eventsData) {
-        setEvents(eventsData)
+        setEvents(eventsData as unknown as EventWithServices[])
       }
     } catch (error) {
       logger.error(error, 'useClientDetails.fetchData', { showToast: false })

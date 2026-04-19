@@ -37,8 +37,7 @@ export default function Login() {
         title: 'Bem-vinda de volta!',
         description: 'Sessão iniciada com sucesso.',
       })
-      // Navigation is handled by AuthContext onAuthStateChange SIGNED_IN event
-      // Do NOT navigate here — it causes a race condition with the auth state
+
     }
   }
 

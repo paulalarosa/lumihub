@@ -80,7 +80,7 @@ export default function BlogPage() {
         {}
         <div className="fixed top-[-20%] right-[-10%] w-[40%] h-[40%] bg-white/[0.015] blur-[180px] rounded-full pointer-events-none" />
 
-        <main className="container mx-auto px-6 lg:px-10 pt-40 pb-24 relative z-10 text-left">
+        <main className="container mx-auto px-6 lg:px-10 pt-28 sm:pt-36 md:pt-40 pb-24 relative z-10 text-left">
           {}
           <div className="max-w-4xl mb-20 space-y-6 text-left">
             <SectionHeader
@@ -101,7 +101,7 @@ export default function BlogPage() {
             >
               <Link to={`/blog/${featuredPost.slug}`} className="block">
                 <div className="rounded-[2.5rem] border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/10 transition-all duration-500 overflow-hidden">
-                  <div className="aspect-[21/9] bg-white/[0.03] relative overflow-hidden">
+                  <div className="aspect-[16/9] sm:aspect-[21/9] bg-white/[0.03] relative overflow-hidden">
                     <img
                       src={featuredPost.image}
                       alt={featuredPost.title}

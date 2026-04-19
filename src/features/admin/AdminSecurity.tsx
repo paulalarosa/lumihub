@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
-  ShieldCheck,
   Download,
   CheckCircle,
   Database,
@@ -31,9 +30,7 @@ export default function AdminSecurity() {
   const [logs, setLogs] = useState<Record<string, unknown>[]>([])
   const [loadingLogs, setLoadingLogs] = useState(false)
   const [backupLoading, setBackupLoading] = useState(false)
-  const [integrityStatus, _setIntegrityStatus] = useState<'secure' | 'risk'>(
-    'secure',
-  )
+  const [lastBackupAt, setLastBackupAt] = useState<string | null>(null)
 
   const fetchLogs = async () => {
     setLoadingLogs(true)
@@ -51,7 +48,10 @@ export default function AdminSecurity() {
         .limit(10)
 
       if (error) throw error
-      setLogs(data || [])
+      const logData = data || []
+      setLogs(logData)
+      const backupLog = logData.find((l) => l.action === 'DATABASE_BACKUP_GENERATED')
+      setLastBackupAt(backupLog ? String(backupLog.created_at) : null)
     } catch (error) {
       logger.error(error, 'AdminSecurity.fetchLogs', { showToast: false })
     } finally {
@@ -84,22 +84,31 @@ export default function AdminSecurity() {
         <Card className="bg-black border border-white/20 rounded-none">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-400 font-mono uppercase tracking-widest">
-              Integrity Status
+              Último Backup
             </CardTitle>
-            <ShieldCheck
-              className={`h-4 w-4 ${integrityStatus === 'secure' ? 'text-green-500' : 'text-red-500'}`}
-            />
+            <Database className={`h-4 w-4 ${lastBackupAt ? 'text-green-500' : 'text-white/20'}`} />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-white flex items-center gap-2 font-serif">
-              {integrityStatus === 'secure' ? 'SECURE' : 'AT RISK'}
-              {integrityStatus === 'secure' && (
-                <CheckCircle className="w-5 h-5 text-green-500" />
-              )}
-            </div>
-            <p className="text-[10px] text-gray-500 mt-2 font-mono uppercase">
-              System Monitoring Active
-            </p>
+            {lastBackupAt ? (
+              <>
+                <div className="text-2xl font-bold text-white flex items-center gap-2 font-serif">
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                  GERADO
+                </div>
+                <p className="text-[10px] text-gray-500 mt-2 font-mono uppercase">
+                  {format(new Date(lastBackupAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="text-2xl font-bold text-white font-serif">
+                  NENHUM
+                </div>
+                <p className="text-[10px] text-gray-500 mt-2 font-mono uppercase">
+                  Nenhum backup registrado nos logs
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
 

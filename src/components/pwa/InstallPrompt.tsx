@@ -25,20 +25,16 @@ export const InstallPrompt = () => {
       }
     }
 
-    window.addEventListener('beforeinstallprompt', handler as any)
+    window.addEventListener('beforeinstallprompt', handler as EventListener)
 
-    return () => window.removeEventListener('beforeinstallprompt', handler as any)
+    return () => window.removeEventListener('beforeinstallprompt', handler as EventListener)
   }, [])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
 
     deferredPrompt.prompt()
-    const { outcome } = await deferredPrompt.userChoice
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt')
-    }
+    await deferredPrompt.userChoice
 
     setDeferredPrompt(null)
     setShowPrompt(false)

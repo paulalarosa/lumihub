@@ -143,10 +143,12 @@ export default defineConfig(({ mode }) => ({
     compression({
       algorithm: 'gzip',
       exclude: [/\.(br)$/, /\.(gz)$/],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any),
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br)$/, /\.(gz)$/],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any),
     ...(process.env.ANALYZE
       ? [

@@ -17,7 +17,7 @@ export const ActionButton = React.forwardRef<
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90',
+        'bg-white text-black hover:bg-white/90',
         'rounded-none uppercase tracking-wider text-xs font-bold',
         'transition-all duration-200',
         fullWidth && 'w-full',

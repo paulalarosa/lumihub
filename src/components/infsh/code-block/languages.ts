@@ -80,16 +80,13 @@ export const javascript: LanguageDefinition = {
   patterns: {
     comment: [/^\/\/[^\n]*/, /^\/\*[\s\S]*?\*\//],
     string: [
-      /^"(?:[^"\\]|\\.)*"/, // double quotes
-      /^'(?:[^'\\]|\\.)*'/, // single quotes
-      /^`(?:[^`\\]|\\.)*`/, // template literals
+      /^"(?:[^"\\]|\\.)*"/,
+      /^'(?:[^'\\]|\\.)*'/,
+      /^`(?:[^`\\]|\\.)*`/,
     ],
   },
 }
 
-/**
- * Python language definition
- */
 export const python: LanguageDefinition = {
   name: 'python',
   aliases: ['py'],
@@ -132,17 +129,14 @@ export const python: LanguageDefinition = {
   patterns: {
     comment: [/^#[^\n]*/],
     string: [
-      /^(?:f|r|b|fr|rf|br|rb)?"""[\s\S]*?"""/, // triple double
-      /^(?:f|r|b|fr|rf|br|rb)?'''[\s\S]*?'''/, // triple single
+      /^(?:f|r|b|fr|rf|br|rb)?"""[\s\S]*?"""/,
+      /^(?:f|r|b|fr|rf|br|rb)?'''[\s\S]*?'''/,
       /^(?:f|r|b)?"(?:[^"\\]|\\.)*"/,
       /^(?:f|r|b)?'(?:[^'\\]|\\.)*'/, // single
     ],
   },
 }
 
-/**
- * Bash/Shell language definition
- */
 export const bash: LanguageDefinition = {
   name: 'bash',
   aliases: ['sh', 'shell', 'zsh'],
@@ -224,9 +218,6 @@ export const json: LanguageDefinition = {
   },
 }
 
-/**
- * CSS language definition
- */
 export const css: LanguageDefinition = {
   name: 'css',
   aliases: ['scss', 'sass', 'less'],
@@ -246,9 +237,6 @@ export const css: LanguageDefinition = {
   },
 }
 
-/**
- * HTML/XML language definition
- */
 export const html: LanguageDefinition = {
   name: 'html',
   aliases: ['xml', 'svg', 'htm'],
@@ -314,9 +302,6 @@ export const go: LanguageDefinition = {
   },
 }
 
-/**
- * Rust language definition
- */
 export const rust: LanguageDefinition = {
   name: 'rust',
   aliases: ['rs'],
@@ -367,9 +352,6 @@ export const rust: LanguageDefinition = {
   },
 }
 
-/**
- * All supported languages
- */
 export const languages: Record<string, LanguageDefinition> = {
   javascript,
   python,
@@ -381,18 +363,13 @@ export const languages: Record<string, LanguageDefinition> = {
   rust,
 }
 
-/**
- * Get language definition by name or alias
- */
 export function getLanguage(name: string): LanguageDefinition | null {
   const normalized = name.toLowerCase()
 
-  // Direct match
   if (languages[normalized]) {
     return languages[normalized]
   }
 
-  // Check aliases
   for (const lang of Object.values(languages)) {
     if (lang.aliases.includes(normalized)) {
       return lang
@@ -402,9 +379,6 @@ export function getLanguage(name: string): LanguageDefinition | null {
   return null
 }
 
-/**
- * Normalize language name to canonical form
- */
 export function normalizeLanguage(language?: string): string {
   if (!language) return 'text'
 

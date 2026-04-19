@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
@@ -6,18 +6,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Terminal, RefreshCw, FileDown } from 'lucide-react'
 import { format } from 'date-fns/format'
 import { supabase } from '@/integrations/supabase/client'
-import { SupabaseClient } from '@supabase/supabase-js'
 import {
-  AuditDatabase,
   AuditLog,
   NotificationLog,
   SystemLog,
 } from '@/types/audit'
+import { TypedSupabaseClient } from '@/types/custom-supabase'
 import { LogFilters } from './components/logs/LogFilters'
 import { LogTable } from './components/logs/LogTable'
 import { LogDetailDialog } from './components/logs/LogDetailDialog'
 
 export default function AdminLogs() {
+  const typedLocal = supabase as unknown as TypedSupabaseClient
   const [activeTab, setActiveTab] = useState('system')
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([])
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([])
@@ -30,27 +30,14 @@ export default function AdminLogs() {
   const [availableTables, setAvailableTables] = useState<string[]>([])
   const [selectedAudit, setSelectedAudit] = useState<AuditLog | null>(null)
 
-  useEffect(() => {
-    fetchData()
-  }, [activeTab, filterUser, filterTable, filterAction])
-
-  useEffect(() => {
-    if (activeTab === 'audit') {
-      fetchAvailableTables()
-    }
-  }, [activeTab])
-
-  const fetchAvailableTables = async () => {
+  const fetchAvailableTables = useCallback(async () => {
     try {
-      const { data, error } = await supabase.rpc('get_audit_tables')
+      const { data, error } = await typedLocal.rpc('get_audit_tables')
       if (data) setAvailableTables(data as string[])
 
       if (error) {
-        const { data: fallbackData } = await (
-          supabase.from(
-            'audit_logs',
-          ) as unknown as SupabaseClient<AuditDatabase>['from']
-        )
+        const { data: fallbackData } = await typedLocal
+          .from('audit_logs')
           .select('table_name')
           .limit(100)
         if (fallbackData) {
@@ -63,14 +50,13 @@ export default function AdminLogs() {
     } catch (e) {
       logger.error(e, 'AdminLogs.fetchAvailableTables', { showToast: false })
     }
-  }
+  }, [typedLocal])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const typedSupabase = supabase
       if (activeTab === 'system') {
-        let query = typedSupabase
+        let query = typedLocal
           .from('system_logs')
           .select('*')
           .order('timestamp', { ascending: false })
@@ -84,7 +70,7 @@ export default function AdminLogs() {
         if (error) throw error
         setSystemLogs(data || [])
       } else if (activeTab === 'audit') {
-        let query = typedSupabase
+        let query = typedLocal
           .from('audit_logs')
           .select('*')
           .order('created_at', { ascending: false })
@@ -98,7 +84,7 @@ export default function AdminLogs() {
         if (error) throw error
         setAuditLogs(data || [])
       } else if (activeTab === 'email') {
-        const { data, error } = await typedSupabase
+        const { data, error } = await typedLocal
           .from('notification_logs')
           .select('*')
           .order('created_at', { ascending: false })
@@ -111,7 +97,17 @@ export default function AdminLogs() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [activeTab, filterUser, filterTable, filterAction, typedLocal])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
+  useEffect(() => {
+    if (activeTab === 'audit') {
+      fetchAvailableTables()
+    }
+  }, [activeTab, fetchAvailableTables])
 
   const handleExportCSV = () => {
     const dataToExport =

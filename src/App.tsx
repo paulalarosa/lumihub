@@ -26,12 +26,6 @@ import { PageLoader } from '@/components/ui/PageLoader'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
-const AchievementNotifications = lazy(() =>
-  import('@/components/onboarding/AchievementToast').then((m) => ({
-    default: m.AchievementNotifications,
-  })),
-)
-
 const ModernAIChat = lazy(() =>
   import('./components/ai/ModernAIChat').then((m) => ({
     default: m.ModernAIChat,
@@ -74,7 +68,6 @@ const Clients = lazy(() => import('@/features/clients/pages/ClientsPage'))
 const ClientDetails = lazy(
   () => import('@/features/clients/pages/ClientDetailsPage'),
 )
-const Projects = lazy(() => import('@/features/projects/pages/ProjectsPage'))
 const ProjectDetails = lazy(
   () => import('@/features/projects/pages/ProjectDetailsPage'),
 )
@@ -129,6 +122,9 @@ const CalendarPage = lazy(
 )
 const GoogleCalendarCallback = lazy(
   () => import('@/pages/GoogleCalendarCallback'),
+)
+const CheckoutReturn = lazy(
+  () => import('@/features/billing/pages/CheckoutReturn'),
 )
 const SignContract = lazy(
   () => import('@/features/contracts/pages/SignContract'),
@@ -366,11 +362,11 @@ const App = () => {
                             />
                             <Route
                               path="/projetos"
-                              element={<LazyPage component={Projects} />}
+                              element={<Navigate to="/clientes" replace />}
                             />
                             <Route
                               path="/projetos/novo"
-                              element={<LazyPage component={Projects} />}
+                              element={<Navigate to="/clientes" replace />}
                             />
                             <Route
                               path="/projetos/:id"
@@ -463,6 +459,10 @@ const App = () => {
                           element={<LazyPage component={UpgradePendingPage} />}
                         />
                         <Route
+                          path="/checkout/return"
+                          element={<LazyPage component={CheckoutReturn} />}
+                        />
+                        <Route
                           path="/b/:slug"
                           element={<LazyPage component={PublicBooking} />}
                         />
@@ -529,7 +529,6 @@ const App = () => {
               </div>
               <Suspense fallback={null}>
                 <AIController />
-                <AchievementNotifications />
               </Suspense>
             </AIProvider>
           </AnalyticsProvider>

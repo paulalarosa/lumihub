@@ -315,8 +315,8 @@ const ScheduledFollowupsTable = () => {
         .from('scheduled_followups')
         .select(
           `
-            *, 
-            template:message_templates(name), 
+            *,
+            template:message_templates(name),
             project:projects(
                 client:wedding_clients(name)
             )

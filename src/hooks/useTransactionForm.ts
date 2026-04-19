@@ -53,6 +53,7 @@ export function useTransactionForm({
     if (open && user) {
       fetchOptions()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, user])
 
   useEffect(() => {
@@ -101,7 +102,7 @@ export function useTransactionForm({
 
         if (accessData) {
           const formattedAssistants = accessData
-            .map((item: any) => item.assistant)
+            .map((item: { assistant: { id: string; full_name: string | null } }) => item.assistant)
             .filter(Boolean)
           setAssistants(formattedAssistants)
         }

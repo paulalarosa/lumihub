@@ -205,7 +205,7 @@ export const ToolInvocation = memo(function ToolInvocation({
           return data as ToolFinish
         }
       } catch (_e) {
-        /* empty catch intended for non-parseable data */
+
       }
     }
 

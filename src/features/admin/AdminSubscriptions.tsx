@@ -12,7 +12,7 @@ export default function AdminSubscriptions() {
           Revenue Intelligence & Payout Management
         </p>
       </div>
-      
+
       <AdminFinancials stats={stats} loading={loading} />
     </div>
   )

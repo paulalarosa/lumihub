@@ -205,7 +205,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [navigate, fetchRole, signOut])
+  }, [navigate, fetchRole, signOut, loading])
 
   return (
     <AuthContext.Provider

@@ -130,7 +130,7 @@ export const EventDetailsModal = ({
                     : event.resource.eventType === 'social'
                       ? 'bg-[#FF69B4]/10 text-[#FF69B4] border border-[#FF69B4]/30'
                       : isProject
-                        ? 'bg-[#00e5ff]/10 text-[#00e5ff] border border-[#00e5ff]/30'
+                        ? 'bg-white/10 text-white border border-white/20'
                         : 'bg-gray-800 text-gray-300 border border-gray-700'
               }`}
             >

@@ -86,7 +86,7 @@ export default function Contact() {
         <div className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[30vw] h-[30vw] bg-white/[0.015] blur-[150px] rounded-full pointer-events-none" />
 
-        <main className="container mx-auto px-6 lg:px-10 pt-20 pb-24 relative z-10">
+        <main className="container mx-auto px-6 lg:px-10 pt-28 sm:pt-36 md:pt-44 pb-24 relative z-10">
           <div className="max-w-6xl mx-auto space-y-24">
             {}
             <motion.section

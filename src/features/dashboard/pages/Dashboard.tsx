@@ -89,7 +89,7 @@ export default function Dashboard() {
                 icon={DollarSign}
                 label={t('dashboard.stats.revenue')}
                 value={`R$ ${d.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                link="/admin"
+                link="/dashboard/financial"
                 linkLabel={t('dashboard.actions.details')}
               />
             </motion.div>
@@ -189,9 +189,18 @@ export default function Dashboard() {
             transition={{ delay: 0.3 }}
             className="border border-white/10 bg-white/[0.02] p-6"
           >
-            <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider mb-5">
-              {t('dashboard.sections.team')}
-            </h2>
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
+                {t('dashboard.sections.team')}
+              </h2>
+              <Link
+                to="/assistentes"
+                className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1"
+              >
+                {t('dashboard.view_all')}
+                <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            </div>
             <AssistantsPanelCard />
           </motion.div>
 

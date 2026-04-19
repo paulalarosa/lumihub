@@ -59,7 +59,7 @@ export const useContracts = () => {
       setNewTitle('')
       setNewClient('')
       setNewContent('')
-    } catch (_error) { /* handled by mutation onError */ }
+    } catch (_error) {  }
   }
 
   const handleSignatureSave = async (dataUrl: string) => {

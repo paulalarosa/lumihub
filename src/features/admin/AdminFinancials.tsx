@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
@@ -45,6 +45,39 @@ export default function AdminFinancials({
   const [commissions, setCommissions] = useState<AssistantCommission[]>([])
   const [dataLoading, setDataLoading] = useState(true)
 
+  const calculateCommissions = useCallback((eventsData: EventWithAssistants[]) => {
+    const commissionMap = new Map<string, AssistantCommission>()
+
+    eventsData.forEach((event) => {
+      const totalCommission = Number(event.assistant_commission) || 0
+      const assistants = event.event_assistants || []
+
+      if (assistants.length > 0 && totalCommission > 0) {
+        const splitCommission = totalCommission / assistants.length
+
+        assistants.forEach((ea) => {
+          const assistantName = ea.assistant?.name || 'Desconhecido'
+          const assistantId = ea.assistant_id
+
+          if (!commissionMap.has(assistantId)) {
+            commissionMap.set(assistantId, {
+              assistant_id: assistantId,
+              assistant_name: assistantName,
+              total_events: 0,
+              total_commission: 0,
+            })
+          }
+
+          const current = commissionMap.get(assistantId)!
+          current.total_events += 1
+          current.total_commission += splitCommission
+        })
+      }
+    })
+
+    setCommissions(Array.from(commissionMap.values()))
+  }, [])
+
   useEffect(() => {
     const fetchMonthlyData = async () => {
       const now = new Date()
@@ -86,40 +119,7 @@ export default function AdminFinancials({
     }
 
     fetchMonthlyData()
-  }, [])
-
-  const calculateCommissions = (eventsData: EventWithAssistants[]) => {
-    const commissionMap = new Map<string, AssistantCommission>()
-
-    eventsData.forEach((event) => {
-      const totalCommission = Number(event.assistant_commission) || 0
-      const assistants = event.event_assistants || []
-
-      if (assistants.length > 0 && totalCommission > 0) {
-        const splitCommission = totalCommission / assistants.length
-
-        assistants.forEach((ea) => {
-          const assistantName = ea.assistant?.name || 'Desconhecido'
-          const assistantId = ea.assistant_id
-
-          if (!commissionMap.has(assistantId)) {
-            commissionMap.set(assistantId, {
-              assistant_id: assistantId,
-              assistant_name: assistantName,
-              total_events: 0,
-              total_commission: 0,
-            })
-          }
-
-          const current = commissionMap.get(assistantId)!
-          current.total_events += 1
-          current.total_commission += splitCommission
-        })
-      }
-    })
-
-    setCommissions(Array.from(commissionMap.values()))
-  }
+  }, [toast, calculateCommissions])
 
   const handleExport = () => {
     if (!events || events.length === 0) {
@@ -195,15 +195,19 @@ export default function AdminFinancials({
           <CardContent className="pt-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Churn Rate</p>
+                <p className="text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Receita Total</p>
                 <h3 className="text-3xl font-serif text-white mt-2 tracking-tighter">
-                  {stats.churnRate}
+                  {new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }).format(stats.mrr * 12)}
                 </h3>
               </div>
               <div className="p-2 bg-white/5 border border-white/10 group-hover:border-white/30 transition-colors">
                 <TrendingUp className="w-5 h-5 text-white/50" />
               </div>
             </div>
+            <p className="text-[10px] text-zinc-600 font-mono mt-3 uppercase tracking-wider">Projeção anual (MRR × 12)</p>
           </CardContent>
         </Card>
       </div>

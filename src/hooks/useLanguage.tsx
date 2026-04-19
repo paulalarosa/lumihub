@@ -7,7 +7,7 @@ export function useLanguage() {
     return {
       language: 'pt' as Language,
       setLanguage: () => {},
-      t: (k: string, _options?: any) => k,
+      t: (k: string, _options?: Record<string, unknown>) => k,
     }
   }
   return context

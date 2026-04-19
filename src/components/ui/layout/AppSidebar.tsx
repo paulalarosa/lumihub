@@ -2,7 +2,6 @@ import {
   Calendar,
   Home,
   Users,
-  Briefcase,
   Settings,
   CreditCard,
   LogOut,
@@ -66,11 +65,6 @@ export function AppSidebar() {
       icon: Users,
     },
     {
-      title: t('sidebar.projects'),
-      url: '/projetos',
-      icon: Briefcase,
-    },
-    {
       title: 'FUNIL',
       url: '/funil',
       icon: Filter,
@@ -118,7 +112,6 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent className="bg-background">
-        {}
         <SidebarGroup>
           <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">
             {t('SIDEBAR_MENU_MAIN') || 'WORKSPACE'}
@@ -147,14 +140,12 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {}
         <SidebarGroup className="mt-auto">
           <SidebarGroupLabel className="text-muted-foreground font-mono text-[10px] uppercase tracking-widest">
             SYSTEM
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {}
               {isAdmin && (
                 <SidebarMenuItem>
                   <SidebarMenuButton
@@ -172,7 +163,6 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               )}
 
-              {}
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
@@ -191,9 +181,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="mt-auto pb-4">
-          <SidebarGroupContent>{}</SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="border-t border-border p-4 bg-background">

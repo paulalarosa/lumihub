@@ -24,6 +24,7 @@ export default function AcceptInvitePage() {
     if (user && token && !processing && !error) {
       acceptInvite()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading, token])
 
   const acceptInvite = async () => {

@@ -55,12 +55,14 @@ export const usePublicBooking = (
     if (slug) {
       fetchProfileAndServices()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug])
 
   useEffect(() => {
     if (selectedDate && profile && selectedService) {
       generateTimeSlots()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate, profile, selectedService])
 
   const fetchProfileAndServices = async () => {
@@ -221,7 +223,9 @@ export const usePublicBooking = (
         if (!clientError && newClient) {
           clientId = newClient.id
         }
-      } catch (_err) {}
+      } catch (_err) {
+
+      }
 
       const description = `Agendamento Online\nCliente: ${clientName}\nWhatsApp: ${clientPhone}\nServiço: ${selectedService.name}`
 

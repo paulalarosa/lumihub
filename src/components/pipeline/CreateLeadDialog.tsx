@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
-import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import {
   Dialog,
@@ -39,7 +38,6 @@ export const CreateLeadDialog = ({
   isOpen,
   onClose,
 }: CreateLeadDialogProps) => {
-  const { user } = useAuth()
   const { organizationId } = useOrganization()
   const queryClient = useQueryClient()
   const { register, handleSubmit, reset } = useForm<LeadFormData>()

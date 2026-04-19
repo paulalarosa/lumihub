@@ -124,7 +124,7 @@ export function SmartContractEditor({
           </span>
           <div className="flex items-center gap-3">
             <div
-              className={`w-1.5 h-1.5 rounded-none rotate-45 ${h.projectData ? 'bg-[#00e5ff]' : 'bg-white/20'}`}
+              className={`w-1.5 h-1.5 rounded-none rotate-45 ${h.projectData ? 'bg-white' : 'bg-white/20'}`}
             />
             <span className="font-mono text-[10px] text-white/50 uppercase tracking-widest">
               {h.projectData ? 'KHAOS SYNC ATIVO' : 'AGUARDANDO PROJETO'}
@@ -139,7 +139,7 @@ export function SmartContractEditor({
             <h3 className="font-mono text-xs text-white/50 uppercase tracking-widest">
               Khaos Intelligence
             </h3>
-            <Bot className="w-4 h-4 text-[#00e5ff]" />
+            <Bot className="w-4 h-4 text-white/60" />
           </div>
           <Button
             className="w-full bg-black hover:bg-white hover:text-black border border-white text-white rounded-none h-12 transition-all duration-300 font-mono text-xs uppercase tracking-widest group"
@@ -149,7 +149,7 @@ export function SmartContractEditor({
             {h.isAiGenerating ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : (
-              <Sparkles className="w-4 h-4 mr-2 text-[#00e5ff] group-hover:text-black" />
+              <Sparkles className="w-4 h-4 mr-2 text-white/60 group-hover:text-black" />
             )}
             {h.isAiGenerating ? 'PROCESSANDO...' : 'GERAR COM IA'}
           </Button>

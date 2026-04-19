@@ -9,6 +9,7 @@ export function useContractMutations() {
   const { toast } = useToast()
 
   const createMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (contractData: any) => {
       const cleanData = sanitizeFormData(contractData)
       const { data, error } = await supabase
@@ -39,6 +40,7 @@ export function useContractMutations() {
   })
 
   const updateMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const cleanData = sanitizeFormData(data)
       const { data: result, error } = await supabase

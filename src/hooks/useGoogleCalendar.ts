@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
+import { toast } from 'sonner'
 
 export const useGoogleCalendar = () => {
   const { user } = useAuth()
@@ -9,6 +10,7 @@ export const useGoogleCalendar = () => {
 
   useEffect(() => {
     checkConnection()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const checkConnection = async () => {
@@ -28,30 +30,33 @@ export const useGoogleCalendar = () => {
     setIsLoading(false)
   }
 
-  const connectGoogleCalendar = () => {
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-    const redirectUri = `${window.location.origin}/calendar/callback`
-    const scope =
-      'https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/calendar.events'
+  const connectGoogleCalendar = async () => {
+    setIsLoading(true)
+    try {
+      const redirectUri = `${window.location.origin}/calendar/callback`
 
-    if (!clientId) {
-      return
+      const { data, error } = await supabase.functions.invoke(
+        'google-calendar-auth',
+        {
+          body: { action: 'get-auth-url', redirect_uri: redirectUri },
+        },
+      )
+
+      if (error) throw error
+      if (!data?.url) throw new Error('URL de autenticação não retornada')
+
+      window.location.href = data.url
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Erro ao iniciar conexão com Google'
+      toast.error(message)
+      setIsLoading(false)
     }
-
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
-    authUrl.searchParams.set('client_id', clientId)
-    authUrl.searchParams.set('redirect_uri', redirectUri)
-    authUrl.searchParams.set('response_type', 'code')
-    authUrl.searchParams.set('scope', scope)
-    authUrl.searchParams.set('access_type', 'offline')
-    authUrl.searchParams.set('prompt', 'consent')
-    authUrl.searchParams.set('state', user?.id || '')
-
-    window.location.href = authUrl.toString()
   }
 
   const disconnectGoogleCalendar = async () => {
     if (!user) return
+    setIsLoading(true)
 
     await supabase
       .from('google_calendar_tokens')
@@ -59,6 +64,8 @@ export const useGoogleCalendar = () => {
       .eq('user_id', user.id)
 
     setIsConnected(false)
+    setIsLoading(false)
+    toast.success('Google Calendar desconectado')
   }
 
   return {

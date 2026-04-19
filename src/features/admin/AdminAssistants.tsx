@@ -25,63 +25,61 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
-interface AssistantProfile {
+interface AssistantRow {
   id: string
-  email: string
   full_name: string
-  created_at: string
-  role: string
-  connections: {
-    professional_name: string
-    professional_email: string
-  }[]
+  email: string | null
+  phone: string | null
+  created_at: string | null
+  is_upgraded: boolean | null
+  owner_name: string
+  owner_email: string
 }
 
 export default function AdminAssistants() {
   const { toast } = useToast()
-  const [assistants, setAssistants] = useState<AssistantProfile[]>([])
+  const [assistants, setAssistants] = useState<AssistantRow[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const fetchAssistants = useCallback(async () => {
     setLoading(true)
     try {
-      const { data: profiles, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('role', 'assistant')
+      const { data, error } = await supabase
+        .from('assistants')
+        .select('id, full_name, email, phone, created_at, is_upgraded, user_id')
+        .order('created_at', { ascending: false })
 
-      if (profileError) throw profileError
+      if (error) throw error
 
-      const enriched = await Promise.all(
-        profiles.map(async (p) => {
-          const { data: connections } = await supabase
-            .from('assistant_access')
-            .select('makeup_artist_id')
-            .eq('assistant_id', p.id)
+      const assistantsList = data || []
 
-          const connectedPros = []
-          if (connections && connections.length > 0) {
-            const proIds = connections.map((c) => c.makeup_artist_id)
-            const { data: pros } = await supabase
-              .from('profiles')
-              .select('full_name, email')
-              .in('id', proIds)
-            if (pros)
-              connectedPros.push(
-                ...pros.map((pro) => ({
-                  professional_name: pro.full_name || 'Desconhecido',
-                  professional_email: pro.email || '',
-                })),
-              )
-          }
+      const ownerIds = [...new Set(assistantsList.map((a) => a.user_id).filter(Boolean))] as string[]
+      const profileMap: Record<string, { full_name: string | null; email: string | null }> = {}
 
-          return {
-            ...p,
-            connections: connectedPros,
-          }
-        }),
-      )
+      if (ownerIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', ownerIds)
+        ;(profiles || []).forEach((p) => {
+          profileMap[p.id] = { full_name: p.full_name, email: p.email }
+        })
+      }
+
+      const enriched = assistantsList.map((a) => {
+        const owner = a.user_id ? profileMap[a.user_id] : null
+        return {
+          id: a.id,
+          full_name: a.full_name,
+          email: a.email,
+          phone: a.phone,
+          created_at: a.created_at,
+          is_upgraded: a.is_upgraded,
+          owner_name: owner?.full_name || 'Desconhecido',
+          owner_email: owner?.email || '',
+        }
+      })
 
       setAssistants(enriched)
     } catch (error) {
@@ -104,24 +102,8 @@ export default function AdminAssistants() {
       .channel('admin-assistants-channel')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: 'role=eq.assistant',
-        },
-        () => {
-          logger.info('Real-time event on assistant profiles')
-          fetchAssistants()
-        },
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'assistant_access' },
-        () => {
-          logger.info('Real-time event on assistant connections')
-          fetchAssistants()
-        },
+        { event: '*', schema: 'public', table: 'assistants' },
+        () => fetchAssistants(),
       )
       .subscribe()
 
@@ -134,19 +116,19 @@ export default function AdminAssistants() {
     if (!deleteId) return
 
     try {
-      const { error: connError } = await supabase
+      const { error: accessError } = await supabase
         .from('assistant_access')
         .delete()
         .eq('assistant_id', deleteId)
 
-      if (connError) throw connError
+      if (accessError) throw accessError
 
-      const { error: profError } = await supabase
-        .from('profiles')
+      const { error: assistantError } = await supabase
+        .from('assistants')
         .delete()
         .eq('id', deleteId)
 
-      if (profError) throw profError
+      if (assistantError) throw assistantError
 
       setAssistants((prev) => prev.filter((a) => a.id !== deleteId))
       toast({
@@ -158,7 +140,7 @@ export default function AdminAssistants() {
       toast({
         title: 'Erro ao excluir',
         description:
-          'Não foi possível remover, verifique se existem outros registros dependentes.',
+          'Não foi possível remover. Verifique se existem outros registros dependentes.',
         variant: 'destructive',
       })
     } finally {
@@ -182,7 +164,7 @@ export default function AdminAssistants() {
           variant="outline"
           className="font-mono text-xs border-white/20 text-white"
         >
-          {assistants.length} Cadastrados
+          {assistants.length} Cadastradas
         </Badge>
       </div>
 
@@ -194,7 +176,10 @@ export default function AdminAssistants() {
                 Assistente
               </TableHead>
               <TableHead className="text-gray-500 font-mono text-[10px] uppercase">
-                Vínculos (Maquiadoras)
+                Profissional Responsável
+              </TableHead>
+              <TableHead className="text-gray-500 font-mono text-[10px] uppercase">
+                Status
               </TableHead>
               <TableHead className="text-right text-gray-500 font-mono text-[10px] uppercase">
                 Ações
@@ -219,29 +204,28 @@ export default function AdminAssistants() {
                         {assistant.full_name}
                       </div>
                       <div className="text-gray-500 text-xs">
-                        {assistant.email}
+                        {assistant.email || assistant.phone || '—'}
                       </div>
                     </div>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex flex-col gap-1">
-                    {assistant.connections.length > 0 ? (
-                      assistant.connections.map((conn, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="w-fit border-white/10 text-gray-400 font-mono text-[10px]"
-                        >
-                          {conn.professional_name}
-                        </Badge>
-                      ))
-                    ) : (
-                      <span className="text-gray-600 text-xs italic">
-                        Sem vínculos
-                      </span>
+                  <div>
+                    <div className="text-white/80 text-sm">{assistant.owner_name}</div>
+                    {assistant.owner_email && (
+                      <div className="text-gray-500 text-xs">{assistant.owner_email}</div>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <Badge
+                    variant="outline"
+                    className={`font-mono text-[10px] border-white/20 ${
+                      assistant.is_upgraded ? 'text-yellow-400 border-yellow-400/30' : 'text-gray-400'
+                    }`}
+                  >
+                    {assistant.is_upgraded ? 'UPGRADED' : 'FREE'}
+                  </Badge>
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
@@ -258,7 +242,7 @@ export default function AdminAssistants() {
             {assistants.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={3}
+                  colSpan={4}
                   className="text-center py-12 text-gray-500"
                 >
                   Nenhuma assistente encontrada.
@@ -277,8 +261,8 @@ export default function AdminAssistants() {
               Excluir Cadastro?
             </AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
-              Esta ação removerá a assistente de <strong>todas</strong> as
-              agendas conectadas. O acesso dela será revogado imediatamente.
+              Esta ação removerá a assistente e todos os vínculos com profissionais.
+              O acesso será revogado imediatamente.
               <br />
               <br />
               <span className="text-xs font-mono uppercase text-red-500">

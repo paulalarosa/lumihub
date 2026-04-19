@@ -93,7 +93,8 @@ export const useProjectDetails = (projectId: string | undefined) => {
 
       const project = projectRes.data as LocalProjectWithRelations
 
-      const adaptedProject: Record<string, any> = { ...project }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const adaptedProject: any = { ...project }
       if (adaptedProject.client) {
         adaptedProject.clients = {
           ...adaptedProject.client,

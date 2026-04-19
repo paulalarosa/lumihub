@@ -40,7 +40,7 @@ export const HoverRevealImage = ({ src, alt, className = '' }: HoverRevealImageP
   }, { scope: containerRef })
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`relative overflow-hidden cursor-pointer group ${className}`}
     >
@@ -50,7 +50,7 @@ export const HoverRevealImage = ({ src, alt, className = '' }: HoverRevealImageP
         alt={alt}
         className="w-full h-full object-cover will-change-transform"
       />
-      <div 
+      <div
         ref={overlayRef}
         className="absolute inset-0 bg-black opacity-0 pointer-events-none transition-opacity"
       />

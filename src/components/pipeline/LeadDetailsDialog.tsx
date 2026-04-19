@@ -21,7 +21,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 
-import { PipelineLead } from '@/pages/SalesPipeline'
+import { PipelineLead } from '@/features/pipeline/pages/SalesPipeline'
 
 interface LeadDetailsDialogProps {
   isOpen: boolean

@@ -9,29 +9,25 @@ export const PageTransition = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!overlayRef.current) return
 
-    // Screen wipe animation
     const tl = gsap.timeline()
-    
-    tl.set(overlayRef.current, { scaleY: 0, transformOrigin: 'top' })
+    tl.set(overlayRef.current, { opacity: 0 })
     tl.to(overlayRef.current, {
-      scaleY: 1,
-      duration: 0.6,
-      ease: 'power4.inOut',
+      opacity: 0.9,
+      duration: 0.2,
+      ease: 'power2.in',
     })
     tl.to(overlayRef.current, {
-      scaleY: 0,
-      transformOrigin: 'bottom',
-      duration: 0.6,
-      ease: 'power4.inOut',
-      delay: 0.1,
+      opacity: 0,
+      duration: 0.35,
+      ease: 'power2.out',
     })
   }, [location.pathname])
 
   return (
     <>
-      <div 
+      <div
         ref={overlayRef}
-        className="fixed inset-0 bg-white z-[9999] pointer-events-none scale-y-0"
+        className="fixed inset-0 bg-black z-[9999] pointer-events-none opacity-0"
       />
       {children}
     </>

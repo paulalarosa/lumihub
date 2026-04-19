@@ -65,21 +65,21 @@ export function ClientForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(handleFormSubmit)}
-        className="space-y-6 mt-4"
+        className="space-y-4"
       >
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs uppercase tracking-widest text-gray-500 font-mono">
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
                 Nome *
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="NOME COMPLETO"
+                  placeholder="Nome completo"
                   {...field}
-                  className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
+                  className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
                 />
               </FormControl>
               <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
@@ -87,48 +87,50 @@ export function ClientForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs uppercase tracking-widest text-gray-500 font-mono">
-                Email
-              </FormLabel>
-              <FormControl>
-                <Input
-                  type="email"
-                  placeholder="EMAIL@EXEMPLO.COM"
-                  {...field}
-                  value={field.value || ''}
-                  className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
-                />
-              </FormControl>
-              <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-3">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    {...field}
+                    value={field.value || ''}
+                    className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
+                  />
+                </FormControl>
+                <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+              </FormItem>
+            )}
+          />
 
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs uppercase tracking-widest text-gray-500 font-mono">
-                Telefone
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="(00) 00000-0000"
-                  {...field}
-                  value={field.value || ''}
-                  className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm"
-                />
-              </FormControl>
-              <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
-            </FormItem>
-          )}
-        />
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem className="space-y-1.5">
+                <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+                  Telefone
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="(00) 00000-0000"
+                    {...field}
+                    value={field.value || ''}
+                    className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
+                  />
+                </FormControl>
+                <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="border border-white/10 p-4 bg-white/5 space-y-4">
           <FormField
@@ -239,14 +241,14 @@ export function ClientForm({
           control={form.control}
           name="notes"
           render={({ field }) => (
-            <FormItem className="space-y-2">
-              <FormLabel className="text-xs uppercase tracking-widest text-gray-500 font-mono">
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
                 Anotações
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="OBSERVAÇÕES TÉCNICAS..."
-                  rows={3}
+                  placeholder="Observações..."
+                  rows={2}
                   {...field}
                   value={field.value || ''}
                   className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none font-mono text-sm resize-none"
@@ -260,7 +262,7 @@ export function ClientForm({
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-zinc-900 text-white hover:bg-black border border-white/10 rounded-none font-mono text-xs uppercase tracking-widest h-12"
+          className="w-full bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest h-10 mt-2"
         >
           {isLoading ? 'SALVANDO...' : submitLabel}
         </Button>

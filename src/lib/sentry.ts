@@ -35,7 +35,7 @@ if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
       'ChunkLoadError',
       /Loading chunk \d+ failed/,
     ],
-    denyUrls: [/extensions\//i, /^chrome:\/\//i, /^moz-extension:\/\//i],
+    denyUrls: [/extensions\//],
   })
 }
 

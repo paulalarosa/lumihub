@@ -19,16 +19,23 @@ import {
   FileText,
   Sparkles,
   Trash2,
+  FolderOpen,
+  ChevronRight,
+  Plus,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { PageLoader } from '@/components/ui/PageLoader'
-
 import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { useQuery } from '@tanstack/react-query'
+import { supabase } from '@/integrations/supabase/client'
+import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
+import { useQueryClient } from '@tanstack/react-query'
 
 export default function ClientDetailsPage() {
   const { id } = useParams()
+  const queryClient = useQueryClient()
   const {
     client,
     records,
@@ -38,6 +45,20 @@ export default function ClientDetailsPage() {
     fetchData,
   } = useClientDetails(id)
   const [isRecordDialogOpen, setIsRecordDialogOpen] = useState(false)
+
+  const { data: clientProjects = [], isLoading: projectsLoading } = useQuery({
+    queryKey: ['client-projects', id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('projects')
+        .select('id, name, event_type, event_date, status, total_budget')
+        .eq('client_id', id)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!id,
+  })
 
   if (loadingData) {
     return <PageLoader />
@@ -93,7 +114,7 @@ export default function ClientDetailsPage() {
 
       <main className="container mx-auto px-4 pt-28 pb-12">
         <Tabs defaultValue="historico" className="space-y-8">
-          <TabsList className="bg-black border border-white/20 p-0 rounded-none w-full max-w-md mx-auto grid grid-cols-2">
+          <TabsList className="bg-black border border-white/20 p-0 rounded-none w-full max-w-xl mx-auto grid grid-cols-3">
             <TabsTrigger
               value="dados"
               className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 font-mono text-xs uppercase tracking-widest rounded-none h-10 transition-all"
@@ -105,6 +126,12 @@ export default function ClientDetailsPage() {
               className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 font-mono text-xs uppercase tracking-widest rounded-none h-10 transition-all"
             >
               Prontuário
+            </TabsTrigger>
+            <TabsTrigger
+              value="projetos"
+              className="data-[state=active]:bg-white data-[state=active]:text-black text-gray-500 font-mono text-xs uppercase tracking-widest rounded-none h-10 transition-all"
+            >
+              Projetos
             </TabsTrigger>
           </TabsList>
 
@@ -319,6 +346,91 @@ export default function ClientDetailsPage() {
                 ))
               )}
             </div>
+          </TabsContent>
+
+          <TabsContent value="projetos" className="max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-3xl font-serif text-white uppercase tracking-tight">
+                  Projetos
+                </h2>
+                <p className="text-gray-500 font-mono text-xs uppercase tracking-widest">
+                  Eventos & Trabalhos
+                </p>
+              </div>
+              <NewProjectWizard
+                preselectedClientId={id}
+                onSuccess={() => queryClient.invalidateQueries({ queryKey: ['client-projects', id] })}
+                trigger={
+                  <Button className="bg-white text-black hover:bg-white/90 rounded-none font-mono text-xs uppercase tracking-widest">
+                    <Plus className="w-3 h-3 mr-2" />
+                    Novo Projeto
+                  </Button>
+                }
+              />
+            </div>
+
+            {projectsLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-16 bg-white/[0.03] animate-pulse" />
+                ))}
+              </div>
+            ) : clientProjects.length === 0 ? (
+              <EmptyState
+                icon={FolderOpen}
+                title="SEM PROJETOS"
+                description="Crie o primeiro projeto para esta cliente."
+                className="bg-black border border-white/10"
+              />
+            ) : (
+              <div className="border border-white/10">
+                <div className="hidden md:grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5 border-b border-white/10 bg-white/[0.02]">
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/30">Projeto</span>
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/30 text-right w-28">Tipo</span>
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/30 text-right w-28">Data</span>
+                  <span className="font-mono text-[8px] uppercase tracking-widest text-white/30 text-right w-20">Status</span>
+                </div>
+                {clientProjects.map((project, i) => {
+                  const d = project.event_date ? new Date(project.event_date + 'T12:00:00') : null
+                  const isValid = d && !isNaN(d.getTime())
+                  return (
+                    <Link
+                      key={project.id}
+                      to={`/projetos/${project.id}`}
+                      className={`flex flex-col md:grid md:grid-cols-[1fr_auto_auto_auto] gap-3 md:gap-4 px-5 py-4 border-b border-white/10 hover:bg-white hover:text-black transition-all duration-150 group ${i === clientProjects.length - 1 ? 'border-b-0' : ''}`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${project.status === 'active' ? 'bg-white group-hover:bg-black' : 'bg-white/20 group-hover:bg-black/30'}`} />
+                        <p className="font-serif text-sm uppercase tracking-wide truncate text-white group-hover:text-black">
+                          {project.name}
+                        </p>
+                      </div>
+                      <div className="flex items-center md:justify-end md:w-28">
+                        {project.event_type ? (
+                          <span className="border border-white/20 group-hover:border-black/20 px-2 py-0.5 font-mono text-[8px] uppercase tracking-widest text-white/50 group-hover:text-black/50">
+                            {project.event_type}
+                          </span>
+                        ) : (
+                          <span className="font-mono text-[9px] text-white/20 group-hover:text-black/20">—</span>
+                        )}
+                      </div>
+                      <div className="flex items-center md:justify-end md:w-28">
+                        <p className="font-mono text-[10px] text-white/60 group-hover:text-black/60">
+                          {isValid ? format(d, 'dd MMM yyyy', { locale: ptBR }) : '—'}
+                        </p>
+                      </div>
+                      <div className="flex items-center justify-between md:justify-end md:w-20 gap-3">
+                        <span className={`border px-1.5 py-0.5 font-mono text-[8px] uppercase tracking-widest ${project.status === 'active' ? 'border-white/50 text-white/70 group-hover:border-black/40 group-hover:text-black/60' : 'border-white/20 text-white/30 group-hover:border-black/20 group-hover:text-black/30'}`}>
+                          {project.status === 'active' ? 'Ativo' : project.status === 'completed' ? 'Concluído' : 'Arquivado'}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-black/40 flex-shrink-0" />
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </main>

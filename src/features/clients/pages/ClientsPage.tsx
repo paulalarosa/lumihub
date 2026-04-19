@@ -5,13 +5,12 @@ import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet'
 import {
   Table,
   TableBody,
@@ -29,7 +28,6 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   ArrowLeft,
-  Plus,
   User,
   Edit,
   Trash2,
@@ -39,18 +37,19 @@ import {
   MoreVertical,
   Link as LinkIcon,
   Download,
+  FolderPlus,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
-
 import { MobileFAB } from '@/components/ui/MobileFAB'
 import { ClientForm } from '../components/ClientForm'
 import { ClientFilters } from '@/components/filters/ClientFilters'
 import { useClientsQuery } from '../hooks/useClientsQuery'
-
 import { useClientFilterStore } from '@/stores/useClientFilterStore'
 import { useClientActions } from '@/features/clients/hooks/useClientActions'
 import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
 import { PageLoader } from '@/components/ui/PageLoader'
+import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
+import { useNewProjectWizard } from '@/features/projects/hooks/useNewProjectWizard'
 
 export default function Clientes() {
   const navigate = useNavigate()
@@ -63,26 +62,25 @@ export default function Clientes() {
     isError,
     refetch: fetchClients,
   } = useClientsQuery()
-  const filterStore = useClientFilterStore()
 
+  const filterStore = useClientFilterStore()
   const actions = useClientActions({ fetchClients, clients })
 
+  const wizard = useNewProjectWizard({ defaultClientMode: 'create', onSuccess: fetchClients })
+
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth')
-    }
+    if (!authLoading && !user) navigate('/auth')
   }, [user, authLoading, navigate])
 
-  if (authLoading || orgLoading) {
-    return <PageLoader />
-  }
+  if (authLoading || orgLoading) return <PageLoader />
 
   const filteredClients = clients
 
   return (
     <div className="min-h-screen bg-black flex flex-col font-mono selection:bg-white selection:text-black">
-      <SEOHead title="Clientes" noindex={true} />
-      <header className="border-b border-white/20 bg-black">
+      <SEOHead title="Clientes" noindex />
+
+      <header className="border-b border-white/20 bg-black sticky top-0 z-10">
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -103,70 +101,84 @@ export default function Clientes() {
                   <h1 className="font-serif text-2xl text-white tracking-tight">
                     MEUS CLIENTES
                   </h1>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono"></div>
+                  <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-mono">
+                    {filteredClients.length} {filteredClients.length === 1 ? 'cliente' : 'clientes'}
+                  </div>
                 </div>
               </div>
             </div>
 
-            <Dialog
-              open={actions.isDialogOpen}
-              onOpenChange={(open) => {
-                actions.setIsDialogOpen(open)
-                if (!open) actions.setEditingClient(null)
-              }}
-            >
-              <div className="flex items-center gap-2">
-                <Button
-                  onClick={actions.handleExportCSV}
-                  disabled={actions.isExporting || filteredClients.length === 0}
-                  variant="outline"
-                  className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10 px-4"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  {actions.isExporting ? 'Exportando...' : 'Exportar CSV'}
-                </Button>
-                <DialogTrigger asChild>
-                  <Button className="rounded-none bg-white text-black hover:bg-gray-300 font-mono text-xs uppercase tracking-widest h-10 px-6">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Novo Cliente
-                  </Button>
-                </DialogTrigger>
-              </div>
-              <DialogContent className="max-w-md bg-black border border-white p-6 rounded-none text-white">
-                <DialogHeader>
-                  <DialogTitle className="text-white font-serif text-2xl">
-                    {actions.editingClient ? 'EDITAR CLIENTE' : 'NOVO CLIENTE'}
-                  </DialogTitle>
-                  <DialogDescription className="sr-only">
-                    Formulário para gerenciamento de dados do cliente.
-                  </DialogDescription>
-                </DialogHeader>
-                <ClientForm
-                  onSubmit={actions.handleFormSubmit}
-                  initialData={
-                    actions.editingClient
-                      ? {
-                          name: actions.editingClient.name,
-                          email: actions.editingClient.email || '',
-                          phone: actions.editingClient.phone || '',
-                          notes: actions.editingClient.notes || '',
-                          is_bride: actions.editingClient.is_bride || false,
-                          wedding_date: actions.editingClient.wedding_date
-                            ? new Date(actions.editingClient.wedding_date)
-                            : undefined,
-                          access_pin: actions.editingClient.access_pin || '',
-                        }
-                      : undefined
-                  }
-                  submitLabel={
-                    actions.editingClient ? 'SALVAR DADOS' : 'REGISTRAR CLIENTE'
-                  }
-                />
-              </DialogContent>
-            </Dialog>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={actions.handleExportCSV}
+                disabled={actions.isExporting || filteredClients.length === 0}
+                variant="outline"
+                className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10 px-4"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                {actions.isExporting ? 'Exportando...' : 'Exportar CSV'}
+              </Button>
+
+              <Button
+                onClick={() => wizard.openWizard()}
+                className="rounded-none bg-white text-black hover:bg-gray-200 font-mono text-xs uppercase tracking-widest h-10 px-6 gap-2"
+              >
+                <FolderPlus className="h-4 w-4" />
+                Nova Cliente
+              </Button>
+            </div>
           </div>
         </div>
       </header>
+
+      <NewProjectWizard
+        externalOpen={wizard.open}
+        onExternalClose={wizard.closeWizard}
+        wizardHook={wizard}
+      />
+
+      <Sheet
+        open={!!actions.editingClient && actions.isDialogOpen}
+        onOpenChange={(open) => {
+          actions.setIsDialogOpen(open)
+          if (!open) actions.setEditingClient(null)
+        }}
+      >
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-md bg-black border-l border-white/20 text-white p-0 overflow-y-auto"
+        >
+          <SheetHeader className="px-6 pt-8 pb-5 border-b border-white/10">
+            <SheetTitle className="text-white font-serif text-xl uppercase tracking-tight">
+              Editar Cliente
+            </SheetTitle>
+            <SheetDescription className="text-white/40 font-mono text-[10px] uppercase tracking-widest">
+              {actions.editingClient?.name}
+            </SheetDescription>
+          </SheetHeader>
+          <div className="px-6 py-6">
+            <ClientForm
+              onSubmit={actions.handleFormSubmit}
+              initialData={
+                actions.editingClient
+                  ? {
+                      name: actions.editingClient.name,
+                      email: actions.editingClient.email || '',
+                      phone: actions.editingClient.phone || '',
+                      notes: actions.editingClient.notes || '',
+                      is_bride: actions.editingClient.is_bride || false,
+                      wedding_date: actions.editingClient.wedding_date
+                        ? new Date(actions.editingClient.wedding_date)
+                        : undefined,
+                      access_pin: actions.editingClient.access_pin || '',
+                    }
+                  : undefined
+              }
+              submitLabel="SALVAR DADOS"
+            />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       <main className="container mx-auto px-4 py-8 flex-1">
         <div className="mb-8">
@@ -190,27 +202,19 @@ export default function Clientes() {
           ) : filteredClients.length === 0 ? (
             <EmptyState
               icon={Star}
-              title={
-                filterStore.search
-                  ? 'REGISTRO NÃO ENCONTRADO'
-                  : 'DATABASE VAZIO'
-              }
+              title={filterStore.search ? 'NENHUM RESULTADO' : 'SEM CLIENTES'}
               description={
                 filterStore.search
-                  ? 'Verifique os termos de busca.'
-                  : 'Inicie o cadastro de clientes para popular o sistema.'
+                  ? 'Nenhuma cliente encontrada para esta busca.'
+                  : 'Nenhuma cliente cadastrada ainda. Clique no botão acima para começar.'
               }
-              actionLabel={!filterStore.search ? 'INICIAR CADASTRO' : undefined}
-              onAction={
-                !filterStore.search
-                  ? () => actions.setIsDialogOpen(true)
-                  : undefined
-              }
+              actionLabel={!filterStore.search ? 'NOVA CLIENTE' : undefined}
+              onAction={!filterStore.search ? () => wizard.openWizard() : undefined}
               className="border border-white/10 rounded-none bg-black"
             />
           ) : (
             <div className="space-y-6">
-              {}
+
               <div className="hidden md:block">
                 <Table>
                   <TableHeader>
@@ -249,7 +253,7 @@ export default function Clientes() {
                                   {client.name}
                                 </span>
                                 {client.is_bride && (
-                                  <Gem className="h-3 w-3 text-[#00e5ff] group-hover:text-black" />
+                                  <Gem className="h-3 w-3 text-white/50 group-hover:text-black" />
                                 )}
                               </div>
                               {client.email && (
@@ -262,13 +266,9 @@ export default function Clientes() {
                         </TableCell>
                         <TableCell>
                           {client.phone ? (
-                            <span className="font-mono text-xs">
-                              {client.phone}
-                            </span>
+                            <span className="font-mono text-xs">{client.phone}</span>
                           ) : (
-                            <span className="text-gray-600 group-hover:text-black/40 text-xs font-mono">
-                              -
-                            </span>
+                            <span className="text-gray-600 group-hover:text-black/40 text-xs font-mono">-</span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -278,14 +278,12 @@ export default function Clientes() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1">
                             {client.is_bride && (
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() =>
-                                  actions.copyPortalLink(client.id)
-                                }
+                                onClick={() => actions.copyPortalLink(client.id)}
                                 className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                                 title="Copiar Link do Portal"
                               >
@@ -324,7 +322,6 @@ export default function Clientes() {
                 </Table>
               </div>
 
-              {}
               <div className="grid grid-cols-1 gap-4 md:hidden">
                 {filteredClients.map((client) => (
                   <div
@@ -341,17 +338,11 @@ export default function Clientes() {
                         </Avatar>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-serif text-xl text-white">
-                              {client.name}
-                            </h3>
-                            {client.is_bride && (
-                              <Gem className="h-4 w-4 text-[#00e5ff]" />
-                            )}
+                            <h3 className="font-serif text-xl text-white">{client.name}</h3>
+                            {client.is_bride && <Gem className="h-4 w-4 text-white/50" />}
                           </div>
                           {client.phone && (
-                            <div className="font-mono text-xs text-gray-500 mt-1">
-                              {client.phone}
-                            </div>
+                            <div className="font-mono text-xs text-gray-500 mt-1">{client.phone}</div>
                           )}
                         </div>
                       </div>
@@ -359,18 +350,12 @@ export default function Clientes() {
                       {client.is_bride && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-white"
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="bg-black border-white/20 rounded-none text-white">
-                            <DropdownMenuItem
-                              onClick={() => actions.copyPortalLink(client.id)}
-                            >
+                            <DropdownMenuItem onClick={() => actions.copyPortalLink(client.id)}>
                               <LinkIcon className="h-4 w-4 mr-2" />
                               Copiar Link Portal
                             </DropdownMenuItem>
@@ -409,10 +394,8 @@ export default function Clientes() {
           )}
         </div>
       </main>
-      <MobileFAB
-        onClick={() => actions.setIsDialogOpen(true)}
-        label="Novo Cliente"
-      />
+
+      <MobileFAB onClick={() => wizard.openWizard()} label="Nova Cliente" />
     </div>
   )
 }

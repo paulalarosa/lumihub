@@ -10,9 +10,10 @@ export function useEventMutations() {
   const { toast } = useToast()
 
   const createMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (eventData: any) => {
       const cleanData = sanitizeFormData(eventData)
-      
+
       const { data: event, error } = await supabase
         .from('events')
         .insert({
@@ -28,7 +29,7 @@ export function useEventMutations() {
 
       try {
         await supabase.functions.invoke('google-calendar-sync', {
-          body: { 
+          body: {
             action: 'create',
             event_id: event.id,
             event_data: {
@@ -64,6 +65,7 @@ export function useEventMutations() {
   })
 
   const updateMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const cleanData = sanitizeFormData(data)
       const { data: event, error } = await supabase
@@ -82,7 +84,7 @@ export function useEventMutations() {
 
       try {
         await supabase.functions.invoke('google-calendar-sync', {
-          body: { 
+          body: {
             action: 'update',
             event_id: id,
             event_data: {

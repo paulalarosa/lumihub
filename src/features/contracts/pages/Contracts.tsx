@@ -120,12 +120,12 @@ export default function Contracts() {
           filteredContracts.map((contract) => (
             <Card
               key={contract.id}
-              className="bg-white/5 border-white/10 backdrop-blur-sm group hover:border-[#00e5ff]/50 transition-all duration-300"
+              className="bg-white/5 border-white/10 backdrop-blur-sm group hover:border-white/30 transition-all duration-300"
             >
               <CardHeader className="pb-3">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <CardTitle className="text-white font-medium text-lg leading-tight group-hover:text-[#00e5ff] transition-colors">
+                    <CardTitle className="text-white font-medium text-lg leading-tight group-hover:text-white transition-colors">
                       {contract.title}
                     </CardTitle>
                     <p className="text-white/50 text-xs uppercase tracking-wider font-mono">

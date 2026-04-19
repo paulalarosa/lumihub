@@ -22,15 +22,16 @@ export interface ErrorDetails {
 }
 
 export function getErrorMessage(
-  error: Error | { message?: string; code?: string; status?: number } | any,
+  error: Error | { message?: string; code?: string; status?: number } | unknown,
   defaultTitle = 'Erro',
 ): ErrorDetails {
   if (!error)
     return { title: defaultTitle, description: ERROR_MESSAGES.UNKNOWN }
 
   let description = ERROR_MESSAGES.UNKNOWN
-  const message = error.message?.toLowerCase() || ''
-  const code = error.code || error.status
+  const err = error as Record<string, unknown> | null;
+  const message = typeof err?.message === 'string' ? err.message.toLowerCase() : ''
+  const code = (err?.code || err?.status) as string | number | undefined
 
   if (code && SUPABASE_ERROR_CODES[code as keyof typeof SUPABASE_ERROR_CODES]) {
     description =
@@ -56,8 +57,8 @@ export function getErrorMessage(
     message.includes('unauthorized')
   ) {
     description = ERROR_MESSAGES.PERMISSION
-  } else if (error.message) {
-    description = error.message
+  } else if (err?.message && typeof err.message === 'string') {
+    description = err.message
   }
 
   return { title: defaultTitle, description }

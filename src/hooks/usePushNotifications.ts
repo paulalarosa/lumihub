@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/integrations/supabase/client'
+import { TypedSupabaseClient } from '@/types/custom-supabase'
 import { useAuth } from '@/hooks/useAuth'
 import { logger } from '@/services/logger'
 
@@ -16,7 +17,10 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
   return outputArray
 }
 
+
+
 export function usePushNotifications() {
+  const typedLocal = supabase as unknown as TypedSupabaseClient
   const { user } = useAuth()
   const [isSupported, setIsSupported] = useState(false)
   const [isSubscribed, setIsSubscribed] = useState(false)
@@ -37,6 +41,7 @@ export function usePushNotifications() {
       setPermission(Notification.permission)
       checkExistingSubscription()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const checkExistingSubscription = useCallback(async () => {
@@ -65,13 +70,13 @@ export function usePushNotifications() {
       const registration = await navigator.serviceWorker.ready
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) as BufferSource,
       })
 
       const keys = subscription.toJSON().keys
       if (!keys?.p256dh || !keys?.auth) throw new Error('Missing push keys')
 
-      const { error } = await supabase.rpc('save_push_subscription', {
+      const { error } = await typedLocal.rpc('save_push_subscription', {
         p_endpoint: subscription.endpoint,
         p_p256dh: keys.p256dh,
         p_auth: keys.auth,
@@ -88,7 +93,7 @@ export function usePushNotifications() {
     } finally {
       setLoading(false)
     }
-  }, [user, isSupported])
+  }, [user, isSupported, typedLocal])
 
   const unsubscribe = useCallback(async () => {
     setLoading(true)
@@ -97,7 +102,7 @@ export function usePushNotifications() {
       const subscription = await registration.pushManager.getSubscription()
 
       if (subscription) {
-        await supabase.rpc('remove_push_subscription', {
+        await typedLocal.rpc('remove_push_subscription', {
           p_endpoint: subscription.endpoint,
         })
         await subscription.unsubscribe()
@@ -111,7 +116,7 @@ export function usePushNotifications() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [typedLocal])
 
   return {
     isSupported,

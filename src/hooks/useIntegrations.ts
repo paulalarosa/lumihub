@@ -100,6 +100,7 @@ export function useIntegrations() {
 
   useEffect(() => {
     if (user) fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   useEffect(() => {
@@ -144,6 +145,7 @@ export function useIntegrations() {
       }
     }
     handleCallback()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchData = async () => {

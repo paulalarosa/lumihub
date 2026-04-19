@@ -82,7 +82,7 @@ export default function PrivacySettings() {
             </CardTitle>
           </div>
           <p className="text-xs text-muted-foreground font-mono uppercase tracking-widest mt-1">
-            LGPD // Lei Geral de Proteção de Dados
+            LGPD
           </p>
         </CardHeader>
         <CardContent className="p-0">

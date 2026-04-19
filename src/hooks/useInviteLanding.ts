@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 export interface AssistantInvite {
   id: string
   email: string
-  name: string | null
+  full_name: string | null
   status: string
   is_registered: boolean
   invite_token: string | null
@@ -37,16 +37,15 @@ export function useInviteLanding() {
       return
     }
     checkInvite()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   const checkInvite = async () => {
     try {
-      const query = supabase
+      const { data, error } = await (supabase as any)
         .from('assistants')
-        .select('id, email, name, status, is_registered, invite_token')
-
-      const { data, error } = await query
-        .eq('invite_token', token)
+        .select('id, email, full_name, status, is_registered, invite_token')
+        .eq('invite_token', token as string)
         .maybeSingle()
 
       if (error || !data) {
@@ -54,7 +53,7 @@ export function useInviteLanding() {
         return
       }
 
-      const safeData = data
+      const safeData = data as unknown as AssistantInvite
 
       if (safeData.is_registered) {
         toast.error('Este convite já foi utilizado.')
@@ -158,9 +157,9 @@ export function useInviteLanding() {
             is_registered: true,
             status: 'accepted',
             phone: cleanPhone,
-            name: cleanFullName,
+            full_name: cleanFullName,
             invite_token: null,
-          })
+          } as any)
           .eq('id', inviteData.id)
 
         if (updateError) {

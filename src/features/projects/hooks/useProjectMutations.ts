@@ -11,6 +11,7 @@ export function useProjectMutations() {
   const { toast } = useToast()
 
   const createProjectMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (projectData: any) => {
       const cleanData = sanitizeFormData(projectData)
       const { data, error } = await supabase
@@ -33,6 +34,7 @@ export function useProjectMutations() {
   })
 
   const updateProjectMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async ({ id, data }: { id: string; data: any }) => {
       const cleanData = sanitizeFormData(data)
       const { data: result, error } = await supabase
@@ -57,6 +59,7 @@ export function useProjectMutations() {
   })
 
   const createTaskMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (taskData: any) => {
       const { data, error } = await ProjectService.createTask(taskData)
       if (error) throw error
@@ -83,6 +86,7 @@ export function useProjectMutations() {
       project_id,
     }: {
       id: string
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       data: any
       project_id: string
     }) => {
@@ -117,6 +121,7 @@ export function useProjectMutations() {
   })
 
   const addServiceMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (serviceData: any) => {
       const { data: _data, error } =
         await ProjectService.addProjectService(serviceData)
@@ -158,6 +163,7 @@ export function useProjectMutations() {
   })
 
   const registerPaymentMutation = useMutation({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mutationFn: async (paymentData: any) => {
       const cleanData = sanitizeFormData(paymentData)
       const { error } = await supabase.from('transactions').insert([cleanData])

@@ -85,7 +85,7 @@ export const CreateEventModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-neutral-900 border-neutral-800 max-w-2xl text-white">
+      <DialogContent className="bg-neutral-900 border-neutral-800 max-w-2xl text-white" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="text-2xl text-white">Novo Evento</DialogTitle>
         </DialogHeader>

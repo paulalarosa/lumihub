@@ -61,7 +61,7 @@ export function NewProjectDialog({
 
         {loadingClients ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-6 h-6 animate-spin text-[#00e5ff]" />
+            <Loader2 className="w-6 h-6 animate-spin text-white/60" />
           </div>
         ) : clients.length === 0 ? (
           <div className="py-8 text-center">

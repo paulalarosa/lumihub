@@ -1,5 +1,5 @@
 import { useState, useRef, memo, useCallback } from 'react'
-import { useClients } from '../hooks/useClients'
+import { useClientsQuery } from '../hooks/useClientsQuery'
 import { useDeleteClient } from '../hooks/useDeleteClient'
 import { useUIStore } from '@/stores/useUIStore'
 import {
@@ -25,7 +25,9 @@ const ClientRow = memo(
     virtualRow,
     onDelete,
   }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     client: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     virtualRow: any
     onDelete: (id: string, name: string) => void
   }) => {
@@ -131,12 +133,12 @@ export const ClientsTable = () => {
   const limit = 50
   const parentRef = useRef<HTMLDivElement>(null)
 
-  const { data: result, isLoading, error } = useClients(page, limit)
+  const { clients: result, isLoading, error } = useClientsQuery()
   const { mutate: deleteClient, isPending: _isDeleting } = useDeleteClient()
   const { searchTerm } = useUIStore()
 
-  const clients = result?.data || []
-  const totalCount = result?.count || 0
+  const clients = result || []
+  const totalCount = clients.length
   const totalPages = Math.ceil(totalCount / limit)
 
   const filteredClients = clients.filter((client) => {

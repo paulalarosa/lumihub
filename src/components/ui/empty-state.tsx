@@ -22,23 +22,23 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center py-16 px-4 text-center bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm',
+        'flex flex-col items-center justify-center py-16 px-4 text-center bg-white/[0.02] border border-white/10',
         className,
       )}
     >
-      <div className="w-16 h-16 bg-[#00e5ff]/10 rounded-full flex items-center justify-center mb-6 border border-[#00e5ff]/20 shadow-[0_0_30px_rgba(0,229,255,0.15)]">
-        <Icon className="h-8 w-8 text-[#00e5ff]" />
+      <div className="w-14 h-14 bg-white/[0.04] flex items-center justify-center mb-5 border border-white/10">
+        <Icon className="h-7 w-7 text-white/30" />
       </div>
-      <h3 className="font-serif text-2xl font-medium text-white mb-2">
+      <h3 className="font-serif text-xl text-white mb-2 uppercase tracking-wide">
         {title}
       </h3>
-      <p className="text-white/50 mb-8 max-w-sm mx-auto leading-relaxed">
+      <p className="text-white/40 mb-8 max-w-sm mx-auto leading-relaxed font-mono text-xs">
         {description}
       </p>
       {actionLabel && onAction && (
         <Button
           onClick={onAction}
-          className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90 h-10 px-8 rounded-full font-medium"
+          className="bg-white text-black hover:bg-white/90 h-10 px-8 rounded-none font-mono text-xs uppercase tracking-widest"
         >
           {actionLabel}
         </Button>

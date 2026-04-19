@@ -46,7 +46,7 @@ export function createICSContent(event: EventData): string {
 
   const icsContent = `BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//Beauty Agenda//Event//PT
+PRODID:-
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT

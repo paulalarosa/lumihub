@@ -50,7 +50,7 @@ Tudo bem? Sou do *Khaos Kontrol* e estou entrando em contato para confirmar os d
 🕐 *Horário:* ${time}
 📍 *Local:* ${location}
 
-Poderia me confirmar se está tudo certo? 
+Poderia me confirmar se está tudo certo?
 
 Se tiver alguma dúvida ou precisar de algum ajuste, estou à disposição!`
 
@@ -70,7 +70,7 @@ Se tiver alguma dúvida ou precisar de algum ajuste, estou à disposição!`
 
     const message = `Olá ${clientName}! 🎨
 
-Lembrete: amanhã (${formattedDate}) é o grande dia! 
+Lembrete: amanhã (${formattedDate}) é o grande dia!
 
 Confirmo sua maquiagem às ${time}.
 

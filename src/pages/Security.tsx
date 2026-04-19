@@ -79,7 +79,7 @@ const Security = () => {
 
               <section className="border-t border-white/10 pt-12 mt-20">
                 <p className="font-mono text-xs text-white/30 uppercase tracking-widest text-center">
-                  KHAOS KONTROL // SECURITY POLICY // v1.0
+                  KHAOS KONTROL
                 </p>
               </section>
             </div>

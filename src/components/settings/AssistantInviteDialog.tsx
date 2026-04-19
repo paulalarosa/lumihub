@@ -49,7 +49,7 @@ export function AssistantInviteDialog() {
       <DialogTrigger asChild>
         <Button
           variant="outline"
-          className="border-[#00e5ff]/20 text-[#00e5ff] hover:bg-[#00e5ff]/10"
+          className="border-white/20 text-white/70 hover:bg-white/10"
         >
           <Mail className="w-4 h-4 mr-2" />
           Convidar Assistente
@@ -80,7 +80,7 @@ export function AssistantInviteDialog() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="bg-[#00e5ff] text-black hover:bg-[#00e5ff]/90"
+                className="bg-white text-black hover:bg-white/90"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -134,7 +134,7 @@ export function AssistantInviteDialog() {
                             onClick={() =>
                               copyLink(invite.invite_code || invite.token)
                             }
-                            className="text-xs text-[#00e5ff] hover:underline flex items-center gap-1"
+                            className="text-xs text-white/60 hover:text-white hover:underline flex items-center gap-1"
                           >
                             {copiedToken ===
                             (invite.invite_code || invite.token) ? (

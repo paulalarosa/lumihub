@@ -16,12 +16,12 @@ export function useContractsQuery() {
         .from('contracts')
         .select(
           `
-          id, 
-          title, 
-          client_id, 
-          status, 
-          created_at, 
-          signed_at, 
+          id,
+          title,
+          client_id,
+          status,
+          created_at,
+          signed_at,
           content,
           signature_url,
           project_id

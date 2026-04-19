@@ -1,0 +1,53 @@
+{
+  "name": "Khaos Kontrol - Gestão para Maquiadoras",
+  "short_name": "Khaos Kontrol",
+  "description": "Organize clientes, contratos, agenda e financeiro em um só lugar.",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/dashboard",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Nova Cliente",
+      "short_name": "Cliente",
+      "description": "Cadastrar nova cliente",
+      "url": "/clientes",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calendário",
+      "short_name": "Agenda",
+      "description": "Ver calendário de eventos",
+      "url": "/calendar",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Contratos",
+      "short_name": "Contratos",
+      "description": "Gerenciar contratos",
+      "url": "/contratos",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useOrganization } from '@/hooks/useOrganization'
 
 interface Project {
@@ -12,8 +11,8 @@ interface Project {
   event_type: string | null
   event_date: string | null
   event_location: string | null
+  total_budget: number | null
   status: string
-  public_token?: string
   created_at: string
   client: {
     id: string
@@ -21,165 +20,75 @@ interface Project {
   } | null
 }
 
-interface Client {
-  id: string
-  full_name: string
-}
+export type StatusFilter = 'all' | 'active' | 'completed' | 'archived'
 
-export type { Project, Client }
+export type { Project }
 
 export function useProjectsPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { user, loading: authLoading } = useAuth()
   const { organizationId } = useOrganization()
-  const { toast } = useToast()
-  const queryClient = useQueryClient()
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const preselectedClientId = searchParams.get('cliente') || undefined
 
-  const [name, setName] = useState('')
-  const [clientId, setClientId] = useState(searchParams.get('cliente') || '')
-  const [eventType, setEventType] = useState('')
-  const [eventDate, setEventDate] = useState('')
-  const [eventLocation, setEventLocation] = useState('')
-
-  useEffect(() => {
-    if (!authLoading && !user) navigate('/auth')
-  }, [user, authLoading, navigate])
-
-  useEffect(() => {
-    if (searchParams.get('cliente')) {
-      setClientId(searchParams.get('cliente') || '')
-      setIsDialogOpen(true)
-    }
-  }, [searchParams])
-
-  const { data: projects = [], isLoading: loadingProjects } = useQuery({
-    queryKey: ['projects', user?.id],
+  const { data: projects = [], isLoading: loadingData } = useQuery({
+    queryKey: ['projects', organizationId],
     queryFn: async () => {
       if (!organizationId) return []
       const { data, error } = await supabase
         .from('projects')
-        .select('*, client:wedding_clients(id, full_name)')
+        .select('id, name, event_type, event_date, event_location, total_budget, status, created_at, client:wedding_clients(id, full_name)')
         .eq('user_id', organizationId)
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data
+      return data as unknown as Project[]
     },
-    enabled: !!user,
+    enabled: !!user && !!organizationId,
   })
 
-  const { data: clients = [] } = useQuery({
-    queryKey: ['wedding_clients_list', user?.id],
-    queryFn: async () => {
-      if (!organizationId) return []
-      const { data, error } = await supabase
-        .from('wedding_clients')
-        .select('id, full_name')
-        .eq('user_id', organizationId)
-        .order('full_name')
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project) => {
+      const matchesSearch =
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.client?.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.event_type || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (project.event_location || '').toLowerCase().includes(searchTerm.toLowerCase())
 
-      if (error) throw error
-      return data as Client[]
-    },
-    enabled: !!user,
-  })
+      const matchesStatus =
+        statusFilter === 'all' ||
+        project.status === statusFilter
 
-  const resetForm = () => {
-    setName('')
-    setClientId('')
-    setEventType('')
-    setEventDate('')
-    setEventLocation('')
-  }
+      return matchesSearch && matchesStatus
+    })
+  }, [projects, searchTerm, statusFilter])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!name.trim() || !clientId) {
-      toast({
-        title: 'Nome e cliente são obrigatórios',
-        variant: 'destructive',
-      })
-      return
+  const stats = useMemo(() => {
+    const now = new Date()
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+    return {
+      total: projects.length,
+      active: projects.filter(p => p.status === 'active').length,
+      completed: projects.filter(p => p.status === 'completed').length,
+      thisMonth: projects.filter(p => new Date(p.created_at) >= thisMonthStart).length,
     }
-
-    const { data, error } = await supabase
-      .from('projects')
-      .insert({
-        name: name.trim(),
-        client_id: clientId,
-        event_date: eventDate || null,
-        event_location: eventLocation.trim() || null,
-        user_id: organizationId || user!.id,
-      })
-      .select()
-      .single()
-
-    if (error) {
-      toast({ title: 'Erro ao criar projeto', variant: 'destructive' })
-    } else {
-      toast({ title: 'Projeto inicializado' })
-
-      supabase.functions
-        .invoke('send-welcome-email', {
-          body: { clientId, projectName: name.trim() },
-        })
-        .then(({ error: fnError }) => {
-          if (fnError) {
-            toast({
-              title: 'Projeto criado, mas houve erro no email de boas-vindas.',
-              variant: 'destructive',
-            })
-          } else {
-            toast({ title: 'Email de acesso enviado para a cliente!' })
-          }
-        })
-
-      setIsDialogOpen(false)
-      resetForm()
-      queryClient.invalidateQueries({ queryKey: ['projects'] })
-      navigate(`/projetos/${data.id}`)
-    }
-  }
-
-  const filteredProjects = useMemo(
-    () =>
-      projects.filter(
-        (project) =>
-          project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          ((project.client as Record<string, unknown>)?.full_name as string)
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase()),
-      ),
-    [projects, searchTerm],
-  )
+  }, [projects])
 
   return {
     user,
     loading: authLoading,
-    loadingData: loadingProjects,
+    loadingData,
     projects,
-    clients,
     filteredProjects,
+    stats,
     searchTerm,
     setSearchTerm,
-    isDialogOpen,
-    setIsDialogOpen,
-    name,
-    setName,
-    clientId,
-    setClientId,
-    eventType,
-    setEventType,
-    eventDate,
-    setEventDate,
-    eventLocation,
-    setEventLocation,
-    handleSubmit,
+    statusFilter,
+    setStatusFilter,
+    preselectedClientId,
     navigate,
   }
 }
