@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { useMemo, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import {
@@ -7,6 +8,16 @@ import {
 } from '@inferencesh/sdk'
 import { useAI } from '@/hooks/useAI'
 import { createWebLLM } from '../services/web-llm-provider'
+
+interface ChatMessage {
+  id: string
+  role: 'system' | 'user' | 'assistant' | 'data' | 'tool'
+  content: string
+  createdAt?: Date
+  toolInvocations?: Record<string, unknown>[]
+  parts?: Record<string, unknown>[]
+  reasoning?: string
+}
 
 export function useKhaosAgent() {
   const { mode, byokSettings } = useAI()
@@ -62,8 +73,7 @@ export function useKhaosAgent() {
   })
 
   const chatMessages = useMemo((): ChatMessageDTO[] => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return (chatHelpers.messages || []).map((m: any) => {
+    return (chatHelpers.messages as unknown as ChatMessage[] || []).map((m: ChatMessage) => {
       const reasoning =
         (m.parts as Record<string, unknown>[])?.find(
           (p) => p.type === 'reasoning',

@@ -93,13 +93,12 @@ export const useProjectDetails = (projectId: string | undefined) => {
 
       const project = projectRes.data as LocalProjectWithRelations
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const adaptedProject: any = { ...project }
-      if (adaptedProject.client) {
-        adaptedProject.clients = {
-          ...adaptedProject.client,
-          name: adaptedProject.client.full_name || adaptedProject.client.name,
-        }
+      const adaptedProject: ProjectWithRelations = { 
+        ...project,
+        clients: project.client ? {
+          ...project.client,
+          name: project.client.full_name || project.client.id,
+        } : undefined
       }
 
       const { data: contractsData } = await supabase

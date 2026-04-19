@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client'
 import { nanoid } from 'nanoid'
+import { logger } from '@/services/logger'
 
 export async function uploadImageSafely(
   file: File,
@@ -35,7 +36,7 @@ export async function deletePhotoSafely(
     const filePath = urlParts.slice(bucketIndex + 1).join('/')
 
     await supabase.storage.from(bucket).remove([filePath])
-  } catch (_error) {
-
+  } catch (error) {
+    logger.error(error, 'upload.deletePhotoSafely')
   }
 }

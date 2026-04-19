@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, CheckCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useAdminNotifications } from '@/hooks/useAdminNotifications'
+import { useUserNotifications } from '@/hooks/useUserNotifications'
 import { Button } from '@/components/ui/button'
 
 export function NotificationBell() {
@@ -9,7 +9,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false)
   const panelRef = useRef<HTMLDivElement>(null)
   const { notifications, unreadCount, markRead, markAllRead } =
-    useAdminNotifications()
+    useUserNotifications()
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -23,8 +23,15 @@ export function NotificationBell() {
 
   const typeIcon: Record<string, string> = {
     new_signup: '👤',
+    new_client: '👤',
     payment_received: '💰',
+    invoice_paid: '💰',
+    invoice_created: '🧾',
+    contract_signed: '📝',
+    new_event: '📅',
     subscription_change: '⚡',
+    trial_ending: '⏰',
+    payment_failed: '⚠️',
   }
 
   const formatTime = (dateStr: string) => {

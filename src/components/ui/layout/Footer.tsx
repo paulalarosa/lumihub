@@ -18,6 +18,7 @@ export default function Footer() {
         { label: t('header_features'), href: '/recursos' },
         { label: t('header_plans'), href: '/planos' },
         { label: t('header_blog'), href: '/blog' },
+        { label: 'Ajuda', href: '/ajuda' },
         { label: t('header_contact'), href: '/contato' },
       ],
     },

@@ -26,7 +26,11 @@ export function CashFlowChart({ data }: CashFlowChartProps) {
         <h3 className="text-lg text-white mb-6 font-mono uppercase tracking-widest">
           FLUXO DE CAIXA (6 MESES)
         </h3>
-        <div className="h-[300px] w-full">
+        <div
+          className="h-[300px] w-full"
+          role="img"
+          aria-label={`Gráfico de barras: fluxo de caixa dos últimos 6 meses, comparando receita e despesa por mês.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <CartesianGrid

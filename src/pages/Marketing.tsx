@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -9,7 +8,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -21,20 +19,21 @@ import {
   MessageCircle,
   Clock,
   CheckCircle2,
-  AlertCircle,
   RefreshCw,
   Send,
-  Terminal,
+  History,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { EmptyState } from '@/components/ui/empty-state'
+import { Skeleton } from '@/components/ui/skeleton'
 import confetti from 'canvas-confetti'
 import {
   useMarketing,
   useInactiveClients,
-  InactiveClient,
+  useContactLog,
+  useLogContact,
+  type InactiveClient,
+  type InactivityBucket,
 } from '@/hooks/useMarketing'
-import { Skeleton } from '@/components/ui/skeleton'
 import { MarketingCampaign } from '@/services/marketing'
 import { useLanguage } from '@/hooks/useLanguage'
 
@@ -42,9 +41,9 @@ const DEFAULT_SCRIPTS: MarketingCampaign[] = [
   {
     id: 'casual',
     user_id: 'system',
-    title: 'Casual (Saudades)',
+    title: 'Saudades',
     content:
-      'Oi {name}! 💖 O Studio está com saudades. Faz {days} dias que não te vejo! Vamos renovar o visual essa semana?',
+      'Oi {name}! O Studio está com saudades. Faz {days} dias que não te vejo — vamos renovar o visual essa semana?',
     category: 'casual',
     created_at: '',
     updated_at: '',
@@ -54,7 +53,7 @@ const DEFAULT_SCRIPTS: MarketingCampaign[] = [
     user_id: 'system',
     title: 'Promoção VIP',
     content:
-      'Olá {name}, sumida! ✨ Liberei um horário VIP para você com condição especial esta semana. O que acha de agendar?',
+      'Olá {name}, liberei um horário VIP pra você com condição especial esta semana. O que acha de agendar?',
     category: 'promo',
     created_at: '',
     updated_at: '',
@@ -64,28 +63,38 @@ const DEFAULT_SCRIPTS: MarketingCampaign[] = [
     user_id: 'system',
     title: 'Novidades',
     content:
-      'Oie {name}! Tudo bem? 😍 Chegaram novidades incríveis aqui no Studio e lembrei de você. Quer dar uma olhadinha?',
+      'Oie {name}, tudo bem? Chegaram novidades incríveis aqui no Studio e lembrei de você. Quer dar uma olhadinha?',
     category: 'news',
     created_at: '',
     updated_at: '',
   },
 ]
 
+const dateFormat = (iso: string) =>
+  new Date(iso).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
+
+const BUCKETS: { value: InactivityBucket; label: string }[] = [
+  { value: 'all', label: 'Todos' },
+  { value: '45-60', label: '45 a 60 dias' },
+  { value: '60-90', label: '60 a 90 dias' },
+  { value: '90+', label: '90+ dias' },
+]
+
 export default function Marketing() {
-  const { user } = useAuth()
   const { t } = useLanguage()
-  const [selectedClient, setSelectedClient] = useState<InactiveClient | null>(
-    null,
-  )
+  const [bucket, setBucket] = useState<InactivityBucket>('all')
+  const [selectedClient, setSelectedClient] = useState<InactiveClient | null>(null)
   const [selectedScriptId, setSelectedScriptId] = useState<string>('')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const { campaigns, loading: campaignsLoading } = useMarketing()
-  const {
-    clients,
-    loading: clientLoading,
-    fetchInactiveClients,
-  } = useInactiveClients()
+  const { clients, loading: clientLoading, refetch } = useInactiveClients(bucket)
+  const { data: log = [] } = useContactLog()
+  const logContact = useLogContact()
 
   const displayCampaigns = campaigns.length > 0 ? campaigns : DEFAULT_SCRIPTS
 
@@ -94,12 +103,6 @@ export default function Marketing() {
       setSelectedScriptId(displayCampaigns[0].id)
     }
   }, [displayCampaigns, selectedScriptId])
-
-  useEffect(() => {
-    if (user) {
-      fetchInactiveClients()
-    }
-  }, [user, fetchInactiveClients])
 
   const handleOpenDialog = (client: InactiveClient) => {
     setSelectedClient(client)
@@ -119,16 +122,23 @@ export default function Marketing() {
       .replace('{name}', selectedClient.name.split(' ')[0])
       .replace('{days}', selectedClient.days_since_created.toString())
 
-    const encodedMessage = encodeURIComponent(message)
-    const whatsappUrl = `https://wa.me/55${selectedClient.phone.replace(/\D/g, '')}?text=${encodedMessage}`
+    await logContact.mutateAsync({
+      client_id: selectedClient.id,
+      template_id: script.id,
+      template_title: script.title,
+      message_preview: message.slice(0, 240),
+      channel: 'whatsapp',
+    })
 
-    toast.success('Abrindo WhatsApp...')
+    const encoded = encodeURIComponent(message)
+    const whatsappUrl = `https://wa.me/55${selectedClient.phone.replace(/\D/g, '')}?text=${encoded}`
 
+    toast.success('Abrindo WhatsApp…')
     confetti({
-      particleCount: 150,
-      spread: 70,
+      particleCount: 120,
+      spread: 60,
       origin: { y: 0.6 },
-      colors: ['#ffffff', '#888888', '#000000'],
+      colors: ['#ffffff', '#c0c0c0'],
     })
 
     window.open(whatsappUrl, '_blank')
@@ -140,157 +150,158 @@ export default function Marketing() {
   )?.content
 
   return (
-    <div className="space-y-12 animate-in fade-in duration-500 relative min-h-screen bg-black p-6 md:p-10 font-mono">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/20 pb-6">
-        <div>
-          <h1 className="font-serif text-4xl text-white uppercase tracking-tighter">
-            {t('pages.marketing.title')}
-          </h1>
-          <p className="text-white/50 text-xs uppercase tracking-widest mt-1">
-            {t('pages.marketing.subtitle')}
-          </p>
+    <div className="min-h-screen bg-black p-6 md:p-10 space-y-10">
+      <header className="flex flex-col gap-3 pb-6 border-b border-white/5">
+        <span className="font-mono text-[10px] text-white/40 tracking-[0.3em] uppercase">
+          Reativação
+        </span>
+        <h1 className="font-serif text-4xl md:text-5xl text-white tracking-wide">
+          {t('pages.marketing.title')}
+        </h1>
+        <p className="text-white/40 text-sm max-w-2xl">
+          Reaproxime clientes que não agendam há mais de 45 dias. Identifica
+          inatividade, sugere roteiros e não reenvia para quem já foi contatado
+          nos últimos 14 dias.
+        </p>
+      </header>
+
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5">
+        <StatTile
+          value={clients.length}
+          label="Oportunidades"
+          hint="Inativos no filtro"
+        />
+        <StatTile value={log.length} label="Contatos recentes" hint="Últimos 30" />
+        <StatTile
+          value={clients.filter((c) => c.days_since_created >= 90).length}
+          label="Alta urgência"
+          hint="90+ dias inativos"
+        />
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[10px] text-white/40 tracking-[0.3em] uppercase">
+              Lista de reativação
+            </span>
+            <div className="h-px w-16 bg-white/10" />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Select value={bucket} onValueChange={(v) => setBucket(v as InactivityBucket)}>
+              <SelectTrigger className="bg-black border-white/10 text-white rounded-none font-mono text-[10px] uppercase tracking-widest h-10 w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-black border border-white/10 text-white rounded-none">
+                {BUCKETS.map((b) => (
+                  <SelectItem
+                    key={b.value}
+                    value={b.value}
+                    className="font-mono text-[10px] uppercase tracking-widest focus:bg-white focus:text-black"
+                  >
+                    {b.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              disabled={clientLoading}
+              className="rounded-none border-white/10 hover:bg-white/5 h-10"
+            >
+              <RefreshCw
+                className={`w-3 h-3 mr-2 ${clientLoading ? 'animate-spin' : ''}`}
+              />
+              Atualizar
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-black border border-white/20 rounded-none">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-mono uppercase tracking-widest text-white/70">
-              OPPORTUNITIES
-            </CardTitle>
-            <AlertCircle className="h-4 w-4 text-white" />
-          </CardHeader>
-          <CardContent>
-            {clientLoading ? (
-              <Skeleton className="h-8 w-16 bg-white/10 rounded-none" />
-            ) : (
-              <>
-                <div className="text-4xl font-serif text-white">
-                  {clients.length}
-                </div>
-                <p className="text-[10px] text-white/50 uppercase tracking-widest mt-1">
-                  INACTIVE_CLIENTS (+45 DAYS)
-                </p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="bg-black border border-white/20 rounded-none col-span-1 md:col-span-2">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-mono uppercase tracking-widest text-white flex items-center gap-2">
-              <Terminal className="h-4 w-4 text-white" />
-              SYSTEM_LOGIC
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-white/60 space-y-2 font-mono uppercase">
-            <p>
-              1. SCANNING_DATABASE :: IDENTIFYING ACCOUNTS INACTIVE &gt; 45
-              DAYS.
-            </p>
-            <p>
-              2. GENERATING_SCRIPT :: SELECT OPTIMIZED RE-ENGAGEMENT MESSAGE.
-            </p>
-            <p>3. EXECUTION :: DEPLOY MESSAGE VIA WHATSAPP API.</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="bg-black border border-white/20 rounded-none">
-        <CardHeader className="flex flex-row items-center justify-between border-b border-white/10">
-          <CardTitle className="text-white font-serif uppercase text-xl">
-            TARGET_LIST
-          </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchInactiveClients}
-            disabled={clientLoading}
-            className="rounded-none border-white/20 hover:bg-white hover:text-black hover:border-white text-xs uppercase tracking-widest text-white bg-black"
-          >
-            <RefreshCw
-              className={`w-3 h-3 mr-2 ${clientLoading ? 'animate-spin' : ''}`}
-            />
-            REFRESH_DATA
-          </Button>
-        </CardHeader>
-        <CardContent className="p-0">
+        <div className="border border-white/10 bg-white/[0.02]">
           {clientLoading ? (
-            <div className="space-y-4 p-6">
+            <div className="space-y-3 p-6">
               {[1, 2, 3].map((i) => (
-                <Skeleton
-                  key={i}
-                  className="h-16 w-full bg-white/5 rounded-none"
-                />
+                <Skeleton key={i} className="h-16 w-full bg-white/5 rounded-none" />
               ))}
             </div>
           ) : clients.length === 0 ? (
-            <div className="p-12">
-              <EmptyState
-                icon={CheckCircle2}
-                title="ALL_SYSTEMS_OPTIMAL"
-                description="NO_DORMANT_CLIENTS_DETECTED."
-              />
+            <div className="py-16 text-center space-y-3">
+              <CheckCircle2 className="w-6 h-6 text-white/20 mx-auto" />
+              <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest">
+                Nenhuma cliente para reativar
+              </p>
+              <p className="text-white/30 text-sm">
+                Toda sua base está ativa ou já foi contatada recentemente.
+              </p>
             </div>
           ) : (
-            <div className="divide-y divide-white/10">
+            <div className="divide-y divide-white/5">
               {clients.map((client) => (
-                <div
+                <ClientRow
                   key={client.id}
-                  className="flex flex-col md:flex-row items-center justify-between p-6 hover:bg-white/5 transition-colors group"
-                >
-                  <div className="flex items-center gap-4 w-full md:w-auto">
-                    <div className="h-10 w-10 border border-white/50 flex items-center justify-center text-white font-serif text-lg bg-black group-hover:bg-white group-hover:text-black transition-colors">
-                      {client.name.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="text-white font-bold uppercase tracking-wide text-sm">
-                        {client.name}
-                      </h3>
-                      <div className="flex items-center gap-3 text-xs text-white/40 mt-1 font-mono uppercase">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          INACTIVE: {client.days_since_created} DAYS
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
-                    <Button
-                      onClick={() => handleOpenDialog(client)}
-                      className="w-full md:w-auto bg-white text-black hover:bg-gray-200 rounded-none border border-transparent font-mono text-xs uppercase tracking-widest"
-                      disabled={!client.phone}
-                    >
-                      <MessageCircle className="w-3 h-3 mr-2" />
-                      INITIALIZE_CONTACT
-                    </Button>
-                  </div>
-                </div>
+                  client={client}
+                  onContact={handleOpenDialog}
+                />
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      {log.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-3">
+            <History className="w-4 h-4 text-white/40" />
+            <span className="font-mono text-[10px] text-white/40 tracking-[0.3em] uppercase">
+              Histórico de envios
+            </span>
+            <div className="h-px flex-1 bg-white/5" />
+          </div>
+          <div className="border border-white/10 bg-white/[0.02] divide-y divide-white/5">
+            {log.slice(0, 10).map((entry) => (
+              <div
+                key={entry.id}
+                className="flex items-center justify-between px-6 py-4 gap-4"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-white/80 text-sm truncate">{entry.client_name}</p>
+                  <p className="text-white/30 text-xs mt-1 truncate">
+                    {entry.template_title ?? '—'}
+                    {entry.message_preview && ` · ${entry.message_preview}`}
+                  </p>
+                </div>
+                <span className="font-mono text-[10px] text-white/40 tracking-widest uppercase whitespace-nowrap">
+                  {dateFormat(entry.contacted_at)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-black border border-white/20 sm:max-w-md rounded-none">
+        <DialogContent className="bg-black border border-white/10 sm:max-w-md rounded-none text-white">
           <DialogHeader>
-            <DialogTitle className="text-white font-serif uppercase tracking-wide">
-              CONFIRM_TRANSMISSION
+            <DialogTitle className="font-serif text-xl tracking-wide">
+              Confirmar envio
             </DialogTitle>
-            <DialogDescription className="font-mono text-xs uppercase tracking-widest text-white/50">
-              TARGET:{' '}
-              <span className="text-white font-bold">
-                {selectedClient?.name}
-              </span>
+            <DialogDescription className="text-white/50 text-sm">
+              Para{' '}
+              <span className="text-white font-medium">{selectedClient?.name}</span>
+              {selectedClient?.days_since_created && (
+                <> · {selectedClient.days_since_created} dias sem voltar</>
+              )}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          <div className="space-y-5 py-4">
             <div className="space-y-2">
-              <label className="text-xs font-mono uppercase tracking-widest text-white/70">
-                SELECT_PROTOCOL
+              <label className="font-mono text-[10px] text-white/40 tracking-widest uppercase">
+                Roteiro
               </label>
               {campaignsLoading ? (
                 <Skeleton className="h-10 w-full bg-white/5 rounded-none" />
@@ -299,15 +310,15 @@ export default function Marketing() {
                   value={selectedScriptId}
                   onValueChange={setSelectedScriptId}
                 >
-                  <SelectTrigger className="bg-black border-white/20 text-white rounded-none font-mono text-xs uppercase h-12 focus:ring-0 focus:border-white">
-                    <SelectValue placeholder="SELECT_SCRIPT" />
+                  <SelectTrigger className="bg-black border-white/10 text-white rounded-none h-10 focus:ring-0 focus:border-white/30">
+                    <SelectValue placeholder="Selecione um roteiro" />
                   </SelectTrigger>
-                  <SelectContent className="bg-black border border-white/20 text-white rounded-none">
+                  <SelectContent className="bg-black border border-white/10 text-white rounded-none">
                     {displayCampaigns.map((script) => (
                       <SelectItem
                         key={script.id}
                         value={script.id}
-                        className="font-mono text-xs uppercase focus:bg-white focus:text-black"
+                        className="focus:bg-white focus:text-black"
                       >
                         {script.title}
                       </SelectItem>
@@ -317,44 +328,95 @@ export default function Marketing() {
               )}
             </div>
 
-            <div className="border border-white/50 p-4 bg-white/5 relative">
-              <h4 className="text-[10px] text-white/40 mb-2 uppercase tracking-widest font-mono border-b border-white/10 pb-1 inline-block">
-                MESSAGE_PREVIEW
-              </h4>
-              <p className="text-sm text-white font-mono leading-relaxed mt-2 whitespace-pre-wrap">
-                "
-                {selectedScriptContent
-                  ?.replace('{name}', selectedClient?.name.split(' ')[0] || '')
-                  .replace(
-                    '{days}',
-                    selectedClient?.days_since_created.toString() || '0',
-                  )}
-                "
+            <div className="border border-white/10 p-4 bg-white/[0.03]">
+              <p className="font-mono text-[9px] text-white/40 tracking-widest uppercase mb-2">
+                Preview
               </p>
-              <div className="absolute top-2 right-2">
-                <MessageCircle className="w-4 h-4 text-white opacity-20" />
-              </div>
+              <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
+                {selectedScriptContent
+                  ?.replace('{name}', selectedClient?.name.split(' ')[0] ?? '')
+                  .replace('{days}', selectedClient?.days_since_created.toString() ?? '0')}
+              </p>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="gap-2">
             <Button
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
-              className="rounded-none border-white/20 text-white bg-black hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest"
+              className="rounded-none border-white/10"
             >
-              CANCEL
+              Cancelar
             </Button>
-            <Button
-              onClick={handleSend}
-              className="bg-white hover:bg-white/80 text-black rounded-none font-mono text-xs uppercase tracking-widest"
-            >
-              <Send className="w-3 h-3 mr-2" />
-              TRANSMIT
+            <Button variant="primary" onClick={handleSend}>
+              <Send className="w-3.5 h-3.5 mr-2" />
+              Enviar WhatsApp
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  )
+}
+
+function StatTile({
+  value,
+  label,
+  hint,
+}: {
+  value: number
+  label: string
+  hint: string
+}) {
+  return (
+    <div className="bg-black p-6 space-y-4">
+      <p className="font-mono text-[10px] text-white/40 tracking-widest uppercase">
+        {label}
+      </p>
+      <p className="font-serif text-4xl text-white leading-none">{value}</p>
+      <p className="font-mono text-[9px] text-white/30 tracking-wider uppercase">
+        {hint}
+      </p>
+    </div>
+  )
+}
+
+function ClientRow({
+  client,
+  onContact,
+}: {
+  client: InactiveClient
+  onContact: (c: InactiveClient) => void
+}) {
+  return (
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 hover:bg-white/[0.02] transition-colors">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
+        <div className="h-10 w-10 border border-white/20 flex items-center justify-center text-white font-serif text-lg bg-black flex-shrink-0">
+          {client.name.substring(0, 2).toUpperCase()}
+        </div>
+        <div className="min-w-0">
+          <p className="text-white text-sm truncate">{client.name}</p>
+          <div className="flex items-center gap-3 text-white/40 text-xs mt-1 font-mono uppercase tracking-wider">
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {client.days_since_created} dias inativo
+            </span>
+            {!client.phone && (
+              <span className="text-red-400/60">Sem telefone</span>
+            )}
+          </div>
+        </div>
+      </div>
+      <Button
+        onClick={() => onContact(client)}
+        disabled={!client.phone}
+        className="rounded-none"
+        variant="primary"
+        size="sm"
+      >
+        <MessageCircle className="w-3.5 h-3.5 mr-2" />
+        Enviar
+      </Button>
     </div>
   )
 }

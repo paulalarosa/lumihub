@@ -34,7 +34,7 @@ export const EventService = {
       const { data: projectsData } = await supabase
         .from('projects')
         .select('*, client:wedding_clients(full_name)')
-        .eq('user_id', userId)
+        .eq('user_id', organizationId)
         .gte('event_date', today.toISOString().split('T')[0])
         .order('event_date', { ascending: true })
         .limit(5)

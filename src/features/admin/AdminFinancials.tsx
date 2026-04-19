@@ -14,7 +14,7 @@ import {
   AssistantCommission,
 } from './components/CommissionTable'
 import { useToast } from '@/hooks/use-toast'
-import type { Database } from '@/types/supabase'
+import type { Database } from '@/integrations/supabase/types'
 
 type EventWithAssistants = Database['public']['Tables']['events']['Row'] & {
   wedding_clients: { name: string | null } | null
@@ -41,7 +41,7 @@ export default function AdminFinancials({
   loading,
 }: AdminFinancialsProps) {
   const { toast } = useToast()
-  const [events, setEvents] = useState<Record<string, unknown>[]>([])
+  const [events, setEvents] = useState<EventWithAssistants[]>([])
   const [commissions, setCommissions] = useState<AssistantCommission[]>([])
   const [dataLoading, setDataLoading] = useState(true)
 

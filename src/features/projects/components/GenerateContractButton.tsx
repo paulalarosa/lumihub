@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
 import { useState } from 'react'
 import { Logger } from '@/services/logger'
+import { useOrganization } from '@/hooks/useOrganization'
 
 interface GenerateContractButtonProps {
   projectId: string
@@ -16,6 +17,7 @@ export const GenerateContractButton = ({
   projectId,
 }: GenerateContractButtonProps) => {
   const [isGenerating, setIsGenerating] = useState(false)
+  const { organizationId } = useOrganization()
 
   const handleGenerate = async () => {
     setIsGenerating(true)
@@ -42,7 +44,7 @@ export const GenerateContractButton = ({
       const { data: makeupArtist } = await supabase
         .from('makeup_artists')
         .select('*')
-        .eq('user_id', user?.id)
+        .eq('user_id', organizationId ?? user?.id)
         .single()
 
       const contractData = {

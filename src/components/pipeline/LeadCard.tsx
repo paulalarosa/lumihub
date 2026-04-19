@@ -8,6 +8,7 @@ import { Phone, Mail, Calendar, DollarSign, TrendingUp } from 'lucide-react'
 import { LeadDetailsDialog } from './LeadDetailsDialog'
 
 import { PipelineLead } from '@/features/pipeline/pages/SalesPipeline'
+import { getLeadTemperature } from '@/features/pipeline/lib/leadTemperature'
 
 interface LeadCardProps {
   lead: PipelineLead
@@ -31,11 +32,7 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
     opacity: isDragging ? 0.5 : 1,
   }
 
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-500'
-    if (score >= 60) return 'text-yellow-500'
-    return 'text-red-500'
-  }
+  const temp = getLeadTemperature(lead.lead_score)
 
   return (
     <>
@@ -69,15 +66,15 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
             </div>
           </div>
 
-          {}
-          <div className="flex items-center gap-1 bg-neutral-900 px-1.5 py-0.5 rounded border border-neutral-800">
-            <TrendingUp
-              className={`w-3 h-3 ${getScoreColor(lead.lead_score)}`}
-            />
-            <span
-              className={`text-xs font-semibold ${getScoreColor(lead.lead_score)}`}
-            >
-              {lead.lead_score}
+          <div className="flex flex-col items-end gap-1">
+            <div className={`flex items-center gap-1 bg-neutral-900 px-1.5 py-0.5 border ${temp.borderClass}`}>
+              <TrendingUp className={`w-3 h-3 ${temp.colorClass}`} />
+              <span className={`text-xs font-semibold ${temp.colorClass}`}>
+                {lead.lead_score}
+              </span>
+            </div>
+            <span className={`font-mono text-[9px] uppercase tracking-widest ${temp.colorClass}`}>
+              {temp.icon} {temp.label}
             </span>
           </div>
         </div>

@@ -67,7 +67,12 @@ export const RevenueChart = ({
   }
 
   return (
-    <div className={className} style={{ width: '100%', height: '100%' }}>
+    <div
+      className={className}
+      style={{ width: '100%', height: '100%' }}
+      role="img"
+      aria-label="Gráfico de barras: projeção de receita mensal comparando valor garantido versus potencial de leads."
+    >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

@@ -24,6 +24,7 @@ import { GoogleAnalytics } from './components/analytics/GoogleAnalytics'
 import { PageLoader } from '@/components/ui/PageLoader'
 
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { PageErrorFallback } from '@/components/ui/PageErrorFallback'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 const ModernAIChat = lazy(() =>
@@ -126,6 +127,11 @@ const GoogleCalendarCallback = lazy(
 const CheckoutReturn = lazy(
   () => import('@/features/billing/pages/CheckoutReturn'),
 )
+const BillingPage = lazy(
+  () => import('@/features/billing/pages/BillingPage'),
+)
+const HelpPage = lazy(() => import('@/pages/Help'))
+const HelpArticlePage = lazy(() => import('@/pages/HelpArticle'))
 const SignContract = lazy(
   () => import('@/features/contracts/pages/SignContract'),
 )
@@ -166,9 +172,15 @@ function LazyPage({
   component: React.ComponentType
 }) {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Component />
-    </Suspense>
+    <ErrorBoundary
+      fallback={(error, reset) => (
+        <PageErrorFallback error={error} onRetry={reset} />
+      )}
+    >
+      <Suspense fallback={<PageLoader />}>
+        <Component />
+      </Suspense>
+    </ErrorBoundary>
   )
 }
 
@@ -235,6 +247,14 @@ const App = () => {
                           <Route
                             path="/contato"
                             element={<LazyPage component={Contact} />}
+                          />
+                          <Route
+                            path="/ajuda"
+                            element={<LazyPage component={HelpPage} />}
+                          />
+                          <Route
+                            path="/ajuda/:slug"
+                            element={<LazyPage component={HelpArticlePage} />}
                           />
                           <Route
                             path="/privacidade"
@@ -379,6 +399,10 @@ const App = () => {
                             <Route
                               path="/configuracoes"
                               element={<LazyPage component={Settings} />}
+                            />
+                            <Route
+                              path="/billing"
+                              element={<LazyPage component={BillingPage} />}
                             />
                             <Route
                               path="/assistentes"

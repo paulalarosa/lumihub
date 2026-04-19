@@ -52,24 +52,24 @@ export const HeroSection = () => {
           <img
             src="/assets/hero-image-B5FCqZ87.png"
             alt=""
-            className="w-full h-full object-cover grayscale contrast-125 scale-110 opacity-55"
-            fetchPriority="high"
+            className="w-full h-full object-cover grayscale opacity-50"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-transparent" />
+          <div className="absolute inset-0 bg-black/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/50 to-transparent" />
           <div
-            className="absolute inset-0 bg-gradient-to-l from-black/60 via-transparent to-transparent"
-            style={{ width: '30%', left: 'auto', right: 0 }}
+            className="absolute inset-0 bg-gradient-to-l from-black/70 via-transparent to-transparent"
+            style={{ width: '35%', left: 'auto', right: 0 }}
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-r from-black from-20% via-black/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black from-20% via-black/60 to-transparent" />
       </div>
 
-      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black via-black/70 to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/60 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black via-black/60 to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/50 to-transparent z-10 pointer-events-none" />
 
       <svg
         className="absolute inset-0 w-full h-full pointer-events-none z-10"
-        style={{ opacity: 0.12, mixBlendMode: 'overlay' }}
+        style={{ opacity: 0.18, mixBlendMode: 'soft-light' }}
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
       >

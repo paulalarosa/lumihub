@@ -1,17 +1,20 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { Database } from '@/integrations/supabase/types'
 import { ClientService } from '../api/clientService'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { analyticsService } from '@/services/analytics.service'
 
 export function useClientMutations() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   const createMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (clientData: any) => {
+    mutationFn: async (
+      clientData: Database['public']['Tables']['wedding_clients']['Insert'],
+    ) => {
       const newClient = await ClientService.create(clientData)
 
       if (clientData.is_bride && newClient && 'id' in newClient) {
@@ -34,9 +37,14 @@ export function useClientMutations() {
 
       return newClient
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.CLIENTS] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
+      analyticsService.trackEvent({
+        action: 'client_created',
+        category: 'feature_usage',
+        label: variables.is_bride ? 'bride' : 'regular',
+      })
       toast({ title: 'Cliente adicionado!' })
     },
     onError: (error) => {
@@ -51,8 +59,13 @@ export function useClientMutations() {
   })
 
   const updateMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string
+      data: Database['public']['Tables']['wedding_clients']['Update']
+    }) => {
       if (data.is_bride) {
         data.portal_link = `https://khaoskontrol.com.br/portal/${id}`
       }

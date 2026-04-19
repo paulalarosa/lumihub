@@ -18,8 +18,8 @@ export default function Plans() {
       id: 'essencial',
       name: 'Essencial',
       tagline: 'Para quem está começando a profissionalizar',
-      monthlyPrice: 39.9,
-      annualPrice: 31.92,
+      monthlyPrice: 49.9,
+      annualPrice: 39.92,
       valueAnchor: 'Menos que um almoço por semana',
       features: [
         { text: 'Até 10 clientes ativos', highlight: false },
@@ -34,8 +34,8 @@ export default function Plans() {
       id: 'profissional',
       name: 'Profissional',
       tagline: 'Para quem já vive de maquiagem e quer escalar',
-      monthlyPrice: 89.9,
-      annualPrice: 71.92,
+      monthlyPrice: 99.9,
+      annualPrice: 79.92,
       valueAnchor: 'Paga-se com 1 cliente extra por mês',
       highlighted: true,
       features: [
@@ -53,8 +53,8 @@ export default function Plans() {
       id: 'studio',
       name: 'Studio',
       tagline: 'Para equipes e quem tem assistentes',
-      monthlyPrice: 149.9,
-      annualPrice: 119.92,
+      monthlyPrice: 199.9,
+      annualPrice: 159.92,
       valueAnchor: 'O custo de 1 hora de trabalho por mês',
       features: [
         { text: 'Tudo do Profissional +', highlight: false },
@@ -82,7 +82,7 @@ export default function Plans() {
         keywords="preço sistema maquiadora, plano CRM beauty, quanto custa sistema gestão maquiagem, software maquiadora preço"
         url="https://khaoskontrol.com.br/planos"
         type="product"
-        productPrice={31.92}
+        productPrice={39.92}
         productCurrency="BRL"
         productAvailability="InStock"
         breadcrumbs={[

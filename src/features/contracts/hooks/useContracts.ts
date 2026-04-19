@@ -59,7 +59,9 @@ export const useContracts = () => {
       setNewTitle('')
       setNewClient('')
       setNewContent('')
-    } catch (_error) {  }
+    } catch (error) {
+      logger.error(error, 'useContracts.handleCreate')
+    }
   }
 
   const handleSignatureSave = async (dataUrl: string) => {

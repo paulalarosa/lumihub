@@ -1,5 +1,22 @@
+import type { MLCEngine, ChatCompletionMessageParam, ChatCompletionChunk } from '@mlc-ai/web-llm'
 
-import type { MLCEngine } from '@mlc-ai/web-llm'
+interface LLMMessage {
+  role: string
+  content: string | null
+}
+
+interface LLMOptions {
+  prompt: LLMMessage[]
+  settings?: Record<string, unknown>
+}
+
+interface LLMResponse {
+  text: string | null
+  usage?: unknown
+  rawCall: { rawPrompt: LLMMessage[]; rawSettings?: Record<string, unknown> }
+  finishReason: string
+}
+
 export class WebLLMProvider {
   readonly specificationVersion = 'v1'
   readonly provider = 'web-llm'
@@ -16,13 +33,13 @@ export class WebLLMProvider {
     this.onProgress = onProgress
   }
 
-  async doGenerate(options: any): Promise<any> {
+  async doGenerate(options: LLMOptions): Promise<LLMResponse> {
     const engine = await this.getEngine()
 
-    const messages = options.prompt.map((p: any) => ({
+    const messages = options.prompt.map((p: LLMMessage) => ({
       role: p.role,
       content: p.content,
-    }))
+    })) as ChatCompletionMessageParam[]
 
     const result = await engine.chat.completions.create({
       messages,
@@ -38,23 +55,26 @@ export class WebLLMProvider {
     }
   }
 
-  async doStream(options: any): Promise<any> {
+  async doStream(options: LLMOptions): Promise<{
+    stream: ReadableStream<unknown>
+    rawCall: { rawPrompt: LLMMessage[]; rawSettings?: Record<string, unknown> }
+  }> {
     const engine = await this.getEngine()
 
-    const messages = options.prompt.map((p: any) => ({
+    const messages = options.prompt.map((p: LLMMessage) => ({
       role: p.role,
       content: p.content,
-    }))
+    })) as ChatCompletionMessageParam[]
 
-    const asyncIterable = (await engine.chat.completions.create({
+    const asyncIterable = await engine.chat.completions.create({
       messages,
       stream: true,
       ...options.settings,
-    })) as any
+    })
 
-    const stream = new ReadableStream<any>({
+    const stream = new ReadableStream<unknown>({
       async start(controller) {
-        for await (const chunk of asyncIterable) {
+        for await (const chunk of asyncIterable as AsyncIterable<ChatCompletionChunk>) {
           const content = chunk.choices[0]?.delta?.content
           if (content) {
             controller.enqueue({ type: 'text-delta', textDelta: content })

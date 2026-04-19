@@ -58,7 +58,11 @@ export function ClientGrowthChart({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <div
+          role="img"
+          aria-label={`Gráfico de linha: evolução de clientes ao longo dos últimos 6 meses. ${data.length} pontos de dados.`}
+        >
+          <ResponsiveContainer width="100%" height={250}>
           <LineChart
             data={data}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -106,6 +110,7 @@ export function ClientGrowthChart({
             />
           </LineChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

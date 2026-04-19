@@ -17,6 +17,7 @@ export type EventCategory =
   | 'auth'
   | 'booking'
   | 'subscription'
+  | 'feature_usage'
 
 export interface AnalyticsEvent {
   category: EventCategory

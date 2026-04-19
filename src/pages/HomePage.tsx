@@ -26,7 +26,7 @@ export default function HomePage() {
           {
             question: 'Quanto custa o Khaos Kontrol?',
             answer:
-              'Os planos começam em R$31,92/mês no plano anual. Todos os planos incluem 14 dias de teste grátis sem cartão de crédito.',
+              'Os planos começam em R$39,92/mês no plano anual. Todos os planos incluem 14 dias de teste grátis sem cartão de crédito.',
           },
           {
             question: 'Preciso de cartão de crédito para testar?',

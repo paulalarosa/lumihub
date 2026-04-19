@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   DndContext,
@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Plus, Search, Filter, TrendingUp } from 'lucide-react'
 import { PipelineColumn } from '@/components/pipeline/PipelineColumn'
 import { CreateLeadDialog } from '@/components/pipeline/CreateLeadDialog'
+import { getLeadTemperature } from '@/features/pipeline/lib/leadTemperature'
 import { toast } from 'sonner'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 
@@ -148,6 +149,15 @@ export const SalesPipeline = () => {
       {},
     ) || {}
 
+  const temperatureStats = useMemo(() => {
+    const buckets = { hot: 0, warm: 0, cold: 0 }
+    ;(leads ?? []).forEach((l) => {
+      const t = getLeadTemperature(l.lead_score).temperature
+      buckets[t] += 1
+    })
+    return buckets
+  }, [leads])
+
   return (
     <div className="container mx-auto p-4 md:p-8 h-[calc(100vh-4rem)] flex flex-col">
       {}
@@ -199,6 +209,30 @@ export const SalesPipeline = () => {
       </div>
 
       {}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <TempTile
+          icon="🔥"
+          label="Quentes"
+          hint="Score ≥ 70"
+          count={temperatureStats.hot}
+          border="border-red-500/30"
+        />
+        <TempTile
+          icon="⚡"
+          label="Mornos"
+          hint="Score 40–69"
+          count={temperatureStats.warm}
+          border="border-yellow-500/30"
+        />
+        <TempTile
+          icon="❄️"
+          label="Frios"
+          hint="Score < 40"
+          count={temperatureStats.cold}
+          border="border-blue-500/25"
+        />
+      </div>
+
       <div className="flex gap-2 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
@@ -244,6 +278,35 @@ export const SalesPipeline = () => {
         isOpen={isCreating}
         onClose={() => setIsCreating(false)}
       />
+    </div>
+  )
+}
+
+function TempTile({
+  icon,
+  label,
+  hint,
+  count,
+  border,
+}: {
+  icon: string
+  label: string
+  hint: string
+  count: number
+  border: string
+}) {
+  return (
+    <div className={`border ${border} bg-white/[0.02] p-4 flex items-center gap-4`}>
+      <span className="text-2xl leading-none">{icon}</span>
+      <div className="flex-1">
+        <p className="font-mono text-[10px] text-white/40 tracking-widest uppercase">
+          {label}
+        </p>
+        <p className="font-serif text-2xl text-white leading-tight">{count}</p>
+      </div>
+      <span className="font-mono text-[9px] text-white/30 tracking-wider uppercase hidden sm:inline">
+        {hint}
+      </span>
     </div>
   )
 }

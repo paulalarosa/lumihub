@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { logger } from '@/services/logger'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { useOrganization } from '@/hooks/useOrganization'
@@ -86,7 +87,9 @@ export function useClientActions({
       setIsDialogOpen(false)
       setEditingClient(null)
       fetchClients()
-    } catch (_error) {  }
+    } catch (error) {
+      logger.error(error, 'useClientActions.handleFormSubmit')
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -95,7 +98,9 @@ export function useClientActions({
     try {
       await deleteClient(id)
       fetchClients()
-    } catch (_error) {  }
+    } catch (error) {
+      logger.error(error, 'useClientActions.handleDelete')
+    }
   }
 
   const copyPortalLink = async (clientId: string) => {
@@ -151,7 +156,8 @@ export function useClientActions({
       } else {
         sonnerToast.error(result.error || 'Erro ao exportar')
       }
-    } catch (_error) {
+    } catch (error) {
+      logger.error(error, 'useClientActions.handleExportCSV')
       sonnerToast.error('Erro inesperado na exportação')
     } finally {
       setIsExporting(false)
@@ -162,7 +168,8 @@ export function useClientActions({
     if (!dateString) return 'Nunca'
     try {
       return format(new Date(dateString), "d 'de' MMM, yyyy", { locale: ptBR })
-    } catch (_e) {
+    } catch (e) {
+      logger.error(e, 'useClientActions.formatDate')
       return 'Data inválida'
     }
   }

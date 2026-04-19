@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { format } from 'date-fns/format'
+import { logger } from '@/services/logger'
+import { analyticsService } from '@/services/analytics.service'
 
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
@@ -81,8 +83,8 @@ export function useProjectContract({
                     ? JSON.parse(contractData.signature_data)
                     : contractData.signature_data
                 if (parsed?.pdf_url) setFinalPdfUrl(parsed.pdf_url)
-              } catch (_) {
-
+              } catch (e) {
+                logger.error(e, 'useProjectContract.parseSignatureData')
               }
             }
           }
@@ -258,6 +260,12 @@ export function useProjectContract({
         }
       }
 
+      analyticsService.trackEvent({
+        action: 'contract_signed',
+        category: 'feature_usage',
+        value: project?.total_value ?? undefined,
+      })
+
       setFinalPdfUrl(urlData.publicUrl)
       setSignedSuccess(true)
       if (project) setProject({ ...project, status: 'signed' })
@@ -307,8 +315,8 @@ export function useProjectContract({
         width: 190,
         windowWidth: 800,
       })
-    } catch (_) {
-
+    } catch (e) {
+      logger.error(e, 'useProjectContract.handleDownloadPDF')
     }
   }
 

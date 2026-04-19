@@ -42,7 +42,7 @@ export function useInviteLanding() {
 
   const checkInvite = async () => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('assistants')
         .select('id, email, full_name, status, is_registered, invite_token')
         .eq('invite_token', token as string)
@@ -159,7 +159,7 @@ export function useInviteLanding() {
             phone: cleanPhone,
             full_name: cleanFullName,
             invite_token: null,
-          } as any)
+          })
           .eq('id', inviteData.id)
 
         if (updateError) {

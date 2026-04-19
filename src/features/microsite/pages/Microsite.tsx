@@ -14,6 +14,7 @@ import {
   Clock,
 } from 'lucide-react'
 import { MicrositeService } from '../api/micrositeService'
+import { useMicrositeInstagram } from '../hooks/useMicrositeInstagram'
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   style: 'currency',
@@ -34,6 +35,11 @@ export default function Microsite() {
   })
 
   const displayBio = microsite?.about_text || microsite?.bio
+
+  const { data: instagramPosts = [] } = useMicrositeInstagram(
+    microsite?.user_id ?? undefined,
+    12,
+  )
 
   const trackView = useCallback(async (micrositeId: string) => {
     await MicrositeService.incrementViews(micrositeId)
@@ -326,6 +332,52 @@ export default function Microsite() {
                       </Badge>
                     )}
                   </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {instagramPosts.length > 0 && (
+          <section className="py-20 px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-center gap-3 mb-12">
+                <Instagram
+                  className="w-6 h-6"
+                  style={{ color: microsite.primary_color || '#fff' }}
+                />
+                <h2
+                  className="text-4xl font-bold text-center"
+                  style={{ color: microsite.primary_color || '#fff' }}
+                >
+                  Instagram
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {instagramPosts.map((post) => (
+                  <a
+                    key={post.id}
+                    href={post.permalink ?? '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative aspect-square overflow-hidden bg-black/30"
+                  >
+                    {post.media_url && (
+                      <img
+                        src={post.media_url}
+                        alt={post.caption?.slice(0, 60) ?? 'Post do Instagram'}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                    )}
+                    {post.caption && (
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-3">
+                        <p className="text-white text-xs leading-snug line-clamp-3">
+                          {post.caption}
+                        </p>
+                      </div>
+                    )}
+                  </a>
                 ))}
               </div>
             </div>

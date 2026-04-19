@@ -19,6 +19,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { logger } from '@/services/logger'
 import { Assistant } from '../hooks/useAssistants'
 
 type AssistantFormData = z.infer<typeof assistantSchema>
@@ -75,8 +76,8 @@ export function AssistantDialog({
         phone: data.phone || null,
       })
       onOpenChange(false)
-    } catch (_error) {
-
+    } catch (error) {
+      logger.error(error, 'AssistantDialog.onSubmit')
     }
   }
 

@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import webpush from 'https://esm.sh/web-push@3.6.7?target=deno'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -7,9 +8,13 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
-const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')!
-const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!
-const VAPID_SUBJECT = 'mailto:contato@khaoskontrol.com.br'
+const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')
+const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')
+const VAPID_SUBJECT = Deno.env.get('VAPID_SUBJECT') ?? 'mailto:contato@khaoskontrol.com.br'
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY)
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -17,6 +22,19 @@ serve(async (req) => {
   }
 
   try {
+    if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+      return new Response(
+        JSON.stringify({
+          error: 'VAPID keys not configured',
+          sent: 0,
+        }),
+        {
+          status: 503,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
@@ -58,35 +76,30 @@ serve(async (req) => {
     let sent = 0
     const failed: string[] = []
 
-    for (const sub of subscriptions) {
-      try {
-        const pushSubscription = {
-          endpoint: sub.endpoint,
-          keys: { p256dh: sub.p256dh, auth: sub.auth },
-        }
-
-        const response = await fetch(sub.endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            TTL: '86400',
-          },
-          body: payload,
-        })
-
-        if (response.ok || response.status === 201) {
+    await Promise.all(
+      subscriptions.map(async (sub) => {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh, auth: sub.auth },
+            },
+            payload,
+            { TTL: 86400 },
+          )
           sent++
-        } else if (response.status === 410 || response.status === 404) {
-          await supabase
-            .from('push_subscriptions')
-            .update({ is_active: false })
-            .eq('id', sub.id)
+        } catch (err: unknown) {
+          const status = (err as { statusCode?: number })?.statusCode
+          if (status === 410 || status === 404) {
+            await supabase
+              .from('push_subscriptions')
+              .update({ is_active: false })
+              .eq('id', sub.id)
+          }
           failed.push(sub.id)
         }
-      } catch {
-        failed.push(sub.id)
-      }
-    }
+      }),
+    )
 
     return new Response(
       JSON.stringify({

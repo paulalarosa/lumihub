@@ -10,6 +10,7 @@ import {
   Scissors,
   Filter,
   Building2,
+  Receipt,
 } from 'lucide-react'
 
 import {
@@ -31,11 +32,13 @@ import { Button } from '@/components/ui/button'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useIsAdmin } from '@/hooks/useIsAdmin'
 import { useIsStudioMember } from '@/features/calendar/hooks/useStudioCalendar'
+import { useOrganization } from '@/hooks/useOrganization'
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
   const isAdmin = useIsAdmin()
   const isStudio = useIsStudioMember()
+  const { isOwner } = useOrganization()
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
 
@@ -157,6 +160,23 @@ export function AppSidebar() {
                       <ShieldCheck className="h-4 w-4" />
                       <span className="font-mono text-xs uppercase tracking-wider">
                         ADMIN
+                      </span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+
+              {isOwner && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive('/billing')}
+                    className="data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none"
+                  >
+                    <Link to="/billing">
+                      <Receipt className="h-4 w-4" />
+                      <span className="font-mono text-xs uppercase tracking-wider">
+                        ASSINATURA
                       </span>
                     </Link>
                   </SidebarMenuButton>

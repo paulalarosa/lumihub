@@ -57,8 +57,8 @@ export function useClientDetails(id: string | undefined) {
 
       setClient(clientData as Client)
 
-      const { data: recordsData } = await (ClientService as any).getTreatmentRecords(id)
-      setRecords((recordsData as any) || [])
+      const { data: recordsData } = await ClientService.getTreatmentRecords(id)
+      setRecords(recordsData || [])
 
       const { data: eventsData, error: eventsError } = await supabase
         .from('events')

@@ -1,19 +1,24 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { Database } from '@/integrations/supabase/types'
 import { ProjectService } from '../api/projectService'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { sanitizeFormData } from '@/lib/security'
+import { analyticsService } from '@/services/analytics.service'
 
 export function useProjectMutations() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   const createProjectMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (projectData: any) => {
-      const cleanData = sanitizeFormData(projectData)
+    mutationFn: async (
+      projectData: Database['public']['Tables']['projects']['Insert'],
+    ) => {
+      const cleanData = sanitizeFormData(
+        projectData as Record<string, unknown>,
+      ) as Database['public']['Tables']['projects']['Insert']
       const { data, error } = await supabase
         .from('projects')
         .insert(cleanData)
@@ -22,9 +27,14 @@ export function useProjectMutations() {
       if (error) throw error
       return data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DASHBOARD_STATS] })
+      analyticsService.trackEvent({
+        action: 'project_created',
+        category: 'feature_usage',
+        value: data?.total_value ?? undefined,
+      })
       toast({ title: 'Projeto criado!' })
     },
     onError: (error) => {
@@ -34,9 +44,16 @@ export function useProjectMutations() {
   })
 
   const updateProjectMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const cleanData = sanitizeFormData(data)
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string
+      data: Database['public']['Tables']['projects']['Update']
+    }) => {
+      const cleanData = sanitizeFormData(
+        data as Record<string, unknown>,
+      ) as Database['public']['Tables']['projects']['Update']
       const { data: result, error } = await supabase
         .from('projects')
         .update(cleanData)
@@ -59,8 +76,9 @@ export function useProjectMutations() {
   })
 
   const createTaskMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (taskData: any) => {
+    mutationFn: async (
+      taskData: Database['public']['Tables']['tasks']['Insert'],
+    ) => {
       const { data, error } = await ProjectService.createTask(taskData)
       if (error) throw error
       return data
@@ -86,8 +104,7 @@ export function useProjectMutations() {
       project_id,
     }: {
       id: string
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      data: any
+      data: Database['public']['Tables']['tasks']['Update']
       project_id: string
     }) => {
       const success = await ProjectService.updateTask(id, data)
@@ -121,8 +138,9 @@ export function useProjectMutations() {
   })
 
   const addServiceMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (serviceData: any) => {
+    mutationFn: async (
+      serviceData: Database['public']['Tables']['project_services']['Insert'],
+    ) => {
       const { data: _data, error } =
         await ProjectService.addProjectService(serviceData)
       if (error) throw error
@@ -163,9 +181,12 @@ export function useProjectMutations() {
   })
 
   const registerPaymentMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (paymentData: any) => {
-      const cleanData = sanitizeFormData(paymentData)
+    mutationFn: async (
+      paymentData: Database['public']['Tables']['transactions']['Insert'],
+    ) => {
+      const cleanData = sanitizeFormData(
+        paymentData as Record<string, unknown>,
+      ) as Database['public']['Tables']['transactions']['Insert']
       const { error } = await supabase.from('transactions').insert([cleanData])
       if (error) throw error
       return paymentData

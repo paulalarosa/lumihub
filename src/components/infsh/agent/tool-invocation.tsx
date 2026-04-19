@@ -204,8 +204,8 @@ export const ToolInvocation = memo(function ToolInvocation({
         if (data && typeof data.status === 'string') {
           return data as ToolFinish
         }
-      } catch (_e) {
-
+      } catch (e) {
+        logger.error('[ToolInvocation] Failed to parse finish data:', e)
       }
     }
 

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { Database } from '@/integrations/supabase/types'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { sanitizeFormData } from '@/lib/security'
@@ -9,9 +10,12 @@ export function useContractMutations() {
   const { toast } = useToast()
 
   const createMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (contractData: any) => {
-      const cleanData = sanitizeFormData(contractData)
+    mutationFn: async (
+      contractData: Database['public']['Tables']['contracts']['Insert'],
+    ) => {
+      const cleanData = sanitizeFormData(
+        contractData as Record<string, unknown>,
+      ) as Database['public']['Tables']['contracts']['Insert']
       const { data, error } = await supabase
         .from('contracts')
         .insert(cleanData)
@@ -40,9 +44,16 @@ export function useContractMutations() {
   })
 
   const updateMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const cleanData = sanitizeFormData(data)
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string
+      data: Database['public']['Tables']['contracts']['Update']
+    }) => {
+      const cleanData = sanitizeFormData(
+        data as Record<string, unknown>,
+      ) as Database['public']['Tables']['contracts']['Update']
       const { data: result, error } = await supabase
         .from('contracts')
         .update(cleanData)

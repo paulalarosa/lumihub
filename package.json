@@ -1,7 +1,7 @@
 {
   "name": "khaos-kontrol-system",
   "private": true,
-  "version": "5.7.5",
+  "version": "5.7.6",
   "type": "module",
   "engines": {
     "node": ">=18.0.0",
@@ -10,7 +10,8 @@
   "scripts": {
     "preinstall": "npx only-allow npm",
     "dev": "vite",
-    "build": "tsc && vite build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\"",
+    "sitemap": "node scripts/generate-sitemap.mjs",
+    "build": "npm run sitemap && tsc && vite build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\"",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Loader2, CheckCircle2, XCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { logger } from '@/services/logger'
 
 const AuthCallbackHandler = () => {
   const [searchParams] = useSearchParams()
@@ -33,8 +34,8 @@ const AuthCallbackHandler = () => {
           .from('profiles')
           .update({ onboarding_completed: true })
           .eq('id', userId)
-      } catch {
-
+      } catch (error) {
+        logger.error(error, 'AuthCallbackHandler.handleSessionReady')
       }
       setStatus('success')
       setTimeout(() => navigate('/dashboard'), 1500)

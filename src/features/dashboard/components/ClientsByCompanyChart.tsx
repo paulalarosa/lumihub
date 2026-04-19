@@ -60,7 +60,11 @@ export function ClientsByCompanyChart({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <div
+          role="img"
+          aria-label={`Gráfico de barras: top ${data.length} empresas por quantidade de clientes.`}
+        >
+          <ResponsiveContainer width="100%" height={250}>
           <BarChart
             data={data}
             layout="vertical"
@@ -101,6 +105,7 @@ export function ClientsByCompanyChart({
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

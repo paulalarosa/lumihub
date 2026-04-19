@@ -1,5 +1,7 @@
 import { useState, useRef, memo, useCallback } from 'react'
 import { useClientsQuery } from '../hooks/useClientsQuery'
+import { Client } from '@/types/api.types'
+import { VirtualItem as VirtualRow } from '@tanstack/react-virtual'
 import { useDeleteClient } from '../hooks/useDeleteClient'
 import { useUIStore } from '@/stores/useUIStore'
 import {
@@ -25,13 +27,11 @@ const ClientRow = memo(
     virtualRow,
     onDelete,
   }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    client: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    virtualRow: any
+    client: Client
+    virtualRow: VirtualRow
     onDelete: (id: string, name: string) => void
   }) => {
-    const contractUrl = (client as { contract_url?: string }).contract_url
+    const contractUrl = client.contract_url
 
     return (
       <TableRow
@@ -132,7 +132,6 @@ export const ClientsTable = () => {
   const [page, setPage] = useState(1)
   const limit = 50
   const parentRef = useRef<HTMLDivElement>(null)
-
   const { clients: result, isLoading, error } = useClientsQuery()
   const { mutate: deleteClient, isPending: _isDeleting } = useDeleteClient()
   const { searchTerm } = useUIStore()

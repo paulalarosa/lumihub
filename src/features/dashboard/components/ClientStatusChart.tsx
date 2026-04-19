@@ -71,7 +71,11 @@ export function ClientStatusChart({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={250}>
+        <div
+          role="img"
+          aria-label={`Gráfico de pizza: status de clientes. Total de ${total} clientes distribuídos em ${data.length} categorias.`}
+        >
+          <ResponsiveContainer width="100%" height={250}>
           <PieChart>
             <Pie
               data={data}
@@ -117,6 +121,7 @@ export function ClientStatusChart({
             />
           </PieChart>
         </ResponsiveContainer>
+        </div>
       </CardContent>
     </Card>
   )

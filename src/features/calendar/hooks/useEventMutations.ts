@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { Database } from '@/integrations/supabase/types'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
@@ -10,9 +11,8 @@ export function useEventMutations() {
   const { toast } = useToast()
 
   const createMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async (eventData: any) => {
-      const cleanData = sanitizeFormData(eventData)
+    mutationFn: async (eventData: Database['public']['Tables']['events']['Insert'] & { start_time?: string; end_time?: string }) => {
+      const cleanData = sanitizeFormData(eventData as Record<string, unknown>) as typeof eventData
 
       const { data: event, error } = await supabase
         .from('events')
@@ -65,9 +65,8 @@ export function useEventMutations() {
   })
 
   const updateMutation = useMutation({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
-      const cleanData = sanitizeFormData(data)
+    mutationFn: async ({ id, data }: { id: string; data: Database['public']['Tables']['events']['Update'] & { start_time?: string; end_time?: string } }) => {
+      const cleanData = sanitizeFormData(data as Record<string, unknown>) as typeof data
       const { data: event, error } = await supabase
         .from('events')
         .update({

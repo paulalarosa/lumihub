@@ -1,4 +1,4 @@
-import { Database } from '@/types/supabase'
+import { Database } from '@/integrations/supabase/types'
 
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type Client = Database['public']['Tables']['wedding_clients']['Row']
@@ -98,6 +98,13 @@ export type ServiceUpdate = Database['public']['Tables']['services']['Update']
 
 export interface ProjectWithRelations extends Project {
   client?: Client & {
+    full_name?: string
+    wedding_date?: string
+    email?: string
+    phone?: string
+  }
+  clients?: Client & {
+    name?: string
     full_name?: string
     wedding_date?: string
     email?: string

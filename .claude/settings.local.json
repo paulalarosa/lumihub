@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(grep -r \"{\\\\s*$\" /c/Users/paula/Desktop/\"Lumi codigo\"/lumihub/src --include=\"*.ts\" --include=\"*.tsx\" -A 3)",
-      "Bash(grep -E \"^[^-]*tsx?-\\\\s*\\(//|}\\\\s*$\\)\")"
+      "Bash(grep -E \"^[^-]*tsx?-\\\\s*\\(//|}\\\\s*$\\)\")",
+      "Bash(npx supabase *)",
+      "Bash(npm run *)",
+      "Bash(node scripts/generate-sitemap.mjs)",
+      "Bash(SITEMAP_ENV_FILE=.env.development node scripts/generate-sitemap.mjs)",
+      "Bash(awk -F: '{print $1}')",
+      "Bash(npm install *)",
+      "Bash(awk -F= '{print $1}')"
     ]
   }
 }

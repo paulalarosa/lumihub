@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
+import { useAnalytics } from '@/hooks/useAnalytics'
 
 export default function CheckoutReturn() {
   const [status, setStatus] = useState<'loading' | 'complete' | 'open' | 'failed'>('loading')
@@ -12,6 +13,7 @@ export default function CheckoutReturn() {
   const sessionId = searchParams.get('session_id')
   const navigate = useNavigate()
   const hasFetched = useRef(false)
+  const { trackSubscription, trackConversion } = useAnalytics()
 
   useEffect(() => {
     if (!sessionId || hasFetched.current) return
@@ -30,6 +32,13 @@ export default function CheckoutReturn() {
         } else if (data.status === 'complete' || data.success) {
           setStatus('complete')
           setCustomerEmail(data.customer_email)
+          trackSubscription('subscribe', data.plan, data.amount)
+          trackConversion({
+            conversion_id: 'subscription_completed',
+            transaction_id: sessionId ?? undefined,
+            value: data.amount,
+            currency: 'BRL',
+          })
         } else {
           setStatus('failed')
         }
@@ -40,7 +49,7 @@ export default function CheckoutReturn() {
     }
 
     fetchSession()
-  }, [sessionId])
+  }, [sessionId, trackSubscription, trackConversion])
 
   if (status === 'loading') {
     return (
