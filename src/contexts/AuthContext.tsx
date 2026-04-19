@@ -103,8 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [],
   )
 
-  const isAdmin =
-    role?.toLowerCase() === 'studio' || role?.toLowerCase() === 'admin'
+  const isAdmin = role?.toLowerCase() === 'admin'
 
   useEffect(() => {
     let mounted = true

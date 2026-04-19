@@ -13,23 +13,36 @@ import {
   Menu,
   X,
   ShieldCheck,
+  FileText,
+  LineChart,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import NotificationBell from '@/features/admin/components/NotificationBell'
 
 import AdminOverview from '@/features/admin/AdminOverview'
+import AdminMetrics from '@/features/admin/AdminMetrics'
 import AdminUsuarias from '@/features/admin/AdminUsuarias'
 import AdminSubscriptions from '@/features/admin/AdminSubscriptions'
 import AdminMarketing from '@/features/admin/AdminMarketing'
 import AdminSistema from '@/features/admin/AdminSistema'
+import AdminContent from '@/features/admin/AdminContent'
 
-type AdminTab = 'overview' | 'usuarios' | 'financeiro' | 'marketing' | 'sistema'
+type AdminTab =
+  | 'overview'
+  | 'metricas'
+  | 'usuarios'
+  | 'financeiro'
+  | 'marketing'
+  | 'conteudo'
+  | 'sistema'
 
 const MENU_ITEMS: { id: AdminTab; label: string; icon: typeof BarChart3 }[] = [
   { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
+  { id: 'metricas', label: 'Métricas', icon: LineChart },
   { id: 'usuarios', label: 'Usuárias', icon: Users },
   { id: 'financeiro', label: 'Financeiro', icon: CreditCard },
   { id: 'marketing', label: 'Marketing', icon: Megaphone },
+  { id: 'conteudo', label: 'Conteúdo', icon: FileText },
   { id: 'sistema', label: 'Sistema', icon: Settings },
 ]
 
@@ -163,8 +176,10 @@ export default function AdminDashboard() {
         <div className="flex-1 overflow-auto bg-muted/20 p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'overview' && <AdminOverview />}
+            {activeTab === 'metricas' && <AdminMetrics />}
             {activeTab === 'usuarios' && <AdminUsuarias />}
             {activeTab === 'financeiro' && <AdminSubscriptions />}
+            {activeTab === 'conteudo' && <AdminContent />}
             {activeTab === 'marketing' && <AdminMarketing />}
             {activeTab === 'sistema' && <AdminSistema />}
           </div>

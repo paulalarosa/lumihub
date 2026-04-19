@@ -27,11 +27,6 @@ import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { PageErrorFallback } from '@/components/ui/PageErrorFallback'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
-const ModernAIChat = lazy(() =>
-  import('./components/ai/ModernAIChat').then((m) => ({
-    default: m.ModernAIChat,
-  })),
-)
 const CanvasPanel = lazy(() =>
   import('./components/ai/canvas/CanvasPanel').then((m) => ({
     default: m.CanvasPanel,
@@ -213,7 +208,6 @@ const App = () => {
         <QueryClientProvider client={queryClient}>
           <AnalyticsProvider>
             <Suspense fallback={null}>
-              <ModernAIChat />
               <CanvasPanel />
             </Suspense>
             <AIProvider>

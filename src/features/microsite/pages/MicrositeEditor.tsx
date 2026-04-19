@@ -323,17 +323,17 @@ export default function MicrositeEditor() {
                 label="Logo"
                 micrositeId={microsite?.id}
                 folder="logos"
-                onUpload={(_url) =>
-                  updateField('business_name', formData.business_name)
-                }
+                currentUrl={formData.logo_url}
+                onUpload={(url) => updateField('logo_url', url)}
+                onRemove={() => updateField('logo_url', '')}
               />
               <ImageUploader
                 label="Imagem de Capa"
                 micrositeId={microsite?.id}
                 folder="covers"
-                onUpload={(_url) =>
-                  updateField('business_name', formData.business_name)
-                }
+                currentUrl={formData.hero_image_url}
+                onUpload={(url) => updateField('hero_image_url', url)}
+                onRemove={() => updateField('hero_image_url', '')}
               />
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <ColorPicker

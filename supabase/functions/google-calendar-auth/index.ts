@@ -1,5 +1,4 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -13,6 +12,19 @@ const GOOGLE_CLIENT_SECRET = Deno.env.get('GOOGLE_CLIENT_SECRET')!
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+type BodyData = {
+  action?: string
+  redirect_uri?: string
+  code?: string
+  state?: string
+}
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -20,33 +32,29 @@ serve(async (req: Request) => {
 
   try {
     const url = new URL(req.url)
+    let body: BodyData = {}
 
-    let action = url.searchParams.get('action')
-    let bodyData: {
-      action?: string
-      redirect_uri?: string
-      code?: string
-      state?: string
-    } = {}
-
-    if (req.method === 'POST') {
+    const text = await req.text()
+    if (text && text.trim().length > 0) {
       try {
-        bodyData = (await req.json()) as typeof bodyData
+        body = JSON.parse(text) as BodyData
+      } catch (_) {
+        return json({ error: 'Invalid JSON body' }, 400)
+      }
+    }
 
-        if (!action && bodyData.action) {
-          action = bodyData.action
-        }
-      } catch (e) {}
+    const action = body.action ?? url.searchParams.get('action') ?? undefined
+
+    if (!action) {
+      return json(
+        { error: 'Missing action', received: { method: req.method, hasBody: text.length > 0 } },
+        400,
+      )
     }
 
     if (action === 'get-auth-url') {
       const authHeader = req.headers.get('Authorization')
-      if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      if (!authHeader) return json({ error: 'Unauthorized' }, 401)
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
       const token = authHeader.replace('Bearer ', '')
@@ -55,18 +63,14 @@ serve(async (req: Request) => {
         error: authError,
       } = await supabase.auth.getUser(token)
 
-      if (authError || !user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      if (authError || !user) return json({ error: 'Unauthorized' }, 401)
 
-      const redirect_uri = bodyData.redirect_uri
+      const redirect_uri = body.redirect_uri
+      if (!redirect_uri) return json({ error: 'Missing redirect_uri' }, 400)
 
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
       authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
-      authUrl.searchParams.set('redirect_uri', redirect_uri || '')
+      authUrl.searchParams.set('redirect_uri', redirect_uri)
       authUrl.searchParams.set('response_type', 'code')
       authUrl.searchParams.set(
         'scope',
@@ -76,22 +80,14 @@ serve(async (req: Request) => {
       authUrl.searchParams.set('prompt', 'consent')
       authUrl.searchParams.set('state', user.id)
 
-      return new Response(JSON.stringify({ url: authUrl.toString() }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return json({ url: authUrl.toString() })
     }
 
     if (action === 'callback') {
-      const { code, state: userId, redirect_uri } = bodyData
+      const { code, state: userId, redirect_uri } = body
 
       if (!code || !userId) {
-        return new Response(
-          JSON.stringify({ error: 'Missing code or state' }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          },
-        )
+        return json({ error: 'Missing code or state' }, 400)
       }
 
       const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
@@ -115,22 +111,15 @@ serve(async (req: Request) => {
       }
 
       if (tokenData.error) {
-        return new Response(
-          JSON.stringify({
-            error: tokenData.error_description || tokenData.error,
-          }),
-          {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          },
+        return json(
+          { error: tokenData.error_description || tokenData.error },
+          400,
         )
       }
 
       const calendarResponse = await fetch(
         'https://www.googleapis.com/calendar/v3/calendars/primary',
-        {
-          headers: { Authorization: `Bearer ${tokenData.access_token}` },
-        },
+        { headers: { Authorization: `Bearer ${tokenData.access_token}` } },
       )
 
       const calendarData = (await calendarResponse.json()) as { id?: string }
@@ -152,29 +141,14 @@ serve(async (req: Request) => {
         },
       )
 
-      if (rpcError) {
-        return new Response(
-          JSON.stringify({ error: 'Failed to save integration' }),
-          {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          },
-        )
-      }
+      if (rpcError) return json({ error: 'Failed to save integration' }, 500)
 
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return json({ success: true })
     }
 
     if (action === 'disconnect') {
       const authHeader = req.headers.get('Authorization')
-      if (!authHeader) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      if (!authHeader) return json({ error: 'Unauthorized' }, 401)
 
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
       const token = authHeader.replace('Bearer ', '')
@@ -183,12 +157,7 @@ serve(async (req: Request) => {
         error: authError,
       } = await supabase.auth.getUser(token)
 
-      if (authError || !user) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      if (authError || !user) return json({ error: 'Unauthorized' }, 401)
 
       const { data: integration } = await supabase
         .from('user_integrations')
@@ -200,9 +169,7 @@ serve(async (req: Request) => {
       if (integration?.access_token) {
         await fetch(
           `https://oauth2.googleapis.com/revoke?token=${integration.access_token}`,
-          {
-            method: 'POST',
-          },
+          { method: 'POST' },
         )
       }
 
@@ -212,33 +179,20 @@ serve(async (req: Request) => {
         .eq('user_id', user.id)
         .eq('provider', 'google')
 
-      if (deleteError) {
-        return new Response(JSON.stringify({ error: 'Failed to disconnect' }), {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        })
-      }
+      if (deleteError) return json({ error: 'Failed to disconnect' }, 500)
 
       await supabase
         .from('events')
         .update({ google_calendar_event_id: null })
         .eq('user_id', user.id)
 
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      return json({ success: true })
     }
 
-    return new Response(JSON.stringify({ error: 'Invalid action' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return json({ error: 'Invalid action', action }, 400)
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    return json({ error: errorMessage }, 500)
   }
 })

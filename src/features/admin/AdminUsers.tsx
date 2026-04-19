@@ -45,6 +45,9 @@ import {
 import { Input } from '@/components/ui/input'
 import { useAdminUsers } from './hooks/useAdminUsers'
 import { Skeleton } from '@/components/ui/skeleton'
+import { exportCsv } from '@/lib/csvExport'
+import { Download } from 'lucide-react'
+import { UserDetailsSheet } from './components/UserDetailsSheet'
 
 const PLAN_OPTIONS = [
   { value: 'free', label: 'Gratuito' },
@@ -69,6 +72,7 @@ export default function AdminUsers() {
   const [selectedPlan, setSelectedPlan] = useState('')
 
   const [planFilter, setPlanFilter] = useState<string>('all')
+  const [detailsUserId, setDetailsUserId] = useState<string | null>(null)
 
   const filteredUsers =
     users?.filter((u) => {
@@ -83,6 +87,25 @@ export default function AdminUsers() {
 
       return matchesSearch && matchesPlan
     }) || []
+
+  const handleExport = (list: typeof filteredUsers) => {
+    exportCsv(
+      `usuarias-${new Date().toISOString().split('T')[0]}`,
+      list,
+      [
+        { key: 'id', header: 'ID', value: (u) => u.id ?? '' },
+        { key: 'name', header: 'Nome', value: (u) => u.full_name ?? '' },
+        { key: 'email', header: 'Email', value: (u) => u.email ?? '' },
+        { key: 'plan', header: 'Plano', value: (u) => u.plan ?? 'free' },
+        { key: 'role', header: 'Role', value: (u) => u.role ?? '' },
+        {
+          key: 'created_at',
+          header: 'Criada em',
+          value: (u) => u.created_at ?? '',
+        },
+      ],
+    )
+  }
 
   const handleImpersonate = async (targetUserId: string) => {
     try {
@@ -304,6 +327,16 @@ export default function AdminUsers() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => handleExport(filteredUsers)}
+            disabled={filteredUsers.length === 0}
+            className="rounded-none border-zinc-800 bg-zinc-900/50 hover:bg-white hover:text-black font-mono text-[10px] tracking-widest transition-all"
+          >
+            <Download className="h-3 w-3 mr-2" />
+            EXPORT_CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => refetch()}
             className="rounded-none border-zinc-800 bg-zinc-900/50 hover:bg-white hover:text-black font-mono text-[10px] tracking-widest transition-all"
           >
@@ -343,7 +376,8 @@ export default function AdminUsers() {
                 {filteredUsers.map((u) => (
                   <tr
                     key={u.id}
-                    className={`border-b border-zinc-900 hover:bg-white/[0.02] transition-colors group ${
+                    onClick={() => setDetailsUserId(u.id)}
+                    className={`border-b border-zinc-900 hover:bg-white/[0.02] transition-colors group cursor-pointer ${
                       isBlocked(u) ? 'bg-red-900/5' : ''
                     }`}
                   >
@@ -451,7 +485,7 @@ export default function AdminUsers() {
                         ? new Date(u.created_at).toLocaleDateString('pt-BR')
                         : '-'}
                     </td>
-                    <td className="py-5 px-6 text-right">
+                    <td className="py-5 px-6 text-right" onClick={(e) => e.stopPropagation()}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -609,6 +643,11 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <UserDetailsSheet
+        userId={detailsUserId}
+        onClose={() => setDetailsUserId(null)}
+      />
     </div>
   )
 }

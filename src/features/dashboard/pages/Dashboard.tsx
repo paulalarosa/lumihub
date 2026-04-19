@@ -15,7 +15,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
-import { SetupChecklist } from '@/components/onboarding/SetupChecklist'
+import { OnboardingChecklist } from '@/features/onboarding/components/OnboardingChecklist'
 import { PageLoader } from '@/components/ui/PageLoader'
 
 const fadeUp = {
@@ -59,7 +59,7 @@ export default function Dashboard() {
           </h1>
         </motion.div>
 
-        <SetupChecklist />
+        <OnboardingChecklist />
 
         {nextEventValid && (
           <motion.div

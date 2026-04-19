@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Terminal, MessageSquare } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { supabase } from '@/integrations/supabase/client'
 
 interface Message {
   id: string
@@ -14,7 +15,7 @@ export default function AIAssistantFAB() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'KONTROL_ASSISTANT ONLINE. INITIALIZE_QUERY?',
+      text: 'KONTROL_ASSISTANT ONLINE. Como posso te ajudar a conhecer o Khaos Kontrol?',
       sender: 'assistant',
       timestamp: new Date(),
     },
@@ -29,35 +30,59 @@ export default function AIAssistantFAB() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    const trimmed = input.trim()
+    if (!trimmed || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: input,
+      text: trimmed,
       sender: 'user',
       timestamp: new Date(),
     }
-    setMessages((prev) => [...prev, userMessage])
+    const nextMessages = [...messages, userMessage]
+    setMessages(nextMessages)
     setInput('')
     setIsLoading(true)
 
-    setTimeout(() => {
-      const responses = [
-        'QUERY_RECEIVED. PLEASE_CONTACT_SUPPORT_VIA_WHATSAPP.',
-        'ACCESSING_KNOWLEDGE_BASE... REDIRECTING_TO_CONCIERGE.',
-        'COMMAND_NOT_RECOGNIZED. HUM_INTERVENTION_REQUIRED.',
-        'PROTOCOL_INITIATED. CONNECTING_TO_AGENT.',
-      ]
+    try {
+      const payload = nextMessages.map((m) => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text,
+      }))
 
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: responses[Math.floor(Math.random() * responses.length)],
-        sender: 'assistant',
-        timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, assistantMessage])
+      const { data, error } = await supabase.functions.invoke(
+        'sales-assistant',
+        { body: { messages: payload } },
+      )
+
+      if (error) throw error
+
+      const replyText =
+        data?.reply?.trim() ||
+        'Não consegui processar agora. Prefere falar direto no WhatsApp?'
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: replyText,
+          sender: 'assistant',
+          timestamp: new Date(),
+        },
+      ])
+    } catch (_err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: 'Erro de conexão. Tenta de novo ou fala comigo no WhatsApp.',
+          sender: 'assistant',
+          timestamp: new Date(),
+        },
+      ])
+    } finally {
       setIsLoading(false)
-    }, 800)
+    }
   }
 
   const handleWhatsAppFallback = () => {
@@ -73,9 +98,8 @@ export default function AIAssistantFAB() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-20 right-0 w-80 h-96 bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] border border-white flex flex-col overflow-hidden"
+            className="absolute bottom-20 right-0 w-80 h-[28rem] bg-black rounded-none shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] border border-white flex flex-col overflow-hidden"
           >
-            {}
             <div className="bg-black border-b border-white p-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-white animate-pulse" />
@@ -86,12 +110,12 @@ export default function AIAssistantFAB() {
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-white hover:bg-white hover:text-black transition-colors px-1"
+                aria-label="Fechar chat"
               >
                 <div className="text-[10px] uppercase tracking-widest">[X]</div>
               </button>
             </div>
 
-            {}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-black">
               {messages.map((message) => (
                 <div
@@ -102,27 +126,30 @@ export default function AIAssistantFAB() {
                     {message.sender === 'user' ? '[GUEST]' : '[SYSTEM]'}
                   </span>
                   <div
-                    className={`max-w-[85%] px-3 py-2 rounded-none text-xs border ${
+                    className={`max-w-[85%] px-3 py-2 rounded-none text-xs border whitespace-pre-wrap ${
                       message.sender === 'user'
                         ? 'bg-white text-black border-white'
                         : 'bg-black text-white border-white/20'
                     }`}
                   >
-                    <p className="uppercase leading-relaxed">{message.text}</p>
+                    <p className="leading-relaxed">{message.text}</p>
                   </div>
                 </div>
               ))}
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="text-[10px] text-white/50 uppercase tracking-widest animate-pulse"></div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-white/50 uppercase tracking-widest">
+                    <span className="inline-block w-1 h-1 bg-white/60 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="inline-block w-1 h-1 bg-white/60 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="inline-block w-1 h-1 bg-white/60 animate-bounce" />
+                  </div>
                 </div>
               )}
 
               <div ref={messagesEndRef} />
             </div>
 
-            {}
             <div className="p-0 border-t border-white/20">
               <button
                 onClick={handleWhatsAppFallback}
@@ -133,7 +160,6 @@ export default function AIAssistantFAB() {
               </button>
             </div>
 
-            {}
             <form onSubmit={handleSendMessage} className="bg-black">
               <div className="flex gap-0 border-t border-white/20">
                 <span className="flex items-center pl-3 text-white font-mono text-xs select-none">
@@ -143,13 +169,15 @@ export default function AIAssistantFAB() {
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="INSERIR_DADOS..."
-                  className="flex-1 bg-transparent border-none py-3 px-2 outline-none text-xs text-white placeholder-white/30 uppercase font-mono"
+                  placeholder="DIGITE_MENSAGEM..."
+                  disabled={isLoading}
+                  className="flex-1 bg-transparent border-none py-3 px-2 outline-none text-xs text-white placeholder-white/30 font-mono disabled:opacity-50"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
                   className="text-white hover:bg-white hover:text-black disabled:opacity-50 transition-colors px-3 border-l border-white/20"
+                  aria-label="Enviar"
                 >
                   <Send className="h-3 w-3" />
                 </button>
@@ -159,12 +187,12 @@ export default function AIAssistantFAB() {
         )}
       </AnimatePresence>
 
-      {}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="h-14 w-14 bg-black text-white border border-white shadow-[4px_4px_0px_0px_rgba(255,255,255,0.2)] flex items-center justify-center group"
+        aria-label={isOpen ? 'Fechar chat' : 'Abrir chat'}
       >
         <AnimatePresence mode="wait">
           {isOpen ? (

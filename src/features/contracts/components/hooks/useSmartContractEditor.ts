@@ -13,8 +13,12 @@ interface ContractProjectData {
   }
   services?: Array<{ service?: { name?: string } }>
   event_date?: string
+  event_time?: string
   budget?: number
+  total_value?: number
   event_location?: string
+  location?: string
+  guests_count?: number
   [key: string]: unknown
 }
 
@@ -26,23 +30,31 @@ interface ContractorProfile {
   state?: string
 }
 
+const formatCurrencyBRL = (n: number) =>
+  n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+
+const formatDateBRL = (iso: string) =>
+  new Date(iso).toLocaleDateString('pt-BR')
+
 export function useSmartContractEditor(
   projectId: string | null,
   editor: Editor | null,
 ) {
   const [isAiGenerating, setIsAiGenerating] = useState(false)
   const [isRefining, setIsRefining] = useState(false)
+  const [isReviewing, setIsReviewing] = useState(false)
   const [aiCommand, setAiCommand] = useState('')
   const [projectData, setProjectData] = useState<ContractProjectData | null>(
     null,
   )
   const [contractor, setContractor] = useState<ContractorProfile | null>(null)
+  const [reviewResult, setReviewResult] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       if (!projectId) return
 
-      const { data: project, error: projectError } = await supabase
+      const { data: project } = await supabase
         .from('projects')
         .select(
           `
@@ -54,9 +66,7 @@ export function useSmartContractEditor(
         .eq('id', projectId)
         .single()
 
-      if (!projectError && project) {
-        setProjectData(project)
-      }
+      if (project) setProjectData(project as ContractProjectData)
 
       const {
         data: { user },
@@ -81,7 +91,51 @@ export function useSmartContractEditor(
       .focus()
       .insertContent(`<h3>${title}</h3><p>${text}</p>`)
       .run()
-    toast.success('Cláusula adicionada!')
+    toast.success('Cláusula adicionada')
+  }
+
+  const buildPayload = () => {
+    if (!projectData) return null
+    const servicesList =
+      projectData.services?.map((s) => s.service?.name).filter(Boolean).join(', ') ||
+      '[A PREENCHER]'
+
+    const price =
+      projectData.total_value ?? projectData.budget
+        ? formatCurrencyBRL(
+            (projectData.total_value ?? projectData.budget) as number,
+          )
+        : '[A PREENCHER]'
+
+    const contractorAddress = [
+      contractor?.address,
+      contractor?.city,
+      contractor?.state,
+    ]
+      .filter(Boolean)
+      .join(', ') || undefined
+
+    return {
+      actors: {
+        contractor_name: contractor?.full_name,
+        contractor_doc: contractor?.document_id,
+        contractor_address: contractorAddress,
+        client_name: projectData.client?.full_name,
+        client_doc: projectData.client?.cpf,
+        client_address: projectData.client?.address,
+      },
+      terms: {
+        event_date: projectData.event_date
+          ? formatDateBRL(projectData.event_date)
+          : undefined,
+        event_time: projectData.event_time,
+        price,
+        services: servicesList,
+        location:
+          projectData.event_location ?? projectData.location ?? undefined,
+        guests_count: projectData.guests_count,
+      },
+    }
   }
 
   const handleGenerateTemplate = async () => {
@@ -89,49 +143,22 @@ export function useSmartContractEditor(
     setIsAiGenerating(true)
 
     try {
-      const servicesList =
-        projectData.services?.map((s) => s.service?.name).join(', ') ||
-        'Serviços Gerais'
-
-      const payload = {
-        mode: 'ARCHITECT',
-        actors: {
-          contractor_name: contractor?.full_name || 'KHAOS SYSTEMS (Prestador)',
-          contractor_doc: contractor?.document_id || '000.000.000-00',
-          client_name: projectData.client?.full_name || 'Cliente',
-          client_doc: projectData.client?.cpf || '000.000.000-00',
-        },
-        terms: {
-          date: projectData.event_date
-            ? new Date(projectData.event_date).toLocaleDateString('pt-BR')
-            : 'A Definir',
-          price: projectData.budget
-            ? projectData.budget.toLocaleString('pt-BR', {
-                style: 'currency',
-                currency: 'BRL',
-              })
-            : 'R$ 0,00',
-          services: servicesList,
-          location: projectData.event_location || 'Local a Definir',
-        },
-      }
+      const payload = buildPayload()
+      if (!payload) throw new Error('Dados do projeto ausentes')
 
       const { data, error } = await supabase.functions.invoke(
         'generate-contract-ai',
-        { body: payload },
+        { body: { mode: 'GENERATE', ...payload } },
       )
       if (error) throw error
 
       if (data?.text) {
         editor.commands.setContent(data.text)
-        toast.success('Contrato Gerado pela Khaos IA', {
-          description: 'Estrutura jurídica aplicada com sucesso.',
-        })
+        toast.success('Contrato gerado pela IA jurídica')
       }
-    } catch (_) {
-      toast.error('Erro na geração', {
-        description: 'Verifique sua conexão ou tente novamente.',
-      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+      toast.error('Erro na geração', { description: msg })
     } finally {
       setIsAiGenerating(false)
     }
@@ -146,37 +173,68 @@ export function useSmartContractEditor(
         'generate-contract-ai',
         {
           body: {
-            mode: 'EDITOR',
+            mode: 'REFINE',
             current_text: editor.getHTML(),
             instruction: aiCommand,
           },
         },
       )
-
       if (error) throw error
 
       if (data?.text) {
         editor.commands.setContent(data.text)
         setAiCommand('')
-        toast.success('Contrato Refinado', {
-          description: 'Alterações aplicadas pela Khaos IA.',
-        })
+        toast.success('Contrato refinado')
       }
-    } catch (_) {
-      toast.error('Erro na refinamento')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+      toast.error('Erro no refinamento', { description: msg })
     } finally {
       setIsRefining(false)
     }
   }
 
+  const handleReview = async () => {
+    if (!editor) return
+    const current = editor.getHTML()
+    if (!current || editor.getText().trim().length < 20) {
+      toast.info('Gere ou escreva o contrato antes de pedir revisão')
+      return
+    }
+    setIsReviewing(true)
+    setReviewResult(null)
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'generate-contract-ai',
+        { body: { mode: 'REVIEW', current_text: current } },
+      )
+      if (error) throw error
+      if (data?.text) {
+        setReviewResult(data.text)
+        toast.success('Parecer jurídico pronto')
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+      toast.error('Erro na revisão', { description: msg })
+    } finally {
+      setIsReviewing(false)
+    }
+  }
+
+  const closeReview = () => setReviewResult(null)
+
   return {
     isAiGenerating,
     isRefining,
+    isReviewing,
     aiCommand,
     setAiCommand,
     projectData,
     insertClause,
     handleGenerateTemplate,
     handleRefine,
+    handleReview,
+    reviewResult,
+    closeReview,
   }
 }

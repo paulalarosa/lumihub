@@ -11,7 +11,7 @@ import { useContractMutations } from './useContractMutations'
 export const useContracts = () => {
   const { user } = useAuth()
   const { data: contractsData = [], isLoading: loading } = useContractsQuery()
-  const { createMutation, signMutation } = useContractMutations()
+  const { createMutation, signMutation, updateMutation } = useContractMutations()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -95,6 +95,17 @@ export const useContracts = () => {
     }
   }
 
+  const handleSend = async (contract: Contract) => {
+    try {
+      await updateMutation.mutateAsync({
+        id: contract.id,
+        data: { status: 'sent' },
+      })
+    } catch (error) {
+      logger.error(error, 'useContracts.handleSend')
+    }
+  }
+
   const filteredContracts = (contractsData as Contract[]).filter((c) => {
     const matchesSearch =
       c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -127,5 +138,7 @@ export const useContracts = () => {
     setSelectedContract,
     handleCreate,
     handleSignatureSave,
+    handleSend,
+    isSending: updateMutation.isPending,
   }
 }

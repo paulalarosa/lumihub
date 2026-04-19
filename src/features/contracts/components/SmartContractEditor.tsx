@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   MessageCircle,
   Loader2,
+  ScanSearch,
+  X,
 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useSmartContractEditor } from './hooks/useSmartContractEditor'
@@ -133,6 +135,32 @@ export function SmartContractEditor({
         </div>
       </div>
 
+      {h.reviewResult && (
+        <div className="w-full md:w-80 flex flex-col border border-white/10 bg-black overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <ScanSearch className="w-3.5 h-3.5 text-white/60" />
+              <h3 className="font-mono text-[10px] uppercase tracking-widest text-white/70">
+                Parecer jurídico
+              </h3>
+            </div>
+            <button
+              onClick={h.closeReview}
+              className="text-white/40 hover:text-white transition-colors"
+              aria-label="Fechar parecer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+          <ScrollArea className="flex-1 p-4">
+            <div
+              className="text-[12px] text-white/75 leading-relaxed [&_h2]:text-white [&_h2]:font-mono [&_h2]:text-[10px] [&_h2]:uppercase [&_h2]:tracking-widest [&_h2]:mt-0 [&_h2]:mb-3 [&_h3]:text-white [&_h3]:font-mono [&_h3]:text-[11px] [&_h3]:uppercase [&_h3]:tracking-wider [&_h3]:mt-4 [&_h3]:mb-2 [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_li]:text-white/70 [&_p]:mt-2"
+              dangerouslySetInnerHTML={{ __html: h.reviewResult }}
+            />
+          </ScrollArea>
+        </div>
+      )}
+
       <div className="w-full md:w-72 flex flex-col gap-6">
         <div className="p-0 space-y-4">
           <div className="flex items-center justify-between">
@@ -153,9 +181,22 @@ export function SmartContractEditor({
             )}
             {h.isAiGenerating ? 'PROCESSANDO...' : 'GERAR COM IA'}
           </Button>
+          <Button
+            variant="outline"
+            className="w-full rounded-none h-10 font-mono text-[10px] uppercase tracking-widest border-white/20 text-white/80 hover:bg-white/10 hover:text-white"
+            onClick={h.handleReview}
+            disabled={h.isReviewing}
+          >
+            {h.isReviewing ? (
+              <Loader2 className="w-3 h-3 animate-spin mr-2" />
+            ) : (
+              <ScanSearch className="w-3 h-3 mr-2" />
+            )}
+            {h.isReviewing ? 'REVISANDO...' : 'REVISAR CONTRATO'}
+          </Button>
           <p className="text-[10px] text-white/30 font-mono leading-relaxed border-l border-white/10 pl-3">
-            Khaos IA irá analisar os dados do projeto e gerar uma minuta
-            jurídica completa.
+            Gerar aplica minuta jurídica completa. Revisar retorna parecer
+            sobre riscos e lacunas.
           </p>
         </div>
 

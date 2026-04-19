@@ -16,7 +16,11 @@ import {
   CheckCircle2,
   Calendar,
   PenTool,
+  Pencil,
+  Send,
+  Loader2,
 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns/format'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { ContractDocument } from '@/features/contracts/components/ContractDocument'
@@ -27,6 +31,7 @@ import { useContracts } from '@/features/contracts/hooks/useContracts'
 import { sanitizeHTML } from '@/lib/sanitize'
 
 export default function Contracts() {
+  const navigate = useNavigate()
   const {
     filteredContracts,
     loading,
@@ -41,6 +46,8 @@ export default function Contracts() {
     selectedContract: _selectedContract,
     setSelectedContract,
     handleSignatureSave,
+    handleSend,
+    isSending,
   } = useContracts()
 
   return (
@@ -164,7 +171,66 @@ export default function Contracts() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="grid grid-cols-3 gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    disabled={!contract.project_id}
+                    onClick={() =>
+                      contract.project_id &&
+                      navigate(`/projects/${contract.project_id}/contract`)
+                    }
+                    className="border-white/10 text-white hover:bg-white/5 h-8 text-[10px] uppercase tracking-wider font-mono disabled:opacity-30"
+                    title={
+                      contract.project_id
+                        ? 'Editar conteúdo'
+                        : 'Sem projeto vinculado'
+                    }
+                  >
+                    <Pencil className="w-3 h-3 mr-1" />
+                    Editar
+                  </Button>
+                  {contract.status === 'draft' && (
+                    <Button
+                      variant="outline"
+                      disabled={isSending}
+                      onClick={() => handleSend(contract)}
+                      className="border-white/10 text-white hover:bg-white/5 h-8 text-[10px] uppercase tracking-wider font-mono"
+                    >
+                      {isSending ? (
+                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                      ) : (
+                        <Send className="w-3 h-3 mr-1" />
+                      )}
+                      Enviar
+                    </Button>
+                  )}
+                  {contract.status !== 'draft' && contract.status !== 'signed' && (
+                    <ActionButton
+                      className="h-8 text-[10px]"
+                      onClick={() => {
+                        setSelectedContract(contract)
+                        setSignatureOpen(true)
+                      }}
+                    >
+                      Assinar
+                    </ActionButton>
+                  )}
+                  {contract.status === 'signed' && (
+                    <PDFDownloadLink
+                      document={<ContractDocument contract={contract} />}
+                      fileName={`contrato-${contract.title.toLowerCase().replace(/\s+/g, '-')}.pdf`}
+                    >
+                      {({ loading: pdfLoading }) => (
+                        <ActionButton
+                          fullWidth
+                          className="h-8 text-[10px]"
+                          disabled={pdfLoading}
+                        >
+                          {pdfLoading ? '...' : 'Baixar'}
+                        </ActionButton>
+                      )}
+                    </PDFDownloadLink>
+                  )}
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button
@@ -264,34 +330,6 @@ export default function Contracts() {
                       </div>
                     </DialogContent>
                   </Dialog>
-
-                  {contract.status === 'signed' ? (
-                    <PDFDownloadLink
-                      document={<ContractDocument contract={contract} />}
-                      fileName={`contrato-${contract.title.toLowerCase().replace(/\s+/g, '-')}.pdf`}
-                    >
-                      {({ loading: pdfLoading }) => (
-                        <ActionButton
-                          fullWidth
-                          className="h-8"
-                          disabled={pdfLoading}
-                        >
-                          {pdfLoading ? '...' : 'Baixar PDF'}
-                        </ActionButton>
-                      )}
-                    </PDFDownloadLink>
-                  ) : (
-                    <ActionButton
-                      fullWidth
-                      className="h-8"
-                      onClick={() => {
-                        setSelectedContract(contract)
-                        setSignatureOpen(true)
-                      }}
-                    >
-                      Assinar
-                    </ActionButton>
-                  )}
                 </div>
               </CardContent>
             </Card>
