@@ -293,6 +293,7 @@ export default function Clientes() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label={`Ver detalhes de ${client.name ?? 'cliente'}`}
                               onClick={() => navigate(`/clientes/${client.id}`)}
                               className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                             >
@@ -301,6 +302,7 @@ export default function Clientes() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label={`Editar ${client.name ?? 'cliente'}`}
                               onClick={() => actions.openEditDialog(client)}
                               className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                             >
@@ -309,6 +311,7 @@ export default function Clientes() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              aria-label={`Excluir ${client.name ?? 'cliente'}`}
                               onClick={() => actions.handleDelete(client.id)}
                               className="h-8 w-8 p-0 rounded-none text-red-500 hover:bg-red-600 hover:text-white"
                             >
@@ -350,7 +353,12 @@ export default function Clientes() {
                       {client.is_bride && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-white">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Ações de ${client.name ?? 'cliente'}`}
+                              className="h-8 w-8 text-white"
+                            >
                               <MoreVertical className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>

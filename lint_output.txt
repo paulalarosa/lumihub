@@ -1,0 +1,4 @@
+
+> khaos-kontrol-system@5.8.1 lint
+> eslint .
+

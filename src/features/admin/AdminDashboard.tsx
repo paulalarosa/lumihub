@@ -162,12 +162,18 @@ export default function AdminDashboard() {
       {/* Mobile sidebar drawer (below md) */}
       {sidebarOpen && (
         <>
-          <div
-            className="md:hidden fixed inset-0 bg-black/60 z-40"
+          <button
+            type="button"
+            aria-label="Fechar menu"
             onClick={() => setSidebarOpen(false)}
-            aria-hidden
+            className="md:hidden fixed inset-0 bg-black/60 z-40 cursor-default"
           />
-          <div className="md:hidden fixed inset-y-0 left-0 w-64 bg-background border-r border-border flex flex-col z-50 animate-in slide-in-from-left duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Menu de navegação do admin"
+            className="md:hidden fixed inset-y-0 left-0 w-64 bg-background border-r border-border flex flex-col z-50 animate-in slide-in-from-left duration-200"
+          >
             {sidebarNav}
           </div>
         </>

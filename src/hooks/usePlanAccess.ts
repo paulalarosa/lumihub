@@ -13,25 +13,38 @@ export const usePlanAccess = () => {
     queryFn: async () => {
       if (!user) return null
 
-      const { data, error } = await supabase
+      // plan_configs was dropped in the orphan cleanup migration. Canonical
+      // table is now `plan_limits` keyed by plan_type. Supabase has no FK
+      // between the two, so we fetch serially and merge here.
+      const { data: artist, error: artistErr } = await supabase
         .from('makeup_artists')
-        .select(
-          `
-          *,
-          plan_config:plan_configs(*)
-        `,
-        )
+        .select('*')
         .eq('user_id', user.id)
         .maybeSingle()
 
-      if (error) throw error
+      if (artistErr) throw artistErr
+
+      let planLimits: {
+        features?: Record<string, unknown> | null
+        max_clients?: number | null
+        max_team_members?: number | null
+      } | null = null
+
+      if (artist?.plan_type) {
+        const { data: limits } = await supabase
+          .from('plan_limits')
+          .select('features, max_clients, max_team_members')
+          .eq('plan_type', artist.plan_type)
+          .maybeSingle()
+        planLimits = limits ?? null
+      }
 
       return {
-        ...data,
-        features: data?.plan_config?.features || {},
+        ...artist,
+        features: (planLimits?.features as Record<string, unknown>) || {},
         limits: {
-          maxClients: data?.plan_config?.max_clients,
-          maxTeamMembers: data?.plan_config?.max_team_members,
+          maxClients: planLimits?.max_clients,
+          maxTeamMembers: planLimits?.max_team_members,
         },
       }
     },

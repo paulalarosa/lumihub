@@ -98,14 +98,12 @@ export const HeroSection = () => {
           </span>
         </div>
 
-        <div className="hero-reveal mb-8">
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-wide">
-            {t('home.hero.title_1')}
-          </h1>
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl text-white/70 leading-[0.95] tracking-wide italic mt-1">
+        <h1 className="hero-reveal mb-8 font-serif text-5xl md:text-7xl lg:text-8xl text-white leading-[0.95] tracking-wide">
+          <span className="block">{t('home.hero.title_1')}</span>
+          <span className="block text-white/70 italic mt-1">
             {t('home.hero.title_2')}
-          </h1>
-        </div>
+          </span>
+        </h1>
 
         <p className="hero-reveal text-white/45 text-base md:text-lg max-w-xl mb-10 leading-relaxed">
           {t('home.hero.subtitle')}

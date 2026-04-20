@@ -74,6 +74,7 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
   const rawBody = await res.text()
   let data: {
     access_token?: string
+    id_token?: string
     error?: string
     error_description?: string
   } = {}
@@ -83,16 +84,32 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
     // Google returned non-JSON (likely an HTML error page)
   }
 
-  if (!data.access_token) {
-    const bodyPreview = rawBody.slice(0, 400).replace(/\s+/g, ' ')
+  if (data.access_token) {
+    return data.access_token
+  }
+
+  // Google returns id_token (instead of access_token) when the service
+  // account can sign JWTs but doesn't have the OAuth2 scopes granted on
+  // the RISC API. RISC requires a real access_token — the id_token is
+  // rejected with 401 UNAUTHENTICATED by the RISC endpoints.
+  if (data.id_token) {
     throw new Error(
-      `Token exchange failed (HTTP ${res.status}): ` +
-        `${data.error_description || data.error || 'no error field'} · ` +
-        `body="${bodyPreview}" · sa_email=${sa.client_email} · ` +
-        `token_uri=${sa.token_uri}`,
+      `Google returned id_token instead of access_token — service account ` +
+        `${sa.client_email} can sign JWTs but lacks OAuth2 scope grants. Fix: ` +
+        `(1) enable RISC API at https://console.cloud.google.com/apis/library/risc.googleapis.com; ` +
+        `(2) grant role "RISC Configuration Admin" (roles/riscconfigurations.admin) ` +
+        `to the service account in IAM; ` +
+        `(3) confirm the key in GOOGLE_RISC_SA_JSON belongs to an ACTIVE key of this SA.`,
     )
   }
-  return data.access_token
+
+  const bodyPreview = rawBody.slice(0, 400).replace(/\s+/g, ' ')
+  throw new Error(
+    `Token exchange failed (HTTP ${res.status}): ` +
+      `${data.error_description || data.error || 'no error field'} · ` +
+      `body="${bodyPreview}" · sa_email=${sa.client_email} · ` +
+      `token_uri=${sa.token_uri}`,
+  )
 }
 
 serve(async (req) => {

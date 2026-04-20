@@ -120,8 +120,9 @@ export default function BillingPage() {
               Cancelar assinatura?
             </DialogTitle>
             <DialogDescription className="text-white/50 text-sm leading-relaxed">
-              Seu acesso continua até o fim do período atual. Depois disso, a
-              conta retorna ao plano gratuito e você perde recursos premium.
+              {subscription?.planExpiresAt
+                ? `Você continua com acesso completo até ${dateFormat(subscription.planExpiresAt)}. Depois dessa data, a conta retorna ao plano gratuito e você perde recursos premium.`
+                : 'Você continua com acesso até o fim do período atual. Depois, a conta retorna ao plano gratuito e você perde recursos premium.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -178,16 +179,23 @@ function EmptyState({ onChoose }: { onChoose: () => void }) {
   return (
     <div className="border border-white/10 bg-white/[0.02] p-12 text-center space-y-6">
       <CreditCard className="w-10 h-10 text-white/20 mx-auto" />
-      <div className="space-y-2">
-        <p className="font-serif text-2xl">Nenhuma assinatura ativa</p>
-        <p className="text-white/40 text-sm max-w-md mx-auto">
-          Escolha um plano para desbloquear todos os recursos do Khaos Kontrol.
+      <div className="space-y-3">
+        <p className="font-serif text-2xl">Você ainda não tem um plano ativo</p>
+        <p className="text-white/50 text-sm max-w-md mx-auto leading-relaxed">
+          Todos os planos começam com 14 dias grátis — você só paga se decidir
+          continuar depois do trial. Organize clientes, contratos, agenda e
+          portal da noiva em um lugar só.
         </p>
       </div>
-      <Button variant="primary" onClick={onChoose}>
-        Ver planos disponíveis
-        <ArrowUpRight className="w-4 h-4 ml-1" />
-      </Button>
+      <div className="flex flex-col items-center gap-3">
+        <Button variant="primary" onClick={onChoose}>
+          Começar teste grátis de 14 dias
+          <ArrowUpRight className="w-4 h-4 ml-1" />
+        </Button>
+        <p className="text-[10px] text-white/30 font-mono uppercase tracking-widest">
+          Sem cobrança agora · Cancela quando quiser
+        </p>
+      </div>
     </div>
   )
 }

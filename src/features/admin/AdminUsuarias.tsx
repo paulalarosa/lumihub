@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import AdminUsers from '@/features/admin/AdminUsers'
 import AdminAssistants from '@/features/admin/AdminAssistants'
-import { Users, UserCheck } from 'lucide-react'
+import AdminBrides from '@/features/admin/AdminBrides'
+import { Users, UserCheck, Gem } from 'lucide-react'
 
-type SubTab = 'users' | 'assistants'
+type SubTab = 'users' | 'assistants' | 'brides'
 
 const SUB_TABS: { id: SubTab; label: string; icon: typeof Users }[] = [
   { id: 'users', label: 'Profissionais', icon: Users },
   { id: 'assistants', label: 'Assistentes', icon: UserCheck },
+  { id: 'brides', label: 'Noivas', icon: Gem },
 ]
 
 export default function AdminUsuarias() {
@@ -15,15 +17,21 @@ export default function AdminUsuarias() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex border-b border-border">
+      <div
+        className="flex border-b border-border overflow-x-auto"
+        role="tablist"
+        aria-label="Categorias de usuárias"
+      >
         {SUB_TABS.map((tab) => {
           const Icon = tab.icon
           const isActive = subTab === tab.id
           return (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={isActive}
               onClick={() => setSubTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 font-mono text-[10px] uppercase tracking-widest transition-colors border-b-2 -mb-px ${
+              className={`flex items-center gap-2 px-6 py-3 font-mono text-[10px] uppercase tracking-widest transition-colors border-b-2 -mb-px whitespace-nowrap ${
                 isActive
                   ? 'border-foreground text-foreground'
                   : 'border-transparent text-muted-foreground hover:text-foreground'
@@ -38,6 +46,7 @@ export default function AdminUsuarias() {
 
       {subTab === 'users' && <AdminUsers />}
       {subTab === 'assistants' && <AdminAssistants />}
+      {subTab === 'brides' && <AdminBrides />}
     </div>
   )
 }

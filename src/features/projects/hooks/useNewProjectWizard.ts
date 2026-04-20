@@ -127,7 +127,7 @@ export function useNewProjectWizard(options?: WizardOptions | (() => void)) {
   }, [])
 
   const filteredClients = clients.filter(c =>
-    c.full_name.toLowerCase().includes(clientSearch.toLowerCase()) ||
+    (c.full_name ?? '').toLowerCase().includes(clientSearch.toLowerCase()) ||
     (c.email || '').toLowerCase().includes(clientSearch.toLowerCase()),
   )
 

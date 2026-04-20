@@ -8,6 +8,8 @@ import {
   Users,
   Palette,
   MessageCircle,
+  UserPlus,
+  FolderPlus,
 } from 'lucide-react'
 import {
   Dialog,
@@ -148,16 +150,18 @@ export default function EventDialog({
 
               {}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <Label className="text-gray-300">Cliente</Label>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => form.setShowQuickClient(true)}
-                    className="h-6 text-[10px] text-white/50 hover:text-white/80 px-2"
+                    aria-label="Cadastrar nova cliente"
+                    className="h-7 rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-[10px] uppercase tracking-widest px-3 flex items-center gap-1.5"
                   >
-                    + NOVO
+                    <UserPlus className="h-3 w-3" />
+                    Nova cliente
                   </Button>
                 </div>
                 <Select
@@ -167,10 +171,10 @@ export default function EventDialog({
                   }
                 >
                   <SelectTrigger className="bg-white/5 border-white/10 text-white rounded-none">
-                    <SelectValue placeholder="Selecione..." />
+                    <SelectValue placeholder="Selecione uma cliente ou cadastre uma nova..." />
                   </SelectTrigger>
                   <SelectContent className="bg-[#1a1a1a] border-white/10 text-white">
-                    <SelectItem value="__none__">Nenhum</SelectItem>
+                    <SelectItem value="__none__">Sem cliente</SelectItem>
                     {form.clients.map((client) => (
                       <SelectItem key={client.id} value={client.id}>
                         {client.name}
@@ -331,17 +335,19 @@ export default function EventDialog({
             {}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <Label className="text-gray-300">Projeto / Pasta</Label>
                   <Button
                     type="button"
-                    variant="ghost"
+                    variant="outline"
                     size="sm"
                     onClick={() => form.setShowQuickProject(true)}
-                    className="h-6 text-[10px] text-white/50 hover:text-white/80 px-2"
                     disabled={form.clients.length === 0}
+                    aria-label="Cadastrar novo projeto"
+                    className="h-7 rounded-none border-white/20 text-white hover:bg-white hover:text-black disabled:opacity-40 font-mono text-[10px] uppercase tracking-widest px-3 flex items-center gap-1.5"
                   >
-                    + NOVO
+                    <FolderPlus className="h-3 w-3" />
+                    Novo projeto
                   </Button>
                 </div>
                 <Select

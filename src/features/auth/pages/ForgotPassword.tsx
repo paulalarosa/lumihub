@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { supabase } from '@/integrations/supabase/client'
-import { Loader2, ArrowLeft, ShieldAlert } from 'lucide-react'
+import { Loader2, ArrowLeft, Mail } from 'lucide-react'
 import { getErrorMessage } from '@/utils/error-handler'
 
 export default function ForgotPassword() {
@@ -30,13 +30,11 @@ export default function ForgotPassword() {
       if (error) throw error
 
       setEmailSent(true)
-      toast({
-        title: 'RECUPERAÇÃO_INICIADA',
-        description: 'VERIFICAR_CANAIS_SEGUROS',
-        className: 'bg-black border border-white/20 text-white',
-      })
     } catch (error: unknown) {
-      const { title, description } = getErrorMessage(error, 'FALHA_TRANSMISSÃO')
+      const { title, description } = getErrorMessage(
+        error,
+        'Não foi possível enviar o email',
+      )
       toast({
         title,
         description,
@@ -47,10 +45,15 @@ export default function ForgotPassword() {
     }
   }
 
+  const handleResend = async () => {
+    setEmailSent(false)
+    await handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+  }
+
   return (
     <AuthLayout
-      title="RECUPERAR_ACESSO"
-      subtitle="INICIAR_PROTOCOLO_RESET_SENHA"
+      title="Recuperar acesso"
+      subtitle="Enviamos um link pro seu email pra você criar uma nova senha"
     >
       {!emailSent ? (
         <form onSubmit={handleSubmit} className="space-y-6 text-left">
@@ -59,7 +62,7 @@ export default function ForgotPassword() {
               htmlFor="email"
               className="block text-[10px] font-mono uppercase tracking-widest text-white/50 mb-1.5"
             >
-              EMAIL_RECUPERAÇÃO
+              Email cadastrado
             </Label>
             <Input
               id="email"
@@ -69,18 +72,22 @@ export default function ForgotPassword() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoFocus
             />
           </div>
 
           <Button
             type="submit"
             className="w-full h-12 bg-white text-black hover:bg-gray-200 rounded-none font-mono uppercase tracking-widest text-xs font-bold"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !email.trim()}
           >
             {isSubmitting ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Enviando...
+              </>
             ) : (
-              'ENVIAR_LINK_RESGATE'
+              'Enviar link de recuperação'
             )}
           </Button>
 
@@ -90,30 +97,45 @@ export default function ForgotPassword() {
               className="text-[10px] text-white/40 hover:text-white flex items-center justify-center font-mono uppercase tracking-widest transition-colors group"
             >
               <ArrowLeft className="w-3 h-3 mr-2 group-hover:-translate-x-1 transition-transform" />
-              RETORNAR_AO_LOGIN
+              Voltar pro login
             </Link>
           </div>
         </form>
       ) : (
         <div className="text-center space-y-6">
           <div className="border border-white/20 bg-white/5 p-6 rounded-none flex flex-col items-center">
-            <ShieldAlert className="h-10 w-10 text-white/80 mb-4" />
-            <p className="text-xs text-white/80 font-mono uppercase tracking-wide mb-2">
-              TRANSMISSÃO_COM_SUCESSO
+            <Mail className="h-10 w-10 text-white/80 mb-4" />
+            <p className="text-sm text-white font-serif mb-2">
+              Email enviado
             </p>
-            <p className="text-[10px] text-white/50 font-mono">
-              INSTRUÇÕES_ENVIADAS_PARA: <br />
-              <span className="text-white border-b border-white/20 pb-0.5">
-                {email}
-              </span>
+            <p className="text-xs text-white/60 mb-1">
+              Verifique sua caixa de entrada em
+            </p>
+            <p className="text-xs font-mono text-white border-b border-white/20 pb-0.5 inline-block">
+              {email}
+            </p>
+            <p className="text-[10px] text-white/40 mt-4 leading-relaxed">
+              O link chega em até 5 minutos. Não esqueça de olhar o spam ou
+              promoções — às vezes ele cai lá.
             </p>
           </div>
-          <Link
-            to="/login"
-            className="inline-block mt-4 text-xs text-white border-b border-white hover:border-transparent transition-colors font-mono uppercase tracking-widest"
-          >
-            RETORNAR_AO_LOGIN
-          </Link>
+
+          <div className="flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isSubmitting}
+              className="text-xs text-white/60 hover:text-white border-b border-white/20 hover:border-white pb-0.5 font-mono uppercase tracking-widest transition-colors disabled:opacity-40"
+            >
+              {isSubmitting ? 'Enviando...' : 'Reenviar email'}
+            </button>
+            <Link
+              to="/login"
+              className="text-[10px] text-white/40 hover:text-white font-mono uppercase tracking-widest transition-colors"
+            >
+              Voltar pro login
+            </Link>
+          </div>
         </div>
       )}
     </AuthLayout>

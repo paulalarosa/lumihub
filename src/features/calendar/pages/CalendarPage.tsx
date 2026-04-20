@@ -57,6 +57,8 @@ interface CalendarEvent {
     projectId?: string
     isSynced: boolean
     googleEventId?: string
+    description?: string
+    location?: string
     serviceType: string
     raw: unknown
   }
@@ -135,6 +137,7 @@ export const CalendarPage = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [createEventDate, setCreateEventDate] = useState<Date | null>(null)
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const range = useMemo(() => {
@@ -178,6 +181,8 @@ export const CalendarPage = () => {
           projectId: event.project_id,
           isSynced: !!(event as unknown as Record<string, unknown>).google_calendar_event_id,
           googleEventId: (event as unknown as Record<string, unknown>).google_calendar_event_id as string,
+          description: event.description ?? undefined,
+          location: event.location ?? undefined,
           serviceType: '',
           raw: event,
         },
@@ -422,12 +427,24 @@ export const CalendarPage = () => {
         event={selectedEvent}
         isOpen={isDetailsModalOpen}
         onClose={() => setIsDetailsModalOpen(false)}
+        onEdit={() => {
+          // The modal types `event.resource` with its own narrower shape, so
+          // we use the original `selectedEvent` (full CalendarPage type) here.
+          if (!selectedEvent) return
+          setEditingEvent(selectedEvent)
+          setCreateEventDate(selectedEvent.start)
+          setIsCreateModalOpen(true)
+        }}
       />
 
       <CreateEventModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false)
+          setEditingEvent(null)
+        }}
         initialDate={createEventDate}
+        event={editingEvent}
         onSuccess={handleEventCreated}
       />
 

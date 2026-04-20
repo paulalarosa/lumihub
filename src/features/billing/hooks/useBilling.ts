@@ -55,9 +55,13 @@ export function useBilling() {
     queryFn: async (): Promise<BillingSubscription | null> => {
       if (!organizationId) return null
 
+      // plan_configs was dropped in the orphan cleanup migration. The canonical
+      // plan data lives in `plan_limits` keyed by plan_type. No FK between the
+      // two tables, so we fetch serially and merge. `display_name` is derived
+      // since plan_limits doesn't store it.
       const { data, error } = await supabase
         .from('makeup_artists')
-        .select('*, plan_config:plan_configs(*)')
+        .select('*')
         .eq('user_id', organizationId)
         .maybeSingle()
 
@@ -81,6 +85,28 @@ export function useBilling() {
             )
           : 0
 
+      let planConfig: BillingSubscription['planConfig'] = null
+      if (data.plan_type) {
+        const { data: limits } = await supabase
+          .from('plan_limits')
+          .select('features, max_clients, max_team_members, max_projects_per_month')
+          .eq('plan_type', data.plan_type)
+          .maybeSingle()
+
+        if (limits) {
+          const displayName =
+            data.plan_type.charAt(0).toUpperCase() + data.plan_type.slice(1)
+          planConfig = {
+            display_name: displayName,
+            monthly_price: data.monthly_price ?? 0,
+            max_clients: limits.max_clients,
+            max_team_members: limits.max_team_members ?? 0,
+            max_projects_per_month: limits.max_projects_per_month,
+            features: (limits.features as Record<string, unknown>) ?? {},
+          }
+        }
+      }
+
       return {
         planType: data.plan_type ?? 'essencial',
         planStatus: data.plan_status,
@@ -93,16 +119,7 @@ export function useBilling() {
         isTrialing,
         isActive,
         trialDaysRemaining,
-        planConfig: data.plan_config
-          ? {
-              display_name: data.plan_config.display_name,
-              monthly_price: data.plan_config.monthly_price,
-              max_clients: data.plan_config.max_clients,
-              max_team_members: data.plan_config.max_team_members,
-              max_projects_per_month: data.plan_config.max_projects_per_month,
-              features: (data.plan_config.features as Record<string, unknown>) ?? {},
-            }
-          : null,
+        planConfig,
       }
     },
     enabled: !!organizationId,

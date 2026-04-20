@@ -131,8 +131,16 @@ export default function Plans() {
               {t('plans.subtitle')}
             </motion.p>
 
-            <div className="inline-flex items-center gap-1 p-1 bg-white/[0.04] border border-white/10">
+            <div
+              className="inline-flex items-center gap-1 p-1 bg-white/[0.04] border border-white/10"
+              role="group"
+              aria-label={t('plans.billing_cycle_group', {
+                defaultValue: 'Ciclo de cobrança',
+              })}
+            >
               <button
+                type="button"
+                aria-pressed={billingCycle === 'monthly'}
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-5 py-2.5 text-sm font-medium transition-all ${
                   billingCycle === 'monthly'
@@ -143,6 +151,8 @@ export default function Plans() {
                 {t('plans.monthly')}
               </button>
               <button
+                type="button"
+                aria-pressed={billingCycle === 'annual'}
                 onClick={() => setBillingCycle('annual')}
                 className={`px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
                   billingCycle === 'annual'

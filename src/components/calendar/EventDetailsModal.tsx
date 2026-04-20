@@ -1,17 +1,29 @@
+import { useState } from 'react'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Calendar, MapPin, AlignLeft, ExternalLink, RefreshCw } from 'lucide-react'
+import {
+  Calendar,
+  MapPin,
+  AlignLeft,
+  ExternalLink,
+  RefreshCw,
+  Pencil,
+  Trash2,
+  AlertTriangle,
+} from 'lucide-react'
 import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
 import { format } from 'date-fns/format'
 
 import { ptBR } from 'date-fns/locale'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
+import { useEventMutations } from '@/features/calendar/hooks/useEventMutations'
 
 interface CalendarEvent {
   id: string
@@ -35,16 +47,29 @@ interface EventDetailsModalProps {
   event: CalendarEvent | null
   isOpen: boolean
   onClose: () => void
+  onEdit?: (event: CalendarEvent) => void
 }
 
 export const EventDetailsModal = ({
   event,
   isOpen,
   onClose,
+  onEdit,
 }: EventDetailsModalProps) => {
   const navigate = useNavigate()
+  const { deleteMutation } = useEventMutations()
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (!event || !event.resource) return null
+
+  const isGoogleEvent =
+    event.resource.eventType === 'personal' ||
+    event.resource.eventType === 'google'
+  const isProject = event.resource.eventType === 'project'
+  // Google-owned and project-linked events can't be deleted inline — they
+  // belong to another system of record.
+  const canEdit = !isGoogleEvent && !isProject
+  const canDelete = canEdit
 
   const handleViewDetails = () => {
     if (event.resource.projectId) {
@@ -60,8 +85,22 @@ export const EventDetailsModal = ({
     }
   }
 
-  const isGoogleEvent = event.resource.eventType === 'personal' || event.resource.eventType === 'google'
-  const isProject = event.resource.eventType === 'project'
+  const handleEdit = () => {
+    if (onEdit) {
+      onEdit(event)
+      onClose()
+    }
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(event.id)
+      setConfirmDelete(false)
+      onClose()
+    } catch {
+      // mutation surfaces its own toast
+    }
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -167,23 +206,43 @@ export const EventDetailsModal = ({
             </div>
           )}
 
-          <div className="flex gap-3 pt-6 border-t border-neutral-800">
-            {event.resource.projectId ? (
+          <div className="flex flex-wrap gap-2 pt-6 border-t border-neutral-800">
+            {canEdit && onEdit && (
+              <Button
+                onClick={handleEdit}
+                className="flex-1 min-w-[140px] bg-white text-black hover:bg-neutral-200"
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Editar
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDelete(true)}
+                className="flex-1 min-w-[140px] border-red-900/50 text-red-400 hover:bg-red-950 hover:text-red-300"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Excluir
+              </Button>
+            )}
+            {event.resource.projectId && (
               <Button
                 onClick={handleViewDetails}
-                className="flex-1 bg-white text-black hover:bg-neutral-200"
+                className="flex-1 min-w-[140px] bg-neutral-800 text-white hover:bg-neutral-700 border border-neutral-700"
               >
                 Ver Projeto
               </Button>
-            ) : event.resource.googleEventId ? (
+            )}
+            {!canEdit && event.resource.googleEventId && (
               <Button
                 onClick={handleViewDetails}
-                className="flex-1 bg-neutral-800 text-white hover:bg-neutral-700 border border-neutral-700"
+                className="flex-1 min-w-[140px] bg-neutral-800 text-white hover:bg-neutral-700 border border-neutral-700"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Abrir no Google
               </Button>
-            ) : null}
+            )}
             <Button
               variant="outline"
               onClick={onClose}
@@ -194,6 +253,44 @@ export const EventDetailsModal = ({
           </div>
         </div>
       </DialogContent>
+
+      <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <DialogContent className="bg-neutral-900 border-neutral-800 max-w-md text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-400" />
+              Excluir este evento?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-3 space-y-2">
+            <p className="text-sm text-neutral-300">
+              "{event.title}" em{' '}
+              {format(event.start, "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+              .
+            </p>
+            <p className="text-xs text-neutral-500">
+              Esta ação é definitiva. Se o evento estiver sincronizado com o
+              Google Calendar, será removido de lá também.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDelete(false)}
+              className="border-neutral-700 text-white hover:bg-neutral-800"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmDelete}
+              disabled={deleteMutation.isPending}
+              className="bg-red-600 text-white hover:bg-red-700"
+            >
+              {deleteMutation.isPending ? 'Excluindo...' : 'Excluir definitivamente'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   )
 }

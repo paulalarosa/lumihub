@@ -160,12 +160,12 @@ export default defineConfig(({ mode }) => ({
     // avoid regressing compression output; cast via Parameters<> so TS and
     // eslint stay happy without `any`.
     compression({
-      algorithm: 'gzip',
+      algorithms: ['gzip'],
       exclude: [/\.(br)$/, /\.(gz)$/],
       threshold: 1024,
     } as unknown as Parameters<typeof compression>[0]),
     compression({
-      algorithm: 'brotliCompress',
+      algorithms: ['brotliCompress'],
       exclude: [/\.(br)$/, /\.(gz)$/],
       threshold: 1024,
     } as unknown as Parameters<typeof compression>[0]),
@@ -240,7 +240,7 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 1500,
+    chunkSizeWarningLimit: 2000,
   },
   optimizeDeps: {
     exclude: ['@mlc-ai/web-llm'],

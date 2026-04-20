@@ -214,7 +214,7 @@ export function NewProjectWizard({
                                   ? 'border-black/20 text-black'
                                   : 'border-white/20 text-white/60'
                               }`}>
-                                {client.full_name.substring(0, 2).toUpperCase()}
+                                {(client.full_name ?? '—').substring(0, 2).toUpperCase()}
                               </div>
                               <div>
                                 <p className={`font-mono text-xs uppercase tracking-wide font-medium ${

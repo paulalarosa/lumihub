@@ -364,15 +364,14 @@ export function useEventForm({
           if (endTime) eventDataForSync.end_time = endTime
         }
 
-        const { error: syncError } = await supabase.functions.invoke(
+        const { error: syncError } = await invokeEdgeFunction(
           'google-calendar-sync',
           {
-            body: {
-              action: event ? 'update' : 'create',
-              event_id: eventId,
-              event_data: eventDataForSync,
-            },
+            action: event ? 'update' : 'create',
+            event_id: eventId,
+            event_data: eventDataForSync,
           },
+          { passUserToken: true },
         )
 
         if (syncError) {

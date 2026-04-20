@@ -45,7 +45,7 @@ export const LeadDetailsDialog = ({
             <div className="flex items-center gap-4">
               <Avatar className="w-16 h-16 border-2 border-neutral-700">
                 <AvatarFallback className="text-xl bg-neutral-800">
-                  {lead.name.substring(0, 2).toUpperCase()}
+                  {(lead.name ?? '—').substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div>

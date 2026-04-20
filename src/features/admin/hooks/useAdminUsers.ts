@@ -10,9 +10,29 @@ export const useAdminUsers = () => {
   const usersQuery = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
+      // Only return profiles that are actual maquiadoras — those registered
+      // in makeup_artists. Previously returned every row in profiles, which
+      // included assistants (causing duplication in the admin panel between
+      // the "Profissionais" and "Assistentes" tabs).
+      const { data: artists, error: artistsErr } = await supabase
+        .from('makeup_artists')
+        .select('user_id')
+
+      if (artistsErr) {
+        logger.error('useAdminUsers.fetchArtists', artistsErr)
+        throw artistsErr
+      }
+
+      const userIds = (artists ?? [])
+        .map((a) => a.user_id)
+        .filter((id): id is string => !!id)
+
+      if (userIds.length === 0) return [] as Tables<'profiles'>[]
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .in('id', userIds)
         .order('created_at', { ascending: false })
 
       if (error) {

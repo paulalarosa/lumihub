@@ -121,14 +121,20 @@ export default function BrideLoginPage() {
           </div>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-12">
-          <div className="space-y-6">
-            <label
-              htmlFor="bride-pin"
-              className="block text-center text-[10px] text-neutral-400 uppercase tracking-[0.2em]"
-            >
-              Código de Acesso
-            </label>
+        <form onSubmit={handleLogin} className="space-y-10">
+          <div className="space-y-4">
+            <div className="text-center space-y-2">
+              <label
+                htmlFor="bride-pin"
+                className="block text-[10px] text-neutral-400 uppercase tracking-[0.2em]"
+              >
+                Código de Acesso
+              </label>
+              <p className="text-[11px] text-neutral-500 leading-relaxed px-2">
+                Digite o código de 4 dígitos que a maquiadora enviou pra você
+                por WhatsApp ou email.
+              </p>
+            </div>
 
             <div className="relative group">
               <div
@@ -178,9 +184,18 @@ export default function BrideLoginPage() {
           </Button>
         </form>
 
-        <div className="mt-16 text-center">
-          <p className="text-[10px] text-neutral-700 uppercase tracking-widest font-mono">
-            Secure Environment
+        <div className="mt-10 text-center space-y-4">
+          <div className="border-t border-neutral-900 pt-6">
+            <p className="text-[11px] text-neutral-500 leading-relaxed">
+              Não recebeu ou perdeu o código?
+            </p>
+            <p className="text-[10px] text-neutral-600 mt-1">
+              Entre em contato com a maquiadora que fez seu cadastro — ela
+              pode gerar um novo código pra você.
+            </p>
+          </div>
+          <p className="text-[9px] text-neutral-800 uppercase tracking-widest font-mono">
+            Ambiente seguro · Khaos Kontrol
           </p>
         </div>
       </div>
