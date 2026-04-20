@@ -16,7 +16,7 @@ import { ptBR } from 'date-fns/locale/pt-BR'
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { OnboardingChecklist } from '@/features/onboarding/components/OnboardingChecklist'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
@@ -326,3 +326,4 @@ function MetricCard({
     </div>
   )
 }
+

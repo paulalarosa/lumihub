@@ -7,7 +7,7 @@ import './lib/sentry'
 
 import { registerSW } from 'virtual:pwa-register'
 import { validateEnv } from './config/env'
-import ConfigErrorPage from './components/ui/ConfigErrorPage.tsx'
+import ConfigErrorPage from './components/ui/config-error-page.tsx'
 
 const updateSW = registerSW({
   onNeedRefresh() {
@@ -23,7 +23,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { HelmetProvider } from 'react-helmet-async'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from '@/lib/queryClient'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import { ErrorBoundary } from './components/error-boundary'
 
 const root = createRoot(document.getElementById('root')!)
 
@@ -52,3 +52,4 @@ if (!envValidation.isValid) {
     </StrictMode>,
   )
 }
+

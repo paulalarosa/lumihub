@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/PageLoader'
+import { LoadingSpinner } from '@/components/ui/page-loader'
 
 import { useNavigate } from 'react-router-dom'
 import { getErrorMessage } from '@/utils/error-handler'
@@ -141,3 +141,4 @@ export const AssistantSignupForm = ({
     </div>
   )
 }
+

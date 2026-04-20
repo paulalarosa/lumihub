@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { logger } from '@/services/logger'
 
 export interface Assistant {
   id: string
@@ -14,22 +16,61 @@ export interface Assistant {
 }
 
 export const useAssistants = () => {
+  const { user } = useAuth()
   const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const fetchAssistants = async () => {
-    const { data, error } = await supabase
-      .from('assistants')
-      .select('*')
-      .order('full_name')
+    if (!user) return []
 
-    if (error) throw error
-    return data
+    // Discover this user's makeup_artist id. Assistants are linked to the
+    // maquiadora via `assistant_access.makeup_artist_id`, not directly via
+    // `assistants.user_id` (that column stays null until the invitee accepts).
+    // Previously this hook queried `assistants` directly and relied on RLS,
+    // which silently returned empty when the profile had no makeup_artist row
+    // or when the RLS subquery broke — making invited but not yet accepted
+    // assistants disappear from the maquiadora's view.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('parent_user_id')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    const organizationId = profile?.parent_user_id || user.id
+
+    const { data: professional } = await supabase
+      .from('makeup_artists')
+      .select('id')
+      .eq('user_id', organizationId)
+      .maybeSingle()
+
+    if (!professional) return []
+
+    const { data: access, error } = await supabase
+      .from('assistant_access')
+      .select('assistant:assistants(*)')
+      .eq('makeup_artist_id', professional.id)
+      .eq('status', 'active')
+
+    if (error) {
+      logger.error(error, 'useAssistants.fetch')
+      throw error
+    }
+
+    const rows =
+      (access ?? [])
+        .map((row) => row.assistant)
+        .filter((a): a is NonNullable<typeof a> => !!a)
+        .sort((a, b) =>
+          (a.full_name ?? '').localeCompare(b.full_name ?? ''),
+        ) ?? []
+    return rows
   }
 
   const query = useQuery({
-    queryKey: [QUERY_KEYS.ASSISTANTS],
+    queryKey: [QUERY_KEYS.ASSISTANTS, user?.id],
     queryFn: fetchAssistants,
+    enabled: !!user,
   })
 
   const createMutation = useMutation({

@@ -8,7 +8,7 @@ import { AdminMRRPanel } from './components/AdminMRRPanel'
 import { AdminDeletionRequests } from './components/AdminDeletionRequests'
 
 const RevenueChart = lazy(() =>
-  import('@/components/ui/RevenueChart').then((m) => ({
+  import('@/components/ui/revenue-chart').then((m) => ({
     default: m.RevenueChart,
   })),
 )
@@ -282,3 +282,4 @@ export default function AdminOverview() {
     </div>
   )
 }
+

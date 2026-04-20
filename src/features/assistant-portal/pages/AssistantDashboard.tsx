@@ -3,7 +3,7 @@ import { useRole } from '@/hooks/useRole'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 import { useAssistantEarnings } from '../hooks/useAssistantEarnings'
 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -482,3 +482,4 @@ export default function AssistantDashboard() {
     </div>
   )
 }
+

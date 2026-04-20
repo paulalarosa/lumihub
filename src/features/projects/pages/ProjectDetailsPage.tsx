@@ -29,7 +29,7 @@ import type {
 import { ProjectHeader } from '@/features/projects/components/details/ProjectHeader'
 import { ProjectStats } from '@/features/projects/components/details/ProjectStats'
 import { ProjectTabs } from '@/features/projects/components/details/ProjectTabs'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 export default function ProjectDetailsPage() {
   const { id } = useParams<{ id: string }>()
@@ -335,3 +335,4 @@ export default function ProjectDetailsPage() {
     </div>
   )
 }
+

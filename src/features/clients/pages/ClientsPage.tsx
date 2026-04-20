@@ -40,14 +40,14 @@ import {
   UserPlus,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
-import { MobileFAB } from '@/components/ui/MobileFAB'
+import { MobileFAB } from '@/components/ui/mobile-fab'
 import { ClientForm } from '../components/ClientForm'
 import { ClientFilters } from '@/components/filters/ClientFilters'
 import { useClientsQuery } from '../hooks/useClientsQuery'
 import { useClientFilterStore } from '@/stores/useClientFilterStore'
 import { useClientActions } from '@/features/clients/hooks/useClientActions'
-import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { LoadingSpinner as TableLoader } from '@/components/ui/page-loader'
+import { PageLoader } from '@/components/ui/page-loader'
 import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
 import { useNewProjectWizard } from '@/features/projects/hooks/useNewProjectWizard'
 
@@ -407,3 +407,4 @@ export default function Clientes() {
     </div>
   )
 }
+

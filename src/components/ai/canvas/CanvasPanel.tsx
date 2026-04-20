@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { toast } from 'sonner'
-import { SafeHTML } from '@/components/ui/SafeHTML'
+import { SafeHTML } from '@/components/ui/safe-html'
 export const CanvasPanel = () => {
   const {
     activeCanvas,
@@ -228,3 +228,4 @@ export const CanvasPanel = () => {
     </div>
   )
 }
+

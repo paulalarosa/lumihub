@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { LoadingSpinner as CardLoader } from '@/components/ui/PageLoader'
+import { LoadingSpinner as CardLoader } from '@/components/ui/page-loader'
 
 import { Upload, Trash2, Image } from 'lucide-react'
 import { toast } from 'sonner'
@@ -169,3 +169,4 @@ export function GalleryEditor({ micrositeId }: { micrositeId?: string }) {
     </Card>
   )
 }
+

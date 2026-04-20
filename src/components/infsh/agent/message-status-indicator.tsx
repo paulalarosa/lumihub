@@ -1,6 +1,6 @@
 import React, { memo } from 'react'
 import { cn } from '@/lib/utils'
-import { Spinner } from '@/components/ui/PageLoader'
+import { Spinner } from '@/components/ui/page-loader'
 
 export interface MessageStatusIndicatorProps {
   className?: string
@@ -32,3 +32,4 @@ export const MessageStatusIndicator = memo(function MessageStatusIndicator({
 })
 
 MessageStatusIndicator.displayName = 'MessageStatusIndicator'
+

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { SafeHTML } from '@/components/ui/SafeHTML'
+import { SafeHTML } from '@/components/ui/safe-html'
 type SignatureMethod = 'drawn' | 'typed'
 type StepId = 'validation' | 'review' | 'sign' | 'complete'
 
@@ -547,3 +547,4 @@ export default function SignContract() {
     </div>
   )
 }
+

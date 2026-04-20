@@ -15,7 +15,7 @@ import { ServicesEditor } from '../components/components/ServicesEditor'
 import { GalleryEditor } from '../components/components/GalleryEditor'
 import { TestimonialsEditor } from '../components/components/TestimonialsEditor'
 
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 import { Eye, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -482,3 +482,4 @@ export default function MicrositeEditor() {
     </div>
   )
 }
+

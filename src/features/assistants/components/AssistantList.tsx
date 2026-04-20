@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useToast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
-import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
+import { LoadingSpinner as TableLoader } from '@/components/ui/page-loader'
 
 import {
   Table,
@@ -198,3 +198,4 @@ export const AssistantList = () => {
     </div>
   )
 }
+

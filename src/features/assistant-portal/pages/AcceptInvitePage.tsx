@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 import { Button } from '@/components/ui/button'
 import { AssistantSignupForm } from '@/features/assistants/components/AssistantSignupForm'
@@ -120,3 +120,4 @@ export default function AcceptInvitePage() {
 
   return null
 }
+

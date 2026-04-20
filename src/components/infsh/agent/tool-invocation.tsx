@@ -15,7 +15,7 @@ import {
   CheckCircle,
   CircleDashed,
 } from 'lucide-react'
-import { Spinner } from '@/components/ui/PageLoader'
+import { Spinner } from '@/components/ui/page-loader'
 import { Button } from '@/components/ui/button'
 import {
   ToolInvocationStatusPending,
@@ -502,3 +502,4 @@ export const ToolInvocation = memo(function ToolInvocation({
 })
 
 ToolInvocation.displayName = 'ToolInvocation'
+

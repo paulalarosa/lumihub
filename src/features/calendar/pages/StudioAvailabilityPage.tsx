@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { format, startOfWeek, addDays, parseISO, isSameDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { Calendar, CheckCircle, AlertCircle } from 'lucide-react'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 import { Button } from '@/components/ui/button'
 
 interface StudioEvent {
@@ -192,3 +192,4 @@ export default function StudioAvailabilityPage() {
     </div>
   )
 }
+

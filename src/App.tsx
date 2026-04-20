@@ -21,10 +21,10 @@ import AppLayout from './components/ui/layout/AppLayout'
 import MarketingLayout from './components/ui/layout/MarketingLayout'
 import { ScrollToTop } from './components/utils/ScrollToTop'
 import { GoogleAnalytics } from './components/analytics/GoogleAnalytics'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
-import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
-import { PageErrorFallback } from '@/components/ui/PageErrorFallback'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import { PageErrorFallback } from '@/components/ui/page-error-fallback'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
 import { InstallPrompt } from '@/components/pwa/InstallPrompt'
 const CanvasPanel = lazy(() =>
@@ -564,3 +564,4 @@ const App = () => {
 }
 
 export default App
+

@@ -8,7 +8,7 @@ import { FinancialMetrics } from '../components/FinancialMetrics'
 import { CashFlowChart } from '../components/CashFlowChart'
 import { TransactionList } from '../components/TransactionList'
 import TransactionDialog from '../components/TransactionDialog'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 export default function FinancialPage() {
   const { t } = useLanguage()
@@ -79,3 +79,4 @@ export default function FinancialPage() {
     </div>
   )
 }
+

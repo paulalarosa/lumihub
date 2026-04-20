@@ -32,7 +32,7 @@ import { useGoogleCalendar } from '@/hooks/useGoogleCalendar'
 import { ConflictResolver } from '@/components/calendar/ConflictResolver'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
-import { LoadingSpinner } from '@/components/ui/PageLoader'
+import { LoadingSpinner } from '@/components/ui/page-loader'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useEvents } from '../hooks/useEvents'
 
@@ -471,3 +471,4 @@ export const CalendarPage = () => {
 }
 
 export default CalendarPage
+

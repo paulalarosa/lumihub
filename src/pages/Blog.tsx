@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import SEOHead from '@/components/seo/SEOHead'
-import { SectionHeader } from '@/components/ui/SectionHeader'
+import { SectionHeader } from '@/components/ui/section-header'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useBlogPosts, type BlogPost } from '@/hooks/useBlogPosts'
 
@@ -202,3 +202,4 @@ function ArticleCard({ post, index }: { post: BlogPost; index: number }) {
     </motion.article>
   )
 }
+

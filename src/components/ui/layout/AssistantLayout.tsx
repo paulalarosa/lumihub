@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useRole } from '@/hooks/useRole'
 import { Button } from '@/components/ui/button'
 import { LogOut, User } from 'lucide-react'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 
 export default function AssistantLayout() {
   const { signOut } = useAuth()
@@ -32,3 +32,4 @@ export default function AssistantLayout() {
     </div>
   )
 }
+

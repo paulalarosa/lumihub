@@ -25,11 +25,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          content: string
+          content?: string
           created_at?: string | null
-          id: string
+          id?: string
           title: string
-          type: string
+          type?: string
           updated_at?: string | null
           user_id: string
         }
@@ -188,15 +188,7 @@ export type Database = {
           rating?: number | null
           technique?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "assistant_reviews_project_id_fkey"
-            columns: ["project_id"]
-            isOneToOne: false
-            referencedRelation: "projects"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       assistants: {
         Row: {
@@ -526,13 +518,6 @@ export type Database = {
             referencedRelation: "contracts"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "contract_signatures_signature_request_id_fkey"
-            columns: ["signature_request_id"]
-            isOneToOne: false
-            referencedRelation: "signature_requests"
-            referencedColumns: ["id"]
-          },
         ]
       }
       contracts: {
@@ -598,46 +583,52 @@ export type Database = {
           },
         ]
       }
+      critical_alert_cooldown: {
+        Row: {
+          alert_type: string
+          last_sent_at: string
+        }
+        Insert: {
+          alert_type: string
+          last_sent_at?: string
+        }
+        Update: {
+          alert_type?: string
+          last_sent_at?: string
+        }
+        Relationships: []
+      }
       data_deletion_requests: {
         Row: {
           cancelled_at: string | null
-          created_at: string | null
           executed_at: string | null
           id: string
           reason: string | null
-          request_reason: string | null
           requested_at: string
           scheduled_for: string | null
           status: string
-          updated_at: string | null
           user_email: string | null
           user_id: string
         }
         Insert: {
           cancelled_at?: string | null
-          created_at?: string | null
           executed_at?: string | null
           id?: string
           reason?: string | null
-          request_reason?: string | null
           requested_at?: string
           scheduled_for?: string | null
           status?: string
-          updated_at?: string | null
           user_email?: string | null
           user_id: string
         }
         Update: {
           cancelled_at?: string | null
-          created_at?: string | null
           executed_at?: string | null
           id?: string
           reason?: string | null
-          request_reason?: string | null
           requested_at?: string
           scheduled_for?: string | null
           status?: string
-          updated_at?: string | null
           user_email?: string | null
           user_id?: string
         }
@@ -741,22 +732,16 @@ export type Database = {
           assistant_id: string
           created_at: string | null
           event_id: string
-          id: string | null
-          status: string | null
         }
         Insert: {
           assistant_id: string
           created_at?: string | null
           event_id: string
-          id?: string | null
-          status?: string | null
         }
         Update: {
           assistant_id?: string
           created_at?: string | null
           event_id?: string
-          id?: string | null
-          status?: string | null
         }
         Relationships: [
           {
@@ -1517,7 +1502,6 @@ export type Database = {
       makeup_artists: {
         Row: {
           address: string | null
-          billing_cycle_anchor: string | null
           business_name: string
           cpf: string | null
           created_at: string | null
@@ -1528,8 +1512,6 @@ export type Database = {
           plan_started_at: string | null
           plan_status: string | null
           plan_type: string | null
-          stripe_customer_id: string | null
-          stripe_subscription_id: string | null
           subscription_status: string | null
           trial_ends_at: string | null
           updated_at: string | null
@@ -1537,7 +1519,6 @@ export type Database = {
         }
         Insert: {
           address?: string | null
-          billing_cycle_anchor?: string | null
           business_name: string
           cpf?: string | null
           created_at?: string | null
@@ -1548,8 +1529,6 @@ export type Database = {
           plan_started_at?: string | null
           plan_status?: string | null
           plan_type?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           subscription_status?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -1557,7 +1536,6 @@ export type Database = {
         }
         Update: {
           address?: string | null
-          billing_cycle_anchor?: string | null
           business_name?: string
           cpf?: string | null
           created_at?: string | null
@@ -1568,8 +1546,6 @@ export type Database = {
           plan_started_at?: string | null
           plan_status?: string | null
           plan_type?: string | null
-          stripe_customer_id?: string | null
-          stripe_subscription_id?: string | null
           subscription_status?: string | null
           trial_ends_at?: string | null
           updated_at?: string | null
@@ -1858,92 +1834,80 @@ export type Database = {
         Row: {
           about_text: string | null
           address: string | null
-          business_name: string
-          cover_image_url: string | null
+          business_name: string | null
+          city: string | null
           created_at: string | null
           custom_domain: string | null
           email: string | null
-          enable_booking: boolean | null
+          font_family: string | null
+          hero_image_url: string | null
           id: string
           instagram_handle: string | null
           is_published: boolean | null
-          last_viewed_at: string | null
           logo_url: string | null
-          meta_description: string | null
-          meta_title: string | null
           phone: string | null
-          portfolio_images: string[] | null
           primary_color: string | null
           secondary_color: string | null
-          services: Json | null
-          show_prices: boolean | null
-          slug: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string | null
+          state: string | null
           tagline: string | null
-          testimonials: Json | null
           updated_at: string | null
-          user_id: string | null
-          view_count: number | null
-          whatsapp_link: string | null
+          user_id: string
+          whatsapp_number: string | null
         }
         Insert: {
           about_text?: string | null
           address?: string | null
-          business_name: string
-          cover_image_url?: string | null
+          business_name?: string | null
+          city?: string | null
           created_at?: string | null
           custom_domain?: string | null
           email?: string | null
-          enable_booking?: boolean | null
+          font_family?: string | null
+          hero_image_url?: string | null
           id?: string
           instagram_handle?: string | null
           is_published?: boolean | null
-          last_viewed_at?: string | null
           logo_url?: string | null
-          meta_description?: string | null
-          meta_title?: string | null
           phone?: string | null
-          portfolio_images?: string[] | null
           primary_color?: string | null
           secondary_color?: string | null
-          services?: Json | null
-          show_prices?: boolean | null
-          slug: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          state?: string | null
           tagline?: string | null
-          testimonials?: Json | null
           updated_at?: string | null
-          user_id?: string | null
-          view_count?: number | null
-          whatsapp_link?: string | null
+          user_id: string
+          whatsapp_number?: string | null
         }
         Update: {
           about_text?: string | null
           address?: string | null
-          business_name?: string
-          cover_image_url?: string | null
+          business_name?: string | null
+          city?: string | null
           created_at?: string | null
           custom_domain?: string | null
           email?: string | null
-          enable_booking?: boolean | null
+          font_family?: string | null
+          hero_image_url?: string | null
           id?: string
           instagram_handle?: string | null
           is_published?: boolean | null
-          last_viewed_at?: string | null
           logo_url?: string | null
-          meta_description?: string | null
-          meta_title?: string | null
           phone?: string | null
-          portfolio_images?: string[] | null
           primary_color?: string | null
           secondary_color?: string | null
-          services?: Json | null
-          show_prices?: boolean | null
-          slug?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string | null
+          state?: string | null
           tagline?: string | null
-          testimonials?: Json | null
           updated_at?: string | null
-          user_id?: string | null
-          view_count?: number | null
-          whatsapp_link?: string | null
+          user_id?: string
+          whatsapp_number?: string | null
         }
         Relationships: []
       }
@@ -2136,13 +2100,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "payments_makeup_artist_id_fkey"
-            columns: ["makeup_artist_id"]
-            isOneToOne: false
-            referencedRelation: "makeup_artists"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "payments_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -2277,7 +2234,6 @@ export type Database = {
           parent_user_id: string | null
           phone: string | null
           plan: string | null
-          plan_type: string | null
           role: string | null
           slug: string | null
           state: string | null
@@ -2314,7 +2270,6 @@ export type Database = {
           parent_user_id?: string | null
           phone?: string | null
           plan?: string | null
-          plan_type?: string | null
           role?: string | null
           slug?: string | null
           state?: string | null
@@ -2351,7 +2306,6 @@ export type Database = {
           parent_user_id?: string | null
           phone?: string | null
           plan?: string | null
-          plan_type?: string | null
           role?: string | null
           slug?: string | null
           state?: string | null
@@ -2418,8 +2372,8 @@ export type Database = {
       projects: {
         Row: {
           budget: number | null
+          client_cpf: string | null
           client_id: string | null
-          "clients_1.cpf": string | null
           cover_url: string | null
           created_at: string
           deadline: string | null
@@ -2450,8 +2404,8 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -2482,8 +2436,8 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          client_cpf?: string | null
           client_id?: string | null
-          "clients_1.cpf"?: string | null
           cover_url?: string | null
           created_at?: string
           deadline?: string | null
@@ -2578,40 +2532,43 @@ export type Database = {
           client_email: string
           completed_at: string | null
           created_at: string | null
-          expires_at: string | null
           id: string
-          opened_at: string | null
-          project_id: string
+          project_id: string | null
+          rating: number | null
+          review_text: string | null
           review_token: string | null
           review_url: string | null
           sent_at: string | null
-          status: string | null
+          status: string
+          user_id: string | null
         }
         Insert: {
           client_email: string
           completed_at?: string | null
           created_at?: string | null
-          expires_at?: string | null
           id?: string
-          opened_at?: string | null
-          project_id: string
+          project_id?: string | null
+          rating?: number | null
+          review_text?: string | null
           review_token?: string | null
           review_url?: string | null
           sent_at?: string | null
-          status?: string | null
+          status?: string
+          user_id?: string | null
         }
         Update: {
           client_email?: string
           completed_at?: string | null
           created_at?: string | null
-          expires_at?: string | null
           id?: string
-          opened_at?: string | null
-          project_id?: string
+          project_id?: string | null
+          rating?: number | null
+          review_text?: string | null
           review_token?: string | null
           review_url?: string | null
           sent_at?: string | null
-          status?: string | null
+          status?: string
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2711,13 +2668,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "reviews_makeup_artist_id_fkey"
-            columns: ["makeup_artist_id"]
-            isOneToOne: false
-            referencedRelation: "makeup_artists"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "reviews_project_id_fkey"
             columns: ["project_id"]
             isOneToOne: false
@@ -2767,34 +2717,34 @@ export type Database = {
           created_at: string | null
           error_message: string | null
           id: string
-          metadata: Json | null
           project_id: string | null
           scheduled_for: string
           sent_at: string | null
-          status: string | null
+          status: string
           template_id: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           error_message?: string | null
           id?: string
-          metadata?: Json | null
           project_id?: string | null
           scheduled_for: string
           sent_at?: string | null
-          status?: string | null
+          status?: string
           template_id?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           error_message?: string | null
           id?: string
-          metadata?: Json | null
           project_id?: string | null
           scheduled_for?: string
           sent_at?: string | null
-          status?: string | null
+          status?: string
           template_id?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -2861,110 +2811,74 @@ export type Database = {
       signature_audit_log: {
         Row: {
           actor_email: string | null
-          actor_ip: unknown
+          actor_ip: string | null
           created_at: string | null
           event_data: Json | null
           event_type: string
           id: string
-          occurred_at: string
           signature_id: string | null
           signature_request_id: string | null
         }
         Insert: {
           actor_email?: string | null
-          actor_ip?: unknown
+          actor_ip?: string | null
           created_at?: string | null
           event_data?: Json | null
           event_type: string
           id?: string
-          occurred_at?: string
           signature_id?: string | null
           signature_request_id?: string | null
         }
         Update: {
           actor_email?: string | null
-          actor_ip?: unknown
+          actor_ip?: string | null
           created_at?: string | null
           event_data?: Json | null
           event_type?: string
           id?: string
-          occurred_at?: string
           signature_id?: string | null
           signature_request_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "signature_audit_log_signature_id_fkey"
-            columns: ["signature_id"]
-            isOneToOne: false
-            referencedRelation: "contract_signatures"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signature_audit_log_signature_request_id_fkey"
-            columns: ["signature_request_id"]
-            isOneToOne: false
-            referencedRelation: "signature_requests"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       signature_requests: {
         Row: {
-          access_tokens: Json | null
-          completed_at: string | null
-          contract_id: string
+          access_tokens: string | null
+          contract_id: string | null
           created_at: string | null
-          created_by: string
-          current_signer_index: number | null
+          created_by: string | null
           expires_at: string | null
           id: string
-          last_reminder_sent_at: string | null
-          metadata: Json | null
           project_id: string | null
-          reminder_count: number | null
-          requires_all: boolean | null
-          signature_flow: string | null
+          signature_flow: string
           signers: Json
-          status: string | null
+          status: string
           updated_at: string | null
         }
         Insert: {
-          access_tokens?: Json | null
-          completed_at?: string | null
-          contract_id: string
+          access_tokens?: string | null
+          contract_id?: string | null
           created_at?: string | null
-          created_by: string
-          current_signer_index?: number | null
+          created_by?: string | null
           expires_at?: string | null
           id?: string
-          last_reminder_sent_at?: string | null
-          metadata?: Json | null
           project_id?: string | null
-          reminder_count?: number | null
-          requires_all?: boolean | null
-          signature_flow?: string | null
-          signers: Json
-          status?: string | null
+          signature_flow?: string
+          signers?: Json
+          status?: string
           updated_at?: string | null
         }
         Update: {
-          access_tokens?: Json | null
-          completed_at?: string | null
-          contract_id?: string
+          access_tokens?: string | null
+          contract_id?: string | null
           created_at?: string | null
-          created_by?: string
-          current_signer_index?: number | null
+          created_by?: string | null
           expires_at?: string | null
           id?: string
-          last_reminder_sent_at?: string | null
-          metadata?: Json | null
           project_id?: string | null
-          reminder_count?: number | null
-          requires_all?: boolean | null
-          signature_flow?: string | null
+          signature_flow?: string
           signers?: Json
-          status?: string | null
+          status?: string
           updated_at?: string | null
         }
         Relationships: [
@@ -3380,27 +3294,30 @@ export type Database = {
       user_ai_settings: {
         Row: {
           api_key: string | null
-          created_at: string
+          created_at: string | null
+          id: string
           model_name: string | null
           provider: string
-          updated_at: string
-          user_id: string
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
           api_key?: string | null
-          created_at?: string
+          created_at?: string | null
+          id?: string
           model_name?: string | null
-          provider: string
-          updated_at?: string
-          user_id: string
+          provider?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
           api_key?: string | null
-          created_at?: string
+          created_at?: string | null
+          id?: string
           model_name?: string | null
           provider?: string
-          updated_at?: string
-          user_id?: string
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -3798,7 +3715,7 @@ export type Database = {
         Returns: Json
       }
       admin_process_deletion: {
-        Args: { p_action: string; p_request_id: string }
+        Args: { p_action?: string; p_request_id: string }
         Returns: Json
       }
       admin_set_studio_tag: {
@@ -3979,18 +3896,6 @@ export type Database = {
         Returns: Json
       }
       get_admin_subscription_stats: { Args: never; Returns: Json }
-      get_assistant_events: {
-        Args: { p_assistant_id: string }
-        Returns: {
-          client_name: string
-          end_time: string
-          id: string
-          location: string
-          notes: string
-          start_time: string
-          title: string
-        }[]
-      }
       get_bride_dashboard_data:
         | { Args: { p_client_id: string }; Returns: Json }
         | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
@@ -4003,41 +3908,15 @@ export type Database = {
         }[]
       }
       get_google_integration: { Args: { p_user_id: string }; Returns: Json }
-      get_lgpd_requests:
-        | {
-            Args: never
-            Returns: {
-              completed_at: string
-              id: string
-              notes: string
-              request_type: string
-              requested_at: string
-              status: string
-              user_email: string
-              user_id: string
-              user_name: string
-            }[]
-          }
-        | { Args: { p_status?: string }; Returns: Json }
+      get_lgpd_requests: { Args: { p_status?: string }; Returns: Json }
       get_marketing_campaigns: { Args: { p_limit?: number }; Returns: Json }
-      get_my_assigned_event_ids: { Args: never; Returns: string[] }
-      get_my_consents: {
-        Args: never
-        Returns: {
-          consent_type: string
-          granted: boolean
-          granted_at: string
-          revoked_at: string
-          version: string
-        }[]
-      }
+      get_my_consents: { Args: never; Returns: Json }
       get_required_plan: { Args: { p_feature: string }; Returns: string }
       get_studio_events: {
         Args: { p_end_date: string; p_start_date: string }
         Returns: Json
       }
       get_user_assistant_id: { Args: never; Returns: string }
-      get_user_client_ids: { Args: never; Returns: string[] }
       increment_microsite_views: {
         Args: { p_microsite_id: string }
         Returns: undefined
@@ -4080,21 +3959,16 @@ export type Database = {
         }
         Returns: undefined
       }
-      record_user_consent:
-        | {
-            Args: { p_consent_type: string; p_granted: boolean }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              p_consent_type: string
-              p_granted: boolean
-              p_ip_address?: string
-              p_user_agent?: string
-              p_version?: string
-            }
-            Returns: Json
-          }
+      record_user_consent: {
+        Args: {
+          p_consent_type: string
+          p_granted: boolean
+          p_ip_address?: string
+          p_user_agent?: string
+          p_version?: string
+        }
+        Returns: Json
+      }
       refresh_instagram_token: { Args: { p_user_id: string }; Returns: Json }
       remove_push_subscription: { Args: { p_endpoint: string }; Returns: Json }
       request_data_deletion: { Args: never; Returns: Json }
@@ -4142,6 +4016,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      try_send_critical_alert: {
+        Args: { p_cooldown?: string; p_data: Json; p_type: string }
+        Returns: boolean
+      }
       unaccent: { Args: { "": string }; Returns: string }
       update_google_token: {
         Args: {
@@ -4162,14 +4040,6 @@ export type Database = {
           p_title: string
         }
         Returns: Json
-      }
-      validate_assistant_pin: {
-        Args: { p_pin: string; p_professional_id: string }
-        Returns: {
-          assistant_id: string
-          email: string
-          full_name: string
-        }[]
       }
       validate_bride_pin: {
         Args: { p_client_id: string; p_pin_code: string }

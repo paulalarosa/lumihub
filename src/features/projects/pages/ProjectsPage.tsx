@@ -14,8 +14,8 @@ import {
 import { format, differenceInDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useProjectsPage, StatusFilter } from '../hooks/useProjectsPage'
-import { PageLoader } from '@/components/ui/PageLoader'
-import { LoadingSpinner } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
+import { LoadingSpinner } from '@/components/ui/page-loader'
 import { NewProjectWizard } from '../components/NewProjectWizard'
 import { cn } from '@/lib/utils'
 
@@ -280,3 +280,4 @@ export default function ProjectsPage() {
     </div>
   )
 }
+

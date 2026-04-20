@@ -19,7 +19,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { useVirtualizer } from '@tanstack/react-virtual'
 
 import { CreateClientDialog } from './CreateClientDialog'
-import { ActionsMenu } from '@/components/ui/ActionsMenu'
+import { ActionsMenu } from '@/components/ui/actions-menu'
 
 const ClientRow = memo(
   ({
@@ -266,3 +266,4 @@ export const ClientsTable = () => {
     </div>
   )
 }
+

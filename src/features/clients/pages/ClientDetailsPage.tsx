@@ -24,10 +24,10 @@ import {
   Plus,
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { PageLoader } from '@/components/ui/PageLoader'
+import { PageLoader } from '@/components/ui/page-loader'
 import { EmptyState } from '@/components/ui/empty-state'
 import { useState } from 'react'
-import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { OptimizedImage } from '@/components/ui/optimized-image'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
@@ -437,3 +437,4 @@ export default function ClientDetailsPage() {
     </div>
   )
 }
+

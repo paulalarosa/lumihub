@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { LoadingSpinner as TableLoader } from '@/components/ui/PageLoader'
+import { LoadingSpinner as TableLoader } from '@/components/ui/page-loader'
 import { Plus, Trash2, Star } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -204,3 +204,4 @@ export function ServicesEditor({ micrositeId }: { micrositeId?: string }) {
     </Card>
   )
 }
+

@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.github
+.vscode
+.env
+.env.local
+.env.development
+.env.production
+npm-debug.log
+docker-compose.lock
+README.md
+CONTRIBUTING.md
+Dockerfile
+.dockerignore
+package-lock.json (if using yarn, but project uses npm)
+# keep package-lock.json for npm install consistency

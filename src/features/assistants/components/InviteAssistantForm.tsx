@@ -5,7 +5,7 @@ import { useOrganization } from '@/hooks/useOrganization'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
-import { LoadingSpinner } from '@/components/ui/PageLoader'
+import { LoadingSpinner } from '@/components/ui/page-loader'
 
 import { AlertCircle, CheckCircle, Copy, Send } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -305,3 +305,4 @@ export const InviteAssistantForm = () => {
     </div>
   )
 }
+

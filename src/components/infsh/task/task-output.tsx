@@ -9,7 +9,7 @@ import {
   TaskStatusCancelled,
 } from '@inferencesh/sdk'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Spinner } from '@/components/ui/PageLoader'
+import { Spinner } from '@/components/ui/page-loader'
 import { CircleAlert, XCircle, Copy, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StatusPill } from './task-status'
@@ -362,3 +362,4 @@ export const TaskOutput = memo(function TaskOutput({
     </div>
   )
 })
+

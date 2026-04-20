@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { FileUploader } from '@/components/ui/FileUploader'
+import { FileUploader } from '@/components/ui/file-uploader'
 import { useContractUpload } from '@/features/contracts/hooks/useContractUpload'
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
@@ -200,3 +200,4 @@ export function CreateClientDialog() {
     </Dialog>
   )
 }
+

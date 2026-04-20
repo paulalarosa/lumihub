@@ -35,7 +35,7 @@ export interface Event {
 
 export const useEvents = (start: Date, end: Date) => {
   useRealtimeInvalidate({
-    table: ['events', 'projects', 'calendar_events'],
+    table: ['events', 'projects', 'calendar_events', 'wedding_clients'],
     invalidate: ['events'],
     channelName: 'rt-events',
   })
@@ -50,37 +50,49 @@ export const useEvents = (start: Date, end: Date) => {
       const startDate = formatDate(start, 'yyyy-MM-dd')
       const endDate = formatDate(end, 'yyyy-MM-dd')
 
-      const [eventsResponse, projectsResponse] = await Promise.all([
-        supabase
-          .from('events')
-          .select(
-            `
-            *,
-            project:projects(name),
-            client:wedding_clients(id, name, phone, email),
-            event_assistants(
-              assistant_id
+      const [eventsResponse, projectsResponse, clientsResponse] =
+        await Promise.all([
+          supabase
+            .from('events')
+            .select(
+              `
+              *,
+              project:projects(name),
+              client:wedding_clients(id, name, phone, email),
+              event_assistants(
+                assistant_id
+              )
+            `,
             )
-          `,
-          )
-          .gte('event_date', startDate)
-          .lte('event_date', endDate)
-          .order('event_date', { ascending: true }),
-        supabase
-          .from('projects')
-          .select(
-            `
-            *,
-            client:wedding_clients(id, name, phone, email)
-          `,
-          )
-          .gte('event_date', startDate)
-          .lte('event_date', endDate)
-          .order('event_date', { ascending: true })
-      ])
+            .gte('event_date', startDate)
+            .lte('event_date', endDate)
+            .order('event_date', { ascending: true }),
+          supabase
+            .from('projects')
+            .select(
+              `
+              *,
+              client:wedding_clients(id, name, phone, email)
+            `,
+            )
+            .gte('event_date', startDate)
+            .lte('event_date', endDate)
+            .order('event_date', { ascending: true }),
+          // Also include wedding_clients whose wedding_date falls in this
+          // range but have NO event/project row linked — otherwise clients
+          // created after the fact (historical records) never surface on
+          // the calendar.
+          supabase
+            .from('wedding_clients')
+            .select('id, name, full_name, phone, email, wedding_date')
+            .gte('wedding_date', startDate)
+            .lte('wedding_date', endDate)
+            .order('wedding_date', { ascending: true }),
+        ])
 
       if (eventsResponse.error) throw eventsResponse.error
       if (projectsResponse.error) throw projectsResponse.error
+      if (clientsResponse.error) throw clientsResponse.error
 
       const events = (eventsResponse.data || []).map((event) => ({
         ...event,
@@ -121,7 +133,51 @@ export const useEvents = (start: Date, end: Date) => {
         longitude: null,
       }))
 
-      return [...events, ...projectEvents] as Event[]
+      // Skip clients that already have an event or project linked. Dedupe
+      // either by direct client_id match or by matching wedding_date to
+      // event_date.
+      const linkedClientIds = new Set<string>([
+        ...(eventsResponse.data ?? [])
+          .map((e) => e.client_id)
+          .filter((id): id is string => !!id),
+        ...(projectsResponse.data ?? [])
+          .map((p) => p.client_id)
+          .filter((id): id is string => !!id),
+      ])
+
+      const clientEvents = (clientsResponse.data || [])
+        .filter((c) => c.wedding_date && !linkedClientIds.has(c.id))
+        .map((c) => {
+          const weddingDate = c.wedding_date
+            ? c.wedding_date.slice(0, 10)
+            : ''
+          return {
+            id: `client-${c.id}`,
+            title: c.full_name ?? c.name ?? 'Cliente sem nome',
+            description: null,
+            event_date: weddingDate,
+            event_type: 'wedding',
+            start_time: null,
+            end_time: null,
+            location: null,
+            color: '#c084a8',
+            client_id: c.id,
+            project_id: null,
+            client: {
+              id: c.id,
+              name: c.full_name ?? c.name ?? '',
+              phone: c.phone ?? undefined,
+              email: c.email ?? undefined,
+            },
+            project: null,
+            assistants: [],
+            reminder_days: [],
+            latitude: null,
+            longitude: null,
+          }
+        })
+
+      return [...events, ...projectEvents, ...clientEvents] as Event[]
     },
     staleTime: 1000 * 60 * 5,
   })
