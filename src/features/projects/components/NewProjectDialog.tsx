@@ -19,6 +19,7 @@ import {
 import { Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { Controller } from 'react-hook-form'
 import { useNewProjectDialog } from './hooks/useNewProjectDialog'
+import { AddressAutocomplete } from '@/components/ui/address-autocomplete'
 
 interface NewProjectDialogProps {
   onSuccess: () => void
@@ -178,10 +179,18 @@ export function NewProjectDialog({
 
               <div className="space-y-2">
                 <Label className="text-gray-300">Local</Label>
-                <Input
-                  {...control.register('event_location')}
-                  placeholder="Local do evento"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
+                <Controller
+                  control={control}
+                  name="event_location"
+                  render={({ field }) => (
+                    <AddressAutocomplete
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
+                      placeholder="Digite o endereço do evento"
+                      className="bg-white/5 border-white/10 text-white placeholder:text-gray-600 focus:border-white/50 focus:ring-white/50"
+                      showMiniMap
+                    />
+                  )}
                 />
               </div>
             </div>

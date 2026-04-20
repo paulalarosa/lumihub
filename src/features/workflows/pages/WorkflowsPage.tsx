@@ -1,6 +1,22 @@
 import { useState } from 'react'
-import { Plus, Zap, Play, Pause, Trash2, Loader2 } from 'lucide-react'
+import {
+  Plus,
+  Zap,
+  Play,
+  Pause,
+  Trash2,
+  Loader2,
+  UserPlus,
+  Heart,
+  FileSignature,
+  Sparkles,
+  Calendar,
+  Bell,
+  type LucideIcon,
+} from 'lucide-react'
 import { useWorkflows, type Workflow } from '../hooks/useWorkflows'
+import { WORKFLOW_TEMPLATES, type WorkflowTemplate } from '../templates'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,6 +38,15 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { WorkflowAnalytics } from '../components/WorkflowAnalytics'
+
+const TEMPLATE_ICONS: Record<string, LucideIcon> = {
+  UserPlus,
+  Heart,
+  FileSignature,
+  Sparkles,
+  Calendar,
+  Bell,
+}
 
 const TRIGGER_OPTIONS = [
   {
@@ -76,6 +101,12 @@ const ACTION_TEMPLATES = {
     channel: 'in_app',
     title: 'Nova ação',
     message: 'Um workflow acabou de rodar.',
+  },
+  push_alert: {
+    type: 'send_push',
+    title: 'Khaos Kontrol',
+    body: 'Nova atividade: {{full_name}}',
+    url: '/dashboard',
   },
 }
 
@@ -132,6 +163,20 @@ export default function WorkflowsPage() {
     setActionsText(JSON.stringify([ACTION_TEMPLATES[tpl]], null, 2))
   }
 
+  const createFromTemplate = async (tpl: WorkflowTemplate) => {
+    try {
+      await create.mutateAsync({
+        name: tpl.name,
+        description: tpl.description,
+        trigger_type: tpl.trigger_type,
+        actions: tpl.actions,
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido'
+      toast.error(`Falha ao criar workflow: ${msg}`)
+    }
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header className="flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
@@ -153,6 +198,66 @@ export default function WorkflowsPage() {
       </header>
 
       <WorkflowAnalytics />
+
+      <section className="space-y-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-serif text-lg text-white">
+            Templates prontos
+          </h2>
+          <span className="font-mono text-[10px] uppercase tracking-widest text-white/40">
+            1-click pra começar
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {WORKFLOW_TEMPLATES.map((tpl) => {
+            const Icon = TEMPLATE_ICONS[tpl.icon] ?? Zap
+            const alreadyExists = list.data?.some(
+              (w) => w.name === tpl.name,
+            )
+            return (
+              <div
+                key={tpl.id}
+                className="p-4 border border-white/10 bg-white/[0.02] hover:border-white/30 transition-colors flex flex-col gap-3"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 border border-white/10 bg-black flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-white/70" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="font-serif text-white text-sm truncate">
+                      {tpl.name}
+                    </h3>
+                    <p className="text-[11px] font-mono text-white/40 uppercase tracking-widest mt-0.5">
+                      {tpl.trigger_label}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-xs text-white/60 leading-relaxed line-clamp-3">
+                  {tpl.description}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => createFromTemplate(tpl)}
+                  disabled={create.isPending || alreadyExists}
+                  className="rounded-none border-white/10 h-8 text-[10px] uppercase tracking-widest mt-auto"
+                >
+                  {alreadyExists ? (
+                    'Já criado'
+                  ) : create.isPending ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <>
+                      <Plus className="w-3 h-3 mr-1.5" />
+                      Usar template
+                    </>
+                  )}
+                </Button>
+              </div>
+            )
+          })}
+        </div>
+      </section>
 
       {list.isLoading && (
         <div className="py-12 flex justify-center">
@@ -278,6 +383,13 @@ export default function WorkflowsPage() {
                     className="text-[10px] text-white/60 hover:text-white px-2 py-1 border border-zinc-800 hover:border-zinc-600"
                   >
                     me notificar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => loadTemplate('push_alert')}
+                    className="text-[10px] text-white/60 hover:text-white px-2 py-1 border border-zinc-800 hover:border-zinc-600"
+                  >
+                    push notif
                   </button>
                 </div>
               </div>

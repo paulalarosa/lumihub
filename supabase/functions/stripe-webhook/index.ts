@@ -71,36 +71,75 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const clientReferenceId = session.client_reference_id
   const userId = clientReferenceId || session.metadata?.user_id
 
-  if (!userId) {
-    return
-  }
+  if (!userId) return
 
   const planType = session.metadata?.plan_type || 'profissional'
+  const stripeCustomerId = session.customer as string | null
+  const stripeSubscriptionId = session.subscription as string | null
 
-  const { error: profileError } = await supabase
+  await supabase
     .from('profiles')
     .update({
-      plan_type: planType,
-      stripe_customer_id: session.customer as string,
+      plan: planType,
+      stripe_customer_id: stripeCustomerId,
     })
     .eq('id', userId)
 
-  if (profileError) {
-  }
-
-  const { error: artistError } = await supabase
+  await supabase
     .from('makeup_artists')
     .update({
-      stripe_subscription_id: session.subscription as string,
+      stripe_subscription_id: stripeSubscriptionId,
       plan_type: planType,
       plan_status: 'active',
       plan_started_at: new Date().toISOString(),
-      stripe_customer_id: session.customer as string,
+      stripe_customer_id: stripeCustomerId,
     })
     .eq('user_id', userId)
 
-  if (artistError) {
+  // For one-time payments (mode='payment'), invoice.payment_succeeded
+  // isn't fired — create the invoice record here.
+  if (session.mode === 'payment' && session.amount_total) {
+    const amount = session.amount_total / 100
+    const stripeRef = (session.payment_intent as string | null) ?? session.id
+
+    const { data: existing } = await supabase
+      .from('invoices')
+      .select('id')
+      .eq('invoice_number', stripeRef)
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (!existing) {
+      await supabase.from('invoices').insert({
+        user_id: userId,
+        invoice_number: stripeRef,
+        amount,
+        status: session.payment_status === 'paid' ? 'paid' : 'pending',
+        paid_at:
+          session.payment_status === 'paid'
+            ? new Date().toISOString()
+            : null,
+      })
+    }
   }
+
+  // Audit trail (survives webhook retries; invoice_paid already triggers workflows)
+  await supabase
+    .from('audit_logs')
+    .insert({
+      user_id: userId,
+      table_name: 'subscriptions',
+      record_id: stripeSubscriptionId ?? session.id,
+      action: 'CHECKOUT_COMPLETED',
+      new_data: {
+        plan_type: planType,
+        mode: session.mode,
+        amount_total: session.amount_total,
+        payment_status: session.payment_status,
+      },
+      source: 'stripe_webhook',
+    })
+    .then(() => undefined, () => undefined)
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {

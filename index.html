@@ -65,8 +65,10 @@
   <meta name="twitter:description" content="Sistema completo para organizar clientes, contratos e agenda. Teste grátis." />
   <meta name="twitter:image" content="https://khaoskontrol.com.br/og-image.png" />
 
-  <!-- Canonical -->
-  <link rel="canonical" href="https://khaoskontrol.com.br/" />
+  <!-- Canonical is set dynamically per route by src/components/seo/SEOHead.tsx -->
+  <!-- Do NOT put a static <link rel="canonical"> here: it would override every page
+       and cause Google to report "Página alternativa com tag canônica adequada". -->
+
 
   <!-- Google Site Verification (preencher valor depois de gerar no Search Console) -->
   <!-- <meta name="google-site-verification" content="COLE_AQUI_O_CODIGO_DO_SEARCH_CONSOLE" /> -->

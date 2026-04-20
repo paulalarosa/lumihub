@@ -24,6 +24,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { toast } from 'sonner'
 
 interface IntegrationStatus {
@@ -107,14 +108,12 @@ export default function AdminIntegrations() {
         }
 
         try {
-          const { data, error } = await supabase.functions.invoke(
-            'google-calendar-sync',
-            {
-              body: { action: 'check_config' },
-            },
-          )
+          const { data, error } = await invokeEdgeFunction<{
+            error?: string
+            missing_keys?: string[]
+          }>('google-calendar-sync', { action: 'check_config' })
 
-          if (error) throw error
+          if (error) throw new Error(error.message)
 
           if (data?.error === 'Service configuration error') {
             updateStatus(
@@ -143,9 +142,11 @@ export default function AdminIntegrations() {
         }
 
         try {
-          const { data, error } = await supabase.functions.invoke(
-            'check-stripe-status',
-          )
+          const { data, error } = await invokeEdgeFunction<{
+            status?: string
+            latency?: string
+            error?: string
+          }>('check-stripe-status')
 
           if (error || data?.status === 'down') {
             const msg = error?.message || data?.error || 'Unknown Error'
@@ -372,10 +373,12 @@ function RiscConfigPanel() {
     setRunning(operation)
     setResult(null)
     try {
-      const { data, error } = await supabase.functions.invoke('risc-setup', {
-        body: { operation },
-      })
-      if (error) throw error
+      const { data, error } = await invokeEdgeFunction(
+        'risc-setup',
+        { operation },
+        { passUserToken: true },
+      )
+      if (error) throw new Error(error.message)
       setResult(JSON.stringify(data, null, 2))
       toast.success(`RISC ${operation} OK`)
     } catch (err) {

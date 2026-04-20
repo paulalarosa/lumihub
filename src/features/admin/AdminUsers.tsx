@@ -48,6 +48,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { useAdminUsers } from './hooks/useAdminUsers'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { exportCsv } from '@/lib/csvExport'
 import { Download } from 'lucide-react'
@@ -203,14 +204,15 @@ export default function AdminUsers() {
     try {
       setImpersonating(targetUserId)
 
-      const { data, error } = await supabase.functions.invoke(
+      const { data, error } = await invokeEdgeFunction<{
+        session_url?: string
+      }>(
         'admin-ghost-login',
-        {
-          body: { target_user_id: targetUserId },
-        },
+        { target_user_id: targetUserId },
+        { passUserToken: true },
       )
 
-      if (error) throw error
+      if (error) throw new Error(error.message)
 
       if (data?.session_url) {
         window.open(data.session_url, '_blank')

@@ -34,6 +34,12 @@ type Action =
       message: string
     }
   | {
+      type: 'send_push'
+      title: string
+      body: string
+      url?: string
+    }
+  | {
       type: 'delay'
       minutes: number
     }
@@ -148,6 +154,25 @@ serve(async (req) => {
             type: 'workflow',
           })
           if (error) errors.push(`notify: ${error.message}`)
+        } else if (action.type === 'send_push') {
+          const { data: workflow } = await sb
+            .from('workflows')
+            .select('user_id')
+            .eq('id', workflow_id)
+            .single()
+          if (!workflow) {
+            errors.push('send_push: workflow not found')
+            continue
+          }
+          const { error } = await sb.functions.invoke('send-push-notification', {
+            body: {
+              user_id: workflow.user_id,
+              title: interpolate(action.title, payload),
+              body: interpolate(action.body, payload),
+              url: action.url ?? '/dashboard',
+            },
+          })
+          if (error) errors.push(`send_push: ${error.message}`)
         } else if (action.type === 'delay') {
           await new Promise((r) =>
             setTimeout(r, Math.min(action.minutes * 60_000, 30_000)),

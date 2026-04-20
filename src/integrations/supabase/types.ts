@@ -952,6 +952,7 @@ export type Database = {
           created_at: string | null
           id: string
           last_sync_at: string | null
+          needs_reauth: boolean
           refresh_token: string
           resource_id: string | null
           sync_token: string | null
@@ -967,6 +968,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_sync_at?: string | null
+          needs_reauth?: boolean
           refresh_token: string
           resource_id?: string | null
           sync_token?: string | null
@@ -982,6 +984,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           last_sync_at?: string | null
+          needs_reauth?: boolean
           refresh_token?: string
           resource_id?: string | null
           sync_token?: string | null

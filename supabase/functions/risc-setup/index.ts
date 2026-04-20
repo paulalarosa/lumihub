@@ -74,18 +74,33 @@ serve(async (req) => {
   }
 
   try {
-    // Require admin caller
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
     )
 
+    const body = (await req.json().catch(() => ({}))) as {
+      operation?: 'status' | 'configure' | 'verify' | 'disable'
+      receiver_url?: string
+      user_token?: string
+    }
+
+    // Accept user token from body (bypass ES256 gateway rejection) OR from
+    // Authorization header (legacy HS256 projects).
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) return json({ error: 'Unauthorized' }, 401)
-    const token = authHeader.replace('Bearer ', '')
+    const bearerFromHeader = authHeader?.replace('Bearer ', '') ?? null
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const token =
+      body.user_token ||
+      (bearerFromHeader && bearerFromHeader !== anonKey
+        ? bearerFromHeader
+        : null)
+
+    if (!token) return json({ error: 'Missing user token' }, 401)
+
     const { data: authData } = await supabase.auth.getUser(token)
     const callerId = authData?.user?.id
-    if (!callerId) return json({ error: 'Unauthorized' }, 401)
+    if (!callerId) return json({ error: 'Invalid token' }, 401)
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -94,11 +109,6 @@ serve(async (req) => {
       .single()
     if (profile?.role !== 'admin') return json({ error: 'Admin only' }, 403)
 
-    // Expect operation + optional receiver_url in body
-    const body = (await req.json().catch(() => ({}))) as {
-      operation?: 'status' | 'configure' | 'verify' | 'disable'
-      receiver_url?: string
-    }
     const operation = body.operation ?? 'status'
 
     const saJson = Deno.env.get('GOOGLE_RISC_SA_JSON')
@@ -115,11 +125,46 @@ serve(async (req) => {
     let sa: ServiceAccount
     try {
       sa = JSON.parse(saJson) as ServiceAccount
-    } catch {
-      return json({ error: 'GOOGLE_RISC_SA_JSON is not valid JSON' }, 500)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      return json(
+        {
+          error: 'GOOGLE_RISC_SA_JSON is not valid JSON',
+          detail: msg,
+          first_chars: saJson.slice(0, 50),
+        },
+        500,
+      )
     }
 
-    const accessToken = await getAccessToken(sa)
+    if (!sa.private_key || !sa.client_email || !sa.token_uri) {
+      return json(
+        {
+          error: 'SA JSON missing required fields',
+          got: {
+            has_private_key: !!sa.private_key,
+            has_client_email: !!sa.client_email,
+            has_token_uri: !!sa.token_uri,
+          },
+        },
+        500,
+      )
+    }
+
+    let accessToken: string
+    try {
+      accessToken = await getAccessToken(sa)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      return json(
+        {
+          error: 'Failed to get Google access token',
+          detail: msg,
+          client_email: sa.client_email,
+        },
+        502,
+      )
+    }
 
     const receiverUrl =
       body.receiver_url ||

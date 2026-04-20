@@ -31,10 +31,13 @@ const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY
 
 const today = new Date().toISOString().split('T')[0]
 
+// Only list real, crawlable routes. Avoid anything that redirects,
+// requires auth, or has no real content (would be reported as
+// "Página com redirecionamento" or "Página alternativa" by Search Console).
 const STATIC_ROUTES = [
   { path: '/', priority: '1.0', changefreq: 'weekly' },
   { path: '/planos', priority: '0.9', changefreq: 'weekly' },
-  { path: '/cadastro', priority: '0.9', changefreq: 'monthly' },
+  { path: '/register', priority: '0.9', changefreq: 'monthly' },
   { path: '/recursos', priority: '0.8', changefreq: 'weekly' },
   { path: '/blog', priority: '0.8', changefreq: 'daily' },
   { path: '/ajuda', priority: '0.7', changefreq: 'weekly' },

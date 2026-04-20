@@ -181,14 +181,19 @@ serve(async (req: Request) => {
       event_data?: Partial<EventData>
     }
 
-    const { data: integration, error: integrationError } = await supabase.rpc(
-      'get_google_integration',
-      { p_user_id: user.id },
-    )
+    // Fetch token directly from google_calendar_tokens (canonical table).
+    const { data: tokenRow, error: tokenErr } = await supabase
+      .from('google_calendar_tokens')
+      .select('access_token, refresh_token, token_expiry, calendar_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
 
-    if (integrationError || !integration) {
+    if (tokenErr || !tokenRow) {
       return new Response(
-        JSON.stringify({ error: 'Google Calendar not connected' }),
+        JSON.stringify({
+          error: 'Google Calendar not connected',
+          detail: tokenErr?.message ?? 'no tokens row for this user',
+        }),
         {
           status: 400,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -196,10 +201,12 @@ serve(async (req: Request) => {
       )
     }
 
-    let accessToken = integration.access_token
-    if (new Date(integration.token_expires_at) <= new Date()) {
-      accessToken = await refreshAccessToken(integration.refresh_token)
+    let accessToken: string | null = tokenRow.access_token
+    const expiry = tokenRow.token_expiry ? new Date(tokenRow.token_expiry) : null
+    const isExpired = !expiry || expiry.getTime() - Date.now() < 60_000
 
+    if (isExpired && tokenRow.refresh_token) {
+      accessToken = await refreshAccessToken(tokenRow.refresh_token)
       if (!accessToken) {
         return new Response(
           JSON.stringify({ error: 'Failed to refresh token' }),
@@ -209,15 +216,17 @@ serve(async (req: Request) => {
           },
         )
       }
-
-      await supabase.rpc('update_google_token', {
-        p_integration_id: integration.id,
-        p_access_token: accessToken,
-        p_expires_in: 3600,
-      })
+      // Update stored token + new expiry (~55min safety margin)
+      await supabase
+        .from('google_calendar_tokens')
+        .update({
+          access_token: accessToken,
+          token_expiry: new Date(Date.now() + 3300 * 1000).toISOString(),
+        })
+        .eq('user_id', user.id)
     }
 
-    const calendarId = integration.calendar_id || 'primary'
+    const calendarId = tokenRow.calendar_id || 'primary'
     const baseUrl = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`
 
     if (action === 'create') {

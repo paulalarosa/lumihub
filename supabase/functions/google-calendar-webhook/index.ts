@@ -104,76 +104,62 @@ async function upsertEventFromGoogle(
   calendarId: string,
   supabase: any,
 ) {
+  // We use `events` (primary table read by the frontend), NOT `calendar_events`.
   if (googleEvent.status === 'cancelled') {
     await supabase
-      .from('calendar_events')
+      .from('events')
       .delete()
-      .eq('google_event_id', googleEvent.id)
+      .eq('google_calendar_event_id', googleEvent.id)
       .eq('user_id', userId)
-
     return
   }
 
+  // Google returns either { dateTime, timeZone } (timed) or { date } (all-day).
+  const startIso = googleEvent.start?.dateTime || googleEvent.start?.date
+  const endIso = googleEvent.end?.dateTime || googleEvent.end?.date
+  if (!startIso) return
+
+  // event_date is required (DATE). start_time/end_time are TIMESTAMPs (nullable).
+  const eventDate = startIso.slice(0, 10)
+  const isAllDay = !googleEvent.start?.dateTime
+
   const { data: existingEvent } = await supabase
-    .from('calendar_events')
+    .from('events')
     .select('*')
-    .eq('google_event_id', googleEvent.id)
+    .eq('google_calendar_event_id', googleEvent.id)
     .eq('user_id', userId)
-    .single()
+    .maybeSingle()
 
   const eventData = {
     user_id: userId,
     title: googleEvent.summary || '(Sem título)',
     description: googleEvent.description || null,
-
-    start_time: googleEvent.start.dateTime || googleEvent.start.date,
-    end_time: googleEvent.end.dateTime || googleEvent.end.date,
+    event_date: eventDate,
+    start_time: isAllDay ? null : startIso,
+    end_time: isAllDay ? null : (endIso ?? null),
     location: googleEvent.location || null,
     event_type: existingEvent?.event_type || 'personal',
-    status: googleEvent.status === 'confirmed' ? 'confirmed' : 'tentative',
-    google_event_id: googleEvent.id,
+    google_calendar_event_id: googleEvent.id,
     google_calendar_id: calendarId,
     is_synced: true,
     last_synced_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
   }
 
   if (existingEvent) {
-    const googleUpdated = new Date(googleEvent.updated)
-    const khaosUpdated = new Date(existingEvent.updated_at)
+    // Last-write-wins — Google event updated time vs Khaos last_synced_at.
+    const googleUpdated = new Date(googleEvent.updated ?? Date.now())
     const lastSynced = existingEvent.last_synced_at
       ? new Date(existingEvent.last_synced_at)
       : new Date(0)
 
-    const safetyMargin = 2000
+    if (googleUpdated.getTime() <= lastSynced.getTime()) return
 
-    const khaosChangedRecently =
-      khaosUpdated.getTime() > lastSynced.getTime() + safetyMargin
-
-    if (khaosChangedRecently) {
-      await supabase.from('sync_conflicts').insert({
-        event_id: existingEvent.id,
-        conflict_type: 'update_conflict',
-        khaos_version: existingEvent,
-        google_version: googleEvent,
-        resolved: true,
-        resolution: googleUpdated > khaosUpdated ? 'google_wins' : 'khaos_wins',
-        resolved_at: new Date().toISOString(),
-      })
-
-      if (khaosUpdated > googleUpdated) {
-        return
-      }
-    }
-  }
-
-  const { error } = await supabase.from('calendar_events').upsert(eventData, {
-    onConflict: 'user_id,google_event_id',
-    ignoreDuplicates: false,
-  })
-
-  if (error) {
+    await supabase
+      .from('events')
+      .update(eventData)
+      .eq('id', existingEvent.id)
   } else {
+    await supabase.from('events').insert(eventData)
   }
 }
 

@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Resend } from 'https://esm.sh/resend@2.0.0'
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limit.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -117,6 +118,12 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limit per IP to prevent AI quota burn from abusive visitors.
+    const clientIp =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
+    const limit = checkRateLimit(clientIp, { maxRequests: 10, windowMs: 60_000 })
+    if (!limit.allowed) return rateLimitResponse(limit.resetAt)
+
     const apiKey =
       Deno.env.get('GOOGLE_API_KEY') ||
       Deno.env.get('GOOGLE_GENERATIVE_AI_API_KEY')

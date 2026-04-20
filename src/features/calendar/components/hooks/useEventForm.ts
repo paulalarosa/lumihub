@@ -310,16 +310,29 @@ export function useEventForm({
 
         const notifications = selectedAssistants.map((assistantId) => ({
           user_id: assistantId,
-          assistant_id: assistantId,
-          event_id: eventId,
           title: `Novo Evento: ${title}`,
-          message: `Você foi adicionado ao evento "${title}" em ${formatDate(eventDate, 'dd/MM/yyyy')}`,
+          message: `Você foi adicionada ao evento "${title}" em ${formatDate(eventDate, 'dd/MM/yyyy')}`,
           type: 'event_assignment',
-          action_link: `/agenda?date=${eventDate}`,
+          action_url: `/agenda?date=${eventDate}`,
+          related_id: eventId,
           read: false,
         }))
 
-        await supabase.from('assistant_notifications').insert(notifications)
+        try {
+          const { error: notifErr } = await supabase
+            .from('notifications')
+            .insert(notifications)
+          if (notifErr) {
+            // Some deployments restrict `type` via CHECK constraint;
+            // don't block event creation if notify insert fails.
+            console.warn(
+              '[useEventForm] notifications insert skipped:',
+              notifErr.message,
+            )
+          }
+        } catch (_) {
+          // swallow — notifications are secondary
+        }
 
         const taggedAssistants = assistants.filter((a) =>
           selectedAssistants.includes(a.id),

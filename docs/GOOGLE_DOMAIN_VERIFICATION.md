@@ -2,7 +2,54 @@
 
 Atualizado 2026-04-20 com a infra nova: botão **"Configurar stream"** no admin + recomendação DNS TXT.
 
-## Passo 1 — Domain verification (DNS TXT é o melhor caminho)
+## Atualização 2026-04-20 — Status
+
+- Service Account JSON já foi setada como `GOOGLE_RISC_SA_JSON` em dev + prod (eu fiz)
+- Meta tag placeholder já está em `index.html` (comentado — você só vai descomentar e preencher)
+
+## Passo 1 — Domain verification (4 alternativas, escolhe a mais fácil)
+
+**Truque:** no Search Console, se você tiver problemas com o método "Domínio" (que só aceita DNS), use **"Prefixo do URL"** em vez disso. Aí aparecem 4 métodos, **sem DNS**:
+
+### Método A — Google Analytics (mais fácil, funciona em minutos)
+
+Você já tem GA (ID `G-C24BXN2S6H`) integrado no site. Se você é **owner** dessa property no Analytics, o Search Console detecta e verifica automaticamente.
+
+1. https://search.google.com/search-console/welcome
+2. **Prefixo do URL** → digita `https://khaoskontrol.com.br`
+3. Procura o método **"Google Analytics"** na lista
+4. Clica "Verificar" — pronto
+
+Se aparecer erro "você não é owner do GA": vá em https://analytics.google.com/ → Admin → Account Access Management → seu email deve ter role "Administrador".
+
+### Método B — Meta tag HTML (preparado, só falta o código)
+
+Eu já adicionei um placeholder comentado em [index.html](index.html):
+```html
+<!-- <meta name="google-site-verification" content="COLE_AQUI_O_CODIGO_DO_SEARCH_CONSOLE" /> -->
+```
+
+1. Search Console → **Prefixo do URL** → método **"HTML tag"**
+2. Google gera uma tag tipo `<meta name="google-site-verification" content="abc123xyz..." />`
+3. Me passa o valor do `content` OU você mesma descomenta a linha em `index.html` e cola
+4. `npm run deploy` → Search Console → Verify
+
+### Método C — Arquivo HTML (sem DNS, sem editar código)
+
+1. Search Console → **Prefixo do URL** → método **"Arquivo HTML"**
+2. Google gera arquivo tipo `google123abc.html` para download
+3. Me passa o arquivo (posso só salvar em `public/`) OU você mesma põe em `public/`
+4. `npm run deploy` → Search Console → Verify
+
+### Método D — Google Tag Manager (só se você usa GTM)
+
+Não vi GTM integrado no seu site, então não é o caminho. Pula.
+
+---
+
+**Minha recomendação final:** **Método A (Google Analytics)**. Você já tem GA configurado, é questão de 30 segundos. Só requer que você seja owner da property.
+
+## Passo 1 antigo — DNS TXT (ainda disponível, mas só se preferir)
 
 **Por que DNS e não HTML file ou meta tag?**
 - DNS é permanente — não depende de deploy

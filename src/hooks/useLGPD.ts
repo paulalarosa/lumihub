@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
@@ -48,8 +49,12 @@ export function useLGPD() {
 
   const exportData = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc('export_my_personal_data')
-      if (error) throw error
+      const { data, error } = await invokeEdgeFunction(
+        'lgpd-export',
+        {},
+        { passUserToken: true },
+      )
+      if (error) throw new Error(error.message)
       return data
     },
     onSuccess: (data) => {
@@ -81,16 +86,32 @@ export function useLGPD() {
   })
 
   const requestDeletion = useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.rpc('request_data_deletion')
-      if (error) throw error
-      return data as { success: boolean; message: string; request_id?: string }
+    mutationFn: async (input?: { reason?: string }) => {
+      const { data, error } = await invokeEdgeFunction<{
+        status: string
+        request_id?: string
+        scheduled_for?: string
+        grace_days?: number
+      }>(
+        'lgpd-delete-account',
+        { action: 'request', reason: input?.reason },
+        { passUserToken: true },
+      )
+      if (error) throw new Error(error.message)
+      return data
     },
     onSuccess: (data) => {
+      const scheduled = data?.scheduled_for
+        ? new Date(data.scheduled_for).toLocaleDateString('pt-BR')
+        : ''
       toast({
-        title: data.success ? 'Solicitação registrada' : 'Aviso',
-        description: data.message,
-        variant: data.success ? 'default' : 'destructive',
+        title:
+          data?.status === 'already_pending'
+            ? 'Já existe solicitação'
+            : 'Solicitação registrada',
+        description: scheduled
+          ? `Exclusão agendada para ${scheduled}. Você pode cancelar até lá.`
+          : 'Sua solicitação foi processada.',
       })
     },
     onError: (error) => {
@@ -98,6 +119,31 @@ export function useLGPD() {
       toast({
         title: 'Erro',
         description: 'Não foi possível registrar a solicitação.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const cancelDeletion = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await invokeEdgeFunction(
+        'lgpd-delete-account',
+        { action: 'cancel' },
+        { passUserToken: true },
+      )
+      if (error) throw new Error(error.message)
+      return data
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Cancelado',
+        description: 'Sua solicitação de exclusão foi cancelada.',
+      })
+    },
+    onError: (error) => {
+      logger.error('useLGPD.cancelDeletion', error)
+      toast({
+        title: 'Erro ao cancelar',
         variant: 'destructive',
       })
     },
@@ -114,6 +160,7 @@ export function useLGPD() {
     updateConsent,
     exportData,
     requestDeletion,
+    cancelDeletion,
     isConsentGranted,
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -46,6 +46,16 @@ export const CreateEventModal = ({
     location: '',
     eventType: 'wedding' as 'wedding' | 'social' | 'test' | 'blocked',
   })
+
+  // When opening the modal from a slot click, pre-fill the date from initialDate.
+  useEffect(() => {
+    if (isOpen && initialDate) {
+      setFormData((prev) => ({
+        ...prev,
+        startDate: format(initialDate, 'yyyy-MM-dd'),
+      }))
+    }
+  }, [isOpen, initialDate])
 
   const resetForm = () => {
     setFormData({
