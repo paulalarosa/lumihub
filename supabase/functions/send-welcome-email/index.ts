@@ -153,6 +153,10 @@ serve(async (req: Request) => {
 
     const resend = new Resend(Deno.env.get('RESEND_API_KEY'))
 
+    const FROM =
+      Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+      'Khaos Kontrol <noreply@khaoskontrol.com.br>'
+
     if (!client.email) {
       return new Response(
         JSON.stringify({ message: 'Client has no email, skipped.' }),
@@ -164,7 +168,7 @@ serve(async (req: Request) => {
     }
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
+      from: FROM,
       to: client.email,
       subject: subject || 'KONTROL // Seu acesso exclusivo ao Khaos Studio',
       html: welcomeEmailTemplate({

@@ -89,8 +89,12 @@ serve(async (req: Request) => {
     const resend = new Resend(resendKey)
     const firstName = (payload.name ?? '').split(' ')[0] || 'Profissional'
 
+    const FROM =
+      Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+      'Khaos Kontrol <noreply@khaoskontrol.com.br>'
+
     const { data, error } = await resend.emails.send({
-      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
+      from: FROM,
       to: payload.to,
       subject: `Bem-vinda ao Khaos Kontrol, ${firstName}`,
       html: welcomeTemplate(firstName),

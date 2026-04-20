@@ -217,6 +217,10 @@ serve(async (req) => {
       </html>
     `
 
+    const FROM =
+      Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+      'Khaos Kontrol <noreply@khaoskontrol.com.br>'
+
     const resendResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -224,9 +228,9 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Khaos Kontrol <convites@khaoskontrol.com.br>',
+        from: FROM,
         to: [to],
-        subject: `${makeup_artist_name} te convidou para ser Assistente 🎨`,
+        subject: `${makeup_artist_name} te convidou para ser Assistente`,
         html: emailHtml,
       }),
     })

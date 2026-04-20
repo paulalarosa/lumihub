@@ -4,6 +4,8 @@ import { Terminal, Users, TrendingUp, UserPlus } from 'lucide-react'
 import { useAdminDashboard } from '@/hooks/useAdminDashboard'
 import { useAdminNotifications } from '@/hooks/useAdminNotifications'
 import { MetricCard } from '@/features/dashboard/components/MetricCard'
+import { AdminMRRPanel } from './components/AdminMRRPanel'
+import { AdminDeletionRequests } from './components/AdminDeletionRequests'
 
 const RevenueChart = lazy(() =>
   import('@/components/ui/RevenueChart').then((m) => ({
@@ -42,8 +44,11 @@ export default function AdminOverview() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {}
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <AdminMRRPanel />
+
+      <AdminDeletionRequests />
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <MetricCard
           title="TOTAL USERS"

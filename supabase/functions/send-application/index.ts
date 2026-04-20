@@ -67,11 +67,14 @@ serve(async (req) => {
     }
 
     const resend = new Resend(RESEND_API_KEY)
+    const FROM =
+      Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+      'Khaos Kontrol <noreply@khaoskontrol.com.br>'
 
     const adminSend = await resend.emails.send({
-      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
+      from: FROM,
       to: RESEND_TO,
-      subject: `✨ Nova aplicação KONTROL — ${name}`,
+      subject: `Nova aplicação KONTROL — ${name}`,
       html: adminNotificationTemplate({
         userName: name,
         userEmail: email,
@@ -81,7 +84,7 @@ serve(async (req) => {
     })
 
     const userSend = await resend.emails.send({
-      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
+      from: FROM,
       to: email,
       subject: 'Recebemos sua aplicação! — KONTROL',
       html: userConfirmationTemplate({

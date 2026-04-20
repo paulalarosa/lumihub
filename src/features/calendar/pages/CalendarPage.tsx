@@ -10,7 +10,7 @@ import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatDate } from '@/lib/date-utils'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
-import { supabase } from '@/integrations/supabase/client'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { useAuth } from '@/hooks/useAuth'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -174,10 +174,10 @@ export const CalendarPage = () => {
         resource: {
           eventId: event.id,
           eventType: event.event_type || 'wedding',
-          status: (event as Record<string, unknown>).status as string || 'confirmed',
+          status: (event as unknown as Record<string, unknown>).status as string || 'confirmed',
           projectId: event.project_id,
-          isSynced: !!(event as Record<string, unknown>).google_calendar_event_id,
-          googleEventId: (event as Record<string, unknown>).google_calendar_event_id as string,
+          isSynced: !!(event as unknown as Record<string, unknown>).google_calendar_event_id,
+          googleEventId: (event as unknown as Record<string, unknown>).google_calendar_event_id as string,
           serviceType: '',
           raw: event,
         },
@@ -187,10 +187,12 @@ export const CalendarPage = () => {
 
   const syncMutation = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('google-calendar-sync', {
-        body: { action: 'sync-from-google', user_id: user?.id },
-      })
-      if (error) throw error
+      const { data, error } = await invokeEdgeFunction(
+        'google-calendar-sync',
+        { action: 'sync-from-google', user_id: user?.id },
+        { passUserToken: true },
+      )
+      if (error) throw new Error(error.message)
       return data
     },
     onSuccess: () => {

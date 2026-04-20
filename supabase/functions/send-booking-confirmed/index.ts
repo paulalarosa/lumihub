@@ -88,8 +88,12 @@ serve(async (req: Request) => {
 
     const resend = new Resend(resendKey)
 
+    const FROM =
+      Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+      'Khaos Kontrol <noreply@khaoskontrol.com.br>'
+
     const { data, error } = await resend.emails.send({
-      from: 'KONTROL <no-reply@khaoskontrol.com.br>',
+      from: FROM,
       to: payload.to,
       subject: `Agendamento confirmado · ${payload.event_date}`,
       html: bookingTemplate(payload),

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { Database } from '@/integrations/supabase/types'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
@@ -28,8 +29,9 @@ export function useEventMutations() {
       if (error) throw error
 
       try {
-        await supabase.functions.invoke('google-calendar-sync', {
-          body: {
+        await invokeEdgeFunction(
+          'google-calendar-sync',
+          {
             action: 'create',
             event_id: event.id,
             event_data: {
@@ -39,9 +41,10 @@ export function useEventMutations() {
               start_time: event.start_time || '09:00',
               end_time: event.end_time,
               location: event.location || '',
-            }
+            },
           },
-        })
+          { passUserToken: true },
+        )
       } catch (syncError) {
         logger.warning('Falha ao sincronizar com Google Calendar:', syncError)
       }
@@ -82,8 +85,9 @@ export function useEventMutations() {
       if (error) throw error
 
       try {
-        await supabase.functions.invoke('google-calendar-sync', {
-          body: {
+        await invokeEdgeFunction(
+          'google-calendar-sync',
+          {
             action: 'update',
             event_id: id,
             event_data: {
@@ -93,9 +97,10 @@ export function useEventMutations() {
               start_time: event.start_time || '09:00',
               end_time: event.end_time,
               location: event.location || '',
-            }
+            },
           },
-        })
+          { passUserToken: true },
+        )
       } catch (syncError) {
         logger.warning('Falha ao sincronizar com Google Calendar:', syncError)
       }
@@ -129,9 +134,11 @@ export function useEventMutations() {
       if (error) throw error
 
       try {
-        await supabase.functions.invoke('google-calendar-sync', {
-          body: { action: 'delete', event_id: id },
-        })
+        await invokeEdgeFunction(
+          'google-calendar-sync',
+          { action: 'delete', event_id: id },
+          { passUserToken: true },
+        )
       } catch (syncError) {
         logger.warning('Falha ao sincronizar com Google Calendar:', syncError)
       }

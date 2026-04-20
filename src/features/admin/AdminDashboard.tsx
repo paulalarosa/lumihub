@@ -15,6 +15,7 @@ import {
   ShieldCheck,
   FileText,
   LineChart,
+  Activity,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import NotificationBell from '@/features/admin/components/NotificationBell'
@@ -26,9 +27,11 @@ import AdminSubscriptions from '@/features/admin/AdminSubscriptions'
 import AdminMarketing from '@/features/admin/AdminMarketing'
 import AdminSistema from '@/features/admin/AdminSistema'
 import AdminContent from '@/features/admin/AdminContent'
+import AdminActivityPanel from '@/features/admin/components/AdminActivityPanel'
 
 type AdminTab =
   | 'overview'
+  | 'atividade'
   | 'metricas'
   | 'usuarios'
   | 'financeiro'
@@ -38,6 +41,7 @@ type AdminTab =
 
 const MENU_ITEMS: { id: AdminTab; label: string; icon: typeof BarChart3 }[] = [
   { id: 'overview', label: 'Visão Geral', icon: BarChart3 },
+  { id: 'atividade', label: 'Atividade', icon: Activity },
   { id: 'metricas', label: 'Métricas', icon: LineChart },
   { id: 'usuarios', label: 'Usuárias', icon: Users },
   { id: 'financeiro', label: 'Financeiro', icon: CreditCard },
@@ -176,6 +180,7 @@ export default function AdminDashboard() {
         <div className="flex-1 overflow-auto bg-muted/20 p-8">
           <div className="max-w-7xl mx-auto">
             {activeTab === 'overview' && <AdminOverview />}
+            {activeTab === 'atividade' && <AdminActivityPanel />}
             {activeTab === 'metricas' && <AdminMetrics />}
             {activeTab === 'usuarios' && <AdminUsuarias />}
             {activeTab === 'financeiro' && <AdminSubscriptions />}

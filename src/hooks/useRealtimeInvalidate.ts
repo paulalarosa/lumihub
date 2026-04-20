@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useQueryClient, type QueryKey } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 
@@ -51,6 +51,18 @@ export function useRealtimeInvalidate({
 }: Options) {
   const queryClient = useQueryClient()
 
+  // Derive stable string keys from array inputs. Callers typically pass inline
+  // array literals which would otherwise re-trigger the effect every render
+  // and churn the realtime channel subscription.
+  const tablesKey = useMemo(
+    () => (Array.isArray(table) ? table.join(',') : table),
+    [table],
+  )
+  const invalidateKey = useMemo(
+    () => JSON.stringify(invalidate),
+    [invalidate],
+  )
+
   useEffect(() => {
     if (!enabled) return
 
@@ -64,7 +76,6 @@ export function useRealtimeInvalidate({
 
     for (const tbl of tables) {
       channel = channel.on(
-        // @ts-expect-error - supabase-js runtime accepts this shape
         'postgres_changes',
         {
           event,
@@ -85,12 +96,8 @@ export function useRealtimeInvalidate({
     return () => {
       supabase.removeChannel(channel)
     }
+    // Effect depends on derived string keys to avoid re-subscribing on every
+    // render when callers pass inline array literals.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    Array.isArray(table) ? table.join(',') : table,
-    filter,
-    event,
-    channelName,
-    enabled,
-  ])
+  }, [tablesKey, invalidateKey, filter, event, channelName, enabled])
 }

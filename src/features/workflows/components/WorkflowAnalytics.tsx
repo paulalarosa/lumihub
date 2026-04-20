@@ -6,13 +6,6 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
-const TRIGGER_LABEL: Record<string, string> = {
-  invoice_paid: 'Fatura paga',
-  event_created: 'Evento criado',
-  client_created: 'Cliente criada',
-  contract_signed: 'Contrato assinado',
-  lead_converted: 'Lead convertida',
-}
 
 export function WorkflowAnalytics() {
   const { stats, recent } = useWorkflowStats()

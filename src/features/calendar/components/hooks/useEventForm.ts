@@ -3,6 +3,7 @@ import { addMinutes } from 'date-fns'
 import { formatDate } from '@/lib/date-utils'
 
 import { supabase } from '@/integrations/supabase/client'
+import { invokeEdgeFunction } from '@/lib/invokeEdge'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
@@ -429,9 +430,11 @@ export function useEventForm({
     setLoading(true)
     try {
       if (event.google_calendar_event_id && user) {
-        await supabase.functions.invoke('google-calendar-sync', {
-          body: { action: 'delete', event_id: event.id },
-        })
+        await invokeEdgeFunction(
+          'google-calendar-sync',
+          { action: 'delete', event_id: event.id },
+          { passUserToken: true },
+        )
       }
 
       const { error } = await supabase

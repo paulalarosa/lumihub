@@ -1,5 +1,45 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { Resend } from 'https://esm.sh/resend@2.0.0'
+
+const FROM_EMAIL =
+  Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+  'Khaos Kontrol <noreply@khaoskontrol.com.br>'
+const ADMIN_EMAIL =
+  Deno.env.get('RESEND_TO') ?? 'khaoskontrol07@gmail.com'
+
+async function notifyAdminDeletionScheduled(args: {
+  email: string
+  reason: string | null
+  scheduledFor: string
+}) {
+  const key = Deno.env.get('RESEND_API_KEY')
+  if (!key) return
+  try {
+    const resend = new Resend(key)
+    const scheduledBR = new Date(args.scheduledFor).toLocaleDateString(
+      'pt-BR',
+      { day: '2-digit', month: 'long', year: 'numeric' },
+    )
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `[LGPD] Solicitação de exclusão - ${args.email}`,
+      html: `
+        <h2>Nova solicitação de exclusão de conta</h2>
+        <p><b>Usuária:</b> ${args.email}</p>
+        <p><b>Agendada para:</b> ${scheduledBR}</p>
+        <p><b>Motivo:</b> ${args.reason ?? '<i>não informado</i>'}</p>
+        <hr>
+        <p style="color:#888;font-size:12px">
+          Cancele em /admin?tab=overview se foi erro. Passado o prazo, a conta e todos os dados vinculados serão removidos automaticamente.
+        </p>
+      `,
+    })
+  } catch (_) {
+    // swallow — notification is best-effort
+  }
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,6 +124,13 @@ serve(async (req) => {
         .single()
 
       if (error) return json({ error: `DB: ${error.message}` }, 500)
+
+      // Fire-and-forget admin notification
+      notifyAdminDeletionScheduled({
+        email: userEmail ?? userId,
+        reason: body.reason ?? null,
+        scheduledFor: scheduledFor.toISOString(),
+      })
 
       return json({
         status: 'scheduled',

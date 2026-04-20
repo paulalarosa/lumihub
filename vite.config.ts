@@ -4,6 +4,20 @@ import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { compression } from 'vite-plugin-compression2'
+import prerender from '@prerenderer/rollup-plugin'
+
+const PRERENDER_ROUTES = [
+  '/',
+  '/recursos',
+  '/planos',
+  '/contato',
+  '/privacidade',
+  '/termos',
+  '/reembolso',
+  '/seguranca',
+  '/cookies',
+  '/dpa',
+]
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -156,6 +170,21 @@ export default defineConfig(({ mode }) => ({
           visualizer({
             open: true,
             filename: 'dist/stats.html',
+          }),
+        ]
+      : []),
+    ...(mode === 'production' && !process.env.SKIP_PRERENDER
+      ? [
+          prerender({
+            routes: PRERENDER_ROUTES,
+            renderer: '@prerenderer/renderer-puppeteer',
+            rendererOptions: {
+              renderAfterTime: 2500,
+              maxConcurrentRoutes: 1,
+              headless: true,
+              viewport: { width: 1280, height: 800 },
+              timeout: 120000,
+            },
           }),
         ]
       : []),

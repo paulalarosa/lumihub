@@ -600,27 +600,45 @@ export type Database = {
       }
       data_deletion_requests: {
         Row: {
+          cancelled_at: string | null
           created_at: string | null
+          executed_at: string | null
           id: string
+          reason: string | null
           request_reason: string | null
+          requested_at: string
+          scheduled_for: string | null
           status: string
           updated_at: string | null
+          user_email: string | null
           user_id: string
         }
         Insert: {
+          cancelled_at?: string | null
           created_at?: string | null
+          executed_at?: string | null
           id?: string
+          reason?: string | null
           request_reason?: string | null
+          requested_at?: string
+          scheduled_for?: string | null
           status?: string
           updated_at?: string | null
+          user_email?: string | null
           user_id: string
         }
         Update: {
+          cancelled_at?: string | null
           created_at?: string | null
+          executed_at?: string | null
           id?: string
+          reason?: string | null
           request_reason?: string | null
+          requested_at?: string
+          scheduled_for?: string | null
           status?: string
           updated_at?: string | null
+          user_email?: string | null
           user_id?: string
         }
         Relationships: []
@@ -3691,6 +3709,28 @@ export type Database = {
       }
     }
     Views: {
+      admin_mrr_stats: {
+        Row: {
+          active_subscribers: number | null
+          arpu: number | null
+          arr: number | null
+          in_trial: number | null
+          mrr: number | null
+          paying: number | null
+        }
+        Relationships: []
+      }
+      admin_signup_cohorts: {
+        Row: {
+          active_now: number | null
+          churned: number | null
+          cohort_month: string | null
+          paying_now: number | null
+          signups: number | null
+          trialing_now: number | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -3892,6 +3932,7 @@ export type Database = {
         Args: { table_name_input: string }
         Returns: undefined
       }
+      execute_pending_deletions: { Args: never; Returns: number }
       execute_stage_automations: {
         Args: {
           p_lead_id: string

@@ -9,8 +9,20 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Download, Trash2, Shield, FileText, AlertTriangle } from 'lucide-react'
+import {
+  Download,
+  Trash2,
+  Shield,
+  FileText,
+  AlertTriangle,
+  X,
+} from 'lucide-react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLGPD } from '@/hooks/useLGPD'
+import { supabase } from '@/integrations/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
+import { formatDistanceToNow } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
 const CONSENT_ITEMS = [
   {
@@ -46,20 +58,48 @@ export default function PrivacySettings() {
     updateConsent,
     exportData,
     requestDeletion,
+    cancelDeletion,
     isConsentGranted,
   } = useLGPD()
 
+  const { user } = useAuth()
+  const queryClient = useQueryClient()
+
+  const pendingDeletion = useQuery({
+    queryKey: ['my-deletion-request', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('data_deletion_requests')
+        .select('id, status, scheduled_for, requested_at')
+        .eq('user_id', user!.id)
+        .in('status', ['pending', 'scheduled'])
+        .order('requested_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      return data
+    },
+  })
+
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleteReason, setDeleteReason] = useState('')
 
   const handleToggleConsent = (type: string, granted: boolean) => {
     updateConsent.mutate({ consentType: type, granted })
   }
 
-  const handleRequestDeletion = () => {
-    requestDeletion.mutate()
+  const handleRequestDeletion = async () => {
+    await requestDeletion.mutateAsync({ reason: deleteReason.trim() || undefined })
     setShowDeleteConfirm(false)
     setDeleteConfirmText('')
+    setDeleteReason('')
+    queryClient.invalidateQueries({ queryKey: ['my-deletion-request'] })
+  }
+
+  const handleCancelDeletion = async () => {
+    await cancelDeletion.mutateAsync()
+    queryClient.invalidateQueries({ queryKey: ['my-deletion-request'] })
   }
 
   if (isLoading) {
@@ -134,6 +174,38 @@ export default function PrivacySettings() {
             seus dados pessoais.
           </p>
 
+          {pendingDeletion.data && (
+            <div className="p-4 border border-amber-500/30 bg-amber-500/5 space-y-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="font-mono text-[11px] uppercase tracking-widest text-amber-400 font-bold">
+                    Exclusão agendada
+                  </p>
+                  <p className="text-xs text-amber-200/80 mt-1">
+                    Sua conta será excluída{' '}
+                    {pendingDeletion.data.scheduled_for
+                      ? formatDistanceToNow(
+                          new Date(pendingDeletion.data.scheduled_for),
+                          { locale: ptBR, addSuffix: true },
+                        )
+                      : 'em breve'}
+                    . Você pode cancelar até lá.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleCancelDeletion}
+                disabled={cancelDeletion.isPending}
+                className="rounded-none w-full font-mono text-[10px] uppercase tracking-widest border-amber-500/30 hover:bg-amber-500/10"
+              >
+                <X className="h-3 w-3 mr-2" />
+                {cancelDeletion.isPending ? 'Cancelando...' : 'Cancelar exclusão'}
+              </Button>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               variant="outline"
@@ -147,25 +219,27 @@ export default function PrivacySettings() {
                 : 'Exportar Meus Dados'}
             </Button>
 
-            <Button
-              variant="outline"
-              className="rounded-none flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest"
-              onClick={() => setShowDeleteConfirm(true)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Solicitar Exclusão
-            </Button>
+            {!pendingDeletion.data && (
+              <Button
+                variant="outline"
+                className="rounded-none flex-1 text-destructive border-destructive/30 hover:bg-destructive/10 font-mono text-xs uppercase tracking-widest"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Solicitar Exclusão
+              </Button>
+            )}
           </div>
 
           <p className="text-[10px] text-muted-foreground font-mono">
-            A exportação gera um arquivo JSON com todos os seus dados. A
-            exclusão é processada em até 15 dias úteis.
+            Exportação gera JSON com todos os dados. Exclusão é agendada com
+            carência de 7 dias — você pode cancelar nesse período.
           </p>
         </CardContent>
       </Card>
 
       <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <DialogContent className="bg-background border-border rounded-none max-w-sm">
+        <DialogContent className="bg-background border-border rounded-none max-w-md">
           <DialogHeader>
             <DialogTitle className="font-serif text-lg flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
@@ -174,17 +248,30 @@ export default function PrivacySettings() {
           </DialogHeader>
           <div className="py-4 space-y-4">
             <p className="text-sm text-muted-foreground">
-              Ao confirmar, uma solicitação será enviada para nossa equipe. Seus
-              dados pessoais serão anonimizados em até 15 dias úteis.
+              A exclusão será <strong>agendada para daqui 7 dias</strong>.
+              Durante esse período você pode cancelar. Passado o prazo, todos
+              os seus dados são apagados automaticamente.
             </p>
             <div className="p-3 bg-destructive/10 border border-destructive/20 space-y-2">
               <p className="text-xs text-destructive font-medium">
-                Esta ação é irreversível. Serão removidos:
+                Após os 7 dias, serão removidos definitivamente:
               </p>
               <p className="text-[11px] text-destructive/80">
-                Nome, email, telefone, endereço, CPF, data de nascimento, fotos
-                e dados de clientes vinculados à sua conta.
+                Conta, perfil, clientes, projetos, eventos, contratos,
+                faturas, automações e qualquer dado vinculado ao seu user_id.
               </p>
+            </div>
+            <div>
+              <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground block mb-1.5">
+                Motivo (opcional — ajuda a gente a melhorar)
+              </label>
+              <textarea
+                className="w-full px-3 py-2 bg-background border border-border text-foreground font-mono text-xs focus:outline-none focus:border-foreground resize-none"
+                rows={2}
+                value={deleteReason}
+                onChange={(e) => setDeleteReason(e.target.value)}
+                placeholder="Ex: migrei pra outra ferramenta, não estou usando, etc."
+              />
             </div>
             <div>
               <label className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground block mb-1.5">
@@ -205,6 +292,7 @@ export default function PrivacySettings() {
               onClick={() => {
                 setShowDeleteConfirm(false)
                 setDeleteConfirmText('')
+                setDeleteReason('')
               }}
             >
               Cancelar
@@ -217,7 +305,7 @@ export default function PrivacySettings() {
                 deleteConfirmText !== 'EXCLUIR' || requestDeletion.isPending
               }
             >
-              {requestDeletion.isPending ? 'Enviando...' : 'Confirmar Exclusão'}
+              {requestDeletion.isPending ? 'Agendando...' : 'Agendar Exclusão'}
             </Button>
           </DialogFooter>
         </DialogContent>

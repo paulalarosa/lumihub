@@ -124,14 +124,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
     if (
       !SUPABASE_URL ||
       !SUPABASE_SERVICE_ROLE_KEY ||
@@ -143,10 +135,6 @@ serve(async (req: Request) => {
       if (!SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY')
       if (!GOOGLE_CLIENT_ID) missing.push('GOOGLE_CLIENT_ID')
       if (!GOOGLE_CLIENT_SECRET) missing.push('GOOGLE_CLIENT_SECRET')
-
-      await logger.error(
-        `Service configuration error: Missing keys [${missing.join(', ')}]`,
-      )
 
       return new Response(
         JSON.stringify({
@@ -162,23 +150,41 @@ serve(async (req: Request) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
-    const token = authHeader.replace('Bearer ', '')
+
+    const { action, event_id, event_data, user_token } = (await req.json()) as {
+      action: string
+      event_id?: string
+      event_data?: Partial<EventData>
+      user_token?: string
+    }
+
+    // Accept token from body (ES256 gateway bypass) OR Authorization header (legacy).
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
+    const authHeader = req.headers.get('Authorization')
+    const bearerFromHeader = authHeader?.replace('Bearer ', '') ?? null
+    const token =
+      user_token ||
+      (bearerFromHeader && bearerFromHeader !== anonKey
+        ? bearerFromHeader
+        : null)
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Missing user token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser(token)
 
     if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      return new Response(JSON.stringify({ error: 'Invalid token' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
-    }
-
-    const { action, event_id, event_data } = (await req.json()) as {
-      action: string
-      event_id?: string
-      event_data?: Partial<EventData>
     }
 
     // Fetch token directly from google_calendar_tokens (canonical table).

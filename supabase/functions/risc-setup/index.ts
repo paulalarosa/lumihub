@@ -33,7 +33,23 @@ const RISC_EVENTS = [
 const RISC_SCOPE = 'https://www.googleapis.com/auth/risc.configuration'
 
 async function getAccessToken(sa: ServiceAccount): Promise<string> {
-  const privateKey = await importPKCS8(sa.private_key, 'RS256')
+  // Normalize private_key: when JSON is round-tripped through .env files,
+  // newlines in the PEM often end up as literal `\n` (two chars) instead of
+  // real line breaks. importPKCS8 requires real newlines.
+  const pem = sa.private_key
+    .replace(/\\n/g, '\n')
+    .replace(/\r\n/g, '\n')
+    .trim()
+
+  let privateKey: CryptoKey
+  try {
+    privateKey = await importPKCS8(pem, 'RS256')
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    throw new Error(
+      `PEM import failed: ${msg}. First 30 chars of key: "${pem.slice(0, 30)}"`,
+    )
+  }
 
   const jwt = await new SignJWT({
     scope: RISC_SCOPE,
