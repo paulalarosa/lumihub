@@ -1,5 +1,0 @@
-{
-    "imports": {
-        "@aws-sdk/client-ses": "https://esm.sh/@aws-sdk/client-ses"
-    }
-}

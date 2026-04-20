@@ -19,7 +19,11 @@ import {
   ShieldOff,
   CreditCard,
   Building2,
+  X,
+  CheckSquare,
+  Loader2,
 } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +77,9 @@ export default function AdminUsers() {
 
   const [planFilter, setPlanFilter] = useState<string>('all')
   const [detailsUserId, setDetailsUserId] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkPlan, setBulkPlan] = useState<string>('')
+  const [bulkRunning, setBulkRunning] = useState(false)
 
   const filteredUsers =
     users?.filter((u) => {
@@ -87,6 +94,90 @@ export default function AdminUsers() {
 
       return matchesSearch && matchesPlan
     }) || []
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const allIds = filteredUsers
+        .filter((u) => u.id !== adminUser?.id)
+        .map((u) => u.id)
+      if (prev.size === allIds.length) return new Set()
+      return new Set(allIds)
+    })
+  }
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const selectedUsers = filteredUsers.filter((u) => selectedIds.has(u.id))
+
+  const handleBulkExport = () => {
+    if (selectedUsers.length === 0) return
+    handleExport(selectedUsers)
+  }
+
+  const handleBulkPlanChange = async () => {
+    if (!bulkPlan || selectedUsers.length === 0) return
+    setBulkRunning(true)
+    let success = 0
+    let failed = 0
+    for (const u of selectedUsers) {
+      try {
+        const { error } = await (supabase.rpc as CallableFunction)(
+          'admin_update_user_plan',
+          { p_user_id: u.id, p_new_plan: bulkPlan },
+        )
+        if (error) throw error
+        success++
+      } catch (err) {
+        logger.error('AdminUsers.bulkPlan', err)
+        failed++
+      }
+    }
+    toast({
+      title: 'Alteração em massa concluída',
+      description: `${success} atualizadas, ${failed} com erro.`,
+    })
+    setBulkRunning(false)
+    setBulkPlan('')
+    clearSelection()
+    refetch()
+  }
+
+  const handleBulkBlock = async (block: boolean) => {
+    if (selectedUsers.length === 0) return
+    setBulkRunning(true)
+    let success = 0
+    let failed = 0
+    for (const u of selectedUsers) {
+      if (u.id === adminUser?.id) continue
+      try {
+        const { error } = await (supabase.rpc as CallableFunction)(
+          'admin_block_user',
+          { p_user_id: u.id, p_blocked: block },
+        )
+        if (error) throw error
+        success++
+      } catch (err) {
+        logger.error('AdminUsers.bulkBlock', err)
+        failed++
+      }
+    }
+    toast({
+      title: block ? 'Usuárias suspensas' : 'Usuárias reativadas',
+      description: `${success} atualizadas, ${failed} com erro.`,
+    })
+    setBulkRunning(false)
+    clearSelection()
+    refetch()
+  }
 
   const handleExport = (list: typeof filteredUsers) => {
     exportCsv(
@@ -352,6 +443,19 @@ export default function AdminUsers() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                  <th className="text-left py-4 px-4 w-8">
+                    <Checkbox
+                      checked={
+                        selectedIds.size > 0 &&
+                        selectedIds.size ===
+                          filteredUsers.filter((u) => u.id !== adminUser?.id)
+                            .length
+                      }
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Selecionar todas"
+                      className="rounded-none border-zinc-700"
+                    />
+                  </th>
                   <th className="text-left py-4 px-6 text-zinc-500 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
                     User
                   </th>
@@ -379,8 +483,20 @@ export default function AdminUsers() {
                     onClick={() => setDetailsUserId(u.id)}
                     className={`border-b border-zinc-900 hover:bg-white/[0.02] transition-colors group cursor-pointer ${
                       isBlocked(u) ? 'bg-red-900/5' : ''
-                    }`}
+                    } ${selectedIds.has(u.id) ? 'bg-white/[0.04]' : ''}`}
                   >
+                    <td
+                      className="py-5 px-4 w-8"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={selectedIds.has(u.id)}
+                        onCheckedChange={() => toggleSelect(u.id)}
+                        disabled={u.id === adminUser?.id}
+                        aria-label={`Selecionar ${u.full_name || u.email}`}
+                        className="rounded-none border-zinc-700"
+                      />
+                    </td>
                     <td className="py-5 px-6">
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-3">
@@ -648,6 +764,90 @@ export default function AdminUsers() {
         userId={detailsUserId}
         onClose={() => setDetailsUserId(null)}
       />
+
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-zinc-950 border border-white/20 shadow-2xl rounded-none flex items-center gap-3 px-4 py-3 min-w-[520px]">
+          <div className="flex items-center gap-2 border-r border-zinc-800 pr-4">
+            <CheckSquare className="w-3.5 h-3.5 text-white" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+              {selectedIds.size} selecionada{selectedIds.size > 1 ? 's' : ''}
+            </span>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleBulkExport}
+            disabled={bulkRunning}
+            className="rounded-none border-zinc-800 bg-transparent hover:bg-white hover:text-black font-mono text-[10px] tracking-widest h-8"
+          >
+            <Download className="w-3 h-3 mr-2" />
+            EXPORTAR CSV
+          </Button>
+
+          <div className="flex items-center gap-1">
+            <Select value={bulkPlan} onValueChange={setBulkPlan}>
+              <SelectTrigger className="w-[140px] h-8 rounded-none border-zinc-800 bg-transparent text-[10px] font-mono uppercase tracking-widest">
+                <SelectValue placeholder="MUDAR PLANO" />
+              </SelectTrigger>
+              <SelectContent className="rounded-none border-zinc-800 bg-zinc-950 text-white">
+                {PLAN_OPTIONS.map((p) => (
+                  <SelectItem
+                    key={p.value}
+                    value={p.value}
+                    className="font-mono text-[10px] uppercase focus:bg-white focus:text-black rounded-none"
+                  >
+                    {p.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              onClick={handleBulkPlanChange}
+              disabled={!bulkPlan || bulkRunning}
+              className="rounded-none bg-white text-black hover:bg-zinc-200 h-8 font-mono text-[10px] tracking-widest"
+            >
+              {bulkRunning ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                'APLICAR'
+              )}
+            </Button>
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleBulkBlock(true)}
+            disabled={bulkRunning}
+            className="rounded-none border-red-900/50 bg-transparent text-red-500 hover:bg-red-500 hover:text-black font-mono text-[10px] tracking-widest h-8"
+          >
+            <Shield className="w-3 h-3 mr-2" />
+            SUSPENDER
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleBulkBlock(false)}
+            disabled={bulkRunning}
+            className="rounded-none border-green-900/50 bg-transparent text-green-500 hover:bg-green-500 hover:text-black font-mono text-[10px] tracking-widest h-8"
+          >
+            <ShieldOff className="w-3 h-3 mr-2" />
+            REATIVAR
+          </Button>
+
+          <button
+            onClick={clearSelection}
+            disabled={bulkRunning}
+            className="ml-auto text-zinc-500 hover:text-white transition-colors"
+            aria-label="Limpar seleção"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

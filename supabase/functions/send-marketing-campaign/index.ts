@@ -122,7 +122,7 @@ serve(async (req) => {
             )
 
             const { error: invokeError } = await supabaseAdmin.functions.invoke(
-              'send-ses-email',
+              'send-email',
               {
                 body: {
                   to: recipient.email,

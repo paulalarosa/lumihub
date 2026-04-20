@@ -50,14 +50,30 @@ export default function Footer() {
     },
   ]
 
-  const socials = [
-    { icon: Instagram, href: 'https://instagram.com/khaoskontrol_', label: 'Instagram' },
+  const socials: Array<{
+    icon: typeof Instagram
+    label: string
+    href?: string
+    onClick?: () => void
+  }> = [
+    {
+      icon: Instagram,
+      href: 'https://instagram.com/khaoskontrol_',
+      label: 'Instagram',
+    },
     {
       icon: MessageCircle,
-      href: 'https://wa.me/5521983604870',
       label: 'WhatsApp',
+      onClick: () =>
+        window.open('https://wa.me/5521983604870', '_blank', 'noopener'),
     },
-    { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com', label: 'E-mail' },
+    {
+      icon: Mail,
+      label: 'E-mail',
+      onClick: () => {
+        window.location.href = 'mailto:khaoskontrol07@gmail.com'
+      },
+    },
   ]
 
   return (
@@ -103,18 +119,32 @@ export default function Footer() {
               {t('footer.desc')}
             </p>
             <div className="flex items-center gap-2.5">
-              {socials.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full border border-border/30 bg-foreground/[0.03] flex items-center justify-center hover:bg-foreground hover:border-foreground transition-all group"
-                  aria-label={social.label}
-                >
-                  <social.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-background transition-colors" />
-                </a>
-              ))}
+              {socials.map((social) =>
+                social.href ? (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-9 h-9 rounded-full border border-border/30 bg-foreground/[0.03] flex items-center justify-center hover:bg-foreground hover:border-foreground transition-all group"
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    <social.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-background transition-colors" />
+                  </a>
+                ) : (
+                  <button
+                    key={social.label}
+                    type="button"
+                    onClick={social.onClick}
+                    className="w-9 h-9 rounded-full border border-border/30 bg-foreground/[0.03] flex items-center justify-center hover:bg-foreground hover:border-foreground transition-all group"
+                    aria-label={social.label}
+                    title={social.label}
+                  >
+                    <social.icon className="w-3.5 h-3.5 text-muted-foreground group-hover:text-background transition-colors" />
+                  </button>
+                ),
+              )}
             </div>
           </div>
 

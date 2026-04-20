@@ -121,7 +121,7 @@ async function sendWhatsApp(phone: string, message: string) {
 }
 
 async function sendEmail(to: string, subject: string, body: string) {
-  const { data, error } = await supabase.functions.invoke('send-ses-email', {
+  const { data, error } = await supabase.functions.invoke('send-email', {
     body: { to, subject, html: body.replace(/\n/g, '<br>') },
   })
 

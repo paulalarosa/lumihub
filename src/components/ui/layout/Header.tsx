@@ -13,11 +13,27 @@ const navLinks = [
   { name: 'header_contact', path: '/contato' },
 ]
 
-const socials = [
-  { icon: Instagram, href: 'https://instagram.com' },
-  { icon: Youtube, href: 'https://youtube.com' },
-  { icon: MessageCircle, href: 'https://wa.me/5521983604870' },
-  { icon: Mail, href: 'mailto:khaoskontrol07@gmail.com' },
+const socials: Array<{
+  icon: typeof Instagram
+  label: string
+  href?: string
+  onClick?: () => void
+}> = [
+  { icon: Instagram, label: 'Instagram', href: 'https://instagram.com' },
+  { icon: Youtube, label: 'YouTube', href: 'https://youtube.com' },
+  {
+    icon: MessageCircle,
+    label: 'WhatsApp',
+    onClick: () =>
+      window.open('https://wa.me/5521983604870', '_blank', 'noopener'),
+  },
+  {
+    icon: Mail,
+    label: 'E-mail',
+    onClick: () => {
+      window.location.href = 'mailto:khaoskontrol07@gmail.com'
+    },
+  },
 ]
 
 export default function Header() {
@@ -251,17 +267,32 @@ export default function Header() {
                   Redes
                 </span>
                 <div className="flex gap-4">
-                  {socials.map((social, i) => (
-                    <a
-                      key={i}
-                      href={social.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-foreground/40 hover:text-foreground transition-colors"
-                    >
-                      <social.icon className="w-4 h-4" />
-                    </a>
-                  ))}
+                  {socials.map((social, i) =>
+                    social.href ? (
+                      <a
+                        key={i}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.label}
+                        title={social.label}
+                        className="text-foreground/40 hover:text-foreground transition-colors"
+                      >
+                        <social.icon className="w-4 h-4" />
+                      </a>
+                    ) : (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={social.onClick}
+                        aria-label={social.label}
+                        title={social.label}
+                        className="text-foreground/40 hover:text-foreground transition-colors"
+                      >
+                        <social.icon className="w-4 h-4" />
+                      </button>
+                    ),
+                  )}
                 </div>
               </div>
             </motion.div>

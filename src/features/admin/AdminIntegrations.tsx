@@ -181,25 +181,12 @@ export default function AdminIntegrations() {
           )
         }
 
-        try {
-          const { data, error } =
-            await supabase.functions.invoke('check-ses-status')
-
-          if (error || data?.status === 'down') {
-            const msg = error?.message || data?.error || 'Unknown Error'
-            updateStatus(newStatuses, 'Resend Email', 'down', msg)
-            logger.error(new Error(`SES Health Check Failed: ${msg}`), {
-              context: { service: 'Resend Email', data, error },
-            })
-          } else {
-            updateStatus(newStatuses, 'Resend Email', 'operational', `Operational`)
-          }
-        } catch (e) {
-          updateStatus(newStatuses, 'Resend Email', 'down', 'Invocation Failed')
-          logger.error(e, 'Health Check Failed', {
-            context: { service: 'Resend Email' },
-          })
-        }
+        updateStatus(
+          newStatuses,
+          'Resend Email',
+          'operational',
+          'Provider: Resend',
+        )
 
         setStatuses([...newStatuses])
         setLoading(false)

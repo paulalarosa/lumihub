@@ -16,7 +16,11 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
-const SALES_TO_EMAIL = 'paula.larosa@klinisaude.com.br'
+const SALES_TO_EMAIL =
+  Deno.env.get('RESEND_TO') ?? 'khaoskontrol07@gmail.com'
+const SALES_FROM_EMAIL =
+  Deno.env.get('OFFICIAL_EMAIL_KHAOS') ??
+  'Khaos Kontrol <noreply@khaoskontrol.com.br>'
 
 const KNOWLEDGE_BASE = `KHAOS KONTROL — CRM para maquiadoras profissionais.
 
@@ -48,7 +52,7 @@ PARA QUEM:
 - Que querem profissionalizar a gestão e escalar
 
 SUPORTE:
-- Email: ${SALES_TO_EMAIL}
+- Email: khaoskontrol07@gmail.com
 - WhatsApp: +55 21 98360-4870
 - Trial de 14 dias sem cartão
 
@@ -71,7 +75,7 @@ const notifyLead = async (
   try {
     const resend = new Resend(resendKey)
     await resend.emails.send({
-      from: 'Khaos Kontrol <vendas@khaoskontrol.com.br>',
+      from: SALES_FROM_EMAIL,
       to: SALES_TO_EMAIL,
       subject: `[LEAD] ${lead.name} — ${lead.email}`,
       html: `
