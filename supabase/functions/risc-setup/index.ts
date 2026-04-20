@@ -32,6 +32,10 @@ const RISC_EVENTS = [
 
 const RISC_SCOPE = 'https://www.googleapis.com/auth/risc.configuration'
 
+// Always hit Google's canonical OAuth2 token endpoint — some service account
+// JSONs carry a legacy token_uri that still works but confuses the flow.
+const GOOGLE_TOKEN_URI = 'https://oauth2.googleapis.com/token'
+
 async function getAccessToken(sa: ServiceAccount): Promise<string> {
   // Normalize private_key: when JSON is round-tripped through .env files,
   // newlines in the PEM often end up as literal `\n` (two chars) instead of
@@ -51,18 +55,24 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
     )
   }
 
+  // Google's server-to-server OAuth2 JWT assertion. Pass ALL claims directly
+  // to the SignJWT constructor — previously we chained setIssuer/setSubject,
+  // which ended up with `sub === iss`. Some reports show Google's token
+  // endpoint treating `sub=iss` + scope as ambiguous and returning id_token
+  // instead of access_token. The canonical flow omits `sub` entirely (it's
+  // only required for domain-wide delegation, which we don't use).
+  const now = Math.floor(Date.now() / 1000)
   const jwt = await new SignJWT({
+    iss: sa.client_email,
     scope: RISC_SCOPE,
+    aud: GOOGLE_TOKEN_URI,
+    iat: now,
+    exp: now + 3600,
   })
     .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
-    .setIssuer(sa.client_email)
-    .setSubject(sa.client_email)
-    .setAudience(sa.token_uri)
-    .setIssuedAt()
-    .setExpirationTime('1h')
     .sign(privateKey)
 
-  const res = await fetch(sa.token_uri, {
+  const res = await fetch(GOOGLE_TOKEN_URI, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({

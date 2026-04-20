@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
+import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -98,7 +99,8 @@ export const FollowUpManager = () => {
       toast.success('Template atualizado!')
     },
     onError: (error) => {
-      toast.error(`Erro ao atualizar: ${error.message}`)
+      logger.error(error, 'FollowUpManager.updateTemplate')
+      toast.error('Não conseguimos salvar o template. Tente de novo.')
     },
   })
 

@@ -85,8 +85,8 @@ export const PostScheduler = () => {
       toast.success('Post agendado com sucesso!')
     },
     onError: (error) => {
-      logger.error(error)
-      toast.error('Erro ao agendar post: ' + error.message)
+      logger.error(error, 'PostScheduler.schedule')
+      toast.error('Não conseguimos agendar o post. Verifique sua conexão e tente de novo.')
     },
   })
 

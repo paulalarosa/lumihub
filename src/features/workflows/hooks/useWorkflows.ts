@@ -90,6 +90,10 @@ export function useWorkflows() {
       qc.invalidateQueries({ queryKey: ['workflows'] })
       toast.success('Workflow atualizado')
     },
+    onError: (err) => {
+      logger.error(err, 'useWorkflows.update')
+      toast.error('Não conseguimos salvar o workflow. Tente de novo.')
+    },
   })
 
   const remove = useMutation({
@@ -101,6 +105,10 @@ export function useWorkflows() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['workflows'] })
       toast.success('Workflow removido')
+    },
+    onError: (err) => {
+      logger.error(err, 'useWorkflows.remove')
+      toast.error('Não conseguimos remover o workflow. Tente de novo.')
     },
   })
 

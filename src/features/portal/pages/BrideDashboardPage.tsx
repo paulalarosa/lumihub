@@ -2,7 +2,13 @@ import SEOHead from '@/components/seo/SEOHead'
 import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
-import { LogOut, CheckCircle2, CalendarDays } from 'lucide-react'
+import {
+  LogOut,
+  CheckCircle2,
+  CalendarDays,
+  AlertCircle,
+  ArrowRight,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -17,6 +23,36 @@ export default function BrideDashboardPage() {
   const remaining = d.totalContract - d.paidAmount
   const progress =
     d.totalContract > 0 ? (d.paidAmount / d.totalContract) * 100 : 0
+
+  // Contextual next-action: shows the single most important task for the bride
+  // right now. Priority order: sign pending contract > pay remaining > all good.
+  const pendingContract = d.contracts.find(
+    (c) => c.status === 'sent' || c.status === 'pending_signature',
+  )
+  const nextAction: {
+    label: string
+    description: string
+    tabValue?: 'contracts' | 'services'
+  } | null = pendingContract
+    ? {
+        label: 'Seu contrato está pronto pra assinar',
+        description: 'Revise os detalhes e confirme sua participação',
+        tabValue: 'contracts',
+      }
+    : remaining > 0 && d.totalContract > 0
+      ? {
+          label: `Falta quitar R$ ${remaining.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+          description: 'Entre em contato com sua maquiadora pra combinar os próximos pagamentos',
+          tabValue: 'services',
+        }
+      : null
+
+  const weddingUrgencyTone =
+    d.daysLeft > 0 && d.daysLeft <= 30
+      ? 'urgent'
+      : d.daysLeft > 0 && d.daysLeft <= 90
+        ? 'soon'
+        : 'calm'
 
   if (d.loading) {
     return <PageLoader />
@@ -59,6 +95,47 @@ export default function BrideDashboardPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-6 py-12 md:py-20">
+        {nextAction && (
+          <div
+            className={`mb-10 border px-6 py-5 flex items-start gap-4 ${
+              weddingUrgencyTone === 'urgent'
+                ? 'border-amber-500/40 bg-amber-500/5'
+                : 'border-white/15 bg-white/[0.03]'
+            }`}
+          >
+            <AlertCircle
+              className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                weddingUrgencyTone === 'urgent'
+                  ? 'text-amber-400'
+                  : 'text-white/60'
+              }`}
+            />
+            <div className="flex-1 min-w-0">
+              <p
+                className={`text-xs uppercase tracking-[0.25em] font-mono font-bold ${
+                  weddingUrgencyTone === 'urgent'
+                    ? 'text-amber-400'
+                    : 'text-white'
+                }`}
+              >
+                {nextAction.label}
+              </p>
+              <p className="text-sm text-neutral-400 mt-1">
+                {nextAction.description}
+              </p>
+            </div>
+            {nextAction.tabValue && (
+              <ArrowRight
+                className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                  weddingUrgencyTone === 'urgent'
+                    ? 'text-amber-400'
+                    : 'text-white/40'
+                }`}
+              />
+            )}
+          </div>
+        )}
+
         <Tabs defaultValue="dashboard" className="w-full">
           <div className="flex justify-center mb-12">
             <TabsList className="bg-[#121212] border border-neutral-800">

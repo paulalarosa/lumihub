@@ -116,6 +116,10 @@ export function useProjectMutations() {
         queryKey: ['project', data.project_id, 'tasks'],
       })
     },
+    onError: (error) => {
+      logger.error(error, 'useProjectMutations.updateTask')
+      toast({ title: 'Não conseguimos salvar a tarefa', variant: 'destructive' })
+    },
   })
 
   const deleteTaskMutation = useMutation({
@@ -134,6 +138,10 @@ export function useProjectMutations() {
       queryClient.invalidateQueries({
         queryKey: ['project', data.project_id, 'tasks'],
       })
+    },
+    onError: (error) => {
+      logger.error(error, 'useProjectMutations.deleteTask')
+      toast({ title: 'Não conseguimos excluir a tarefa', variant: 'destructive' })
     },
   })
 
@@ -177,6 +185,10 @@ export function useProjectMutations() {
         queryKey: ['project', data.project_id, 'services'],
       })
       toast({ title: 'Serviço removido!' })
+    },
+    onError: (error) => {
+      logger.error(error, 'useProjectMutations.removeService')
+      toast({ title: 'Não conseguimos remover o serviço', variant: 'destructive' })
     },
   })
 

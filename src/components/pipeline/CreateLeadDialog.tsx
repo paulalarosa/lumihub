@@ -100,8 +100,8 @@ export const CreateLeadDialog = ({
       onClose()
     },
     onError: (error) => {
-      logger.error('Error creating lead:', error)
-      toast.error('Erro ao criar lead: ' + error.message)
+      logger.error(error, 'CreateLeadDialog.createLead')
+      toast.error('Não conseguimos criar o lead. Verifique os campos e tente de novo.')
     },
 
     onSettled: () => {

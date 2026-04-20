@@ -394,6 +394,25 @@ export default function SignContract() {
                 Assine o Contrato
               </h2>
 
+              <div className="border border-amber-500/30 bg-amber-500/5 p-4 flex items-start gap-3">
+                <FileText className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-mono uppercase tracking-widest text-amber-400 font-bold">
+                    Você está assinando
+                  </p>
+                  <p className="text-sm text-white mt-1 font-medium truncate">
+                    {requestData.contract?.title || 'Contrato'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setStep('review')}
+                    className="text-[10px] font-mono uppercase tracking-widest text-amber-300/80 hover:text-amber-200 underline underline-offset-2 mt-2"
+                  >
+                    Reler o contrato antes de assinar
+                  </button>
+                </div>
+              </div>
+
               <Tabs
                 value={signatureMethod}
                 onValueChange={(v: string) =>

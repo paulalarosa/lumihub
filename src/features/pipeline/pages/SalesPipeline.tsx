@@ -27,6 +27,7 @@ import { PipelineColumn } from '@/components/pipeline/PipelineColumn'
 import { CreateLeadDialog } from '@/components/pipeline/CreateLeadDialog'
 import { getLeadTemperature } from '@/features/pipeline/lib/leadTemperature'
 import { toast } from 'sonner'
+import { logger } from '@/services/logger'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 
 export interface PipelineLead {
@@ -126,7 +127,8 @@ export const SalesPipeline = () => {
       queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ADMIN_METRICS] })
     },
     onError: (error) => {
-      toast.error('Erro ao mover card: ' + error.message)
+      logger.error(error, 'SalesPipeline.moveLead')
+      toast.error('Não conseguimos mover o lead. Tente de novo em instantes.')
     },
   })
 
@@ -188,8 +190,10 @@ export const SalesPipeline = () => {
                   'create_default_pipeline_stages',
                   { p_user_id: organizationId || user?.id },
                 )
-                if (error) toast.error(error.message)
-                else {
+                if (error) {
+                  logger.error(error, 'SalesPipeline.initStages')
+                  toast.error('Não conseguimos criar os estágios. Tente de novo.')
+                } else {
                   toast.success('Estágios criados!')
                   queryClient.invalidateQueries({
                     queryKey: ['pipeline-stages'],

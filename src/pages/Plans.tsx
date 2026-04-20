@@ -169,9 +169,12 @@ export default function Plans() {
           </div>
         </section>
 
-        <section className="relative z-10 py-12 px-6">
+        <section className="relative z-10 py-12 px-0 md:px-6">
           <div className="container mx-auto max-w-6xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch">
+            <p className="md:hidden text-center text-[10px] font-mono uppercase tracking-widest text-white/30 mb-4 px-6">
+              Arraste para comparar os planos →
+            </p>
+            <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 px-6 pb-6 md:grid md:grid-cols-3 md:gap-5 md:px-0 md:pb-0 md:overflow-visible items-stretch scrollbar-thin">
               {plans.map((plan, index) => {
                 const price =
                   billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice
@@ -180,7 +183,7 @@ export default function Plans() {
                 return (
                   <motion.div
                     key={plan.id}
-                    className={`relative flex flex-col p-6 sm:p-8 border transition-all ${
+                    className={`relative flex flex-col p-6 sm:p-8 border transition-all snap-center flex-shrink-0 w-[85vw] max-w-[340px] md:w-auto md:max-w-none md:flex-shrink ${
                       plan.highlighted
                         ? 'border-white/30 bg-white/[0.06] md:scale-[1.03] z-20'
                         : 'border-white/10 bg-white/[0.02] z-10'

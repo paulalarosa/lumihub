@@ -58,10 +58,10 @@ export default function Settings() {
           disabled={cfg.saving}
           className="shrink-0 rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-[10px] sm:text-xs uppercase tracking-widest px-3 sm:px-6"
         >
-          {cfg.saving ? '...' : (
+          {cfg.saving ? 'Salvando...' : (
             <>
-              <span className="hidden sm:inline">SAVE_CHANGES</span>
-              <span className="sm:hidden">SAVE</span>
+              <span className="hidden sm:inline">Salvar alterações</span>
+              <span className="sm:hidden">Salvar</span>
             </>
           )}
         </Button>

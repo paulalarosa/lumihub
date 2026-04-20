@@ -45,6 +45,14 @@ export function useLGPD() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-consents'] })
     },
+    onError: (error) => {
+      logger.error(error, 'useLGPD.updateConsent')
+      toast({
+        title: 'Não conseguimos salvar seu consentimento',
+        description: 'Tente de novo em instantes. Se persistir, recarregue a página.',
+        variant: 'destructive',
+      })
+    },
   })
 
   const exportData = useMutation({

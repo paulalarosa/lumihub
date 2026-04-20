@@ -37,7 +37,7 @@ import {
   MoreVertical,
   Link as LinkIcon,
   Download,
-  FolderPlus,
+  UserPlus,
 } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
 import { MobileFAB } from '@/components/ui/MobileFAB'
@@ -123,7 +123,7 @@ export default function Clientes() {
                 onClick={() => wizard.openWizard()}
                 className="rounded-none bg-white text-black hover:bg-gray-200 font-mono text-xs uppercase tracking-widest h-10 px-6 gap-2"
               >
-                <FolderPlus className="h-4 w-4" />
+                <UserPlus className="h-4 w-4" />
                 Nova Cliente
               </Button>
             </div>

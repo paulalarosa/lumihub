@@ -1,0 +1,401 @@
+
+> khaos-kontrol-system@5.8.2 build
+> npm run sitemap && tsc && vite build && node -e "const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');"
+
+
+> khaos-kontrol-system@5.8.2 sitemap
+> node scripts/generate-sitemap.mjs
+
+[sitemap] Supabase env missing, skipping dynamic URLs
+[sitemap] Wrote 14 static + 0 blog + 0 help URLs to public/sitemap.xml
+[36mvite v7.3.2 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mÔ£ô[39m 5510 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32massets/card-BcyYrIxl.js.br                     [39m[1m[2m    0.35 kB[22m[1m[22m
+[2mdist/[22m[32massets/card-BcyYrIxl.js.gz                     [39m[1m[2m    0.43 kB[22m[1m[22m
+[2mdist/[22m[32massets/useBlogPosts-CNqblhQV.js.br             [39m[1m[2m    0.43 kB[22m[1m[22m
+[2mdist/[22m[32massets/useMFA-TQGB7FI8.js.br                   [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mdist/[22m[32massets/table-B5gKIiRF.js.br                    [39m[1m[2m    0.45 kB[22m[1m[22m
+[2mdist/[22m[32massets/useKnowledgeBase-CcITWsaT.js.br         [39m[1m[2m    0.48 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantLayout-CJjnPaVY.js.br          [39m[1m[2m    0.50 kB[22m[1m[22m
+[2mdist/[22m[32massets/useBlogPosts-CNqblhQV.js.gz             [39m[1m[2m    0.50 kB[22m[1m[22m
+[2mdist/[22m[32massets/NotFound-Ds3YMMxy.js.br                 [39m[1m[2m    0.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/useMFA-TQGB7FI8.js.gz                   [39m[1m[2m    0.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/table-B5gKIiRF.js.gz                    [39m[1m[2m    0.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/error-handler-DGW3sR79.js.br            [39m[1m[2m    0.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/useKnowledgeBase-CcITWsaT.js.gz         [39m[1m[2m    0.56 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideProtectedRoute-CiNCaRKz.js.br      [39m[1m[2m    0.56 kB[22m[1m[22m
+[2mdist/[22m[32massets/MetricCard-DAH0ofG8.js.br               [39m[1m[2m    0.57 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantLayout-CJjnPaVY.js.gz          [39m[1m[2m    0.58 kB[22m[1m[22m
+[2mdist/[22m[32massets/AIController-CRSl7P9M.css.br            [39m[1m[2m    0.59 kB[22m[1m[22m
+[2mdist/[22m[32massets/NotFound-Ds3YMMxy.js.gz                 [39m[1m[2m    0.61 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideProtectedRoute-CiNCaRKz.js.gz      [39m[1m[2m    0.64 kB[22m[1m[22m
+[2mdist/[22m[32massets/error-handler-DGW3sR79.js.gz            [39m[1m[2m    0.65 kB[22m[1m[22m
+[2mdist/[22m[32massets/MetricCard-DAH0ofG8.js.gz               [39m[1m[2m    0.66 kB[22m[1m[22m
+[2mdist/[22m[32massets/Integrations-BhtnXxaq.js.br             [39m[1m[2m    0.70 kB[22m[1m[22m
+[2mdist/[22m[32massets/AIController-CRSl7P9M.css.gz            [39m[1m[2m    0.72 kB[22m[1m[22m
+[2mdist/[22m[32massets/dialog-CENRoDEZ.js.br                   [39m[1m[2m    0.73 kB[22m[1m[22m
+[2mdist/[22m[32massets/Integrations-BhtnXxaq.js.gz             [39m[1m[2m    0.74 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpdatePassword-DfrkcZ6n.js.br           [39m[1m[2m    0.77 kB[22m[1m[22m
+[2mdist/[22m[32massets/middleware-BecK8QcD.js.br               [39m[1m[2m    0.82 kB[22m[1m[22m
+[2mdist/[22m[32massets/dialog-CENRoDEZ.js.gz                   [39m[1m[2m    0.85 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpdatePassword-DfrkcZ6n.js.gz           [39m[1m[2m    0.86 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradePendingPage-D-UYkmAV.js.br       [39m[1m[2m    0.86 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradeFailurePage-Dz1Ua4wY.js.br       [39m[1m[2m    0.88 kB[22m[1m[22m
+[2mdist/[22m[32massets/middleware-BecK8QcD.js.gz               [39m[1m[2m    0.88 kB[22m[1m[22m
+[2mdist/[22m[32massets/GoogleCalendarCallback-B4n5VSSI.js.br   [39m[1m[2m    0.89 kB[22m[1m[22m
+[2mdist/[22m[32massets/dropdown-menu-Bz-qjDc0.js.br            [39m[1m[2m    0.90 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradeSuccessPage-Bweii1Pi.js.br       [39m[1m[2m    0.91 kB[22m[1m[22m
+[2mdist/[22m[32massets/AuthLayout-BmBaiS-a.js.br               [39m[1m[2m    0.94 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradeFailurePage-Dz1Ua4wY.js.gz       [39m[1m[2m    0.97 kB[22m[1m[22m
+[2mdist/[22m[32massets/RevenueChart-D7BsOiX3.js.br             [39m[1m[2m    0.97 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradePendingPage-D-UYkmAV.js.gz       [39m[1m[2m    0.97 kB[22m[1m[22m
+[2mdist/[22m[32massets/SignatureModal-oJKTmuuJ.js.br           [39m[1m[2m    1.01 kB[22m[1m[22m
+[2mdist/[22m[32massets/GoogleCalendarCallback-B4n5VSSI.js.gz   [39m[1m[2m    1.02 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradeSuccessPage-Bweii1Pi.js.gz       [39m[1m[2m    1.03 kB[22m[1m[22m
+[2mdist/[22m[32massets/dropdown-menu-Bz-qjDc0.js.gz            [39m[1m[2m    1.04 kB[22m[1m[22m
+[2mdist/[22m[32massets/CheckoutReturn-CQWsZQ7I.js.br           [39m[1m[2m    1.06 kB[22m[1m[22m
+[2mdist/[22m[32massets/AuthLayout-BmBaiS-a.js.gz               [39m[1m[2m    1.06 kB[22m[1m[22m
+[2mdist/[22m[32massets/switch-DZCrlrx2.js.br                   [39m[1m[2m    1.09 kB[22m[1m[22m
+[2mdist/[22m[32massets/RevenueChart-D7BsOiX3.js.gz             [39m[1m[2m    1.12 kB[22m[1m[22m
+[2mdist/[22m[32mmanifest.webmanifest                           [39m[1m[2m    1.14 kB[22m[1m[22m
+[2mdist/[22m[32massets/SignatureModal-oJKTmuuJ.js.gz           [39m[1m[2m    1.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/tabs-BrxeObDL.js.br                     [39m[1m[2m    1.19 kB[22m[1m[22m
+[2mdist/[22m[32massets/CheckoutReturn-CQWsZQ7I.js.gz           [39m[1m[2m    1.19 kB[22m[1m[22m
+[2mdist/[22m[32massets/HelpArticle-C1Yd5bGz.js.br              [39m[1m[2m    1.21 kB[22m[1m[22m
+[2mdist/[22m[32massets/MFAVerifyPage-eSV-TCuN.js.br            [39m[1m[2m    1.22 kB[22m[1m[22m
+[2mdist/[22m[32massets/switch-DZCrlrx2.js.gz                   [39m[1m[2m    1.26 kB[22m[1m[22m
+[2mdist/[22m[32massets/ForgotPassword-DCvebjoH.js.br           [39m[1m[2m    1.26 kB[22m[1m[22m
+[2mdist/[22m[32massets/BlogArticle-Bkf28f6Z.js.br              [39m[1m[2m    1.29 kB[22m[1m[22m
+[2mdist/[22m[32massets/HelpArticle-C1Yd5bGz.js.gz              [39m[1m[2m    1.36 kB[22m[1m[22m
+[2mdist/[22m[32massets/tabs-BrxeObDL.js.gz                     [39m[1m[2m    1.36 kB[22m[1m[22m
+[2mdist/[22m[32massets/MFAVerifyPage-eSV-TCuN.js.gz            [39m[1m[2m    1.36 kB[22m[1m[22m
+[2mdist/[22m[32massets/Cookies-dPTCu6vX.js.br                  [39m[1m[2m    1.38 kB[22m[1m[22m
+[2mdist/[22m[32massets/AuthCallbackHandler-BR3RWbau.js.br      [39m[1m[2m    1.40 kB[22m[1m[22m
+[2mdist/[22m[32massets/ForgotPassword-DCvebjoH.js.gz           [39m[1m[2m    1.44 kB[22m[1m[22m
+[2mdist/[22m[32massets/Terms-BgkwIfMN.js.br                    [39m[1m[2m    1.46 kB[22m[1m[22m
+[2mdist/[22m[32massets/BlogArticle-Bkf28f6Z.js.gz              [39m[1m[2m    1.48 kB[22m[1m[22m
+[2mdist/[22m[32massets/Login-BqN6KMU1.js.br                    [39m[1m[2m    1.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/WhatsAppButtons-BsevihgW.js.br          [39m[1m[2m    1.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/Help-eoFVzbAK.js.br                     [39m[1m[2m    1.50 kB[22m[1m[22m
+[2mdist/[22m[32massets/checkbox-DbFqhtgC.js.br                 [39m[1m[2m    1.51 kB[22m[1m[22m
+[2mdist/[22m[32massets/SEOHead-CES3ph1G.js.br                  [39m[1m[2m    1.53 kB[22m[1m[22m
+[2mdist/[22m[32massets/Cookies-dPTCu6vX.js.gz                  [39m[1m[2m    1.56 kB[22m[1m[22m
+[2mdist/[22m[32massets/Security-CbCAn5mW.js.br                 [39m[1m[2m    1.58 kB[22m[1m[22m
+[2mdist/[22m[32massets/DPA-u7ZdTEMO.js.br                      [39m[1m[2m    1.60 kB[22m[1m[22m
+[2mdist/[22m[32massets/AcceptInvitePage-DqI5YZgt.js.br         [39m[1m[2m    1.60 kB[22m[1m[22m
+[2mdist/[22m[32massets/AuthCallbackHandler-BR3RWbau.js.gz      [39m[1m[2m    1.61 kB[22m[1m[22m
+[2mdist/[22m[32massets/validators-m21AQ9zU.js.br               [39m[1m[2m    1.62 kB[22m[1m[22m
+[2mdist/[22m[32massets/Terms-BgkwIfMN.js.gz                    [39m[1m[2m    1.64 kB[22m[1m[22m
+[2mdist/[22m[32massets/WhatsAppButtons-BsevihgW.js.gz          [39m[1m[2m    1.66 kB[22m[1m[22m
+[2mdist/[22m[32massets/Help-eoFVzbAK.js.gz                     [39m[1m[2m    1.67 kB[22m[1m[22m
+[2mdist/[22m[32massets/Login-BqN6KMU1.js.gz                    [39m[1m[2m    1.70 kB[22m[1m[22m
+[2mdist/[22m[32massets/checkbox-DbFqhtgC.js.gz                 [39m[1m[2m    1.72 kB[22m[1m[22m
+[2mdist/[22m[32mindex.html.br                                  [39m[1m[2m    1.72 kB[22m[1m[22m
+[2mdist/[22m[32massets/Security-CbCAn5mW.js.gz                 [39m[1m[2m    1.76 kB[22m[1m[22m
+[2mdist/[22m[32massets/Refund-B8E_HQuw.js.br                   [39m[1m[2m    1.76 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideLoginPage-DScyz2R7.js.br           [39m[1m[2m    1.79 kB[22m[1m[22m
+[2mdist/[22m[32massets/StudioAvailabilityPage-DiRAWs4O.js.br   [39m[1m[2m    1.79 kB[22m[1m[22m
+[2mdist/[22m[32massets/DPA-u7ZdTEMO.js.gz                      [39m[1m[2m    1.79 kB[22m[1m[22m
+[2mdist/[22m[32massets/validators-m21AQ9zU.js.gz               [39m[1m[2m    1.79 kB[22m[1m[22m
+[2mdist/[22m[32massets/AcceptInvitePage-DqI5YZgt.js.gz         [39m[1m[2m    1.81 kB[22m[1m[22m
+[2mdist/[22m[32massets/SEOHead-CES3ph1G.js.gz                  [39m[1m[2m    1.82 kB[22m[1m[22m
+[2mdist/[22m[32massets/pt-BR-BcCl0GMU.js.br                    [39m[1m[2m    1.89 kB[22m[1m[22m
+[2mdist/[22m[32massets/Blog-BBuIdw2j.js.br                     [39m[1m[2m    1.94 kB[22m[1m[22m
+[2mdist/[22m[32massets/Contact-BB_-4_b7.js.br                  [39m[1m[2m    1.94 kB[22m[1m[22m
+[2mdist/[22m[32massets/Register-DrK1qu1j.js.br                 [39m[1m[2m    1.95 kB[22m[1m[22m
+[2mdist/[22m[32massets/Refund-B8E_HQuw.js.gz                   [39m[1m[2m    1.96 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantQuickLogin-DoW6lXo0.js.br      [39m[1m[2m    1.97 kB[22m[1m[22m
+[2mdist/[22m[32massets/StudioAvailabilityPage-DiRAWs4O.js.gz   [39m[1m[2m    1.99 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideLoginPage-DScyz2R7.js.gz           [39m[1m[2m    2.02 kB[22m[1m[22m
+[2mdist/[22m[32massets/workbox-window.prod.es5-BIl4cyR9.js.br  [39m[1m[2m    2.09 kB[22m[1m[22m
+[2mdist/[22m[32massets/pt-BR-BcCl0GMU.js.gz                    [39m[1m[2m    2.10 kB[22m[1m[22m
+[2mdist/[22m[32massets/CalendarPage-BSwzzYnC.css.br            [39m[1m[2m    2.12 kB[22m[1m[22m
+[2mdist/[22m[32mindex.html.gz                                  [39m[1m[2m    2.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/Blog-BBuIdw2j.js.gz                     [39m[1m[2m    2.17 kB[22m[1m[22m
+[2mdist/[22m[32massets/Register-DrK1qu1j.js.gz                 [39m[1m[2m    2.22 kB[22m[1m[22m
+[2mdist/[22m[32massets/Contact-BB_-4_b7.js.gz                  [39m[1m[2m    2.23 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantQuickLogin-DoW6lXo0.js.gz      [39m[1m[2m    2.25 kB[22m[1m[22m
+[2mdist/[22m[32massets/LeaveReview-BABIerK1.js.br              [39m[1m[2m    2.30 kB[22m[1m[22m
+[2mdist/[22m[32massets/workbox-window.prod.es5-BIl4cyR9.js.gz  [39m[1m[2m    2.37 kB[22m[1m[22m
+[2mdist/[22m[32massets/CalendarPage-BSwzzYnC.css.gz            [39m[1m[2m    2.48 kB[22m[1m[22m
+[2mdist/[22m[32massets/Privacy-DWLjk2Rl.js.br                  [39m[1m[2m    2.54 kB[22m[1m[22m
+[2mdist/[22m[32massets/LeaveReview-BABIerK1.js.gz              [39m[1m[2m    2.60 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantFreeDashboard-DNlSAShf.js.br   [39m[1m[2m    2.60 kB[22m[1m[22m
+[2mdist/[22m[32massets/Analytics-B8HbbuMh.js.br                [39m[1m[2m    2.62 kB[22m[1m[22m
+[2mdist/[22m[32massets/CanvasPanel-B0bg9n3n.js.br              [39m[1m[2m    2.64 kB[22m[1m[22m
+[2mdist/[22m[32massets/reportService-BhwhQ4Yi.js.br            [39m[1m[2m    2.73 kB[22m[1m[22m
+[2mdist/[22m[32massets/PostScheduler-LYdpFwY5.js.br            [39m[1m[2m    2.77 kB[22m[1m[22m
+[2mdist/[22m[32massets/Privacy-DWLjk2Rl.js.gz                  [39m[1m[2m    2.84 kB[22m[1m[22m
+[2mdist/[22m[32massets/Plans-DoMkodbE.js.br                    [39m[1m[2m    2.87 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantFreeDashboard-DNlSAShf.js.gz   [39m[1m[2m    2.90 kB[22m[1m[22m
+[2mdist/[22m[32massets/CanvasPanel-B0bg9n3n.js.gz              [39m[1m[2m    2.92 kB[22m[1m[22m
+[2mdist/[22m[32massets/Analytics-B8HbbuMh.js.gz                [39m[1m[2m    2.93 kB[22m[1m[22m
+[2mdist/[22m[32massets/date-utils-BBVfUGLk.js.br               [39m[1m[2m    3.01 kB[22m[1m[22m
+[2mdist/[22m[32massets/reportService-BhwhQ4Yi.js.gz            [39m[1m[2m    3.07 kB[22m[1m[22m
+[2mdist/[22m[32massets/StudioCalendarPage-DeJQ2LgF.js.br       [39m[1m[2m    3.11 kB[22m[1m[22m
+[2mdist/[22m[32massets/PostScheduler-LYdpFwY5.js.gz            [39m[1m[2m    3.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/Services-Cx4P9siN.js.br                 [39m[1m[2m    3.18 kB[22m[1m[22m
+[2mdist/[22m[32massets/Plans-DoMkodbE.js.gz                    [39m[1m[2m    3.23 kB[22m[1m[22m
+[2mdist/[22m[32massets/OnboardingWizard-DSyAd5Sf.js.br         [39m[1m[2m    3.27 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradePage-Dh3EnC3u.js.br              [39m[1m[2m    3.27 kB[22m[1m[22m
+[2mdist/[22m[32massets/date-utils-BBVfUGLk.js.gz               [39m[1m[2m    3.31 kB[22m[1m[22m
+[2mdist/[22m[32massets/Microsite-CcayoVTl.js.br                [39m[1m[2m    3.35 kB[22m[1m[22m
+[2mdist/[22m[32massets/StudioCalendarPage-DeJQ2LgF.js.gz       [39m[1m[2m    3.44 kB[22m[1m[22m
+[2mdist/[22m[32massets/scroll-area-DzbxZ1Or.js.br              [39m[1m[2m    3.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/HomePage-DW03OmST.js.br                 [39m[1m[2m    3.50 kB[22m[1m[22m
+[2mdist/[22m[32massets/Services-Cx4P9siN.js.gz                 [39m[1m[2m    3.57 kB[22m[1m[22m
+[2mdist/[22m[32massets/OnboardingWizard-DSyAd5Sf.js.gz         [39m[1m[2m    3.65 kB[22m[1m[22m
+[2mdist/[22m[32massets/UpgradePage-Dh3EnC3u.js.gz              [39m[1m[2m    3.65 kB[22m[1m[22m
+[2mdist/[22m[32massets/SignContract-B8qeyLZD.js.br             [39m[1m[2m    3.69 kB[22m[1m[22m
+[2mdist/[22m[32massets/Marketing-Bl61zhX3.js.br                [39m[1m[2m    3.81 kB[22m[1m[22m
+[2mdist/[22m[32massets/confetti.module-C_1cc0iU.js.br          [39m[1m[2m    3.83 kB[22m[1m[22m
+[2mdist/[22m[32massets/Microsite-CcayoVTl.js.gz                [39m[1m[2m    3.84 kB[22m[1m[22m
+[2mdist/[22m[32massets/scroll-area-DzbxZ1Or.js.gz              [39m[1m[2m    3.91 kB[22m[1m[22m
+[2mdist/[22m[32massets/ProjectContract-BOYel5qP.js.br          [39m[1m[2m    3.92 kB[22m[1m[22m
+[2mdist/[22m[32massets/HomePage-DW03OmST.js.gz                 [39m[1m[2m    3.95 kB[22m[1m[22m
+[2mdist/[22m[32massets/SignContract-B8qeyLZD.js.gz             [39m[1m[2m    4.12 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-DIweVd5e.js.br                    [39m[1m[2m    4.14 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantDashboard-BVhB_WrF.js.br       [39m[1m[2m    4.19 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantsPage-D5AWT4ui.js.br           [39m[1m[2m    4.22 kB[22m[1m[22m
+[2mdist/[22m[32massets/confetti.module-C_1cc0iU.js.gz          [39m[1m[2m    4.23 kB[22m[1m[22m
+[2mdist/[22m[32massets/Marketing-Bl61zhX3.js.gz                [39m[1m[2m    4.24 kB[22m[1m[22m
+[2mdist/[22m[32massets/FinancialPage-DXn54clP.js.br            [39m[1m[2m    4.40 kB[22m[1m[22m
+[2mdist/[22m[32massets/PublicBooking-CqL21wme.js.br            [39m[1m[2m    4.42 kB[22m[1m[22m
+[2mdist/[22m[32massets/ClientDetailsPage-xaFCRTIi.js.br        [39m[1m[2m    4.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/ProjectContract-BOYel5qP.js.gz          [39m[1m[2m    4.51 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-DIweVd5e.js.gz                    [39m[1m[2m    4.61 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantDashboard-BVhB_WrF.js.gz       [39m[1m[2m    4.64 kB[22m[1m[22m
+[2mdist/[22m[32massets/Resources-DP13pMw8.js.br                [39m[1m[2m    4.72 kB[22m[1m[22m
+[2mdist/[22m[32massets/AssistantsPage-D5AWT4ui.js.gz           [39m[1m[2m    4.81 kB[22m[1m[22m
+[2mdist/[22m[32massets/FinancialPage-DXn54clP.js.gz            [39m[1m[2m    4.89 kB[22m[1m[22m
+[2mdist/[22m[32massets/PublicBooking-CqL21wme.js.gz            [39m[1m[2m    4.91 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideDashboardPage-B2239kxZ.js.br       [39m[1m[2m    4.93 kB[22m[1m[22m
+[2mdist/[22m[32massets/Dashboard-BH9n6z_Q.js.br                [39m[1m[2m    4.93 kB[22m[1m[22m
+[2mdist/[22m[32massets/NewProjectWizard-8JGEsNUC.js.br         [39m[1m[2m    5.02 kB[22m[1m[22m
+[2mdist/[22m[32massets/ClientDetailsPage-xaFCRTIi.js.gz        [39m[1m[2m    5.09 kB[22m[1m[22m
+[2mdist/[22m[32massets/MicrositeEditor-C773ru2P.js.br          [39m[1m[2m    5.18 kB[22m[1m[22m
+[2mdist/[22m[32massets/Resources-DP13pMw8.js.gz                [39m[1m[2m    5.29 kB[22m[1m[22m
+[2mdist/[22m[32massets/WorkflowsPage-DQtY2Bq_.js.br            [39m[1m[2m    5.42 kB[22m[1m[22m
+[2mdist/[22m[32massets/BrideDashboardPage-B2239kxZ.js.gz       [39m[1m[2m    5.50 kB[22m[1m[22m
+[2mdist/[22m[32massets/Dashboard-BH9n6z_Q.js.gz                [39m[1m[2m    5.53 kB[22m[1m[22m
+[2mdist/[22m[32massets/NewProjectWizard-8JGEsNUC.js.gz         [39m[1m[2m    5.62 kB[22m[1m[22m
+[2mdist/[22m[32massets/MicrositeEditor-C773ru2P.js.gz          [39m[1m[2m    5.78 kB[22m[1m[22m
+[2mdist/[22m[32massets/WorkflowsPage-DQtY2Bq_.js.gz            [39m[1m[2m    5.90 kB[22m[1m[22m
+[2mdist/[22m[32massets/BillingPage-FPWVGdZH.js.br              [39m[1m[2m    6.04 kB[22m[1m[22m
+[2mdist/[22m[32massets/BillingPage-FPWVGdZH.js.gz              [39m[1m[2m    6.76 kB[22m[1m[22m
+[2mdist/[22m[32massets/select-BClXTipv.js.br                   [39m[1m[2m    6.94 kB[22m[1m[22m
+[2mdist/[22m[32massets/CalendarPage-CuteUP3K.js.br             [39m[1m[2m    7.42 kB[22m[1m[22m
+[2mdist/[22m[32massets/select-BClXTipv.js.gz                   [39m[1m[2m    7.71 kB[22m[1m[22m
+[2mdist/[22m[32massets/purify.es-C1dq4m_l.js.br                [39m[1m[2m    7.80 kB[22m[1m[22m
+[2mdist/[22m[32massets/CalendarPage-CuteUP3K.js.gz             [39m[1m[2m    8.28 kB[22m[1m[22m
+[2mdist/[22m[32massets/purify.es-C1dq4m_l.js.gz                [39m[1m[2m    8.68 kB[22m[1m[22m
+[2mdist/[22m[32massets/calendar-CEk7K7Od.js.br                 [39m[1m[2m    9.11 kB[22m[1m[22m
+[2mdist/[22m[32massets/ClientsPage-DokzrGxM.js.br              [39m[1m[2m    9.46 kB[22m[1m[22m
+[2mdist/[22m[32massets/feature-forms-CTGjPQ-D.js.br            [39m[1m[2m    9.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/Contracts-Df8EeP7W.js.br                [39m[1m[2m    9.87 kB[22m[1m[22m
+[2mdist/[22m[32massets/calendar-CEk7K7Od.js.gz                 [39m[1m[2m   10.30 kB[22m[1m[22m
+[2mdist/[22m[32massets/feature-forms-CTGjPQ-D.js.gz            [39m[1m[2m   10.36 kB[22m[1m[22m
+[2mdist/[22m[32massets/ClientsPage-DokzrGxM.js.gz              [39m[1m[2m   10.52 kB[22m[1m[22m
+[2mdist/[22m[32massets/Contracts-Df8EeP7W.js.gz                [39m[1m[2m   11.15 kB[22m[1m[22m
+[2mdist/[22m[32massets/Settings-CwygHC16.js.br                 [39m[1m[2m   13.71 kB[22m[1m[22m
+[2mdist/[22m[32massets/ProjectDetailsPage-BEpvtplx.js.br       [39m[1m[2m   13.74 kB[22m[1m[22m
+[2mdist/[22m[32massets/Settings-CwygHC16.js.gz                 [39m[1m[2m   15.49 kB[22m[1m[22m
+[2mdist/[22m[32massets/ProjectDetailsPage-BEpvtplx.js.gz       [39m[1m[2m   15.63 kB[22m[1m[22m
+[2mdist/[22m[32massets/SalesPipeline-CcO5XHUK.js.br            [39m[1m[2m   18.07 kB[22m[1m[22m
+[2mdist/[22m[32massets/SalesPipeline-CcO5XHUK.js.gz            [39m[1m[2m   19.98 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-utils-BvP1mSzu.js.br             [39m[1m[2m   21.45 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-utils-BvP1mSzu.js.gz             [39m[1m[2m   24.38 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-C9RkV72I.css.br                   [39m[1m[2m   24.78 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-C9RkV72I.css.gz                   [39m[1m[2m   31.80 kB[22m[1m[22m
+[2mdist/[22m[32massets/feature-calendar-DjZPM5yU.js.br         [39m[1m[2m   35.68 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-supabase-D_CmHeyx.js.br          [39m[1m[2m   37.99 kB[22m[1m[22m
+[2mdist/[22m[32mcookies\index.html                             [39m[1m[2m   38.42 kB[22m[1m[22m[2m Ôöé gzip:     9.62 kB[22m
+[2mdist/[22m[32mtermos\index.html                              [39m[1m[2m   38.45 kB[22m[1m[22m[2m Ôöé gzip:     9.71 kB[22m
+[2mdist/[22m[32mseguranca\index.html                           [39m[1m[2m   38.68 kB[22m[1m[22m[2m Ôöé gzip:     9.82 kB[22m
+[2mdist/[22m[32mdpa\index.html                                 [39m[1m[2m   39.02 kB[22m[1m[22m[2m Ôöé gzip:     9.83 kB[22m
+[2mdist/[22m[32mreembolso\index.html                           [39m[1m[2m   39.28 kB[22m[1m[22m[2m Ôöé gzip:    10.01 kB[22m
+[2mdist/[22m[32massets/feature-calendar-DjZPM5yU.js.gz         [39m[1m[2m   40.19 kB[22m[1m[22m
+[2mdist/[22m[32massets/ai-markdown-e9kRISS7.js.br              [39m[1m[2m   41.52 kB[22m[1m[22m
+[2mdist/[22m[32massets/AdminDashboard-vZXqlmZ5.js.br           [39m[1m[2m   42.45 kB[22m[1m[22m
+[2mdist/[22m[32mprivacidade\index.html                         [39m[1m[2m   42.57 kB[22m[1m[22m[2m Ôöé gzip:    10.82 kB[22m
+[2mdist/[22m[32mcontato\index.html                             [39m[1m[2m   43.99 kB[22m[1m[22m[2m Ôöé gzip:     9.97 kB[22m
+[2mdist/[22m[32massets/vendor-supabase-D_CmHeyx.js.gz          [39m[1m[2m   44.58 kB[22m[1m[22m
+[2mdist/[22m[32massets/index.es-C2M_opv2.js.br                 [39m[1m[2m   45.96 kB[22m[1m[22m
+[2mdist/[22m[32massets/ai-markdown-e9kRISS7.js.gz              [39m[1m[2m   47.32 kB[22m[1m[22m
+[2mdist/[22m[32mrecursos\index.html                            [39m[1m[2m   49.21 kB[22m[1m[22m[2m Ôöé gzip:    10.89 kB[22m
+[2mdist/[22m[32massets/AdminDashboard-vZXqlmZ5.js.gz           [39m[1m[2m   52.18 kB[22m[1m[22m
+[2mdist/[22m[32massets/index.es-C2M_opv2.js.gz                 [39m[1m[2m   52.61 kB[22m[1m[22m
+[2mdist/[22m[32mplanos\index.html                              [39m[1m[2m   55.81 kB[22m[1m[22m[2m Ôöé gzip:    11.33 kB[22m
+[2mdist/[22m[32massets/AIController-DF58HTKr.js.br             [39m[1m[2m   55.86 kB[22m[1m[22m
+[2mdist/[22m[32mindex.html                                     [39m[1m[2m   57.06 kB[22m[1m[22m[2m Ôöé gzip:    11.89 kB[22m
+[2mdist/[22m[32massets/AIController-DF58HTKr.js.gz             [39m[1m[2m   63.96 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-BFF3ekbc.js.br                    [39m[1m[2m   99.80 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-core-Ck3tipWm.js.br              [39m[1m[2m  100.25 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-charts-fDTw-pUg.js.br            [39m[1m[2m  106.91 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-core-Ck3tipWm.js.gz              [39m[1m[2m  116.23 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-BFF3ekbc.js.gz                    [39m[1m[2m  116.98 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-charts-fDTw-pUg.js.gz            [39m[1m[2m  134.86 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-pdf-DUfNQPFe.js.br               [39m[1m[2m  144.01 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-BOzHloOg.js.br                    [39m[1m[2m  152.01 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-pdf-DUfNQPFe.js.gz               [39m[1m[2m  173.51 kB[22m[1m[22m
+[2mdist/[22m[32massets/index-BOzHloOg.js.gz                    [39m[1m[2m  176.04 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-excel-DCjHvqI8.js.br             [39m[1m[2m  217.38 kB[22m[1m[22m
+[2mdist/[22m[32massets/vendor-excel-DCjHvqI8.js.gz             [39m[1m[2m  268.75 kB[22m[1m[22m
+[2mdist/[22m[32massets/react-pdf.browser-ArtDC_ov.js.br        [39m[1m[2m  415.56 kB[22m[1m[22m
+[2mdist/[22m[32massets/react-pdf.browser-ArtDC_ov.js.gz        [39m[1m[2m  524.22 kB[22m[1m[22m
+[2mdist/[22m[32massets/ai-engine-DlSysRmG.js.br                [39m[1m[2m1,429.51 kB[22m[1m[22m
+[2mdist/[22m[32massets/ai-engine-DlSysRmG.js.gz                [39m[1m[2m2,132.83 kB[22m[1m[22m
+[2mdist/[22m[35massets/AIController-CRSl7P9M.css               [39m[1m[2m    2.02 kB[22m[1m[22m[2m Ôöé gzip:     0.72 kB[22m
+[2mdist/[22m[35massets/CalendarPage-BSwzzYnC.css               [39m[1m[2m   10.88 kB[22m[1m[22m[2m Ôöé gzip:     2.48 kB[22m
+[2mdist/[22m[35massets/index-C9RkV72I.css                      [39m[1m[2m  209.97 kB[22m[1m[22m[2m Ôöé gzip:    32.19 kB[22m
+[2mdist/[22m[36massets/index-BdQq_4o_.js                       [39m[1m[2m    0.06 kB[22m[1m[22m[2m Ôöé gzip:     0.08 kB[22m
+[2mdist/[22m[36massets/queryKeys-hiAhjbZY.js                   [39m[1m[2m    0.17 kB[22m[1m[22m[2m Ôöé gzip:     0.17 kB[22m
+[2mdist/[22m[36massets/useAI-CaPOHc8u.js                       [39m[1m[2m    0.22 kB[22m[1m[22m[2m Ôöé gzip:     0.19 kB[22m
+[2mdist/[22m[36massets/SafeHTML-nDZSg87_.js                    [39m[1m[2m    0.23 kB[22m[1m[22m[2m Ôöé gzip:     0.20 kB[22m
+[2mdist/[22m[36massets/index-CFsVaNZ0.js                       [39m[1m[2m    0.24 kB[22m[1m[22m[2m Ôöé gzip:     0.18 kB[22m
+[2mdist/[22m[36massets/sanitize-BLIQMR1H.js                    [39m[1m[2m    0.37 kB[22m[1m[22m[2m Ôöé gzip:     0.27 kB[22m
+[2mdist/[22m[36massets/exceljs.min-DNYzFtco.js                 [39m[1m[2m    0.51 kB[22m[1m[22m[2m Ôöé gzip:     0.37 kB[22m
+[2mdist/[22m[36massets/textarea-Syht9Zc1.js                    [39m[1m[2m    0.54 kB[22m[1m[22m[2m Ôöé gzip:     0.35 kB[22m
+[2mdist/[22m[36massets/upload-BLaStds3.js                      [39m[1m[2m    0.56 kB[22m[1m[22m[2m Ôöé gzip:     0.38 kB[22m
+[2mdist/[22m[36massets/useRealtimeInvalidate-D1LV99CH.js       [39m[1m[2m    0.66 kB[22m[1m[22m[2m Ôöé gzip:     0.45 kB[22m
+[2mdist/[22m[36massets/rateLimit-uFgQ9d3Q.js                   [39m[1m[2m    0.69 kB[22m[1m[22m[2m Ôöé gzip:     0.41 kB[22m
+[2mdist/[22m[36massets/useRole-BSgIAwR7.js                     [39m[1m[2m    0.71 kB[22m[1m[22m[2m Ôöé gzip:     0.41 kB[22m
+[2mdist/[22m[36massets/badge-CTN53FPP.js                       [39m[1m[2m    0.75 kB[22m[1m[22m[2m Ôöé gzip:     0.39 kB[22m
+[2mdist/[22m[36massets/empty-state-DCEecTPZ.js                 [39m[1m[2m    0.87 kB[22m[1m[22m[2m Ôöé gzip:     0.46 kB[22m
+[2mdist/[22m[36massets/label-C6JUCGB-.js                       [39m[1m[2m    0.92 kB[22m[1m[22m[2m Ôöé gzip:     0.57 kB[22m
+[2mdist/[22m[36massets/alert-B2jf3qVt.js                       [39m[1m[2m    0.95 kB[22m[1m[22m[2m Ôöé gzip:     0.49 kB[22m
+[2mdist/[22m[36massets/action-buttons-NHhdb9Y9.js              [39m[1m[2m    0.95 kB[22m[1m[22m[2m Ôöé gzip:     0.43 kB[22m
+[2mdist/[22m[36massets/invokeEdge-Dz7hGNTS.js                  [39m[1m[2m    0.97 kB[22m[1m[22m[2m Ôöé gzip:     0.68 kB[22m
+[2mdist/[22m[36massets/AssistantLayout-CJjnPaVY.js             [39m[1m[2m    1.04 kB[22m[1m[22m[2m Ôöé gzip:     0.58 kB[22m
+[2mdist/[22m[36massets/useBlogPosts-CNqblhQV.js                [39m[1m[2m    1.05 kB[22m[1m[22m[2m Ôöé gzip:     0.50 kB[22m
+[2mdist/[22m[36massets/useKnowledgeBase-CcITWsaT.js            [39m[1m[2m    1.06 kB[22m[1m[22m[2m Ôöé gzip:     0.56 kB[22m
+[2mdist/[22m[36massets/BrideProtectedRoute-CiNCaRKz.js         [39m[1m[2m    1.15 kB[22m[1m[22m[2m Ôöé gzip:     0.64 kB[22m
+[2mdist/[22m[36massets/error-handler-DGW3sR79.js               [39m[1m[2m    1.17 kB[22m[1m[22m[2m Ôöé gzip:     0.65 kB[22m
+[2mdist/[22m[36massets/card-BcyYrIxl.js                        [39m[1m[2m    1.21 kB[22m[1m[22m[2m Ôöé gzip:     0.43 kB[22m
+[2mdist/[22m[36massets/NotFound-Ds3YMMxy.js                    [39m[1m[2m    1.24 kB[22m[1m[22m[2m Ôöé gzip:     0.61 kB[22m
+[2mdist/[22m[36massets/useMFA-TQGB7FI8.js                      [39m[1m[2m    1.38 kB[22m[1m[22m[2m Ôöé gzip:     0.54 kB[22m
+[2mdist/[22m[36massets/table-B5gKIiRF.js                       [39m[1m[2m    1.53 kB[22m[1m[22m[2m Ôöé gzip:     0.54 kB[22m
+[2mdist/[22m[36massets/Integrations-BhtnXxaq.js                [39m[1m[2m    1.53 kB[22m[1m[22m[2m Ôöé gzip:     0.74 kB[22m
+[2mdist/[22m[36massets/UpdatePassword-DfrkcZ6n.js              [39m[1m[2m    1.56 kB[22m[1m[22m[2m Ôöé gzip:     0.86 kB[22m
+[2mdist/[22m[36massets/MetricCard-DAH0ofG8.js                  [39m[1m[2m    1.68 kB[22m[1m[22m[2m Ôöé gzip:     0.66 kB[22m
+[2mdist/[22m[36massets/middleware-BecK8QcD.js                  [39m[1m[2m    1.81 kB[22m[1m[22m[2m Ôöé gzip:     0.88 kB[22m
+[2mdist/[22m[36massets/UpgradePendingPage-D-UYkmAV.js          [39m[1m[2m    2.09 kB[22m[1m[22m[2m Ôöé gzip:     0.97 kB[22m
+[2mdist/[22m[36massets/UpgradeFailurePage-Dz1Ua4wY.js          [39m[1m[2m    2.17 kB[22m[1m[22m[2m Ôöé gzip:     0.97 kB[22m
+[2mdist/[22m[36massets/dialog-CENRoDEZ.js                      [39m[1m[2m    2.17 kB[22m[1m[22m[2m Ôöé gzip:     0.85 kB[22m
+[2mdist/[22m[36massets/GoogleCalendarCallback-B4n5VSSI.js      [39m[1m[2m    2.35 kB[22m[1m[22m[2m Ôöé gzip:     1.02 kB[22m
+[2mdist/[22m[36massets/RevenueChart-D7BsOiX3.js                [39m[1m[2m    2.38 kB[22m[1m[22m[2m Ôöé gzip:     1.12 kB[22m
+[2mdist/[22m[36massets/switch-DZCrlrx2.js                      [39m[1m[2m    2.52 kB[22m[1m[22m[2m Ôöé gzip:     1.26 kB[22m
+[2mdist/[22m[36massets/MFAVerifyPage-eSV-TCuN.js               [39m[1m[2m    2.60 kB[22m[1m[22m[2m Ôöé gzip:     1.36 kB[22m
+[2mdist/[22m[36massets/AuthLayout-BmBaiS-a.js                  [39m[1m[2m    2.68 kB[22m[1m[22m[2m Ôöé gzip:     1.06 kB[22m
+[2mdist/[22m[36massets/UpgradeSuccessPage-Bweii1Pi.js          [39m[1m[2m    2.70 kB[22m[1m[22m[2m Ôöé gzip:     1.03 kB[22m
+[2mdist/[22m[36massets/SignatureModal-oJKTmuuJ.js              [39m[1m[2m    2.75 kB[22m[1m[22m[2m Ôöé gzip:     1.15 kB[22m
+[2mdist/[22m[36massets/CheckoutReturn-CQWsZQ7I.js              [39m[1m[2m    3.10 kB[22m[1m[22m[2m Ôöé gzip:     1.20 kB[22m
+[2mdist/[22m[36massets/tabs-BrxeObDL.js                        [39m[1m[2m    3.23 kB[22m[1m[22m[2m Ôöé gzip:     1.36 kB[22m
+[2mdist/[22m[36massets/ForgotPassword-DCvebjoH.js              [39m[1m[2m    3.37 kB[22m[1m[22m[2m Ôöé gzip:     1.44 kB[22m
+[2mdist/[22m[36massets/BlogArticle-Bkf28f6Z.js                 [39m[1m[2m    3.52 kB[22m[1m[22m[2m Ôöé gzip:     1.48 kB[22m
+[2mdist/[22m[36massets/HelpArticle-C1Yd5bGz.js                 [39m[1m[2m    3.63 kB[22m[1m[22m[2m Ôöé gzip:     1.36 kB[22m
+[2mdist/[22m[36massets/WhatsAppButtons-BsevihgW.js             [39m[1m[2m    3.69 kB[22m[1m[22m[2m Ôöé gzip:     1.66 kB[22m
+[2mdist/[22m[36massets/dropdown-menu-Bz-qjDc0.js               [39m[1m[2m    3.79 kB[22m[1m[22m[2m Ôöé gzip:     1.04 kB[22m
+[2mdist/[22m[36massets/Login-BqN6KMU1.js                       [39m[1m[2m    3.87 kB[22m[1m[22m[2m Ôöé gzip:     1.70 kB[22m
+[2mdist/[22m[36massets/checkbox-DbFqhtgC.js                    [39m[1m[2m    3.91 kB[22m[1m[22m[2m Ôöé gzip:     1.72 kB[22m
+[2mdist/[22m[36massets/Terms-BgkwIfMN.js                       [39m[1m[2m    3.95 kB[22m[1m[22m[2m Ôöé gzip:     1.64 kB[22m
+[2mdist/[22m[36massets/SEOHead-CES3ph1G.js                     [39m[1m[2m    3.99 kB[22m[1m[22m[2m Ôöé gzip:     1.82 kB[22m
+[2mdist/[22m[36massets/AuthCallbackHandler-BR3RWbau.js         [39m[1m[2m    4.04 kB[22m[1m[22m[2m Ôöé gzip:     1.61 kB[22m
+[2mdist/[22m[36massets/Help-eoFVzbAK.js                        [39m[1m[2m    4.04 kB[22m[1m[22m[2m Ôöé gzip:     1.67 kB[22m
+[2mdist/[22m[36massets/Cookies-dPTCu6vX.js                     [39m[1m[2m    4.07 kB[22m[1m[22m[2m Ôöé gzip:     1.56 kB[22m
+[2mdist/[22m[36massets/AcceptInvitePage-DqI5YZgt.js            [39m[1m[2m    4.24 kB[22m[1m[22m[2m Ôöé gzip:     1.81 kB[22m
+[2mdist/[22m[36massets/Security-CbCAn5mW.js                    [39m[1m[2m    4.24 kB[22m[1m[22m[2m Ôöé gzip:     1.76 kB[22m
+[2mdist/[22m[36massets/validators-m21AQ9zU.js                  [39m[1m[2m    4.30 kB[22m[1m[22m[2m Ôöé gzip:     1.79 kB[22m
+[2mdist/[22m[36massets/DPA-u7ZdTEMO.js                         [39m[1m[2m    4.54 kB[22m[1m[22m[2m Ôöé gzip:     1.79 kB[22m
+[2mdist/[22m[36massets/Refund-B8E_HQuw.js                      [39m[1m[2m    4.88 kB[22m[1m[22m[2m Ôöé gzip:     1.96 kB[22m
+[2mdist/[22m[36massets/BrideLoginPage-DScyz2R7.js              [39m[1m[2m    5.02 kB[22m[1m[22m[2m Ôöé gzip:     2.02 kB[22m
+[2mdist/[22m[36massets/Register-DrK1qu1j.js                    [39m[1m[2m    5.28 kB[22m[1m[22m[2m Ôöé gzip:     2.22 kB[22m
+[2mdist/[22m[36massets/StudioAvailabilityPage-DiRAWs4O.js      [39m[1m[2m    5.30 kB[22m[1m[22m[2m Ôöé gzip:     2.00 kB[22m
+[2mdist/[22m[36massets/AssistantQuickLogin-DoW6lXo0.js         [39m[1m[2m    5.76 kB[22m[1m[22m[2m Ôöé gzip:     2.25 kB[22m
+[2mdist/[22m[36massets/workbox-window.prod.es5-BIl4cyR9.js     [39m[1m[2m    5.76 kB[22m[1m[22m[2m Ôöé gzip:     2.37 kB[22m
+[2mdist/[22m[36massets/pt-BR-BcCl0GMU.js                       [39m[1m[2m    5.88 kB[22m[1m[22m[2m Ôöé gzip:     2.10 kB[22m
+[2mdist/[22m[36massets/Blog-BBuIdw2j.js                        [39m[1m[2m    6.92 kB[22m[1m[22m[2m Ôöé gzip:     2.17 kB[22m
+[2mdist/[22m[36massets/reportService-BhwhQ4Yi.js               [39m[1m[2m    7.03 kB[22m[1m[22m[2m Ôöé gzip:     3.07 kB[22m
+[2mdist/[22m[36massets/LeaveReview-BABIerK1.js                 [39m[1m[2m    7.10 kB[22m[1m[22m[2m Ôöé gzip:     2.60 kB[22m
+[2mdist/[22m[36massets/Contact-BB_-4_b7.js                     [39m[1m[2m    7.52 kB[22m[1m[22m[2m Ôöé gzip:     2.24 kB[22m
+[2mdist/[22m[36massets/CanvasPanel-B0bg9n3n.js                 [39m[1m[2m    8.14 kB[22m[1m[22m[2m Ôöé gzip:     2.92 kB[22m
+[2mdist/[22m[36massets/date-utils-BBVfUGLk.js                  [39m[1m[2m    8.86 kB[22m[1m[22m[2m Ôöé gzip:     3.31 kB[22m
+[2mdist/[22m[36massets/PostScheduler-LYdpFwY5.js               [39m[1m[2m    9.05 kB[22m[1m[22m[2m Ôöé gzip:     3.15 kB[22m
+[2mdist/[22m[36massets/Plans-DoMkodbE.js                       [39m[1m[2m    9.09 kB[22m[1m[22m[2m Ôöé gzip:     3.23 kB[22m
+[2mdist/[22m[36massets/Privacy-DWLjk2Rl.js                     [39m[1m[2m    9.18 kB[22m[1m[22m[2m Ôöé gzip:     2.85 kB[22m
+[2mdist/[22m[36massets/UpgradePage-Dh3EnC3u.js                 [39m[1m[2m    9.22 kB[22m[1m[22m[2m Ôöé gzip:     3.66 kB[22m
+[2mdist/[22m[36massets/AssistantFreeDashboard-DNlSAShf.js      [39m[1m[2m    9.35 kB[22m[1m[22m[2m Ôöé gzip:     2.91 kB[22m
+[2mdist/[22m[36massets/Services-Cx4P9siN.js                    [39m[1m[2m   10.25 kB[22m[1m[22m[2m Ôöé gzip:     3.57 kB[22m
+[2mdist/[22m[36massets/Analytics-B8HbbuMh.js                   [39m[1m[2m   10.41 kB[22m[1m[22m[2m Ôöé gzip:     2.93 kB[22m
+[2mdist/[22m[36massets/confetti.module-C_1cc0iU.js             [39m[1m[2m   10.59 kB[22m[1m[22m[2m Ôöé gzip:     4.23 kB[22m
+[2mdist/[22m[36massets/OnboardingWizard-DSyAd5Sf.js            [39m[1m[2m   11.49 kB[22m[1m[22m[2m Ôöé gzip:     3.65 kB[22m
+[2mdist/[22m[36massets/HomePage-DW03OmST.js                    [39m[1m[2m   11.77 kB[22m[1m[22m[2m Ôöé gzip:     3.96 kB[22m
+[2mdist/[22m[36massets/StudioCalendarPage-DeJQ2LgF.js          [39m[1m[2m   11.90 kB[22m[1m[22m[2m Ôöé gzip:     3.45 kB[22m
+[2mdist/[22m[36massets/ProjectContract-BOYel5qP.js             [39m[1m[2m   12.24 kB[22m[1m[22m[2m Ôöé gzip:     4.51 kB[22m
+[2mdist/[22m[36massets/Marketing-Bl61zhX3.js                   [39m[1m[2m   12.42 kB[22m[1m[22m[2m Ôöé gzip:     4.24 kB[22m
+[2mdist/[22m[36massets/scroll-area-DzbxZ1Or.js                 [39m[1m[2m   12.46 kB[22m[1m[22m[2m Ôöé gzip:     3.92 kB[22m
+[2mdist/[22m[36massets/Microsite-CcayoVTl.js                   [39m[1m[2m   12.99 kB[22m[1m[22m[2m Ôöé gzip:     3.85 kB[22m
+[2mdist/[22m[36massets/SignContract-B8qeyLZD.js                [39m[1m[2m   13.07 kB[22m[1m[22m[2m Ôöé gzip:     4.13 kB[22m
+[2mdist/[22m[36massets/index-DIweVd5e.js                       [39m[1m[2m   13.34 kB[22m[1m[22m[2m Ôöé gzip:     4.62 kB[22m
+[2mdist/[22m[36massets/AssistantsPage-D5AWT4ui.js              [39m[1m[2m   13.84 kB[22m[1m[22m[2m Ôöé gzip:     4.82 kB[22m
+[2mdist/[22m[36massets/Resources-DP13pMw8.js                   [39m[1m[2m   14.67 kB[22m[1m[22m[2m Ôöé gzip:     5.29 kB[22m
+[2mdist/[22m[36massets/PublicBooking-CqL21wme.js               [39m[1m[2m   14.96 kB[22m[1m[22m[2m Ôöé gzip:     4.92 kB[22m
+[2mdist/[22m[36massets/FinancialPage-DXn54clP.js               [39m[1m[2m   15.74 kB[22m[1m[22m[2m Ôöé gzip:     4.90 kB[22m
+[2mdist/[22m[36massets/AssistantDashboard-BVhB_WrF.js          [39m[1m[2m   16.21 kB[22m[1m[22m[2m Ôöé gzip:     4.65 kB[22m
+[2mdist/[22m[36massets/BrideDashboardPage-B2239kxZ.js          [39m[1m[2m   17.35 kB[22m[1m[22m[2m Ôöé gzip:     5.50 kB[22m
+[2mdist/[22m[36massets/Dashboard-BH9n6z_Q.js                   [39m[1m[2m   18.15 kB[22m[1m[22m[2m Ôöé gzip:     5.54 kB[22m
+[2mdist/[22m[36massets/ClientDetailsPage-xaFCRTIi.js           [39m[1m[2m   18.37 kB[22m[1m[22m[2m Ôöé gzip:     5.11 kB[22m
+[2mdist/[22m[36massets/WorkflowsPage-DQtY2Bq_.js               [39m[1m[2m   19.86 kB[22m[1m[22m[2m Ôöé gzip:     5.92 kB[22m
+[2mdist/[22m[36massets/MicrositeEditor-C773ru2P.js             [39m[1m[2m   21.26 kB[22m[1m[22m[2m Ôöé gzip:     5.79 kB[22m
+[2mdist/[22m[36massets/select-BClXTipv.js                      [39m[1m[2m   22.18 kB[22m[1m[22m[2m Ôöé gzip:     7.72 kB[22m
+[2mdist/[22m[36massets/NewProjectWizard-8JGEsNUC.js            [39m[1m[2m   22.29 kB[22m[1m[22m[2m Ôöé gzip:     5.65 kB[22m
+[2mdist/[22m[36massets/BillingPage-FPWVGdZH.js                 [39m[1m[2m   22.47 kB[22m[1m[22m[2m Ôöé gzip:     6.77 kB[22m
+[2mdist/[22m[36massets/purify.es-C1dq4m_l.js                   [39m[1m[2m   22.65 kB[22m[1m[22m[2m Ôöé gzip:     8.68 kB[22m
+[2mdist/[22m[36massets/feature-forms-CTGjPQ-D.js               [39m[1m[2m   28.18 kB[22m[1m[22m[2m Ôöé gzip:    10.36 kB[22m
+[2mdist/[22m[36massets/CalendarPage-CuteUP3K.js                [39m[1m[2m   28.90 kB[22m[1m[22m[2m Ôöé gzip:     8.30 kB[22m
+[2mdist/[22m[36massets/calendar-CEk7K7Od.js                    [39m[1m[2m   32.32 kB[22m[1m[22m[2m Ôöé gzip:    10.32 kB[22m
+[2mdist/[22m[36massets/ClientsPage-DokzrGxM.js                 [39m[1m[2m   35.15 kB[22m[1m[22m[2m Ôöé gzip:    10.53 kB[22m
+[2mdist/[22m[36massets/Contracts-Df8EeP7W.js                   [39m[1m[2m   38.09 kB[22m[1m[22m[2m Ôöé gzip:    11.17 kB[22m
+[2mdist/[22m[36massets/Settings-CwygHC16.js                    [39m[1m[2m   61.03 kB[22m[1m[22m[2m Ôöé gzip:    15.56 kB[22m
+[2mdist/[22m[36massets/ProjectDetailsPage-BEpvtplx.js          [39m[1m[2m   61.71 kB[22m[1m[22m[2m Ôöé gzip:    15.67 kB[22m
+[2mdist/[22m[36massets/SalesPipeline-CcO5XHUK.js               [39m[1m[2m   63.22 kB[22m[1m[22m[2m Ôöé gzip:    20.02 kB[22m
+[2mdist/[22m[36massets/vendor-utils-BvP1mSzu.js                [39m[1m[2m  102.04 kB[22m[1m[22m[2m Ôöé gzip:    24.42 kB[22m
+[2mdist/[22m[36massets/feature-calendar-DjZPM5yU.js            [39m[1m[2m  129.37 kB[22m[1m[22m[2m Ôöé gzip:    40.29 kB[22m
+[2mdist/[22m[36massets/ai-markdown-e9kRISS7.js                 [39m[1m[2m  156.61 kB[22m[1m[22m[2m Ôöé gzip:    47.40 kB[22m
+[2mdist/[22m[36massets/index.es-C2M_opv2.js                    [39m[1m[2m  158.07 kB[22m[1m[22m[2m Ôöé gzip:    52.77 kB[22m
+[2mdist/[22m[36massets/vendor-supabase-D_CmHeyx.js             [39m[1m[2m  168.89 kB[22m[1m[22m[2m Ôöé gzip:    44.71 kB[22m
+[2mdist/[22m[36massets/AdminDashboard-vZXqlmZ5.js              [39m[1m[2m  224.50 kB[22m[1m[22m[2m Ôöé gzip:    52.50 kB[22m
+[2mdist/[22m[36massets/AIController-DF58HTKr.js                [39m[1m[2m  231.80 kB[22m[1m[22m[2m Ôöé gzip:    64.12 kB[22m
+[2mdist/[22m[36massets/vendor-core-Ck3tipWm.js                 [39m[1m[2m  357.52 kB[22m[1m[22m[2m Ôöé gzip:   116.52 kB[22m
+[2mdist/[22m[36massets/index-BFF3ekbc.js                       [39m[1m[2m  369.53 kB[22m[1m[22m[2m Ôöé gzip:   117.18 kB[22m
+[2mdist/[22m[36massets/vendor-charts-fDTw-pUg.js               [39m[1m[2m  516.09 kB[22m[1m[22m[2m Ôöé gzip:   135.17 kB[22m
+[2mdist/[22m[36massets/index-BOzHloOg.js                       [39m[1m[2m  531.29 kB[22m[1m[22m[2m Ôöé gzip:   176.45 kB[22m
+[2mdist/[22m[36massets/vendor-pdf-DUfNQPFe.js                  [39m[1m[2m  588.07 kB[22m[1m[22m[2m Ôöé gzip:   174.13 kB[22m
+[2mdist/[22m[36massets/vendor-excel-DCjHvqI8.js                [39m[1m[2m  935.54 kB[22m[1m[22m[2m Ôöé gzip:   270.18 kB[22m
+[2mdist/[22m[36massets/react-pdf.browser-ArtDC_ov.js           [39m[1m[2m1,568.29 kB[22m[1m[22m[2m Ôöé gzip:   525.02 kB[22m
+[2mdist/[22m[36massets/ai-engine-DlSysRmG.js                   [39m[1m[33m5,994.04 kB[39m[22m[2m Ôöé gzip: 2,134.23 kB[22m
+
+(!) Some chunks are larger than 2000 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+
+PWA v1.2.0
+mode      generateSW
+precache  159 entries (18176.99 KiB)
+files generated
+  dist/sw.js
+  dist/workbox-4b126c97.js
+[2mdist/[22m[32mdebug_connection.html.gz     [39m[1m[2m1.22 kB[1m[22m
+[2mdist/[22m[32moffline.html.gz              [39m[1m[2m0.59 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.gz           [39m[1m[2m0.92 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.gz               [39m[1m[2m0.34 kB[1m[22m
+[2mdist/[22m[32mpush-handler.js.gz           [39m[1m[2m0.59 kB[1m[22m
+[2mdist/[22m[32moffline.html.br              [39m[1m[2m0.42 kB[1m[22m
+[2mdist/[22m[32mdebug_connection.html.br     [39m[1m[2m0.89 kB[1m[22m
+[2mdist/[22m[32mpush-handler.js.br           [39m[1m[2m0.49 kB[1m[22m
+[2mdist/[22m[32msitemap.xml.br               [39m[1m[2m0.29 kB[1m[22m
+[2mdist/[22m[32mplaceholder.svg.br           [39m[1m[2m0.84 kB[1m[22m

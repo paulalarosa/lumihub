@@ -3,6 +3,7 @@ import { AIDomainService } from '@/features/ai/services/AIDomainService'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { logger } from '@/services/logger'
 
 export const useCanvasActions = () => {
   const {
@@ -41,7 +42,8 @@ export const useCanvasActions = () => {
       queryClient.invalidateQueries({ queryKey: ['ai-documents'] })
     },
     onError: (error: Error) => {
-      toast.error('Erro ao salvar: ' + error.message)
+      logger.error(error, 'useCanvasActions.save')
+      toast.error('Não conseguimos salvar o documento. Tente de novo.')
     },
   })
 

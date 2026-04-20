@@ -112,7 +112,8 @@ export const usePlanAccess = () => {
       }
     },
     onError: (error: Error) => {
-      toast.error('Erro ao criar sessão de pagamento: ' + error.message)
+      logger.error(error, 'usePlanAccess.createCheckoutSession')
+      toast.error('Não conseguimos abrir o checkout. Tente de novo em instantes.')
     },
   })
 

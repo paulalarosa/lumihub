@@ -111,7 +111,11 @@ export default function AdminIntegrations() {
           const { data, error } = await invokeEdgeFunction<{
             error?: string
             missing_keys?: string[]
-          }>('google-calendar-sync', { action: 'check_config' })
+          }>(
+            'google-calendar-sync',
+            { action: 'check_config' },
+            { passUserToken: true },
+          )
 
           if (error) throw new Error(error.message)
 

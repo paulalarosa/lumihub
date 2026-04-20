@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Instagram, CheckCircle, XCircle, Check } from 'lucide-react'
 import { toast } from 'sonner'
+import { logger } from '@/services/logger'
 
 const INSTAGRAM_APP_ID = import.meta.env.VITE_INSTAGRAM_APP_ID
 const REDIRECT_URI = `${window.location.origin}/instagram/callback`
@@ -41,6 +42,10 @@ export const InstagramConnect = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['instagram-connection'] })
       toast.success('Instagram desconectado')
+    },
+    onError: (error) => {
+      logger.error(error, 'InstagramConnect.disconnect')
+      toast.error('Não conseguimos desconectar. Tente de novo.')
     },
   })
 

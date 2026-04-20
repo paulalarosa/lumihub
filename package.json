@@ -1,7 +1,7 @@
 {
   "name": "khaos-kontrol-system",
   "private": true,
-  "version": "5.8.2",
+  "version": "5.8.3",
   "type": "module",
   "engines": {
     "node": ">=18.0.0",

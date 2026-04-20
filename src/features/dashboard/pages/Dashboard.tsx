@@ -174,11 +174,17 @@ export default function Dashboard() {
                   )
                 })
               ) : (
-                <div className="h-48 flex flex-col items-center justify-center">
-                  <Calendar className="w-8 h-8 text-white/10 mb-3" />
-                  <p className="text-sm text-white/20">
+                <div className="h-48 flex flex-col items-center justify-center gap-3 text-center px-4">
+                  <Calendar className="w-8 h-8 text-white/15" />
+                  <p className="text-sm text-white/40">
                     {t('dashboard.no_events')}
                   </p>
+                  <Link
+                    to="/calendar"
+                    className="text-[10px] font-mono uppercase tracking-widest text-white/60 hover:text-white border-b border-white/20 hover:border-white pb-0.5 transition-colors"
+                  >
+                    Criar primeiro evento
+                  </Link>
                 </div>
               )}
             </div>

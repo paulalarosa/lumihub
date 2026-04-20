@@ -71,8 +71,9 @@ export default function Register() {
       })
       trackFormSubmit('register', true)
       toast({
-        title: 'Conta criada!',
-        description: 'Verifique seu email para confirmar.',
+        title: 'Bem-vinda ao Khaos Kontrol',
+        description:
+          'Enviamos um email pra confirmar sua conta. Verifique sua caixa de entrada (e o spam) nos próximos minutos.',
       })
       navigate('/dashboard')
     }

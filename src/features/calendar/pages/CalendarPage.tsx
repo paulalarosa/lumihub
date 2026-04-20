@@ -31,6 +31,7 @@ import { GoogleCalendarSettings } from '@/components/calendar/GoogleCalendarSett
 import { useGoogleCalendar } from '@/hooks/useGoogleCalendar'
 import { ConflictResolver } from '@/components/calendar/ConflictResolver'
 import { toast } from 'sonner'
+import { logger } from '@/services/logger'
 import { LoadingSpinner } from '@/components/ui/PageLoader'
 import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useEvents } from '../hooks/useEvents'
@@ -207,7 +208,8 @@ export const CalendarPage = () => {
       toast.success('Sincronização concluída!')
     },
     onError: (error: Error) => {
-      toast.error('Erro na sincronização: ' + error.message)
+      logger.error(error, 'CalendarPage.syncFromGoogle')
+      toast.error('Não conseguimos sincronizar com o Google Calendar. Tente de novo.')
     },
   })
 

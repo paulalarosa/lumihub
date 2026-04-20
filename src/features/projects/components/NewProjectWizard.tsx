@@ -96,10 +96,14 @@ export function NewProjectWizard({
           <DialogHeader className="px-8 pt-8 pb-0">
             <div className="mb-6">
               <DialogTitle className="font-serif text-2xl uppercase tracking-tight">
-                Novo Projeto
+                {w.step === 0 && w.state.clientMode === 'create'
+                  ? 'Nova Cliente'
+                  : 'Novo Projeto'}
               </DialogTitle>
               <DialogDescription className="sr-only">
-                Crie um novo projeto em 4 passos: cliente, projeto, evento e confirmação.
+                {w.step === 0 && w.state.clientMode === 'create'
+                  ? 'Cadastre a cliente — depois você pode criar projeto e evento, ou parar por aqui.'
+                  : 'Crie um novo projeto em 4 passos: cliente, projeto, evento e confirmação.'}
               </DialogDescription>
             </div>
 
