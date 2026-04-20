@@ -53,7 +53,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { exportCsv } from '@/lib/csvExport'
 import { Download } from 'lucide-react'
 import { UserDetailsSheet } from './components/UserDetailsSheet'
-import { AdminAssistantsSection } from './components/AdminAssistantsSection'
 
 const PLAN_OPTIONS = [
   { value: 'free', label: 'Gratuito' },
@@ -844,8 +843,6 @@ export default function AdminUsers() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <AdminAssistantsSection />
 
       <UserDetailsSheet
         userId={detailsUserId}

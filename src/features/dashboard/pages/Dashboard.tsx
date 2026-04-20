@@ -127,7 +127,7 @@ export default function Dashboard() {
                 {t('dashboard.sections.agenda')}
               </h2>
               <Link
-                to="/calendar"
+                to="/calendar?view=agenda"
                 className="text-xs text-white/40 hover:text-white transition-colors flex items-center gap-1"
               >
                 {t('dashboard.view_all')}
@@ -141,23 +141,35 @@ export default function Dashboard() {
                   const startTime =
                     (event as { start_time?: string; event_date?: string })
                       .start_time || event.event_date
-                  const dateObj = startTime ? new Date(startTime) : null
-                  const isValid = dateObj && !isNaN(dateObj.getTime())
+                  const eventDate = event.event_date
+                    ? new Date(event.event_date)
+                    : null
+                  const timeObj = startTime ? new Date(startTime) : null
+                  const isValid =
+                    eventDate && !isNaN(eventDate.getTime())
+                  const currentYear = new Date().getFullYear()
+                  const eventYear = isValid ? eventDate.getFullYear() : null
+                  const showYear = eventYear && eventYear !== currentYear
 
                   return (
                     <div
                       key={i}
                       className="flex items-center gap-4 p-3 border border-white/[0.06] hover:border-white/20 transition-colors group"
                     >
-                      <div className="text-center w-11 flex-shrink-0">
+                      <div className="text-center w-12 flex-shrink-0">
                         <span className="block text-[10px] text-white/30 uppercase leading-none">
                           {isValid
-                            ? format(dateObj, 'MMM', { locale: ptBR })
+                            ? format(eventDate, 'MMM', { locale: ptBR })
                             : ''}
                         </span>
                         <span className="block text-lg font-mono text-white/90 leading-tight">
-                          {isValid ? dateObj.getDate() : '--'}
+                          {isValid ? eventDate.getDate() : '--'}
                         </span>
+                        {showYear && (
+                          <span className="block text-[9px] font-mono text-white/40 leading-none mt-0.5">
+                            {eventYear}
+                          </span>
+                        )}
                       </div>
                       <div className="h-8 w-px bg-white/10" />
                       <div className="flex-1 min-w-0">
@@ -165,8 +177,8 @@ export default function Dashboard() {
                           {event.title}
                         </h4>
                         <p className="text-xs text-white/30 font-mono">
-                          {isValid
-                            ? format(dateObj, 'HH:mm', { locale: ptBR })
+                          {timeObj && !isNaN(timeObj.getTime())
+                            ? format(timeObj, 'HH:mm', { locale: ptBR })
                             : ''}
                         </p>
                       </div>

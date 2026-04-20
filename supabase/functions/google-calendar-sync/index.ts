@@ -438,9 +438,9 @@ serve(async (req: Request) => {
       }
 
       await supabase
-        .from('user_integrations')
+        .from('google_calendar_tokens')
         .update({ last_sync_at: new Date().toISOString() })
-        .eq('id', integration.id)
+        .eq('user_id', user.id)
 
       return new Response(
         JSON.stringify({ success: true, imported, updated }),
@@ -483,9 +483,9 @@ serve(async (req: Request) => {
       }
 
       await supabase
-        .from('user_integrations')
+        .from('google_calendar_tokens')
         .update({ last_sync_at: new Date().toISOString() })
-        .eq('id', integration.id)
+        .eq('user_id', user.id)
 
       return new Response(JSON.stringify({ success: true, synced }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

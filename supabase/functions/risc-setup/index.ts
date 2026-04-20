@@ -30,7 +30,15 @@ const RISC_EVENTS = [
   'https://schemas.openid.net/secevent/risc/event-type/verification',
 ]
 
-const RISC_SCOPE = 'https://www.googleapis.com/auth/risc.configuration'
+// Using the broad `cloud-platform` scope instead of the narrow
+// `risc.configuration`. The narrow scope repeatedly returned an id_token
+// instead of access_token even with the RISC API enabled + IAM role granted,
+// suggesting Google's OAuth2 token endpoint doesn't treat it as a standard
+// OAuth2 scope for service-account JWT assertions. `cloud-platform` is the
+// canonical "all Google Cloud APIs" scope — any SA with IAM roles on the
+// project (including RISC Configuration Admin) can obtain access_token with
+// it, and RISC endpoints accept tokens from this scope.
+const RISC_SCOPE = 'https://www.googleapis.com/auth/cloud-platform'
 
 // Always hit Google's canonical OAuth2 token endpoint — some service account
 // JSONs carry a legacy token_uri that still works but confuses the flow.

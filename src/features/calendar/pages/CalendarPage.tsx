@@ -1,6 +1,6 @@
 import SEOHead from '@/components/seo/SEOHead'
 import { useState, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Calendar, dateFnsLocalizer, View, ToolbarProps } from 'react-big-calendar'
 import { format } from 'date-fns/format'
 import { parse } from 'date-fns/parse'
@@ -132,7 +132,19 @@ export const CalendarPage = () => {
   const { isConnected, isLoading: isGoogleLoading } = useGoogleCalendar()
   const queryClient = useQueryClient()
 
-  const [view, setView] = useState<View>('month')
+  const [searchParams] = useSearchParams()
+  const initialView: View = (() => {
+    const paramView = searchParams.get('view')
+    if (
+      paramView === 'month' ||
+      paramView === 'week' ||
+      paramView === 'day' ||
+      paramView === 'agenda'
+    )
+      return paramView
+    return 'month'
+  })()
+  const [view, setView] = useState<View>(initialView)
   const [date, setDate] = useState(new Date())
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false)

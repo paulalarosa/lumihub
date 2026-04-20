@@ -10,36 +10,39 @@ export const useAdminUsers = () => {
   const usersQuery = useQuery({
     queryKey: ['admin-users'],
     queryFn: async () => {
-      // Only return profiles that are actual maquiadoras — those registered
-      // in makeup_artists. Previously returned every row in profiles, which
-      // included assistants (causing duplication in the admin panel between
-      // the "Profissionais" and "Assistentes" tabs).
-      const { data: artists, error: artistsErr } = await supabase
-        .from('makeup_artists')
+      // Return every profile EXCEPT those that are assistants. Originally the
+      // list mixed both, causing assistants to show under "Profissionais".
+      // A more aggressive previous fix filtered by makeup_artists membership,
+      // which hid everyone still in trial/onboarding (no makeup_artists row
+      // yet). The correct rule: show all profiles, minus assistants.
+      const { data: assistants, error: assistantsErr } = await supabase
+        .from('assistants')
         .select('user_id')
 
-      if (artistsErr) {
-        logger.error('useAdminUsers.fetchArtists', artistsErr)
-        throw artistsErr
+      if (assistantsErr) {
+        logger.error(assistantsErr, 'useAdminUsers.fetchAssistants')
+        throw assistantsErr
       }
 
-      const userIds = (artists ?? [])
-        .map((a) => a.user_id)
-        .filter((id): id is string => !!id)
-
-      if (userIds.length === 0) return [] as Tables<'profiles'>[]
+      const assistantUserIds = new Set(
+        (assistants ?? [])
+          .map((a) => a.user_id)
+          .filter((id): id is string => !!id),
+      )
 
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .in('id', userIds)
         .order('created_at', { ascending: false })
 
       if (error) {
-        logger.error('useAdminUsers.fetch', error)
+        logger.error(error, 'useAdminUsers.fetch')
         throw error
       }
-      return data as Tables<'profiles'>[]
+
+      return (data as Tables<'profiles'>[]).filter(
+        (p) => !assistantUserIds.has(p.id),
+      )
     },
   })
 
