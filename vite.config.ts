@@ -155,16 +155,20 @@ export default defineConfig(({ mode }) => ({
         enabled: false,
       },
     }),
+    // vite-plugin-compression2 renamed `algorithm` → `algorithms` in newer
+    // types but still accepts the singular form at runtime. Keep singular to
+    // avoid regressing compression output; cast via Parameters<> so TS and
+    // eslint stay happy without `any`.
     compression({
       algorithm: 'gzip',
       exclude: [/\.(br)$/, /\.(gz)$/],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any),
+      threshold: 1024,
+    } as unknown as Parameters<typeof compression>[0]),
     compression({
       algorithm: 'brotliCompress',
       exclude: [/\.(br)$/, /\.(gz)$/],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any),
+      threshold: 1024,
+    } as unknown as Parameters<typeof compression>[0]),
     ...(process.env.ANALYZE
       ? [
           visualizer({
@@ -179,11 +183,18 @@ export default defineConfig(({ mode }) => ({
             routes: PRERENDER_ROUTES,
             renderer: '@prerenderer/renderer-puppeteer',
             rendererOptions: {
-              renderAfterTime: 2500,
+              renderAfterTime: 5000,
               maxConcurrentRoutes: 1,
               headless: true,
               viewport: { width: 1280, height: 800 },
-              timeout: 120000,
+              timeout: 180000,
+              launchOptions: {
+                args: [
+                  '--no-sandbox',
+                  '--disable-setuid-sandbox',
+                  '--disable-dev-shm-usage',
+                ],
+              },
             },
           }),
         ]
@@ -219,6 +230,9 @@ export default defineConfig(({ mode }) => ({
           ],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
+          'vendor-charts': ['recharts'],
+          'vendor-excel': ['exceljs'],
+          'vendor-pdf': ['jspdf', 'html2canvas'],
           'ai-engine': ['@mlc-ai/web-llm'],
           'ai-markdown': ['react-markdown', 'remark-gfm'],
           'feature-calendar': ['react-big-calendar'],
@@ -226,7 +240,7 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1500,
   },
   optimizeDeps: {
     exclude: ['@mlc-ai/web-llm'],

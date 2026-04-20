@@ -4,7 +4,17 @@ export const SplashScreen = () => {
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black md:hidden">
       {}
-      <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10" />
+      {/* Grid Pattern Background - CSS Based to avoid missing asset warnings */}
+      <div 
+        className="absolute inset-0 opacity-10" 
+        style={{
+          backgroundImage: `
+            linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
+          `,
+          backgroundSize: '40px 40px'
+        }}
+      />
 
       {}
       <motion.div

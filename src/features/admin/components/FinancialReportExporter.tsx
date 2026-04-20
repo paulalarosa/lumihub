@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { exportCsv } from '@/lib/csvExport'
+import { logger } from '@/services/logger'
 import { useMonthlyFinancials } from '../hooks/useMonthlyFinancials'
 import { FinancialReportPDF } from './FinancialReportPDF'
 
@@ -64,7 +65,7 @@ export function FinancialReportExporter() {
       toast.success('PDF gerado')
     } catch (err) {
       toast.error('Erro ao gerar PDF')
-      console.error(err)
+      logger.error(err, 'FinancialReportExporter.handleDownloadPdf')
     } finally {
       setGenerating(false)
     }

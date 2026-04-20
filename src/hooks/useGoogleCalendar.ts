@@ -35,8 +35,11 @@ export const useGoogleCalendar = () => {
 
   // Silent refresh on mount + every 45min while session alive.
   // Keeps access_token valid without forcing the user to log in again.
+  // Guard: only attempts refresh after `checkConnection` confirms a token row
+  // exists, otherwise the Edge Function returns 401 (no Google connection)
+  // and pollutes the console on every page mount.
   useEffect(() => {
-    if (!user) return
+    if (!user || isLoading || !isConnected) return
     let cancelled = false
 
     const refresh = async () => {
@@ -58,7 +61,7 @@ export const useGoogleCalendar = () => {
       cancelled = true
       clearInterval(timer)
     }
-  }, [user])
+  }, [user, isLoading, isConnected])
 
   const connectGoogleCalendar = async () => {
     setIsLoading(true)

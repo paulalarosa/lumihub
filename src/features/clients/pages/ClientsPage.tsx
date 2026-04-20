@@ -244,7 +244,7 @@ export default function Clientes() {
                             <Avatar className="h-10 w-10 border border-white/20 rounded-none group-hover:border-black">
                               <AvatarImage src={client.avatar_url || ''} />
                               <AvatarFallback className="bg-white/10 text-white rounded-none group-hover:bg-black group-hover:text-white font-mono">
-                                {client.name.substring(0, 2).toUpperCase()}
+                                {(client.name ?? '—').substring(0, 2).toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
@@ -333,7 +333,7 @@ export default function Clientes() {
                         <Avatar className="h-12 w-12 border border-white rounded-none">
                           <AvatarImage src={client.avatar_url || ''} />
                           <AvatarFallback className="bg-black text-white font-mono rounded-none border border-white/20">
-                            {client.name.substring(0, 2).toUpperCase()}
+                            {(client.name ?? '—').substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>

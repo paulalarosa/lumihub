@@ -392,7 +392,7 @@ function ClientRow({
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 hover:bg-white/[0.02] transition-colors">
       <div className="flex items-center gap-4 min-w-0 flex-1">
         <div className="h-10 w-10 border border-white/20 flex items-center justify-center text-white font-serif text-lg bg-black flex-shrink-0">
-          {client.name.substring(0, 2).toUpperCase()}
+          {(client.name ?? '—').substring(0, 2).toUpperCase()}
         </div>
         <div className="min-w-0">
           <p className="text-white text-sm truncate">{client.name}</p>

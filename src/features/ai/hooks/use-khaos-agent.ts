@@ -19,6 +19,17 @@ interface ChatMessage {
   reasoning?: string
 }
 
+// @ai-sdk/react exposes runtime shapes whose TS types diverge between
+// versions we use simultaneously (`ai` v6 vs `@ai-sdk/react` v3). The runtime
+// contract is stable; these shims describe what the hook actually accepts so
+// callers can stay strict without per-call suppressions.
+type OnFinishArg = { message: { content: string } }
+type UserMessageInput = { role: 'user'; content: string }
+interface ChatHelpersShim {
+  append: (msg: UserMessageInput) => void
+  sendMessage: (msg: UserMessageInput) => void
+}
+
 export function useKhaosAgent() {
   const { mode, byokSettings } = useAI()
   const [localInput, setLocalInput] = useState('')
@@ -42,7 +53,11 @@ export function useKhaosAgent() {
     return undefined
   }, [mode])
 
-  const chatHelpers = useChat({
+  // AI SDK runtime accepts these fields (`api`, `onFinish`) but the published
+  // TS types don't expose them on `UseChatOptions` in the versions we run
+  // (`ai` v6 + `@ai-sdk/react` v3). Cast the config once here rather than
+  // sprinkling @ts-expect-error across callers.
+  const chatConfig = {
     api:
       mode === 'cloud'
         ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`
@@ -56,9 +71,8 @@ export function useKhaosAgent() {
       }),
     },
     model: mode === 'local' ? localModel : undefined,
-    // @ts-expect-error - AI SDK type mismatch
-    onFinish: ({ message }: { message: { content: string } }) => {
-      const artifactMatch = message.content.match(
+    onFinish: (event: OnFinishArg) => {
+      const artifactMatch = event.message.content.match(
         /<artifact\s+title="([^"]+)"(?:\s+type="([^"]+)")?>([\s\S]*?)<\/artifact>/i,
       )
       if (artifactMatch) {
@@ -70,7 +84,11 @@ export function useKhaosAgent() {
         })
       }
     },
-  })
+  }
+  const chatHelpers = useChat(
+    chatConfig as unknown as Parameters<typeof useChat>[0],
+  )
+  const chatShim = chatHelpers as unknown as ChatHelpersShim
 
   const chatMessages = useMemo((): ChatMessageDTO[] => {
     return (chatHelpers.messages as unknown as ChatMessage[] || []).map((m: ChatMessage) => {
@@ -115,8 +133,7 @@ export function useKhaosAgent() {
     if (e) e.preventDefault()
     if (!localInput.trim()) return
 
-    // @ts-expect-error - AI SDK type mismatch
-    chatHelpers.append({
+    chatShim.append({
       role: 'user',
       content: localInput,
     })
@@ -135,8 +152,7 @@ export function useKhaosAgent() {
     stop: chatHelpers.stop,
     error: chatHelpers.error?.message,
     sendMessage: (content: string) =>
-      // @ts-expect-error - AI SDK type mismatch
-      chatHelpers.sendMessage({ role: 'user', content }),
+      chatShim.sendMessage({ role: 'user', content }),
     artifact,
     closeArtifact: () =>
       setArtifact((prev) => (prev ? { ...prev, isOpen: false } : null)),

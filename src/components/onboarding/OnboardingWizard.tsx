@@ -5,16 +5,22 @@ import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   ArrowRight,
   CheckCircle,
   User,
   Sparkles,
   Heart,
-  PartyPopper,
   Lightbulb,
-  type LucideIcon,
+  Clock,
+  AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
@@ -24,29 +30,36 @@ import { useAnalytics } from '@/hooks/useAnalytics'
 const STEPS = [
   {
     id: 'welcome',
-    title: 'Sua conta está quase pronta',
-    subtitle: '3 passos rápidos para você começar a organizar sua carreira',
+    title: 'Bem-vinda ao Khaos Kontrol',
+    subtitle:
+      'Em 90 segundos seu estúdio vai estar organizado. Perfil, primeira cliente e você já tá operando.',
     icon: Sparkles,
+    timeEstimate: '< 30s',
   },
   {
     id: 'profile',
-    title: 'Como suas clientes vão te encontrar',
-    subtitle: 'Essas informações aparecem no seu portal público',
+    title: 'Sua marca, do seu jeito',
+    subtitle:
+      'Isso é o que aparece pras suas clientes no portal público. Pode editar depois em Configurações.',
     icon: User,
+    timeEstimate: '~ 45s',
   },
   {
     id: 'first_client',
-    title: 'Cadastre sua primeira cliente',
-    subtitle: 'Pode ser uma cliente real ou fictícia para testar',
+    title: 'Sua primeira cliente no sistema',
+    subtitle:
+      'Pode ser uma noiva real que você já atende ou uma fictícia pra testar. Você vai ver o sistema ganhando forma.',
     icon: Heart,
+    timeEstimate: '~ 30s',
   },
   {
     id: 'complete',
-    title: 'Pronta para começar!',
-    subtitle: 'Seu sistema está configurado',
+    title: 'Tudo pronto',
+    subtitle: 'Seu estúdio tá configurado. Escolhe o próximo passo natural.',
     icon: CheckCircle,
+    timeEstimate: 'imediato',
   },
-]
+] as const
 
 export const OnboardingWizard = () => {
   const { user } = useAuth()
@@ -55,6 +68,7 @@ export const OnboardingWizard = () => {
   const { trackEvent, trackConversion } = useAnalytics()
   const [step, setStep] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
+  const [showSkipConfirm, setShowSkipConfirm] = useState(false)
 
   const [profileData, setProfileData] = useState({
     business_name: '',
@@ -141,7 +155,7 @@ export const OnboardingWizard = () => {
         label: 'profile',
       })
 
-      toast.success('Perfil salvo! Suas clientes já podem te encontrar.')
+      toast.success(`${profileData.business_name} salvo no sistema.`)
     }
 
     if (currentStep.id === 'first_client') {
@@ -172,9 +186,7 @@ export const OnboardingWizard = () => {
         label: clientData.name,
       })
 
-      toast.success(
-        `${clientData.name} cadastrada! Sua primeira cliente no sistema.`,
-      )
+      toast.success(`${clientData.name} cadastrada.`)
     }
 
     if (currentStep.id === 'complete') {
@@ -197,275 +209,371 @@ export const OnboardingWizard = () => {
     setStep(nextStep)
   }
 
-  const handleSkip = async () => {
+  const confirmSkip = async () => {
+    trackEvent({
+      category: 'engagement',
+      action: 'onboarding_skipped',
+      label: currentStep.id,
+    })
     await updateMutation.mutateAsync({
       has_seen_tour: true,
       is_completed: true,
       completed_at: new Date().toISOString(),
     })
+    setShowSkipConfirm(false)
     setIsOpen(false)
   }
 
   if (!isOpen) return null
 
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleSkip()}>
-      <DialogContent className="bg-[#050505] border border-white/10 max-w-xl text-white p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)]" aria-describedby={undefined}>
-        {}
-        <div className="h-1 bg-white/5">
-          <div
-            className="h-full bg-white transition-all duration-500"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
+  const firstClientName = clientData.name.trim() || null
 
-        <div className="p-8">
-          <div className="flex items-center justify-between mb-6">
-            <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-bold">
-              {step + 1} de {STEPS.length}
-            </p>
+  return (
+    <>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (!open) setShowSkipConfirm(true)
+        }}
+      >
+        <DialogContent
+          className="bg-[#050505] border border-white/10 max-w-xl text-white p-0 overflow-hidden shadow-[0_0_50px_rgba(0,0,0,1)]"
+          aria-describedby={undefined}
+        >
+          <div className="h-1 bg-white/5">
+            <div
+              className="h-full bg-white transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
           </div>
 
-          {}
-          <h2 className="text-3xl font-serif text-white mb-2 tracking-tight italic">
-            {currentStep.title}
-          </h2>
-          <p className="text-sm text-white/45 mb-10 leading-relaxed font-sans font-light">
-            {currentStep.subtitle}
-          </p>
-
-          {}
-          {currentStep.id === 'welcome' && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-3">
-                {(
-                  [
-                    { Icon: User, label: 'Perfil', desc: '30 segundos' },
-                    { Icon: Heart, label: 'Cliente', desc: '30 segundos' },
-                    { Icon: PartyPopper, label: 'Pronta!', desc: 'Imediato' },
-                  ] as { Icon: LucideIcon; label: string; desc: string }[]
-                ).map((item, i) => (
-                  <div
-                    key={i}
-                    className="text-center p-4 border border-white/[0.06] bg-white/[0.02]"
-                  >
-                    <item.Icon className="w-5 h-5 mx-auto mb-2 text-white" />
-                    <p className="text-xs text-white font-medium">
-                      {item.label}
-                    </p>
-                    <p className="text-[10px] text-white/30">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-white/25 text-center">
-                Leva menos de 2 minutos
+          <div className="p-8">
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-[10px] text-white/30 uppercase tracking-[0.3em] font-bold">
+                Passo {step + 1} de {STEPS.length}
               </p>
+              <div className="flex items-center gap-1.5 text-[10px] text-white/40 font-mono uppercase tracking-widest">
+                <Clock className="w-3 h-3" />
+                {currentStep.timeEstimate}
+              </div>
             </div>
-          )}
 
-          {}
-          {currentStep.id === 'profile' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                  Nome do seu negócio *
-                </label>
-                <Input
-                  value={profileData.business_name}
-                  onChange={(e) =>
-                    setProfileData({
-                      ...profileData,
-                      business_name: e.target.value,
-                    })
-                  }
-                  placeholder="Ex: Studio Glam, Maria Makeup..."
-                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
-                />
-              </div>
+            <h2 className="text-3xl font-serif text-white mb-2 tracking-tight italic">
+              {currentStep.title}
+            </h2>
+            <p className="text-sm text-white/45 mb-10 leading-relaxed font-sans font-light">
+              {currentStep.subtitle}
+            </p>
 
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                  Sobre você (aparece no seu portal)
-                </label>
-                <Textarea
-                  value={profileData.bio}
-                  onChange={(e) =>
-                    setProfileData({ ...profileData, bio: e.target.value })
-                  }
-                  rows={3}
-                  placeholder="Maquiadora profissional especializada em..."
-                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                    WhatsApp
-                  </label>
-                  <Input
-                    value={profileData.phone}
-                    onChange={(e) =>
-                      setProfileData({ ...profileData, phone: e.target.value })
-                    }
-                    placeholder="(11) 99999-9999"
-                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
-                  />
+            {currentStep.id === 'welcome' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    {
+                      Icon: User,
+                      label: 'Sua marca',
+                      desc: '~ 45s',
+                    },
+                    {
+                      Icon: Heart,
+                      label: 'Primeira cliente',
+                      desc: '~ 30s',
+                    },
+                    {
+                      Icon: Sparkles,
+                      label: 'Sistema ativo',
+                      desc: 'imediato',
+                    },
+                  ].map((item, i) => (
+                    <div
+                      key={i}
+                      className="text-center p-4 border border-white/[0.06] bg-white/[0.02]"
+                    >
+                      <item.Icon className="w-5 h-5 mx-auto mb-2 text-white" />
+                      <p className="text-xs text-white font-medium">
+                        {item.label}
+                      </p>
+                      <p className="text-[10px] text-white/30 font-mono uppercase tracking-wider mt-1">
+                        {item.desc}
+                      </p>
+                    </div>
+                  ))}
                 </div>
+                <p className="text-xs text-white/25 text-center font-mono uppercase tracking-wider">
+                  Dá pra pular e voltar depois em Configurações
+                </p>
+              </div>
+            )}
+
+            {currentStep.id === 'profile' && (
+              <div className="space-y-4">
                 <div>
                   <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                    Instagram
+                    Nome do seu negócio *
                   </label>
                   <Input
-                    value={profileData.instagram}
+                    value={profileData.business_name}
                     onChange={(e) =>
                       setProfileData({
                         ...profileData,
-                        instagram: e.target.value,
+                        business_name: e.target.value,
                       })
                     }
-                    placeholder="@seu.perfil"
+                    placeholder="Ex: Studio Glam, Maria Makeup..."
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
                 </div>
-              </div>
-            </div>
-          )}
 
-          {}
-          {currentStep.id === 'first_client' && (
-            <div className="space-y-4">
-              <p className="text-xs text-white/30 mb-2">
-                Cadastrar uma cliente real faz você sentir o sistema funcionando
-                de verdade.
-              </p>
-
-              <div>
-                <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                  Nome da cliente *
-                </label>
-                <Input
-                  value={clientData.name}
-                  onChange={(e) =>
-                    setClientData({ ...clientData, name: e.target.value })
-                  }
-                  placeholder="Ex: Ana Silva"
-                  className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                    WhatsApp da cliente
+                    Sobre você (aparece no seu portal)
+                  </label>
+                  <Textarea
+                    value={profileData.bio}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, bio: e.target.value })
+                    }
+                    rows={3}
+                    placeholder="Maquiadora profissional especializada em noivas de alto padrão..."
+                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 resize-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                      WhatsApp
+                    </label>
+                    <Input
+                      value={profileData.phone}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          phone: e.target.value,
+                        })
+                      }
+                      placeholder="(11) 99999-9999"
+                      className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                      Instagram
+                    </label>
+                    <Input
+                      value={profileData.instagram}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          instagram: e.target.value,
+                        })
+                      }
+                      placeholder="@seu.perfil"
+                      className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {currentStep.id === 'first_client' && (
+              <div className="space-y-4">
+                <p className="text-xs text-white/30 mb-2">
+                  Uma cliente real faz você sentir o sistema funcionando de
+                  verdade.
+                </p>
+
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    Nome da cliente *
                   </label>
                   <Input
-                    value={clientData.phone}
+                    value={clientData.name}
                     onChange={(e) =>
-                      setClientData({ ...clientData, phone: e.target.value })
+                      setClientData({ ...clientData, name: e.target.value })
                     }
-                    placeholder="(11) 99999-9999"
+                    placeholder="Ex: Ana Silva"
                     className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                    Data do evento
-                  </label>
-                  <Input
-                    type="date"
-                    value={clientData.event_date}
-                    onChange={(e) =>
-                      setClientData({
-                        ...clientData,
-                        event_date: e.target.value,
-                      })
-                    }
-                    className="bg-white/[0.04] border-white/10 text-white h-11"
-                  />
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                      WhatsApp da cliente
+                    </label>
+                    <Input
+                      value={clientData.phone}
+                      onChange={(e) =>
+                        setClientData({ ...clientData, phone: e.target.value })
+                      }
+                      placeholder="(11) 99999-9999"
+                      className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                      Data do evento
+                    </label>
+                    <Input
+                      type="date"
+                      value={clientData.event_date}
+                      onChange={(e) =>
+                        setClientData({
+                          ...clientData,
+                          event_date: e.target.value,
+                        })
+                      }
+                      className="bg-white/[0.04] border-white/10 text-white h-11"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 border border-white/[0.06] bg-white/[0.02]">
+                  <p className="text-xs text-white/40 flex items-start gap-2">
+                    <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                    <span>
+                      Depois de cadastrar, você pode gerar contrato digital e
+                      enviar o portal exclusivo pra ela em dois cliques.
+                    </span>
+                  </p>
                 </div>
               </div>
+            )}
 
-              <div className="p-3 border border-white/[0.06] bg-white/[0.02]">
-                <p className="text-xs text-white/40 flex items-start gap-2">
-                  <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
-                  <span>
-                    Depois de cadastrar, você pode gerar um contrato e enviar o
-                    portal exclusivo para ela.
-                  </span>
-                </p>
-              </div>
-            </div>
-          )}
+            {currentStep.id === 'complete' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto border border-white/20 flex items-center justify-center mb-4">
+                    <CheckCircle className="w-8 h-8 text-white" />
+                  </div>
+                  {firstClientName && (
+                    <p className="text-white/80 text-sm">
+                      <span className="text-white font-medium">
+                        {firstClientName}
+                      </span>{' '}
+                      já está no seu sistema.
+                    </p>
+                  )}
+                  <p className="text-white/50 text-sm mt-2">
+                    Escolhe o próximo passo natural:
+                  </p>
+                </div>
 
-          {}
-          {currentStep.id === 'complete' && (
-            <div className="space-y-6 text-center">
-              <div className="w-16 h-16 mx-auto border border-white/20 flex items-center justify-center">
-                <CheckCircle className="w-8 h-8 text-white" />
-              </div>
-
-              <div>
-                <p className="text-white/60 text-sm mb-6">
-                  Seu sistema está configurado. Aqui está o que você já pode
-                  fazer:
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 text-left">
+                <div className="space-y-2">
                   {[
-                    { action: 'Gerar contrato digital', path: '/contratos' },
-                    { action: 'Criar evento na agenda', path: '/calendar' },
-                    { action: 'Enviar portal da noiva', path: '/clientes' },
-                    { action: 'Ver seu dashboard', path: '/dashboard' },
+                    {
+                      action: firstClientName
+                        ? `Gerar contrato para ${firstClientName}`
+                        : 'Gerar primeiro contrato',
+                      path: '/contratos',
+                      primary: true,
+                    },
+                    {
+                      action: 'Agendar próximo evento',
+                      path: '/calendar',
+                    },
+                    {
+                      action: 'Explorar dashboard completo',
+                      path: '/dashboard',
+                    },
                   ].map((item, i) => (
                     <button
                       key={i}
-                      onClick={() => {
-                        handleNext()
+                      onClick={async () => {
+                        await handleNext()
                         navigate(item.path)
                       }}
-                      className="p-3 border border-white/[0.06] bg-white/[0.02] hover:border-white/20 transition-colors text-left"
+                      className={`w-full p-4 text-left flex items-center justify-between transition-colors group ${
+                        item.primary
+                          ? 'border border-white/30 bg-white/[0.06] hover:bg-white/[0.1]'
+                          : 'border border-white/[0.06] bg-white/[0.02] hover:border-white/20'
+                      }`}
                     >
-                      <p className="text-xs text-white">{item.action}</p>
-                      <p className="text-[10px] text-white/25 mt-0.5">
-                        → Ir agora
-                      </p>
+                      <span
+                        className={`text-sm ${
+                          item.primary ? 'text-white font-medium' : 'text-white/70'
+                        }`}
+                      >
+                        {item.action}
+                      </span>
+                      <ArrowRight
+                        className={`w-4 h-4 group-hover:translate-x-1 transition-transform ${
+                          item.primary ? 'text-white' : 'text-white/30'
+                        }`}
+                      />
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-
-          {}
-          <div className="flex gap-3 mt-8">
-            {currentStep.id !== 'complete' && (
-              <button
-                onClick={handleSkip}
-                className="text-[10px] uppercase tracking-widest text-white/20 hover:text-white transition-colors py-2 px-1"
-              >
-                Pular Configuração
-              </button>
             )}
-            <div className="flex-1" />
-            <Button
-              onClick={handleNext}
-              disabled={updateMutation.isPending}
-              variant="primary"
-              className="group"
-            >
-              {currentStep.id === 'complete' ? (
-                'Ir para o Dashboard'
-              ) : (
-                <>
+
+            <div className="flex gap-3 mt-8">
+              {currentStep.id !== 'complete' && (
+                <button
+                  onClick={() => setShowSkipConfirm(true)}
+                  className="text-[10px] uppercase tracking-widest text-white/20 hover:text-white transition-colors py-2 px-1"
+                >
+                  Pular configuração
+                </button>
+              )}
+              <div className="flex-1" />
+              {currentStep.id !== 'complete' && (
+                <Button
+                  onClick={handleNext}
+                  disabled={updateMutation.isPending}
+                  variant="primary"
+                  className="group"
+                >
                   Continuar
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
+                </Button>
               )}
-            </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSkipConfirm} onOpenChange={setShowSkipConfirm}>
+        <DialogContent className="bg-[#050505] border border-white/10 max-w-md text-white">
+          <DialogHeader>
+            <DialogTitle className="font-serif text-xl flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-400" />
+              Pular configuração?
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-3 space-y-3">
+            <p className="text-sm text-white/70">
+              Seu dashboard vai começar vazio — sem perfil, sem cliente, sem
+              portal pronto pra compartilhar.
+            </p>
+            <p className="text-xs text-white/40">
+              Você pode refazer tudo depois em{' '}
+              <span className="font-mono uppercase tracking-wider text-white/60">
+                Configurações
+              </span>
+              , mas os 90 segundos agora economizam muito atrito depois.
+            </p>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button
+              variant="outline"
+              className="rounded-none font-mono text-[11px] uppercase tracking-widest border-white/20 text-white hover:bg-white/5"
+              onClick={() => setShowSkipConfirm(false)}
+            >
+              Voltar pra configuração
+            </Button>
+            <Button
+              variant="ghost"
+              className="rounded-none font-mono text-[11px] uppercase tracking-widest text-white/60 hover:text-white hover:bg-white/5"
+              onClick={confirmSkip}
+              disabled={updateMutation.isPending}
+            >
+              Pular mesmo assim
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

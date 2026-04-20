@@ -326,9 +326,10 @@ export function useEventForm({
           if (notifErr) {
             // Some deployments restrict `type` via CHECK constraint;
             // don't block event creation if notify insert fails.
-            console.warn(
-              '[useEventForm] notifications insert skipped:',
-              notifErr.message,
+            logger.warning(
+              'useEventForm notifications insert skipped',
+              'SYSTEM',
+              { error: notifErr.message },
             )
           }
         } catch (_) {

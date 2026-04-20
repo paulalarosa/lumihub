@@ -71,14 +71,25 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
     }),
   })
 
-  const data = (await res.json()) as {
+  const rawBody = await res.text()
+  let data: {
     access_token?: string
     error?: string
     error_description?: string
+  } = {}
+  try {
+    data = JSON.parse(rawBody)
+  } catch {
+    // Google returned non-JSON (likely an HTML error page)
   }
+
   if (!data.access_token) {
+    const bodyPreview = rawBody.slice(0, 400).replace(/\s+/g, ' ')
     throw new Error(
-      `Token exchange failed: ${data.error_description || data.error || 'unknown'}`,
+      `Token exchange failed (HTTP ${res.status}): ` +
+        `${data.error_description || data.error || 'no error field'} · ` +
+        `body="${bodyPreview}" · sa_email=${sa.client_email} · ` +
+        `token_uri=${sa.token_uri}`,
     )
   }
   return data.access_token
