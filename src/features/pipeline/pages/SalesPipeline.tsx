@@ -13,7 +13,16 @@ import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Plus, Search, Filter, TrendingUp } from 'lucide-react'
+import {
+  Plus,
+  Search,
+  Filter,
+  TrendingUp,
+  Flame,
+  Zap,
+  Snowflake,
+  type LucideIcon,
+} from 'lucide-react'
 import { PipelineColumn } from '@/components/pipeline/PipelineColumn'
 import { CreateLeadDialog } from '@/components/pipeline/CreateLeadDialog'
 import { getLeadTemperature } from '@/features/pipeline/lib/leadTemperature'
@@ -211,21 +220,24 @@ export const SalesPipeline = () => {
       {}
       <div className="grid grid-cols-3 gap-3 mb-6">
         <TempTile
-          icon="🔥"
+          Icon={Flame}
+          iconClass="text-red-400"
           label="Quentes"
           hint="Score ≥ 70"
           count={temperatureStats.hot}
           border="border-red-500/30"
         />
         <TempTile
-          icon="⚡"
+          Icon={Zap}
+          iconClass="text-yellow-400"
           label="Mornos"
           hint="Score 40–69"
           count={temperatureStats.warm}
           border="border-yellow-500/30"
         />
         <TempTile
-          icon="❄️"
+          Icon={Snowflake}
+          iconClass="text-blue-300"
           label="Frios"
           hint="Score < 40"
           count={temperatureStats.cold}
@@ -283,13 +295,15 @@ export const SalesPipeline = () => {
 }
 
 function TempTile({
-  icon,
+  Icon,
+  iconClass,
   label,
   hint,
   count,
   border,
 }: {
-  icon: string
+  Icon: LucideIcon
+  iconClass: string
   label: string
   hint: string
   count: number
@@ -297,7 +311,7 @@ function TempTile({
 }) {
   return (
     <div className={`border ${border} bg-white/[0.02] p-4 flex items-center gap-4`}>
-      <span className="text-2xl leading-none">{icon}</span>
+      <Icon className={`w-6 h-6 ${iconClass}`} />
       <div className="flex-1">
         <p className="font-mono text-[10px] text-white/40 tracking-widest uppercase">
           {label}

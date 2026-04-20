@@ -334,7 +334,7 @@ export function useEventForm({
 
       try {
         const eventDataForSync: Record<string, string | number | null> = {
-          title: isNoivas ? `👰 ${title}` : title,
+          title: isNoivas ? `[NOIVA] ${title}` : title,
           description: description || '',
           event_date: eventDate,
           color,
@@ -442,7 +442,7 @@ export function useEventForm({
       '55' +
       (clients.find((c) => c.id === clientId)?.phone || '').replace(/\D/g, '')
     const dateStr = formatDate(eventDate, 'dd/MM')
-    const msg = `Olá ${clientName}! ✨ Aqui é a ${user?.user_metadata?.full_name?.split(' ')[0] || 'Profissional'}. Confirmando seu horário de ${title || 'Procedimento'} para ${dateStr} às ${isNoivas ? arrivalTime : startTime}. Podemos confirmar?`
+    const msg = `Olá ${clientName}! Aqui é a ${user?.user_metadata?.full_name?.split(' ')[0] || 'Profissional'}. Confirmando seu horário de ${title || 'Procedimento'} para ${dateStr} às ${isNoivas ? arrivalTime : startTime}. Podemos confirmar?`
     window.open(
       `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,
       '_blank',

@@ -321,7 +321,7 @@ export function AutomationTabNoir() {
                   return
                 }
                 const text = encodeURIComponent(
-                  'Olá! Minha automação do KONTROL está conectada e os modelos Noir estão funcionando! 🚀',
+                  'Olá! Minha automação do KONTROL está conectada e os modelos Noir estão funcionando!',
                 )
                 window.open(
                   `https://wa.me/${userPhone.replace(/\D/g, '')}?text=${text}`,

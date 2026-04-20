@@ -15,17 +15,32 @@ import { Switch } from '@/components/ui/switch'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import {
+  CheckCircle2,
+  Clock,
+  Star,
+  Mail,
+  FileText,
+  Calendar,
+  type LucideIcon,
+} from 'lucide-react'
 
-const TRIGGER_TYPES = [
+interface TriggerType {
+  value: string
+  label: string
+  Icon: LucideIcon
+}
+
+const TRIGGER_TYPES: TriggerType[] = [
   {
     value: 'booking_confirmation',
     label: 'Confirmação de Reserva',
-    icon: '✅',
+    Icon: CheckCircle2,
   },
-  { value: 'reminder_7days', label: 'Lembrete 7 Dias Antes', icon: '📅' },
-  { value: 'reminder_24h', label: 'Lembrete 24h Antes', icon: '⏰' },
-  { value: 'post_event_review', label: 'Pedido de Avaliação', icon: '⭐' },
-  { value: 'reengagement_30days', label: 'Reengajamento 30 Dias', icon: '💌' },
+  { value: 'reminder_7days', label: 'Lembrete 7 Dias Antes', Icon: Calendar },
+  { value: 'reminder_24h', label: 'Lembrete 24h Antes', Icon: Clock },
+  { value: 'post_event_review', label: 'Pedido de Avaliação', Icon: Star },
+  { value: 'reengagement_30days', label: 'Reengajamento 30 Dias', Icon: Mail },
 ]
 
 export interface MessageTemplate {
@@ -111,11 +126,13 @@ export const FollowUpManager = () => {
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-2xl">
-                      {TRIGGER_TYPES.find(
-                        (t) => t.value === template.trigger_type,
-                      )?.icon || '📝'}
-                    </span>
+                    {(() => {
+                      const Icon =
+                        TRIGGER_TYPES.find(
+                          (t) => t.value === template.trigger_type,
+                        )?.Icon || FileText
+                      return <Icon className="w-5 h-5 text-white" />
+                    })()}
                     <span className="font-semibold text-white">
                       {template.name}
                     </span>

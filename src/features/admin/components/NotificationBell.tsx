@@ -1,5 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, CheckCheck } from 'lucide-react'
+import {
+  Bell,
+  CheckCheck,
+  User,
+  DollarSign,
+  Zap,
+  Clipboard,
+  type LucideIcon,
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAdminNotifications } from '@/hooks/useAdminNotifications'
 import { Button } from '@/components/ui/button'
@@ -21,10 +29,10 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
-  const typeIcon: Record<string, string> = {
-    new_signup: '👤',
-    payment_received: '💰',
-    subscription_change: '⚡',
+  const typeIcon: Record<string, LucideIcon> = {
+    new_signup: User,
+    payment_received: DollarSign,
+    subscription_change: Zap,
   }
 
   const formatTime = (dateStr: string) => {
@@ -94,9 +102,12 @@ export function NotificationBell() {
                     !n.is_read ? 'bg-white/[0.02]' : ''
                   }`}
                 >
-                  <span className="text-lg flex-shrink-0 mt-0.5 grayscale group-hover:grayscale-0 transition-all">
-                    {typeIcon[n.type] || '📋'}
-                  </span>
+                  {(() => {
+                    const Icon = typeIcon[n.type] || Clipboard
+                    return (
+                      <Icon className="w-4 h-4 flex-shrink-0 mt-0.5 text-zinc-400 group-hover:text-white transition-colors" />
+                    )
+                  })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <span

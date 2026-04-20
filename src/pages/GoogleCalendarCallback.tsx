@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Check, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 const GoogleCalendarCallback = () => {
@@ -30,7 +30,7 @@ const GoogleCalendarCallback = () => {
         {
           body: {
             code,
-            user_id: state,
+            state,
             redirect_uri: window.location.href.split('?')[0],
           },
         },
@@ -71,7 +71,7 @@ const GoogleCalendarCallback = () => {
         {status === 'success' && (
           <>
             <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✓</span>
+              <Check className="w-8 h-8 text-white" strokeWidth={3} />
             </div>
             <h1 className="text-2xl text-white font-bold">Conectado!</h1>
             <p className="text-neutral-400 mt-2">
@@ -83,7 +83,7 @@ const GoogleCalendarCallback = () => {
         {status === 'error' && (
           <>
             <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">✕</span>
+              <X className="w-8 h-8 text-white" strokeWidth={3} />
             </div>
             <h1 className="text-2xl text-white font-bold">Erro na conexão</h1>
             <p className="text-neutral-400 mt-2 mb-4">

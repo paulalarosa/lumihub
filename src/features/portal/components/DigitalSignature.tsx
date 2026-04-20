@@ -135,7 +135,7 @@ export function DigitalSignature({
       }
 
       toast({
-        title: 'Contrato Assinado! ✅',
+        title: 'Contrato Assinado!',
         description: 'Documento registrado com sucesso.',
       })
       onSigned()

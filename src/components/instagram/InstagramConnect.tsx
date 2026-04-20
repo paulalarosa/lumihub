@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Instagram, CheckCircle, XCircle } from 'lucide-react'
+import { Instagram, CheckCircle, XCircle, Check } from 'lucide-react'
 import { toast } from 'sonner'
 
 const INSTAGRAM_APP_ID = import.meta.env.VITE_INSTAGRAM_APP_ID
@@ -123,10 +123,22 @@ export const InstagramConnect = () => {
             </Button>
 
             <div className="text-xs text-neutral-500 space-y-1 mt-4">
-              <p>✓ Publicar posts e stories</p>
-              <p>✓ Agendar publicações</p>
-              <p>✓ Analytics de engagement</p>
-              <p>✓ Hashtags inteligentes com IA</p>
+              <p className="flex items-center gap-2">
+                <Check className="w-3 h-3" />
+                Publicar posts e stories
+              </p>
+              <p className="flex items-center gap-2">
+                <Check className="w-3 h-3" />
+                Agendar publicações
+              </p>
+              <p className="flex items-center gap-2">
+                <Check className="w-3 h-3" />
+                Analytics de engagement
+              </p>
+              <p className="flex items-center gap-2">
+                <Check className="w-3 h-3" />
+                Hashtags inteligentes com IA
+              </p>
             </div>
           </div>
         )}

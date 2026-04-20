@@ -46,8 +46,9 @@ export default function UpgradeSuccessPage() {
 
         {}
         <div className="bg-neutral-950 border border-neutral-800 rounded-lg p-6 mb-8 text-left">
-          <h3 className="text-white font-semibold mb-4 text-center">
-            ✨ Recursos Desbloqueados
+          <h3 className="text-white font-semibold mb-4 text-center flex items-center justify-center gap-2">
+            <Sparkles className="w-4 h-4 text-yellow-400" />
+            Recursos Desbloqueados
           </h3>
           <ul className="space-y-2 text-sm text-neutral-300">
             <li className="flex items-center gap-2">

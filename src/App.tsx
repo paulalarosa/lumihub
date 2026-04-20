@@ -68,6 +68,9 @@ const ProjectDetails = lazy(
   () => import('@/features/projects/pages/ProjectDetailsPage'),
 )
 const Settings = lazy(() => import('./pages/Settings'))
+const WorkflowsPage = lazy(
+  () => import('./features/workflows/pages/WorkflowsPage'),
+)
 const Contact = lazy(() => import('./pages/Contact'))
 const Privacy = lazy(() => import('./pages/Privacy'))
 const Terms = lazy(() => import('./pages/Terms'))
@@ -393,6 +396,10 @@ const App = () => {
                             <Route
                               path="/configuracoes"
                               element={<LazyPage component={Settings} />}
+                            />
+                            <Route
+                              path="/automacoes"
+                              element={<LazyPage component={WorkflowsPage} />}
                             />
                             <Route
                               path="/billing"

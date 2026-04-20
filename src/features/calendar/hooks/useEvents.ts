@@ -1,7 +1,7 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { formatDate } from '@/lib/date-utils'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export interface Event {
   id: string
@@ -34,39 +34,11 @@ export interface Event {
 }
 
 export const useEvents = (start: Date, end: Date) => {
-  const queryClient = useQueryClient()
-
-  useEffect(() => {
-    const channel = supabase
-      .channel('calendar-events-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'events',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['events'] })
-        },
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'projects',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['events'] })
-        },
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [queryClient])
+  useRealtimeInvalidate({
+    table: ['events', 'projects', 'calendar_events'],
+    invalidate: ['events'],
+    channelName: 'rt-events',
+  })
 
   return useQuery({
     queryKey: [

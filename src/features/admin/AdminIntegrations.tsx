@@ -20,6 +20,8 @@ import {
   AlertTriangle,
   CheckCircle,
   XCircle,
+  Shield,
+  Loader2,
 } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
@@ -323,6 +325,8 @@ export default function AdminIntegrations() {
         })}
       </div>
 
+      <RiscConfigPanel />
+
       <Card className="bg-muted/5 border-none">
         <CardHeader>
           <CardTitle className="text-lg font-serif">Diagnostic Logs</CardTitle>
@@ -355,5 +359,112 @@ export default function AdminIntegrations() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+function RiscConfigPanel() {
+  const [running, setRunning] = useState<
+    'status' | 'configure' | 'verify' | null
+  >(null)
+  const [result, setResult] = useState<string | null>(null)
+
+  const call = async (operation: 'status' | 'configure' | 'verify') => {
+    setRunning(operation)
+    setResult(null)
+    try {
+      const { data, error } = await supabase.functions.invoke('risc-setup', {
+        body: { operation },
+      })
+      if (error) throw error
+      setResult(JSON.stringify(data, null, 2))
+      toast.success(`RISC ${operation} OK`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setResult(msg)
+      toast.error(`RISC ${operation} falhou: ${msg}`)
+      logger.error(err, `AdminIntegrations.risc.${operation}`)
+    } finally {
+      setRunning(null)
+    }
+  }
+
+  return (
+    <Card className="bg-black/40 border border-white/10">
+      <CardHeader>
+        <CardTitle className="text-lg font-serif flex items-center gap-2">
+          <Shield className="h-4 w-4 text-white/60" />
+          Google Cross-Account Protection (RISC)
+        </CardTitle>
+        <CardDescription className="font-mono text-[10px] uppercase tracking-widest">
+          Configure o stream de eventos de segurança do Google
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="text-xs text-white/70 space-y-2 border-l-2 border-white/10 pl-3">
+          <p>
+            <strong className="text-white">Pré-requisito:</strong> secret{' '}
+            <code className="font-mono bg-black px-1 py-0.5">
+              GOOGLE_RISC_SA_JSON
+            </code>{' '}
+            deve conter o JSON da Service Account com role{' '}
+            <em>RISC Configuration Admin</em>.
+          </p>
+          <ol className="list-decimal list-inside space-y-1 text-white/60">
+            <li>
+              <strong>Status:</strong> verifica config atual do stream
+            </li>
+            <li>
+              <strong>Configurar:</strong> registra o endpoint receiver com os
+              eventos padrão
+            </li>
+            <li>
+              <strong>Testar:</strong> Google manda um evento de verificação —
+              checa a tabela <code>risc_events</code> ~10s depois
+            </li>
+          </ol>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            onClick={() => call('status')}
+            disabled={running !== null}
+            variant="outline"
+            className="rounded-none border-white/10 font-mono text-[10px] uppercase tracking-widest h-9"
+          >
+            {running === 'status' ? (
+              <Loader2 className="h-3 w-3 animate-spin mr-2" />
+            ) : null}
+            Verificar status
+          </Button>
+          <Button
+            onClick={() => call('configure')}
+            disabled={running !== null}
+            className="rounded-none bg-white text-black hover:bg-zinc-200 font-mono text-[10px] uppercase tracking-widest h-9"
+          >
+            {running === 'configure' ? (
+              <Loader2 className="h-3 w-3 animate-spin mr-2" />
+            ) : null}
+            Configurar stream
+          </Button>
+          <Button
+            onClick={() => call('verify')}
+            disabled={running !== null}
+            variant="outline"
+            className="rounded-none border-emerald-900/50 text-emerald-500 hover:bg-emerald-500 hover:text-black font-mono text-[10px] uppercase tracking-widest h-9"
+          >
+            {running === 'verify' ? (
+              <Loader2 className="h-3 w-3 animate-spin mr-2" />
+            ) : null}
+            Testar conexão
+          </Button>
+        </div>
+
+        {result && (
+          <pre className="mt-4 p-3 border border-white/10 bg-black text-[10px] text-white/70 font-mono overflow-auto max-h-60 whitespace-pre-wrap">
+            {result}
+          </pre>
+        )}
+      </CardContent>
+    </Card>
   )
 }

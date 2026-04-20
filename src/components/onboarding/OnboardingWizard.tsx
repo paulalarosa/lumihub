@@ -6,7 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { ArrowRight, CheckCircle, User, Sparkles, Heart } from 'lucide-react'
+import {
+  ArrowRight,
+  CheckCircle,
+  User,
+  Sparkles,
+  Heart,
+  PartyPopper,
+  Lightbulb,
+  type LucideIcon,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import confetti from 'canvas-confetti'
 import { useNavigate } from 'react-router-dom'
@@ -229,16 +238,18 @@ export const OnboardingWizard = () => {
           {currentStep.id === 'welcome' && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { emoji: '👩💼', label: 'Perfil', desc: '30 segundos' },
-                  { emoji: '💍', label: 'Cliente', desc: '30 segundos' },
-                  { emoji: '🎉', label: 'Pronta!', desc: 'Imediato' },
-                ].map((item, i) => (
+                {(
+                  [
+                    { Icon: User, label: 'Perfil', desc: '30 segundos' },
+                    { Icon: Heart, label: 'Cliente', desc: '30 segundos' },
+                    { Icon: PartyPopper, label: 'Pronta!', desc: 'Imediato' },
+                  ] as { Icon: LucideIcon; label: string; desc: string }[]
+                ).map((item, i) => (
                   <div
                     key={i}
                     className="text-center p-4 border border-white/[0.06] bg-white/[0.02]"
                   >
-                    <span className="text-xl block mb-2">{item.emoji}</span>
+                    <item.Icon className="w-5 h-5 mx-auto mb-2 text-white" />
                     <p className="text-xs text-white font-medium">
                       {item.label}
                     </p>
@@ -376,9 +387,12 @@ export const OnboardingWizard = () => {
               </div>
 
               <div className="p-3 border border-white/[0.06] bg-white/[0.02]">
-                <p className="text-xs text-white/40">
-                  💡 Depois de cadastrar, você pode gerar um contrato e enviar o
-                  portal exclusivo para ela.
+                <p className="text-xs text-white/40 flex items-start gap-2">
+                  <Lightbulb className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                  <span>
+                    Depois de cadastrar, você pode gerar um contrato e enviar o
+                    portal exclusivo para ela.
+                  </span>
                 </p>
               </div>
             </div>

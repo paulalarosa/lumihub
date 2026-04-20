@@ -17,7 +17,7 @@ import { TestimonialsEditor } from '../components/components/TestimonialsEditor'
 
 import { PageLoader } from '@/components/ui/PageLoader'
 
-import { Eye, Save } from 'lucide-react'
+import { Eye, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface MicrositeFormData {
@@ -461,15 +461,16 @@ export default function MicrositeEditor() {
 
               <div className="border-t border-neutral-800 pt-5 mt-5">
                 <SettingToggle
-                  label="🌐 Site Publicado"
+                  label="Site Publicado"
                   description="Tornar acessível publicamente"
                   checked={formData.is_published}
                   onChange={(v) => updateField('is_published', v)}
                 />
                 {formData.is_published && micrositeUrl && (
-                  <div className="mt-3 bg-green-950/50 border border-green-800 rounded-lg p-3">
+                  <div className="mt-3 bg-green-950/50 border border-green-800 rounded-lg p-3 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 flex-shrink-0" />
                     <p className="text-green-400 text-sm">
-                      ✅ Seu site está no ar: {micrositeUrl}
+                      Seu site está no ar: {micrositeUrl}
                     </p>
                   </div>
                 )}

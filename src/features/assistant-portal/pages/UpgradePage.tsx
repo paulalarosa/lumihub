@@ -189,8 +189,9 @@ export default function UpgradePage() {
             </div>
           </div>
 
-          <p className="text-neutral-500 text-xs uppercase tracking-wider">
-            💳 Pagamento seguro via Stripe
+          <p className="text-neutral-500 text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+            <CreditCard className="w-3 h-3" />
+            Pagamento seguro via Stripe
           </p>
           <p className="text-neutral-600 text-xs">
             Dados criptografados de ponta a ponta (PCI Compliance)

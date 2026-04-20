@@ -24,6 +24,7 @@ import {
   FileText,
   Sparkles,
   MessageCircle,
+  AlertTriangle,
 } from 'lucide-react'
 import type {
   Contract,
@@ -170,8 +171,9 @@ export function ContractsTab({
                       : 'GERAR ESTRUTURA COMPLETA (LEGAL ARCHITECT)'}
                   </Button>
                   {!contractor && (
-                    <p className="text-[9px] text-red-400 font-mono mt-1 text-center">
-                      ⚠️ Perfil incompleto (CPF/Endereço)
+                    <p className="text-[9px] text-red-400 font-mono mt-1 text-center flex items-center justify-center gap-1">
+                      <AlertTriangle className="w-3 h-3" />
+                      Perfil incompleto (CPF/Endereço)
                     </p>
                   )}
                 </div>

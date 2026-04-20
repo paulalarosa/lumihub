@@ -116,7 +116,7 @@ export default function AIAssistantFAB() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.22, ease: 'easeOut' }}
-            className="absolute bottom-20 right-0 w-[22rem] md:w-[26rem] h-[32rem] bg-background border border-border/50 shadow-2xl flex flex-col overflow-hidden rounded-lg"
+            className="absolute bottom-20 right-0 w-[calc(100vw-3rem)] max-w-[22rem] md:max-w-[26rem] h-[min(32rem,calc(100vh-9rem))] bg-background border border-border/50 shadow-2xl flex flex-col overflow-hidden rounded-lg"
           >
             <header className="flex items-center justify-between px-5 py-4 border-b border-border/40 bg-foreground/[0.015]">
               <div className="flex items-center gap-3">

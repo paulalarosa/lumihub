@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, Loader2 } from 'lucide-react'
+import { Plus, Loader2, AlertTriangle } from 'lucide-react'
 import { Controller } from 'react-hook-form'
 import { useNewProjectDialog } from './hooks/useNewProjectDialog'
 
@@ -132,8 +132,8 @@ export function NewProjectDialog({
               <input type="hidden" {...control.register('client_email')} />
               {errors.client_email && (
                 <p className="text-xs text-amber-400 flex items-center gap-1">
-                  ⚠️ {errors.client_email.message} (Atualize o cadastro do
-                  cliente)
+                  <AlertTriangle className="w-3 h-3" />
+                  {errors.client_email.message} (Atualize o cadastro do cliente)
                 </p>
               )}
             </div>

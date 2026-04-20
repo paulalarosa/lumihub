@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { Tables } from '@/integrations/supabase/types'
 import { logger } from '@/services/logger'
-import { useEffect } from 'react'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export const useAdminUsers = () => {
   const queryClient = useQueryClient()
@@ -23,24 +23,11 @@ export const useAdminUsers = () => {
     },
   })
 
-  useEffect(() => {
-    const channel = supabase
-      .channel('admin-users-channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'profiles' },
-        (payload: Record<string, unknown>) => {
-          logger.debug('Real-time event on profiles:', payload)
-
-          queryClient.invalidateQueries({ queryKey: ['admin-users'] })
-        },
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [queryClient])
+  useRealtimeInvalidate({
+    table: ['profiles', 'makeup_artists', 'assistants'],
+    invalidate: ['admin-users'],
+    channelName: 'rt-admin-users',
+  })
 
   const deleteUser = useMutation({
     mutationFn: async (userId: string) => {

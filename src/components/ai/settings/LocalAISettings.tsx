@@ -32,7 +32,7 @@ export const LocalAISettings = () => {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <p className="text-white font-bold text-xs uppercase tracking-widest mb-1">
-                Local AI - Total Privacy Protocol 🔒
+                Local AI - Total Privacy Protocol
               </p>
               <p className="text-neutral-400 text-[10px] uppercase tracking-wider">
                 Available exclusively on the{' '}
@@ -59,7 +59,7 @@ export const LocalAISettings = () => {
         <Shield className="w-4 h-4 text-emerald-500/50" />
         <AlertDescription className="text-[10px] uppercase tracking-widest leading-relaxed">
           <p className="text-white font-bold mb-1">
-            Local AI Engine Enabled ✨
+            Local AI Engine Enabled
           </p>
           <p className="text-zinc-500">
             Total privacy protocol: the model executes within your local

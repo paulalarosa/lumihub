@@ -14,6 +14,8 @@ import {
   FileText,
   Clock,
   AlertTriangle,
+  PenLine,
+  Keyboard,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -399,11 +401,13 @@ export default function SignContract() {
                 }
               >
                 <TabsList className="w-full bg-neutral-800">
-                  <TabsTrigger value="drawn" className="flex-1">
-                    ✍️ Desenhar
+                  <TabsTrigger value="drawn" className="flex-1 gap-2">
+                    <PenLine className="w-4 h-4" />
+                    Desenhar
                   </TabsTrigger>
-                  <TabsTrigger value="typed" className="flex-1">
-                    ⌨️ Digitar
+                  <TabsTrigger value="typed" className="flex-1 gap-2">
+                    <Keyboard className="w-4 h-4" />
+                    Digitar
                   </TabsTrigger>
                 </TabsList>
 

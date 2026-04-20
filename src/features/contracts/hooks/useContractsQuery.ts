@@ -2,10 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export function useContractsQuery() {
   const { user } = useAuth()
   const { organizationId } = useOrganization()
+
+  useRealtimeInvalidate({
+    table: 'contracts',
+    invalidate: ['contracts'],
+    filter: organizationId ? `user_id=eq.${organizationId}` : undefined,
+    enabled: !!organizationId,
+    channelName: 'rt-contracts',
+  })
 
   return useQuery({
     queryKey: ['contracts', organizationId],

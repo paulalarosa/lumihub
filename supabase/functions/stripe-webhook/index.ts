@@ -167,51 +167,85 @@ async function handleSubscriptionCancelled(subscription: Stripe.Subscription) {
     .eq('stripe_subscription_id', subscription.id)
 }
 
-async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string
-
+async function findUserByCustomer(customerId: string) {
   const { data: artist } = await supabase
     .from('makeup_artists')
     .select('user_id')
     .eq('stripe_customer_id', customerId)
     .single()
+  return artist?.user_id ?? null
+}
 
-  if (!artist) return
+async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+  const userId = await findUserByCustomer(invoice.customer as string)
+  if (!userId) return
 
-  await supabase.from('payment_history').insert({
-    user_id: artist.user_id,
-    stripe_payment_intent_id: invoice.payment_intent as string,
-    stripe_invoice_id: invoice.id,
-    amount: invoice.amount_paid / 100,
-    currency: invoice.currency.toUpperCase(),
-    status: 'succeeded',
-    description: `Pagamento ${invoice.billing_reason}`,
-    paid_at: new Date(invoice.created * 1000).toISOString(),
-  })
+  const amount = invoice.amount_paid / 100
+  const stripeInvoiceId = invoice.id
+  const paidAt = new Date((invoice.status_transitions?.paid_at ?? invoice.created) * 1000).toISOString()
+
+  // Upsert by stripe invoice id so this handler is idempotent (Stripe may retry)
+  const { data: existing } = await supabase
+    .from('invoices')
+    .select('id, status')
+    .eq('invoice_number', stripeInvoiceId)
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (existing) {
+    if (existing.status !== 'paid') {
+      await supabase
+        .from('invoices')
+        .update({ status: 'paid', paid_at: paidAt, amount })
+        .eq('id', existing.id)
+    }
+  } else {
+    await supabase.from('invoices').insert({
+      user_id: userId,
+      invoice_number: stripeInvoiceId,
+      amount,
+      status: 'paid',
+      paid_at: paidAt,
+      due_date: invoice.due_date
+        ? new Date(invoice.due_date * 1000).toISOString()
+        : null,
+    })
+  }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const customerId = invoice.customer as string
+  const userId = await findUserByCustomer(invoice.customer as string)
+  if (!userId) return
 
-  const { data: artist } = await supabase
-    .from('makeup_artists')
-    .select('user_id')
-    .eq('stripe_customer_id', customerId)
-    .single()
+  const amount = invoice.amount_due / 100
+  const stripeInvoiceId = invoice.id
 
-  if (!artist) return
+  const { data: existing } = await supabase
+    .from('invoices')
+    .select('id')
+    .eq('invoice_number', stripeInvoiceId)
+    .eq('user_id', userId)
+    .maybeSingle()
 
-  await supabase.from('payment_history').insert({
-    user_id: artist.user_id,
-    stripe_invoice_id: invoice.id,
-    amount: invoice.amount_due / 100,
-    currency: invoice.currency.toUpperCase(),
-    status: 'failed',
-    description: `Falha no pagamento: ${invoice.billing_reason}`,
-  })
+  if (existing) {
+    await supabase
+      .from('invoices')
+      .update({ status: 'overdue' })
+      .eq('id', existing.id)
+  } else {
+    await supabase.from('invoices').insert({
+      user_id: userId,
+      invoice_number: stripeInvoiceId,
+      amount,
+      status: 'overdue',
+      due_date: invoice.due_date
+        ? new Date(invoice.due_date * 1000).toISOString()
+        : null,
+    })
+  }
 
   await supabase
     .from('makeup_artists')
     .update({ plan_status: 'past_due' })
-    .eq('user_id', artist.user_id)
+    .eq('user_id', userId)
 }

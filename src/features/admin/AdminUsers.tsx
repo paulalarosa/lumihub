@@ -52,6 +52,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { exportCsv } from '@/lib/csvExport'
 import { Download } from 'lucide-react'
 import { UserDetailsSheet } from './components/UserDetailsSheet'
+import { AdminAssistantsSection } from './components/AdminAssistantsSection'
 
 const PLAN_OPTIONS = [
   { value: 'free', label: 'Gratuito' },
@@ -437,7 +438,89 @@ export default function AdminUsers() {
         </div>
       </div>
 
-      <Card className="bg-black/40 border border-zinc-800 rounded-none overflow-hidden backdrop-blur-sm shadow-2xl">
+      {/* Mobile: cards */}
+      <div className="md:hidden space-y-3">
+        {filteredUsers.map((u) => (
+          <div
+            key={u.id}
+            className={`border border-zinc-800 bg-black/40 p-4 cursor-pointer ${
+              isBlocked(u) ? 'bg-red-900/5' : ''
+            } ${selectedIds.has(u.id) ? 'border-white/40' : ''}`}
+            onClick={() => setDetailsUserId(u.id)}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="pt-1"
+              >
+                <Checkbox
+                  checked={selectedIds.has(u.id)}
+                  onCheckedChange={() => toggleSelect(u.id)}
+                  disabled={u.id === adminUser?.id}
+                  aria-label={`Selecionar ${u.full_name || u.email}`}
+                  className="rounded-none border-zinc-700"
+                />
+              </div>
+
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="font-serif text-white text-sm truncate">
+                    {u.full_name || 'Anonymous User'}
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className={`shrink-0 rounded-none font-mono text-[8px] uppercase tracking-widest ${
+                      isBlocked(u)
+                        ? 'bg-red-950/30 border-red-900 text-red-500'
+                        : u.subscription_status === 'active'
+                          ? 'border-green-900/50 text-green-500'
+                          : 'border-zinc-800 text-zinc-600'
+                    }`}
+                  >
+                    {isBlocked(u)
+                      ? 'SUSPENSO'
+                      : u.subscription_status || 'offline'}
+                  </Badge>
+                </div>
+                <p className="text-[11px] font-mono text-zinc-500 truncate">
+                  {u.email}
+                </p>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                  <Badge
+                    variant="outline"
+                    className={`rounded-none font-mono text-[9px] uppercase tracking-widest ${
+                      u.role === 'admin'
+                        ? 'bg-white text-black font-bold'
+                        : 'text-zinc-500 border-zinc-800'
+                    }`}
+                  >
+                    {u.role === 'admin' ? (
+                      <Shield className="h-2.5 w-2.5 mr-1" />
+                    ) : (
+                      <User className="h-2.5 w-2.5 mr-1" />
+                    )}
+                    {u.role || 'user'}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="rounded-none font-mono text-[9px] uppercase tracking-widest border-zinc-800 text-zinc-400"
+                  >
+                    {getPlanLabel(u.plan || 'free')}
+                  </Badge>
+                  <span className="text-[9px] font-mono text-zinc-600 ml-auto">
+                    {u.created_at
+                      ? new Date(u.created_at).toLocaleDateString('pt-BR')
+                      : '-'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop: table */}
+      <Card className="hidden md:block bg-black/40 border border-zinc-800 rounded-none overflow-hidden backdrop-blur-sm shadow-2xl">
         <CardContent className="p-0">
           <div className="overflow-x-auto custom-scrollbar">
             <table className="w-full border-collapse">
@@ -760,18 +843,30 @@ export default function AdminUsers() {
         </DialogContent>
       </Dialog>
 
+      <AdminAssistantsSection />
+
       <UserDetailsSheet
         userId={detailsUserId}
         onClose={() => setDetailsUserId(null)}
       />
 
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-zinc-950 border border-white/20 shadow-2xl rounded-none flex items-center gap-3 px-4 py-3 min-w-[520px]">
-          <div className="flex items-center gap-2 border-r border-zinc-800 pr-4">
-            <CheckSquare className="w-3.5 h-3.5 text-white" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-white">
-              {selectedIds.size} selecionada{selectedIds.size > 1 ? 's' : ''}
-            </span>
+        <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-1/2 md:right-auto md:-translate-x-1/2 z-40 bg-zinc-950 border-t md:border border-white/20 shadow-2xl rounded-none flex flex-wrap items-center gap-2 px-3 py-3 md:min-w-[520px]">
+          <div className="flex items-center gap-2 md:border-r md:border-zinc-800 md:pr-3 w-full md:w-auto justify-between md:justify-start">
+            <div className="flex items-center gap-2">
+              <CheckSquare className="w-3.5 h-3.5 text-white" />
+              <span className="font-mono text-[10px] uppercase tracking-widest text-white">
+                {selectedIds.size} selecionada{selectedIds.size > 1 ? 's' : ''}
+              </span>
+            </div>
+            <button
+              onClick={clearSelection}
+              disabled={bulkRunning}
+              className="md:hidden text-zinc-500 hover:text-white"
+              aria-label="Limpar seleção"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           <Button
@@ -779,15 +874,16 @@ export default function AdminUsers() {
             size="sm"
             onClick={handleBulkExport}
             disabled={bulkRunning}
-            className="rounded-none border-zinc-800 bg-transparent hover:bg-white hover:text-black font-mono text-[10px] tracking-widest h-8"
+            className="rounded-none border-zinc-800 bg-transparent hover:bg-white hover:text-black font-mono text-[10px] tracking-widest h-8 flex-1 md:flex-none"
           >
-            <Download className="w-3 h-3 mr-2" />
-            EXPORTAR CSV
+            <Download className="w-3 h-3 md:mr-2" />
+            <span className="hidden md:inline">EXPORTAR CSV</span>
+            <span className="md:hidden ml-1">CSV</span>
           </Button>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 flex-1 md:flex-none">
             <Select value={bulkPlan} onValueChange={setBulkPlan}>
-              <SelectTrigger className="w-[140px] h-8 rounded-none border-zinc-800 bg-transparent text-[10px] font-mono uppercase tracking-widest">
+              <SelectTrigger className="flex-1 md:w-[140px] h-8 rounded-none border-zinc-800 bg-transparent text-[10px] font-mono uppercase tracking-widest">
                 <SelectValue placeholder="MUDAR PLANO" />
               </SelectTrigger>
               <SelectContent className="rounded-none border-zinc-800 bg-zinc-950 text-white">
@@ -806,12 +902,12 @@ export default function AdminUsers() {
               size="sm"
               onClick={handleBulkPlanChange}
               disabled={!bulkPlan || bulkRunning}
-              className="rounded-none bg-white text-black hover:bg-zinc-200 h-8 font-mono text-[10px] tracking-widest"
+              className="rounded-none bg-white text-black hover:bg-zinc-200 h-8 font-mono text-[10px] tracking-widest px-3"
             >
               {bulkRunning ? (
                 <Loader2 className="w-3 h-3 animate-spin" />
               ) : (
-                'APLICAR'
+                'OK'
               )}
             </Button>
           </div>
@@ -821,10 +917,12 @@ export default function AdminUsers() {
             size="sm"
             onClick={() => handleBulkBlock(true)}
             disabled={bulkRunning}
-            className="rounded-none border-red-900/50 bg-transparent text-red-500 hover:bg-red-500 hover:text-black font-mono text-[10px] tracking-widest h-8"
+            className="rounded-none border-red-900/50 bg-transparent text-red-500 hover:bg-red-500 hover:text-black font-mono text-[10px] tracking-widest h-8 flex-1 md:flex-none px-3"
+            aria-label="Suspender selecionadas"
           >
-            <Shield className="w-3 h-3 mr-2" />
-            SUSPENDER
+            <Shield className="w-3 h-3 md:mr-2" />
+            <span className="hidden md:inline">SUSPENDER</span>
+            <span className="md:hidden ml-1">STOP</span>
           </Button>
 
           <Button
@@ -832,16 +930,18 @@ export default function AdminUsers() {
             size="sm"
             onClick={() => handleBulkBlock(false)}
             disabled={bulkRunning}
-            className="rounded-none border-green-900/50 bg-transparent text-green-500 hover:bg-green-500 hover:text-black font-mono text-[10px] tracking-widest h-8"
+            className="rounded-none border-green-900/50 bg-transparent text-green-500 hover:bg-green-500 hover:text-black font-mono text-[10px] tracking-widest h-8 flex-1 md:flex-none px-3"
+            aria-label="Reativar selecionadas"
           >
-            <ShieldOff className="w-3 h-3 mr-2" />
-            REATIVAR
+            <ShieldOff className="w-3 h-3 md:mr-2" />
+            <span className="hidden md:inline">REATIVAR</span>
+            <span className="md:hidden ml-1">GO</span>
           </Button>
 
           <button
             onClick={clearSelection}
             disabled={bulkRunning}
-            className="ml-auto text-zinc-500 hover:text-white transition-colors"
+            className="hidden md:block ml-auto text-zinc-500 hover:text-white transition-colors"
             aria-label="Limpar seleção"
           >
             <X className="w-4 h-4" />

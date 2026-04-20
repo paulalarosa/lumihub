@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { subMonths } from 'date-fns/subMonths'
 import { formatDate, toZonedTime } from '@/lib/date-utils'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export interface Transaction {
   id: string
@@ -19,6 +20,14 @@ export interface Transaction {
 export const useFinancials = () => {
   const { user } = useAuth()
   const { organizationId } = useOrganization()
+
+  useRealtimeInvalidate({
+    table: ['invoices', 'payments'],
+    invalidate: ['financial-transactions'],
+    filter: organizationId ? `user_id=eq.${organizationId}` : undefined,
+    enabled: !!organizationId,
+    channelName: 'rt-financials',
+  })
 
   const query = useQuery({
     queryKey: ['financial-transactions', organizationId],

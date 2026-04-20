@@ -68,6 +68,45 @@ serve(async (req: Request) => {
       const redirect_uri = body.redirect_uri
       if (!redirect_uri) return json({ error: 'Missing redirect_uri' }, 400)
 
+      // Generate cryptographically random CSRF state
+      const stateBytes = new Uint8Array(32)
+      crypto.getRandomValues(stateBytes)
+      const stateToken = btoa(String.fromCharCode(...stateBytes))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+
+      // PKCE verifier/challenge (S256)
+      const verifierBytes = new Uint8Array(32)
+      crypto.getRandomValues(verifierBytes)
+      const codeVerifier = btoa(String.fromCharCode(...verifierBytes))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+
+      const challengeBuf = await crypto.subtle.digest(
+        'SHA-256',
+        new TextEncoder().encode(codeVerifier),
+      )
+      const codeChallenge = btoa(
+        String.fromCharCode(...new Uint8Array(challengeBuf)),
+      )
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+
+      // Persist state for validation on callback
+      const { error: stateErr } = await supabase.from('oauth_states').insert({
+        state_token: stateToken,
+        user_id: user.id,
+        provider: 'google',
+        code_verifier: codeVerifier,
+        redirect_uri,
+      })
+      if (stateErr) {
+        return json({ error: `Failed to persist state: ${stateErr.message}` }, 500)
+      }
+
       const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
       authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
       authUrl.searchParams.set('redirect_uri', redirect_uri)
@@ -78,7 +117,10 @@ serve(async (req: Request) => {
       )
       authUrl.searchParams.set('access_type', 'offline')
       authUrl.searchParams.set('prompt', 'consent')
-      authUrl.searchParams.set('state', user.id)
+      authUrl.searchParams.set('include_granted_scopes', 'true')
+      authUrl.searchParams.set('state', stateToken)
+      authUrl.searchParams.set('code_challenge', codeChallenge)
+      authUrl.searchParams.set('code_challenge_method', 'S256')
 
       return json({ url: authUrl.toString() })
     }

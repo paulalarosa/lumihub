@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { supabase } from '@/integrations/supabase/client'
 import { useQuery } from '@tanstack/react-query'
 import { useOrganization } from '@/hooks/useOrganization'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 interface Project {
   id: string
@@ -33,6 +34,14 @@ export function useProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
   const preselectedClientId = searchParams.get('cliente') || undefined
+
+  useRealtimeInvalidate({
+    table: 'projects',
+    invalidate: ['projects'],
+    filter: organizationId ? `user_id=eq.${organizationId}` : undefined,
+    enabled: !!organizationId,
+    channelName: 'rt-projects',
+  })
 
   const { data: projects = [], isLoading: loadingData } = useQuery({
     queryKey: ['projects', organizationId],

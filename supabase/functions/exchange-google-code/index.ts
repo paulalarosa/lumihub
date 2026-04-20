@@ -34,29 +34,70 @@ serve(async (req) => {
       return json({ success: false, error: 'Supabase credentials missing' }, 500)
     }
 
-    const { code, user_id, redirect_uri } = (await req.json()) as {
+    const { code, user_id, redirect_uri, state } = (await req.json()) as {
       code?: string
       user_id?: string
       redirect_uri?: string
+      state?: string
     }
 
-    if (!code || !user_id) {
-      return json({ success: false, error: 'Missing code or user_id' }, 400)
+    if (!code) {
+      return json({ success: false, error: 'Missing code' }, 400)
     }
 
     const callbackUri =
       redirect_uri || `${req.headers.get('origin')}/calendar/callback`
 
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+
+    // Validate CSRF state (must match a row in oauth_states not consumed + not expired)
+    let verifiedUserId = user_id
+    let codeVerifier: string | null = null
+
+    if (state) {
+      const { data: stateRow } = await supabase
+        .from('oauth_states')
+        .select('*')
+        .eq('state_token', state)
+        .eq('provider', 'google')
+        .is('consumed_at', null)
+        .gt('expires_at', new Date().toISOString())
+        .maybeSingle()
+
+      if (!stateRow) {
+        return json(
+          { success: false, error: 'Invalid or expired state (possible CSRF)' },
+          401,
+        )
+      }
+
+      verifiedUserId = stateRow.user_id
+      codeVerifier = stateRow.code_verifier
+
+      // Mark state as consumed (single-use)
+      await supabase
+        .from('oauth_states')
+        .update({ consumed_at: new Date().toISOString() })
+        .eq('id', stateRow.id)
+    }
+
+    if (!verifiedUserId) {
+      return json({ success: false, error: 'Missing user_id' }, 400)
+    }
+
+    const tokenRequestBody: Record<string, string> = {
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: callbackUri,
+      grant_type: 'authorization_code',
+    }
+    if (codeVerifier) tokenRequestBody.code_verifier = codeVerifier
+
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: callbackUri,
-        grant_type: 'authorization_code',
-      }),
+      body: new URLSearchParams(tokenRequestBody),
     })
 
     const tokens = (await tokenResponse.json()) as {
@@ -99,7 +140,7 @@ serve(async (req) => {
 
     if (WEBHOOK_URL && !WEBHOOK_URL.includes('localhost')) {
       try {
-        const channelId = `khk-${user_id}-${Date.now()}`
+        const channelId = `khk-${verifiedUserId}-${Date.now()}`
         const watchResponse = await fetch(
           `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(primaryCalendar.id)}/events/watch`,
           {
@@ -112,7 +153,7 @@ serve(async (req) => {
               id: channelId,
               type: 'web_hook',
               address: WEBHOOK_URL,
-              token: user_id,
+              token: verifiedUserId,
             }),
           },
         )
@@ -133,12 +174,10 @@ serve(async (req) => {
       }
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-
     const { error: dbError } = await supabase
       .from('google_calendar_tokens')
       .upsert({
-        user_id,
+        user_id: verifiedUserId,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
         token_expiry: new Date(
@@ -157,7 +196,7 @@ serve(async (req) => {
     }
 
     initialSync(
-      user_id,
+      verifiedUserId,
       tokens.access_token,
       primaryCalendar.id,
       supabase,

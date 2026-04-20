@@ -207,7 +207,7 @@ export const APIKeysSettings = () => {
       {}
       <div className="p-4 bg-zinc-950 border border-white/5 space-y-3">
         <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
-          Security_Parameters 🔒
+          Security_Parameters
         </p>
         <ul className="space-y-1.5">
           {[

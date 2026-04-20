@@ -73,8 +73,9 @@ export const LeadCard = memo(({ lead }: LeadCardProps) => {
                 {lead.lead_score}
               </span>
             </div>
-            <span className={`font-mono text-[9px] uppercase tracking-widest ${temp.colorClass}`}>
-              {temp.icon} {temp.label}
+            <span className={`font-mono text-[9px] uppercase tracking-widest ${temp.colorClass} flex items-center gap-1`}>
+              <temp.Icon className="w-3 h-3" />
+              {temp.label}
             </span>
           </div>
         </div>

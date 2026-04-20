@@ -1,9 +1,11 @@
+import { Flame, Zap, Snowflake, type LucideIcon } from 'lucide-react'
+
 export type LeadTemperature = 'hot' | 'warm' | 'cold'
 
 export interface TemperatureMeta {
   temperature: LeadTemperature
   label: string
-  icon: string
+  Icon: LucideIcon
   colorClass: string
   borderClass: string
 }
@@ -14,7 +16,7 @@ export function getLeadTemperature(score: number | null | undefined): Temperatur
     return {
       temperature: 'hot',
       label: 'Quente',
-      icon: '🔥',
+      Icon: Flame,
       colorClass: 'text-red-400',
       borderClass: 'border-red-500/40',
     }
@@ -23,7 +25,7 @@ export function getLeadTemperature(score: number | null | undefined): Temperatur
     return {
       temperature: 'warm',
       label: 'Morno',
-      icon: '⚡',
+      Icon: Zap,
       colorClass: 'text-yellow-400',
       borderClass: 'border-yellow-500/40',
     }
@@ -31,7 +33,7 @@ export function getLeadTemperature(score: number | null | undefined): Temperatur
   return {
     temperature: 'cold',
     label: 'Frio',
-    icon: '❄️',
+    Icon: Snowflake,
     colorClass: 'text-blue-300',
     borderClass: 'border-blue-500/30',
   }

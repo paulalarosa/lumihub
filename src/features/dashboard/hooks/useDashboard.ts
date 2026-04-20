@@ -5,11 +5,33 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useDashboardStats } from '@/hooks/useDashboardStats'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export function useDashboard() {
   const { user } = useAuth()
   const { organizationId, isOwner, loading: orgLoading } = useOrganization()
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
+
+  useRealtimeInvalidate({
+    table: [
+      'profiles',
+      'wedding_clients',
+      'projects',
+      'events',
+      'invoices',
+    ],
+    invalidate: [
+      ['dashboard-profile'],
+      ['dashboard-clients-count'],
+      ['dashboard-projects-count'],
+      ['dashboard-upcoming-events'],
+      ['dashboard-financials'],
+      ['dashboard-stats'],
+    ],
+    filter: organizationId ? `user_id=eq.${organizationId}` : undefined,
+    enabled: !!organizationId,
+    channelName: 'rt-dashboard',
+  })
 
   const { data: profileName = '', isLoading: profileLoading } = useQuery({
     queryKey: ['dashboard-profile', organizationId],

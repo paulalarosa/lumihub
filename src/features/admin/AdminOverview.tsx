@@ -21,13 +21,13 @@ export default function AdminOverview() {
       minute: '2-digit',
       second: '2-digit',
     })
-    const icon =
+    const tag =
       n.type === 'new_signup'
-        ? '👤'
+        ? '[USER]'
         : n.type === 'payment_received'
-          ? '💰'
-          : '📋'
-    return `> [${time}] ${icon} ${n.message}`
+          ? '[PAY]'
+          : '[LOG]'
+    return `> [${time}] ${tag} ${n.message}`
   })
 
   if (isLoading) {

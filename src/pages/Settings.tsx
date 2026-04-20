@@ -33,9 +33,9 @@ export default function Settings() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="border-b border-border bg-background px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <Link to="/dashboard">
+      <header className="border-b border-border bg-background px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-10 gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link to="/dashboard" className="shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -44,11 +44,11 @@ export default function Settings() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-xl font-serif font-bold text-foreground tracking-tight">
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl font-serif font-bold text-foreground tracking-tight truncate">
               SYSTEM CONFIG
             </h1>
-            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
+            <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest hidden sm:block">
               Control Panel
             </p>
           </div>
@@ -56,15 +56,20 @@ export default function Settings() {
         <Button
           onClick={cfg.saveSettings}
           disabled={cfg.saving}
-          className="rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-xs uppercase tracking-widest px-6"
+          className="shrink-0 rounded-none bg-foreground text-background hover:bg-foreground/90 font-mono text-[10px] sm:text-xs uppercase tracking-widest px-3 sm:px-6"
         >
-          {cfg.saving ? 'PROCESSING...' : 'SAVE_CHANGES'}
+          {cfg.saving ? '...' : (
+            <>
+              <span className="hidden sm:inline">SAVE_CHANGES</span>
+              <span className="sm:hidden">SAVE</span>
+            </>
+          )}
         </Button>
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
+      <main className="flex-1 container mx-auto px-4 py-6 sm:py-8 max-w-5xl">
         <Tabs defaultValue="perfil" className="w-full space-y-8">
-          <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-white/10 h-auto p-0 mb-8 overflow-x-auto">
+          <TabsList className="w-full justify-start rounded-none bg-transparent border-b border-white/10 h-auto p-0 mb-6 sm:mb-8 overflow-x-auto scrollbar-hide flex-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
             <TabsTrigger
               value="perfil"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground text-muted-foreground hover:text-foreground transition-colors px-4 py-4 font-mono text-xs uppercase tracking-widest whitespace-nowrap"

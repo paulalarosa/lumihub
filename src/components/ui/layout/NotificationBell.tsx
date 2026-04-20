@@ -1,5 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
-import { Bell, CheckCheck } from 'lucide-react'
+import {
+  Bell,
+  CheckCheck,
+  User,
+  DollarSign,
+  Receipt,
+  FileText,
+  Calendar,
+  Zap,
+  Clock,
+  AlertTriangle,
+  Clipboard,
+  type LucideIcon,
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useUserNotifications } from '@/hooks/useUserNotifications'
 import { Button } from '@/components/ui/button'
@@ -21,17 +34,17 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [open])
 
-  const typeIcon: Record<string, string> = {
-    new_signup: '👤',
-    new_client: '👤',
-    payment_received: '💰',
-    invoice_paid: '💰',
-    invoice_created: '🧾',
-    contract_signed: '📝',
-    new_event: '📅',
-    subscription_change: '⚡',
-    trial_ending: '⏰',
-    payment_failed: '⚠️',
+  const typeIcon: Record<string, LucideIcon> = {
+    new_signup: User,
+    new_client: User,
+    payment_received: DollarSign,
+    invoice_paid: DollarSign,
+    invoice_created: Receipt,
+    contract_signed: FileText,
+    new_event: Calendar,
+    subscription_change: Zap,
+    trial_ending: Clock,
+    payment_failed: AlertTriangle,
   }
 
   const formatTime = (dateStr: string) => {
@@ -101,9 +114,12 @@ export function NotificationBell() {
                     !n.is_read ? 'bg-white/[0.02]' : ''
                   }`}
                 >
-                  <span className="text-lg flex-shrink-0 mt-0.5 grayscale group-hover:grayscale-0 transition-all">
-                    {typeIcon[n.type] || '📋'}
-                  </span>
+                  {(() => {
+                    const Icon = typeIcon[n.type] || Clipboard
+                    return (
+                      <Icon className="w-4 h-4 flex-shrink-0 mt-0.5 text-zinc-400 group-hover:text-white transition-colors" />
+                    )
+                  })()}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
                       <span
