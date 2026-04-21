@@ -124,9 +124,6 @@ export function useDashboard() {
     enabled: !!organizationId,
   })
 
-  const marketingTriggers: { clientName: string; details: string }[] = []
-  const triggersLoading = false
-
   const {
     data: financials = {
       totalRevenue: 0,
@@ -230,7 +227,6 @@ export function useDashboard() {
     clientsLoading ||
     projectsLoading ||
     eventsLoading ||
-    triggersLoading ||
     financialsLoading ||
     contractsLoading
 
@@ -249,7 +245,6 @@ export function useDashboard() {
     pendingAmount: financials.pendingAmount,
     overdueCount: financials.overdueCount,
     upcomingEvents,
-    marketingTriggers,
     profileName,
     stats,
   }

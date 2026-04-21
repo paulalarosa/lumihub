@@ -29,17 +29,24 @@
     },
     "dashboard": {
         "welcome": "Bem-vinda de volta",
-        "control_center": "Central de Controle",
+        "control_center": "Centro de Controle",
+        "next_event_prefix": "Próximo evento",
         "stats": {
             "clients": "Clientes",
             "projects": "Projetos",
             "revenue": "Faturamento",
-            "commissions": "Comissões"
+            "commissions": "Comissões",
+            "revenue_mtd": "Receita este mês",
+            "revenue_ytd": "Ano",
+            "revenue_pending": "A receber",
+            "avg_ticket": "Ticket médio",
+            "contracts_pending": "Contratos pendentes"
         },
         "actions": {
             "add_client": "Adicionar",
             "create_project": "Criar",
-            "details": "Detalhes"
+            "details": "Detalhes",
+            "open": "Abrir"
         },
         "sections": {
             "agenda": "Agenda",
@@ -47,8 +54,18 @@
             "insights": "Insights",
             "origin": "Origem dos Clientes"
         },
-        "no_events": "Sem eventos próximos",
-        "view_all": "VER TODA"
+        "alerts": {
+            "invoices_overdue_one": "{{count}} fatura vencida",
+            "invoices_overdue_other": "{{count}} faturas vencidas",
+            "pending_total": "total em aberto",
+            "contracts_pending_one": "{{count}} contrato sem assinatura",
+            "contracts_pending_other": "{{count}} contratos sem assinatura",
+            "waiting_bride": "aguardando a noiva",
+            "view_invoices": "Ver faturas",
+            "view_contracts": "Ver contratos"
+        },
+        "no_events": "Nenhum evento agendado",
+        "view_all": "Ver todas"
     },
     "common": {
         "loading": "Carregando...",

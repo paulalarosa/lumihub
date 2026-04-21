@@ -57,7 +57,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-[#030303] text-white selection:bg-white selection:text-black">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+        style={{
+          paddingTop: 'max(2rem, env(safe-area-inset-top))',
+          paddingBottom: 'max(2rem, env(safe-area-inset-bottom))',
+        }}
+      >
         <motion.div {...fadeUp} className="mb-10">
           <p className="text-xs font-mono text-white/40 uppercase tracking-[0.2em] mb-1">
             {t('dashboard.control_center')}
@@ -101,22 +107,28 @@ export default function Dashboard() {
               {d.overdueCount > 0 && (
                 <p>
                   <span className="font-medium text-white">
-                    {d.overdueCount}{' '}
-                    {d.overdueCount === 1 ? 'fatura vencida' : 'faturas vencidas'}
+                    {t(
+                      d.overdueCount === 1
+                        ? 'dashboard.alerts.invoices_overdue_one'
+                        : 'dashboard.alerts.invoices_overdue_other',
+                      { count: d.overdueCount },
+                    )}
                   </span>{' '}
-                  — total em aberto{' '}
+                  — {t('dashboard.alerts.pending_total')}{' '}
                   <span className="font-mono">{fmtBRL(d.pendingAmount)}</span>.
                 </p>
               )}
               {d.contractsPending > 0 && (
                 <p>
                   <span className="font-medium text-white">
-                    {d.contractsPending}{' '}
-                    {d.contractsPending === 1
-                      ? 'contrato sem assinatura'
-                      : 'contratos sem assinatura'}
+                    {t(
+                      d.contractsPending === 1
+                        ? 'dashboard.alerts.contracts_pending_one'
+                        : 'dashboard.alerts.contracts_pending_other',
+                      { count: d.contractsPending },
+                    )}
                   </span>{' '}
-                  aguardando a noiva.
+                  {t('dashboard.alerts.waiting_bride')}.
                 </p>
               )}
             </div>
@@ -126,7 +138,7 @@ export default function Dashboard() {
                   to="/dashboard/financial"
                   className="text-[10px] font-mono uppercase tracking-widest text-amber-200 hover:text-white border border-amber-500/30 hover:border-white px-3 py-1.5 transition-colors"
                 >
-                  Ver faturas
+                  {t('dashboard.alerts.view_invoices')}
                 </Link>
               )}
               {d.contractsPending > 0 && (
@@ -134,7 +146,7 @@ export default function Dashboard() {
                   to="/contratos"
                   className="text-[10px] font-mono uppercase tracking-widest text-amber-200 hover:text-white border border-amber-500/30 hover:border-white px-3 py-1.5 transition-colors"
                 >
-                  Ver contratos
+                  {t('dashboard.alerts.view_contracts')}
                 </Link>
               )}
             </div>
@@ -148,6 +160,18 @@ export default function Dashboard() {
                 mtd={d.revenueMTD}
                 ytd={d.revenueYTD}
                 pending={d.pendingAmount}
+                avgTicket={
+                  d.stats?.leadsConversion?.converted
+                    ? d.totalRevenue / d.stats.leadsConversion.converted
+                    : 0
+                }
+                labels={{
+                  mtd: t('dashboard.stats.revenue_mtd'),
+                  ytd: t('dashboard.stats.revenue_ytd'),
+                  pending: t('dashboard.stats.revenue_pending'),
+                  avgTicket: t('dashboard.stats.avg_ticket'),
+                  details: t('dashboard.actions.details'),
+                }}
               />
             </motion.div>
           )}
@@ -175,10 +199,10 @@ export default function Dashboard() {
           <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
             <MetricCard
               icon={FileSignature}
-              label="Contratos pendentes"
+              label={t('dashboard.stats.contracts_pending')}
               value={d.contractsPending.toString()}
               link="/contratos"
-              linkLabel="Abrir"
+              linkLabel={t('dashboard.actions.open')}
               tone={d.contractsPending > 0 ? 'warn' : 'neutral'}
             />
           </motion.div>
@@ -358,10 +382,20 @@ function RevenueCard({
   mtd,
   ytd,
   pending,
+  avgTicket,
+  labels,
 }: {
   mtd: number
   ytd: number
   pending: number
+  avgTicket: number
+  labels: {
+    mtd: string
+    ytd: string
+    pending: string
+    avgTicket: string
+    details: string
+  }
 }) {
   return (
     <div className="border border-white/10 bg-white/[0.02] p-5 h-full flex flex-col justify-between group hover:border-white/25 transition-colors">
@@ -371,7 +405,7 @@ function RevenueCard({
         </div>
         <Link to="/dashboard/financial">
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider hover:text-white/60 transition-colors flex items-center gap-1">
-            Detalhes
+            {labels.details}
             <ArrowUpRight className="w-3 h-3" />
           </span>
         </Link>
@@ -381,23 +415,31 @@ function RevenueCard({
           {fmtBRL(mtd)}
         </p>
         <p className="text-[11px] text-white/35 uppercase tracking-widest">
-          Receita este mês
+          {labels.mtd}
         </p>
-        <div className="pt-3 mt-3 border-t border-white/[0.06] flex justify-between gap-2">
+        <div className="pt-3 mt-3 border-t border-white/[0.06] grid grid-cols-3 gap-2">
           <div className="min-w-0">
-            <p className="text-[10px] text-white/30 uppercase tracking-wider">
-              Ano
+            <p className="text-[9px] text-white/30 uppercase tracking-wider truncate">
+              {labels.ytd}
             </p>
-            <p className="text-sm font-mono text-white/70 truncate">
+            <p className="text-xs font-mono text-white/70 truncate">
               {fmtBRL(ytd)}
             </p>
           </div>
-          <div className="min-w-0 text-right">
-            <p className="text-[10px] text-white/30 uppercase tracking-wider">
-              A receber
+          <div className="min-w-0 text-center">
+            <p className="text-[9px] text-white/30 uppercase tracking-wider truncate">
+              {labels.pending}
             </p>
-            <p className="text-sm font-mono text-white/70 truncate">
+            <p className="text-xs font-mono text-white/70 truncate">
               {fmtBRL(pending)}
+            </p>
+          </div>
+          <div className="min-w-0 text-right">
+            <p className="text-[9px] text-white/30 uppercase tracking-wider truncate">
+              {labels.avgTicket}
+            </p>
+            <p className="text-xs font-mono text-white/70 truncate">
+              {fmtBRL(avgTicket)}
             </p>
           </div>
         </div>

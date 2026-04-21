@@ -78,7 +78,7 @@ export function ClientForm({
           name="name"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+              <FormLabel className="text-xs sm:text-[10px] uppercase tracking-widest text-gray-400 font-mono">
                 Nome *
               </FormLabel>
               <FormControl>
@@ -88,7 +88,7 @@ export function ClientForm({
                   className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
                 />
               </FormControl>
-              <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+              <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
             </FormItem>
           )}
         />
@@ -99,7 +99,7 @@ export function ClientForm({
             name="email"
             render={({ field }) => (
               <FormItem className="space-y-1.5">
-                <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+                <FormLabel className="text-xs sm:text-[10px] uppercase tracking-widest text-gray-400 font-mono">
                   Email
                 </FormLabel>
                 <FormControl>
@@ -111,7 +111,7 @@ export function ClientForm({
                     className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
                   />
                 </FormControl>
-                <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
               </FormItem>
             )}
           />
@@ -121,7 +121,7 @@ export function ClientForm({
             name="phone"
             render={({ field }) => (
               <FormItem className="space-y-1.5">
-                <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+                <FormLabel className="text-xs sm:text-[10px] uppercase tracking-widest text-gray-400 font-mono">
                   Telefone
                 </FormLabel>
                 <FormControl>
@@ -132,7 +132,7 @@ export function ClientForm({
                     className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-10 font-mono text-sm"
                   />
                 </FormControl>
-                <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
               </FormItem>
             )}
           />
@@ -210,7 +210,7 @@ export function ClientForm({
                         />
                       </PopoverContent>
                     </Popover>
-                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                    <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
                   </FormItem>
                 )}
               />
@@ -237,7 +237,7 @@ export function ClientForm({
                         className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none h-12 font-mono text-sm tracking-[0.5em] text-center font-bold"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+                    <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
                   </FormItem>
                 )}
               />
@@ -284,7 +284,7 @@ export function ClientForm({
           name="notes"
           render={({ field }) => (
             <FormItem className="space-y-1.5">
-              <FormLabel className="text-[10px] uppercase tracking-widest text-gray-500 font-mono">
+              <FormLabel className="text-xs sm:text-[10px] uppercase tracking-widest text-gray-400 font-mono">
                 Anotações
               </FormLabel>
               <FormControl>
@@ -296,7 +296,7 @@ export function ClientForm({
                   className="bg-black border border-white/30 text-white placeholder:text-white/20 focus:border-white rounded-none font-mono text-sm resize-none"
                 />
               </FormControl>
-              <FormMessage className="text-red-500 text-[10px] font-mono uppercase" />
+              <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
             </FormItem>
           )}
         />

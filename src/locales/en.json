@@ -30,16 +30,23 @@
     "dashboard": {
         "welcome": "Welcome back",
         "control_center": "Control Center",
+        "next_event_prefix": "Next event",
         "stats": {
             "clients": "Clients",
             "projects": "Projects",
             "revenue": "Revenue",
-            "commissions": "Commissions"
+            "commissions": "Commissions",
+            "revenue_mtd": "Revenue this month",
+            "revenue_ytd": "YTD",
+            "revenue_pending": "Outstanding",
+            "avg_ticket": "Avg ticket",
+            "contracts_pending": "Pending contracts"
         },
         "actions": {
             "add_client": "Add",
             "create_project": "Create",
-            "details": "Details"
+            "details": "Details",
+            "open": "Open"
         },
         "sections": {
             "agenda": "Schedule",
@@ -47,8 +54,18 @@
             "insights": "Insights",
             "origin": "Client Sources"
         },
+        "alerts": {
+            "invoices_overdue_one": "{{count}} overdue invoice",
+            "invoices_overdue_other": "{{count}} overdue invoices",
+            "pending_total": "outstanding",
+            "contracts_pending_one": "{{count}} unsigned contract",
+            "contracts_pending_other": "{{count}} unsigned contracts",
+            "waiting_bride": "waiting on the bride",
+            "view_invoices": "View invoices",
+            "view_contracts": "View contracts"
+        },
         "no_events": "No upcoming events",
-        "view_all": "VIEW ALL"
+        "view_all": "View all"
     },
     "common": {
         "loading": "Loading...",

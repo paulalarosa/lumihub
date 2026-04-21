@@ -27,31 +27,6 @@ const inlineTranslations: Record<Language, Record<string, string>> = {
     'dashboard.register_payment': 'REGISTRAR PAGAMENTO',
     'finance.log_payment': 'REGISTRAR PAGAMENTO',
 
-    'dashboard.control_center': 'Centro de Controle',
-    'dashboard.view_all': 'Ver todas',
-    'dashboard.no_events': 'Nenhum evento agendado',
-    'dashboard.stats.revenue_mtd': 'Receita este mês',
-    'dashboard.stats.revenue_ytd': 'Ano',
-    'dashboard.stats.revenue_pending': 'A receber',
-    'dashboard.stats.clients': 'Clientes',
-    'dashboard.stats.projects': 'Projetos',
-    'dashboard.stats.contracts_pending': 'Contratos pendentes',
-    'dashboard.actions.details': 'Detalhes',
-    'dashboard.actions.add_client': 'Adicionar',
-    'dashboard.actions.create_project': 'Criar',
-    'dashboard.actions.open': 'Abrir',
-    'dashboard.sections.agenda': 'Agenda',
-    'dashboard.sections.team': 'Equipe',
-    'dashboard.alerts.invoices_overdue_one': '{{count}} fatura vencida',
-    'dashboard.alerts.invoices_overdue_other': '{{count}} faturas vencidas',
-    'dashboard.alerts.pending_total': 'total em aberto',
-    'dashboard.alerts.contracts_pending_one': '{{count}} contrato sem assinatura',
-    'dashboard.alerts.contracts_pending_other': '{{count}} contratos sem assinatura',
-    'dashboard.alerts.waiting_bride': 'aguardando a noiva',
-    'dashboard.alerts.view_invoices': 'Ver faturas',
-    'dashboard.alerts.view_contracts': 'Ver contratos',
-    'dashboard.next_event_prefix': 'Próximo evento',
-
     'service.dialog.title.new': 'Novo Serviço',
     'service.dialog.title.edit': 'Editar Serviço',
     'service.name.label': 'Nome do Serviço',
@@ -106,31 +81,6 @@ const inlineTranslations: Record<Language, Record<string, string>> = {
     'dashboard.internal': 'INTERNAL',
     'dashboard.add_service': 'ADD SERVICE',
     'dashboard.register_payment': 'REGISTER PAYMENT',
-
-    'dashboard.control_center': 'Control Center',
-    'dashboard.view_all': 'View all',
-    'dashboard.no_events': 'No upcoming events',
-    'dashboard.stats.revenue_mtd': 'Revenue this month',
-    'dashboard.stats.revenue_ytd': 'YTD',
-    'dashboard.stats.revenue_pending': 'Outstanding',
-    'dashboard.stats.clients': 'Clients',
-    'dashboard.stats.projects': 'Projects',
-    'dashboard.stats.contracts_pending': 'Pending contracts',
-    'dashboard.actions.details': 'Details',
-    'dashboard.actions.add_client': 'Add',
-    'dashboard.actions.create_project': 'Create',
-    'dashboard.actions.open': 'Open',
-    'dashboard.sections.agenda': 'Agenda',
-    'dashboard.sections.team': 'Team',
-    'dashboard.alerts.invoices_overdue_one': '{{count}} overdue invoice',
-    'dashboard.alerts.invoices_overdue_other': '{{count}} overdue invoices',
-    'dashboard.alerts.pending_total': 'outstanding',
-    'dashboard.alerts.contracts_pending_one': '{{count}} unsigned contract',
-    'dashboard.alerts.contracts_pending_other': '{{count}} unsigned contracts',
-    'dashboard.alerts.waiting_bride': 'waiting on the bride',
-    'dashboard.alerts.view_invoices': 'View invoices',
-    'dashboard.alerts.view_contracts': 'View contracts',
-    'dashboard.next_event_prefix': 'Next event',
     'finance.log_payment': 'REGISTER PAYMENT',
 
     'service.dialog.title.new': 'New Service',
@@ -175,6 +125,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     i18n.changeLanguage(lang)
   }
 
+  // Translation lookup order:
+  //   1. i18next (src/locales/{pt,en}.json — canonical app copy)
+  //   2. externalTranslations (src/utils/translations.ts — landing page)
+  //   3. inlineTranslations (this file — legacy overrides being migrated out)
+  //   4. return the raw key as last-resort fallback
+  //
+  // New keys should go to (1). (3) stays for legacy strings until each
+  // section is migrated. In dev, a missing-key warning surfaces orphans.
   const t = (key: string, options?: Record<string, string | number>): string => {
     const lang = (i18n.language as Language) || 'pt'
 
@@ -185,10 +143,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     const source = externalTranslations[lang]
     let externalValue: unknown = source
-    const keys = key.split('.')
-
-    for (const k of keys) {
-      if (externalValue && typeof externalValue === 'object' && k in externalValue) {
+    for (const k of key.split('.')) {
+      if (
+        externalValue &&
+        typeof externalValue === 'object' &&
+        k in externalValue
+      ) {
         externalValue = externalValue[k]
       } else {
         externalValue = undefined
@@ -196,10 +156,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    if (externalValue && typeof externalValue === 'string') {
+    if (typeof externalValue === 'string') {
       if (options) {
         let result = externalValue
-        Object.keys(options).forEach(optKey => {
+        Object.keys(options).forEach((optKey) => {
           result = result.replace(`{{${optKey}}}`, String(options[optKey]))
         })
         return result
@@ -210,7 +170,12 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const inlineValue = inlineTranslations[lang]?.[key]
     if (inlineValue) return inlineValue
 
-    return i18nResult || key
+    if (import.meta.env.DEV) {
+      // Loud console warning in dev so orphan keys don't ship silently.
+      console.warn(`[i18n] missing key "${key}" for lang "${lang}"`)
+    }
+
+    return key
   }
 
   return (

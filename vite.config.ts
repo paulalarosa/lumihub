@@ -247,7 +247,7 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    chunkSizeWarningLimit: 2000,
+    chunkSizeWarningLimit: 8000,
   },
   optimizeDeps: {
     exclude: ['@mlc-ai/web-llm'],

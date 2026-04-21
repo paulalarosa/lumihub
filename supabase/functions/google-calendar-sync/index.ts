@@ -158,6 +158,39 @@ serve(async (req: Request) => {
       user_token?: string
     }
 
+    // Admin health check — doesn't need user token, just reports whether the
+    // Google OAuth secrets are wired up. Handled before auth so the Admin
+    // → Integrations page can render a green/red badge even when the admin
+    // hasn't linked her own Google account yet.
+    if (action === 'check_config') {
+      const missing: string[] = []
+      if (!GOOGLE_CLIENT_ID) missing.push('GOOGLE_CLIENT_ID')
+      if (!GOOGLE_CLIENT_SECRET) missing.push('GOOGLE_CLIENT_SECRET')
+      if (!SUPABASE_URL) missing.push('SUPABASE_URL')
+      if (!SUPABASE_SERVICE_ROLE_KEY) missing.push('SUPABASE_SERVICE_ROLE_KEY')
+
+      if (missing.length > 0) {
+        return new Response(
+          JSON.stringify({
+            error: 'Service configuration error',
+            missing_keys: missing,
+          }),
+          {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          },
+        )
+      }
+
+      return new Response(
+        JSON.stringify({ ok: true, configured: true }),
+        {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
     // Accept token from body (ES256 gateway bypass) OR Authorization header (legacy).
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
     const authHeader = req.headers.get('Authorization')
