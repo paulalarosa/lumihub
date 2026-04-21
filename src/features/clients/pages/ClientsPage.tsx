@@ -51,11 +51,13 @@ import { PageLoader } from '@/components/ui/page-loader'
 import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
 import { useNewProjectWizard } from '@/features/projects/hooks/useNewProjectWizard'
 import { DeleteClientDialog } from '../components/DeleteClientDialog'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export default function Clientes() {
   const navigate = useNavigate()
   const { user, loading: authLoading } = useAuth()
   const { loading: orgLoading } = useOrganization()
+  const { t } = useLanguage()
 
   const {
     clients,
@@ -99,11 +101,16 @@ export default function Clientes() {
                   <User className="h-5 w-5 text-black" />
                 </div>
                 <div>
-                  <h1 className="font-serif text-2xl text-white tracking-tight">
-                    MEUS CLIENTES
+                  <h1 className="font-serif text-2xl text-white tracking-tight uppercase">
+                    {t('clients.title')}
                   </h1>
                   <div className="text-[10px] text-white/30 uppercase tracking-[0.2em] font-mono">
-                    {filteredClients.length} {filteredClients.length === 1 ? 'cliente' : 'clientes'}
+                    {t(
+                      filteredClients.length === 1
+                        ? 'clients.count_one'
+                        : 'clients.count_other',
+                      { count: filteredClients.length },
+                    )}
                   </div>
                 </div>
               </div>
@@ -117,7 +124,9 @@ export default function Clientes() {
                 className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10 px-4"
               >
                 <Download className="h-4 w-4 mr-2" />
-                {actions.isExporting ? 'Exportando...' : 'Exportar CSV'}
+                {actions.isExporting
+                  ? t('clients.exporting')
+                  : t('clients.export_csv')}
               </Button>
 
               <Button
@@ -125,7 +134,7 @@ export default function Clientes() {
                 className="rounded-none bg-white text-black hover:bg-gray-200 font-mono text-xs uppercase tracking-widest h-10 px-6 gap-2"
               >
                 <UserPlus className="h-4 w-4" />
-                Nova Cliente
+                {t('clients.new')}
               </Button>
             </div>
           </div>
@@ -193,9 +202,9 @@ export default function Clientes() {
             <div className="flex justify-center py-20">
               <EmptyState
                 icon={Star}
-                title="FALHA NA CONEXÃO"
-                description="Erro ao carregar os clientes. Verifique sua conexão ou contate o suporte."
-                actionLabel="TENTAR NOVAMENTE"
+                title={t('clients.error.title')}
+                description={t('clients.error.description')}
+                actionLabel={t('clients.error.retry')}
                 onAction={() => fetchClients()}
                 className="border border-red-500/20 rounded-none bg-black text-red-100"
               />
@@ -203,13 +212,17 @@ export default function Clientes() {
           ) : filteredClients.length === 0 ? (
             <EmptyState
               icon={Star}
-              title={filterStore.search ? 'NENHUM RESULTADO' : 'SEM CLIENTES'}
+              title={
+                filterStore.search
+                  ? t('clients.empty.no_results_title')
+                  : t('clients.empty.no_clients_title')
+              }
               description={
                 filterStore.search
-                  ? 'Nenhuma cliente encontrada para esta busca.'
-                  : 'Nenhuma cliente cadastrada ainda. Clique no botão acima para começar.'
+                  ? t('clients.empty.no_results_description')
+                  : t('clients.empty.no_clients_description')
               }
-              actionLabel={!filterStore.search ? 'NOVA CLIENTE' : undefined}
+              actionLabel={!filterStore.search ? t('clients.new') : undefined}
               onAction={!filterStore.search ? () => wizard.openWizard() : undefined}
               className="border border-white/10 rounded-none bg-black"
             />
@@ -221,16 +234,16 @@ export default function Clientes() {
                   <TableHeader>
                     <TableRow className="border-b border-white hover:bg-transparent">
                       <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">
-                        Cliente
+                        {t('clients.table.client')}
                       </TableHead>
                       <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">
-                        Contato
+                        {t('clients.table.contact')}
                       </TableHead>
                       <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12">
-                        Última Visita
+                        {t('clients.table.last_visit')}
                       </TableHead>
                       <TableHead className="text-white font-mono text-[10px] uppercase tracking-widest h-12 text-right">
-                        Ações
+                        {t('clients.table.actions')}
                       </TableHead>
                     </TableRow>
                   </TableHeader>

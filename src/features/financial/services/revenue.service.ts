@@ -2,12 +2,22 @@ import { supabase } from '@/integrations/supabase/client';
 
 export const RevenueService = {
     async getTotalRevenue(organizationId: string) {
+        // Only count paid invoices. Cancelled/archived are explicitly
+        // excluded so the "receita total" KPI matches what the maquiadora
+        // considers money in the door, not everything ever issued.
         const { data: invoices } = await supabase
             .from('invoices')
-            .select('amount')
-            .eq('user_id', organizationId);
+            .select('amount, status')
+            .eq('user_id', organizationId)
+            .eq('status', 'paid');
 
-        const payments = invoices || [];
-        return payments.reduce((sum: number, p) => sum + (p.amount || 0), 0);
-    }
+        return (invoices ?? []).reduce((sum, row) => {
+            const raw = row.amount;
+            const n =
+                raw == null || raw === ''
+                    ? 0
+                    : Number.parseFloat(String(raw));
+            return sum + (Number.isFinite(n) ? n : 0);
+        }, 0);
+    },
 };

@@ -20,6 +20,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { CalendarIcon, CalendarPlus, Gem } from 'lucide-react'
 import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
@@ -51,6 +58,7 @@ export function ClientForm({
       is_bride: initialData?.is_bride || false,
       wedding_date: initialData?.wedding_date || undefined,
       access_pin: initialData?.access_pin || '',
+      origin: initialData?.origin || undefined,
       create_event:
         initialData?.create_event !== undefined
           ? initialData.create_event
@@ -137,6 +145,36 @@ export function ClientForm({
             )}
           />
         </div>
+
+        <FormField
+          control={form.control}
+          name="origin"
+          render={({ field }) => (
+            <FormItem className="space-y-1.5">
+              <FormLabel className="text-xs sm:text-[10px] uppercase tracking-widest text-gray-400 font-mono">
+                Como ela te encontrou?
+              </FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value ?? undefined}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-black border border-white/30 text-white focus:border-white rounded-none h-10 font-mono text-sm">
+                    <SelectValue placeholder="Selecione a origem (opcional)" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className="bg-black border border-white/20 text-white">
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="indicacao">Indicação</SelectItem>
+                  <SelectItem value="site">Site / Portfólio</SelectItem>
+                  <SelectItem value="google">Google / Busca</SelectItem>
+                  <SelectItem value="outro">Outro</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage className="text-red-500 text-xs sm:text-[10px] font-mono uppercase" />
+            </FormItem>
+          )}
+        />
 
         <div className="border border-white/10 p-4 bg-white/5 space-y-4">
           <FormField

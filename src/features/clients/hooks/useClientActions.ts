@@ -6,6 +6,7 @@ import { useOrganization } from '@/hooks/useOrganization'
 import { exportClientsToCSV } from '@/utils/exportCSV'
 import { toast as sonnerToast } from 'sonner'
 import { format } from 'date-fns/format'
+import { startOfDay } from 'date-fns/startOfDay'
 import { ptBR } from 'date-fns/locale'
 import type { ClientFormData } from '../components/ClientForm'
 import { getErrorMessage } from '@/utils/error-handler'
@@ -66,6 +67,19 @@ export function useClientActions({
       return
     }
 
+    // wedding_date comes from the form's Calendar component as a local Date.
+    // Stripping to YYYY-MM-DD in the user's local timezone (start-of-day)
+    // avoids the UTC shift that `.toISOString()` would introduce — e.g. a
+    // noiva whose casamento é 6 de abril em SP não pode virar 5 de abril em
+    // UTC. The DB column is TIMESTAMPTZ so we persist midnight local as
+    // ISO to keep the time slot but anchored at start-of-day local.
+    const weddingLocalDate = formData.wedding_date
+      ? startOfDay(new Date(formData.wedding_date))
+      : null
+    const weddingDateStr = weddingLocalDate
+      ? format(weddingLocalDate, 'yyyy-MM-dd')
+      : null
+
     const clientData = {
       full_name: formData.name.trim(),
       name: formData.name.trim(),
@@ -74,12 +88,11 @@ export function useClientActions({
       notes: formData.notes.trim() || null,
       user_id: organizationId,
       is_bride: Boolean(formData.is_bride),
-      wedding_date: formData.wedding_date
-        ? new Date(formData.wedding_date).toISOString()
-        : null,
+      wedding_date: weddingLocalDate ? weddingLocalDate.toISOString() : null,
       access_pin: formData.access_pin
         ? String(formData.access_pin).trim() || null
         : null,
+      origin: formData.origin ?? null,
     }
 
     try {
@@ -95,21 +108,15 @@ export function useClientActions({
         newClient = created && 'id' in created ? { id: created.id } : null
       }
 
-      // When inviting a new noiva with a wedding_date, drop a linked event on
-      // the calendar so the maquiadora doesn't have to duplicate the cadastro
-      // flow in /calendar. Only runs on create (editing keeps the existing
-      // event untouched) and only when the toggle was left on.
+      // On CREATE: drop a linked event on the calendar so the maquiadora
+      // doesn't have to redo the cadastro in /calendar.
       if (
         !editingClient &&
         newClient &&
         formData.is_bride &&
-        formData.wedding_date &&
+        weddingDateStr &&
         formData.create_event !== false
       ) {
-        const weddingDateStr = new Date(formData.wedding_date)
-          .toISOString()
-          .slice(0, 10)
-
         const { error: eventError } = await supabase.from('events').insert({
           title: `Casamento — ${formData.name.trim()}`,
           event_date: weddingDateStr,
@@ -129,11 +136,33 @@ export function useClientActions({
         }
       }
 
+      // On UPDATE: if wedding_date changed, keep linked events + projects
+      // aligned. useClientMutations already syncs projects.event_date; here
+      // we propagate to events rows that share client_id + event_type=wedding.
+      if (editingClient && weddingDateStr && formData.is_bride) {
+        const { error: syncError } = await supabase
+          .from('events')
+          .update({ event_date: weddingDateStr })
+          .eq('client_id', editingClient.id)
+          .eq('event_type', 'wedding')
+
+        if (syncError) {
+          logger.error(syncError, 'useClientActions.syncLinkedEvent')
+        }
+      }
+
+      // Success path: close modal and refetch. On error the catch below
+      // keeps the dialog open so the user can retry without retyping.
       setIsDialogOpen(false)
       setEditingClient(null)
       fetchClients()
     } catch (error) {
       logger.error(error, 'useClientActions.handleFormSubmit')
+      toast({
+        title: 'Não conseguimos salvar a cliente',
+        description: 'Confere os dados e tenta de novo.',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -197,22 +226,19 @@ export function useClientActions({
 
   const copyPortalLink = async (clientId: string) => {
     try {
-      const { data: client, error: clientError } = await supabase
-        .from('wedding_clients')
-        .select('access_pin')
-        .eq('id', clientId)
-        .single()
+      // Use the cached client row when we already have it — avoids a
+      // pointless roundtrip to fetch `access_pin` we already read in list().
+      const cached = clients.find((c) => c.id === clientId)
+      let accessPin = cached?.access_pin ?? null
 
-      if (clientError) throw clientError
-
-      if (!client?.access_pin) {
-        const newPin = Math.floor(1000 + Math.random() * 9000).toString()
+      if (!accessPin) {
+        accessPin = Math.floor(1000 + Math.random() * 9000).toString()
         const { error: updateError } = await supabase
           .from('wedding_clients')
-          .update({ access_pin: newPin })
+          .update({ access_pin: accessPin })
           .eq('id', clientId)
         if (updateError) throw updateError
-        toast({ title: 'PIN Gerado', description: `Novo PIN: ${newPin}` })
+        toast({ title: 'PIN Gerado', description: `Novo PIN: ${accessPin}` })
       }
 
       const link = `${window.location.origin}/portal/${clientId}/login`

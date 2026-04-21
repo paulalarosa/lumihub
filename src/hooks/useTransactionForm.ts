@@ -135,6 +135,14 @@ export function useTransactionForm({
         data.amount.replace('R$ ', '').replace(/\./g, '').replace(',', '.'),
       )
 
+      // Guard zero/negative/NaN. A "despesa" já vem marcada como `type=expense`
+      // no form, então não faz sentido aceitar amount negativo aqui —
+      // negativo invertia o sinal do lançamento e estragaria os KPIs.
+      if (!Number.isFinite(amountValue) || amountValue <= 0) {
+        toast.error('Valor inválido — informe um valor maior que zero.')
+        return
+      }
+
       const { data: transaction, error } = await supabase
         .from('transactions')
         .insert({

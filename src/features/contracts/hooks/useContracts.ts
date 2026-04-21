@@ -1,68 +1,26 @@
-import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/integrations/supabase/client'
-import { useAuth } from '@/hooks/useAuth'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
-import { Contract, Client } from '../types'
+import { Contract } from '../types'
 import { deletePhotoSafely, uploadImageSafely } from '@/lib/upload'
 import { useContractsQuery } from './useContractsQuery'
 import { useContractMutations } from './useContractMutations'
 
 export const useContracts = () => {
-  const { user } = useAuth()
   const { data: contractsData = [], isLoading: loading } = useContractsQuery()
-  const { createMutation, signMutation, updateMutation } = useContractMutations()
+  const { signMutation, updateMutation } = useContractMutations()
 
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
+  // ContractDialog (create flow) has its own form state via useContractForm.
+  // Keep only the open/close toggle here.
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [newTitle, setNewTitle] = useState('')
-  const [newClient, setNewClient] = useState('')
-  const [newContent, setNewContent] = useState('')
-  const [clients, setClients] = useState<Client[]>([])
 
   const [signatureOpen, setSignatureOpen] = useState(false)
   const [selectedContract, setSelectedContract] = useState<Contract | null>(
     null,
   )
-
-  const fetchClients = useCallback(async () => {
-    const { data } = await supabase
-      .from('wedding_clients')
-      .select('id, name:full_name')
-      .order('full_name')
-    if (data) setClients(data)
-  }, [])
-
-  useEffect(() => {
-    if (user) {
-      fetchClients()
-    }
-  }, [user, fetchClients])
-
-  const handleCreate = async () => {
-    if (!newTitle || !newClient) {
-      toast.error('Preencha todos os campos obrigatórios')
-      return
-    }
-
-    try {
-      await createMutation.mutateAsync({
-        user_id: user?.id,
-        title: newTitle,
-        client_id: newClient,
-        content: newContent || 'Conteúdo do contrato...',
-        status: 'draft',
-      })
-      setIsDialogOpen(false)
-      setNewTitle('')
-      setNewClient('')
-      setNewContent('')
-    } catch (error) {
-      logger.error(error, 'useContracts.handleCreate')
-    }
-  }
 
   const handleSignatureSave = async (dataUrl: string) => {
     if (!selectedContract) return
@@ -124,19 +82,11 @@ export const useContracts = () => {
     setStatusFilter,
     isDialogOpen,
     setIsDialogOpen,
-    isSubmitting: createMutation.isPending || signMutation.isPending,
-    newTitle,
-    setNewTitle,
-    newClient,
-    setNewClient,
-    newContent,
-    setNewContent,
-    clients,
+    isSubmitting: signMutation.isPending,
     signatureOpen,
     setSignatureOpen,
     selectedContract,
     setSelectedContract,
-    handleCreate,
     handleSignatureSave,
     handleSend,
     isSending: updateMutation.isPending,

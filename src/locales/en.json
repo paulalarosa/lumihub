@@ -65,7 +65,151 @@
             "view_contracts": "View contracts"
         },
         "no_events": "No upcoming events",
-        "view_all": "View all"
+        "view_all": "View all",
+        "tasks": "TASKS",
+        "total_value": "TOTAL VALUE",
+        "received": "RECEIVED",
+        "pending": "PENDING",
+        "task_manager": "TASK MANAGER",
+        "briefing": "BRIEFING",
+        "contracts": "CONTRACTS",
+        "financial": "FINANCIAL",
+        "preview": "PREVIEW",
+        "internal": "INTERNAL",
+        "add_service": "ADD SERVICE",
+        "register_payment": "REGISTER PAYMENT",
+        "total": "Total Value",
+        "paid": "Received"
+    },
+    "finance": {
+        "log_payment": "REGISTER PAYMENT",
+        "total": "Financial Total"
+    },
+    "service": {
+        "dialog": {
+            "title": {
+                "new": "New Service",
+                "edit": "Edit Service"
+            }
+        },
+        "name": {
+            "label": "Service Name",
+            "placeholder": "Ex: Bridal Makeup"
+        },
+        "price": {
+            "label": "Price (R$)"
+        },
+        "duration": {
+            "label": "Duration"
+        },
+        "description": {
+            "label": "Description",
+            "placeholder": "What is included?"
+        },
+        "save": "Save",
+        "cancel": "Cancel",
+        "error": {
+            "name_required": "Service name is required"
+        }
+    },
+    "bride": {
+        "welcome": "Welcome",
+        "countdown": "Countdown",
+        "days": "DAYS",
+        "days_left": "DAYS LEFT",
+        "journey": "Your Journey",
+        "financial": "Financial",
+        "total": "Total",
+        "paid": "Paid",
+        "progress": "Progress",
+        "remaining": "Remaining",
+        "overview": "Overview",
+        "services": "Services",
+        "contracts": "Contracts",
+        "logout": "Logout"
+    },
+    "contract": {
+        "sign": "Sign Contract",
+        "view": "View Signed Contract",
+        "none_available": "No contract available at this time."
+    },
+    "contracts": {
+        "title": "Contracts & Documents",
+        "subtitle": "Manage contracts, quotes, and digital signatures.",
+        "new": "New Contract",
+        "search_placeholder": "Search contract...",
+        "filters": {
+            "all": "All",
+            "draft": "Drafts",
+            "sent": "Sent",
+            "signed": "Signed"
+        },
+        "status": {
+            "draft": "Draft",
+            "sent": "Sent",
+            "signed": "Signed"
+        },
+        "actions": {
+            "download": "Download",
+            "download_pdf": "Download PDF",
+            "generating_pdf": "Generating PDF...",
+            "pdf_loading": "...",
+            "signed_at": "Digitally signed on"
+        }
+    },
+    "transactions": {
+        "dialog": {
+            "title_income": "New Income",
+            "title_expense": "New Expense",
+            "subtitle": "Fill in the transaction details."
+        },
+        "form": {
+            "description_label": "Description",
+            "description_placeholder": "Ex: Haircut",
+            "amount_label": "Amount",
+            "amount_placeholder": "R$ 0.00",
+            "date_label": "Date",
+            "category_label": "Category",
+            "payment_method_label": "Payment Method",
+            "project_label": "Link to Project (Bride)",
+            "project_placeholder": "Select project",
+            "service_label": "Dedicated Service",
+            "service_placeholder": "Select service",
+            "assistant_label": "Assistant (Optional)",
+            "assistant_placeholder": "Select",
+            "select_placeholder": "Select"
+        },
+        "save_income": "Save Income",
+        "save_expense": "Save Expense",
+        "cancel": "Cancel",
+        "errors": {
+            "invalid_amount": "Invalid amount — enter a value greater than zero."
+        }
+    },
+    "clients": {
+        "title": "My Clients",
+        "count_one": "{{count}} client",
+        "count_other": "{{count}} clients",
+        "new": "New Client",
+        "export_csv": "Export CSV",
+        "exporting": "Exporting...",
+        "empty": {
+            "no_clients_title": "No Clients",
+            "no_clients_description": "No clients registered yet. Click the button above to get started.",
+            "no_results_title": "No Results",
+            "no_results_description": "No clients found for this search."
+        },
+        "error": {
+            "title": "Connection Failed",
+            "description": "Error loading clients. Check your connection or contact support.",
+            "retry": "Try again"
+        },
+        "table": {
+            "client": "Client",
+            "contact": "Contact",
+            "last_visit": "Last Visit",
+            "actions": "Actions"
+        }
     },
     "common": {
         "loading": "Loading...",

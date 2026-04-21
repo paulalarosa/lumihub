@@ -28,6 +28,8 @@ interface DeleteClientDialogProps {
 interface LinkedCount {
   events: number
   projects: number
+  contracts: number
+  invoices: number
 }
 
 export function DeleteClientDialog({
@@ -44,20 +46,32 @@ export function DeleteClientDialog({
     queryKey: ['client-linked-count', client?.id],
     enabled: !!client,
     queryFn: async (): Promise<LinkedCount> => {
-      if (!client) return { events: 0, projects: 0 }
-      const [eventsRes, projectsRes] = await Promise.all([
-        supabase
-          .from('events')
-          .select('id', { count: 'exact', head: true })
-          .eq('client_id', client.id),
-        supabase
-          .from('projects')
-          .select('id', { count: 'exact', head: true })
-          .eq('client_id', client.id),
-      ])
+      if (!client)
+        return { events: 0, projects: 0, contracts: 0, invoices: 0 }
+      const [eventsRes, projectsRes, contractsRes, invoicesRes] =
+        await Promise.all([
+          supabase
+            .from('events')
+            .select('id', { count: 'exact', head: true })
+            .eq('client_id', client.id),
+          supabase
+            .from('projects')
+            .select('id', { count: 'exact', head: true })
+            .eq('client_id', client.id),
+          supabase
+            .from('contracts')
+            .select('id', { count: 'exact', head: true })
+            .eq('client_id', client.id),
+          supabase
+            .from('invoices')
+            .select('id', { count: 'exact', head: true })
+            .eq('client_id', client.id),
+        ])
       return {
         events: eventsRes.count ?? 0,
         projects: projectsRes.count ?? 0,
+        contracts: contractsRes.count ?? 0,
+        invoices: invoicesRes.count ?? 0,
       }
     },
   })
@@ -67,7 +81,35 @@ export function DeleteClientDialog({
   const typedMatches =
     !!expectedName &&
     confirmText.trim().toLowerCase() === expectedName.toLowerCase()
-  const totalLinked = (linked?.events ?? 0) + (linked?.projects ?? 0)
+  const totalLinked =
+    (linked?.events ?? 0) +
+    (linked?.projects ?? 0) +
+    (linked?.contracts ?? 0) +
+    (linked?.invoices ?? 0)
+
+  const parts: string[] = []
+  if (linked?.events) {
+    parts.push(`${linked.events} ${linked.events === 1 ? 'evento' : 'eventos'}`)
+  }
+  if (linked?.projects) {
+    parts.push(
+      `${linked.projects} ${linked.projects === 1 ? 'projeto' : 'projetos'}`,
+    )
+  }
+  if (linked?.contracts) {
+    parts.push(
+      `${linked.contracts} ${linked.contracts === 1 ? 'contrato' : 'contratos'}`,
+    )
+  }
+  if (linked?.invoices) {
+    parts.push(
+      `${linked.invoices} ${linked.invoices === 1 ? 'fatura' : 'faturas'}`,
+    )
+  }
+  const linkedSummary =
+    parts.length > 1
+      ? `${parts.slice(0, -1).join(', ')} e ${parts[parts.length - 1]}`
+      : parts[0] ?? ''
 
   return (
     <Dialog
@@ -106,25 +148,13 @@ export function DeleteClientDialog({
                 Atenção: há dados vinculados
               </p>
               <p className="text-xs text-amber-100/80 leading-relaxed">
-                Esta cliente tem{' '}
-                {linked!.events > 0 && (
-                  <>
-                    <strong>
-                      {linked!.events}{' '}
-                      {linked!.events === 1 ? 'evento' : 'eventos'}
-                    </strong>
-                  </>
+                Esta cliente tem <strong>{linkedSummary}</strong> no sistema.
+                {(linked?.contracts || linked?.invoices) && (
+                  <span className="block mt-1 text-white/50">
+                    Contratos e faturas ficam órfãos após a exclusão — o
+                    cascade atinge apenas eventos e projetos.
+                  </span>
                 )}
-                {linked!.events > 0 && linked!.projects > 0 && <> e </>}
-                {linked!.projects > 0 && (
-                  <>
-                    <strong>
-                      {linked!.projects}{' '}
-                      {linked!.projects === 1 ? 'projeto' : 'projetos'}
-                    </strong>
-                  </>
-                )}{' '}
-                no sistema.
               </p>
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <Checkbox
@@ -134,9 +164,9 @@ export function DeleteClientDialog({
                 />
                 <span className="text-xs text-white/80 leading-relaxed">
                   Excluir também os{' '}
-                  {linked!.events > 0 && 'eventos'}
-                  {linked!.events > 0 && linked!.projects > 0 && ' e '}
-                  {linked!.projects > 0 && 'projetos'} vinculados.
+                  {linked?.events ? 'eventos' : ''}
+                  {linked?.events && linked?.projects ? ' e ' : ''}
+                  {linked?.projects ? 'projetos' : ''} vinculados.
                   <span className="block text-[10px] text-white/40 font-mono mt-1">
                     Se deixar desmarcado, eles ficam órfãos (sem cliente
                     associado).

@@ -36,8 +36,10 @@ export function SignatureCanvas({ onSave, _onCancel }: SignatureCanvasProps) {
         <SignaturePad
           ref={padRef}
           canvasProps={{
-            className: 'w-full h-64 cursor-crosshair',
-            style: { width: '100%', height: '256px' },
+            // Shorter on mobile so the canvas fits portrait viewports and
+            // stays touch-friendly without forcing the user to scroll to
+            // find the actions row below.
+            className: 'w-full h-40 sm:h-64 cursor-crosshair',
           }}
           onEnd={handleEnd}
           penColor="#ffffff"

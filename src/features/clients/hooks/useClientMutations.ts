@@ -18,7 +18,14 @@ export function useClientMutations() {
       const newClient = await ClientService.create(clientData)
 
       if (clientData.is_bride && newClient && 'id' in newClient) {
-        const link = `https://khaoskontrol.com.br/portal/${newClient.id}`
+        // Persist the runtime origin so the link is correct in both prod
+        // (khaoskontrol.com.br) and dev (localhost). Falls back to prod
+        // host when origin is unavailable (SSR / server context).
+        const origin =
+          typeof window !== 'undefined' && window.location?.origin
+            ? window.location.origin
+            : 'https://khaoskontrol.com.br'
+        const link = `${origin}/portal/${newClient.id}`
         await ClientService.update(newClient.id, { portal_link: link })
       }
 
@@ -67,7 +74,11 @@ export function useClientMutations() {
       data: Database['public']['Tables']['wedding_clients']['Update']
     }) => {
       if (data.is_bride) {
-        data.portal_link = `https://khaoskontrol.com.br/portal/${id}`
+        const origin =
+          typeof window !== 'undefined' && window.location?.origin
+            ? window.location.origin
+            : 'https://khaoskontrol.com.br'
+        data.portal_link = `${origin}/portal/${id}`
       }
 
       const result = await ClientService.update(id, data)

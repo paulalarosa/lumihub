@@ -64,35 +64,56 @@ type Body = {
   prompt?: string
 }
 
+// Strip characters that could be used to inject instructions into the prompt:
+// backticks (template escape), curly braces (placeholder), and control chars.
+// Also collapses whitespace — a user-supplied multi-line "address" can't break
+// out of its line and inject a fake prompt directive.
+const sanitizeField = (raw: unknown, maxLen = 250): string => {
+  if (raw == null) return ''
+  const s = String(raw)
+  return s
+    .replace(/[`${}]/g, '')
+    .replace(/[\r\n\t]+/g, ' ')
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim()
+    .slice(0, maxLen)
+}
+
+const s = (v: unknown, fallback = '[A PREENCHER]'): string => {
+  const clean = sanitizeField(v)
+  return clean || fallback
+}
+
 const buildGeneratePrompt = (actors?: Actors, terms?: Terms) => `${LAWYER_PERSONA}
 
 TAREFA: Gerar contrato completo de prestação de serviços de maquiagem/beleza profissional.
 
 DADOS FORNECIDOS:
 CONTRATADA (prestadora do serviço):
-- Nome: ${actors?.contractor_name || '[A PREENCHER]'}
-- CPF: ${actors?.contractor_doc || '[A PREENCHER]'}
-- RG: ${actors?.contractor_rg || '[A PREENCHER]'}
-- Nacionalidade: ${actors?.contractor_nationality || 'brasileira'}
-- Estado civil: ${actors?.contractor_marital_status || '[A PREENCHER]'}
-- Endereço: ${actors?.contractor_address || '[A PREENCHER]'}
+- Nome: ${s(actors?.contractor_name)}
+- CPF: ${s(actors?.contractor_doc)}
+- RG: ${s(actors?.contractor_rg)}
+- Nacionalidade: ${s(actors?.contractor_nationality, 'brasileira')}
+- Estado civil: ${s(actors?.contractor_marital_status)}
+- Endereço: ${s(actors?.contractor_address)}
 
 CONTRATANTE (cliente):
-- Nome: ${actors?.client_name || '[A PREENCHER]'}
-- CPF: ${actors?.client_doc || '[A PREENCHER]'}
-- RG: ${actors?.client_rg || '[A PREENCHER]'}
-- Nacionalidade: ${actors?.client_nationality || 'brasileira'}
-- Estado civil: ${actors?.client_marital_status || '[A PREENCHER]'}
-- Endereço: ${actors?.client_address || '[A PREENCHER]'}
+- Nome: ${s(actors?.client_name)}
+- CPF: ${s(actors?.client_doc)}
+- RG: ${s(actors?.client_rg)}
+- Nacionalidade: ${s(actors?.client_nationality, 'brasileira')}
+- Estado civil: ${s(actors?.client_marital_status)}
+- Endereço: ${s(actors?.client_address)}
 
 DETALHES DO EVENTO:
-- Data: ${terms?.event_date || '[A PREENCHER]'}
-- Horário: ${terms?.event_time || '[A PREENCHER]'}
-- Local: ${terms?.location || '[A PREENCHER]'}
-- Serviços contratados: ${terms?.services || '[A PREENCHER]'}
-- Número de pessoas atendidas: ${terms?.guests_count ?? '[A PREENCHER]'}
-- Valor total: ${terms?.price || '[A PREENCHER]'}
-- Forma de pagamento: ${terms?.payment_method || '50% na assinatura, 50% no dia do evento'}
+- Data: ${s(terms?.event_date)}
+- Horário: ${s(terms?.event_time)}
+- Local: ${s(terms?.location)}
+- Serviços contratados: ${s(terms?.services)}
+- Número de pessoas atendidas: ${s(terms?.guests_count)}
+- Valor total: ${s(terms?.price)}
+- Forma de pagamento: ${s(terms?.payment_method, '50% na assinatura, 50% no dia do evento')}
 
 ESTRUTURA OBRIGATÓRIA (use EXATAMENTE nesta ordem):
 <h1>CONTRATO DE PRESTAÇÃO DE SERVIÇOS DE MAQUIAGEM E BELEZA</h1>

@@ -48,13 +48,21 @@ export const useFinancials = () => {
 
   const transactions = query.data || []
 
+  // Guard null/NaN amounts so a single bad row doesn't poison the whole KPI.
+  const safeAmount = (v: unknown) => {
+    if (v == null || v === '') return 0
+    const n =
+      typeof v === 'number' ? v : Number.parseFloat(String(v))
+    return Number.isFinite(n) ? n : 0
+  }
+
   const income = transactions
     .filter((t) => t.type === 'income')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0)
+    .reduce((acc, curr) => acc + safeAmount(curr.amount), 0)
 
   const expense = transactions
     .filter((t) => t.type === 'expense')
-    .reduce((acc, curr) => acc + Number(curr.amount), 0)
+    .reduce((acc, curr) => acc + safeAmount(curr.amount), 0)
 
   const profit = income - expense
 
@@ -76,8 +84,9 @@ export const useFinancials = () => {
         txDate.getFullYear() === m.fullDate.getFullYear(),
     )
     if (monthEntry) {
-      if (tx.type === 'income') monthEntry.income += Number(tx.amount)
-      if (tx.type === 'expense') monthEntry.expense += Number(tx.amount)
+      const amount = safeAmount(tx.amount)
+      if (tx.type === 'income') monthEntry.income += amount
+      if (tx.type === 'expense') monthEntry.expense += amount
     }
   })
 

@@ -29,9 +29,11 @@ import { SignatureModal } from '@/features/contracts/components/SignatureModal'
 import { PDFDownloadLink } from '@react-pdf/renderer'
 import { useContracts } from '@/features/contracts/hooks/useContracts'
 import { sanitizeHTML } from '@/lib/sanitize'
+import { useLanguage } from '@/hooks/useLanguage'
 
 export default function Contracts() {
   const navigate = useNavigate()
+  const { t } = useLanguage()
   const {
     filteredContracts,
     loading,
@@ -55,14 +57,12 @@ export default function Contracts() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="font-serif text-3xl text-white">
-            Contratos & Documentos
+            {t('contracts.title')}
           </h1>
-          <p className="text-white/60">
-            Gerencie contratos, orçamentos e assinaturas digitais.
-          </p>
+          <p className="text-white/60">{t('contracts.subtitle')}</p>
         </div>
         <ActionButton onClick={() => setIsDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" /> Novo Contrato
+          <Plus className="mr-2 h-4 w-4" /> {t('contracts.new')}
         </ActionButton>
       </div>
 
@@ -72,7 +72,7 @@ export default function Contracts() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
           <Input
-            placeholder="BUSCAR CONTRATO..."
+            placeholder={t('contracts.search_placeholder').toUpperCase()}
             className="pl-10 bg-transparent border-white/20 text-white placeholder:text-white/30 rounded-none focus:border-white font-mono text-xs uppercase"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -84,25 +84,25 @@ export default function Contracts() {
               onClick={() => setStatusFilter('all')}
               className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'all' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
             >
-              Todos
+              {t('contracts.filters.all')}
             </button>
             <button
               onClick={() => setStatusFilter('draft')}
               className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'draft' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
             >
-              Rascunhos
+              {t('contracts.filters.draft')}
             </button>
             <button
               onClick={() => setStatusFilter('sent')}
               className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'sent' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
             >
-              Enviados
+              {t('contracts.filters.sent')}
             </button>
             <button
               onClick={() => setStatusFilter('signed')}
               className={`px-4 py-1.5 text-[10px] font-mono uppercase tracking-widest transition-colors rounded-full ${statusFilter === 'signed' ? 'bg-white/20 text-white backdrop-blur-md shadow-sm border border-white/30 font-bold' : 'text-white/60 hover:text-white border border-transparent'}`}
             >
-              Assinados
+              {t('contracts.filters.signed')}
             </button>
           </div>
         </div>
@@ -142,10 +142,10 @@ export default function Contracts() {
                   <StatusBadge
                     label={
                       contract.status === 'signed'
-                        ? 'Assinado'
+                        ? t('contracts.status.signed')
                         : contract.status === 'sent'
-                          ? 'Enviado'
-                          : 'Rascunho'
+                          ? t('contracts.status.sent')
+                          : t('contracts.status.draft')
                     }
                     color={
                       contract.status === 'signed'
@@ -226,7 +226,7 @@ export default function Contracts() {
                           className="h-8 text-[10px]"
                           disabled={pdfLoading}
                         >
-                          {pdfLoading ? '...' : 'Baixar'}
+                          {pdfLoading ? t('contracts.actions.pdf_loading') : t('contracts.actions.download')}
                         </ActionButton>
                       )}
                     </PDFDownloadLink>
@@ -267,7 +267,7 @@ export default function Contracts() {
                                   {contract.clients?.name}
                                 </div>
                                 <div className="text-[10px] text-gray-500 mt-1">
-                                  Assinado digitalmente em{' '}
+                                  {t('contracts.actions.signed_at')}{' '}
                                   {format(
                                     new Date(contract.signed_at || ''),
                                     'dd/MM/yyyy HH:mm',
@@ -310,7 +310,7 @@ export default function Contracts() {
                                 disabled={pdfLoading}
                                 className="border-white/10 text-white hover:bg-white/10"
                               >
-                                {pdfLoading ? 'Gerando PDF...' : 'Baixar PDF'}
+                                {pdfLoading ? t('contracts.actions.generating_pdf') : t('contracts.actions.download_pdf')}
                               </Button>
                             )}
                           </PDFDownloadLink>

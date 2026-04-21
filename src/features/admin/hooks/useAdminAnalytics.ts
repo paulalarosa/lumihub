@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { exportFinancialExcel } from '@/utils/exportExcel'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 interface AnalyticsData {
   total_events: number
@@ -19,6 +20,15 @@ interface AnalyticsData {
 }
 
 export function useAdminAnalytics() {
+  // Invalidate when anything in the analytics surface changes. Admins bypass
+  // RLS via is_admin() so no per-user filter is needed — the RPC aggregates
+  // across the whole project regardless of who triggered the change.
+  useRealtimeInvalidate({
+    table: ['wedding_clients', 'transactions', 'analytics_logs', 'events'],
+    invalidate: [['admin-analytics']],
+    channelName: 'rt-admin-analytics',
+  })
+
   const { data, isLoading: loading } = useQuery({
     queryKey: ['admin-analytics'],
     queryFn: async (): Promise<AnalyticsData> => {

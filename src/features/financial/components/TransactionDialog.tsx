@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/form'
 import { Loader2 } from 'lucide-react'
 import { useTransactionForm } from '@/hooks/useTransactionForm'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface TransactionDialogProps {
   open: boolean
@@ -66,6 +67,7 @@ export default function TransactionDialog({
   type,
   onSuccess,
 }: TransactionDialogProps) {
+  const { t } = useLanguage()
   const { form, options, handleAmountChange, onSubmit } = useTransactionForm({
     open,
     type,
@@ -78,10 +80,12 @@ export default function TransactionDialog({
       <DialogContent className="bg-[#050505] border border-white/10 text-white sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">
-            {type === 'income' ? 'Nova Receita' : 'Nova Despesa'}
+            {type === 'income'
+              ? t('transactions.dialog.title_income')
+              : t('transactions.dialog.title_expense')}
           </DialogTitle>
           <p className="text-gray-400 text-sm">
-            Preencha os dados da transação financeira.
+            {t('transactions.dialog.subtitle')}
           </p>
         </DialogHeader>
 
@@ -95,10 +99,10 @@ export default function TransactionDialog({
               name="description"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Descrição</FormLabel>
+                  <FormLabel>{t('transactions.form.description_label')}</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Ex: Corte de Cabelo"
+                      placeholder={t('transactions.form.description_placeholder')}
                       {...field}
                       className="bg-white/5 border-white/10 focus:border-white/50"
                     />
@@ -114,10 +118,10 @@ export default function TransactionDialog({
                 name="amount"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel>Valor</FormLabel>
+                    <FormLabel>{t('transactions.form.amount_label')}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="R$ 0,00"
+                        placeholder={t('transactions.form.amount_placeholder')}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e)
@@ -135,7 +139,7 @@ export default function TransactionDialog({
                 name="date"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel>Data</FormLabel>
+                    <FormLabel>{t('transactions.form.date_label')}</FormLabel>
                     <FormControl>
                       <Input
                         type="date"
@@ -156,14 +160,14 @@ export default function TransactionDialog({
                   name="project_id"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel>Vincular a Projeto (Noiva)</FormLabel>
+                      <FormLabel>{t('transactions.form.project_label')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || undefined}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                            <SelectValue placeholder="Selecione o Projeto" />
+                            <SelectValue placeholder={t('transactions.form.project_placeholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -184,14 +188,14 @@ export default function TransactionDialog({
                   name="service_id"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel>Serviço Dedicado</FormLabel>
+                      <FormLabel>{t('transactions.form.service_label')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || undefined}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                            <SelectValue placeholder="Selecione o Serviço" />
+                            <SelectValue placeholder={t('transactions.form.service_placeholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -212,14 +216,14 @@ export default function TransactionDialog({
                   name="assistant_id"
                   render={({ field }) => (
                     <FormItem className="space-y-2">
-                      <FormLabel>Assistente Responsável (Opcional)</FormLabel>
+                      <FormLabel>{t('transactions.form.assistant_label')}</FormLabel>
                       <Select
                         onValueChange={field.onChange}
                         value={field.value || undefined}
                       >
                         <FormControl>
                           <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                            <SelectValue placeholder="Selecione" />
+                            <SelectValue placeholder={t('transactions.form.assistant_placeholder')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -243,11 +247,11 @@ export default function TransactionDialog({
                 name="category"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel>Categoria</FormLabel>
+                    <FormLabel>{t('transactions.form.category_label')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder={t('transactions.form.select_placeholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -268,11 +272,11 @@ export default function TransactionDialog({
                 name="payment_method"
                 render={({ field }) => (
                   <FormItem className="space-y-2">
-                    <FormLabel>Método de Pagamento</FormLabel>
+                    <FormLabel>{t('transactions.form.payment_method_label')}</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="bg-white/5 border-white/10 focus:border-white/50">
-                          <SelectValue placeholder="Selecione" />
+                          <SelectValue placeholder={t('transactions.form.select_placeholder')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="bg-[#1A1A1A] border-white/10 text-white">
@@ -296,7 +300,7 @@ export default function TransactionDialog({
                 onClick={() => onOpenChange(false)}
                 className="text-white/60 hover:text-white hover:bg-white/5"
               >
-                Cancelar
+                {t('transactions.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -310,7 +314,9 @@ export default function TransactionDialog({
                 {form.formState.isSubmitting && (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                Salvar {type === 'income' ? 'Receita' : 'Despesa'}
+                {type === 'income'
+                  ? t('transactions.save_income')
+                  : t('transactions.save_expense')}
               </Button>
             </DialogFooter>
           </form>

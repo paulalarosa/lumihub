@@ -65,7 +65,151 @@
             "view_contracts": "Ver contratos"
         },
         "no_events": "Nenhum evento agendado",
-        "view_all": "Ver todas"
+        "view_all": "Ver todas",
+        "tasks": "TAREFAS",
+        "total_value": "VALOR TOTAL",
+        "received": "RECEBIDO",
+        "pending": "PENDENTE",
+        "task_manager": "GERENCIADOR DE TAREFAS",
+        "briefing": "BRIEFING",
+        "contracts": "CONTRATOS",
+        "financial": "FINANCEIRO",
+        "preview": "PREVIEW",
+        "internal": "INTERNO",
+        "add_service": "ADICIONAR SERVIÇO",
+        "register_payment": "REGISTRAR PAGAMENTO",
+        "total": "Valor Total",
+        "paid": "Recebido"
+    },
+    "finance": {
+        "log_payment": "REGISTRAR PAGAMENTO",
+        "total": "Total Financeiro"
+    },
+    "service": {
+        "dialog": {
+            "title": {
+                "new": "Novo Serviço",
+                "edit": "Editar Serviço"
+            }
+        },
+        "name": {
+            "label": "Nome do Serviço",
+            "placeholder": "Ex: Maquiagem Social"
+        },
+        "price": {
+            "label": "Preço (R$)"
+        },
+        "duration": {
+            "label": "Duração"
+        },
+        "description": {
+            "label": "Descrição",
+            "placeholder": "O que está incluso?"
+        },
+        "save": "Salvar",
+        "cancel": "Cancelar",
+        "error": {
+            "name_required": "O nome do serviço é obrigatório"
+        }
+    },
+    "bride": {
+        "welcome": "Bem-vinda",
+        "countdown": "Contagem Regressiva",
+        "days": "DIAS",
+        "days_left": "DIAS RESTANTES",
+        "journey": "Sua Jornada",
+        "financial": "Financeiro",
+        "total": "Total",
+        "paid": "Pago",
+        "progress": "Progresso",
+        "remaining": "Restante",
+        "overview": "Visão Geral",
+        "services": "Serviços",
+        "contracts": "Contratos",
+        "logout": "Sair"
+    },
+    "contract": {
+        "sign": "Assinar Contrato",
+        "view": "Ver Contrato Assinado",
+        "none_available": "Nenhum contrato disponível no momento."
+    },
+    "contracts": {
+        "title": "Contratos & Documentos",
+        "subtitle": "Gerencie contratos, orçamentos e assinaturas digitais.",
+        "new": "Novo Contrato",
+        "search_placeholder": "Buscar contrato...",
+        "filters": {
+            "all": "Todos",
+            "draft": "Rascunhos",
+            "sent": "Enviados",
+            "signed": "Assinados"
+        },
+        "status": {
+            "draft": "Rascunho",
+            "sent": "Enviado",
+            "signed": "Assinado"
+        },
+        "actions": {
+            "download": "Baixar",
+            "download_pdf": "Baixar PDF",
+            "generating_pdf": "Gerando PDF...",
+            "pdf_loading": "...",
+            "signed_at": "Assinado digitalmente em"
+        }
+    },
+    "transactions": {
+        "dialog": {
+            "title_income": "Nova Receita",
+            "title_expense": "Nova Despesa",
+            "subtitle": "Preencha os dados da transação financeira."
+        },
+        "form": {
+            "description_label": "Descrição",
+            "description_placeholder": "Ex: Corte de Cabelo",
+            "amount_label": "Valor",
+            "amount_placeholder": "R$ 0,00",
+            "date_label": "Data",
+            "category_label": "Categoria",
+            "payment_method_label": "Método de Pagamento",
+            "project_label": "Vincular a Projeto (Noiva)",
+            "project_placeholder": "Selecione o Projeto",
+            "service_label": "Serviço Dedicado",
+            "service_placeholder": "Selecione o Serviço",
+            "assistant_label": "Assistente Responsável (Opcional)",
+            "assistant_placeholder": "Selecione",
+            "select_placeholder": "Selecione"
+        },
+        "save_income": "Salvar Receita",
+        "save_expense": "Salvar Despesa",
+        "cancel": "Cancelar",
+        "errors": {
+            "invalid_amount": "Valor inválido — informe um valor maior que zero."
+        }
+    },
+    "clients": {
+        "title": "Meus Clientes",
+        "count_one": "{{count}} cliente",
+        "count_other": "{{count}} clientes",
+        "new": "Nova Cliente",
+        "export_csv": "Exportar CSV",
+        "exporting": "Exportando...",
+        "empty": {
+            "no_clients_title": "Sem Clientes",
+            "no_clients_description": "Nenhuma cliente cadastrada ainda. Clique no botão acima para começar.",
+            "no_results_title": "Nenhum Resultado",
+            "no_results_description": "Nenhuma cliente encontrada para esta busca."
+        },
+        "error": {
+            "title": "Falha na Conexão",
+            "description": "Erro ao carregar os clientes. Verifique sua conexão ou contate o suporte.",
+            "retry": "Tentar novamente"
+        },
+        "table": {
+            "client": "Cliente",
+            "contact": "Contato",
+            "last_visit": "Última Visita",
+            "actions": "Ações"
+        }
     },
     "common": {
         "loading": "Carregando...",

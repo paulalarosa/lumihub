@@ -30,16 +30,13 @@ const RISC_EVENTS = [
   'https://schemas.openid.net/secevent/risc/event-type/verification',
 ]
 
-// Google's RISC API enforces the narrow `risc.configuration` scope at the
-// endpoint level (403 ACCESS_TOKEN_SCOPE_INSUFFICIENT otherwise), but the
-// OAuth2 token endpoint historically returned id_token instead of access_token
-// when that scope was requested alone. Requesting BOTH scopes space-separated
-// satisfies both sides: the token endpoint honours cloud-platform and hands
-// back a real access_token, while the resulting token also carries
-// risc.configuration and is accepted by the RISC endpoints.
-const RISC_SCOPE =
-  'https://www.googleapis.com/auth/risc.configuration ' +
-  'https://www.googleapis.com/auth/cloud-platform'
+// Canonical RISC scope per Google's docs: `.../auth/risc`. Earlier attempts
+// used `.../auth/risc.configuration` (which caused the token endpoint to
+// return id_token instead of access_token because that string isn't a
+// registered OAuth2 scope). Dropping the cloud-platform fallback too —
+// requesting only the canonical scope is what makes Google mint a proper
+// access_token for the RISC API.
+const RISC_SCOPE = 'https://www.googleapis.com/auth/risc'
 
 // Always hit Google's canonical OAuth2 token endpoint — some service account
 // JSONs carry a legacy token_uri that still works but confuses the flow.

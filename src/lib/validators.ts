@@ -8,11 +8,12 @@ export const phoneSchema = z
 
   .regex(/^[\d\s()+-]+$/, 'Formato de telefone inválido')
 
+// 4 dígitos fixos — alinha com o form da cliente e com o portal da noiva.
+// Antes permitia 4-6 e causava inconsistência entre schema geral e o uso
+// específico do portal, que sempre gera PINs de 4 dígitos.
 export const pinSchema = z
   .string()
-  .min(4, 'PIN deve ter pelo menos 4 dígitos')
-  .max(6, 'PIN deve ter no máximo 6 dígitos')
-  .regex(/^\d+$/, 'PIN deve conter apenas números')
+  .regex(/^\d{4}$/, 'PIN deve ter exatamente 4 dígitos numéricos')
 
 export const clientSchema = z.object({
   name: z.string().min(2, 'Nome muito curto'),
@@ -26,6 +27,10 @@ export const clientSchema = z.object({
   is_bride: z.boolean().default(false).optional(),
   wedding_date: z.date().optional().nullable(),
   create_event: z.boolean().default(true).optional(),
+  origin: z
+    .enum(['instagram', 'indicacao', 'site', 'google', 'outro'])
+    .optional()
+    .nullable(),
   access_pin: z
     .string()
     .optional()
