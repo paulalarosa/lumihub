@@ -6,7 +6,7 @@ import { format } from 'date-fns/format'
 import { parse } from 'date-fns/parse'
 import { startOfWeek } from 'date-fns/startOfWeek'
 import { getDay } from 'date-fns/getDay'
-import { startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns'
+import { startOfMonth, endOfMonth, startOfDay, endOfDay, addDays, subDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { formatDate } from '@/lib/date-utils'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
@@ -154,8 +154,15 @@ export const CalendarPage = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
   const range = useMemo(() => {
+    // Agenda ("Lista") is browsable as an upcoming feed, so pull a wide window
+    // — 90 days back, 18 months ahead — so distant future weddings (e.g. a
+    // noiva whose casamento é daqui a 1+ ano) ainda aparecem na lista sem a
+    // maquiadora precisar navegar manualmente.
+    if (view === 'agenda') {
+      return { start: subDays(date, 90), end: addDays(date, 540) }
+    }
     return { start: startOfMonth(date), end: endOfMonth(date) }
-  }, [date])
+  }, [date, view])
 
   const { data: unifiedEvents, isLoading, isError } = useEvents(range.start, range.end)
 

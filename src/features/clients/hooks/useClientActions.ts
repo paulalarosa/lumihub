@@ -47,6 +47,14 @@ export function useClientActions({
   const [editingClient, setEditingClient] = useState<ClientRecord | null>(null)
   const [isExporting, setIsExporting] = useState(false)
 
+  // Delete dialog state — replaces the old browser `confirm()` with a proper
+  // modal that (a) requires the user to type the client's name and (b)
+  // optionally cascades the delete to linked events + projects.
+  const [deleteTarget, setDeleteTarget] = useState<ClientRecord | null>(null)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [cascadeEvents, setCascadeEvents] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const openEditDialog = (client: ClientRecord) => {
     setEditingClient(client)
     setIsDialogOpen(true)
@@ -92,14 +100,61 @@ export function useClientActions({
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Tem certeza que deseja excluir este cliente?')) return
+  const handleDelete = (id: string) => {
+    const target = clients.find((c) => c.id === id)
+    if (!target) return
+    setDeleteTarget(target)
+    setDeleteConfirmText('')
+    setCascadeEvents(false)
+  }
 
+  const closeDeleteDialog = () => {
+    setDeleteTarget(null)
+    setDeleteConfirmText('')
+    setCascadeEvents(false)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return
+    const expectedName = (deleteTarget.name ?? '').trim()
+    if (
+      !expectedName ||
+      deleteConfirmText.trim().toLowerCase() !== expectedName.toLowerCase()
+    ) {
+      toast({
+        title: 'O nome digitado não confere',
+        description: 'Digite exatamente o nome da cliente para confirmar.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    setIsDeleting(true)
     try {
-      await deleteClient(id)
+      if (cascadeEvents) {
+        const [eventsRes, projectsRes] = await Promise.all([
+          supabase.from('events').delete().eq('client_id', deleteTarget.id),
+          supabase
+            .from('projects')
+            .delete()
+            .eq('client_id', deleteTarget.id),
+        ])
+        if (eventsRes.error) throw eventsRes.error
+        if (projectsRes.error) throw projectsRes.error
+      }
+
+      await deleteClient(deleteTarget.id)
+      closeDeleteDialog()
       fetchClients()
     } catch (error) {
-      logger.error(error, 'useClientActions.handleDelete')
+      logger.error(error, 'useClientActions.confirmDelete')
+      toast({
+        title: 'Não conseguimos excluir a cliente',
+        description: 'Tente de novo em instantes.',
+        variant: 'destructive',
+      })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -186,5 +241,14 @@ export function useClientActions({
     copyPortalLink,
     handleExportCSV,
     formatDate,
+    // Delete dialog
+    deleteTarget,
+    deleteConfirmText,
+    setDeleteConfirmText,
+    cascadeEvents,
+    setCascadeEvents,
+    closeDeleteDialog,
+    confirmDelete,
+    isDeleting,
   }
 }

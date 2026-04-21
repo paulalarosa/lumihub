@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dialog'
 import {
   ArrowRight,
+  ArrowLeft,
   CheckCircle,
   User,
   Sparkles,
@@ -508,7 +509,17 @@ export const OnboardingWizard = () => {
               </div>
             )}
 
-            <div className="flex gap-3 mt-8">
+            <div className="flex gap-3 mt-8 items-center">
+              {step > 0 && currentStep.id !== 'complete' && (
+                <button
+                  onClick={() => setStep(step - 1)}
+                  disabled={updateMutation.isPending}
+                  className="text-[10px] uppercase tracking-widest text-white/40 hover:text-white transition-colors py-2 px-1 flex items-center gap-1.5 group disabled:opacity-40"
+                >
+                  <ArrowLeft className="w-3 h-3 group-hover:-translate-x-0.5 transition-transform" />
+                  Voltar
+                </button>
+              )}
               {currentStep.id !== 'complete' && (
                 <button
                   onClick={() => setShowSkipConfirm(true)}

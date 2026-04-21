@@ -8,6 +8,8 @@ import {
   CalendarDays,
   AlertCircle,
   ArrowRight,
+  Check,
+  Circle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -53,6 +55,27 @@ export default function BrideDashboardPage() {
       : d.daysLeft > 0 && d.daysLeft <= 90
         ? 'soon'
         : 'calm'
+
+  // Next-steps checklist — short, actionable state summary for the bride.
+  // Each item resolves `done` from the data already loaded on the page.
+  const signedContract = d.contracts.find((c) => c.status === 'signed')
+  const nextSteps: { label: string; done: boolean }[] = [
+    { label: 'Cadastro no portal', done: true },
+    {
+      label: 'Data do casamento confirmada',
+      done: !!d.project?.event_date,
+    },
+    { label: 'Contrato assinado', done: !!signedContract },
+    {
+      label: 'Serviços definidos com a maquiadora',
+      done: d.services.length > 0,
+    },
+    {
+      label: 'Pagamento quitado',
+      done: d.totalContract > 0 && remaining <= 0,
+    },
+  ]
+  const completedSteps = nextSteps.filter((s) => s.done).length
 
   if (d.loading) {
     return <PageLoader />
@@ -135,6 +158,58 @@ export default function BrideDashboardPage() {
             )}
           </div>
         )}
+
+        <section className="mb-10 border border-neutral-800 bg-[#080808]">
+          <header className="flex items-center justify-between px-6 py-4 border-b border-neutral-900">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-neutral-500">
+                Próximos passos
+              </p>
+              <p className="font-serif text-lg text-white mt-0.5">
+                {completedSteps} de {nextSteps.length} concluídos
+              </p>
+            </div>
+            <div className="hidden sm:block h-8 w-32 bg-neutral-900 overflow-hidden">
+              <div
+                className="h-full bg-white transition-all duration-700"
+                style={{
+                  width: `${(completedSteps / nextSteps.length) * 100}%`,
+                }}
+              />
+            </div>
+          </header>
+          <ul className="divide-y divide-neutral-900">
+            {nextSteps.map((step) => (
+              <li
+                key={step.label}
+                className="flex items-center gap-4 px-6 py-3.5"
+              >
+                <span
+                  className={`flex-shrink-0 w-5 h-5 flex items-center justify-center border ${
+                    step.done
+                      ? 'border-[#D4AF37] bg-[#D4AF37]/15 text-[#D4AF37]'
+                      : 'border-neutral-700 bg-transparent text-neutral-600'
+                  }`}
+                >
+                  {step.done ? (
+                    <Check className="w-3 h-3" strokeWidth={3} />
+                  ) : (
+                    <Circle className="w-2 h-2" strokeWidth={2} />
+                  )}
+                </span>
+                <span
+                  className={`text-sm ${
+                    step.done
+                      ? 'text-neutral-400 line-through decoration-neutral-700'
+                      : 'text-white'
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <Tabs defaultValue="dashboard" className="w-full">
           <div className="flex justify-center mb-12">

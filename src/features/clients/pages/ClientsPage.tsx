@@ -50,6 +50,7 @@ import { LoadingSpinner as TableLoader } from '@/components/ui/page-loader'
 import { PageLoader } from '@/components/ui/page-loader'
 import { NewProjectWizard } from '@/features/projects/components/NewProjectWizard'
 import { useNewProjectWizard } from '@/features/projects/hooks/useNewProjectWizard'
+import { DeleteClientDialog } from '../components/DeleteClientDialog'
 
 export default function Clientes() {
   const navigate = useNavigate()
@@ -404,6 +405,17 @@ export default function Clientes() {
       </main>
 
       <MobileFAB onClick={() => wizard.openWizard()} label="Nova Cliente" />
+
+      <DeleteClientDialog
+        client={actions.deleteTarget}
+        confirmText={actions.deleteConfirmText}
+        onConfirmTextChange={actions.setDeleteConfirmText}
+        cascadeEvents={actions.cascadeEvents}
+        onCascadeChange={actions.setCascadeEvents}
+        onClose={actions.closeDeleteDialog}
+        onConfirm={actions.confirmDelete}
+        isDeleting={actions.isDeleting}
+      />
     </div>
   )
 }

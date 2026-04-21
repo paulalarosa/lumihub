@@ -38,16 +38,18 @@ export const AssistantList = () => {
         .eq('id', organizationId)
         .maybeSingle()
 
-      const { data: created } = await supabase
+      const { data: created, error: createError } = await supabase
         .from('makeup_artists')
         .insert({
           user_id: organizationId,
           business_name:
             profile?.full_name || 'Profissional',
+          plan_type: 'essencial',
         })
         .select('id')
         .single()
 
+      if (createError) throw createError
       return created || null
     },
     enabled: !!user,

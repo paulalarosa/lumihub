@@ -36,7 +36,7 @@ import { useOrganization } from '@/hooks/useOrganization'
 
 export function AppSidebar() {
   const { user, signOut } = useAuth()
-  const isAdmin = useIsAdmin()
+  const { isAdmin } = useIsAdmin()
   const isStudio = useIsStudioMember()
   const { isOwner } = useOrganization()
   const location = useLocation()
