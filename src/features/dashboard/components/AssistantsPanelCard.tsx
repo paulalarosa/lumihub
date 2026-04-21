@@ -17,14 +17,36 @@ export function AssistantsPanelCard() {
     queryKey: ['dashboard-assistants', organizationId],
     queryFn: async () => {
       if (!organizationId) return []
-      const { data, error } = await supabase
-        .from('assistants')
-        .select('id, full_name, phone')
+
+      // Assistants are linked to the maquiadora via assistant_access, not via
+      // assistants.user_id (which stays null for invited-but-not-accepted
+      // rows). Pull the artist id first, then the active accesses.
+      const { data: artist } = await supabase
+        .from('makeup_artists')
+        .select('id')
         .eq('user_id', organizationId)
-        .order('created_at', { ascending: false })
-        .limit(4)
+        .maybeSingle()
+
+      if (!artist) return []
+
+      const { data, error } = await supabase
+        .from('assistant_access')
+        .select('assistant:assistants(id, full_name, phone, created_at)')
+        .eq('makeup_artist_id', artist.id)
+        .eq('status', 'active')
+
       if (error) throw error
-      return (data || []) as Assistant[]
+
+      return (data ?? [])
+        .map((row) => row.assistant)
+        .filter((a): a is NonNullable<typeof a> => !!a)
+        .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+        .slice(0, 4)
+        .map(({ id, full_name, phone }) => ({
+          id,
+          full_name,
+          phone,
+        })) as Assistant[]
     },
     enabled: !!organizationId,
   })

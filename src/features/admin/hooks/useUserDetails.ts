@@ -84,10 +84,16 @@ export function useUserDetails(userId: string | null) {
           .from('contracts')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId),
+        // Count via assistant_access (assistants.user_id is null for invited
+        // rows). Nested subquery resolves the artist id inline.
         supabase
-          .from('assistants')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId),
+          .from('assistant_access')
+          .select('id, makeup_artists!inner(user_id)', {
+            count: 'exact',
+            head: true,
+          })
+          .eq('makeup_artists.user_id', userId)
+          .eq('status', 'active'),
         supabase
           .from('invoices')
           .select('id, invoice_number, amount, status, created_at')

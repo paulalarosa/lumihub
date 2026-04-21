@@ -162,15 +162,26 @@ export function useBillingUsage() {
         1,
       ).toISOString()
 
+      // Resolve the artist id first so assistant count goes via
+      // assistant_access (assistants.user_id is null for invited rows).
+      const { data: artist } = await supabase
+        .from('makeup_artists')
+        .select('id')
+        .eq('user_id', organizationId)
+        .maybeSingle()
+
       const [clients, assistants, projects] = await Promise.all([
         supabase
           .from('wedding_clients')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', organizationId),
-        supabase
-          .from('assistants')
-          .select('id', { count: 'exact', head: true })
-          .eq('user_id', organizationId),
+        artist
+          ? supabase
+              .from('assistant_access')
+              .select('id', { count: 'exact', head: true })
+              .eq('makeup_artist_id', artist.id)
+              .eq('status', 'active')
+          : Promise.resolve({ count: 0 }),
         supabase
           .from('projects')
           .select('id', { count: 'exact', head: true })
