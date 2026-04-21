@@ -80,40 +80,40 @@ const VIEW_LABELS: Record<string, string> = {
 
 function CustomToolbar({ onNavigate, onView, view, label }: ToolbarProps<CalendarEvent, object>) {
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-5 py-4 border-b border-white/10 gap-4">
+    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between px-3 sm:px-5 py-3 sm:py-4 border-b border-white/10 gap-3">
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => onNavigate('PREV')}
-          className="w-8 h-8 flex items-center justify-center border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
           aria-label="Anterior"
         >
           <ChevronLeft className="w-4 h-4" />
         </button>
         <button
           onClick={() => onNavigate('TODAY')}
-          className="px-3 h-8 text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-white border border-white/10 hover:border-white/30 transition-all"
+          className="px-3 h-10 sm:h-8 text-[10px] font-mono uppercase tracking-widest text-white/40 hover:text-white border border-white/10 hover:border-white/30 transition-all"
         >
           Hoje
         </button>
         <button
           onClick={() => onNavigate('NEXT')}
-          className="w-8 h-8 flex items-center justify-center border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
+          className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center border border-white/10 text-white/50 hover:text-white hover:border-white/30 transition-all"
           aria-label="Próximo"
         >
           <ChevronRight className="w-4 h-4" />
         </button>
-        <span className="font-serif text-lg text-white capitalize ml-3 tracking-tight">
+        <span className="font-serif text-base sm:text-lg text-white capitalize ml-1 sm:ml-3 tracking-tight truncate">
           {label}
         </span>
       </div>
 
-      <div className="flex items-center border border-white/10">
+      <div className="flex items-center border border-white/10 overflow-x-auto">
         {(['month', 'week', 'day', 'agenda'] as View[]).map((v) => (
           <button
             key={v}
             onClick={() => onView(v)}
-            className={`px-4 h-8 text-[10px] font-mono uppercase tracking-widest transition-all ${
+            className={`px-3 sm:px-4 h-10 sm:h-8 text-[10px] font-mono uppercase tracking-widest transition-all whitespace-nowrap ${
               view === v
                 ? 'bg-white text-black'
                 : 'text-white/35 hover:text-white hover:bg-white/[0.04]'
@@ -385,7 +385,7 @@ export const CalendarPage = () => {
           </div>
         )}
 
-        <div className="calendar-dark border border-white/10 bg-white/[0.01] overflow-hidden">
+        <div className="calendar-dark border border-white/10 bg-white/[0.01] overflow-x-auto">
           {isLoading ? (
             <div className="h-[680px] flex items-center justify-center">
               <div className="flex flex-col items-center gap-3">
@@ -414,7 +414,7 @@ export const CalendarPage = () => {
               events={events}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 680 }}
+              style={{ height: 680, minWidth: 320 }}
               view={view}
               onView={setView}
               date={date}

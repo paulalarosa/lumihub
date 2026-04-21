@@ -24,6 +24,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/useAuth'
 import { Link, useLocation } from 'react-router-dom'
@@ -41,6 +42,11 @@ export function AppSidebar() {
   const { isOwner } = useOrganization()
   const location = useLocation()
   const { t, setLanguage, language } = useLanguage()
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const closeOnMobile = () => {
+    if (isMobile) setOpenMobile(false)
+  }
 
   const items = [
     {
@@ -130,7 +136,7 @@ export function AppSidebar() {
                       isActive={isActive(item.url)}
                       className="data-[active=true]:bg-foreground data-[active=true]:text-background data-[active=true]:border-r-0 hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none border-l-2 border-transparent data-[active=true]:border-transparent"
                     >
-                      <Link to={item.url}>
+                      <Link to={item.url} onClick={closeOnMobile}>
                         <item.icon className="h-4 w-4" />
                         <span className="font-mono text-xs uppercase tracking-wider">
                           {item.title}
@@ -156,7 +162,7 @@ export function AppSidebar() {
                     isActive={isActive('/admin')}
                     className="data-[active=true]:bg-yellow-500 data-[active=true]:text-black hover:bg-white/10 transition-all text-muted-foreground rounded-none"
                   >
-                    <Link to="/admin">
+                    <Link to="/admin" onClick={closeOnMobile}>
                       <ShieldCheck className="h-4 w-4" />
                       <span className="font-mono text-xs uppercase tracking-wider">
                         ADMIN
@@ -173,7 +179,7 @@ export function AppSidebar() {
                     isActive={isActive('/billing')}
                     className="data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none"
                   >
-                    <Link to="/billing">
+                    <Link to="/billing" onClick={closeOnMobile}>
                       <Receipt className="h-4 w-4" />
                       <span className="font-mono text-xs uppercase tracking-wider">
                         ASSINATURA
@@ -189,7 +195,7 @@ export function AppSidebar() {
                   isActive={isActive('/configuracoes')}
                   className="data-[active=true]:bg-foreground data-[active=true]:text-background hover:bg-accent hover:text-accent-foreground transition-all text-muted-foreground rounded-none"
                 >
-                  <Link to="/configuracoes">
+                  <Link to="/configuracoes" onClick={closeOnMobile}>
                     <Settings className="h-4 w-4" />
                     <span className="font-mono text-xs uppercase tracking-wider">
                       {t('sidebar.settings')}

@@ -6,17 +6,25 @@ import {
   DollarSign,
   FolderOpen,
   ArrowUpRight,
-  TrendingUp,
   Clock,
+  FileSignature,
+  AlertTriangle,
 } from 'lucide-react'
 import { AssistantsPanelCard } from '@/features/dashboard/components/AssistantsPanelCard'
 import { motion } from 'framer-motion'
 import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
 import { useDashboard } from '../hooks/useDashboard'
 import { OnboardingChecklist } from '@/features/onboarding/components/OnboardingChecklist'
 import { PageLoader } from '@/components/ui/page-loader'
+
+const fmtBRL = (n: number) =>
+  n.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: n >= 10000 ? 0 : 2,
+  })
 
 const fadeUp = {
   initial: { opacity: 0, y: 12 },
@@ -69,7 +77,7 @@ export default function Dashboard() {
           >
             <Clock className="w-4 h-4 text-white/40 flex-shrink-0" />
             <p className="text-sm text-white/60">
-              Próximo evento:{' '}
+              {t('dashboard.next_event_prefix')}:{' '}
               <span className="text-white font-medium">{nextEvent.title}</span>
               {' — '}
               <span className="text-white/80">
@@ -82,15 +90,64 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {(d.overdueCount > 0 || d.contractsPending > 0) && (
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.05 }}
+            className="mb-6 border border-amber-500/30 bg-amber-500/[0.05] p-4 flex flex-col sm:flex-row sm:items-center gap-3"
+          >
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <div className="flex-1 text-sm text-amber-100/90 space-y-0.5">
+              {d.overdueCount > 0 && (
+                <p>
+                  <span className="font-medium text-white">
+                    {d.overdueCount}{' '}
+                    {d.overdueCount === 1 ? 'fatura vencida' : 'faturas vencidas'}
+                  </span>{' '}
+                  — total em aberto{' '}
+                  <span className="font-mono">{fmtBRL(d.pendingAmount)}</span>.
+                </p>
+              )}
+              {d.contractsPending > 0 && (
+                <p>
+                  <span className="font-medium text-white">
+                    {d.contractsPending}{' '}
+                    {d.contractsPending === 1
+                      ? 'contrato sem assinatura'
+                      : 'contratos sem assinatura'}
+                  </span>{' '}
+                  aguardando a noiva.
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              {d.overdueCount > 0 && (
+                <Link
+                  to="/dashboard/financial"
+                  className="text-[10px] font-mono uppercase tracking-widest text-amber-200 hover:text-white border border-amber-500/30 hover:border-white px-3 py-1.5 transition-colors"
+                >
+                  Ver faturas
+                </Link>
+              )}
+              {d.contractsPending > 0 && (
+                <Link
+                  to="/contratos"
+                  className="text-[10px] font-mono uppercase tracking-widest text-amber-200 hover:text-white border border-amber-500/30 hover:border-white px-3 py-1.5 transition-colors"
+                >
+                  Ver contratos
+                </Link>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {d.isOwner && (
-            <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-              <MetricCard
-                icon={DollarSign}
-                label={t('dashboard.stats.revenue')}
-                value={`R$ ${d.totalRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
-                link="/dashboard/financial"
-                linkLabel={t('dashboard.actions.details')}
+            <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="col-span-2 lg:col-span-1">
+              <RevenueCard
+                mtd={d.revenueMTD}
+                ytd={d.revenueYTD}
+                pending={d.pendingAmount}
               />
             </motion.div>
           )}
@@ -112,6 +169,17 @@ export default function Dashboard() {
               value={d.projectsCount.toString()}
               link="/projetos"
               linkLabel={t('dashboard.actions.create_project')}
+            />
+          </motion.div>
+
+          <motion.div {...fadeUp} transition={{ delay: 0.25 }}>
+            <MetricCard
+              icon={FileSignature}
+              label="Contratos pendentes"
+              value={d.contractsPending.toString()}
+              link="/contratos"
+              linkLabel="Abrir"
+              tone={d.contractsPending > 0 ? 'warn' : 'neutral'}
             />
           </motion.div>
         </div>
@@ -150,7 +218,6 @@ export default function Dashboard() {
                   const currentYear = new Date().getFullYear()
                   const eventYear = isValid ? eventDate.getFullYear() : null
                   const showYear = eventYear && eventYear !== currentYear
-
                   return (
                     <div
                       key={i}
@@ -222,67 +289,6 @@ export default function Dashboard() {
             <AssistantsPanelCard />
           </motion.div>
 
-          {d.originStats.length > 0 && (
-            <motion.div
-              {...fadeUp}
-              transition={{ delay: 0.35 }}
-              className="lg:col-span-2 border border-white/10 bg-white/[0.02] p-6"
-            >
-              <div className="flex items-center gap-2 mb-5">
-                <TrendingUp className="w-4 h-4 text-white/40" />
-                <h2 className="text-sm font-medium text-white/80 uppercase tracking-wider">
-                  {t('dashboard.sections.origin')}
-                </h2>
-              </div>
-              <div className="h-[220px] w-full flex items-center justify-center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={d.originStats}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
-                      paddingAngle={4}
-                      dataKey="value"
-                      stroke="none"
-                    >
-                      {d.originStats.map((_entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={['#ffffff', '#555555'][index % 2]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#111',
-                        border: '1px solid #333',
-                        borderRadius: '0',
-                        fontSize: '12px',
-                      }}
-                      itemStyle={{ color: '#fff', textTransform: 'uppercase' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-col gap-2 ml-4">
-                  {d.originStats.map((stat, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div
-                        className="w-2 h-2"
-                        style={{
-                          backgroundColor: ['#ffffff', '#555555'][i % 2],
-                        }}
-                      />
-                      <span className="text-xs text-white/50 uppercase tracking-wide">
-                        {stat.name}: {stat.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </main>
     </div>
@@ -295,18 +301,35 @@ function MetricCard({
   value,
   link,
   linkLabel,
+  tone = 'neutral',
 }: {
   icon: React.ElementType
   label: string
   value: string
   link: string
   linkLabel: string
+  tone?: 'neutral' | 'warn'
 }) {
+  const isWarn = tone === 'warn'
   return (
-    <div className="border border-white/10 bg-white/[0.02] p-5 h-full flex flex-col justify-between group hover:border-white/25 transition-colors">
+    <div
+      className={`border bg-white/[0.02] p-5 h-full flex flex-col justify-between group transition-colors ${
+        isWarn
+          ? 'border-amber-500/40 hover:border-amber-400'
+          : 'border-white/10 hover:border-white/25'
+      }`}
+    >
       <div className="flex items-start justify-between mb-6">
-        <div className="p-2 border border-white/10 bg-white/[0.04]">
-          <Icon className="w-4 h-4 text-white/50" />
+        <div
+          className={`p-2 border ${
+            isWarn
+              ? 'border-amber-500/40 bg-amber-500/[0.08]'
+              : 'border-white/10 bg-white/[0.04]'
+          }`}
+        >
+          <Icon
+            className={`w-4 h-4 ${isWarn ? 'text-amber-300' : 'text-white/50'}`}
+          />
         </div>
         <Link to={link}>
           <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider hover:text-white/60 transition-colors flex items-center gap-1">
@@ -316,12 +339,68 @@ function MetricCard({
         </Link>
       </div>
       <div>
-        <p className="text-2xl sm:text-3xl font-mono text-white tracking-tight font-light">
+        <p
+          className={`text-2xl sm:text-3xl font-mono tracking-tight font-light ${
+            isWarn ? 'text-amber-100' : 'text-white'
+          }`}
+        >
           {value}
         </p>
         <p className="text-[11px] text-white/35 uppercase tracking-widest mt-1">
           {label}
         </p>
+      </div>
+    </div>
+  )
+}
+
+function RevenueCard({
+  mtd,
+  ytd,
+  pending,
+}: {
+  mtd: number
+  ytd: number
+  pending: number
+}) {
+  return (
+    <div className="border border-white/10 bg-white/[0.02] p-5 h-full flex flex-col justify-between group hover:border-white/25 transition-colors">
+      <div className="flex items-start justify-between mb-4">
+        <div className="p-2 border border-white/10 bg-white/[0.04]">
+          <DollarSign className="w-4 h-4 text-white/50" />
+        </div>
+        <Link to="/dashboard/financial">
+          <span className="text-[10px] font-mono text-white/30 uppercase tracking-wider hover:text-white/60 transition-colors flex items-center gap-1">
+            Detalhes
+            <ArrowUpRight className="w-3 h-3" />
+          </span>
+        </Link>
+      </div>
+      <div className="space-y-1">
+        <p className="text-2xl sm:text-3xl font-mono text-white tracking-tight font-light">
+          {fmtBRL(mtd)}
+        </p>
+        <p className="text-[11px] text-white/35 uppercase tracking-widest">
+          Receita este mês
+        </p>
+        <div className="pt-3 mt-3 border-t border-white/[0.06] flex justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider">
+              Ano
+            </p>
+            <p className="text-sm font-mono text-white/70 truncate">
+              {fmtBRL(ytd)}
+            </p>
+          </div>
+          <div className="min-w-0 text-right">
+            <p className="text-[10px] text-white/30 uppercase tracking-wider">
+              A receber
+            </p>
+            <p className="text-sm font-mono text-white/70 truncate">
+              {fmtBRL(pending)}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   )

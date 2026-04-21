@@ -5,6 +5,7 @@ import { useAuth } from './useAuth'
 import { useOrganization } from './useOrganization'
 import { addDays } from 'date-fns/addDays'
 import { startOfDay } from 'date-fns/startOfDay'
+import { format } from 'date-fns/format'
 
 export interface DashboardStats {
   totalBudgets: number
@@ -64,17 +65,10 @@ export function useDashboardStats() {
           queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
         },
       )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'project_services',
-        },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] })
-        },
-      )
+      // project_services does not carry user_id, so we can't filter via RLS
+      // channel. Rely on the `projects` subscription above — any insert/update
+      // to a service line also touches projects.updated_at via trigger, which
+      // invalidates this query. Avoids a cross-tenant noisy subscription.
       .subscribe()
 
     return () => {
@@ -89,49 +83,70 @@ export function useDashboardStats() {
         throw new Error('User not authenticated')
       }
 
+      // Exclude archived/cancelled clients from KPIs so the dashboard reflects
+      // the *active* pipeline, not historical garbage. Adjust allow-list as
+      // new statuses are added.
       const { data: clients, error: clientsError } = await supabase
         .from('wedding_clients')
-        .select('id, is_bride, projects(id)')
+        .select('id, is_bride, status, projects(id, status)')
         .eq('user_id', userId)
+        .not('status', 'in', '("archived","cancelled")')
 
       if (clientsError) throw clientsError
 
       const totalClients = clients?.length || 0
+      // A client counts as "converted" when at least one non-cancelled project
+      // exists. Deduped by client id (filter on clients, not projects).
       const converted =
-        clients?.filter((c) => c.projects && c.projects.length > 0).length || 0
+        clients?.filter((c) =>
+          (c.projects ?? []).some(
+            (p) => !p?.status || p.status !== 'cancelled',
+          ),
+        ).length || 0
       const pending = totalClients - converted
 
       const { data: projectServices, error: financeError } = await supabase
         .from('project_services')
-        .select('*, project:projects!inner(user_id), service:services(price)')
+        .select(
+          '*, project:projects!inner(user_id, status), service:services(price)',
+        )
         .eq('project.user_id', userId)
+        .not('project.status', 'in', '("cancelled")')
 
       if (financeError) throw financeError
 
       let totalBudget = 0
       projectServices?.forEach((ps) => {
-        const price = parseFloat(ps.service?.price || '0') || 0
-        totalBudget += price
+        // service.price can be string (text column) or null. Guard both.
+        const raw = ps.service?.price
+        const price =
+          raw == null || raw === '' ? 0 : Number.parseFloat(String(raw))
+        if (Number.isFinite(price)) totalBudget += price
       })
 
       const avgValue = converted > 0 ? totalBudget / converted : 0
 
+      // event_date columns are DATE, not TIMESTAMPTZ — compare as YYYY-MM-DD
+      // strings to avoid timezone drift (a `.toISOString()` on "today" in São
+      // Paulo becomes "yesterday 03:00 UTC").
       const now = startOfDay(new Date())
-      const ninetyDaysFromNow = addDays(now, 90)
+      const todayStr = format(now, 'yyyy-MM-dd')
+      const ninetyDaysStr = format(addDays(now, 90), 'yyyy-MM-dd')
 
       const [eventsResponse, projectsResponse] = await Promise.all([
         supabase
           .from('events')
           .select('id')
           .eq('user_id', userId)
-          .gte('event_date', now.toISOString())
-          .lte('event_date', ninetyDaysFromNow.toISOString()),
+          .gte('event_date', todayStr)
+          .lte('event_date', ninetyDaysStr),
         supabase
           .from('projects')
           .select('id')
           .eq('user_id', userId)
-          .gte('event_date', now.toISOString())
-          .lte('event_date', ninetyDaysFromNow.toISOString())
+          .not('status', 'in', '("cancelled")')
+          .gte('event_date', todayStr)
+          .lte('event_date', ninetyDaysStr),
       ])
 
       const upcomingCount = (eventsResponse.data?.length || 0) + (projectsResponse.data?.length || 0)

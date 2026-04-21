@@ -83,13 +83,50 @@ export function useClientActions({
     }
 
     try {
+      let newClient: { id: string } | null = null
+
       if (editingClient) {
         await updateMutation.mutateAsync({
           id: editingClient.id,
           data: clientData,
         })
       } else {
-        await createMutation.mutateAsync(clientData)
+        const created = await createMutation.mutateAsync(clientData)
+        newClient = created && 'id' in created ? { id: created.id } : null
+      }
+
+      // When inviting a new noiva with a wedding_date, drop a linked event on
+      // the calendar so the maquiadora doesn't have to duplicate the cadastro
+      // flow in /calendar. Only runs on create (editing keeps the existing
+      // event untouched) and only when the toggle was left on.
+      if (
+        !editingClient &&
+        newClient &&
+        formData.is_bride &&
+        formData.wedding_date &&
+        formData.create_event !== false
+      ) {
+        const weddingDateStr = new Date(formData.wedding_date)
+          .toISOString()
+          .slice(0, 10)
+
+        const { error: eventError } = await supabase.from('events').insert({
+          title: `Casamento — ${formData.name.trim()}`,
+          event_date: weddingDateStr,
+          event_type: 'wedding',
+          user_id: organizationId,
+          client_id: newClient.id,
+          color: '#c084a8',
+        })
+
+        if (eventError) {
+          logger.error(eventError, 'useClientActions.createLinkedEvent')
+          toast({
+            title: 'Cliente salva, mas não criamos o evento',
+            description: 'Tente adicionar manualmente em /calendar.',
+            variant: 'destructive',
+          })
+        }
       }
 
       setIsDialogOpen(false)

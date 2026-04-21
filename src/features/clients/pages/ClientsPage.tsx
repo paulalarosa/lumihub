@@ -285,7 +285,7 @@ export default function Clientes() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => actions.copyPortalLink(client.id)}
-                                className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                                className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                                 title="Copiar Link do Portal"
                               >
                                 <LinkIcon className="h-4 w-4" />
@@ -296,7 +296,7 @@ export default function Clientes() {
                               size="sm"
                               aria-label={`Ver detalhes de ${client.name ?? 'cliente'}`}
                               onClick={() => navigate(`/clientes/${client.id}`)}
-                              className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                              className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
@@ -305,7 +305,7 @@ export default function Clientes() {
                               size="sm"
                               aria-label={`Editar ${client.name ?? 'cliente'}`}
                               onClick={() => actions.openEditDialog(client)}
-                              className="h-8 w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
+                              className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none text-white hover:bg-black hover:text-white group-hover:text-black group-hover:hover:bg-black group-hover:hover:text-white"
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -314,7 +314,7 @@ export default function Clientes() {
                               size="sm"
                               aria-label={`Excluir ${client.name ?? 'cliente'}`}
                               onClick={() => actions.handleDelete(client.id)}
-                              className="h-8 w-8 p-0 rounded-none text-red-500 hover:bg-red-600 hover:text-white"
+                              className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none text-red-500 hover:bg-red-600 hover:text-white"
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>

@@ -5,7 +5,16 @@ import { useOnboardingChecklist } from '../hooks/useOnboardingChecklist'
 export function OnboardingChecklist() {
   const { data, dismiss, isDismissing } = useOnboardingChecklist()
 
-  if (!data || data.isDismissed || data.total === 0 || data.isAllDone) {
+  // Show only on "first access": nothing configured yet. Assim que a
+  // maquiadora avança qualquer passo ou dispensa manualmente, o checklist
+  // some permanente e o dashboard fica limpo para uso diário.
+  if (
+    !data ||
+    data.isDismissed ||
+    data.total === 0 ||
+    data.isAllDone ||
+    data.completed > 0
+  ) {
     return null
   }
 

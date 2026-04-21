@@ -24,7 +24,7 @@ export const Pagination = ({
         <Button
           variant="outline"
           size="sm"
-          className="h-8 w-8 p-0 rounded-none border-black disabled:opacity-30 hover:bg-black hover:text-white"
+          className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none border-black disabled:opacity-30 hover:bg-black hover:text-white"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1 || isLoading}
         >
@@ -34,7 +34,7 @@ export const Pagination = ({
         <Button
           variant="outline"
           size="sm"
-          className="h-8 w-8 p-0 rounded-none border-black disabled:opacity-30 hover:bg-black hover:text-white"
+          className="h-10 w-10 sm:h-8 sm:w-8 p-0 rounded-none border-black disabled:opacity-30 hover:bg-black hover:text-white"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages || isLoading}
         >

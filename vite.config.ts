@@ -28,6 +28,13 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Amplify's default SPA rewrite captures `.webmanifest` (it's not in
+      // the excluded-extensions regex) and returns index.html — the browser
+      // then tries to parse HTML as JSON and logs "Line 1, column 1, Syntax
+      // error". `.json` IS in Amplify's default exclusion list, so serving
+      // the manifest as manifest.json avoids the rewrite without needing a
+      // custom redirect rule.
+      filename: 'manifest.json',
       includeAssets: [
         'favicon-khaoskontrol.webp',
         'android-chrome-192x192.png',

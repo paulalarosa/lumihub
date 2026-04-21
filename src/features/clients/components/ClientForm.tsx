@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { CalendarIcon, Gem } from 'lucide-react'
+import { CalendarIcon, CalendarPlus, Gem } from 'lucide-react'
 import { format } from 'date-fns/format'
 import { ptBR } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -51,6 +51,10 @@ export function ClientForm({
       is_bride: initialData?.is_bride || false,
       wedding_date: initialData?.wedding_date || undefined,
       access_pin: initialData?.access_pin || '',
+      create_event:
+        initialData?.create_event !== undefined
+          ? initialData.create_event
+          : !initialData,
     },
   })
 
@@ -60,6 +64,8 @@ export function ClientForm({
   }
 
   const isBride = form.watch('is_bride')
+  const weddingDate = form.watch('wedding_date')
+  const isEditing = !!initialData
 
   return (
     <Form {...form}>
@@ -190,8 +196,10 @@ export function ClientForm({
                         </FormControl>
                       </PopoverTrigger>
                       <PopoverContent
-                        className="w-auto p-0 bg-black border-white/20"
+                        className="w-auto max-w-[calc(100vw-2rem)] p-0 bg-black border-white/20"
                         align="start"
+                        side="bottom"
+                        avoidCollisions
                       >
                         <Calendar
                           mode="single"
@@ -234,6 +242,40 @@ export function ClientForm({
                 )}
               />
             </div>
+          )}
+
+          {isBride && weddingDate && !isEditing && (
+            <FormField
+              control={form.control}
+              name="create_event"
+              render={({ field }) => (
+                <FormItem className="flex items-start justify-between gap-3 space-y-0 border-t border-white/10 pt-4 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <div className="flex items-start gap-2 min-w-0">
+                    <CalendarPlus
+                      className={cn(
+                        'h-4 w-4 mt-0.5 flex-shrink-0',
+                        field.value ? 'text-white' : 'text-gray-500',
+                      )}
+                    />
+                    <div className="space-y-1">
+                      <FormLabel className="text-xs uppercase tracking-widest text-white font-mono cursor-pointer">
+                        Criar evento na agenda
+                      </FormLabel>
+                      <p className="text-[10px] text-white/40 font-mono leading-relaxed">
+                        Um compromisso "Casamento — {form.watch('name') || 'noiva'}" é lançado na data selecionada.
+                      </p>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? true}
+                      onCheckedChange={field.onChange}
+                      className="data-[state=checked]:bg-zinc-100 data-[state=unchecked]:bg-zinc-800 border-zinc-700"
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           )}
         </div>
 

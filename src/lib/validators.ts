@@ -25,6 +25,7 @@ export const clientSchema = z.object({
   notes: z.string().optional(),
   is_bride: z.boolean().default(false).optional(),
   wedding_date: z.date().optional().nullable(),
+  create_event: z.boolean().default(true).optional(),
   access_pin: z
     .string()
     .optional()
