@@ -82,6 +82,9 @@ const Marketing = lazy(() => import('./pages/Marketing'))
 const NetworkPage = lazy(
   () => import('@/features/network/pages/NetworkPage'),
 )
+const MyPeerEventsPage = lazy(
+  () => import('@/features/network/pages/MyPeerEventsPage'),
+)
 const Contracts = lazy(() => import('@/features/contracts/pages/Contracts'))
 const ProjectContract = lazy(
   () => import('@/features/contracts/pages/ProjectContract'),
@@ -412,6 +415,12 @@ const App = () => {
                             <Route
                               path="/rede"
                               element={<LazyPage component={NetworkPage} />}
+                            />
+                            <Route
+                              path="/meus-reforcos"
+                              element={
+                                <LazyPage component={MyPeerEventsPage} />
+                              }
                             />
                             <Route
                               path="/servicos"

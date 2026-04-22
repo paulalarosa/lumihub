@@ -16,6 +16,7 @@ import { format, formatDistanceToNow } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import { useDashboard } from '../hooks/useDashboard'
 import { OnboardingChecklist } from '@/features/onboarding/components/OnboardingChecklist'
+import { PendingMigrationsCard } from '@/features/network/components/PendingMigrationsCard'
 import { PageLoader } from '@/components/ui/page-loader'
 
 const fmtBRL = (n: number) =>
@@ -74,6 +75,8 @@ export default function Dashboard() {
         </motion.div>
 
         <OnboardingChecklist />
+
+        <PendingMigrationsCard />
 
         {nextEventValid && (
           <motion.div

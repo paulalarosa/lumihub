@@ -66,13 +66,12 @@ export const AssistantList = () => {
     queryKey: ['assistants-list', makeupArtistId],
     queryFn: async () => {
       const { data: accessData, error } = await supabase
-
         .from('assistant_access')
         .select(
           `
-                    id, status, granted_at,
-                    assistant:assistants (id, full_name, email, phone, pin, access_pin)
-                `,
+            id, status, granted_at, pin,
+            assistant:assistants (id, full_name, email, phone, pin, access_pin)
+          `,
         )
         .eq('makeup_artist_id', makeupArtistId)
         .eq('status', 'active')
@@ -136,8 +135,15 @@ export const AssistantList = () => {
             </TableHeader>
             <TableBody>
               {activeList.map((item: Record<string, unknown>) => {
+                // Ordem de leitura após rodada 2: PIN per-par em
+                // assistant_access.pin é a fonte canônica. Fallback pros
+                // campos legados em assistants pra cobrir dados que ainda
+                // não passaram pela migração completa.
                 const finalPin =
-                  item.assistant?.pin || item.assistant?.access_pin || 'N/A'
+                  (item.pin as string) ||
+                  item.assistant?.pin ||
+                  item.assistant?.access_pin ||
+                  'N/A'
                 return (
                   <TableRow key={item.id as string}>
                     <TableCell className="font-medium">

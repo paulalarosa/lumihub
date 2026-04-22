@@ -122,7 +122,16 @@ export const InviteAssistantForm = () => {
           .eq('assistant_id', assistantId)
           .maybeSingle()
 
-        if (!existingAccess) {
+        if (existingAccess) {
+          // Reset PIN pro par se a assistente já existia (ex: reconvite).
+          // PIN é per-par desde a rodada 2 da refatoração — não pode depender
+          // mais do PIN "global" em assistants.
+          const { error: updateAccessError } = await supabase
+            .from('assistant_access')
+            .update({ pin: cleanPin, status: 'active' })
+            .eq('id', existingAccess.id)
+          if (updateAccessError) throw updateAccessError
+        } else {
           const { error: accessError } = await supabase
             .from('assistant_access')
             .insert({
@@ -130,6 +139,9 @@ export const InviteAssistantForm = () => {
               assistant_id: assistantId,
               status: 'active',
               granted_at: new Date().toISOString(),
+              // PIN per-par (novo schema). assistants.access_pin continua
+              // como fallback histórico até dropar na próxima rodada.
+              pin: cleanPin,
             })
 
           if (accessError) throw accessError

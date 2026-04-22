@@ -199,6 +199,63 @@
             "pending": "Pending",
             "accepted": "Accepted",
             "declined": "Declined"
+        },
+        "migration": {
+            "eyebrow": "Old assistant ties detected",
+            "title_one": "1 makeup artist had you as assistant",
+            "title_other": "{{count}} makeup artists had you as assistant",
+            "description": "We found your email in old assistant records. Turn these ties into peer partnerships?",
+            "accept_action": "Migrate",
+            "dismiss_action": "Dismiss",
+            "dismiss_tooltip": "Keep as PIN-only assistant"
+        },
+        "event_invite": {
+            "dialog_title": "Invite backup for event",
+            "dialog_description": "Invite a makeup artist from your network to work with you at this event.",
+            "already_invited": "Already invited",
+            "new_invite": "New invite",
+            "no_peers_available": "All your connections are already invited, or you have no partnerships yet.",
+            "go_to_network": "Open my network",
+            "peer_label": "Makeup artist",
+            "peer_placeholder": "Pick who to invite",
+            "fee_label": "Agreed fee (R$)",
+            "notes_label": "Notes (optional)",
+            "notes_placeholder": "Ex: classic look, bring extra lash kit",
+            "notes_warning": "Heads up: don't include the bride's name, total event value or any client data. The backup only sees this text + date, time, location.",
+            "close": "Close",
+            "cancel_invite": "Cancel invite",
+            "send": "Send invite",
+            "status": {
+                "invited": "Pending",
+                "accepted": "Accepted",
+                "declined": "Declined",
+                "cancelled": "Cancelled",
+                "done": "Done"
+            }
+        }
+    },
+    "peer_events": {
+        "title": "My Backups",
+        "subtitle": "Events where you were invited as backup.",
+        "tabs": {
+            "pending": "Awaiting response",
+            "upcoming": "Upcoming",
+            "history": "History"
+        },
+        "empty": {
+            "pending_title": "No pending invites",
+            "pending_description": "When someone invites you, it'll show up here to accept or decline.",
+            "upcoming_title": "No accepted backups",
+            "upcoming_description": "Your upcoming backups will appear here after you accept.",
+            "history_title": "Empty history",
+            "history_description": "Past or declined events appear here."
+        },
+        "card": {
+            "fee": "Agreed fee",
+            "notes": "Host notes",
+            "host": "Invited by",
+            "accept": "Accept",
+            "decline": "Decline"
         }
     },
     "transactions": {

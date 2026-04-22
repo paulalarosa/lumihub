@@ -16,8 +16,10 @@ import {
   Pencil,
   Trash2,
   AlertTriangle,
+  Users2,
 } from 'lucide-react'
 import { WhatsAppButtons } from '@/components/whatsapp/WhatsAppButtons'
+import { InvitePeerToEventDialog } from '@/features/network/components/InvitePeerToEventDialog'
 import { format } from 'date-fns/format'
 
 import { ptBR } from 'date-fns/locale'
@@ -59,6 +61,7 @@ export const EventDetailsModal = ({
   const navigate = useNavigate()
   const { deleteMutation } = useEventMutations()
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [peerDialogOpen, setPeerDialogOpen] = useState(false)
 
   if (!event || !event.resource) return null
 
@@ -216,6 +219,16 @@ export const EventDetailsModal = ({
                 Editar
               </Button>
             )}
+            {canEdit && !isGoogleEvent && (
+              <Button
+                variant="outline"
+                onClick={() => setPeerDialogOpen(true)}
+                className="flex-1 min-w-[140px] border-neutral-700 text-white hover:bg-neutral-800"
+              >
+                <Users2 className="w-4 h-4 mr-2" />
+                Chamar reforço
+              </Button>
+            )}
             {canDelete && (
               <Button
                 variant="outline"
@@ -291,6 +304,12 @@ export const EventDetailsModal = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <InvitePeerToEventDialog
+        open={peerDialogOpen}
+        onOpenChange={setPeerDialogOpen}
+        eventId={event.id}
+      />
     </Dialog>
   )
 }

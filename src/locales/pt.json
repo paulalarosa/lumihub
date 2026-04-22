@@ -199,6 +199,63 @@
             "pending": "Aguardando",
             "accepted": "Aceita",
             "declined": "Recusada"
+        },
+        "migration": {
+            "eyebrow": "Vínculos antigos encontrados",
+            "title_one": "1 maquiadora chamava você como assistente",
+            "title_other": "{{count}} maquiadoras chamavam você como assistente",
+            "description": "Identificamos o seu email em cadastros antigos. Quer transformar esses vínculos em conexões de parceria?",
+            "accept_action": "Migrar",
+            "dismiss_action": "Dispensar",
+            "dismiss_tooltip": "Continuar só como assistente-PIN"
+        },
+        "event_invite": {
+            "dialog_title": "Chamar reforço pro evento",
+            "dialog_description": "Convide uma maquiadora da sua rede pra trabalhar com você neste evento.",
+            "already_invited": "Já convidadas",
+            "new_invite": "Novo convite",
+            "no_peers_available": "Todas as suas conexões já foram convidadas ou você ainda não tem parcerias.",
+            "go_to_network": "Abrir minha rede",
+            "peer_label": "Maquiadora",
+            "peer_placeholder": "Selecione quem convidar",
+            "fee_label": "Valor acertado (R$)",
+            "notes_label": "Notas (opcional)",
+            "notes_placeholder": "Ex: look clássico, levar kit extra de cílios",
+            "notes_warning": "Atenção: não inclua nome da noiva, valor total do evento ou qualquer dado da cliente. A reforço vê só esse texto + data, hora, local.",
+            "close": "Fechar",
+            "cancel_invite": "Cancelar convite",
+            "send": "Enviar convite",
+            "status": {
+                "invited": "Aguardando",
+                "accepted": "Aceita",
+                "declined": "Recusada",
+                "cancelled": "Cancelada",
+                "done": "Concluída"
+            }
+        }
+    },
+    "peer_events": {
+        "title": "Meus Reforços",
+        "subtitle": "Eventos em que você foi chamada como reforço.",
+        "tabs": {
+            "pending": "Aguardando resposta",
+            "upcoming": "Próximos",
+            "history": "Histórico"
+        },
+        "empty": {
+            "pending_title": "Sem convites pendentes",
+            "pending_description": "Quando alguém te chamar pra um evento, aparece aqui pra aceitar ou recusar.",
+            "upcoming_title": "Sem reforços aceitos",
+            "upcoming_description": "Seus próximos reforços vão aparecer aqui depois de aceitar.",
+            "history_title": "Histórico vazio",
+            "history_description": "Eventos passados ou recusados aparecem aqui."
+        },
+        "card": {
+            "fee": "Valor acertado",
+            "notes": "Notas da host",
+            "host": "Convidada por",
+            "accept": "Aceitar",
+            "decline": "Recusar"
         }
     },
     "transactions": {

@@ -79,27 +79,36 @@ export type Database = {
       assistant_access: {
         Row: {
           assistant_id: string
+          default_fee: number | null
           granted_at: string | null
           id: string
           makeup_artist_id: string
+          pin: string | null
           revoked_at: string | null
           status: string | null
+          upgraded_at: string | null
         }
         Insert: {
           assistant_id: string
+          default_fee?: number | null
           granted_at?: string | null
           id?: string
           makeup_artist_id: string
+          pin?: string | null
           revoked_at?: string | null
           status?: string | null
+          upgraded_at?: string | null
         }
         Update: {
           assistant_id?: string
+          default_fee?: number | null
           granted_at?: string | null
           id?: string
           makeup_artist_id?: string
+          pin?: string | null
           revoked_at?: string | null
           status?: string | null
+          upgraded_at?: string | null
         }
         Relationships: [
           {
@@ -2207,6 +2216,147 @@ export type Database = {
           },
         ]
       }
+      peer_event_assignments: {
+        Row: {
+          agreed_fee: number
+          created_at: string
+          event_id: string
+          host_user_id: string
+          id: string
+          notes: string | null
+          peer_user_id: string
+          platform_fee_amount: number | null
+          platform_fee_percent: number | null
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          agreed_fee?: number
+          created_at?: string
+          event_id: string
+          host_user_id: string
+          id?: string
+          notes?: string | null
+          peer_user_id: string
+          platform_fee_amount?: number | null
+          platform_fee_percent?: number | null
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          agreed_fee?: number
+          created_at?: string
+          event_id?: string
+          host_user_id?: string
+          id?: string
+          notes?: string | null
+          peer_user_id?: string
+          platform_fee_amount?: number | null
+          platform_fee_percent?: number | null
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "peer_event_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_event_assignments_host_user_id_fkey"
+            columns: ["host_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_event_assignments_host_user_id_fkey"
+            columns: ["host_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_event_assignments_peer_user_id_fkey"
+            columns: ["peer_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "peer_event_assignments_peer_user_id_fkey"
+            columns: ["peer_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pending_peer_migrations: {
+        Row: {
+          assistant_access_id: string
+          assistant_email: string
+          created_at: string | null
+          host_user_id: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          assistant_access_id: string
+          assistant_email: string
+          created_at?: string | null
+          host_user_id: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          assistant_access_id?: string
+          assistant_email?: string
+          created_at?: string | null
+          host_user_id?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_peer_migrations_assistant_access_id_fkey"
+            columns: ["assistant_access_id"]
+            isOneToOne: false
+            referencedRelation: "assistant_access"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_peer_migrations_host_user_id_fkey"
+            columns: ["host_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_peer_migrations_host_user_id_fkey"
+            columns: ["host_user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_peer_migrations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pending_peer_migrations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pipeline_custom_fields: {
         Row: {
           created_at: string | null
@@ -3787,6 +3937,16 @@ export type Database = {
         }
         Relationships: []
       }
+      peer_collaboration_history: {
+        Row: {
+          events_done: number | null
+          events_upcoming: number | null
+          last_done_at: string | null
+          user_a: string | null
+          user_b: string | null
+        }
+        Relationships: []
+      }
       public_profiles: {
         Row: {
           avatar_url: string | null
@@ -3980,6 +4140,19 @@ export type Database = {
         Returns: Json
       }
       delete_studio_event: { Args: { p_event_id: string }; Returns: Json }
+      dispatch_peer_notification: {
+        Args: {
+          p_action_url?: string
+          p_email_html?: string
+          p_email_subject?: string
+          p_message: string
+          p_related_id?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       dispatch_workflow_trigger: {
         Args: { p_payload?: Json; p_trigger_type: string; p_user_id: string }
         Returns: string[]
@@ -4087,6 +4260,27 @@ export type Database = {
           version: string
         }[]
       }
+      get_my_peer_assignments: {
+        Args: { p_status?: string }
+        Returns: {
+          address: string
+          agreed_fee: number
+          created_at: string
+          end_time: string
+          event_date: string
+          event_id: string
+          event_type: string
+          host_email: string
+          host_full_name: string
+          host_user_id: string
+          id: string
+          location: string
+          notes: string
+          responded_at: string
+          start_time: string
+          status: string
+        }[]
+      }
       get_required_plan: { Args: { p_feature: string }; Returns: string }
       get_studio_events: {
         Args: { p_end_date: string; p_start_date: string }
@@ -4189,6 +4383,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      send_peer_reminders_24h: { Args: never; Returns: undefined }
       send_templated_email: {
         Args: {
           recipient: string

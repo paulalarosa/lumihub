@@ -31,6 +31,7 @@ import {
 import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/hooks/useAuth'
 import { usePeerConnections, PeerConnection } from '../hooks/usePeerConnections'
+import { usePeerHistory } from '../hooks/usePeerHistory'
 import { formatDistanceToNow } from 'date-fns/formatDistanceToNow'
 import { ptBR } from 'date-fns/locale/pt-BR'
 
@@ -97,13 +98,23 @@ export default function NetworkPage() {
               </div>
             </div>
 
-            <Button
-              onClick={() => setDialogOpen(true)}
-              className="rounded-none bg-white text-black hover:bg-gray-200 font-mono text-xs uppercase tracking-widest h-10 px-6 gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              {t('network.invite.button')}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Link to="/meus-reforcos">
+                <Button
+                  variant="outline"
+                  className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest h-10 px-4"
+                >
+                  {t('peer_events.title')}
+                </Button>
+              </Link>
+              <Button
+                onClick={() => setDialogOpen(true)}
+                className="rounded-none bg-white text-black hover:bg-gray-200 font-mono text-xs uppercase tracking-widest h-10 px-6 gap-2"
+              >
+                <Plus className="h-4 w-4" />
+                {t('network.invite.button')}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -312,6 +323,15 @@ function ConnectionRow({
     connection.host_user_id === selfId
       ? connection.peer_profile
       : connection.host_profile
+  const otherId =
+    connection.host_user_id === selfId
+      ? connection.peer_user_id
+      : connection.host_user_id
+  const { data: history } = usePeerHistory(otherId)
+
+  // Badge compacto só se houver histórico — evita poluir conexões novas.
+  const totalEvents =
+    (history?.events_done ?? 0) + (history?.events_upcoming ?? 0)
 
   return (
     <div className="flex items-center justify-between gap-4 p-4 border border-white/10 hover:border-white/30 transition-colors">
@@ -329,7 +349,9 @@ function ConnectionRow({
             {other?.full_name || other?.email || 'Sem nome'}
           </p>
           <p className="text-[10px] text-white/30 font-mono truncate">
-            {other?.email}
+            {totalEvents > 0
+              ? `${totalEvents} ${totalEvents === 1 ? 'evento' : 'eventos'} · ${other?.email ?? ''}`
+              : other?.email}
           </p>
         </div>
       </div>
