@@ -2,6 +2,7 @@ import {
   Calendar,
   Home,
   Users,
+  Users2,
   Settings,
   CreditCard,
   LogOut,
@@ -92,6 +93,11 @@ export function AppSidebar() {
       title: t('sidebar.services'),
       url: '/servicos',
       icon: Scissors,
+    },
+    {
+      title: 'REDE',
+      url: '/rede',
+      icon: Users2,
     },
     {
       title: t('sidebar.settings'),

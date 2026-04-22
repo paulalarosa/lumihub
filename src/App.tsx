@@ -79,6 +79,9 @@ const AssistantsPage = lazy(
 )
 const Services = lazy(() => import('./pages/Services'))
 const Marketing = lazy(() => import('./pages/Marketing'))
+const NetworkPage = lazy(
+  () => import('@/features/network/pages/NetworkPage'),
+)
 const Contracts = lazy(() => import('@/features/contracts/pages/Contracts'))
 const ProjectContract = lazy(
   () => import('@/features/contracts/pages/ProjectContract'),
@@ -95,9 +98,6 @@ const PublicBooking = lazy(
   () => import('@/features/public-booking/pages/PublicBooking'),
 )
 const Analytics = lazy(() => import('./pages/Analytics'))
-const AcceptInvitePage = lazy(
-  () => import('@/features/assistant-portal/pages/AcceptInvitePage'),
-)
 const AssistantDashboard = lazy(
   () => import('@/features/assistant-portal/pages/AssistantDashboard'),
 )
@@ -410,6 +410,10 @@ const App = () => {
                               element={<LazyPage component={AssistantsPage} />}
                             />
                             <Route
+                              path="/rede"
+                              element={<LazyPage component={NetworkPage} />}
+                            />
+                            <Route
                               path="/servicos"
                               element={<LazyPage component={Services} />}
                             />
@@ -463,10 +467,6 @@ const App = () => {
                             />
                           </Route>
                         </Route>
-                        <Route
-                          path="/assistente/convite/:token"
-                          element={<LazyPage component={AcceptInvitePage} />}
-                        />
                         <Route
                           path="/upgrade"
                           element={<LazyPage component={UpgradePage} />}

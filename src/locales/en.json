@@ -162,6 +162,45 @@
             "signed_at": "Digitally signed on"
         }
     },
+    "network": {
+        "title": "My Network",
+        "subtitle": "Makeup artists you can collaborate with on events.",
+        "tabs": {
+            "connections": "Connections",
+            "received": "Received invites",
+            "sent": "Sent invites"
+        },
+        "invite": {
+            "button": "Invite by email",
+            "dialog_title": "Invite artist",
+            "dialog_description": "The person needs an account. If not, add them as an assistant in /assistentes.",
+            "email_label": "Email",
+            "email_placeholder": "artist@example.com",
+            "message_label": "Message (optional)",
+            "message_placeholder": "Ex: can you cover my Saturday?",
+            "submit": "Send invite",
+            "cancel": "Cancel"
+        },
+        "empty": {
+            "connections_title": "No connections yet",
+            "connections_description": "Invite artists you work with to unlock flexibility on events.",
+            "received_title": "No invites",
+            "received_description": "When someone invites you, it'll show up here.",
+            "sent_title": "No invites sent",
+            "sent_description": "Invites you send will stay here until answered."
+        },
+        "actions": {
+            "accept": "Accept",
+            "decline": "Decline",
+            "remove": "Remove",
+            "cancel_invite": "Cancel"
+        },
+        "status": {
+            "pending": "Pending",
+            "accepted": "Accepted",
+            "declined": "Declined"
+        }
+    },
     "transactions": {
         "dialog": {
             "title_income": "New Income",

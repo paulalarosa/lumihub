@@ -162,6 +162,45 @@
             "signed_at": "Assinado digitalmente em"
         }
     },
+    "network": {
+        "title": "Minha Rede",
+        "subtitle": "Maquiadoras com quem você pode trabalhar em eventos.",
+        "tabs": {
+            "connections": "Conexões",
+            "received": "Convites recebidos",
+            "sent": "Convites enviados"
+        },
+        "invite": {
+            "button": "Convidar por email",
+            "dialog_title": "Convidar maquiadora",
+            "dialog_description": "A pessoa precisa ter conta na plataforma. Se ainda não tem, cadastre como assistente em /assistentes.",
+            "email_label": "Email",
+            "email_placeholder": "maquiadora@exemplo.com",
+            "message_label": "Mensagem (opcional)",
+            "message_placeholder": "Ex: bora cobrir meu sábado?",
+            "submit": "Enviar convite",
+            "cancel": "Cancelar"
+        },
+        "empty": {
+            "connections_title": "Sem conexões ainda",
+            "connections_description": "Convide maquiadoras que você trabalha junto pra ganhar flexibilidade nos eventos.",
+            "received_title": "Nenhum convite",
+            "received_description": "Quando alguém te convidar, aparece aqui.",
+            "sent_title": "Nenhum convite enviado",
+            "sent_description": "Os convites que você mandar ficam aqui até serem respondidos."
+        },
+        "actions": {
+            "accept": "Aceitar",
+            "decline": "Recusar",
+            "remove": "Remover",
+            "cancel_invite": "Cancelar"
+        },
+        "status": {
+            "pending": "Aguardando",
+            "accepted": "Aceita",
+            "declined": "Recusada"
+        }
+    },
     "transactions": {
         "dialog": {
             "title_income": "Nova Receita",
