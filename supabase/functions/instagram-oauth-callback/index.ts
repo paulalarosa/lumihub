@@ -1,5 +1,5 @@
-import { serve } from 'std/http/server.ts'
-import { createClient } from '@supabase/supabase-js'
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const INSTAGRAM_APP_ID = Deno.env.get('INSTAGRAM_APP_ID')!
 const INSTAGRAM_APP_SECRET = Deno.env.get('INSTAGRAM_APP_SECRET')!

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Upload, FileText, Sparkles, Bot } from 'lucide-react'
 import { SmartContractEditor } from './SmartContractEditor'
-import { useContractForm } from '@/hooks/useContractForm'
+import { useContractForm } from '@/features/contracts/hooks/useContractForm'
 
 interface ContractDialogProps {
   open: boolean

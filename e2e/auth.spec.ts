@@ -14,7 +14,8 @@ test.describe('Auth Flows', () => {
     await page.goto('/')
     // Use first() to avoid strict mode violation if multiple CTAs exist
     const cta = page.getByRole('button', { name: /Começar grátis/i }).first()
-    await cta.click()
+    await cta.scrollIntoViewIfNeeded()
+    await cta.click({ force: true })
     await expect(page).toHaveURL(/cadastro|register/i)
   })
 

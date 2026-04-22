@@ -23,6 +23,18 @@ interface PlaceSuggestion {
   place_id: string
 }
 
+interface AutocompleteResponse {
+  predictions?: PlaceSuggestion[]
+  status?: string
+}
+
+interface DetailsResponse {
+  result?: {
+    geometry?: { location?: { lat: number; lng: number } }
+  }
+  status?: string
+}
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value)
   useEffect(() => {
@@ -84,68 +96,30 @@ export function AddressAutocomplete({
   }, [latitude, longitude])
 
   useEffect(() => {
-    if (
-      !window.google &&
-      !document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')
-    ) {
-      const script = document.createElement('script')
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-
-      if (!apiKey) {
-        logger.error(
-          'VITE_GOOGLE_MAPS_API_KEY missing',
-          'AddressAutocomplete.loadScript',
-          { showToast: false },
-        )
-        return
-      }
-
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
-      script.async = true
-      script.defer = true
-      document.body.appendChild(script)
-    }
-  }, [])
-
-  useEffect(() => {
     const searchPlaces = async () => {
       if (!debouncedSearch || debouncedSearch === value) {
         setSuggestions([])
         return
       }
 
-      if (!window.google || !window.google.maps || !window.google.maps.places) {
-        return
-      }
-
       setLoading(true)
       try {
-        const autocompleteService =
-          new window.google.maps.places.AutocompleteService()
-
-        autocompleteService.getPlacePredictions(
-          {
-            input: debouncedSearch,
-            language: 'pt-BR',
-            componentRestrictions: { country: 'br' },
-          },
-          (predictions, status) => {
-            if (
-              status === google.maps.places.PlacesServiceStatus.OK &&
-              predictions
-            ) {
-              setSuggestions(predictions)
-              setShowSuggestions(true)
-            } else {
-              setSuggestions([])
-            }
-            setLoading(false)
-          },
+        const { data, error } = await supabase.functions.invoke<AutocompleteResponse>(
+          'places-proxy',
+          { body: { action: 'autocomplete', input: debouncedSearch } },
         )
+
+        if (error) throw error
+
+        const predictions = data?.predictions ?? []
+        setSuggestions(predictions)
+        setShowSuggestions(predictions.length > 0)
       } catch (err) {
         logger.error(err, 'AddressAutocomplete.searchPlaces', {
           showToast: false,
         })
+        setSuggestions([])
+      } finally {
         setLoading(false)
       }
     }
@@ -159,8 +133,7 @@ export function AddressAutocomplete({
     setShowSuggestions(false)
 
     try {
-      const typedSupabase = supabase
-      const { data: cached } = await typedSupabase
+      const { data: cached } = await supabase
         .from('geo_cache')
         .select('response')
         .eq('query', place.place_id)
@@ -176,46 +149,32 @@ export function AddressAutocomplete({
         return
       }
 
-      if (window.google && window.google.maps && window.google.maps.places) {
-        setLoading(true)
-        const placesService = new window.google.maps.places.PlacesService(
-          document.createElement('div'),
-        )
+      setLoading(true)
+      const { data, error } = await supabase.functions.invoke<DetailsResponse>(
+        'places-proxy',
+        { body: { action: 'details', place_id: place.place_id } },
+      )
+      setLoading(false)
 
-        placesService.getDetails(
-          { placeId: place.place_id, fields: ['geometry'] },
-          async (result, status) => {
-            setLoading(false)
-            if (
-              status === window.google.maps.places.PlacesServiceStatus.OK &&
-              result?.geometry?.location
-            ) {
-              const lat = result.geometry.location.lat()
-              const lng = result.geometry.location.lng()
+      if (error) throw error
+      const loc = data?.result?.geometry?.location
+      if (!loc) return
 
-              if (onCoordinatesChange) onCoordinatesChange(lat, lng)
-              setCoords({ lat, lng })
+      if (onCoordinatesChange) onCoordinatesChange(loc.lat, loc.lng)
+      setCoords({ lat: loc.lat, lng: loc.lng })
 
-              const cachePayload = {
-                geometry: {
-                  location: { lat, lng },
-                },
-              }
-
-              const expiresAt = new Date()
-              expiresAt.setDate(expiresAt.getDate() + 30)
-
-              const typedSupabase = supabase
-              await typedSupabase.from('geo_cache').upsert({
-                query: place.place_id,
-                response: cachePayload,
-                expires_at: expiresAt.toISOString(),
-              })
-            }
-          },
-        )
+      const cachePayload = {
+        geometry: { location: { lat: loc.lat, lng: loc.lng } },
       }
+      const expiresAt = new Date()
+      expiresAt.setDate(expiresAt.getDate() + 30)
+      await supabase.from('geo_cache').upsert({
+        query: place.place_id,
+        response: cachePayload,
+        expires_at: expiresAt.toISOString(),
+      })
     } catch (err) {
+      setLoading(false)
       logger.error(err, 'AddressAutocomplete.handleSelect', {
         showToast: false,
       })
@@ -257,7 +216,7 @@ export function AddressAutocomplete({
           }}
           onBlur={onBlur}
           placeholder={placeholder}
-          className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none pr-10 focus-visible:ring-0 focus-visible:border-[#00e5ff]/50 transition-colors"
+          className="bg-white/5 border-white/10 text-white placeholder:text-white/30 rounded-none pr-10 focus-visible:ring-0 focus-visible:border-white/40 transition-colors"
         />
         {loading && (
           <div className="absolute right-3 top-2.5">

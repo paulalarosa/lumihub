@@ -8,7 +8,8 @@ import { toast } from 'sonner'
 import { logger } from '@/services/logger'
 
 const INSTAGRAM_APP_ID = import.meta.env.VITE_INSTAGRAM_APP_ID
-const REDIRECT_URI = `${window.location.origin}/instagram/callback`
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const REDIRECT_URI = `${SUPABASE_URL}/functions/v1/instagram-oauth-callback`
 
 export const InstagramConnect = () => {
   const { user } = useAuth()
