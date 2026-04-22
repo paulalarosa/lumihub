@@ -120,11 +120,15 @@ export default function AdminLogs() {
 
     const headers = Object.keys(dataToExport[0]).join(',')
     const csvRows = dataToExport.map((row) => {
-      const _record = row as Record<string, unknown>
       return Object.values(row)
         .map((value) => {
+          // null/undefined → campo vazio (em vez da string literal "null"
+          // ou "undefined", que poluiriam planilhas).
+          if (value == null) return '""'
           const stringValue =
             typeof value === 'object' ? JSON.stringify(value) : String(value)
+          // RFC 4180: escapa aspas duplicando-as. Newlines e vírgulas são
+          // OK dentro das aspas.
           return `"${stringValue.replace(/"/g, '""')}"`
         })
         .join(',')
@@ -143,6 +147,8 @@ export default function AdminLogs() {
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
+    // Libera o blob URL — sem isso, cada export vazaria uns KB até o GC.
+    URL.revokeObjectURL(url)
   }
 
   return (

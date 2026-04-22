@@ -69,9 +69,15 @@ export default function AdminConfig() {
   }
 
   const handleSave = async (key: string, value: unknown) => {
+    const prevSnapshot = configs[key]
     try {
       setSaving(true)
 
+      // Optimistic update: UI reflete de imediato, mas guardamos o valor
+      // anterior para rollback se o upsert falhar. Antes a função só
+      // atualizava o state otimisticamente e chamava `fetchConfigs()` no
+      // catch — o que podia deixar a UI mostrando valor inválido por uma
+      // fração de segundo antes do reload.
       setConfigs((prev) => ({ ...prev, [key]: value }))
 
       const { error } = await supabase
@@ -84,7 +90,8 @@ export default function AdminConfig() {
     } catch (error) {
       logger.error(error, 'AdminConfig.handleSave', { showToast: false })
       toast.error('Falha ao atualizar parâmetros do sistema.')
-      fetchConfigs()
+      // Rollback local imediato — sem esperar round trip do fetchConfigs.
+      setConfigs((prev) => ({ ...prev, [key]: prevSnapshot }))
     } finally {
       setSaving(false)
     }

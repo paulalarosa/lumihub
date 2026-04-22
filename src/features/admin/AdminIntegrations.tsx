@@ -188,12 +188,37 @@ export default function AdminIntegrations() {
           )
         }
 
-        updateStatus(
-          newStatuses,
-          'Resend Email',
-          'operational',
-          'Provider: Resend',
-        )
+        try {
+          const { data, error } = await invokeEdgeFunction<{
+            ok?: boolean
+            configured?: boolean
+            missing_keys?: string[]
+            error?: string
+          }>('send-email', { action: 'check_config' }, { passUserToken: true })
+
+          if (error) throw new Error(error.message)
+
+          if (data?.ok && data?.configured) {
+            updateStatus(
+              newStatuses,
+              'Resend Email',
+              'operational',
+              'RESEND_API_KEY Configured',
+            )
+          } else {
+            updateStatus(
+              newStatuses,
+              'Resend Email',
+              'not_configured',
+              `Missing: ${data?.missing_keys?.join(', ') || 'RESEND_API_KEY'}`,
+            )
+          }
+        } catch (e) {
+          updateStatus(newStatuses, 'Resend Email', 'down', 'Health Check Failed')
+          logger.error(e, 'Health Check Failed', {
+            context: { service: 'Resend Email' },
+          })
+        }
 
         setStatuses([...newStatuses])
         setLoading(false)

@@ -110,6 +110,11 @@
         "cancel": "Cancel",
         "error": {
             "name_required": "Service name is required"
+        },
+        "empty": {
+            "title": "Empty catalog",
+            "description": "No services registered yet.",
+            "cta": "Register first service"
         }
     },
     "bride": {

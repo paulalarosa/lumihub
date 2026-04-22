@@ -17,6 +17,7 @@ import {
 import { useWorkflows, type Workflow } from '../hooks/useWorkflows'
 import { WORKFLOW_TEMPLATES, type WorkflowTemplate } from '../templates'
 import { toast } from 'sonner'
+import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -75,6 +76,39 @@ const TRIGGER_OPTIONS = [
     description: 'Quando uma lead vira cliente (won)',
   },
 ]
+
+// Zod schema pra validar o JSON de actions antes de insert. Cada action
+// precisa ter `type` (discriminator) + campos específicos por tipo. Pega
+// erro comum (faltando subject, body como objeto em vez de string, etc).
+const ACTION_SCHEMA = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('send_email'),
+    to_from: z.string().min(1, 'to_from obrigatório'),
+    subject: z.string().min(1, 'subject obrigatório'),
+    body: z.string().min(1, 'body obrigatório'),
+  }),
+  z.object({
+    type: z.literal('send_push'),
+    title: z.string().min(1),
+    body: z.string().min(1),
+    url: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('create_task'),
+    title: z.string().min(1),
+    due_in_days: z.number().int().positive().optional(),
+  }),
+  z.object({
+    type: z.literal('notify'),
+    channel: z.enum(['in_app', 'email', 'push']),
+    title: z.string().min(1),
+    message: z.string().min(1),
+  }),
+])
+
+const ACTIONS_SCHEMA = z
+  .array(ACTION_SCHEMA)
+  .min(1, 'Adicione pelo menos uma ação')
 
 const ACTION_TEMPLATES = {
   welcome_email: {
@@ -138,10 +172,19 @@ export default function WorkflowsPage() {
     }
     let actions
     try {
-      actions = JSON.parse(actionsText)
-      if (!Array.isArray(actions)) throw new Error('Deve ser um array')
+      const parsed = JSON.parse(actionsText)
+      const validation = ACTIONS_SCHEMA.safeParse(parsed)
+      if (!validation.success) {
+        // Pega o primeiro erro e mostra pro usuário em PT, sem expor o JSON
+        // path complexo do Zod. Ex: "send_email: subject obrigatório".
+        const first = validation.error.issues[0]
+        const path = first.path.join('.')
+        setError(path ? `${path}: ${first.message}` : first.message)
+        return
+      }
+      actions = validation.data
     } catch (e) {
-      setError(`JSON inválido em ações: ${(e as Error).message}`)
+      setError(`JSON inválido: ${(e as Error).message}`)
       return
     }
     setSaving(true)

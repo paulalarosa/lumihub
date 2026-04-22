@@ -150,6 +150,9 @@ export function useBrideDashboard() {
   })
 
   const handleLogout = () => {
+    sessionStorage.removeItem('bride_access_token')
+    sessionStorage.removeItem('bride_client_id')
+    // Limpa chaves antigas caso sobrevivam de versões anteriores.
     localStorage.removeItem(`bride_auth_${clientId}`)
     localStorage.removeItem(`bride_pin_${clientId}`)
     navigate(`/portal/${clientId}/login`)

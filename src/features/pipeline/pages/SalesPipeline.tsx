@@ -29,6 +29,7 @@ import { getLeadTemperature } from '@/features/pipeline/lib/leadTemperature'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
 import { QUERY_KEYS } from '@/constants/queryKeys'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export interface PipelineLead {
   id: string
@@ -59,6 +60,20 @@ export const SalesPipeline = () => {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+
+  // Realtime: kanban reflete em segundos quando a assistente move um lead em
+  // outra aba/dispositivo. Escuta `leads` e `pipeline_stages` filtrados por
+  // user_id (RLS já barra o resto, mas o filter reduz payload).
+  useRealtimeInvalidate({
+    table: ['leads', 'pipeline_stages'],
+    invalidate: [
+      [QUERY_KEYS.PIPELINE_LEADS],
+      [QUERY_KEYS.PIPELINE_STAGES],
+    ],
+    filter: organizationId ? `user_id=eq.${organizationId}` : undefined,
+    enabled: !!organizationId,
+    channelName: 'rt-pipeline',
+  })
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

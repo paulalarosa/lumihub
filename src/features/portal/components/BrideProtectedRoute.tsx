@@ -15,8 +15,12 @@ export default function BrideProtectedRoute() {
 
   useEffect(() => {
     async function validateSession() {
-      const token = localStorage.getItem('bride_access_token')
-      const storedClientId = localStorage.getItem('bride_client_id')
+      // sessionStorage (per-tab, expires on close) — noiva acessa o portal de
+      // forma esporádica, muitas vezes no celular da própria maquiadora ou em
+      // dispositivo compartilhado. Persistir o token entre sessions seria
+      // fricção menor, mas o risco de alguém fuçar o navegador depois supera.
+      const token = sessionStorage.getItem('bride_access_token')
+      const storedClientId = sessionStorage.getItem('bride_client_id')
 
       if (!clientId || !token || storedClientId !== clientId) {
         setIsValid(false)
@@ -31,8 +35,8 @@ export default function BrideProtectedRoute() {
         const validation = data as unknown as ValidateBrideTokenResult | null
 
         if (error || !validation?.valid) {
-          localStorage.removeItem('bride_access_token')
-          localStorage.removeItem('bride_client_id')
+          sessionStorage.removeItem('bride_access_token')
+          sessionStorage.removeItem('bride_client_id')
           setIsValid(false)
           return
         }

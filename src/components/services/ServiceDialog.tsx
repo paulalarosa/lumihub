@@ -72,8 +72,10 @@ export default function ServiceDialog({
   useEffect(() => {
     if (service) {
       setTitle(service.title)
-      setPrice(service.price.toString())
-      setDuration(service.duration_minutes.toString())
+      // price/duration_minutes podem vir nulos do DB (coluna nullable);
+      // ?? 0 evita crash no .toString() e deixa o campo editável em 0.
+      setPrice((service.price ?? 0).toString())
+      setDuration((service.duration_minutes ?? 60).toString())
       setDescription(service.description || '')
     } else {
       resetForm()

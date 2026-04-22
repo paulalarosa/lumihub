@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export interface SubscriptionUser {
   id: string
@@ -22,6 +23,17 @@ export interface SubscriptionStats {
 export function useAdminSubscriptions() {
   const { toast } = useToast()
   const queryClient = useQueryClient()
+
+  // Realtime: MRR e lista de usuárias invalidam quando alguém muda de plano
+  // ou o status de subscription muda (webhook Stripe → profile update).
+  useRealtimeInvalidate({
+    table: ['profiles', 'subscriptions'],
+    invalidate: [
+      ['admin-subscription-stats'],
+      ['admin-subscription-users'],
+    ],
+    channelName: 'rt-admin-subs',
+  })
 
   const statsQuery = useQuery({
     queryKey: ['admin-subscription-stats'],

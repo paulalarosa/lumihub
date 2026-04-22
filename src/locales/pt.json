@@ -110,6 +110,11 @@
         "cancel": "Cancelar",
         "error": {
             "name_required": "O nome do serviço é obrigatório"
+        },
+        "empty": {
+            "title": "Catálogo vazio",
+            "description": "Nenhum serviço cadastrado ainda.",
+            "cta": "Cadastrar primeiro serviço"
         }
     },
     "bride": {

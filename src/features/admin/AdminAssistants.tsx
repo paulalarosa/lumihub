@@ -116,13 +116,9 @@ export default function AdminAssistants() {
     if (!deleteId) return
 
     try {
-      const { error: accessError } = await supabase
-        .from('assistant_access')
-        .delete()
-        .eq('assistant_id', deleteId)
-
-      if (accessError) throw accessError
-
+      // `assistant_access.assistant_id` tem ON DELETE CASCADE, então apagar
+      // a assistente já limpa os vínculos em uma query só. Antes eram 2
+      // roundtrips redundantes.
       const { error: assistantError } = await supabase
         .from('assistants')
         .delete()

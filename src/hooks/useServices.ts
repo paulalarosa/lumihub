@@ -2,18 +2,21 @@ import { useState, useEffect, useCallback } from 'react'
 import { ServicesService, ServiceItem } from '@/services/services.service'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
+import { useOrganization } from '@/hooks/useOrganization'
 
 export const useServices = (userId?: string) => {
+  const { organizationId } = useOrganization()
+  const effectiveId = organizationId || userId
   const [services, setServices] = useState<ServiceItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   const fetchServices = useCallback(async () => {
-    if (!userId) return
+    if (!effectiveId) return
     setLoading(true)
     setError(null)
     try {
-      const data = await ServicesService.getAll()
+      const data = await ServicesService.getAll(effectiveId)
       setServices(data)
     } catch (err: unknown) {
       const error = err instanceof Error ? err : new Error('Unknown error')
@@ -23,7 +26,7 @@ export const useServices = (userId?: string) => {
     } finally {
       setLoading(false)
     }
-  }, [userId])
+  }, [effectiveId])
 
   useEffect(() => {
     fetchServices()

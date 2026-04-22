@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
+import { useRealtimeInvalidate } from '@/hooks/useRealtimeInvalidate'
 
 export interface Campaign {
   id: string
@@ -22,6 +23,15 @@ export interface Campaign {
 export function useAdminMarketing() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+
+  // Realtime — painel reflete em segundos quando outra aba dispara
+  // send/create/delete. Admins bypassam RLS via is_admin(), sem filter
+  // por user_id (a função enxerga cross-tenant).
+  useRealtimeInvalidate({
+    table: ['marketing_campaigns', 'marketing_contacts'],
+    invalidate: [['admin-marketing-campaigns']],
+    channelName: 'rt-admin-marketing',
+  })
 
   const campaignsQuery = useQuery({
     queryKey: ['admin-marketing-campaigns'],

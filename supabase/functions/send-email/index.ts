@@ -36,9 +36,25 @@ serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get('RESEND_API_KEY')
+
+    // Health check — AdminIntegrations usa essa action pra marcar o cartão
+    // de Resend como operacional/degraded em vez de hardcoded "operational".
+    // Nunca envia email; só confirma que o secret está lá.
+    const probeBody = await req
+      .clone()
+      .json()
+      .catch(() => ({}))
+    if ((probeBody as { action?: string }).action === 'check_config') {
+      return json({
+        ok: !!apiKey,
+        configured: !!apiKey,
+        missing_keys: apiKey ? [] : ['RESEND_API_KEY'],
+      })
+    }
+
     if (!apiKey) return json({ error: 'RESEND_API_KEY not configured' }, 500)
 
-    const body = (await req.json()) as EmailRequest
+    const body = probeBody as EmailRequest
     const { to, subject, html, text, replyTo } = body
     const from =
       body.from ||

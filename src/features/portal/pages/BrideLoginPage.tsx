@@ -1,6 +1,6 @@
 import SEOHead from '@/components/seo/SEOHead'
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { logger } from '@/services/logger'
 import { Button } from '@/components/ui/button'
@@ -15,6 +15,7 @@ interface ValidateBridePinResult {
 
 export default function BrideLoginPage() {
   const { clientId } = useParams()
+  const navigate = useNavigate()
   const { toast } = useToast()
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(false)
@@ -72,9 +73,16 @@ export default function BrideLoginPage() {
 
       const token = tokenData as unknown as string
 
-      localStorage.setItem('bride_access_token', token)
-      localStorage.setItem('bride_client_id', clientId)
+      // Per-tab storage: expira ao fechar o navegador. Mais seguro pra
+      // celulares emprestados ou desktop compartilhado. Sempre que a noiva
+      // voltar depois, o PIN é redigitado.
+      sessionStorage.setItem('bride_access_token', token)
+      sessionStorage.setItem('bride_client_id', clientId)
 
+      // Limpa chaves antigas do localStorage (histórico de versões anteriores)
+      // caso ainda existam do device — migração silenciosa.
+      localStorage.removeItem('bride_access_token')
+      localStorage.removeItem('bride_client_id')
       localStorage.removeItem('bride_auth_id')
       localStorage.removeItem('bride_portal_session')
       localStorage.removeItem('is_bride_authenticated')
@@ -85,7 +93,7 @@ export default function BrideLoginPage() {
         description: 'Acesso autorizado com sucesso.',
       })
 
-      window.location.href = `/portal/${clientId}/dashboard`
+      navigate(`/portal/${clientId}/dashboard`, { replace: true })
     } catch (error) {
       logger.error(error, 'BrideLoginPage.handleLogin', { showToast: false })
       toast({

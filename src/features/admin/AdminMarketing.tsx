@@ -168,12 +168,18 @@ export default function AdminMarketing() {
           {
             icon: Eye,
             label: 'Total Aberturas',
-            val: campaigns.reduce((sum, c) => sum + (c.total_opened || 0), 0),
+            val: campaigns.reduce((sum, c) => {
+              const n = Number(c.total_opened)
+              return sum + (Number.isFinite(n) ? n : 0)
+            }, 0),
           },
           {
             icon: MousePointer,
             label: 'Total Cliques',
-            val: campaigns.reduce((sum, c) => sum + (c.total_clicked || 0), 0),
+            val: campaigns.reduce((sum, c) => {
+              const n = Number(c.total_clicked)
+              return sum + (Number.isFinite(n) ? n : 0)
+            }, 0),
           },
         ].map((s, i) => (
           <Card
@@ -283,7 +289,21 @@ export default function AdminMarketing() {
                             <div
                               className="h-full bg-white/20 transition-all duration-1000"
                               style={{
-                                width: `${(c.total_sent / (c.total_recipients || 1)) * 100}%`,
+                                width: (() => {
+                                  // Guard total_sent e total_recipients: NaN
+                                  // vira 0, e o resultado é clampeado em [0,100]
+                                  // pra nunca estourar a barrinha.
+                                  const sent = Number(c.total_sent)
+                                  const total = Number(c.total_recipients)
+                                  const denom =
+                                    Number.isFinite(total) && total > 0
+                                      ? total
+                                      : 1
+                                  const numer = Number.isFinite(sent)
+                                    ? sent
+                                    : 0
+                                  return `${Math.min(100, Math.max(0, (numer / denom) * 100))}%`
+                                })(),
                               }}
                             />
                           </div>
@@ -306,7 +326,18 @@ export default function AdminMarketing() {
                                 variant="ghost"
                                 size="sm"
                                 className="rounded-none h-8 w-8 p-0 text-zinc-600 hover:text-red-500 hover:bg-red-500/10"
-                                onClick={() => deleteCampaign.mutate(c.id)}
+                                onClick={() => {
+                                  // Confirmação inline pra evitar delete
+                                  // acidental — rascunho de campanha pode
+                                  // ter hours of copywriting.
+                                  if (
+                                    window.confirm(
+                                      `Excluir o rascunho "${c.name}"? Essa ação não pode ser desfeita.`,
+                                    )
+                                  ) {
+                                    deleteCampaign.mutate(c.id)
+                                  }
+                                }}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>

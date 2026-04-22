@@ -96,17 +96,17 @@ export default function Services() {
             <div className="border border-dashed border-white/20 p-12 text-center">
               <Terminal className="w-12 h-12 text-white/20 mx-auto mb-6" />
               <h3 className="text-white font-serif uppercase text-xl tracking-wider mb-2">
-                CATALOG_EMPTY
+                {t('service.empty.title')}
               </h3>
               <p className="text-white/40 text-xs font-mono uppercase mb-6">
-                NO_SERVICES_DETECTED_IN_DATABASE.
+                {t('service.empty.description')}
               </p>
               <Button
                 onClick={handleNew}
                 variant="outline"
                 className="rounded-none border-white/20 text-white hover:bg-white hover:text-black font-mono text-xs uppercase tracking-widest"
               >
-                INITIALIZE_FIRST_SERVICE
+                {t('service.empty.cta')}
               </Button>
             </div>
           ) : (
