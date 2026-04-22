@@ -8,9 +8,13 @@ import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, Sparkles } from 'lucide-react'
 
-interface ValidateBridePinResult {
+interface BrideLoginResult {
   success: boolean
   error?: string
+  token?: string
+  client_id?: string
+  client_name?: string
+  client_email?: string
 }
 
 export default function BrideLoginPage() {
@@ -43,40 +47,32 @@ export default function BrideLoginPage() {
     try {
       const finalPin = String(pin).trim()
 
-      const { data, error } = await supabase.rpc('validate_bride_pin', {
+      // Single atomic RPC — antes eram 2 chamadas separadas (validate_bride_pin
+      // + generate_bride_token), a segunda falhava pra anon porque exigia
+      // auth.uid(). bride_login valida PIN e gera token em uma transação só.
+      const { data, error } = await supabase.rpc('bride_login', {
         p_client_id: clientId,
         p_pin_code: finalPin,
       })
 
-      const validation = data as unknown as ValidateBridePinResult | null
+      const result = data as unknown as BrideLoginResult | null
 
       if (error) throw error
 
-      if (!validation?.success) {
+      if (!result?.success || !result.token) {
         toast({
           title: 'Acesso Negado',
           description:
-            validation?.error || 'PIN incorreto ou acesso não autorizado.',
+            result?.error || 'PIN incorreto ou acesso não autorizado.',
           variant: 'destructive',
         })
         return
       }
 
-      const { data: tokenData, error: tokenError } = await supabase.rpc(
-        'generate_bride_token',
-        { p_client_id: clientId },
-      )
-
-      if (tokenError || !tokenData) {
-        throw new Error('Erro ao gerar token de acesso')
-      }
-
-      const token = tokenData as unknown as string
-
       // Per-tab storage: expira ao fechar o navegador. Mais seguro pra
       // celulares emprestados ou desktop compartilhado. Sempre que a noiva
       // voltar depois, o PIN é redigitado.
-      sessionStorage.setItem('bride_access_token', token)
+      sessionStorage.setItem('bride_access_token', result.token)
       sessionStorage.setItem('bride_client_id', clientId)
 
       // Limpa chaves antigas do localStorage (histórico de versões anteriores)

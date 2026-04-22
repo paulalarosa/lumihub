@@ -1,81 +1,99 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Assistant Portal Flow', () => {
-  const mockToken = 'mock-invite-token-123'
+  const mockProfessionalId = 'mock-prof-123'
 
   test.beforeEach(async ({ page }) => {
-    await page.route(
-      '**/rest/v1/rpc/accept_assistant_invite',
-      async (route) => {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: true, is_new_connection: true }),
-        })
-      },
-    )
-
-    await page.route('**/rest/v1/rpc/check_assistant_exists', async (route) => {
+    // Mock profiles check
+    await page.route('**/rest/v1/profiles?id=eq.*', async (route) => {
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ exists: false, is_assistant: false }),
+        body: JSON.stringify([{ full_name: 'Makeup Artist Profissional' }]),
       })
     })
 
-    await page.route('**/auth/v1/token?grant_type=*', async (route) => {
-      await route.fulfill({
-        status: 400,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          error: 'invalid_grant',
-          error_description: 'Invalid Refresh Token',
-        }),
-      })
+    // Mock RPC verify_assistant_login
+    await page.route('**/rest/v1/rpc/verify_assistant_login', async (route) => {
+      const payload = route.request().postDataJSON()
+      if (payload.p_pin === '1234') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            id: 'mock-assistant-id',
+            full_name: 'Assistant User',
+          }),
+        })
+      } else {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ error: 'invalid_pin' }),
+        })
+      }
     })
 
+    // Mock initial check for existing session
     await page.route('**/auth/v1/session', async (route) => {
       await route.fulfill({
-        status: 401,
+        status: 200,
         contentType: 'application/json',
-        body: JSON.stringify({ error: 'not_authenticated' }),
-      })
-    })
-
-    await page.route('**/auth/v1/user', async (route) => {
-      await route.fulfill({
-        status: 401,
-        contentType: 'application/json',
-        body: JSON.stringify({ error: 'not_authenticated' }),
+        body: JSON.stringify({ session: null }),
       })
     })
   })
 
-  test('Guest user should see signup form when visiting invite link', async ({
-    page,
-  }) => {
-    await page.goto(`/assistente/convite/${mockToken}`)
-    await page.waitForLoadState('networkidle')
+  test('Assistant should see quick login screen', async ({ page }) => {
+    test.setTimeout(60000)
+    await page.goto(`/agenda-equipa/${mockProfessionalId}`)
+    
+    // Wait for the specific content to appear
+    await page.waitForSelector('text=AGENDA DA ASSISTENTE', { timeout: 30000 })
 
-    await expect(page.getByText('Criar Conta de Assistente')).toBeVisible({
-      timeout: 15000,
-    })
-    await expect(page.getByLabel('Email')).toBeVisible()
-    await expect(page.getByLabel('Senha')).toBeVisible()
-    await expect(page.getByLabel('Nome Completo')).toBeVisible()
+    // Check for the header text
+    await expect(page.getByText('AGENDA DA ASSISTENTE')).toBeVisible()
+    
+    // Check for PIN label
+    await expect(page.getByText('PIN de Acesso')).toBeVisible()
+    
+    // Check for the access button
+    await expect(page.getByRole('button', { name: 'Aceder à Agenda' })).toBeVisible()
   })
 
-  test('Existing user should see login form toggle', async ({ page }) => {
-    await page.goto(`/assistente/convite/${mockToken}`)
-    await page.waitForLoadState('networkidle')
+  test('Assistant should fail with wrong PIN', async ({ page }) => {
+    test.setTimeout(60000)
+    await page.goto(`/agenda-equipa/${mockProfessionalId}`)
+    await page.waitForSelector('text=AGENDA DA ASSISTENTE', { timeout: 30000 })
 
-    await expect(page.getByText('Criar Conta de Assistente')).toBeVisible({
-      timeout: 15000,
-    })
+    const pinInput = page.locator('#assistant-pin')
+    await pinInput.fill('0000')
+    
+    // Wait for the specific RPC call to finish
+    const responsePromise = page.waitForResponse('**/rest/v1/rpc/verify_assistant_login')
+    await page.click('button:has-text("Aceder à Agenda")')
+    await responsePromise
 
-    await page.click('text=Já tem conta? Entre')
+    await expect(page.getByText('Acesso Negado', { exact: true })).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('PIN incorreto ou sem autorização.', { exact: true })).toBeVisible()
+  })
 
-    await expect(page.getByText('Acessar Portal da Assistente')).toBeVisible()
-    await expect(page.getByLabel('Nome Completo')).not.toBeVisible()
+  test('Assistant should log in successfully with correct PIN', async ({ page }) => {
+    test.setTimeout(60000)
+    await page.goto(`/agenda-equipa/${mockProfessionalId}`)
+    await page.waitForSelector('text=AGENDA DA ASSISTENTE', { timeout: 30000 })
+
+    const pinInput = page.locator('#assistant-pin')
+    await pinInput.fill('1234')
+    
+    const responsePromise = page.waitForResponse('**/rest/v1/rpc/verify_assistant_login')
+    await page.click('button:has-text("Aceder à Agenda")')
+    await responsePromise
+
+    // Should see success toast
+    await expect(page.getByText('Acesso autorizado', { exact: true })).toBeVisible({ timeout: 10000 })
+    
+    // Should navigate to dashboard
+    await expect(page).toHaveURL(new RegExp(`/agenda-equipa/${mockProfessionalId}/dashboard`), { timeout: 15000 })
   })
 })

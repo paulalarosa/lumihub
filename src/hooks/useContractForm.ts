@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useContracts } from '@/hooks/useContracts'
+import { useContractCreator } from '@/hooks/useContractCreator'
 import { useProjects } from '@/hooks/useProjects'
 import { logger } from '@/services/logger'
 
@@ -19,7 +19,7 @@ export function useContractForm({
     createContract,
     uploadContractFile,
     loading: isSaving,
-  } = useContracts()
+  } = useContractCreator()
   const { projects } = useProjects()
 
   const [mode, setMode] = useState<'digital' | 'upload'>('digital')

@@ -4,23 +4,22 @@ import { useOrganization } from './useOrganization'
 import { toast } from 'sonner'
 import { Logger } from '@/services/logger'
 import { logger } from '@/services/logger'
+import type { Tables } from '@/integrations/supabase/types'
 
-export interface Contract {
-  id: string
-  project_id: string
-  title: string
-  content?: string
-  status: string
-  created_at: string
-  signature_url?: string
-  signed_at?: string
-  attachment_url?: string
-  project?: {
-    name: string
-  }
+/**
+ * Shape local de contratos com o join `project:projects(name)` que a list
+ * query deste hook usa. Deriva da row DB via `Tables<'contracts'>` pra
+ * evitar divergência entre tipo TypeScript e schema real.
+ *
+ * Este hook é focado em CRIAÇÃO (fetchContracts, createContract,
+ * uploadContractFile). Pra list/sign/update em Contracts.tsx, use
+ * `src/features/contracts/hooks/useContracts.ts`.
+ */
+export type Contract = Tables<'contracts'> & {
+  project?: { name: string } | null
 }
 
-export function useContracts() {
+export function useContractCreator() {
   const { user, organizationId } = useOrganization()
   const [contracts, setContracts] = useState<Contract[]>([])
   const [loading, setLoading] = useState(false)

@@ -336,6 +336,35 @@ export type Database = {
         }
         Relationships: []
       }
+      bride_pin_attempts: {
+        Row: {
+          attempted_at: string
+          client_id: string
+          id: string
+          succeeded: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          client_id: string
+          id?: string
+          succeeded: boolean
+        }
+        Update: {
+          attempted_at?: string
+          client_id?: string
+          id?: string
+          succeeded?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bride_pin_attempts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "wedding_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       briefings: {
         Row: {
           content: Json | null
@@ -4029,6 +4058,10 @@ export type Database = {
         }
         Returns: Json
       }
+      bride_login: {
+        Args: { p_client_id: string; p_pin_code: string }
+        Returns: Json
+      }
       calculate_assistant_earnings: {
         Args: {
           p_assistant_id: string
@@ -4220,9 +4253,7 @@ export type Database = {
           title: string
         }[]
       }
-      get_bride_dashboard_data:
-        | { Args: { p_client_id: string }; Returns: Json }
-        | { Args: { p_client_id: string; p_pin: string }; Returns: Json }
+      get_bride_portal: { Args: { p_token: string }; Returns: Json }
       get_campaign_recipients: {
         Args: { p_campaign_id: string }
         Returns: {

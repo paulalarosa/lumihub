@@ -4,13 +4,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { differenceInDays } from 'date-fns/differenceInDays'
 import { useQuery } from '@tanstack/react-query'
 
-import type {
-  Project,
-  ProjectService,
-  Service,
-  Transaction,
-  Contract,
-} from '@/types/api.types'
+import type { Contract } from '@/types/api.types'
 
 interface ServiceItem {
   id: string
@@ -26,27 +20,84 @@ interface BrideData {
   wedding_date: string | null
 }
 
-interface Event {
+interface BrideEventRow {
   id: string
-  title: string
-  event_date: string
+  title: string | null
+  description: string | null
   event_type: string | null
+  event_date: string
+  start_time: string | null
+  end_time: string | null
+  arrival_time: string | null
+  making_of_time: string | null
+  ceremony_time: string | null
+  location: string | null
+  address: string | null
+  color: string | null
 }
 
-interface BrideProject extends Project {
+interface BrideProject {
+  id: string
+  name: string | null
+  status: string | null
+  event_date: string | null
+  event_time: string | null
+  event_location: string | null
+  notes: string | null
+  total_value: number | null
+  created_at: string
+  client_id?: string
+  client?: BrideData | null
+}
+
+interface BridePortalPayload {
   client: {
+    id: string
+    name: string | null
     full_name: string | null
     email: string | null
     phone: string | null
     wedding_date: string | null
+    portal_link: string | null
   } | null
-  services: (ProjectService & {
-    service: Pick<Service, 'name'> | null
-  })[]
-  transactions: Transaction[]
+  project: BrideProject | null
+  services: Array<{
+    id: string
+    name: string
+    quantity: number | null
+    unit_price: number | null
+    line_total: number
+  }>
+  contracts: Contract[]
+  events: BrideEventRow[]
+  transactions: Array<{
+    id: string
+    amount: number
+    date: string | null
+    payment_method: string | null
+    category: string | null
+    description: string | null
+  }>
+  total_contract: number
+  total_paid: number
+  is_fully_paid: boolean
+  makeup_artist: MakeupArtistContact | null
+  error?: string
 }
 
-export type { ServiceItem, BrideData, Event as BrideEvent, BrideProject }
+interface MakeupArtistContact {
+  full_name: string | null
+  phone: string | null
+  whatsapp: string | null
+}
+
+export type {
+  ServiceItem,
+  BrideData,
+  MakeupArtistContact,
+  BrideEventRow as BrideEvent,
+  BrideProject,
+}
 
 export function useBrideDashboard() {
   const { clientId } = useParams()
@@ -67,81 +118,70 @@ export function useBrideDashboard() {
     queryFn: async () => {
       if (!clientId) throw new Error('Client ID is required')
 
-      const { data: projectData, error: projectError } = await supabase
-        .from('projects')
-        .select(
-          `
-          *,
-          client:wedding_clients(full_name, email, phone, wedding_date),
-          services:project_services(*, service:services(name)),
-          transactions(*)
-        `,
-        )
-        .eq('client_id', clientId)
-        .maybeSingle()
-
-      if (projectError) throw projectError
-      if (!projectData) {
-        throw new Error('Projeto não encontrado para este cliente.')
+      // Antes o hook fazia SELECTs diretos que falhavam silenciosamente por
+      // RLS (a noiva é anon, não tem auth.uid()). Agora usa a RPC
+      // SECURITY DEFINER `get_bride_portal` que valida o token guardado
+      // em sessionStorage e retorna shape completo em uma viagem só.
+      const token = sessionStorage.getItem('bride_access_token')
+      if (!token) {
+        throw new Error('Sessão expirada. Faça login novamente.')
       }
 
-      const typedProject = projectData
-      const sData = typedProject.services || []
-      const tData = typedProject.transactions || []
+      const { data, error } = await supabase.rpc('get_bride_portal', {
+        p_token: token,
+      })
 
-      const totalValue = sData.reduce((sum: number, s) => {
-        const price =
-          typeof s.unit_price === 'string'
-            ? parseFloat(s.unit_price)
-            : Number(s.unit_price || 0)
-        const quantity =
-          typeof s.quantity === 'string'
-            ? parseFloat(s.quantity)
-            : Number(s.quantity || 1)
-        return sum + price * quantity
-      }, 0)
+      if (error) throw error
 
-      const paidValue = tData
-        .filter((t) => t.type === 'income')
-        .reduce((sum: number, t) => sum + (Number(t.amount) || 0), 0)
+      const payload = data as unknown as BridePortalPayload
+
+      if (!payload || payload.error) {
+        throw new Error(payload?.error || 'Sessão inválida.')
+      }
+
+      const typedProject = payload.project
+
+      // is_fully_paid vem pronto do server. Pros services individuais:
+      // sem rastreio per-item explícito no schema atual, adotamos regra
+      // simples — todos viram "paid" quando o total cobre o contrato;
+      // "pending" caso contrário. Não mente em contextos ambíguos.
+      const serviceStatus: 'paid' | 'pending' = payload.is_fully_paid
+        ? 'paid'
+        : 'pending'
+
+      const services: ServiceItem[] = payload.services.map((s) => ({
+        id: s.id,
+        name: s.name,
+        price: Number(s.line_total ?? 0),
+        status: serviceStatus,
+        paid_amount: serviceStatus === 'paid' ? Number(s.line_total ?? 0) : 0,
+      }))
 
       const targetDate =
-        typedProject.event_date || typedProject.client?.wedding_date
+        typedProject?.event_date || payload.client?.wedding_date || null
       let daysLeft = 0
       if (targetDate) {
         const diff = differenceInDays(new Date(targetDate), new Date())
         daysLeft = diff > 0 ? diff : 0
       }
 
-      const { data: contractsData } = await supabase
-        .from('contracts')
-        .select('*')
-        .eq('project_id', typedProject.id)
-
       return {
         project: typedProject,
-        totalContract: totalValue,
-        paidAmount: paidValue,
-        services: sData.map((s) => {
-          const uPrice =
-            typeof s.unit_price === 'string'
-              ? parseFloat(s.unit_price)
-              : Number(s.unit_price || 0)
-          return {
-            id: s.id,
-            name: s.service?.name || 'Serviço',
-            price: uPrice,
-            status: 'pending' as const,
-            paid_amount: 0,
-          }
-        }) as ServiceItem[],
-        contracts: (contractsData || []) as Contract[],
+        totalContract: Number(payload.total_contract ?? 0),
+        paidAmount: Number(payload.total_paid ?? 0),
+        services,
+        contracts: payload.contracts,
         daysLeft,
-        events: [] as Event[],
+        events: payload.events,
+        isFullyPaid: payload.is_fully_paid,
+        makeupArtist: payload.makeup_artist,
         bride: {
-          id: typedProject.client_id,
-          name: typedProject.client?.full_name || 'Noiva',
-          wedding_date: typedProject.client?.wedding_date || null,
+          id: payload.client?.id ?? clientId,
+          name:
+            payload.client?.full_name ||
+            payload.client?.name ||
+            'Noiva',
+          wedding_date: payload.client?.wedding_date ?? null,
         } as BrideData,
       }
     },
@@ -170,6 +210,8 @@ export function useBrideDashboard() {
     events: dashboardData?.events || [],
     daysLeft: dashboardData?.daysLeft || 0,
     bride: dashboardData?.bride || null,
+    makeupArtist: dashboardData?.makeupArtist || null,
+    isFullyPaid: dashboardData?.isFullyPaid ?? false,
     isSigOpen,
     setIsSigOpen,
     selectedContract,

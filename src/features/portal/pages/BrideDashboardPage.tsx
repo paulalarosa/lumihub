@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useLanguage } from '@/hooks/useLanguage'
 import { DigitalSignature } from '../components/DigitalSignature'
+import { MakeupArtistContactButton } from '../components/MakeupArtistContactButton'
 import { useBrideDashboard } from '../hooks/useBrideDashboard'
 import { PageLoader } from '@/components/ui/page-loader'
 
@@ -531,6 +532,11 @@ export default function BrideDashboardPage() {
           onSigned={d.refreshData}
         />
       )}
+
+      <MakeupArtistContactButton
+        makeupArtist={d.makeupArtist}
+        brideName={d.bride?.name}
+      />
     </div>
   )
 }

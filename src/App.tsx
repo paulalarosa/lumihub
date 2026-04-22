@@ -447,18 +447,7 @@ const App = () => {
                           </Route>
                         </Route>
 
-                        <Route
-                          path="/assistant/accept/:token"
-                          element={
-                            <Navigate
-                              to={window.location.pathname.replace(
-                                '/assistant/accept/',
-                                '/assistente/convite/',
-                              )}
-                              replace
-                            />
-                          }
-                        />
+
                         <Route element={<ProtectedRoute />}>
                           <Route
                             path="/assistant"

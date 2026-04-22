@@ -10,10 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Loader2, Eraser, Check } from 'lucide-react'
+import { Loader2, Eraser, Check, ArrowRight, FileText } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
 import jsPDF from 'jspdf'
+import { sanitizeHTML } from '@/lib/sanitize'
 import type { Contract } from '@/types/api.types'
 
 interface DigitalSignatureProps {
@@ -31,6 +32,10 @@ export function DigitalSignature({
 }: DigitalSignatureProps) {
   const sigCanvas = useRef<SignatureCanvas>(null)
   const [isSaving, setIsSaving] = useState(false)
+  // Fluxo em 2 passos: preview do contrato → assinar. Força a noiva a
+  // ao menos abrir o texto antes de colocar o dedo no canvas. Antes era
+  // direto pro canvas — consentimento informado questionável.
+  const [step, setStep] = useState<'preview' | 'sign'>('preview')
   const { toast } = useToast()
 
   const clear = () => {
@@ -154,55 +159,106 @@ export function DigitalSignature({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-white text-black">
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          setStep('preview')
+          onClose()
+        }
+      }}
+    >
+      <DialogContent className="sm:max-w-lg bg-white text-black max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-serif uppercase text-center">
-            Confirmar Assinatura
+          <DialogTitle className="font-serif uppercase text-center flex items-center justify-center gap-2">
+            <FileText className="w-4 h-4" />
+            {contract.title || 'Contrato'}
           </DialogTitle>
           <DialogDescription className="text-center font-mono text-xs uppercase tracking-wider text-gray-500">
-            Desenhe sua assinatura abaixo para aceitar os termos.
+            {step === 'preview'
+              ? 'Leia com atenção antes de continuar.'
+              : 'Desenhe sua assinatura abaixo para aceitar.'}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="border-2 border-dashed border-gray-300 rounded-md p-1 mt-4 bg-gray-50">
-          <SignatureCanvas
-            ref={sigCanvas}
-            penColor="black"
-            canvasProps={{
-              className: 'signature-canvas w-full h-40 cursor-crosshair',
-            }}
-            backgroundColor="rgba(0,0,0,0)"
-          />
-        </div>
+        {step === 'preview' ? (
+          <>
+            <article
+              className="border border-gray-200 rounded p-4 bg-gray-50 max-h-[45vh] overflow-y-auto text-sm leading-relaxed font-serif"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHTML(contract.content || ''),
+              }}
+            />
+            <p className="text-[10px] text-gray-400 text-center font-mono mt-2">
+              Ao assinar você concorda com todos os termos acima.
+            </p>
+            <DialogFooter className="flex gap-2 sm:justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="flex-1 font-mono text-xs uppercase"
+              >
+                Voltar
+              </Button>
+              <Button
+                onClick={() => setStep('sign')}
+                className="flex-1 bg-black text-white hover:bg-gray-800 font-mono text-xs uppercase"
+              >
+                Continuar
+                <ArrowRight className="w-3 h-3 ml-2" />
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <div className="border-2 border-dashed border-gray-300 rounded-md p-1 mt-4 bg-gray-50">
+              <SignatureCanvas
+                ref={sigCanvas}
+                penColor="black"
+                canvasProps={{
+                  className: 'signature-canvas w-full h-40 cursor-crosshair',
+                }}
+                backgroundColor="rgba(0,0,0,0)"
+              />
+            </div>
 
-        <div className="text-[10px] text-gray-400 text-center font-mono mt-2">
-          Ao assinar, você concorda com todos os termos do contrato.
-        </div>
+            <div className="text-[10px] text-gray-400 text-center font-mono mt-2">
+              Ao assinar, você concorda com todos os termos do contrato.
+            </div>
 
-        <DialogFooter className="flex gap-2 sm:justify-center mt-4">
-          <Button
-            variant="outline"
-            onClick={clear}
-            disabled={isSaving}
-            className="flex-1 font-mono text-xs uppercase"
-          >
-            <Eraser className="w-3 h-3 mr-2" />
-            Limpar
-          </Button>
-          <Button
-            onClick={save}
-            disabled={isSaving}
-            className="flex-1 bg-black text-white hover:bg-gray-800 font-mono text-xs uppercase"
-          >
-            {isSaving ? (
-              <Loader2 className="w-3 h-3 mr-2 animate-spin" />
-            ) : (
-              <Check className="w-3 h-3 mr-2" />
-            )}
-            {isSaving ? 'Assinando...' : 'Assinar Agora'}
-          </Button>
-        </DialogFooter>
+            <DialogFooter className="flex gap-2 sm:justify-center mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setStep('preview')}
+                disabled={isSaving}
+                className="flex-1 font-mono text-xs uppercase"
+              >
+                Ver contrato
+              </Button>
+              <Button
+                variant="outline"
+                onClick={clear}
+                disabled={isSaving}
+                className="flex-1 font-mono text-xs uppercase"
+              >
+                <Eraser className="w-3 h-3 mr-2" />
+                Limpar
+              </Button>
+              <Button
+                onClick={save}
+                disabled={isSaving}
+                className="flex-1 bg-black text-white hover:bg-gray-800 font-mono text-xs uppercase"
+              >
+                {isSaving ? (
+                  <Loader2 className="w-3 h-3 mr-2 animate-spin" />
+                ) : (
+                  <Check className="w-3 h-3 mr-2" />
+                )}
+                {isSaving ? 'Assinando...' : 'Assinar'}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )
