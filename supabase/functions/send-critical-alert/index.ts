@@ -19,7 +19,12 @@ const json = (body: unknown, status = 200) =>
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 
-type AlertType = 'payment_failed' | 'system_error' | 'workflow_failed'
+type AlertType =
+  | 'payment_failed'
+  | 'system_error'
+  | 'workflow_failed'
+  | 'cron_failure'
+  | 'email_queue_backlog'
 
 interface AlertPayload {
   type: AlertType
@@ -34,6 +39,10 @@ function renderSubject(payload: AlertPayload): string {
       return `[ALERTA] Erro crítico no sistema`
     case 'workflow_failed':
       return `[ALERTA] Workflow falhou`
+    case 'cron_failure':
+      return `[ALERTA] Cron job falhou — ${payload.data.count ?? '?'} execuções`
+    case 'email_queue_backlog':
+      return `[ALERTA] Fila de email travada — ${payload.data.pending_count ?? '?'} pendentes`
   }
 }
 
@@ -45,12 +54,14 @@ function renderHtml(payload: AlertPayload): string {
     )
     .join('')
 
-  const title =
-    payload.type === 'payment_failed'
-      ? 'Pagamento falhou'
-      : payload.type === 'system_error'
-        ? 'Erro crítico no sistema'
-        : 'Workflow falhou'
+  const titles: Record<AlertType, string> = {
+    payment_failed: 'Pagamento falhou',
+    system_error: 'Erro crítico no sistema',
+    workflow_failed: 'Workflow falhou',
+    cron_failure: 'Cron job falhou',
+    email_queue_backlog: 'Fila de email travada',
+  }
+  const title = titles[payload.type] ?? 'Alerta do sistema'
 
   return `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#0a0a0a;color:#fff">
