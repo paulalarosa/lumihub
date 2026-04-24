@@ -52,6 +52,10 @@ export const HeroSection = () => {
           <img
             src="/assets/hero-image-B5FCqZ87.png"
             alt=""
+            width={1024}
+            height={1024}
+            loading="eager"
+            fetchPriority="high"
             className="w-full h-full object-cover grayscale opacity-50"
           />
           <div className="absolute inset-0 bg-black/35" />

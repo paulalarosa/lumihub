@@ -75,7 +75,6 @@ export const OnboardingWizard = () => {
     business_name: '',
     bio: '',
     phone: '',
-    instagram: '',
   })
 
   const [clientData, setClientData] = useState({
@@ -113,6 +112,10 @@ export const OnboardingWizard = () => {
   useEffect(() => {
     if (onboarding && !onboarding.is_completed && !onboarding.has_seen_tour) {
       setIsOpen(true)
+      // Restaura o step onde a maquiadora parou na última sessão.
+      // Sem isso, ela volta pro step 0 e tem que refazer tudo.
+      const savedStep = STEPS.findIndex((s) => s.id === onboarding.current_step)
+      if (savedStep > 0) setStep(savedStep)
     }
   }, [onboarding])
 
@@ -340,39 +343,25 @@ export const OnboardingWizard = () => {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                      WhatsApp
-                    </label>
-                    <Input
-                      value={profileData.phone}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          phone: e.target.value,
-                        })
-                      }
-                      placeholder="(11) 99999-9999"
-                      className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
-                      Instagram
-                    </label>
-                    <Input
-                      value={profileData.instagram}
-                      onChange={(e) =>
-                        setProfileData({
-                          ...profileData,
-                          instagram: e.target.value,
-                        })
-                      }
-                      placeholder="@seu.perfil"
-                      className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs text-white/50 mb-1.5 uppercase tracking-wider">
+                    WhatsApp
+                  </label>
+                  <Input
+                    value={profileData.phone}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        phone: e.target.value,
+                      })
+                    }
+                    placeholder="(11) 99999-9999"
+                    inputMode="tel"
+                    className="bg-white/[0.04] border-white/10 text-white placeholder:text-white/20 h-11"
+                  />
+                  <p className="text-[10px] text-white/25 mt-1.5 uppercase tracking-wider font-mono">
+                    Instagram você conecta depois em Integrações
+                  </p>
                 </div>
               </div>
             )}
