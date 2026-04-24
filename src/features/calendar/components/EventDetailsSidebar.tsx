@@ -75,7 +75,7 @@ export function EventDetailsSidebar({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
-        className="w-[400px] sm:w-[540px] flex flex-col p-0 gap-0 bg-background border-l shadow-2xl"
+        className="w-full sm:max-w-[540px] flex flex-col p-0 gap-0 bg-background border-l shadow-2xl"
         side="right"
       >
         <SheetHeader className="px-6 py-4 border-b flex flex-row items-center justify-between sticky top-0 bg-background z-10">

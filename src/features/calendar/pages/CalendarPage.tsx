@@ -414,7 +414,7 @@ export const CalendarPage = () => {
               events={events}
               startAccessor="start"
               endAccessor="end"
-              style={{ height: 680, minWidth: 320 }}
+              style={{ height: 680 }}
               view={view}
               onView={setView}
               date={date}
