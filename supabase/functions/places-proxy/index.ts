@@ -11,6 +11,7 @@ const corsHeaders = {
 type Payload =
   | { action: 'autocomplete'; input: string }
   | { action: 'details'; place_id: string }
+  | { action: 'health' }
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -47,6 +48,21 @@ serve(async (req: Request) => {
     const apiKey =
       Deno.env.get('GOOGLE_MAPS_API_KEY') ||
       Deno.env.get('VITE_GOOGLE_MAPS_API_KEY')
+
+    const body = (await req.json()) as Partial<Payload> & {
+      input?: string
+    }
+
+    // Back-compat: sem action => autocomplete (client antigo).
+    const action = body.action ?? 'autocomplete'
+
+    if (action === 'health') {
+      return new Response(
+        JSON.stringify({ configured: Boolean(apiKey) }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+
     if (!apiKey) {
       return new Response(
         JSON.stringify({ error: 'GOOGLE_MAPS_API_KEY not configured' }),
@@ -56,13 +72,6 @@ serve(async (req: Request) => {
         },
       )
     }
-
-    const body = (await req.json()) as Partial<Payload> & {
-      input?: string
-    }
-
-    // Back-compat: sem action => autocomplete (client antigo).
-    const action = body.action ?? 'autocomplete'
 
     if (action === 'autocomplete') {
       const input = body.input

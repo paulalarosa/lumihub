@@ -171,21 +171,31 @@ export default function AdminIntegrations() {
           logger.error(e, 'Health Check Failed', { context: { service: 'Stripe' } })
         }
 
-        const mapsKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-        if (mapsKey) {
+        try {
+          const { data, error } = await invokeEdgeFunction<{
+            configured?: boolean
+          }>('places-proxy', { action: 'health' }, { passUserToken: true })
+
+          if (error) throw new Error(error.message)
+
           updateStatus(
             newStatuses,
             'Google Maps',
-            'operational',
-            'Key Present in Client',
+            data?.configured ? 'operational' : 'not_configured',
+            data?.configured
+              ? 'GOOGLE_MAPS_API_KEY Present (server-side)'
+              : 'GOOGLE_MAPS_API_KEY Missing on edge function',
           )
-        } else {
+        } catch (e) {
           updateStatus(
             newStatuses,
             'Google Maps',
-            'not_configured',
-            'VITE_GOOGLE_MAPS_API_KEY Missing',
+            'down',
+            'places-proxy health check failed',
           )
+          logger.error(e, 'Health Check Failed', {
+            context: { service: 'Google Maps' },
+          })
         }
 
         try {

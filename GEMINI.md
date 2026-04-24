@@ -101,7 +101,9 @@ Required (validated at startup via Zod in `src/lib/env.ts`):
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-Optional: `VITE_GOOGLE_CLIENT_ID`, `VITE_STRIPE_PUBLISHABLE_KEY`, `VITE_SENTRY_DSN`, `VITE_GOOGLE_MAPS_API_KEY`
+Optional: `VITE_GOOGLE_CLIENT_ID`, `VITE_STRIPE_PUBLISHABLE_KEY`, `VITE_SENTRY_DSN`
+
+Google Maps Places é server-side only: secret `GOOGLE_MAPS_API_KEY` nas edge functions (passa pelo `places-proxy`, não vai pro bundle do browser).
 
 ### Error Handling & Observability
 
