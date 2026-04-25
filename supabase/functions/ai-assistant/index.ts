@@ -4,6 +4,8 @@ import { generateText, tool } from 'npm:ai'
 import { createGoogleGenerativeAI } from 'npm:@ai-sdk/google'
 import { createOpenAI } from 'npm:@ai-sdk/openai'
 import { z } from 'npm:zod'
+import { consumeAiQuota, aiQuotaResponse } from '../_shared/ai-rate-limit.ts'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +27,11 @@ serve(async (req) => {
   try {
     const { messages, user_id } = await req.json()
     if (!user_id) return json({ error: 'Missing user_id' }, 400)
+
+    // Rate limit antes de tocar em API paga. 50 req/hora é generoso
+    // pra uso normal e mata loops/abuso antes de virar centenas de R$.
+    const quota = await consumeAiQuota(user_id, 'ai-assistant', 50)
+    if (!quota.allowed) return aiQuotaResponse(quota)
 
     const clientProvider = req.headers.get('x-ai-provider')
     const clientKey = req.headers.get('x-ai-key')
@@ -517,6 +524,7 @@ DIRETRIZES:
 
     return json({ reply: text, action: actionData })
   } catch (error) {
+    await logEdgeError('ai-assistant', error)
     const msg = error instanceof Error ? error.message : 'Unknown error'
     return json({ error: msg }, 500)
   }

@@ -99,7 +99,7 @@ export function useClientDetails(id: string | undefined) {
     }
   }
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!client) return
 
     const reportProjects: ReportProject[] = events.map((e) => ({
@@ -117,7 +117,7 @@ export function useClientDetails(id: string | undefined) {
       })),
     }))
 
-    generateClientPDF(client, reportProjects)
+    await generateClientPDF(client, reportProjects)
     toast({
       title: 'Relatório gerado',
       description: 'O PDF do histórico foi baixado com sucesso.',

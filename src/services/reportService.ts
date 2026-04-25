@@ -1,4 +1,6 @@
-import jsPDF from 'jspdf'
+// jsPDF lazy: só carrega no momento que a usuária gera um relatório
+// de cliente (export). Tipos via `import type` ficam fora do bundle.
+import type jsPDF from 'jspdf'
 
 import { saveAs } from 'file-saver'
 import { format } from 'date-fns/format'
@@ -17,11 +19,12 @@ interface _AutoTableDoc extends jsPDF {
   lastAutoTable: { finalY: number }
 }
 
-export const generateClientPDF = (
+export const generateClientPDF = async (
   client: Client,
   projects: ReportProject[],
 ) => {
-  const doc = new jsPDF()
+  const { default: JsPDF } = await import('jspdf')
+  const doc = new JsPDF()
 
   const colors = {
     primary: '#D4AF37',

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { FileText, Download } from 'lucide-react'
-import { pdf } from '@react-pdf/renderer'
-import { ContractTemplate } from '@/features/contracts/components/ContractTemplate'
+// @react-pdf/renderer + ContractTemplate são lazy no handler pra tirar
+// ~1.5MB do bundle inicial de quem só abre o projeto sem gerar PDF.
 
 import { toast } from 'sonner'
 import { supabase } from '@/integrations/supabase/client'
@@ -87,6 +87,10 @@ export const GenerateContractButton = ({
         },
       }
 
+      const [{ pdf }, { ContractTemplate }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('@/features/contracts/components/ContractTemplate'),
+      ])
       const doc = <ContractTemplate data={contractData} />
       const asPdf = pdf(doc)
       const blob = await asPdf.toBlob()

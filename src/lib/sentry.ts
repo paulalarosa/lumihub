@@ -1,5 +1,15 @@
 import * as Sentry from '@sentry/react'
 
+// Aviso visível em prod quando o DSN não está setado: sem isso, Sentry
+// fica silencioso e dá impressão que está funcionando. Com o aviso,
+// fica óbvio que precisa configurar.
+if (import.meta.env.PROD && !import.meta.env.VITE_SENTRY_DSN) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[Sentry] VITE_SENTRY_DSN ausente em produção — erros não estão sendo capturados',
+  )
+}
+
 if (import.meta.env.PROD && import.meta.env.VITE_SENTRY_DSN) {
   Sentry.init({
     dsn: import.meta.env.VITE_SENTRY_DSN,

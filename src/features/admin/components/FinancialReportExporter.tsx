@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { pdf } from '@react-pdf/renderer'
 import { FileText, Download, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -13,7 +12,8 @@ import {
 import { exportCsv } from '@/lib/csvExport'
 import { logger } from '@/services/logger'
 import { useMonthlyFinancials } from '../hooks/useMonthlyFinancials'
-import { FinancialReportPDF } from './FinancialReportPDF'
+// @react-pdf/renderer + FinancialReportPDF ficam lazy no handler
+// (o painel admin carrega sem puxar ~1.5MB de PDF engine).
 
 const MONTH_NAMES = [
   'Janeiro',
@@ -55,6 +55,10 @@ export function FinancialReportExporter() {
     if (!data) return
     setGenerating(true)
     try {
+      const [{ pdf }, { FinancialReportPDF }] = await Promise.all([
+        import('@react-pdf/renderer'),
+        import('./FinancialReportPDF'),
+      ])
       const blob = await pdf(<FinancialReportPDF data={data} />).toBlob()
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')

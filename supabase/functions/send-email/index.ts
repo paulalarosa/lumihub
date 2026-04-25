@@ -2,6 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { Resend } from 'https://esm.sh/resend@2.0.0'
 import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limit.ts'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -106,6 +107,7 @@ serve(async (req) => {
 
     return json({ success: true, id: result.data?.id })
   } catch (error) {
+    await logEdgeError('send-email', error)
     const msg = error instanceof Error ? error.message : String(error)
     return json({ error: msg }, 500)
   }

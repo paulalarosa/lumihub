@@ -5,6 +5,14 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { compression } from 'vite-plugin-compression2'
 import prerender from '@prerenderer/rollup-plugin'
+import { readFileSync } from 'fs'
+
+// Versão real do package.json injetada como VITE_APP_VERSION pra
+// release tracking do Sentry. Sem isso o Sentry agrupava todos
+// os erros sob "khaos-kontrol@1.0.0" (fallback hardcoded).
+const pkgVersion = JSON.parse(
+  readFileSync(path.resolve(__dirname, 'package.json'), 'utf-8'),
+).version
 
 const PRERENDER_ROUTES = [
   '/',
@@ -215,6 +223,9 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     drop: mode === 'production' ? ['console', 'debugger'] : [],
   },
+  define: {
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkgVersion),
+  },
   build: {
     sourcemap: mode !== 'production',
     minify: 'esbuild',
@@ -238,9 +249,13 @@ export default defineConfig(({ mode }) => ({
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-utils': ['date-fns', 'uuid', 'nanoid', 'zod'],
           'vendor-charts': ['recharts'],
-          'vendor-excel': ['exceljs'],
-          'vendor-pdf': ['jspdf', 'html2canvas'],
-          'ai-engine': ['@mlc-ai/web-llm'],
+          // exceljs, jspdf, html2canvas, @mlc-ai/web-llm, @react-pdf/renderer
+          // NÃO ficam em manualChunks: todos são dynamic import-only, e listá-los
+          // aqui força o chunk pro preload do entry HTML (era o caso da
+          // v5.8.18 que shipou ~1.5MB de react-pdf + 587KB de jspdf no primeiro
+          // paint mesmo sem uso). Deixando o Rollup criar chunks automáticos
+          // eles só carregam quando a maquiadora clica em "Gerar PDF" ou
+          // "Exportar Excel".
           'ai-markdown': ['react-markdown', 'remark-gfm'],
           'feature-calendar': ['react-big-calendar'],
           'feature-forms': ['react-hook-form', '@hookform/resolvers'],

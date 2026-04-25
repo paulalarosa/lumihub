@@ -13,7 +13,8 @@ import {
   Lock,
   Download,
 } from 'lucide-react'
-import { pdf } from '@react-pdf/renderer'
+// @react-pdf/renderer + InvoicePDFDocument carregam só quando a usuária
+// baixa a fatura (lazy no handler). Tira ~1.5MB do bundle de /billing.
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,7 +28,6 @@ import {
 import { supabase } from '@/integrations/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
 import { logger } from '@/services/logger'
-import { InvoicePDFDocument } from '@/features/billing/components/InvoicePDFDocument'
 import {
   useBilling,
   useBillingInvoices,
@@ -469,6 +469,11 @@ async function downloadInvoicePDF(invoice: BillingInvoice) {
   const project = Array.isArray(invoiceFull?.project)
     ? invoiceFull?.project[0]
     : invoiceFull?.project
+
+  const [{ pdf }, { InvoicePDFDocument }] = await Promise.all([
+    import('@react-pdf/renderer'),
+    import('@/features/billing/components/InvoicePDFDocument'),
+  ])
 
   const doc = (
     <InvoicePDFDocument

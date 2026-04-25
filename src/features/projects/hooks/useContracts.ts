@@ -12,7 +12,7 @@ import type {
   ProjectServiceItem,
   Profile,
 } from '@/types/api.types'
-import jsPDF from 'jspdf'
+// jsPDF lazy no handler handleExportPDF
 
 interface UseContratosProps {
   projectId: string
@@ -96,11 +96,12 @@ export function useContracts({
     }
   }
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!contractTitle || !contractContent) {
       toast({ title: 'Preencha o contrato primeiro', variant: 'destructive' })
       return
     }
+    const { default: jsPDF } = await import('jspdf')
     const doc = new jsPDF()
     doc.setFont('helvetica', 'bold')
     doc.text(contractTitle.toUpperCase(), 20, 20)

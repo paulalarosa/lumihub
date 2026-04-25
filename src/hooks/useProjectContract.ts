@@ -7,7 +7,8 @@ import { analyticsService } from '@/services/analytics.service'
 
 import { ptBR } from 'date-fns/locale'
 import { v4 as uuidv4 } from 'uuid'
-import jsPDF from 'jspdf'
+// jsPDF fica lazy: ~588KB só baixam quando a cliente assina ou
+// a maquiadora baixa o draft.
 import type { Tables } from '@/integrations/supabase/types'
 import type { Editor } from '@tiptap/react'
 
@@ -188,6 +189,7 @@ export function useProjectContract({
 
       const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:'Times New Roman',serif;line-height:1.6;color:#000;padding:40px;}p{margin:10px 0;}h1{font-size:24px;margin:20px 0;}h2{font-size:18px;margin:15px 0;}ul,ol{margin:10px 0 10px 20px;}li{margin:5px 0;}</style></head><body>${contractHTML}${signatureBlock}</body></html>`
 
+      const { default: jsPDF } = await import('jspdf')
       const pdfBlob = await new Promise<Blob>((resolve, reject) => {
         const doc = new jsPDF({
           unit: 'mm',
@@ -295,6 +297,7 @@ export function useProjectContract({
 
     try {
       const html = editor.getHTML()
+      const { default: jsPDF } = await import('jspdf')
       const doc = new jsPDF({
         unit: 'mm',
         format: 'a4',

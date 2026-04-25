@@ -13,7 +13,7 @@ import {
 import { Loader2, Eraser, Check, ArrowRight, FileText } from 'lucide-react'
 import { supabase } from '@/integrations/supabase/client'
 import { useToast } from '@/hooks/use-toast'
-import jsPDF from 'jspdf'
+// jsPDF lazy: só carrega quando a noiva confirma a assinatura.
 import { sanitizeHTML } from '@/lib/sanitize'
 import type { Contract } from '@/types/api.types'
 
@@ -68,6 +68,7 @@ export function DigitalSignature({
         .toDataURL('image/png')
       if (!dataUrl) throw new Error('Failed to generate signature image')
 
+      const { default: jsPDF } = await import('jspdf')
       const doc = new jsPDF()
 
       doc.setFontSize(20)

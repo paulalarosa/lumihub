@@ -44,6 +44,27 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_usage_counter: {
+        Row: {
+          count: number
+          endpoint: string
+          user_id: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          endpoint: string
+          user_id: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          endpoint?: string
+          user_id?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       analytics_logs: {
         Row: {
           client_id: string | null
@@ -4083,6 +4104,7 @@ export type Database = {
         Returns: number
       }
       check_assistant_exists: { Args: { p_email: string }; Returns: Json }
+      check_cron_failures: { Args: never; Returns: undefined }
       check_data_access_anomaly: {
         Args: {
           p_record_count: number
@@ -4091,6 +4113,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      check_email_queue_backlog: { Args: never; Returns: undefined }
       check_expiring_instagram_tokens: { Args: never; Returns: undefined }
       check_feature_access: {
         Args: { p_feature: string; p_user_id: string }
@@ -4402,6 +4425,10 @@ export type Database = {
         }
         Returns: Json
       }
+      send_invoice_email: {
+        Args: { p_template: string; p_template_data: Json; p_user_id: string }
+        Returns: undefined
+      }
       send_invoice_email_resend: {
         Args: {
           p_amount: string
@@ -4423,6 +4450,14 @@ export type Database = {
           user_id?: string
         }
         Returns: undefined
+      }
+      try_consume_ai_quota: {
+        Args: { p_endpoint: string; p_max_per_hour?: number; p_user_id: string }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
       }
       try_send_critical_alert: {
         Args: { p_cooldown?: string; p_data: Json; p_type: string }

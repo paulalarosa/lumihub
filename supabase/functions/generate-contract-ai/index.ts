@@ -1,4 +1,7 @@
 import { GoogleGenerativeAI } from 'https://esm.sh/@google/generative-ai@0.21.0'
+import { consumeAiQuota, aiQuotaResponse } from '../_shared/ai-rate-limit.ts'
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limit.ts'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,6 +65,7 @@ type Body = {
   instruction?: string
   clause_topic?: string
   prompt?: string
+  user_id?: string
 }
 
 // Strip characters that could be used to inject instructions into the prompt:
@@ -232,6 +236,22 @@ Deno.serve(async (req: Request) => {
     const body = (await req.json()) as Body
     const mode = body.mode
 
+    // Rate limit: prefere user-based quota (persistente DB-backed) quando o
+    // client manda user_id. Cai pra IP-based in-memory como defesa mínima
+    // quando user_id não vem (callers antigos). 20/hora é suficiente pra
+    // uso normal (refinos + geração) e corta loops de abuso.
+    if (body.user_id) {
+      const quota = await consumeAiQuota(body.user_id, 'generate-contract-ai', 20)
+      if (!quota.allowed) return aiQuotaResponse(quota)
+    } else {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown'
+      const limit = checkRateLimit(`generate-contract-ai:${ip}`, {
+        maxRequests: 10,
+        windowMs: 60 * 60 * 1000,
+      })
+      if (!limit.allowed) return rateLimitResponse(limit.resetAt)
+    }
+
     let finalPrompt = ''
     if (body.prompt) {
       finalPrompt = body.prompt
@@ -268,6 +288,7 @@ Deno.serve(async (req: Request) => {
 
     return json({ text: cleaned, mode })
   } catch (error) {
+    await logEdgeError('generate-contract-ai', error)
     const msg = error instanceof Error ? error.message : String(error)
     return json({ error: `Function Error: ${msg}` }, 500)
   }

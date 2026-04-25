@@ -23,10 +23,9 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { format } from 'date-fns/format'
 import { StatusBadge } from '@/components/ui/status-badge'
-import { ContractDocument } from '@/features/contracts/components/ContractDocument'
 import { ContractDialog } from '@/features/contracts/components/ContractDialog'
 import { SignatureModal } from '@/features/contracts/components/SignatureModal'
-import { PDFDownloadLink } from '@react-pdf/renderer'
+import { LazyContractPdfButton } from '@/features/contracts/components/LazyContractPdfButton'
 import { useContracts } from '@/features/contracts/hooks/useContracts'
 import { sanitizeHTML } from '@/lib/sanitize'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -216,8 +215,8 @@ export default function Contracts() {
                     </ActionButton>
                   )}
                   {contract.status === 'signed' && (
-                    <PDFDownloadLink
-                      document={<ContractDocument contract={contract} />}
+                    <LazyContractPdfButton
+                      contract={contract}
                       fileName={`contrato-${contract.title.toLowerCase().replace(/\s+/g, '-')}.pdf`}
                     >
                       {({ loading: pdfLoading }) => (
@@ -229,7 +228,7 @@ export default function Contracts() {
                           {pdfLoading ? t('contracts.actions.pdf_loading') : t('contracts.actions.download')}
                         </ActionButton>
                       )}
-                    </PDFDownloadLink>
+                    </LazyContractPdfButton>
                   )}
                   <Dialog>
                     <DialogTrigger asChild>
@@ -300,8 +299,8 @@ export default function Contracts() {
                         </div>
 
                         <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                          <PDFDownloadLink
-                            document={<ContractDocument contract={contract} />}
+                          <LazyContractPdfButton
+                            contract={contract}
                             fileName={`contrato-${contract.title.toLowerCase().replace(/\s+/g, '-')}.pdf`}
                           >
                             {({ loading: pdfLoading }) => (
@@ -313,7 +312,7 @@ export default function Contracts() {
                                 {pdfLoading ? t('contracts.actions.generating_pdf') : t('contracts.actions.download_pdf')}
                               </Button>
                             )}
-                          </PDFDownloadLink>
+                          </LazyContractPdfButton>
 
                           {contract.status !== 'signed' && (
                             <ActionButton
