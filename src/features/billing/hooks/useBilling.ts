@@ -199,6 +199,37 @@ export function useBillingUsage() {
   })
 }
 
+export function useCustomerPortal() {
+  const { user } = useAuth()
+
+  return useMutation({
+    mutationFn: async () => {
+      if (!user) throw new Error('Usuária não autenticada')
+      enforceRateLimit(`customer-portal:${user.id}`, 5, 60_000)
+      const { data, error } = await supabase.functions.invoke(
+        'create-portal-session',
+        { body: { user_id: user.id } },
+      )
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      if (!data?.url) throw new Error('URL do portal não retornada')
+      return data.url as string
+    },
+    onSuccess: (url) => {
+      window.location.href = url
+    },
+    onError: (error: Error) => {
+      if (error instanceof RateLimitError) {
+        const seconds = Math.ceil(error.retryAfterMs / 1000)
+        toast.error(`Muitas tentativas. Aguarde ${seconds}s.`)
+        return
+      }
+      logger.error(error, 'useCustomerPortal')
+      toast.error('Não foi possível abrir o portal de cobrança.')
+    },
+  })
+}
+
 export function useCancelSubscription() {
   const queryClient = useQueryClient()
   const { organizationId } = useOrganization()

@@ -5,6 +5,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4'
 import { Resend } from 'https://esm.sh/resend@2.0.0'
 
 import { Ratelimit } from 'https://esm.sh/@upstash/ratelimit@0.4.3'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 import { Redis } from 'https://esm.sh/@upstash/redis@1.22.0'
 
@@ -190,6 +191,7 @@ serve(async (req: Request) => {
       },
     )
   } catch (error: any) {
+    await logEdgeError('send-welcome-email', error)
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

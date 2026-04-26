@@ -33,6 +33,7 @@ import {
   useBillingInvoices,
   useBillingUsage,
   useCancelSubscription,
+  useCustomerPortal,
   type BillingSubscription,
   type BillingInvoice,
   type BillingUsage,
@@ -60,6 +61,7 @@ export default function BillingPage() {
   const { data: invoices = [], isLoading: invLoading } = useBillingInvoices()
   const { data: usage } = useBillingUsage()
   const cancel = useCancelSubscription()
+  const portal = useCustomerPortal()
   const [cancelDialog, setCancelDialog] = useState(false)
 
   if (subLoading || orgLoading) {
@@ -102,6 +104,10 @@ export default function BillingPage() {
               <UsageSection usage={usage} plan={subscription.planConfig} />
             )}
             <InvoicesSection invoices={invoices} loading={invLoading} />
+            <PaymentMethodSection
+              onOpenPortal={() => portal.mutate()}
+              busy={portal.isPending}
+            />
             <DangerZone
               subscription={subscription!}
               onCancel={() => setCancelDialog(true)}
@@ -520,6 +526,54 @@ async function downloadInvoicePDF(invoice: BillingInvoice) {
   link.download = `fatura-${invoice.invoice_number ?? invoice.id.slice(0, 8)}.pdf`
   link.click()
   URL.revokeObjectURL(url)
+}
+
+function PaymentMethodSection({
+  onOpenPortal,
+  busy,
+}: {
+  onOpenPortal: () => void
+  busy: boolean
+}) {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center gap-3">
+        <span className="font-mono text-[10px] text-white/40 tracking-[0.3em] uppercase">
+          Pagamento
+        </span>
+        <div className="h-px flex-1 bg-white/5" />
+      </div>
+      <div className="border border-white/10 bg-white/[0.02] p-6 flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-white/60" />
+            <p className="font-mono text-[10px] uppercase tracking-widest text-white/60">
+              Atualizar cartão · ver faturas Stripe · alterar dados de cobrança
+            </p>
+          </div>
+          <p className="text-white/40 text-sm leading-relaxed">
+            Tudo num portal seguro hospedado pelo Stripe. Você pode trocar o
+            cartão, baixar faturas históricas e atualizar endereço de cobrança.
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={onOpenPortal}
+          disabled={busy}
+          className="md:min-w-[200px]"
+        >
+          {busy ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <>
+              Abrir portal de cobrança
+              <ArrowUpRight className="w-4 h-4 ml-1" />
+            </>
+          )}
+        </Button>
+      </div>
+    </section>
+  )
 }
 
 function DangerZone({

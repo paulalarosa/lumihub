@@ -19,11 +19,19 @@ function loadEnvFile(path) {
   }
 }
 
-const envFile =
-  process.env.SITEMAP_ENV_FILE ??
-  (process.env.NODE_ENV === 'production' ? '.env.production' : '.env')
-loadEnvFile(resolve(process.cwd(), envFile))
-loadEnvFile(resolve(process.cwd(), '.env'))
+// Sitemap sempre aponta pra prod (BASE_URL hardcoded em khaoskontrol.com.br),
+// então preferimos .env.production. Cai pra .env apenas como último recurso.
+// `npm run build` não seta NODE_ENV=production antes do sitemap, e o repo
+// não tem `.env` — sem essa preferência o gerador silenciosamente skipa
+// posts/articles dinâmicos.
+const envCandidates = [
+  process.env.SITEMAP_ENV_FILE,
+  '.env.production',
+  '.env',
+].filter(Boolean)
+for (const candidate of envCandidates) {
+  loadEnvFile(resolve(process.cwd(), candidate))
+}
 
 const BASE_URL = 'https://khaoskontrol.com.br'
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL

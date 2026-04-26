@@ -192,7 +192,7 @@ export const translations = {
       },
       plans: {
         seo_title: 'Planos e Preços',
-        seo_description: 'Escolha o plano ideal para organizar sua carreira de maquiagem. A partir de R$39,92/mês. Essencial, Profissional ou Studio. 14 dias grátis.',
+        seo_description: 'Escolha o plano ideal para organizar sua carreira de maquiagem. A partir de R$31,92/mês. Essencial, Profissional ou Studio. 14 dias grátis.',
         eyebrow: 'Quanto custa continuar desorganizada?',
         title: 'Sua arte merece uma gestão à altura da sua excelência',
         subtitle: 'Cada cliente esquecido, cada contrato perdido, cada follow-up não enviado custa mais do que qualquer plano abaixo.',
@@ -434,7 +434,7 @@ export const translations = {
       },
       plans: {
         seo_title: 'Plans and Pricing',
-        seo_description: 'Choose the ideal plan to organize your makeup career. Starting at R$39.92/month. Essential, Professional or Studio. 14 days free.',
+        seo_description: 'Choose the ideal plan to organize your makeup career. Starting at R$31.92/month. Essential, Professional or Studio. 14 days free.',
         eyebrow: 'How much does it cost to stay disorganized?',
         title: 'Your art deserves management to match your excellence',
         subtitle: 'Every forgotten client, every lost contract, every unsent follow-up costs more than any plan below.',

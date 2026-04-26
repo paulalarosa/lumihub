@@ -5,6 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { visualizer } from 'rollup-plugin-visualizer'
 import { compression } from 'vite-plugin-compression2'
 import prerender from '@prerenderer/rollup-plugin'
+import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { readFileSync } from 'fs'
 
 // Versão real do package.json injetada como VITE_APP_VERSION pra
@@ -192,6 +193,22 @@ export default defineConfig(({ mode }) => ({
           }),
         ]
       : []),
+    // Sourcemaps + release tracking pro Sentry. Roda só em build prod e
+    // só se SENTRY_AUTH_TOKEN estiver no ambiente (CI/local). Sem o token
+    // o plugin é noop — não quebra build local sem credencial.
+    ...(mode === 'production' && process.env.SENTRY_AUTH_TOKEN
+      ? [
+          sentryVitePlugin({
+            org: 'khaos-kontrol',
+            project: 'khaos-kontrol-prod',
+            authToken: process.env.SENTRY_AUTH_TOKEN,
+            release: { name: `khaos-kontrol@${pkgVersion}` },
+            sourcemaps: {
+              filesToDeleteAfterUpload: ['./dist/**/*.map'],
+            },
+          }),
+        ]
+      : []),
     ...(mode === 'production' && !process.env.SKIP_PRERENDER
       ? [
           prerender({
@@ -227,7 +244,10 @@ export default defineConfig(({ mode }) => ({
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkgVersion),
   },
   build: {
-    sourcemap: mode !== 'production',
+    // 'hidden' em prod: gera .map mas omite a referência sourceMappingURL
+    // do .js, então users no browser NÃO baixam sourcemap. Os .map ficam
+    // no dist/ só pro sentryVitePlugin upload, depois são deletados.
+    sourcemap: mode === 'production' ? 'hidden' : true,
     minify: 'esbuild',
     rollupOptions: {
       output: {

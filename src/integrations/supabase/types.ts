@@ -2487,6 +2487,8 @@ export type Database = {
           max_projects_per_month: number | null
           max_team_members: number | null
           plan_type: string
+          stripe_price_id: string | null
+          stripe_price_id_yearly: string | null
         }
         Insert: {
           created_at?: string | null
@@ -2495,6 +2497,8 @@ export type Database = {
           max_projects_per_month?: number | null
           max_team_members?: number | null
           plan_type: string
+          stripe_price_id?: string | null
+          stripe_price_id_yearly?: string | null
         }
         Update: {
           created_at?: string | null
@@ -2503,6 +2507,8 @@ export type Database = {
           max_projects_per_month?: number | null
           max_team_members?: number | null
           plan_type?: string
+          stripe_price_id?: string | null
+          stripe_price_id_yearly?: string | null
         }
         Relationships: []
       }

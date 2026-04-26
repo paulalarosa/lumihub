@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import { logger } from '@/services/logger'
+import { analyticsService } from '@/services/analytics.service'
 
 export const usePlanAccess = () => {
   const { user } = useAuth()
@@ -92,13 +93,26 @@ export const usePlanAccess = () => {
   }
 
   const createCheckoutSession = useMutation({
-    mutationFn: async (planType: string) => {
+    mutationFn: async (input: string | { planType: string; cycle?: 'monthly' | 'annual' }) => {
+      const planType = typeof input === 'string' ? input : input.planType
+      const cycle =
+        typeof input === 'string' ? 'monthly' : input.cycle ?? 'monthly'
+
+      // Funnel event: usuária clicou e iniciou checkout. Pareado com
+      // `subscription_completed` em CheckoutReturn (success do Stripe).
+      analyticsService.trackEvent({
+        action: 'checkout_started',
+        category: 'funnel',
+        label: `${planType}_${cycle}`,
+      })
+
       const { data, error } = await supabase.functions.invoke(
         'create-checkout-session',
         {
           body: {
             plan_type: planType,
             user_id: user?.id,
+            cycle,
           },
         },
       )

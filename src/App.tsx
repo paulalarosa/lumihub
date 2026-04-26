@@ -26,7 +26,7 @@ import { PageLoader } from '@/components/ui/page-loader'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import { PageErrorFallback } from '@/components/ui/page-error-fallback'
 import { SkipToContent } from '@/components/a11y/SkipToContent'
-import { InstallPrompt } from '@/components/pwa/InstallPrompt'
+import { PlanGate } from '@/components/access/PlanGate'
 const CanvasPanel = lazy(() =>
   import('./components/ai/canvas/CanvasPanel').then((m) => ({
     default: m.CanvasPanel,
@@ -207,7 +207,6 @@ const App = () => {
     <BrowserRouter>
       <Toaster />
       <Sonner />
-      <InstallPrompt />
       <ScrollToTop />
       <GoogleAnalytics />
       <AuthProvider>
@@ -290,6 +289,10 @@ const App = () => {
                           path="/register"
                           element={<LazyPage component={Register} />}
                         />
+                        <Route
+                          path="/cadastro"
+                          element={<LazyPage component={Register} />}
+                        />
                         <Route path="/auth">
                           <Route
                             index
@@ -333,7 +336,11 @@ const App = () => {
                             />
                             <Route
                               path="/analytics"
-                              element={<LazyPage component={Analytics} />}
+                              element={
+                                <PlanGate plan="profissional">
+                                  <LazyPage component={Analytics} />
+                                </PlanGate>
+                              }
                             />
 
                             <Route element={<AdminRoute />}>
@@ -402,19 +409,35 @@ const App = () => {
                             />
                             <Route
                               path="/automacoes"
-                              element={<LazyPage component={WorkflowsPage} />}
+                              element={
+                                <PlanGate plan="profissional">
+                                  <LazyPage component={WorkflowsPage} />
+                                </PlanGate>
+                              }
                             />
                             <Route
                               path="/billing"
                               element={<LazyPage component={BillingPage} />}
                             />
                             <Route
+                              path="/configuracoes/assinatura"
+                              element={<LazyPage component={BillingPage} />}
+                            />
+                            <Route
                               path="/assistentes"
-                              element={<LazyPage component={AssistantsPage} />}
+                              element={
+                                <PlanGate plan="studio">
+                                  <LazyPage component={AssistantsPage} />
+                                </PlanGate>
+                              }
                             />
                             <Route
                               path="/rede"
-                              element={<LazyPage component={NetworkPage} />}
+                              element={
+                                <PlanGate plan="studio">
+                                  <LazyPage component={NetworkPage} />
+                                </PlanGate>
+                              }
                             />
                             <Route
                               path="/meus-reforcos"
@@ -428,12 +451,18 @@ const App = () => {
                             />
                             <Route
                               path="/funil"
-                              element={<LazyPage component={SalesPipeline} />}
+                              element={
+                                <PlanGate plan="profissional">
+                                  <LazyPage component={SalesPipeline} />
+                                </PlanGate>
+                              }
                             />
                             <Route
                               path="/integracoes"
                               element={
-                                <LazyPage component={IntegrationsPage} />
+                                <PlanGate plan="studio">
+                                  <LazyPage component={IntegrationsPage} />
+                                </PlanGate>
                               }
                             />
                             <Route
@@ -442,7 +471,11 @@ const App = () => {
                             />
                             <Route
                               path="/marketing"
-                              element={<LazyPage component={Marketing} />}
+                              element={
+                                <PlanGate plan="profissional">
+                                  <LazyPage component={Marketing} />
+                                </PlanGate>
+                              }
                             />
                           </Route>
                         </Route>
@@ -451,7 +484,11 @@ const App = () => {
                         <Route element={<ProtectedRoute />}>
                           <Route
                             path="/assistant"
-                            element={<AssistantLayout />}
+                            element={
+                              <PlanGate plan="profissional">
+                                <AssistantLayout />
+                              </PlanGate>
+                            }
                           >
                             <Route
                               path="dashboard"

@@ -11,27 +11,9 @@ export interface BillingHistoryItem {
 }
 
 export const BillingService = {
-  async createCheckoutSession(
-    priceId: string,
-  ): Promise<{ sessionId: string; url: string }> {
-    const { data, error } = await supabase.functions.invoke(
-      'create-checkout-session',
-      {
-        body: { priceId },
-      },
-    )
-
-    if (error) throw error
-    return data
-  },
-
-  async cancelSubscription(subscriptionId: string): Promise<void> {
-    const { error } = await supabase.functions.invoke('cancel-subscription', {
-      body: { subscriptionId },
-    })
-
-    if (error) throw error
-  },
+  // createCheckoutSession e cancelSubscription removidos (eram órfãos
+  // com payload desalinhado da edge). Os callers reais vivem em
+  // usePlanAccess (checkout) e useBilling/useCancelSubscription (cancel).
 
   async getBillingHistory(): Promise<BillingHistoryItem[]> {
     const { data, error } = await supabase.functions.invoke('get-invoices')

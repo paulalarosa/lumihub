@@ -140,6 +140,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       source: 'stripe_webhook',
     })
     .then(() => undefined, () => undefined)
+
+  // Email de boas-vindas pós-checkout (template específico por plano).
+  // Fire-and-forget: falha aqui não pode reverter checkout. logEdgeError
+  // dentro da edge cuida do alerta se falhar.
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    await fetch(`${supabaseUrl}/functions/v1/send-subscription-welcome`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${serviceRole}`,
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        plan_type: planType,
+        trial_days: 14,
+      }),
+    })
+  } catch {
+    // engole — system_logs já recebe via logEdgeError dentro do edge
+  }
 }
 
 async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {

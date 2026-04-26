@@ -572,8 +572,8 @@
                 "contracts": "Digital signature contracts",
                 "portal": "Exclusive bridal portal"
             },
-            "cta_start": "Start free for 14 days",
-            "cta_how_it_works": "See how it works"
+            "cta_start": "Professionalize my agenda",
+            "cta_how_it_works": "See it in 90 seconds"
         },
         "stats": {
             "clients": "ACTIVE CLIENTS",
@@ -615,8 +615,8 @@
             "eyebrow": "Every week without a system",
             "title": "You lose clients who never come back.",
             "subtitle": "Professionals who use Khaos Kontrol close more contracts, never forget a follow-up, and have clients who refer.",
-            "cta": "Start free for 14 days",
-            "disclaimer": "No credit card required. Cancel anytime."
+            "cta": "I want to stop losing brides",
+            "disclaimer": "14 days free · no credit card · cancel in 2 clicks"
         }
     },
     "plans": {
@@ -654,8 +654,8 @@
             "desc": "KHAOS KONTROL is a high-performance management platform dedicated to transforming your digital operations into reality."
         },
         "cta": {
-            "choose_plan": "Choose Plan",
-            "contact": "Contact Us"
+            "choose_plan": "I want my 14-day trial",
+            "contact": "Talk to the team"
         },
         "services": {
             "calendar": {

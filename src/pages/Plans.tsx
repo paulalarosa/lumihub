@@ -1,26 +1,56 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Check, ArrowRight, Shield, Clock, Star } from 'lucide-react'
+import { Check, ArrowRight, Shield, Clock, Star, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Link, useNavigate } from 'react-router-dom'
 import SEOHead from '@/components/seo/SEOHead'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useLanguage } from '@/hooks/useLanguage'
+import { useAuth } from '@/hooks/useAuth'
+import { usePlanAccess } from '@/hooks/usePlanAccess'
 
 export default function Plans() {
   const { t } = useLanguage()
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly')
   const navigate = useNavigate()
   const { trackSubscription, trackCTAClick } = useAnalytics()
+  const { user } = useAuth()
+  const { createCheckoutSession } = usePlanAccess()
+  const [pendingPlanId, setPendingPlanId] = useState<string | null>(null)
+
+  // Auto-checkout: usuário veio de /cadastro?plan=X, completou signup +
+  // confirmou email + voltou aqui logado. Dispara o checkout sem
+  // precisar clicar de novo. Limpa o intent assim que dispara — se
+  // falhar, o cancelUrl traz ela pra /planos e ela escolhe manual.
+  useEffect(() => {
+    if (!user) return
+    const pending = localStorage.getItem('pending_checkout_plan')
+    if (!pending) return
+    if (pendingPlanId || createCheckoutSession.isPending) return
+    const pendingCycle =
+      (localStorage.getItem('pending_checkout_cycle') as
+        | 'monthly'
+        | 'annual'
+        | null) ?? 'monthly'
+    localStorage.removeItem('pending_checkout_plan')
+    localStorage.removeItem('pending_checkout_cycle')
+    setPendingPlanId(pending)
+    createCheckoutSession.mutate(
+      { planType: pending, cycle: pendingCycle },
+      { onSettled: () => setPendingPlanId(null) },
+    )
+  }, [user, createCheckoutSession, pendingPlanId])
 
   const plans = [
     {
       id: 'essencial',
       name: 'Essencial',
       tagline: 'Para quem está começando a profissionalizar',
-      monthlyPrice: 49.9,
-      annualPrice: 39.92,
+      monthlyPrice: 39.9,
+      annualPrice: 31.92,
       valueAnchor: 'Menos que um almoço por semana',
+      cta: 'Profissionalizar minha agenda',
+      ctaSub: '14 dias grátis · sem cartão · cancele em 2 cliques',
       features: [
         { text: 'Até 10 clientes ativos', highlight: false },
         { text: 'Agenda integrada com Google Calendar', highlight: false },
@@ -34,9 +64,11 @@ export default function Plans() {
       id: 'profissional',
       name: 'Profissional',
       tagline: 'Para quem já vive de maquiagem e quer escalar',
-      monthlyPrice: 99.9,
-      annualPrice: 79.92,
+      monthlyPrice: 89.9,
+      annualPrice: 71.92,
       valueAnchor: 'Paga-se com 1 cliente extra por mês',
+      cta: 'Quero faturar mais este mês',
+      ctaSub: '14 dias grátis · upgrade automático quando crescer',
       highlighted: true,
       features: [
         { text: 'Clientes ilimitados', highlight: true },
@@ -53,9 +85,11 @@ export default function Plans() {
       id: 'studio',
       name: 'Studio',
       tagline: 'Para equipes e quem tem assistentes',
-      monthlyPrice: 199.9,
-      annualPrice: 159.92,
+      monthlyPrice: 149.9,
+      annualPrice: 119.92,
       valueAnchor: 'O custo de 1 hora de trabalho por mês',
+      cta: 'Liderar minha equipe agora',
+      ctaSub: '14 dias grátis · suporte prioritário desde o dia 1',
       features: [
         { text: 'Tudo do Profissional +', highlight: false },
         { text: 'Gestão de equipe completa', highlight: true },
@@ -82,7 +116,7 @@ export default function Plans() {
         keywords="preço sistema maquiadora, plano CRM beauty, quanto custa sistema gestão maquiagem, software maquiadora preço"
         url="https://khaoskontrol.com.br/planos"
         type="product"
-        productPrice={39.92}
+        productPrice={31.92}
         productCurrency="BRL"
         productAvailability="InStock"
         breadcrumbs={[
@@ -262,16 +296,48 @@ export default function Plans() {
                       variant={plan.highlighted ? 'primary' : 'outline'}
                       size="lg"
                       className="w-full group rounded-none"
+                      disabled={
+                        pendingPlanId === plan.id || createCheckoutSession.isPending
+                      }
                       onClick={() => {
-                        const p = billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice
-                        trackSubscription('select_plan', plan.name, p)
-                        trackCTAClick('plan_select', 'pricing_page', `/cadastro?plan=${plan.id}`)
-                        navigate(`/cadastro?plan=${plan.id}&cycle=${billingCycle}`)
+                        const price =
+                          billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice
+                        trackSubscription('select_plan', plan.name, price)
+                        trackCTAClick(
+                          'plan_select',
+                          'pricing_page',
+                          user ? 'checkout' : `/cadastro?plan=${plan.id}`,
+                        )
+                        if (user) {
+                          // User logado: invoca checkout direto (Stripe-hosted).
+                          // onSuccess do hook redireciona pra session.url.
+                          setPendingPlanId(plan.id)
+                          createCheckoutSession.mutate(
+                            { planType: plan.id, cycle: billingCycle },
+                            { onSettled: () => setPendingPlanId(null) },
+                          )
+                        } else {
+                          // Visitante: cadastra primeiro, plan param viaja
+                          // pra abrir checkout depois do signup.
+                          navigate(`/cadastro?plan=${plan.id}&cycle=${billingCycle}`)
+                        }
                       }}
                     >
-                      {t('plans.start_free')}
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      {pendingPlanId === plan.id ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Abrindo checkout...
+                        </>
+                      ) : (
+                        <>
+                          {plan.cta}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
                     </Button>
+                    <p className="text-[11px] text-white/40 text-center mt-3 font-mono uppercase tracking-wider">
+                      {plan.ctaSub}
+                    </p>
                   </motion.div>
                 )
               })}

@@ -572,8 +572,8 @@
                 "contracts": "Contratos com assinatura digital",
                 "portal": "Portal exclusivo para noivas"
             },
-            "cta_start": "Começar grátis por 14 dias",
-            "cta_how_it_works": "Ver como funciona"
+            "cta_start": "Profissionalizar minha agenda",
+            "cta_how_it_works": "Ver em 90 segundos"
         },
         "stats": {
             "clients": "Clientes Ativos",
@@ -615,8 +615,8 @@
             "eyebrow": "A cada semana sem sistema",
             "title": "Você perde clientes que nunca mais voltam.",
             "subtitle": "Profissionais que usam o Khaos Kontrol fecham mais contratos, nunca esquecem um follow-up, e têm clientes que indicam.",
-            "cta": "Começar grátis por 14 dias",
-            "disclaimer": "Sem cartão de crédito. Cancele quando quiser."
+            "cta": "Quero parar de perder noivas",
+            "disclaimer": "14 dias grátis · sem cartão · cancele em 2 cliques"
         }
     },
     "plans": {
@@ -654,8 +654,8 @@
             "desc": "O KHAOS KONTROL é uma plataforma de gestão de alta performance dedicada a transformar suas operações digitais em realidade."
         },
         "cta": {
-            "choose_plan": "Escolher Plano",
-            "contact": "Fale Conosco"
+            "choose_plan": "Quero meu trial de 14 dias",
+            "contact": "Falar com a equipe"
         },
         "services": {
             "calendar": {

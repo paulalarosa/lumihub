@@ -77,8 +77,12 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npm run dev -- --port 5174',
+    command: 'npm run dev -- --port 5174 --strictPort',
     url: 'http://localhost:5174',
     reuseExistingServer: !process.env.CI,
+    // Vite com SWC + Sentry plugin demora ~12s no laptop; +reserva pra CI
+    timeout: 120_000,
+    stdout: 'ignore',
+    stderr: 'pipe',
   },
 })

@@ -1,7 +1,7 @@
 {
   "name": "khaos-kontrol-system",
   "private": true,
-  "version": "5.8.18",
+  "version": "5.8.19",
   "type": "module",
   "engines": {
     "node": ">=18.0.0",
@@ -154,6 +154,7 @@
     "@playwright/test": "^1.58.0",
     "@prerenderer/renderer-puppeteer": "^1.2.4",
     "@prerenderer/rollup-plugin": "^0.3.12",
+    "@sentry/vite-plugin": "^5.2.0",
     "@storybook/addon-a11y": "^10.2.3",
     "@storybook/addon-docs": "^10.2.3",
     "@storybook/addon-links": "^10.2.3",

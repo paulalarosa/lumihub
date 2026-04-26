@@ -3,6 +3,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { fetchWithRetry } from '../_shared/retry.ts'
 import { Logger } from '../_shared/logger.ts'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -530,6 +531,7 @@ serve(async (req: Request) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (error) {
+    await logEdgeError('google-calendar-sync', error)
     const errorMessage =
       error instanceof Error ? error.message : 'Unknown error'
     return new Response(JSON.stringify({ error: errorMessage }), {

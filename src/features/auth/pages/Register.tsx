@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import AuthLayout from '@/components/ui/layout/AuthLayout'
 import { Button } from '@/components/ui/button'
@@ -25,9 +25,17 @@ const registerSchema = z.object({
 
 export default function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { signUp, signInWithGoogle } = useAuth()
   const { toast } = useToast()
   const { trackAuth, trackConversion, trackFormSubmit } = useAnalytics()
+
+  // Quando o usuário chega aqui via /planos (clicou em "Assinar X"), o
+  // plan_type vem no query param. Após o signup ele tem que confirmar email
+  // antes de logar — então persistimos a intenção em localStorage. O
+  // Plans.tsx detecta a intent depois e dispara o checkout.
+  const intendedPlan = searchParams.get('plan')
+  const intendedCycle = searchParams.get('cycle')
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -70,12 +78,19 @@ export default function Register() {
         currency: 'BRL',
       })
       trackFormSubmit('register', true)
+      if (intendedPlan) {
+        localStorage.setItem('pending_checkout_plan', intendedPlan)
+        if (intendedCycle === 'monthly' || intendedCycle === 'annual') {
+          localStorage.setItem('pending_checkout_cycle', intendedCycle)
+        }
+      }
       toast({
         title: 'Bem-vinda ao Khaos Kontrol',
-        description:
-          'Enviamos um email pra confirmar sua conta. Verifique sua caixa de entrada (e o spam) nos próximos minutos.',
+        description: intendedPlan
+          ? 'Confirmação por email enviada. Após confirmar, abriremos o checkout do plano automaticamente.'
+          : 'Enviamos um email pra confirmar sua conta. Verifique sua caixa de entrada (e o spam) nos próximos minutos.',
       })
-      navigate('/dashboard')
+      navigate(intendedPlan ? '/planos' : '/dashboard')
     }
     setIsSubmitting(false)
   }

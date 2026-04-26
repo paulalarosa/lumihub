@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/react'
 // fica silencioso e dá impressão que está funcionando. Com o aviso,
 // fica óbvio que precisa configurar.
 if (import.meta.env.PROD && !import.meta.env.VITE_SENTRY_DSN) {
-  // eslint-disable-next-line no-console
   console.warn(
     '[Sentry] VITE_SENTRY_DSN ausente em produção — erros não estão sendo capturados',
   )

@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { logEdgeError } from '../_shared/log-error.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -178,7 +179,8 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     )
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    await logEdgeError('send-marketing-campaign', error)
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
