@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Database } from '@/integrations/supabase/types'
 import { ProjectService } from '../api/projectService'
@@ -7,15 +8,25 @@ import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { sanitizeFormData } from '@/lib/security'
 import { analyticsService } from '@/services/analytics.service'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  ensureWithinUsageLimit,
+  UsageLimitError,
+  showUsageLimitToast,
+} from '@/lib/usageLimit'
 
 export function useProjectMutations() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
   const createProjectMutation = useMutation({
     mutationFn: async (
       projectData: Database['public']['Tables']['projects']['Insert'],
     ) => {
+      if (user) await ensureWithinUsageLimit(user.id, 'projects')
+
       const cleanData = sanitizeFormData(
         projectData as Record<string, unknown>,
       ) as Database['public']['Tables']['projects']['Insert']
@@ -38,6 +49,12 @@ export function useProjectMutations() {
       toast({ title: 'Projeto criado!' })
     },
     onError: (error) => {
+      if (error instanceof UsageLimitError) {
+        showUsageLimitToast(error, () =>
+          navigate('/configuracoes/assinatura'),
+        )
+        return
+      }
       logger.error(error, 'useProjectMutations.createProject')
       toast({ title: 'Erro ao criar projeto', variant: 'destructive' })
     },

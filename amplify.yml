@@ -6,7 +6,10 @@ frontend:
         - npm ci
     build:
       commands:
-        - env | grep -e VITE_ >> .env
+        # `grep` retorna exit 1 quando nenhuma var VITE_ existe, o que mata
+        # o build no Amplify. `|| true` segura — se não houver VITE_, o
+        # arquivo .env fica como está (já existe .env.production no repo).
+        - env | grep -e VITE_ >> .env || true
         - npm run build
   artifacts:
     baseDirectory: dist

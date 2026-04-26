@@ -5,15 +5,25 @@ test.describe('Auth Flows', () => {
     await page.goto('/')
     await expect(page).toHaveTitle(/Khaos Kontrol/i)
     await expect(page.locator('text=Gestão profissional').first()).toBeVisible()
+    // CTAs atuais (verbo primeira pessoa): "Profissionalizar minha agenda",
+    // "Quero parar de perder noivas". Mantém fallback "Começar" pra
+    // regressões caso voltem ao copy genérico.
     await expect(
-      page.getByRole('button', { name: /Começar grátis/i }).first(),
+      page
+        .getByRole('button', {
+          name: /Profissionalizar|Quero parar|Começar/i,
+        })
+        .first(),
     ).toBeVisible()
   })
 
   test('CTA navigates to register', async ({ page }) => {
     await page.goto('/')
-    // Use first() to avoid strict mode violation if multiple CTAs exist
-    const cta = page.getByRole('button', { name: /Começar grátis/i }).first()
+    const cta = page
+      .getByRole('button', {
+        name: /Profissionalizar|Quero parar|Começar/i,
+      })
+      .first()
     await cta.scrollIntoViewIfNeeded()
     await cta.click({ force: true })
     await expect(page).toHaveURL(/cadastro|register/i)

@@ -32,6 +32,19 @@ vi.mock('@/services/analytics.service', () => ({
   analyticsService: { trackEvent: (e: unknown) => analyticsSpy(e) },
 }))
 
+const navigateSpy = vi.fn()
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => navigateSpy,
+}))
+
+vi.mock('@/hooks/useAuth', () => ({
+  useAuth: () => ({ user: { id: 'test-user-id' } }),
+}))
+
+vi.mock('sonner', () => ({
+  toast: { error: vi.fn() },
+}))
+
 vi.mock('@/integrations/supabase/client', () => ({
   supabase: {
     functions: {
@@ -44,6 +57,11 @@ vi.mock('@/integrations/supabase/client', () => ({
           return Promise.resolve({ error: null })
         },
       }),
+    }),
+    // RPC default: allowed=true (limite não bloqueia tests existentes)
+    rpc: vi.fn().mockResolvedValue({
+      data: { allowed: true, used: 0, limit: 10, unlimited: false },
+      error: null,
     }),
   },
 }))

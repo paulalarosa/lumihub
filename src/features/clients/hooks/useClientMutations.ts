@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
 import { Database } from '@/integrations/supabase/types'
 import { ClientService } from '../api/clientService'
@@ -6,15 +7,25 @@ import { QUERY_KEYS } from '@/constants/queryKeys'
 import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { analyticsService } from '@/services/analytics.service'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  ensureWithinUsageLimit,
+  UsageLimitError,
+  showUsageLimitToast,
+} from '@/lib/usageLimit'
 
 export function useClientMutations() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const navigate = useNavigate()
+  const { user } = useAuth()
 
   const createMutation = useMutation({
     mutationFn: async (
       clientData: Database['public']['Tables']['wedding_clients']['Insert'],
     ) => {
+      if (user) await ensureWithinUsageLimit(user.id, 'clients')
+
       const newClient = await ClientService.create(clientData)
 
       if (clientData.is_bride && newClient && 'id' in newClient) {
@@ -55,6 +66,12 @@ export function useClientMutations() {
       toast({ title: 'Cliente adicionado!' })
     },
     onError: (error) => {
+      if (error instanceof UsageLimitError) {
+        showUsageLimitToast(error, () =>
+          navigate('/configuracoes/assinatura'),
+        )
+        return
+      }
       logger.error(error, 'useClientMutations.create')
       toast({
         title: 'Erro ao adicionar cliente',

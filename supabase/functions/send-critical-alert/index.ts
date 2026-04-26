@@ -83,6 +83,19 @@ serve(async (req) => {
   }
 
   try {
+    // Shared secret check. A função SQL try_send_critical_alert manda esse
+    // header pra autenticar a chamada interna (de pg_net). Sem isso a
+    // edge ficava com JWT verification e o trigger nunca conseguia
+    // chamar — todos os alertas falhavam silenciosamente.
+    const expectedSecret = Deno.env.get('ALERT_SECRET')
+    const providedSecret = req.headers.get('x-alert-secret')
+    if (!expectedSecret) {
+      return json({ error: 'ALERT_SECRET not configured' }, 500)
+    }
+    if (providedSecret !== expectedSecret) {
+      return json({ error: 'Invalid alert secret' }, 401)
+    }
+
     const apiKey = Deno.env.get('RESEND_API_KEY')
     if (!apiKey) return json({ error: 'RESEND_API_KEY not configured' }, 500)
 

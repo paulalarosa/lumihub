@@ -25,6 +25,26 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: err.message }), { status: 400 })
   }
 
+  // Idempotency: Stripe reenvia o mesmo event.id em retries (timeout/erro).
+  // Tenta INSERT — UNIQUE conflict (23505) significa que já processamos.
+  // Retorna 200 pra Stripe parar de retentar, sem reexecutar o handler.
+  // Outros erros: log + segue (fail-open — não bloquear webhook real por
+  // problema infra do dedup).
+  const { error: dedupErr } = await supabase
+    .from('processed_stripe_events')
+    .insert({ event_id: event.id, event_type: event.type })
+
+  if (dedupErr) {
+    if (dedupErr.code === '23505') {
+      return new Response(
+        JSON.stringify({ received: true, deduped: true }),
+        { status: 200 },
+      )
+    }
+    // Não bloqueia — só loga
+    console.warn('[stripe-webhook] dedup insert failed', dedupErr)
+  }
+
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
