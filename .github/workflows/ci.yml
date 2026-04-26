@@ -109,3 +109,30 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 14
+
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    needs: lint-and-build
+    # Roda só em PR pra evitar custo em main (push). Reutiliza o dist
+    # do job lint-and-build pra não rebuildar.
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          configPath: ./.lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        # continue-on-error pra não bloquear merge enquanto Performance
+        # baseline está em 62. Quando estiver verde, remover o flag e
+        # virar gate real.
+        continue-on-error: true

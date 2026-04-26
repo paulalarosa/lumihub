@@ -726,5 +726,176 @@
         "desc": "High-performance management for professionals who seek the extraordinary.",
         "copyright": "© {{year}} Khaos Kontrol · All rights reserved",
         "global_ops": "Global Operations"
+    },
+    "header_contact": "CONTACT",
+    "khaos_pro_title": "KHAOS PRO",
+    "khaos_pro_subtitle": "EXCELLENCE IN EVERY DETAIL",
+    "btn_new_event": "NEW_EVENT",
+    "btn_new_client": "REGISTER_CLIENT",
+    "btn_new_project": "CREATE_PROJECT",
+    "btn_new_contract": "GENERATE_CONTRACT",
+    "btn_new_transaction": "NEW_TRANSACTION",
+    "btn_add_service": "ADD_SERVICE",
+    "btn_mark_read": "MARK_READ",
+    "lbl_notifications": "NOTIFICATIONS",
+    "sidebar_dashboard": "DASHBOARD",
+    "sidebar_agenda": "CALENDAR",
+    "sidebar_clients": "CLIENTS",
+    "sidebar_projects": "PROJECTS",
+    "sidebar_marketing": "MARKETING",
+    "sidebar_contracts": "CONTRACTS",
+    "sidebar_financial": "FINANCIAL",
+    "sidebar_services": "SERVICES",
+    "sidebar_settings": "SETTINGS",
+    "sidebar_admin": "ADMIN",
+    "sidebar_logout": "LOGOUT",
+    "sidebar_menu_main": "MAIN MENU",
+    "sidebar_menu_admin": "ADMINISTRATION",
+    "landing": {
+        "hero": {
+            "badge": "Used by +200 beauty professionals",
+            "title_line1": "Professional management",
+            "title_line2": "for those who transform beauty into business.",
+            "subtitle": "Khaos Kontrol organizes your clients, contracts, schedule and finances in one place — so you can focus on what you do best.",
+            "cta_primary": "Start free for 14 days",
+            "cta_secondary": "See how it works",
+            "scroll": "Scroll",
+            "features": {
+                "calendar": "Google integrated calendar",
+                "contracts": "Contracts with digital signature",
+                "portal": "Exclusive portal for brides"
+            }
+        },
+        "cta": {
+            "title": "You lose clients who",
+            "title_highlight": "never come back.",
+            "subtitle": "Professionals using Khaos Kontrol close more contracts, never forget a follow-up, and have clients who refer others.",
+            "button": "Start free for 14 days",
+            "no_card": "No credit card required. Cancel anytime."
+        },
+        "stats": {
+            "clients": "ACTIVE_CLIENTS",
+            "contracts": "CONTRACTS_GENERATED",
+            "uptime": "AVAILABILITY",
+            "projects": "COMPLETED_PROJECTS"
+        },
+        "process": {
+            "title": "Processes",
+            "title_highlight1": "Simple",
+            "title_line2": "For Empires",
+            "title_highlight2": "Real",
+            "subtitle": "WE AUTOMATE WHAT IS MECHANICAL SO YOU CAN FOCUS ON WHAT IS ARTISTIC.",
+            "highlight_title": "Save 15h+ weekly",
+            "highlight_desc": "Eliminate repetitive tasks with our operational AI and intelligent contract automations.",
+            "feature1_title": "Analytics Noir",
+            "feature1_desc": "High-contrast dashboard with vital career metrics in real time.",
+            "feature2_title": "Legal Kontrol",
+            "feature2_desc": "Contract generator with legal validity and integrated digital signature.",
+            "feature3_title": "Sales Pro",
+            "feature3_desc": "Minimalist CRM focused on converting leads into recurring revenue."
+        },
+        "testimonials": {
+            "role1": "Bridal Makeup Specialist",
+            "content1": "I was able to completely professionalize my business. My clients love the exclusive portal!",
+            "role2": "Makeup Artist & Beauty Artist",
+            "content2": "The payment system changed everything! Now I get paid instantly without complications.",
+            "role3": "Hair Stylist",
+            "content3": "The organization that KHAOS KONTROL brought to my routine is indescribable. Highly recommend!",
+            "role4": "Nail Designer",
+            "content4": "I finally have total control of my finances and schedule in one place."
+        },
+        "footer": {
+            "cta_title": "Ready to get started?",
+            "cta_subtitle": "Join professionals who have already transformed their operations with KONTROL.",
+            "cta_button": "View Plans",
+            "platform": "Platform",
+            "tools": "Tools",
+            "support": "Support",
+            "resources": "Resources",
+            "plans": "Plans",
+            "blog": "Blog",
+            "contact": "Contact",
+            "smart_calendar": "Smart Calendar",
+            "client_management": "Client Management",
+            "digital_contracts": "Digital Contracts",
+            "help_center": "Help Center",
+            "whatsapp": "WhatsApp",
+            "email": "Email",
+            "brand_tagline": "High-performance management for professionals seeking the extraordinary.",
+            "copyright": "All rights reserved",
+            "global_ops": "Global Operations"
+        },
+        "resources": {
+            "seo_title": "Resources | Everything Khaos Kontrol Offers",
+            "seo_description": "Smart schedule, digital contracts, bride portal, financial management, team of assistants and more. Meet all resources.",
+            "eyebrow": "SYSTEM CAPABILITIES",
+            "title": "DESIGNED FOR HIGH PERFORMANCE",
+            "subtitle": "Unlock your digital potential with KHAOS KONTROL. We offer complete solutions in management, scheduling, contracts, and analytics to elevate your professional presence.",
+            "choose_plan": "Choose Plan",
+            "contact_us": "Contact Us",
+            "stats": {
+                "projects": "Completed Projects",
+                "partners": "Global Partners",
+                "offices": "Offices"
+            },
+            "about_eyebrow": "About",
+            "about_title": "About the platform",
+            "about_description": "KHAOS KONTROL is a high-performance management platform dedicated to transforming your digital operations into reality. With a focus on creativity and innovation, we specialize in creating solutions that capture audiences and generate tangible results in an extremely competitive market.\n\nOur ecosystem was meticulously designed for beauty professionals who do not compromise on a luxurious aesthetic and relentless performance. From the moment of scheduling to analytical profit management, our fluid and intuitive interface ensures you remain focused exclusively on your art.",
+            "features_title": "Our Resources",
+            "features_subtitle": "Explore our arsenal of tools, designed to elevate your digital presence and drive results.",
+            "special_offer_eyebrow": "Special Offer",
+            "special_offer_title": "Special Offer for New Clients",
+            "special_offer_description": "We are offering special conditions for new professionals. Elevate your business with our personalized solutions.",
+            "start_now": "Start"
+        },
+        "plans": {
+            "seo_title": "Plans and Pricing",
+            "seo_description": "Choose the ideal plan to organize your makeup career. Starting at R$31.92/month. Essential, Professional or Studio. 14 days free.",
+            "eyebrow": "How much does it cost to stay disorganized?",
+            "title": "Your art deserves management to match your excellence",
+            "subtitle": "Every forgotten client, every lost contract, every unsent follow-up costs more than any plan below.",
+            "monthly": "Monthly",
+            "annual": "Annual",
+            "save": "Save R$ {{savings}}/year",
+            "start_free": "Start 14 days free trial",
+            "footer": {
+                "trial": "14 days free",
+                "trial_desc": "Try everything with no commitment. No credit card required.",
+                "cancel": "Cancel anytime",
+                "cancel_desc": "No fine, no bureaucracy. 2 clicks and done.",
+                "support": "Human support",
+                "support_desc": "Not a chatbot. Talk to someone who understands the market."
+            },
+            "social_proof": "More than 200 professionals already organize their careers with Khaos Kontrol."
+        },
+        "blog": {
+            "seo_title": "Blog | Tips for Professional Makeup Artists",
+            "seo_description": "Articles about management, makeup trends, business tips and organization for beauty professionals.",
+            "eyebrow": "EDITORIAL DEPARTMENT",
+            "title": "JOURNAL",
+            "subtitle": "Insights, trends and guides for beauty professionals seeking excellence.",
+            "featured": "Featured",
+            "read_more": "Read more",
+            "back": "Back to Journal"
+        },
+        "contact": {
+            "seo_title": "Contact | Talk to KHAOS KONTROL",
+            "seo_description": "Contact us for support, sales questions or partnerships.",
+            "eyebrow": "RELATIONSHIP DEPARTMENT",
+            "title": "LET'S TALK",
+            "subtitle": "Ready to scale your business? Our team is ready to help you implement the best management in the market.",
+            "form": {
+                "name": "Full name",
+                "email": "Business email",
+                "whatsapp": "WhatsApp",
+                "message": "Your message",
+                "submit": "Send message"
+            },
+            "info": {
+                "office": "Headquarters",
+                "email": "Email",
+                "team": "Team"
+            }
+        }
     }
 }

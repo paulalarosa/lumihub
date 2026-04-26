@@ -39,6 +39,35 @@ export async function consumeAiQuota(
   return data[0] as QuotaResult
 }
 
+// Variante para endpoints públicos (sem auth) — chave é text (IP, etc),
+// não uuid. Usada pelo sales-assistant.
+export async function consumePublicAiQuota(
+  identifier: string,
+  endpoint: string,
+  maxPerHour = 50,
+): Promise<QuotaResult> {
+  const sb = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+  )
+
+  const { data, error } = await sb.rpc('try_consume_public_ai_quota', {
+    p_identifier: identifier,
+    p_endpoint: endpoint,
+    p_max_per_hour: maxPerHour,
+  })
+
+  if (error || !data || !Array.isArray(data) || data.length === 0) {
+    return {
+      allowed: true,
+      remaining: maxPerHour,
+      reset_at: new Date(Date.now() + 3600 * 1000).toISOString(),
+    }
+  }
+
+  return data[0] as QuotaResult
+}
+
 export function aiQuotaResponse(quota: QuotaResult): Response {
   const retryAfterSec = Math.max(
     1,

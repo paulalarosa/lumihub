@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { act, renderHook } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createElement, type ReactNode } from 'react'
 
-import { useCancelSubscription } from './useBilling'
+import { useBillingInvoices, useCancelSubscription } from './useBilling'
 
 const invokeSpy = vi.fn()
 const successSpy = vi.fn()
 const errorSpy = vi.fn()
 const trackSubscriptionSpy = vi.fn()
 const enforceRateLimitSpy = vi.fn()
+const fromSpy = vi.fn()
 
 vi.mock('sonner', () => ({
   toast: {
@@ -56,6 +57,7 @@ vi.mock('@/integrations/supabase/client', () => ({
     functions: {
       invoke: (name: string, opts: unknown) => invokeSpy(name, opts),
     },
+    from: (table: string) => fromSpy(table),
   },
 }))
 
@@ -167,6 +169,82 @@ describe('useCancelSubscription', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       'Não foi possível processar a solicitação.',
+    )
+  })
+})
+
+describe('useBillingInvoices', () => {
+  beforeEach(() => {
+    fromSpy.mockReset()
+  })
+
+  // Helper: monta a chain .from('invoices').select().eq().order().limit()
+  // que useBillingInvoices percorre. limit() retorna { data, error }.
+  const mockInvoicesChain = (data: unknown, error: unknown = null) => {
+    const limit = vi.fn().mockResolvedValue({ data, error })
+    const order = vi.fn().mockReturnValue({ limit })
+    const eq = vi.fn().mockReturnValue({ order })
+    const select = vi.fn().mockReturnValue({ eq })
+    fromSpy.mockReturnValueOnce({ select })
+    return { select, eq, order, limit }
+  }
+
+  it('retorna lista de invoices com query correta', async () => {
+    const fixture = [
+      {
+        id: 'inv-1',
+        invoice_number: 'INV-2026-001',
+        amount: 99.9,
+        status: 'paid',
+        created_at: '2026-04-01T00:00:00Z',
+        due_date: '2026-04-08',
+        paid_at: '2026-04-02T10:00:00Z',
+      },
+      {
+        id: 'inv-2',
+        invoice_number: 'INV-2026-002',
+        amount: 99.9,
+        status: 'pending',
+        created_at: '2026-04-15T00:00:00Z',
+        due_date: '2026-04-22',
+        paid_at: null,
+      },
+    ]
+    const chain = mockInvoicesChain(fixture)
+
+    const { result } = renderHook(() => useBillingInvoices(), {
+      wrapper: wrapper(),
+    })
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+    expect(fromSpy).toHaveBeenCalledWith('invoices')
+    expect(chain.select).toHaveBeenCalledWith(
+      'id, invoice_number, amount, status, created_at, due_date, paid_at',
+    )
+    expect(chain.eq).toHaveBeenCalledWith('user_id', 'org-1')
+    expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
+    expect(chain.limit).toHaveBeenCalledWith(50)
+    expect(result.current.data).toEqual(fixture)
+  })
+
+  it('retorna [] quando data é null', async () => {
+    mockInvoicesChain(null)
+    const { result } = renderHook(() => useBillingInvoices(), {
+      wrapper: wrapper(),
+    })
+    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    expect(result.current.data).toEqual([])
+  })
+
+  it('propaga erro do supabase', async () => {
+    mockInvoicesChain(null, { message: 'RLS denied' })
+    const { result } = renderHook(() => useBillingInvoices(), {
+      wrapper: wrapper(),
+    })
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect((result.current.error as Error & { message: string }).message).toBe(
+      'RLS denied',
     )
   })
 })

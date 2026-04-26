@@ -54,15 +54,18 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
 
-    /* Test against mobile viewports. */
-    // {
-    //   name: 'Mobile Chrome',
-    //   use: { ...devices['Pixel 5'] },
-    // },
-    // {
-    //   name: 'Mobile Safari',
-    //   use: { ...devices['iPhone 12'] },
-    // },
+    /* Mobile viewports — só roda mobile-*.spec.ts pra evitar duplicar
+       suite inteira em 375px (boa parte dos testes valida desktop). */
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+      testMatch: /.*mobile.*\.spec\.ts/,
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+      testMatch: /.*mobile.*\.spec\.ts/,
+    },
 
     /* Test against branded browsers. */
     // {

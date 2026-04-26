@@ -2512,6 +2512,24 @@ export type Database = {
         }
         Relationships: []
       }
+      processed_stripe_events: {
+        Row: {
+          event_id: string
+          event_type: string
+          processed_at: string
+        }
+        Insert: {
+          event_id: string
+          event_type: string
+          processed_at?: string
+        }
+        Update: {
+          event_id?: string
+          event_type?: string
+          processed_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -2783,6 +2801,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      public_ai_usage_counter: {
+        Row: {
+          count: number
+          endpoint: string
+          identifier: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          endpoint: string
+          identifier: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          endpoint?: string
+          identifier?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       push_subscriptions: {
         Row: {
@@ -4459,6 +4498,18 @@ export type Database = {
       }
       try_consume_ai_quota: {
         Args: { p_endpoint: string; p_max_per_hour?: number; p_user_id: string }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          reset_at: string
+        }[]
+      }
+      try_consume_public_ai_quota: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_per_hour?: number
+        }
         Returns: {
           allowed: boolean
           remaining: number

@@ -19,6 +19,7 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:ui": "vitest --ui",
+    "lhci": "npx @lhci/cli@0.14.x autorun",
     "coverage": "vitest run --coverage",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
