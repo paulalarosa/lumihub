@@ -22,6 +22,10 @@ import {
 import SEOHead from '@/components/seo/SEOHead'
 import { NoirLayout } from '@/components/noir/NoirLayout'
 import { NoirGrain } from '@/components/noir/NoirGrain'
+import { BigTextBackdrop } from '@/components/noir/BigTextBackdrop'
+import { SplitText } from '@/components/noir/SplitText'
+import { TiltCard } from '@/components/noir/TiltCard'
+import { MagneticButton } from '@/components/noir/MagneticButton'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/hooks/useAuth'
@@ -106,6 +110,8 @@ const PLANS: Plan[] = [
   },
 ]
 
+const EASE_NOIR = [0.16, 1, 0.3, 1] as const
+
 export default function Plans() {
   const { t } = useLanguage()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('monthly')
@@ -173,7 +179,7 @@ export default function Plans() {
         ]}
       />
 
-      <NoirLayout bigText="Planos" bigTextSize={20} bigTextAnchor="top">
+      <NoirLayout>
         <HeroSection
           billingCycle={billingCycle}
           onChangeCycle={setBillingCycle}
@@ -187,8 +193,6 @@ export default function Plans() {
         />
 
         <StatsBar />
-
-        <TestimonialSpotlight />
 
         <FAQSection />
 
@@ -211,37 +215,51 @@ function HeroSection({ billingCycle, onChangeCycle }: HeroSectionProps) {
   const { t } = useLanguage()
 
   return (
-    <section className="pt-28 sm:pt-36 md:pt-44 pb-10 px-6">
-      <div className="container mx-auto max-w-5xl text-center">
+    <section className="relative pt-28 sm:pt-36 md:pt-44 pb-10 px-6 overflow-hidden">
+      {/* Big text "Pricing" no fundo do hero — referência das imagens */}
+      <BigTextBackdrop
+        text="Pricing"
+        size={26}
+        anchor={5}
+        opacity={0.08}
+        italic={false}
+      />
+
+      <div className="container mx-auto max-w-5xl text-center relative z-10">
         <motion.p
-          className="text-[10px] text-white/40 uppercase tracking-[0.3em] mb-4 font-mono"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="text-[10px] text-white/45 uppercase tracking-[0.3em] mb-5 font-mono"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: EASE_NOIR }}
         >
           {t('plans.eyebrow')}
         </motion.p>
 
-        <motion.h1
-          className="text-4xl sm:text-5xl md:text-6xl font-serif italic text-white tracking-tight mb-4 leading-[1.05]"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {t('plans.title')}
-        </motion.h1>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif text-white tracking-tight mb-6 leading-[1.05]">
+          <SplitText
+            text={t('plans.title')}
+            stagger={0.05}
+            delay={0.1}
+            italic
+          />
+        </h1>
 
         <motion.p
-          className="text-white/50 text-base max-w-xl mx-auto mb-12 font-light"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          className="text-white/55 text-base md:text-lg max-w-xl mx-auto mb-12 font-light leading-relaxed"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6, ease: EASE_NOIR }}
         >
           {t('plans.subtitle')}
         </motion.p>
 
-        <BillingToggle
-          value={billingCycle}
-          onChange={onChangeCycle}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.85, ease: EASE_NOIR }}
+        >
+          <BillingToggle value={billingCycle} onChange={onChangeCycle} />
+        </motion.div>
       </div>
     </section>
   )
@@ -260,32 +278,45 @@ function BillingToggle({ value, onChange }: BillingToggleProps) {
     <div
       role="group"
       aria-label="Ciclo de cobrança"
-      className="inline-flex items-center gap-1 p-1 bg-white/[0.04] border border-white/10"
+      className="relative inline-flex items-center gap-1 p-1 bg-white/[0.03] border border-white/10 backdrop-blur-sm"
     >
       <button
         type="button"
         aria-pressed={!isAnnual}
         onClick={() => onChange('monthly')}
-        className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest transition-all ${
-          !isAnnual ? 'bg-white text-black' : 'text-white/50 hover:text-white'
+        className={`relative px-6 py-2.5 text-xs font-mono uppercase tracking-widest transition-colors duration-300 z-10 ${
+          !isAnnual ? 'text-black' : 'text-white/55 hover:text-white/80'
         }`}
       >
-        {t('plans.monthly')}
+        {!isAnnual && (
+          <motion.div
+            layoutId="cycle-pill"
+            className="absolute inset-0 bg-white"
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          />
+        )}
+        <span className="relative">{t('plans.monthly')}</span>
       </button>
+
       <button
         type="button"
         aria-pressed={isAnnual}
         onClick={() => onChange('annual')}
-        className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest transition-all flex items-center gap-2.5 ${
-          isAnnual ? 'bg-white text-black' : 'text-white/50 hover:text-white'
+        className={`relative px-6 py-2.5 text-xs font-mono uppercase tracking-widest transition-colors duration-300 z-10 flex items-center gap-2.5 ${
+          isAnnual ? 'text-black' : 'text-white/55 hover:text-white/80'
         }`}
       >
-        {t('plans.annual')}
+        {isAnnual && (
+          <motion.div
+            layoutId="cycle-pill"
+            className="absolute inset-0 bg-white"
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          />
+        )}
+        <span className="relative">{t('plans.annual')}</span>
         <span
-          className={`text-[9px] font-bold tracking-widest border px-1.5 py-0.5 ${
-            isAnnual
-              ? 'border-black/20 text-black'
-              : 'border-white/20 text-white/60'
+          className={`relative text-[9px] font-bold tracking-widest border px-1.5 py-0.5 ${
+            isAnnual ? 'border-black/30 text-black' : 'border-white/25 text-white/65'
           }`}
         >
           −20%
@@ -313,8 +344,11 @@ function PlanCardsSection({
   onSelect,
 }: PlanCardsSectionProps) {
   return (
-    <section className="py-12 px-0 md:px-6">
-      <div className="container mx-auto max-w-6xl">
+    <section className="relative py-12 px-0 md:px-6 overflow-hidden">
+      {/* Big text "Planos" gigante atrás dos cards */}
+      <BigTextBackdrop text="Planos" size={20} anchor={10} opacity={0.07} />
+
+      <div className="container mx-auto max-w-6xl relative z-10">
         <p className="md:hidden text-center text-[10px] font-mono uppercase tracking-widest text-white/30 mb-4 px-6">
           Arraste para comparar os planos →
         </p>
@@ -360,131 +394,161 @@ function PlanCard({
 
   return (
     <motion.div
-      className={`relative flex flex-col overflow-hidden border transition-all snap-center flex-shrink-0 w-[85vw] max-w-[340px] md:w-auto md:max-w-none md:flex-shrink ${
-        plan.highlighted
-          ? 'border-white/30 bg-white/[0.06] md:scale-[1.03] z-20'
-          : 'border-white/10 bg-white/[0.02] z-10 hover:border-white/25 hover:bg-white/[0.04]'
-      }`}
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-50px' }}
-      transition={{ delay: index * 0.08, duration: 0.6 }}
+      className="snap-center flex-shrink-0 w-[85vw] max-w-[340px] md:w-auto md:max-w-none md:flex-shrink"
+      initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+      whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ delay: index * 0.12, duration: 0.9, ease: EASE_NOIR }}
     >
-      {/* Glow direcional no canto sup-esquerdo do card */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-1/3 -left-1/4 w-2/3 h-2/3 rounded-full"
-        style={{
-          background: plan.highlighted
-            ? 'radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 60%)'
-            : 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 65%)',
-          filter: 'blur(70px)',
-        }}
-      />
-
-      {/* Grain local — overlay extra de textura no card */}
-      <NoirGrain opacity={0.18} baseFrequency={1.1} scope="local" />
-
-      {plan.highlighted && (
-        <div className="absolute -top-3 left-6 z-30">
-          <span className="px-3 py-1 bg-white text-black text-[9px] font-bold uppercase tracking-[0.25em]">
-            {t('plans.most_chosen')}
-          </span>
-        </div>
-      )}
-
-      <div className="relative z-10 flex flex-col h-full p-6 sm:p-8">
-        <div className="mb-6">
-          <h3 className="text-xl font-semibold text-white mb-1 tracking-tight">
-            {plan.name}
-          </h3>
-          <p className="text-xs text-white/40 leading-relaxed">{plan.tagline}</p>
-        </div>
-
-        <div className="mb-2">
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm text-white/40 font-mono">R$</span>
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={billingCycle}
-                className="text-5xl font-serif text-white tracking-tight"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.25 }}
-              >
-                {price.toFixed(2).replace('.', ',')}
-              </motion.span>
-            </AnimatePresence>
-            <span className="text-xs text-white/40 font-mono">/mês</span>
-          </div>
-        </div>
-
-        <p className="text-xs text-white/40 mb-1 italic">{plan.valueAnchor}</p>
-
-        {billingCycle === 'annual' ? (
-          <p className="text-[10px] font-mono text-white/60 uppercase tracking-widest mb-6">
-            {t('plans.save', { savings: annualSavings })}
-          </p>
-        ) : (
-          <div className="mb-6 h-[14px]" />
+      <TiltCard
+        intensity={4}
+        glow
+        className={`group relative flex flex-col overflow-hidden border h-full ${
+          plan.highlighted
+            ? 'border-white/40 bg-white/[0.06] md:scale-[1.04] z-20'
+            : 'border-white/10 bg-white/[0.025] hover:border-white/30 transition-colors duration-500 z-10'
+        }`}
+      >
+        {/* Border pulse pro card highlighted */}
+        {plan.highlighted && (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 border border-white"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0.15, 0.45, 0.15] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          />
         )}
 
-        <div className="h-px bg-white/10 mb-6" />
+        {/* Glow direcional sup-esquerdo */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-1/3 -left-1/4 w-2/3 h-2/3 rounded-full"
+          style={{
+            background: plan.highlighted
+              ? 'radial-gradient(circle, rgba(255,255,255,0.22) 0%, transparent 60%)'
+              : 'radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 65%)',
+            filter: 'blur(70px)',
+          }}
+        />
 
-        <ul className="space-y-3 mb-8 flex-1">
-          {plan.features.map((feature, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <Check
-                className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                  feature.highlight ? 'text-white' : 'text-white/25'
-                }`}
-                strokeWidth={2.5}
-              />
-              <span
-                className={`text-sm leading-snug ${
-                  feature.highlight ? 'text-white' : 'text-white/55'
-                }`}
-              >
-                {feature.text}
-              </span>
-            </li>
-          ))}
-        </ul>
+        {/* Glow inf-direito (contra-ponto) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-1/3 -right-1/4 w-1/2 h-1/2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
+            filter: 'blur(60px)',
+          }}
+        />
 
-        <p className="text-[11px] text-white/35 mb-6 italic font-light">
-          {plan.idealFor}
-        </p>
+        {/* Grain local */}
+        <NoirGrain opacity={0.25} baseFrequency={0.85} animated={false} scope="local" />
 
-        <Button
-          variant={plan.highlighted ? 'primary' : 'outline'}
-          size="lg"
-          className="w-full group rounded-none"
-          disabled={isPending}
-          onClick={onSelect}
-        >
-          {showLoadingOnThis ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Abrindo checkout...
-            </>
+        {plan.highlighted && (
+          <div className="absolute -top-3 left-6 z-30">
+            <span className="px-3 py-1 bg-white text-black text-[9px] font-bold uppercase tracking-[0.25em]">
+              {t('plans.most_chosen')}
+            </span>
+          </div>
+        )}
+
+        <div className="relative z-10 flex flex-col h-full p-6 sm:p-8" style={{ transform: 'translateZ(20px)' }}>
+          <div className="mb-6">
+            <h3 className="text-xl font-semibold text-white mb-1 tracking-tight">
+              {plan.name}
+            </h3>
+            <p className="text-xs text-white/45 leading-relaxed">{plan.tagline}</p>
+          </div>
+
+          <div className="mb-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm text-white/45 font-mono">R$</span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={billingCycle}
+                  className="text-5xl font-serif text-white tracking-tight"
+                  initial={{ opacity: 0, y: -12, filter: 'blur(4px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  exit={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+                  transition={{ duration: 0.35, ease: EASE_NOIR }}
+                >
+                  {price.toFixed(2).replace('.', ',')}
+                </motion.span>
+              </AnimatePresence>
+              <span className="text-xs text-white/45 font-mono">/mês</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-white/45 mb-1 italic">{plan.valueAnchor}</p>
+
+          {billingCycle === 'annual' ? (
+            <p className="text-[10px] font-mono text-white/65 uppercase tracking-widest mb-6">
+              {t('plans.save', { savings: annualSavings })}
+            </p>
           ) : (
-            <>
-              {plan.cta}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </>
+            <div className="mb-6 h-[14px]" />
           )}
-        </Button>
-        <p className="text-[10px] text-white/40 text-center mt-3 font-mono uppercase tracking-wider">
-          {plan.ctaSub}
-        </p>
-      </div>
+
+          <div className="h-px bg-white/10 mb-6" />
+
+          <ul className="space-y-3 mb-8 flex-1">
+            {plan.features.map((feature, idx) => (
+              <li key={idx} className="flex items-start gap-3">
+                <Check
+                  className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
+                    feature.highlight ? 'text-white' : 'text-white/30'
+                  }`}
+                  strokeWidth={2.5}
+                />
+                <span
+                  className={`text-sm leading-snug ${
+                    feature.highlight ? 'text-white' : 'text-white/55'
+                  }`}
+                >
+                  {feature.text}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <p className="text-[11px] text-white/35 mb-6 italic font-light">
+            {plan.idealFor}
+          </p>
+
+          <MagneticButton strength={6} className="w-full">
+            <Button
+              variant={plan.highlighted ? 'primary' : 'outline'}
+              size="lg"
+              className="w-full group/btn rounded-none"
+              disabled={isPending}
+              onClick={onSelect}
+            >
+              {showLoadingOnThis ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Abrindo checkout...
+                </>
+              ) : (
+                <>
+                  {plan.cta}
+                  <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                </>
+              )}
+            </Button>
+          </MagneticButton>
+          <p className="text-[10px] text-white/40 text-center mt-3 font-mono uppercase tracking-wider">
+            {plan.ctaSub}
+          </p>
+        </div>
+      </TiltCard>
     </motion.div>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Stats bar — trust indicators
+// Stats bar
 // ─────────────────────────────────────────────────────────────────────────────
 
 function StatsBar() {
@@ -496,15 +560,22 @@ function StatsBar() {
   ]
 
   return (
-    <section className="px-6 py-12 border-y border-white/5">
+    <section className="px-6 py-14 border-y border-white/[0.07]">
       <div className="container mx-auto max-w-5xl">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
-          {stats.map(({ value, label, icon: Icon }) => (
-            <div
+          {stats.map(({ value, label, icon: Icon }, idx) => (
+            <motion.div
               key={label}
               className="flex items-start gap-4 md:flex-col md:items-start md:gap-2"
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ delay: idx * 0.08, duration: 0.6, ease: EASE_NOIR }}
             >
-              <Icon className="w-5 h-5 text-white/30 mt-0.5 md:mt-0" strokeWidth={1.5} />
+              <Icon
+                className="w-5 h-5 text-white/35 mt-0.5 md:mt-0"
+                strokeWidth={1.5}
+              />
               <div>
                 <p className="font-serif text-2xl md:text-3xl text-white tracking-tight">
                   {value}
@@ -513,65 +584,9 @@ function StatsBar() {
                   {label}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-      </div>
-    </section>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Testimonial spotlight
-// ─────────────────────────────────────────────────────────────────────────────
-
-function TestimonialSpotlight() {
-  return (
-    <section className="px-6 py-20">
-      <div className="container mx-auto max-w-3xl">
-        <motion.figure
-          className="relative border border-white/10 bg-white/[0.02] p-8 md:p-12 overflow-hidden"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-100px' }}
-        >
-          <NoirGrain opacity={0.15} baseFrequency={1.0} scope="local" />
-
-          {/* Glow direcional no canto inf-direito */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -bottom-1/3 -right-1/4 w-2/3 h-2/3 rounded-full"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 60%)',
-              filter: 'blur(80px)',
-            }}
-          />
-
-          <div className="relative z-10">
-            <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/40 mb-6">
-              Depoimento
-            </p>
-
-            <blockquote className="font-serif text-2xl md:text-3xl italic leading-[1.4] text-white/90 mb-8">
-              &ldquo;Antes eu perdia noivas porque esquecia follow-up. Agora o
-              Khaos me lembra, manda o contrato, e na hora da prova já tem tudo
-              registrado. Em 3 meses, dobrei o ticket.&rdquo;
-            </blockquote>
-
-            <figcaption className="flex items-center gap-4 pt-6 border-t border-white/10">
-              <div className="w-10 h-10 border border-white/20 flex items-center justify-center bg-white/[0.04]">
-                <span className="font-serif text-sm">M</span>
-              </div>
-              <div>
-                <p className="text-sm text-white">Mariana A.</p>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-white/40 mt-0.5">
-                  Maquiadora de noivas · São Paulo
-                </p>
-              </div>
-            </figcaption>
-          </div>
-        </motion.figure>
       </div>
     </section>
   )
@@ -614,7 +629,7 @@ const FAQ_ITEMS = [
 
 function FAQSection() {
   return (
-    <section className="px-6 py-20 border-t border-white/5">
+    <section className="px-6 py-20 border-t border-white/[0.07]">
       <div className="container mx-auto max-w-2xl">
         <div className="text-center mb-12">
           <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 mb-3">
@@ -625,7 +640,10 @@ function FAQSection() {
           </h2>
           <p className="text-white/50 text-sm">
             Não achou sua dúvida?{' '}
-            <Link to="/contato" className="text-white underline hover:no-underline">
+            <Link
+              to="/contato"
+              className="text-white underline underline-offset-4 hover:no-underline"
+            >
               fale com a gente
             </Link>
             .
@@ -634,18 +652,25 @@ function FAQSection() {
 
         <Accordion type="single" collapsible className="space-y-2">
           {FAQ_ITEMS.map((item, idx) => (
-            <AccordionItem
+            <motion.div
               key={idx}
-              value={`item-${idx}`}
-              className="border border-white/10 bg-white/[0.02] data-[state=open]:bg-white/[0.04] data-[state=open]:border-white/20 transition-colors"
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ delay: idx * 0.05, duration: 0.5, ease: EASE_NOIR }}
             >
-              <AccordionTrigger className="px-5 py-4 text-left text-sm text-white hover:no-underline font-medium [&>svg]:text-white/40">
-                {item.q}
-              </AccordionTrigger>
-              <AccordionContent className="px-5 pb-5 pt-0 text-sm text-white/60 leading-relaxed">
-                {item.a}
-              </AccordionContent>
-            </AccordionItem>
+              <AccordionItem
+                value={`item-${idx}`}
+                className="border border-white/10 bg-white/[0.02] data-[state=open]:bg-white/[0.04] data-[state=open]:border-white/25 transition-all duration-300"
+              >
+                <AccordionTrigger className="px-5 py-4 text-left text-sm text-white hover:no-underline font-medium [&>svg]:text-white/40">
+                  {item.q}
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-5 pt-0 text-sm text-white/60 leading-relaxed">
+                  {item.a}
+                </AccordionContent>
+              </AccordionItem>
+            </motion.div>
           ))}
         </Accordion>
       </div>
@@ -662,67 +687,92 @@ function FinalCTA() {
   const { trackCTAClick } = useAnalytics()
 
   return (
-    <section className="relative px-6 py-24 md:py-32 overflow-hidden border-t border-white/5">
-      {/* Big text backdrop dessa section */}
-      <div
-        aria-hidden
-        className="pointer-events-none select-none absolute inset-x-0 top-1/2 -translate-y-1/2 text-center"
-      >
-        <span
-          className="font-serif italic font-black tracking-tighter blur-sm"
-          style={{
-            fontSize: '24vw',
-            color: 'rgba(255,255,255,0.05)',
-            lineHeight: 1,
-          }}
-        >
-          Vamos?
-        </span>
-      </div>
+    <section className="relative px-6 py-24 md:py-32 overflow-hidden border-t border-white/[0.07]">
+      <BigTextBackdrop
+        text="Vamos?"
+        size={28}
+        anchor="middle"
+        opacity={0.08}
+      />
 
       <div className="relative z-10 container mx-auto max-w-3xl text-center">
-        <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 mb-4">
+        <motion.p
+          className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/40 mb-5"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
           Você até aqui não foi à toa
-        </p>
+        </motion.p>
 
         <h2 className="font-serif italic text-4xl md:text-5xl tracking-tight leading-[1.1] mb-6 text-white">
-          Sua próxima cliente já está procurando
-          <br />
-          uma maquiadora <span className="text-white/50">como você</span>.
+          <SplitText
+            text="Sua próxima cliente já está procurando uma maquiadora como você."
+            stagger={0.04}
+          />
         </h2>
 
-        <p className="text-white/55 text-base md:text-lg max-w-xl mx-auto mb-10 font-light">
-          A diferença é se você vai aparecer organizada — ou perdida no meio
-          de mensagens de WhatsApp.
-        </p>
+        <motion.p
+          className="text-white/55 text-base md:text-lg max-w-xl mx-auto mb-10 font-light leading-relaxed"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+        >
+          A diferença é se você vai aparecer organizada — ou perdida no meio de
+          mensagens de WhatsApp.
+        </motion.p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button
-            variant="primary"
-            size="lg"
-            className="rounded-none group min-w-[220px]"
-            onClick={() => {
-              trackCTAClick('final_cta_signup', 'plans_final_cta', '/cadastro')
-              navigate('/cadastro')
-            }}
-          >
-            Começar 14 dias grátis
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Button>
+        <motion.div
+          className="flex flex-col sm:flex-row items-center justify-center gap-3"
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.85, ease: EASE_NOIR }}
+        >
+          <MagneticButton strength={10}>
+            <Button
+              variant="primary"
+              size="lg"
+              className="rounded-none group min-w-[220px]"
+              onClick={() => {
+                trackCTAClick(
+                  'final_cta_signup',
+                  'plans_final_cta',
+                  '/cadastro',
+                )
+                navigate('/cadastro')
+              }}
+            >
+              Começar 14 dias grátis
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Button>
+          </MagneticButton>
           <Button
             variant="outline"
             size="lg"
-            className="rounded-none border-white/20 text-white hover:bg-white hover:text-black min-w-[220px]"
+            className="rounded-none border-white/25 text-white hover:bg-white hover:text-black min-w-[220px]"
             onClick={() => {
-              trackCTAClick('final_cta_contact', 'plans_final_cta', '/contato')
+              trackCTAClick(
+                'final_cta_contact',
+                'plans_final_cta',
+                '/contato',
+              )
               navigate('/contato')
             }}
           >
             Falar com a gente
           </Button>
-        </div>
+        </motion.div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-mono uppercase tracking-widest text-white/35">
+        <motion.div
+          className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[10px] font-mono uppercase tracking-widest text-white/35"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, delay: 1.1 }}
+        >
           <span className="flex items-center gap-2">
             <Shield className="w-3 h-3" /> Sem cartão
           </span>
@@ -732,7 +782,7 @@ function FinalCTA() {
           <span className="flex items-center gap-2">
             <Lock className="w-3 h-3" /> Stripe seguro
           </span>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
