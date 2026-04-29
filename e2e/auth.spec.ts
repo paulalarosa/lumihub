@@ -19,6 +19,9 @@ test.describe('Auth Flows', () => {
 
   test('CTA navigates to register', async ({ page }) => {
     await page.goto('/')
+    // networkidle: garantir que React Router hidratou antes do click. Firefox
+    // CI ocasionalmente clicava antes do listener anexar.
+    await page.waitForLoadState('networkidle')
     const cta = page
       .getByRole('button', {
         name: /Profissionalizar|Quero parar|Começar/i,
@@ -26,7 +29,7 @@ test.describe('Auth Flows', () => {
       .first()
     await cta.scrollIntoViewIfNeeded()
     await cta.click({ force: true })
-    await expect(page).toHaveURL(/cadastro|register/i)
+    await expect(page).toHaveURL(/cadastro|register/i, { timeout: 15_000 })
   })
 
   test('register page has correct fields', async ({ page }) => {
