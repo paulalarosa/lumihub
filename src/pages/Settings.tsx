@@ -3,6 +3,7 @@ import PushNotificationToggle from '@/components/settings/PushNotificationToggle
 import AISettings from '@/components/settings/AISettings'
 import IntegrationsTab from '@/components/settings/IntegrationsTab'
 import PrivacySettings from '@/features/privacy/components/PrivacySettings'
+import { PlanGate } from '@/components/access/PlanGate'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -446,16 +447,18 @@ export default function Settings() {
             value="ia"
             className="space-y-6 focus-visible:outline-none"
           >
-            <AISettings
-              provider={cfg.aiProvider}
-              setProvider={cfg.setAiProvider}
-              apiKey={cfg.aiKey}
-              setApiKey={cfg.setAiKey}
-              model={cfg.aiModel}
-              setModel={cfg.setAiModel}
-              saving={cfg.saving}
-              onSave={cfg.saveSettings}
-            />
+            <PlanGate plan="profissional">
+              <AISettings
+                provider={cfg.aiProvider}
+                setProvider={cfg.setAiProvider}
+                apiKey={cfg.aiKey}
+                setApiKey={cfg.setAiKey}
+                model={cfg.aiModel}
+                setModel={cfg.setAiModel}
+                saving={cfg.saving}
+                onSave={cfg.saveSettings}
+              />
+            </PlanGate>
           </TabsContent>
 
           <TabsContent

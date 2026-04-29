@@ -1,7 +1,7 @@
 {
   "name": "khaos-kontrol-system",
   "private": true,
-  "version": "5.8.21",
+  "version": "5.9.0",
   "type": "module",
   "engines": {
     "node": ">=18.0.0",
@@ -15,7 +15,6 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && aws s3 sync dist/ s3://khaos-kontrol-site --delete --no-cli-pager && aws cloudfront create-invalidation --distribution-id E2QFIPXMPI0HCW --paths \"/*\" --no-cli-pager",
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:ui": "vitest --ui",

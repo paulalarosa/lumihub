@@ -37,9 +37,9 @@ const PLAN_COLORS: Record<string, string> = {
 }
 
 const PLAN_PRICES: Record<string, number> = {
-  essencial: 49.9,
-  profissional: 99.9,
-  studio: 199.9,
+  essencial: 39.9,
+  profissional: 89.9,
+  studio: 149.9,
 }
 
 const MONTH_LABEL = (d: Date) =>

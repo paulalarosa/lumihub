@@ -6,7 +6,7 @@ import { logEdgeError } from '../_shared/log-error.ts'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
+    'authorization, x-client-info, apikey, content-type, x-ai-key, x-ai-model',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
@@ -228,10 +228,18 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // BYOK: usuário pode trazer chave própria via header `x-ai-key`. Cai pra
+    // chave global do Khaos quando o header não vem.
+    const clientKey = req.headers.get('x-ai-key')
     const apiKey =
+      clientKey ||
       Deno.env.get('GOOGLE_API_KEY') ||
       Deno.env.get('GOOGLE_GENERATIVE_AI_API_KEY')
     if (!apiKey) return json({ error: 'Missing API key' }, 500)
+
+    // BYOK: modelo override opcional (default gemini-2.0-flash).
+    const clientModel = req.headers.get('x-ai-model')
+    const modelId = clientModel || 'gemini-2.0-flash'
 
     const body = (await req.json()) as Body
     const mode = body.mode
@@ -269,7 +277,7 @@ Deno.serve(async (req: Request) => {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: modelId,
       generationConfig: {
         temperature: 0.3,
         topP: 0.9,

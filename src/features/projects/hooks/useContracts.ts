@@ -4,6 +4,8 @@ import { useToast } from '@/hooks/use-toast'
 import { logger } from '@/services/logger'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/hooks/useAuth'
+import { useAI } from '@/hooks/useAI'
+import { buildBYOKHeaders } from '@/lib/byok'
 import { ProjectService as ProjectServiceAPI } from '../api/projectService'
 
 import type {
@@ -32,6 +34,7 @@ export function useContracts({
   const { organizationId } = useOrganization()
   const { user } = useAuth()
   const { toast } = useToast()
+  const { byokSettings } = useAI()
 
   const [isContractDialogOpen, setIsContractDialogOpen] = useState(false)
   const [contractTitle, setContractTitle] = useState('')
@@ -183,6 +186,7 @@ export function useContracts({
         'generate-contract-ai',
         {
           body: context,
+          headers: buildBYOKHeaders(byokSettings),
         },
       )
 
@@ -221,6 +225,7 @@ export function useContracts({
             currentText: contractContent,
             command: aiCommand,
           },
+          headers: buildBYOKHeaders(byokSettings),
         },
       )
 

@@ -41,7 +41,13 @@ jobs:
           VITE_STRIPE_PUBLISHABLE_KEY: ${{ secrets.VITE_STRIPE_PUBLISHABLE_KEY }}
           VITE_GA_MEASUREMENT_ID: ${{ secrets.VITE_GA_MEASUREMENT_ID }}
           VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+          VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
+          VITE_GOOGLE_API_KEY: ${{ secrets.VITE_GOOGLE_API_KEY }}
           VITE_APP_VERSION: ${{ github.sha }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          # Pular prerender em CI: precisa de Chrome via puppeteer + memória.
+          # Build do deploy é mesmo dist/ — prerender é otimização SEO opcional.
+          SKIP_PRERENDER: "1"
           NODE_OPTIONS: --max_old_space_size=4096
 
       - name: Upload build artifact
@@ -136,3 +142,52 @@ jobs:
         # baseline está em 62. Quando estiver verde, remover o flag e
         # virar gate real.
         continue-on-error: true
+
+  deploy:
+    name: Deploy to S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: [lint-and-build, unit-tests]
+    # Só faz deploy em push pro main (não roda em PRs).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Sync to S3
+        # --delete remove arquivos do bucket que não estão mais no dist.
+        # Cache headers diferentes por tipo: HTML curto (revalidar rápido),
+        # assets com hash (cache longo).
+        run: |
+          # Assets com hash no nome (vendor-*.js, *-CV9WJ5UQ.css) → cache 1 ano
+          aws s3 sync dist/ s3://khaoskontrol-prod/ \
+            --delete \
+            --cache-control "public, max-age=31536000, immutable" \
+            --exclude "*.html" --exclude "service-worker.js" --exclude "sw.js" \
+            --exclude "manifest.json" --exclude "robots.txt" --exclude "sitemap.xml"
+
+          # HTML + service worker + manifest → cache curto (revalidar)
+          aws s3 sync dist/ s3://khaoskontrol-prod/ \
+            --cache-control "public, max-age=0, must-revalidate" \
+            --exclude "*" \
+            --include "*.html" --include "service-worker.js" --include "sw.js" \
+            --include "manifest.json" --include "robots.txt" --include "sitemap.xml"
+
+      - name: Invalidate CloudFront
+        # Invalida tudo após deploy. CloudFront cobra $0.005/path acima de 1000/mês.
+        # `/*` conta como 1 path. Free tier de 1000 = ~30 deploys/dia.
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E1QWOTTUQ1VK6N \
+            --paths "/*"

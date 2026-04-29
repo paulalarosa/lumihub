@@ -126,13 +126,18 @@ Pra rodar **só mobile** (375px) no Playwright: `npx playwright test --project="
 
 Para deletar uma function: `npx supabase functions delete <nome> --project-ref <ref>` (rodar nos dois projects).
 
-### Deploy do site (S3 + CloudFront)
+### Deploy do site
 
-```bash
-npm run deploy        # build + s3 sync + invalidação CloudFront
-```
+**Automático via GitHub Actions** — não roda manual. Cada `git push origin main` dispara o workflow `.github/workflows/ci.yml` que:
 
-Requer AWS CLI configurada com permissões pro bucket `khaos-kontrol-site` e distribution `E2QFIPXMPI0HCW`.
+1. Build (`npm run build` com env vars dos GitHub Secrets)
+2. Roda testes unit + E2E
+3. Job `deploy` faz `aws s3 sync dist/ s3://khaoskontrol-prod/` com cache headers diferenciados (assets com hash → 1 ano; HTML/SW/manifest → revalidate)
+4. Invalida CloudFront `E1QWOTTUQ1VK6N` em `/*`
+
+**Stack:** S3 `khaoskontrol-prod` (us-east-1, privado via OAC) + CloudFront `E1QWOTTUQ1VK6N` + Route53 hosted zone `Z0786165UVX5F21Q8WAQ`. Secrets do build estão em GitHub Secrets do repo.
+
+Pra rodar deploy manual em emergência (ex: GH Actions out): build local com `npm run build`, depois `aws s3 sync dist/ s3://khaoskontrol-prod/ --delete` + `aws cloudfront create-invalidation --distribution-id E1QWOTTUQ1VK6N --paths "/*"`. Mas prefira sempre via PR/push.
 
 ### Stripe CLI
 

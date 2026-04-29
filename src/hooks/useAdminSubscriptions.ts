@@ -18,11 +18,12 @@ export interface SubscriptionStats {
   growth: string
 }
 
-const PLAN_PRICES = {
-  free: 0,
-  starter: 29.9,
-  pro: 59.9,
-  empire: 99.9,
+// Plan tiers reais do Stripe live (sincronizados com Plans.tsx).
+// Trial não conta como MRR — só plan_status='active' deve somar.
+const PLAN_PRICES: Record<string, number> = {
+  essencial: 39.9,
+  profissional: 89.9,
+  studio: 149.9,
 }
 
 export function useAdminSubscriptions() {

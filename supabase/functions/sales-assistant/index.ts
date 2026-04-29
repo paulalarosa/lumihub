@@ -26,9 +26,9 @@ const SALES_FROM_EMAIL =
 const KNOWLEDGE_BASE = `KHAOS KONTROL — CRM para maquiadoras profissionais.
 
 PLANOS (assinatura mensal, 14 dias grátis):
-- Essential: R$ 49,90/mês (anual R$ 39,92 — 20% off). Até 30 clientes, agenda + financeiro básico, contratos.
-- Pro: R$ 99,90/mês (anual R$ 79,92). Clientes ilimitados, IA de contratos, microsite público, agendamentos online.
-- Studio: R$ 199,90/mês (anual R$ 159,92). Equipe ilimitada, gestão de assistentes, Instagram integrado, relatórios avançados, prioridade de suporte.
+- Essencial: R$ 39,90/mês (anual R$ 31,92/mês — 20% off). Até 10 clientes, agenda + financeiro básico, contratos digitais.
+- Profissional: R$ 89,90/mês (anual R$ 71,92/mês). Clientes ilimitados, analytics, portal da noiva personalizado, follow-up automático.
+- Studio: R$ 149,90/mês (anual R$ 119,92/mês). Equipe + comissões automáticas, multi-usuário, IA operacional, suporte prioritário, API.
 
 FEATURES PRINCIPAIS:
 - Agenda integrada com Google Calendar

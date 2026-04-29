@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/integrations/supabase/client'
 import { toast } from 'sonner'
 import { Editor } from '@tiptap/react'
+import { useAI } from '@/hooks/useAI'
+import { buildBYOKHeaders } from '@/lib/byok'
 
 interface ContractProjectData {
   client?: {
@@ -40,6 +42,7 @@ export function useSmartContractEditor(
   projectId: string | null,
   editor: Editor | null,
 ) {
+  const { byokSettings } = useAI()
   const [isAiGenerating, setIsAiGenerating] = useState(false)
   const [isRefining, setIsRefining] = useState(false)
   const [isReviewing, setIsReviewing] = useState(false)
@@ -148,7 +151,10 @@ export function useSmartContractEditor(
 
       const { data, error } = await supabase.functions.invoke(
         'generate-contract-ai',
-        { body: { mode: 'GENERATE', ...payload } },
+        {
+          body: { mode: 'GENERATE', ...payload },
+          headers: buildBYOKHeaders(byokSettings),
+        },
       )
       if (error) throw error
 
@@ -177,6 +183,7 @@ export function useSmartContractEditor(
             current_text: editor.getHTML(),
             instruction: aiCommand,
           },
+          headers: buildBYOKHeaders(byokSettings),
         },
       )
       if (error) throw error
@@ -206,7 +213,10 @@ export function useSmartContractEditor(
     try {
       const { data, error } = await supabase.functions.invoke(
         'generate-contract-ai',
-        { body: { mode: 'REVIEW', current_text: current } },
+        {
+          body: { mode: 'REVIEW', current_text: current },
+          headers: buildBYOKHeaders(byokSettings),
+        },
       )
       if (error) throw error
       if (data?.text) {

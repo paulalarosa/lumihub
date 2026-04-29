@@ -56,3 +56,6 @@ estrutura.txt
 .env.local
 supabase/local_status.json
 full_lint_results.json
+
+# AWS migration snapshots (rollback safety, not versioned)
+.migration-snapshot/
