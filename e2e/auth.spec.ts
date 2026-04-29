@@ -19,17 +19,25 @@ test.describe('Auth Flows', () => {
 
   test('CTA navigates to register', async ({ page }) => {
     await page.goto('/')
-    // networkidle: garantir que React Router hidratou antes do click. Firefox
-    // CI ocasionalmente clicava antes do listener anexar.
+    // networkidle garante hidratação do React Router. Firefox CI ocasionalmente
+    // clicava antes do listener anexar.
     await page.waitForLoadState('networkidle')
+
     const cta = page
       .getByRole('button', {
         name: /Profissionalizar|Quero parar|Começar/i,
       })
       .first()
     await cta.scrollIntoViewIfNeeded()
-    await cta.click({ force: true })
-    await expect(page).toHaveURL(/cadastro|register/i, { timeout: 15_000 })
+    await expect(cta).toBeEnabled()
+
+    // Pattern oficial do Playwright pra SPA navigation: aguarda a URL mudar
+    // CONCORRENTE ao click. Mais robusto em Firefox que `expect(page).toHaveURL`
+    // depois — evita race entre history.pushState do React Router e o assert.
+    await Promise.all([
+      page.waitForURL(/cadastro|register/i, { timeout: 15_000 }),
+      cta.click(),
+    ])
   })
 
   test('register page has correct fields', async ({ page }) => {
