@@ -35,28 +35,16 @@ export interface Canvas {
   updatedAt: string
 }
 
-interface UserAPIKeys {
-  gemini?: string
-  openai?: string
-}
-
-interface AISettings {
-  provider: 'gemini' | 'openai' | 'local'
-  model: string
-  temperature: number
-  maxTokens: number
-  useLocalAI: boolean
-}
-
+// AI BYOK settings (provider/api_key/model_name) e settings de runtime
+// (temperature, maxTokens) ficam em `user_ai_settings` no banco e são
+// carregados via AIProvider (src/contexts/AIProvider.tsx). Esta store é só
+// pra estado client-side ephemeral: conversas + canvases + UI toggles.
 interface AIStore {
   conversations: Record<string, Message[]>
   currentConversationId: string | null
 
   canvases: Canvas[]
   activeCanvasId: string | null
-
-  settings: AISettings
-  userAPIKeys: UserAPIKeys
 
   isChatOpen: boolean
   isCanvasOpen: boolean
@@ -75,10 +63,6 @@ interface AIStore {
   updateCanvas: (id: string, updates: Partial<Canvas>) => void
   setActiveCanvas: (id: string | null) => void
 
-  updateSettings: (settings: Partial<AISettings>) => void
-  setUserAPIKey: (provider: 'gemini' | 'openai', key: string) => void
-  clearUserAPIKey: (provider: 'gemini' | 'openai') => void
-
   toggleChat: () => void
   toggleCanvas: () => void
 }
@@ -90,16 +74,6 @@ export const useAIStore = create<AIStore>()(
       currentConversationId: null,
       canvases: [],
       activeCanvasId: null,
-
-      settings: {
-        provider: 'gemini',
-        model: 'gemini-2.0-flash-exp',
-        temperature: 0.7,
-        maxTokens: 2048,
-        useLocalAI: false,
-      },
-
-      userAPIKeys: {},
       isChatOpen: false,
       isCanvasOpen: false,
 
@@ -177,26 +151,6 @@ export const useAIStore = create<AIStore>()(
         set({ activeCanvasId: id, isCanvasOpen: !!id })
       },
 
-      updateSettings: (settings) => {
-        set((state) => ({
-          settings: { ...state.settings, ...settings },
-        }))
-      },
-
-      setUserAPIKey: (provider, key) => {
-        set((state) => ({
-          userAPIKeys: { ...state.userAPIKeys, [provider]: key },
-        }))
-      },
-
-      clearUserAPIKey: (provider) => {
-        set((state) => {
-          const keys = { ...state.userAPIKeys }
-          delete keys[provider]
-          return { userAPIKeys: keys }
-        })
-      },
-
       toggleChat: () => {
         set((state) => ({ isChatOpen: !state.isChatOpen }))
       },
@@ -210,8 +164,6 @@ export const useAIStore = create<AIStore>()(
       partialize: (state) => ({
         conversations: state.conversations,
         canvases: state.canvases,
-        settings: state.settings,
-        userAPIKeys: state.userAPIKeys,
       }),
     },
   ),
