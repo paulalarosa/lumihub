@@ -1,7 +1,40 @@
-import { Suspense, useRef } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { MeshDistortMaterial, Sphere, Float } from '@react-three/drei'
 import type { Mesh } from 'three'
+
+/**
+ * Probe se podemos renderizar WebGL com decência:
+ * - Tem suporte WebGL?
+ * - Não estamos em automation (Playwright/Puppeteer headless sem GPU)?
+ * - Usuária não pediu "reduce motion"?
+ */
+function canRenderOrb(): boolean {
+  if (typeof window === 'undefined') return false
+
+  // Skip em automation (CI Playwright tests, Puppeteer prerender)
+  if (typeof navigator !== 'undefined' && navigator.webdriver) return false
+
+  // Respeita preferência de movimento reduzido
+  if (
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    return false
+  }
+
+  // Feature detect WebGL
+  try {
+    const canvas = document.createElement('canvas')
+    const gl =
+      canvas.getContext('webgl2') ||
+      canvas.getContext('webgl') ||
+      canvas.getContext('experimental-webgl')
+    return !!gl
+  } catch {
+    return false
+  }
+}
 
 interface NoirOrbProps {
   /** Tamanho do canvas. */
@@ -56,6 +89,14 @@ export function NoirOrb({
   speed = 1.4,
   emissive = 0.45,
 }: NoirOrbProps) {
+  const [shouldRender, setShouldRender] = useState(false)
+
+  useEffect(() => {
+    setShouldRender(canRenderOrb())
+  }, [])
+
+  if (!shouldRender) return null
+
   return (
     <div className={`pointer-events-none ${className}`} aria-hidden>
       <Canvas
