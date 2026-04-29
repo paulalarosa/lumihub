@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowRight,
@@ -26,10 +26,17 @@ import { BigTextBackdrop } from '@/components/noir/BigTextBackdrop'
 import { SplitText } from '@/components/noir/SplitText'
 import { TiltCard } from '@/components/noir/TiltCard'
 import { MagneticButton } from '@/components/noir/MagneticButton'
+import { useNoirScroll } from '@/hooks/useNoirScroll'
 import { useAnalytics } from '@/hooks/useAnalytics'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useAuth } from '@/hooks/useAuth'
 import { usePlanAccess } from '@/hooks/usePlanAccess'
+
+// 3D orb lazy: Three.js só carrega quando hidrata client-side. Evita
+// quebrar prerender (Puppeteer sem WebGL) e mantém initial bundle leve.
+const NoirOrb = lazy(() =>
+  import('@/components/noir/NoirOrb').then((m) => ({ default: m.NoirOrb })),
+)
 
 type BillingCycle = 'monthly' | 'annual'
 
@@ -142,6 +149,9 @@ export default function Plans() {
     trackSubscription('view_plans')
   }, [trackSubscription])
 
+  // GSAP ScrollTrigger pra big-text drift + fade-up reveals
+  useNoirScroll([])
+
   const handleSelectPlan = (plan: Plan) => {
     const price =
       billingCycle === 'monthly' ? plan.monthlyPrice : plan.annualPrice
@@ -180,6 +190,24 @@ export default function Plans() {
       />
 
       <NoirLayout>
+        {/* Orb 3D blob orgânico, absolute top-right, behind tudo, lazy */}
+        <Suspense fallback={null}>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-[-15%] right-[-20%] w-[80vw] h-[80vw] max-w-[900px] max-h-[900px] z-[3]"
+            style={{
+              filter: 'blur(40px)',
+              opacity: 0.55,
+              maskImage:
+                'radial-gradient(circle at center, black 40%, transparent 75%)',
+              WebkitMaskImage:
+                'radial-gradient(circle at center, black 40%, transparent 75%)',
+            }}
+          >
+            <NoirOrb />
+          </div>
+        </Suspense>
+
         <HeroSection
           billingCycle={billingCycle}
           onChangeCycle={setBillingCycle}
@@ -216,14 +244,16 @@ function HeroSection({ billingCycle, onChangeCycle }: HeroSectionProps) {
 
   return (
     <section className="relative pt-28 sm:pt-36 md:pt-44 pb-10 px-6 overflow-hidden">
-      {/* Big text "Pricing" no fundo do hero — referência das imagens */}
-      <BigTextBackdrop
-        text="Pricing"
-        size={26}
-        anchor={5}
-        opacity={0.08}
-        italic={false}
-      />
+      {/* Big text "Pricing" no fundo do hero — drift horizontal no scroll */}
+      <div data-noir-drift="-180" className="absolute inset-x-0 top-0">
+        <BigTextBackdrop
+          text="Pricing"
+          size={26}
+          anchor={5}
+          opacity={0.18}
+          italic={false}
+        />
+      </div>
 
       <div className="container mx-auto max-w-5xl text-center relative z-10">
         <motion.p
@@ -345,8 +375,10 @@ function PlanCardsSection({
 }: PlanCardsSectionProps) {
   return (
     <section className="relative py-12 px-0 md:px-6 overflow-hidden">
-      {/* Big text "Planos" gigante atrás dos cards */}
-      <BigTextBackdrop text="Planos" size={20} anchor={10} opacity={0.07} />
+      {/* Big text "Planos" gigante atrás dos cards — drift positivo (oposto do hero) */}
+      <div data-noir-drift="220" className="absolute inset-x-0 top-0">
+        <BigTextBackdrop text="Planos" size={22} anchor={5} opacity={0.16} />
+      </div>
 
       <div className="container mx-auto max-w-6xl relative z-10">
         <p className="md:hidden text-center text-[10px] font-mono uppercase tracking-widest text-white/30 mb-4 px-6">
@@ -688,12 +720,14 @@ function FinalCTA() {
 
   return (
     <section className="relative px-6 py-24 md:py-32 overflow-hidden border-t border-white/[0.07]">
-      <BigTextBackdrop
-        text="Vamos?"
-        size={28}
-        anchor="middle"
-        opacity={0.08}
-      />
+      <div data-noir-drift="-260" className="absolute inset-x-0 top-0 bottom-0 flex items-center">
+        <BigTextBackdrop
+          text="Vamos?"
+          size={32}
+          anchor="middle"
+          opacity={0.16}
+        />
+      </div>
 
       <div className="relative z-10 container mx-auto max-w-3xl text-center">
         <motion.p
